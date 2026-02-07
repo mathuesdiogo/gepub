@@ -46,9 +46,14 @@
               <th style="padding:10px 12px; width:90px;">UF</th>
               <th style="padding:10px 12px; width:90px;">Ativo</th>
               <th style="padding:10px 12px; width:140px;">Ações</th>
+              <th style="padding:10px 12px; width:90px;">CNPJ</th>
+              <th style="padding:10px 12px; width:140px;">Prefeito(a)</th>
             </tr>
           </thead>
           <tbody>
+            <td style="padding:10px 12px;">{{ m.cnpj_prefeitura|default:"—" }}</td>
+            <td style="padding:10px 12px;">{{ m.nome_prefeito|default:"—" }}</td>
+
             {% for m in page_obj %}
               <tr style="border-top:1px solid rgba(255,255,255,.06);">
                 <td style="padding:10px 12px;">

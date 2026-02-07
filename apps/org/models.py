@@ -4,6 +4,17 @@ from django.db import models
 class Municipio(models.Model):
     nome = models.CharField(max_length=120, unique=True)
     uf = models.CharField(max_length=2, default="MA")
+
+    # Dados da Prefeitura
+    cnpj_prefeitura = models.CharField("CNPJ da Prefeitura", max_length=18, blank=True, default="")
+    razao_social_prefeitura = models.CharField("Razão Social", max_length=180, blank=True, default="")
+    nome_fantasia_prefeitura = models.CharField("Nome Fantasia", max_length=180, blank=True, default="")
+    endereco_prefeitura = models.TextField("Endereço", blank=True, default="")
+    telefone_prefeitura = models.CharField("Telefone", max_length=40, blank=True, default="")
+    email_prefeitura = models.EmailField("E-mail", blank=True, default="")
+    site_prefeitura = models.URLField("Site", blank=True, default="")
+    nome_prefeito = models.CharField("Prefeito(a)", max_length=160, blank=True, default="")
+
     ativo = models.BooleanField(default=True)
 
     class Meta:
@@ -13,6 +24,7 @@ class Municipio(models.Model):
 
     def __str__(self) -> str:
         return f"{self.nome}/{self.uf}"
+
 
 
 class Secretaria(models.Model):

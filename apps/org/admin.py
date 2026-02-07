@@ -4,8 +4,8 @@ from .models import Municipio, Secretaria, Unidade, Setor
 
 @admin.register(Municipio)
 class MunicipioAdmin(admin.ModelAdmin):
-    list_display = ("nome", "uf", "ativo")
-    search_fields = ("nome", "uf")
+    list_display = ("nome", "uf", "cnpj_prefeitura", "nome_prefeito", "ativo")
+    search_fields = ("nome", "uf", "cnpj_prefeitura", "nome_prefeito")
     list_filter = ("uf", "ativo")
 
 

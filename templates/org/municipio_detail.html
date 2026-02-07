@@ -37,6 +37,55 @@
           <div class="small">Ativo</div>
           <div style="font-weight:700;">{% if municipio.ativo %}Sim{% else %}Não{% endif %}</div>
         </div>
+        <div style="margin-top:14px; border-top:1px solid rgba(255,255,255,.08); padding-top:12px;">
+  <div class="small" style="margin-bottom:8px; opacity:.9;">Dados da Prefeitura</div>
+
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; max-width:720px;">
+    <div>
+      <div class="small">CNPJ</div>
+      <div style="font-weight:700;">{{ municipio.cnpj_prefeitura|default:"—" }}</div>
+    </div>
+    <div>
+      <div class="small">Prefeito(a)</div>
+      <div style="font-weight:700;">{{ municipio.nome_prefeito|default:"—" }}</div>
+    </div>
+
+    <div style="grid-column:1 / -1;">
+      <div class="small">Razão Social</div>
+      <div style="font-weight:700;">{{ municipio.razao_social_prefeitura|default:"—" }}</div>
+    </div>
+
+    <div style="grid-column:1 / -1;">
+      <div class="small">Nome Fantasia</div>
+      <div style="font-weight:700;">{{ municipio.nome_fantasia_prefeitura|default:"—" }}</div>
+    </div>
+
+    <div style="grid-column:1 / -1;">
+      <div class="small">Endereço</div>
+      <div style="font-weight:700; white-space:pre-wrap;">{{ municipio.endereco_prefeitura|default:"—" }}</div>
+    </div>
+
+    <div>
+      <div class="small">Telefone</div>
+      <div style="font-weight:700;">{{ municipio.telefone_prefeitura|default:"—" }}</div>
+    </div>
+
+    <div>
+      <div class="small">E-mail</div>
+      <div style="font-weight:700;">{{ municipio.email|default:"—" }}</div>
+    </div>
+
+    <div style="grid-column:1 / -1;">
+      <div class="small">Site</div>
+      {% if municipio.site_prefeitura %}
+        <div style="font-weight:700;"><a class="link" href="{{ municipio.site_prefeitura }}" target="_blank" rel="noopener">Abrir site</a></div>
+      {% else %}
+        <div style="font-weight:700;">—</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
       </div>
 
       <div style="margin-top:14px;">
