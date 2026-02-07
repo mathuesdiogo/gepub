@@ -1,0 +1,58 @@
+{% extends "core/base.html" %}
+{% block title %}{% if mode == 'create' %}Novo Município{% else %}Editar Município{% endif %} • Organização • GEPUB{% endblock %}
+{% block header %}Organização{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'org:index' %}">Organização</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'org:municipio_list' %}">Municípios</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">
+      {% if mode == "create" %}Novo{% else %}Editar{% endif %}
+    </span>
+  </div>
+{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <div class="card__title">
+      {% if mode == "create" %}Novo Município{% else %}Editar Município{% endif %}
+    </div>
+
+    <div class="card__body">
+      <form method="post" style="display:grid; grid-template-columns: 1fr 120px; gap:12px; max-width:640px;">
+        {% csrf_token %}
+
+        <div style="grid-column:1 / -1;">
+          <label class="small">Nome</label><br>
+          {{ form.nome }}
+          {% if form.nome.errors %}<div class="small" style="color:#ffb4b4;">{{ form.nome.errors|striptags }}</div>{% endif %}
+        </div>
+
+        <div>
+          <label class="small">UF</label><br>
+          {{ form.uf }}
+          {% if form.uf.errors %}<div class="small" style="color:#ffb4b4;">{{ form.uf.errors|striptags }}</div>{% endif %}
+        </div>
+
+        <div style="display:flex; align-items:end; padding-bottom:2px;">
+          <label class="small" style="display:flex; align-items:center; gap:8px;">
+            {{ form.ativo }} Ativo
+          </label>
+        </div>
+
+        <div style="grid-column:1 / -1; display:flex; gap:10px; margin-top:6px;">
+          <button type="submit"
+                  style="padding:10px 12px; border-radius:12px; border:1px solid rgba(90,166,255,.35); background:rgba(90,166,255,.15); color:inherit; font-weight:700;">
+            Salvar
+          </button>
+
+          <a class="link" href="{% url 'org:municipio_list' %}">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

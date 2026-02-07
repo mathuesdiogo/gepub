@@ -1,0 +1,47 @@
+{% extends "core/base.html" %}
+{% block title %}{{ municipio.nome }} • Municípios • Organização • GEPUB{% endblock %}
+{% block header %}Organização{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'org:index' %}">Organização</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'org:municipio_list' %}">Municípios</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">{{ municipio.nome }}</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <div class="card__title" style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+      <span>{{ municipio.nome }}</span>
+      <a class="link" href="{% url 'org:municipio_update' municipio.pk %}">Editar</a>
+    </div>
+
+    <div class="card__body">
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; max-width:720px;">
+        <div>
+          <div class="small">Nome</div>
+          <div style="font-weight:700;">{{ municipio.nome }}</div>
+        </div>
+
+        <div>
+          <div class="small">UF</div>
+          <div style="font-weight:700;">{{ municipio.uf }}</div>
+        </div>
+
+        <div>
+          <div class="small">Ativo</div>
+          <div style="font-weight:700;">{% if municipio.ativo %}Sim{% else %}Não{% endif %}</div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;">
+        <a class="link" href="{% url 'org:municipio_list' %}">← Voltar para lista</a>
+      </div>
+    </div>
+  </div>
+{% endblock %}
