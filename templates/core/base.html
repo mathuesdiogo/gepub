@@ -39,11 +39,21 @@
 
     <main class="main">
       <header class="topbar">
-        <div class="topbar__title">{% block header %}Dashboard{% endblock %}</div>
-        <div class="topbar__right">
-          <span class="pill">v0.1</span>
-        </div>
-      </header>
+  <div>
+    <div class="topbar__title">{% block header %}Dashboard{% endblock %}</div>
+
+    {% block breadcrumbs %}
+      <div class="breadcrumbs">
+        <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+      </div>
+    {% endblock %}
+  </div>
+
+  <div class="topbar__right">
+    <span class="pill">v0.1</span>
+  </div>
+</header>
+
 
       <section class="content">
 

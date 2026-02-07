@@ -115,3 +115,19 @@ body{
 .flash--error, .flash--danger{border-color:rgba(255, 90, 90, .35); background:rgba(255, 90, 90, .10);}
 .flash--warning{border-color:rgba(255, 200, 80, .35); background:rgba(255, 200, 80, .10);}
 .flash--info{border-color:rgba(90,166,255,.35); background:rgba(90,166,255,.10);}
+
+.breadcrumbs{
+  margin-top:6px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  color:var(--muted);
+  font-size:12px;
+}
+.breadcrumbs__link{
+  color:var(--muted);
+  text-decoration:none;
+}
+.breadcrumbs__link:hover{color:var(--text); text-decoration:underline;}
+.breadcrumbs__sep{opacity:.6;}
+.breadcrumbs__current{color:var(--text); font-weight:600;}
