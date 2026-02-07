@@ -1,0 +1,44 @@
+{% extends "core/base.html" %}
+{% block title %}{% if mode == "create" %}Novo Setor{% else %}Editar Setor{% endif %} • Organização{% endblock %}
+{% block header %}Organização{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'org:index' %}">Organização</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'org:setor_list' %}">Setores</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">{% if mode == "create" %}Novo{% else %}Editar{% endif %}</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:700px;">
+  <div class="card__title">
+    {% if mode == "create" %}Novo Setor{% else %}Editar Setor{% endif %}
+  </div>
+  <div class="card__body">
+    <form method="post" style="display:grid; gap:14px;">
+      {% csrf_token %}
+      <div>
+        <label class="small">Unidade</label><br>
+        {{ form.unidade }}
+      </div>
+      <div>
+        <label class="small">Nome</label><br>
+        {{ form.nome }}
+      </div>
+      <label class="small" style="display:flex; gap:8px;">
+        {{ form.ativo }} Ativo
+      </label>
+
+      <div style="display:flex; gap:10px;">
+        <button type="submit">Salvar</button>
+        <a class="link" href="{% url 'org:setor_list' %}">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends "core/base.html" %}
+{% block title %}Setores • Organização • GEPUB{% endblock %}
+{% block header %}Organização{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'org:index' %}">Organização</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">Setores</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card__title" style="display:flex; justify-content:space-between;">
+    <span>Setores</span>
+    <a class="link" href="{% url 'org:setor_create' %}">+ Novo setor</a>
+  </div>
+
+  <div class="card__body">
+    <form method="get" style="display:flex; gap:10px; margin-bottom:12px;">
+      <input name="q" value="{{ q }}" placeholder="Buscar setor ou unidade..." />
+      <select name="unidade">
+        <option value="">Todas as unidades</option>
+        {% for u in unidades %}
+          <option value="{{ u.id }}" {% if unidade_id|stringformat:"s" == u.id|stringformat:"s" %}selected{% endif %}>
+            {{ u.nome }}
+          </option>
+        {% endfor %}
+      </select>
+      <button type="submit">Filtrar</button>
+    </form>
+
+    <table style="width:100%; border-collapse:collapse;">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Unidade</th>
+          <th>Secretaria</th>
+          <th>Município</th>
+          <th>Ativo</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in page_obj %}
+        <tr>
+          <td><a class="link" href="{% url 'org:setor_detail' s.pk %}">{{ s.nome }}</a></td>
+          <td>{{ s.unidade.nome }}</td>
+          <td>{{ s.unidade.secretaria.nome }}</td>
+          <td>{{ s.unidade.secretaria.municipio.nome }}</td>
+          <td>{% if s.ativo %}Sim{% else %}Não{% endif %}</td>
+          <td><a class="link" href="{% url 'org:setor_update' s.pk %}">Editar</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">Nenhum setor encontrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

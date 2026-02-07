@@ -1,0 +1,33 @@
+{% extends "core/base.html" %}
+{% block title %}{{ setor.nome }} • Setores{% endblock %}
+{% block header %}Organização{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'org:index' %}">Organização</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'org:setor_list' %}">Setores</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">{{ setor.nome }}</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:700px;">
+  <div class="card__title" style="display:flex; justify-content:space-between;">
+    <span>{{ setor.nome }}</span>
+    <a class="link" href="{% url 'org:setor_update' setor.pk %}">Editar</a>
+  </div>
+
+  <div class="card__body">
+    <p><strong>Unidade:</strong> {{ setor.unidade.nome }}</p>
+    <p><strong>Secretaria:</strong> {{ setor.unidade.secretaria.nome }}</p>
+    <p><strong>Município:</strong> {{ setor.unidade.secretaria.municipio.nome }}</p>
+    <p><strong>Ativo:</strong> {% if setor.ativo %}Sim{% else %}Não{% endif %}</p>
+
+    <a class="link" href="{% url 'org:setor_list' %}">← Voltar</a>
+  </div>
+</div>
+{% endblock %}

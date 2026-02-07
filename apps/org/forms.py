@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Municipio, Secretaria, Unidade
+from .models import Municipio, Secretaria, Unidade, Setor
 
 
 class MunicipioForm(forms.ModelForm):
@@ -80,4 +80,11 @@ class UnidadeForm(forms.ModelForm):
             "endereco": forms.Textarea(attrs={"rows": 3, "placeholder": "Endereço completo (opcional)"}),
             "telefone": forms.TextInput(attrs={"placeholder": "(00) 0000-0000"}),
             "email": forms.EmailInput(attrs={"placeholder": "contato@..."}),
+        }
+class SetorForm(forms.ModelForm):
+    class Meta:
+        model = Setor
+        fields = ["unidade", "nome", "ativo"]
+        widgets = {
+            "nome": forms.TextInput(attrs={"placeholder": "Ex.: Secretaria Escolar"}),
         }

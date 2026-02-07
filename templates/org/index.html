@@ -14,9 +14,51 @@
   <div class="card">
     <br><br>
 <br>
-  <a class="link" href="{% url 'org:municipio_list' %}">Gerenciar Municípios</a>
-  <br><br\>
-  <a class="link" href="{% url 'org:secretaria_list' %}">Gerenciar Secretarias</a>
+  <div class="card" style="max-width: 900px;">
+  <div class="card__title">Organização</div>
+
+  <div class="card__body">
+    <div class="link-list">
+      <a class="link-card" href="{% url 'org:municipio_list' %}">
+        <div>
+          <div style="font-weight:800;">Municípios</div>
+          <div class="link-card__meta">Cadastro do município + dados da Prefeitura</div>
+        </div>
+        <span class="pill">Abrir</span>
+      </a>
+
+      <a class="link-card" href="{% url 'org:secretaria_list' %}">
+  <div>
+    <div style="font-weight:800;">Secretarias</div>
+    <div class="link-card__meta">
+      Secretarias vinculadas ao Município
+    </div>
+  </div>
+  <span class="pill">Abrir</span>
+</a>
+
+<a class="link-card" href="{% url 'org:unidade_list' %}">
+  <div>
+    <div style="font-weight:800;">Unidades</div>
+    <div class="link-card__meta">
+      Escolas, creches e unidades vinculadas à secretaria
+    </div>
+  </div>
+  <span class="pill">Abrir</span>
+</a>
+<a class="link-card" href="{% url 'org:setor_list' %}">
+  <div>
+    <div style="font-weight:800;">Setores</div>
+    <div class="link-card__meta">Departamentos internos das unidades</div>
+  </div>
+  <span class="pill">Abrir</span>
+</a>
+
+
+    </div>
+  </div>
+</div>
+
 
 
     <div class="card__title">Módulo Organização</div>
