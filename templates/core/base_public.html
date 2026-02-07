@@ -1,0 +1,17 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}GEPUB{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body>
+  <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:18px;">
+    <div style="width:100%; max-width:420px;">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</body>
+</html>
