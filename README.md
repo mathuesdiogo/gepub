@@ -30,3 +30,13 @@ python manage.py runserver
 - Breadcrumbs: definido por página via `{% block breadcrumbs %}`.
 - Menu ativo: baseado em `request.resolver_match.namespace`.
 - Título: `base.html` usa `{% block header %}`.
+## Módulo ORG
+Entidades base do sistema:
+- Município → Secretarias → Unidades → Setores
+
+Regras:
+- Relacionamentos usam `on_delete=PROTECT` para evitar exclusões acidentais.
+- Unicidade:
+  - Secretaria única por município (nome)
+  - Unidade única por secretaria (nome)
+  - Setor único por unidade (nome)
