@@ -20,14 +20,26 @@
       </div>
 
       <nav class="menu">
-        <a class="menu__item is-active" href="{% url 'core:dashboard' %}">Dashboard</a>
-        <a class="menu__item" href="/admin/">Admin</a>
-        <div class="menu__section">Módulos</div>
-        <a class="menu__item" href="{% url 'pessoas:index' %}">Pessoas</a>
-<a class="menu__item" href="{% url 'org:index' %}">Organização</a>
-<a class="menu__item" href="{% url 'educacao:index' %}">Educação</a>
-<a class="menu__item" href="{% url 'nee:index' %}">NEE</a>
-      </nav>
+        <a class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'core' %}is-active{% endif %}"
+   href="{% url 'core:dashboard' %}">Dashboard</a>
+
+<a class="menu__item" href="/admin/">Admin</a>
+
+<div class="menu__section">Módulos</div>
+
+        <a class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'pessoas' %}is-active{% endif %}"
+          href="{% url 'pessoas:index' %}">Pessoas</a>
+
+        <a class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'org' %}is-active{% endif %}"
+          href="{% url 'org:index' %}">Organização</a>
+
+        <a class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'educacao' %}is-active{% endif %}"
+          href="{% url 'educacao:index' %}">Educação</a>
+
+        <a class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'nee' %}is-active{% endif %}"
+          href="{% url 'nee:index' %}">NEE</a>
+
+              </nav>
 
       <div class="sidebar__footer">
         <span class="small">Logado como:</span>
