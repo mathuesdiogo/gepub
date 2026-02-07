@@ -1,0 +1,138 @@
+{% extends "core/base.html" %}
+{% block title %}{{ aluno.nome }} • Alunos • Educação • GEPUB{% endblock %}
+{% block header %}Educação{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'educacao:index' %}">Educação</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'educacao:aluno_list' %}">Alunos</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">{{ aluno.nome }}</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 1100px;">
+  <div class="card__title" style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+    <span>{{ aluno.nome }}</span>
+    <a class="link" href="{% url 'educacao:aluno_update' aluno.pk %}">Editar</a>
+  </div>
+
+  <div class="card__body">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; max-width:980px;">
+      <div>
+        <div class="small">CPF</div>
+        <div style="font-weight:800;">{{ aluno.cpf|default:"—" }}</div>
+      </div>
+      <div>
+        <div class="small">NIS</div>
+        <div style="font-weight:800;">{{ aluno.nis|default:"—" }}</div>
+      </div>
+
+      <div>
+        <div class="small">Nascimento</div>
+        <div style="font-weight:800;">{{ aluno.data_nascimento|date:"d/m/Y"|default:"—" }}</div>
+      </div>
+      <div>
+        <div class="small">Ativo</div>
+        <div style="font-weight:800;">{% if aluno.ativo %}Sim{% else %}Não{% endif %}</div>
+      </div>
+
+      <div>
+        <div class="small">Mãe</div>
+        <div style="font-weight:800;">{{ aluno.nome_mae|default:"—" }}</div>
+      </div>
+      <div>
+        <div class="small">Pai</div>
+        <div style="font-weight:800;">{{ aluno.nome_pai|default:"—" }}</div>
+      </div>
+
+      <div>
+        <div class="small">Telefone</div>
+        <div style="font-weight:800;">{{ aluno.telefone|default:"—" }}</div>
+      </div>
+      <div>
+        <div class="small">E-mail</div>
+        <div style="font-weight:800;">{{ aluno.email|default:"—" }}</div>
+      </div>
+
+      <div style="grid-column:1 / -1;">
+        <div class="small">Endereço</div>
+        <div style="font-weight:800; white-space:pre-wrap;">{{ aluno.endereco|default:"—" }}</div>
+      </div>
+    </div>
+
+    <div class="form-section" style="margin-top:18px;">
+      <div class="form-section__title">Matrículas</div>
+
+      <div style="overflow:auto; border:1px solid rgba(255,255,255,.08); border-radius:14px;">
+        <table style="width:100%; border-collapse:collapse; min-width:980px;">
+          <thead>
+            <tr style="text-align:left; background:rgba(255,255,255,.03);">
+              <th style="padding:10px 12px;">Turma</th>
+              <th style="padding:10px 12px;">Unidade</th>
+              <th style="padding:10px 12px; width:140px;">Ano</th>
+              <th style="padding:10px 12px; width:160px;">Situação</th>
+              <th style="padding:10px 12px; width:160px;">Data</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in matriculas %}
+              <tr style="border-top:1px solid rgba(255,255,255,.06);">
+                <td style="padding:10px 12px;">{{ m.turma.nome }}</td>
+                <td style="padding:10px 12px;">{{ m.turma.unidade.nome }}</td>
+                <td style="padding:10px 12px;">{{ m.turma.ano_letivo }}</td>
+                <td style="padding:10px 12px;">{{ m.get_situacao_display }}</td>
+                <td style="padding:10px 12px;">{{ m.data_matricula|date:"d/m/Y"|default:"—" }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="5" style="padding:12px;">Nenhuma matrícula ainda.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:14px;">
+        <div class="small" style="margin-bottom:8px;">Adicionar matrícula</div>
+
+        <form method="post" style="display:grid; grid-template-columns: 1fr 220px 220px; gap:12px; max-width:980px;">
+          {% csrf_token %}
+          <input type="hidden" name="_action" value="add_matricula" />
+
+          <div style="grid-column:1 / -1;">
+            <label class="small">Turma</label><br>
+            {{ form_matricula.turma }}
+            {% if form_matricula.turma.errors %}<div class="small" style="color:#ffb4b4;">{{ form_matricula.turma.errors|striptags }}</div>{% endif %}
+          </div>
+
+          <div>
+            <label class="small">Data</label><br>
+            {{ form_matricula.data_matricula }}
+          </div>
+
+          <div>
+            <label class="small">Situação</label><br>
+            {{ form_matricula.situacao }}
+          </div>
+
+          <div style="grid-column:1 / -1;">
+            <label class="small">Observação</label><br>
+            {{ form_matricula.observacao }}
+          </div>
+
+          <div style="grid-column:1 / -1; display:flex; gap:10px; margin-top:6px;">
+            <button type="submit">Adicionar matrícula</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;">
+      <a class="link" href="{% url 'educacao:aluno_list' %}">← Voltar para lista</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

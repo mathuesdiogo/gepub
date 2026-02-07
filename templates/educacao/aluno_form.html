@@ -1,0 +1,86 @@
+{% extends "core/base.html" %}
+{% block title %}{% if mode == "create" %}Novo Aluno{% else %}Editar Aluno{% endif %} • Educação • GEPUB{% endblock %}
+{% block header %}Educação{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'educacao:index' %}">Educação</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'educacao:aluno_list' %}">Alunos</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">{% if mode == "create" %}Novo{% else %}Editar{% endif %}</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 980px;">
+  <div class="card__title">{% if mode == "create" %}Novo Aluno{% else %}Editar Aluno{% endif %}</div>
+  <div class="card__body">
+    <form method="post" style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; max-width:860px;">
+      {% csrf_token %}
+
+      <div style="grid-column:1 / -1;">
+        <label class="small">Nome</label><br>
+        {{ form.nome }}
+        {% if form.nome.errors %}<div class="small" style="color:#ffb4b4;">{{ form.nome.errors|striptags }}</div>{% endif %}
+      </div>
+
+      <div>
+        <label class="small">Data de nascimento</label><br>
+        {{ form.data_nascimento }}
+        {% if form.data_nascimento.errors %}<div class="small" style="color:#ffb4b4;">{{ form.data_nascimento.errors|striptags }}</div>{% endif %}
+      </div>
+
+      <div>
+        <label class="small">CPF</label><br>
+        {{ form.cpf }}
+        {% if form.cpf.errors %}<div class="small" style="color:#ffb4b4;">{{ form.cpf.errors|striptags }}</div>{% endif %}
+      </div>
+
+      <div>
+        <label class="small">NIS</label><br>
+        {{ form.nis }}
+        {% if form.nis.errors %}<div class="small" style="color:#ffb4b4;">{{ form.nis.errors|striptags }}</div>{% endif %}
+      </div>
+
+      <div>
+        <label class="small">Nome da mãe</label><br>
+        {{ form.nome_mae }}
+      </div>
+
+      <div>
+        <label class="small">Nome do pai</label><br>
+        {{ form.nome_pai }}
+      </div>
+
+      <div>
+        <label class="small">Telefone</label><br>
+        {{ form.telefone }}
+      </div>
+
+      <div>
+        <label class="small">E-mail</label><br>
+        {{ form.email }}
+      </div>
+
+      <div style="grid-column:1 / -1;">
+        <label class="small">Endereço</label><br>
+        {{ form.endereco }}
+      </div>
+
+      <div style="grid-column:1 / -1;">
+        <label class="small" style="display:flex; align-items:center; gap:8px;">
+          {{ form.ativo }} Ativo
+        </label>
+      </div>
+
+      <div style="grid-column:1 / -1; display:flex; gap:10px; margin-top:6px;">
+        <button type="submit">Salvar</button>
+        <a class="link" href="{% url 'educacao:aluno_list' %}">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
