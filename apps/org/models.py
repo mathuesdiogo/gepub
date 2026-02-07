@@ -21,10 +21,14 @@ class Municipio(models.Model):
         verbose_name = "Município"
         verbose_name_plural = "Municípios"
         ordering = ["nome"]
+        indexes = [
+            models.Index(fields=["nome"]),
+            models.Index(fields=["uf"]),
+            models.Index(fields=["ativo"]),
+        ]
 
     def __str__(self) -> str:
         return f"{self.nome}/{self.uf}"
-
 
 
 class Secretaria(models.Model):
@@ -47,6 +51,10 @@ class Secretaria(models.Model):
                 name="uniq_secretaria_por_municipio",
             )
         ]
+        indexes = [
+            models.Index(fields=["nome"]),
+            models.Index(fields=["ativo"]),
+        ]
 
     def __str__(self) -> str:
         return self.nome
@@ -56,7 +64,7 @@ class Unidade(models.Model):
     class Tipo(models.TextChoices):
         ESCOLA = "ESCOLA", "Escola"
         CRECHE = "CRECHE", "Creche"
-        SECRETARIA = "SECRETARIA", "Secretaria"
+        SECRETARIA = "SECRETARIA", "Secretaria/Órgão"
         OUTRO = "OUTRO", "Outro"
 
     secretaria = models.ForeignKey(
@@ -64,9 +72,19 @@ class Unidade(models.Model):
         on_delete=models.PROTECT,
         related_name="unidades",
     )
+
     nome = models.CharField(max_length=180)
     tipo = models.CharField(max_length=20, choices=Tipo.choices, default=Tipo.ESCOLA)
-    codigo_inep = models.CharField(max_length=20, blank=True, default="")
+
+    # Identificadores (opcionais)
+    codigo_inep = models.CharField("Código INEP", max_length=20, blank=True, default="")
+    cnpj = models.CharField("CNPJ", max_length=18, blank=True, default="")
+
+    # Contato / endereço (opcionais)
+    email = models.EmailField("E-mail", blank=True, default="")
+    telefone = models.CharField("Telefone", max_length=40, blank=True, default="")
+    endereco = models.TextField("Endereço", blank=True, default="")
+
     ativo = models.BooleanField(default=True)
 
     class Meta:
@@ -78,6 +96,12 @@ class Unidade(models.Model):
                 fields=["secretaria", "nome"],
                 name="uniq_unidade_por_secretaria",
             )
+        ]
+        indexes = [
+            models.Index(fields=["nome"]),
+            models.Index(fields=["tipo"]),
+            models.Index(fields=["codigo_inep"]),
+            models.Index(fields=["ativo"]),
         ]
 
     def __str__(self) -> str:
@@ -102,6 +126,10 @@ class Setor(models.Model):
                 fields=["unidade", "nome"],
                 name="uniq_setor_por_unidade",
             )
+        ]
+        indexes = [
+            models.Index(fields=["nome"]),
+            models.Index(fields=["ativo"]),
         ]
 
     def __str__(self) -> str:
