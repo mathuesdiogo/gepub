@@ -25,3 +25,8 @@ python manage.py runserver
 - Templates de erro:
   - `templates/404.html`
   - `templates/500.html`
+
+## Navegação (UI Core)
+- Breadcrumbs: definido por página via `{% block breadcrumbs %}`.
+- Menu ativo: baseado em `request.resolver_match.namespace`.
+- Título: `base.html` usa `{% block header %}`.
