@@ -1,6 +1,6 @@
 from django import forms
-from .models import Municipio
-from .models import Secretaria 
+
+from .models import Municipio, Secretaria, Unidade
 
 
 class MunicipioForm(forms.ModelForm):
@@ -25,19 +25,11 @@ class MunicipioForm(forms.ModelForm):
             "cnpj_prefeitura": forms.TextInput(attrs={"placeholder": "00.000.000/0000-00"}),
             "razao_social_prefeitura": forms.TextInput(attrs={"placeholder": "Razão social da Prefeitura"}),
             "nome_fantasia_prefeitura": forms.TextInput(attrs={"placeholder": "Prefeitura Municipal de ..."}),
-            "endereco_prefeitura": forms.Textarea(attrs={"rows": 3}),
+            "endereco_prefeitura": forms.Textarea(attrs={"rows": 3, "placeholder": "Endereço completo (opcional)"}),
             "telefone_prefeitura": forms.TextInput(attrs={"placeholder": "(00) 0000-0000"}),
             "email_prefeitura": forms.EmailInput(attrs={"placeholder": "contato@prefeitura.gov.br"}),
             "site_prefeitura": forms.URLInput(attrs={"placeholder": "https://..."}),
             "nome_prefeito": forms.TextInput(attrs={"placeholder": "Nome do prefeito(a)"}),
-        }
-class SecretariaForm(forms.ModelForm):
-    class Meta:
-        model = Secretaria
-        fields = ["municipio", "nome", "sigla", "ativo"]
-        widgets = {
-            "nome": forms.TextInput(attrs={"placeholder": "Ex.: Secretaria Municipal de Educação"}),
-            "sigla": forms.TextInput(attrs={"placeholder": "Ex.: SEMED"}),
         }
 
     def clean_uf(self):
@@ -54,5 +46,38 @@ class SecretariaForm(forms.ModelForm):
         digits = "".join(ch for ch in cnpj if ch.isdigit())
         if len(digits) != 14:
             raise forms.ValidationError("CNPJ inválido. Deve conter 14 dígitos.")
-
         return cnpj
+
+
+class SecretariaForm(forms.ModelForm):
+    class Meta:
+        model = Secretaria
+        fields = ["municipio", "nome", "sigla", "ativo"]
+        widgets = {
+            "nome": forms.TextInput(attrs={"placeholder": "Ex.: Secretaria Municipal de Educação"}),
+            "sigla": forms.TextInput(attrs={"placeholder": "Ex.: SEMED"}),
+        }
+
+
+class UnidadeForm(forms.ModelForm):
+    class Meta:
+        model = Unidade
+        fields = [
+            "secretaria",
+            "nome",
+            "tipo",
+            "codigo_inep",
+            "cnpj",
+            "endereco",
+            "telefone",
+            "email",
+            "ativo",
+        ]
+        widgets = {
+            "nome": forms.TextInput(attrs={"placeholder": "Ex.: Escola Municipal ..."}),
+            "codigo_inep": forms.TextInput(attrs={"placeholder": "Código INEP (opcional)"}),
+            "cnpj": forms.TextInput(attrs={"placeholder": "00.000.000/0000-00 (opcional)"}),
+            "endereco": forms.Textarea(attrs={"rows": 3, "placeholder": "Endereço completo (opcional)"}),
+            "telefone": forms.TextInput(attrs={"placeholder": "(00) 0000-0000"}),
+            "email": forms.EmailInput(attrs={"placeholder": "contato@..."}),
+        }
