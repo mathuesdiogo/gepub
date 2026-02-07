@@ -1,5 +1,6 @@
 from django import forms
 from .models import Municipio
+from .models import Secretaria 
 
 
 class MunicipioForm(forms.ModelForm):
@@ -29,6 +30,14 @@ class MunicipioForm(forms.ModelForm):
             "email_prefeitura": forms.EmailInput(attrs={"placeholder": "contato@prefeitura.gov.br"}),
             "site_prefeitura": forms.URLInput(attrs={"placeholder": "https://..."}),
             "nome_prefeito": forms.TextInput(attrs={"placeholder": "Nome do prefeito(a)"}),
+        }
+class SecretariaForm(forms.ModelForm):
+    class Meta:
+        model = Secretaria
+        fields = ["municipio", "nome", "sigla", "ativo"]
+        widgets = {
+            "nome": forms.TextInput(attrs={"placeholder": "Ex.: Secretaria Municipal de Educação"}),
+            "sigla": forms.TextInput(attrs={"placeholder": "Ex.: SEMED"}),
         }
 
     def clean_uf(self):
