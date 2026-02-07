@@ -11,10 +11,18 @@
 {% endblock %}
 
 {% block content %}
-  <div class="card">
-    <div class="card__title">Módulo Educação</div>
+  <div class="card" style="max-width: 900px;">
+    <div class="card__title">Educação</div>
     <div class="card__body">
-      Próximo passo: Ano letivo, Turmas, Matrículas e relatórios básicos.
+      <div class="link-list">
+        <a class="link-card" href="{% url 'educacao:turma_list' %}">
+          <div>
+            <div style="font-weight:800;">Turmas</div>
+            <div class="link-card__meta">Turmas vinculadas às Unidades (escolas/creches)</div>
+          </div>
+          <span class="pill">Abrir</span>
+        </a>
+      </div>
     </div>
   </div>
 {% endblock %}

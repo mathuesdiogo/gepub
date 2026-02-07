@@ -1,0 +1,74 @@
+{% extends "core/base.html" %}
+{% block title %}Turmas • Educação • GEPUB{% endblock %}
+{% block header %}Educação{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'educacao:index' %}">Educação</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">Turmas</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card__title" style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+    <span>Turmas</span>
+    <a class="link" href="{% url 'educacao:turma_create' %}">+ Nova turma</a>
+  </div>
+
+  <div class="card__body">
+    <form method="get" style="display:flex; gap:10px; flex-wrap:wrap; align-items:end; margin-bottom:12px;">
+      <div style="min-width:260px; flex:1;">
+        <label class="small">Buscar</label><br>
+        <input name="q" value="{{ q }}" placeholder="Turma, unidade, secretaria ou município..." />
+      </div>
+
+      <div style="min-width:160px;">
+        <label class="small">Ano letivo</label><br>
+        <input name="ano" value="{{ ano }}" placeholder="Ex.: 2026" />
+      </div>
+
+      <button type="submit">Filtrar</button>
+      {% if q or ano %}
+        <a class="link" href="{% url 'educacao:turma_list' %}">Limpar</a>
+      {% endif %}
+    </form>
+
+    <div style="overflow:auto; border:1px solid rgba(255,255,255,.08); border-radius:14px;">
+      <table style="width:100%; border-collapse:collapse; min-width:900px;">
+        <thead>
+          <tr style="text-align:left; background:rgba(255,255,255,.03);">
+            <th style="padding:10px 12px;">Turma</th>
+            <th style="padding:10px 12px; width:110px;">Ano</th>
+            <th style="padding:10px 12px; width:140px;">Turno</th>
+            <th style="padding:10px 12px;">Unidade</th>
+            <th style="padding:10px 12px;">Secretaria</th>
+            <th style="padding:10px 12px; width:140px;">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in page_obj %}
+            <tr style="border-top:1px solid rgba(255,255,255,.06);">
+              <td style="padding:10px 12px;">
+                <a class="link" href="{% url 'educacao:turma_detail' t.pk %}">{{ t.nome }}</a>
+              </td>
+              <td style="padding:10px 12px;">{{ t.ano_letivo }}</td>
+              <td style="padding:10px 12px;">{{ t.get_turno_display }}</td>
+              <td style="padding:10px 12px;">{{ t.unidade.nome }}</td>
+              <td style="padding:10px 12px;">{{ t.unidade.secretaria.nome }}</td>
+              <td style="padding:10px 12px;">
+                <a class="link" href="{% url 'educacao:turma_update' t.pk %}">Editar</a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6" style="padding:12px;">Nenhuma turma encontrada.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

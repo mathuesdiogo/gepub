@@ -1,0 +1,56 @@
+{% extends "core/base.html" %}
+{% block title %}{{ turma.nome }} • Turmas • Educação • GEPUB{% endblock %}
+{% block header %}Educação{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'educacao:index' %}">Educação</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'educacao:turma_list' %}">Turmas</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">{{ turma.nome }}</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 980px;">
+  <div class="card__title" style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+    <span>{{ turma.nome }}</span>
+    <a class="link" href="{% url 'educacao:turma_update' turma.pk %}">Editar</a>
+  </div>
+
+  <div class="card__body">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; max-width:860px;">
+      <div>
+        <div class="small">Ano letivo</div>
+        <div style="font-weight:800;">{{ turma.ano_letivo }}</div>
+      </div>
+      <div>
+        <div class="small">Turno</div>
+        <div style="font-weight:800;">{{ turma.get_turno_display }}</div>
+      </div>
+
+      <div style="grid-column:1 / -1;">
+        <div class="small">Unidade</div>
+        <div style="font-weight:800;">{{ turma.unidade.nome }}</div>
+      </div>
+
+      <div style="grid-column:1 / -1;">
+        <div class="small">Secretaria</div>
+        <div style="font-weight:800;">{{ turma.unidade.secretaria.nome }}</div>
+      </div>
+
+      <div style="grid-column:1 / -1;">
+        <div class="small">Município</div>
+        <div style="font-weight:800;">{{ turma.unidade.secretaria.municipio.nome }} / {{ turma.unidade.secretaria.municipio.uf }}</div>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;">
+      <a class="link" href="{% url 'educacao:turma_list' %}">← Voltar para lista</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
