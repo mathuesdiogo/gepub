@@ -5,10 +5,30 @@ from .models import Municipio
 class MunicipioForm(forms.ModelForm):
     class Meta:
         model = Municipio
-        fields = ["nome", "uf", "ativo"]
+        fields = [
+            "nome",
+            "uf",
+            "cnpj_prefeitura",
+            "razao_social_prefeitura",
+            "nome_fantasia_prefeitura",
+            "endereco_prefeitura",
+            "telefone_prefeitura",
+            "email_prefeitura",
+            "site_prefeitura",
+            "nome_prefeito",
+            "ativo",
+        ]
         widgets = {
             "nome": forms.TextInput(attrs={"placeholder": "Ex.: Governador Nunes Freire"}),
             "uf": forms.TextInput(attrs={"placeholder": "Ex.: MA"}),
+            "cnpj_prefeitura": forms.TextInput(attrs={"placeholder": "00.000.000/0000-00"}),
+            "razao_social_prefeitura": forms.TextInput(attrs={"placeholder": "Razão social da Prefeitura"}),
+            "nome_fantasia_prefeitura": forms.TextInput(attrs={"placeholder": "Prefeitura Municipal de ..."}),
+            "endereco_prefeitura": forms.Textarea(attrs={"rows": 3}),
+            "telefone_prefeitura": forms.TextInput(attrs={"placeholder": "(00) 0000-0000"}),
+            "email_prefeitura": forms.EmailInput(attrs={"placeholder": "contato@prefeitura.gov.br"}),
+            "site_prefeitura": forms.URLInput(attrs={"placeholder": "https://..."}),
+            "nome_prefeito": forms.TextInput(attrs={"placeholder": "Nome do prefeito(a)"}),
         }
 
     def clean_uf(self):
@@ -16,3 +36,14 @@ class MunicipioForm(forms.ModelForm):
         if len(uf) != 2:
             raise forms.ValidationError("UF deve ter 2 letras (ex.: MA).")
         return uf
+
+    def clean_cnpj_prefeitura(self):
+        cnpj = (self.cleaned_data.get("cnpj_prefeitura") or "").strip()
+        if not cnpj:
+            return ""
+
+        digits = "".join(ch for ch in cnpj if ch.isdigit())
+        if len(digits) != 14:
+            raise forms.ValidationError("CNPJ inválido. Deve conter 14 dígitos.")
+
+        return cnpj
