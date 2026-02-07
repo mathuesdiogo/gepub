@@ -40,3 +40,10 @@ Regras:
   - Secretaria única por município (nome)
   - Unidade única por secretaria (nome)
   - Setor único por unidade (nome)
+
+## ORG - CRUD (fora do admin)
+Rotas iniciais:
+- /org/municipios/ (lista + busca + paginação)
+- /org/municipios/novo/
+- /org/municipios/<id>/
+- /org/municipios/<id>/editar/
