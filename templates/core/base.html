@@ -23,10 +23,10 @@
         <a class="menu__item is-active" href="{% url 'core:dashboard' %}">Dashboard</a>
         <a class="menu__item" href="/admin/">Admin</a>
         <div class="menu__section">Módulos</div>
-        <a class="menu__item" href="#">Pessoas</a>
-        <a class="menu__item" href="#">Organização</a>
-        <a class="menu__item" href="#">Educação</a>
-        <a class="menu__item" href="#">NEE</a>
+        <a class="menu__item" href="{% url 'pessoas:index' %}">Pessoas</a>
+<a class="menu__item" href="{% url 'org:index' %}">Organização</a>
+<a class="menu__item" href="{% url 'educacao:index' %}">Educação</a>
+<a class="menu__item" href="{% url 'nee:index' %}">NEE</a>
       </nav>
 
       <div class="sidebar__footer">
@@ -46,8 +46,20 @@
       </header>
 
       <section class="content">
+
+      {% if messages %}
+        <div class="flash-stack">
+          {% for message in messages %}
+            <div class="flash flash--{{ message.tags }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
         {% block content %}{% endblock %}
       </section>
+
     </main>
   </div>
 </body>
