@@ -1,0 +1,20 @@
+{% extends "core/base.html" %}
+{% block title %}NEE • GEPUB{% endblock %}
+{% block header %}NEE{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">NEE</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <div class="card__title">Módulo NEE</div>
+    <div class="card__body">
+      Próximo passo: necessidades/deficiências, laudos, atendimentos e relatórios.
+    </div>
+  </div>
+{% endblock %}

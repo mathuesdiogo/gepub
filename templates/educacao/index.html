@@ -1,0 +1,20 @@
+{% extends "core/base.html" %}
+{% block title %}Educação • GEPUB{% endblock %}
+{% block header %}Educação{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">Educação</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <div class="card__title">Módulo Educação</div>
+    <div class="card__body">
+      Próximo passo: Ano letivo, Turmas, Matrículas e relatórios básicos.
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "core/base.html" %}
+{% block title %}Organização • GEPUB{% endblock %}
+{% block header %}Organização{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">Organização</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <div class="card__title">Módulo Organização</div>
+    <div class="card__body">
+      Próximo passo: Secretaria, Escolas/Unidades, Setores e vínculos.
+    </div>
+  </div>
+{% endblock %}
