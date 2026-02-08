@@ -1,18 +1,17 @@
 {% extends "core/base_public.html" %}
 
-{% block title %}Entrar • GEPUB{% endblock %}
+{% block title %}Alterar senha • GEPUB{% endblock %}
 
 {% block content %}
-  <div class="card">
+  <div class="card" style="max-width:460px;">
     <div class="card__title" style="display:flex; align-items:center; gap:10px;">
-      <span class="pill">GEPUB</span>
-      <span>Entrar</span>
+      <span class="pill">Segurança</span>
+      <span>Alterar senha</span>
     </div>
 
     <div class="card__body">
       <p style="margin-top:0;">
-        Use seu <strong>código de acesso</strong> e senha para entrar.
-        No primeiro acesso, a senha inicial é o <strong>CPF</strong>.
+        Primeiro acesso: por segurança, defina uma nova senha para continuar.
       </p>
 
       {% if error %}
@@ -23,20 +22,20 @@
         {% csrf_token %}
 
         <div>
-          <label class="small">Código de acesso</label><br>
-          <input name="codigo_acesso" autocomplete="username" required
+          <label class="small">Nova senha</label><br>
+          <input name="password1" type="password" required
                  style="width:100%; padding:10px 12px; border-radius:12px; border:2px solid rgba(90,166,255,.35); background:rgba(255,255,255,.03); color:inherit;">
         </div>
 
         <div>
-          <label class="small">Senha</label><br>
-          <input name="password" type="password" autocomplete="current-password" required
+          <label class="small">Confirmar nova senha</label><br>
+          <input name="password2" type="password" required
                  style="width:100%; padding:10px 12px; border-radius:12px; border:2px solid rgba(90,166,255,.35); background:rgba(255,255,255,.03); color:inherit;">
         </div>
 
         <button type="submit"
                 style="padding:10px 12px; border-radius:12px; border:1px solid rgba(90,166,255,.35); background:rgba(90,166,255,.15); color:inherit; font-weight:800;">
-          Entrar
+          Salvar nova senha
         </button>
       </form>
     </div>
