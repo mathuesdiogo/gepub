@@ -1,0 +1,30 @@
+{% extends "core/base.html" %}
+{% block title %}Relatórios • NEE • GEPUB{% endblock %}
+{% block header %}NEE{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'nee:index' %}">NEE</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">Relatórios</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 900px;">
+  <div class="card__title">Relatórios NEE</div>
+  <div class="card__body">
+    <div class="link-list">
+      <a class="link-card" href="{% url 'nee:relatorio_por_tipo' %}">
+        <div>
+          <div style="font-weight:800;">Por tipo</div>
+          <div class="link-card__meta">Quantos alunos NEE por tipo (TEA, TDAH...)</div>
+        </div>
+        <span class="pill">Abrir</span>
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

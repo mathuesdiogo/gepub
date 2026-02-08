@@ -14,4 +14,7 @@ urlpatterns = [
     # Relatórios
     path("relatorios/", views.relatorios_index, name="relatorios_index"),
     path("relatorios/por-tipo/", views.relatorio_por_tipo, name="relatorio_por_tipo"),
+    path("relatorios/por-municipio/", views.relatorio_por_municipio, name="relatorio_por_municipio"),
+    path("relatorios/por-unidade/", views.relatorio_por_unidade, name="relatorio_por_unidade"),
+
 ]

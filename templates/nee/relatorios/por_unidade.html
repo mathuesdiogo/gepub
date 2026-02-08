@@ -1,0 +1,92 @@
+{% extends "core/base.html" %}
+{% block title %}Relatório por unidade • NEE • GEPUB{% endblock %}
+{% block header %}NEE{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'nee:index' %}">NEE</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'nee:relatorios_index' %}">Relatórios</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">Por unidade</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card__title">NEE por unidade</div>
+
+  <div class="card__body">
+    <form method="get" style="display:flex; gap:10px; flex-wrap:wrap; align-items:end; margin-bottom:12px;">
+      <div style="min-width:160px;">
+        <label class="small">Ano letivo</label><br>
+        <input name="ano" value="{{ ano }}" placeholder="Ex.: 2026" />
+      </div>
+
+      <div style="min-width:280px;">
+        <label class="small">Município</label><br>
+        <select name="municipio">
+          <option value="">Todos</option>
+          {% for m in municipios %}
+            <option value="{{ m.id }}" {% if municipio_id|stringformat:"s" == m.id|stringformat:"s" %}selected{% endif %}>
+              {{ m.nome }} / {{ m.uf }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="min-width:320px;">
+        <label class="small">Unidade</label><br>
+        <select name="unidade">
+          <option value="">Todas</option>
+          {% for u in unidades %}
+            <option value="{{ u.id }}" {% if unidade_id|stringformat:"s" == u.id|stringformat:"s" %}selected{% endif %}>
+              {{ u.nome }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <button type="submit">Filtrar</button>
+      <a class="link" href="{% url 'nee:relatorio_por_unidade' %}">Limpar</a>
+    </form>
+
+    <div class="small" style="margin-bottom:10px; opacity:.9;">
+      Total de alunos com NEE (no filtro): <strong>{{ total_alunos_nee }}</strong>
+    </div>
+
+    <div style="overflow:auto; border:1px solid rgba(255,255,255,.08); border-radius:14px;">
+      <table style="width:100%; border-collapse:collapse; min-width:1100px;">
+        <thead>
+          <tr style="text-align:left; background:rgba(255,255,255,.03);">
+            <th style="padding:10px 12px;">Unidade</th>
+            <th style="padding:10px 12px;">Secretaria</th>
+            <th style="padding:10px 12px;">Município</th>
+            <th style="padding:10px 12px; width:160px;">Alunos (NEE)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+            <tr style="border-top:1px solid rgba(255,255,255,.06);">
+              <td style="padding:10px 12px;">
+                {{ r.aluno__matriculas__turma__unidade__nome }}
+              </td>
+              <td style="padding:10px 12px;">
+                {{ r.aluno__matriculas__turma__unidade__secretaria__nome }}
+              </td>
+              <td style="padding:10px 12px;">
+                {{ r.aluno__matriculas__turma__unidade__secretaria__municipio__nome }}
+              </td>
+              <td style="padding:10px 12px; font-weight:800;">{{ r.total }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4" style="padding:12px;">Nenhum dado para o filtro selecionado.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
