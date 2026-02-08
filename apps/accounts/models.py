@@ -3,8 +3,6 @@ from __future__ import annotations
 import re
 from django.conf import settings
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.utils import timezone
 
 
@@ -14,7 +12,6 @@ def _only_digits(s: str) -> str:
 
 def gerar_codigo_acesso(nome: str, ano: int | None = None) -> str:
     """
-    Gera um código simples e legível.
     Ex.: "joao.silva-2026"
     """
     base = (nome or "").strip().lower()
@@ -28,7 +25,10 @@ class Profile(models.Model):
     class Role(models.TextChoices):
         ADMIN = "ADMIN", "Admin (Sistema)"
         MUNICIPAL = "MUNICIPAL", "Gestor Municipal"
+        SECRETARIA = "SECRETARIA", "Gestor de Secretaria"
         UNIDADE = "UNIDADE", "Gestor de Unidade"
+        PROFESSOR = "PROFESSOR", "Professor"
+        ALUNO = "ALUNO", "Aluno"
         NEE = "NEE", "Técnico NEE"
         LEITURA = "LEITURA", "Somente leitura"
 
@@ -73,19 +73,21 @@ class Profile(models.Model):
         return f"{self.user} ({self.role})"
 
     def save(self, *args, **kwargs):
-        # gera código se vazio
+        # Gera código se vazio, garantindo unicidade
         if not self.codigo_acesso:
             nome_base = (self.user.get_full_name() or self.user.username or "usuario").strip()
-            self.codigo_acesso = gerar_codigo_acesso(nome_base)
+            base = gerar_codigo_acesso(nome_base)
 
-        # normaliza CPF (guarda como veio; mas podemos garantir dígitos)
-        # se quiser só dígitos, descomente a linha abaixo:
-        # self.cpf = _only_digits(self.cpf)
+            codigo = base
+            i = 2
+            while Profile.objects.filter(codigo_acesso__iexact=codigo).exclude(pk=self.pk).exists():
+                codigo = f"{base}-{i}"
+                i += 1
+
+            self.codigo_acesso = codigo
 
         super().save(*args, **kwargs)
 
-
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def criar_profile(sender, instance, created, **kwargs):
-    if created:
-        Profile.objects.create(user=instance)
+    @property
+    def cpf_digits(self) -> str:
+        return _only_digits(self.cpf)

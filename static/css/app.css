@@ -1,21 +1,33 @@
 :root{
   --bg:#0b1220;
   --panel:#0f1b31;
-  --panel2:#0c1628;
+  --panel-2:#0c1628;          /* ✅ nome que você usa nos inputs */
   --text:#e7eefc;
   --muted:#a9b6d3;
   --stroke:rgba(255,255,255,.08);
   --accent:#5aa6ff;
+  --accent-stroke:rgba(90,166,255,.38); /* ✅ estava faltando */
+
 }
 
 *{box-sizing:border-box}
 html,body{height:100%}
+html, body{ height:100%; }
+
 body{
   margin:0;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
-  background:linear-gradient(180deg,var(--bg),#060b14);
-  color:var(--text);
+  background:
+    radial-gradient(1200px 700px at 20% 0%, rgba(90,166,255,.12), transparent 60%),
+    radial-gradient(900px 600px at 90% 10%, rgba(120,90,255,.10), transparent 55%),
+    var(--bg);
+  background-attachment: fixed;   /* ✅ mantém o fundo fixo ao rolar */
+  background-repeat: no-repeat;
+  background-size: cover;
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial;
 }
+
+
 
 .layout{display:flex; min-height:100vh}
 
@@ -131,3 +143,143 @@ body{
 .breadcrumbs__link:hover{color:var(--text); text-decoration:underline;}
 .breadcrumbs__sep{opacity:.6;}
 .breadcrumbs__current{color:var(--text); font-weight:600;}
+
+/* Cards */
+.card{
+  background: var(--panel);
+  border: 1px solid var(--stroke);
+  border-radius: 18px;
+  box-shadow: 0 14px 35px rgba(0,0,0,.25);
+}
+.card__title{
+  padding: 14px 16px;
+  font-weight: 800;
+  letter-spacing: .2px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.card__body{ padding: 14px 16px; }
+
+/* Inputs padrão (escuros e maiores) */
+input, select, textarea{
+  width:100%;
+  box-sizing:border-box;
+  padding:12px 14px;
+  border-radius: 14px;
+  border:2.5px solid var(--stroke);
+  background: var(--panel-2);
+  color: var(--text);
+  outline:none;
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+textarea{ resize: vertical; min-height: 90px; }
+
+input::placeholder, textarea::placeholder{ color: rgba(255,255,255,.45); }
+
+input:focus, select:focus, textarea:focus{
+  border-color: var(--accent-stroke);
+  box-shadow: 0 0 0 4px rgba(90,166,255,.14);
+  background: rgba(255,255,255,.06);
+}
+
+/* Checkbox */
+input[type="checkbox"]{
+  width:auto;
+  padding:0;
+  border-radius: 6px;
+}
+
+/* Botões */
+button{
+  padding: 12px 14px;
+  border-radius: 14px;
+  border:1px solid var(--accent-stroke);
+  background: var(--accent);
+  color: var(--text);
+  font-weight: 800;
+  cursor: pointer;
+}
+button:hover{ filter: brightness(1.05); }
+
+/* Links */
+.link{
+  color: rgba(155,205,255,.95);
+  text-decoration: none;
+}
+.link:hover{ text-decoration: underline; }
+
+/* Pequenos textos */
+.small{ font-size: 12px; color: var(--muted); }
+
+.form-section{
+  border: 1.5px solid var(--stroke);
+  background: rgba(255,255,255,.03);
+  border-radius: 16px;
+  padding: 12px;
+}
+.form-section__title{
+  margin-bottom: 14px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+.form-section{
+  border: 1.5px solid var(--stroke);
+  background: rgba(255,255,255,.03);
+  border-radius: 16px;
+  padding: 12px;
+}
+.form-section__title{
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+/* Espaçamento padrão entre campos */
+label.small{
+  display: block;
+  margin-bottom: 6px;
+}
+
+/* Espaço entre grupos de formulário */
+.form-section{
+  margin-top: 22px;
+}
+
+/* Título de seção mais “respirado” */
+.form-section__title{
+  margin-bottom: 16px;
+}
+
+.link-list{
+  display: grid;
+  gap: 10px;             /* controla o espaçamento vertical */
+  margin-top: 10px;
+}
+
+.link-card{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1.5px solid var(--stroke);
+  background: rgba(255,255,255,.03);
+  text-decoration: none;
+  color: var(--text);
+}
+
+.link-card:hover{
+  background: rgba(255,255,255,.05);
+  border-color: rgba(255,255,255,.14);
+}
+
+.link-card__meta{
+  color: var(--muted);
+  font-size: 12px;
+}
+

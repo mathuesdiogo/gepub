@@ -1,0 +1,26 @@
+{% extends "nee/relatorios/pdf/base_pdf.html" %}
+
+{% block body %}
+  <div style="margin-bottom:10px;">
+    <strong>Total de alunos com NEE:</strong> {{ total_alunos_nee }}
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Tipo de Necessidade</th>
+        <th class="right">Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+        <tr>
+          <td>{{ r.tipo__nome }}</td>
+          <td class="right">{{ r.total }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="2">Sem dados para os filtros selecionados.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

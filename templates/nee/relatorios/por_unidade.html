@@ -62,13 +62,15 @@
 
       <button type="submit">Filtrar</button>
       <button class="btn" type="submit" name="format" value="csv">Exportar CSV</button>
+      <button class="btn" type="submit" name="format" value="pdf">Baixar PDF</button>
 
       <a class="link" href="{% url 'nee:relatorio_por_unidade' %}">Limpar</a>
     </form>
 
-    <div class="small" style="margin-bottom:10px; opacity:.9;">
-      Total de alunos com NEE (no filtro): <strong>{{ total_alunos_nee }}</strong>
-    </div>
+    <div class="kpi">
+  <strong>Total de alunos com NEE:</strong> {{ total_alunos_nee }}
+</div>
+
 
     <div style="overflow:auto; border:1px solid rgba(255,255,255,.08); border-radius:14px;">
       <table style="width:100%; border-collapse:collapse; min-width:1100px;">

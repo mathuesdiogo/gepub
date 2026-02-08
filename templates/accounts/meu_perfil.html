@@ -1,0 +1,45 @@
+{% extends "core/base.html" %}
+
+{% block title %}Meu perfil • GEPUB{% endblock %}
+{% block header %}Meu perfil{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+  <span class="breadcrumbs__sep">›</span>
+  <span>Meu perfil</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:760px;">
+  <div class="small" style="opacity:.85; margin-bottom:10px;">
+    <div><strong>Código de acesso:</strong> {{ p.codigo_acesso }}</div>
+    <div><strong>Função:</strong> {{ p.get_role_display }}</div>
+  </div>
+
+  <form method="post" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+    {% csrf_token %}
+
+    <div>
+      <label class="small">Nome</label><br>
+      <input name="first_name" value="{{ request.user.first_name }}" />
+    </div>
+
+    <div>
+      <label class="small">Sobrenome</label><br>
+      <input name="last_name" value="{{ request.user.last_name }}" />
+    </div>
+
+    <div style="grid-column:1 / -1;">
+      <label class="small">E-mail</label><br>
+      <input name="email" value="{{ request.user.email }}" />
+    </div>
+
+    <div style="grid-column:1 / -1; display:flex; gap:10px; margin-top:6px;">
+      <button class="btn" type="submit">Salvar</button>
+      <a class="link" href="{% url 'accounts:alterar_senha' %}">Alterar minha senha</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

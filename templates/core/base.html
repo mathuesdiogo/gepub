@@ -1,10 +1,17 @@
 {% load static %}
+
+{% if perms.org.view %}
+  ... link org ...
+{% endif %}
+
+
 <!doctype html>
 <html lang="pt-br">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}GEPUB{% endblock %}</title>
+<div class="small">ORG view? {{ perms.org.view }}</div>
 
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
 </head>
@@ -20,24 +27,51 @@
       </div>
 
       <nav class="menu">
-        <a class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'core' %}is-active{% endif %}"
-   href="{% url 'core:dashboard' %}">Dashboard</a>
+  <a class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'core' %}is-active{% endif %}"
+     href="{% url 'core:dashboard' %}">Dashboard</a>
 
-<a class="menu__item" href="/admin/">Admin</a>
+  {% if perms.admin.django %}
+    <a class="menu__item" href="/admin/">Admin</a>
+  {% endif %}
 
-<div class="menu__section">Módulos</div>
+  <div class="menu__section">Módulos</div>
 
-        <a class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'pessoas' %}is-active{% endif %}"
-          href="{% url 'pessoas:index' %}">Pessoas</a>
+  {% if perms.org.view %}
+    <a class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'org' %}is-active{% endif %}"
+       href="{% url 'org:index' %}">Organização</a>
+  {% endif %}
 
-        <a class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'org' %}is-active{% endif %}"
-          href="{% url 'org:index' %}">Organização</a>
+  {% if perms.educacao.view %}
+    <a class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'educacao' %}is-active{% endif %}"
+       href="{% url 'educacao:index' %}">Educação</a>
+  {% endif %}
 
-        <a class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'educacao' %}is-active{% endif %}"
-          href="{% url 'educacao:index' %}">Educação</a>
+  {% if perms.nee.view %}
+    <a class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'nee' %}is-active{% endif %}"
+       href="{% url 'nee:index' %}">NEE</a>
+  {% endif %}
 
-        <a class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'nee' %}is-active{% endif %}"
-          href="{% url 'nee:index' %}">NEE</a>
+  <div class="menu__section">Conta</div>
+
+  {% if perms.accounts.profile %}
+    <a class="menu__item {% if request.resolver_match and request.resolver_match.url_name == 'meu_perfil' %}is-active{% endif %}"
+       href="{% url 'accounts:meu_perfil' %}">Meu perfil</a>
+
+    <a class="menu__item {% if request.resolver_match and request.resolver_match.url_name == 'alterar_senha' %}is-active{% endif %}"
+       href="{% url 'accounts:alterar_senha' %}">Alterar senha</a>
+  {% endif %}
+
+  {% if perms.accounts.manage %}
+    <a class="menu__item {% if request.resolver_match and request.resolver_match.url_name == 'usuarios_list' %}is-active{% endif %}"
+       href="{% url 'accounts:usuarios_list' %}">Usuários</a>
+  {% endif %}
+</nav>
+
+
+{% if perms.admin.view %}
+  <a class="menu__item" href="/admin/">Admin Django</a>
+{% endif %}
+
 
               </nav>
 

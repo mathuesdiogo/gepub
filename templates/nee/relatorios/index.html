@@ -17,14 +17,33 @@
   <div class="card__title">Relatórios NEE</div>
   <div class="card__body">
     <div class="link-list">
-      <a class="link-card" href="{% url 'nee:relatorio_por_tipo' %}">
-        <div>
-          <div style="font-weight:800;">Por tipo</div>
-          <div class="link-card__meta">Quantos alunos NEE por tipo (TEA, TDAH...)</div>
-        </div>
-        <span class="pill">Abrir</span>
-      </a>
+
+  <a class="link-card" href="{% url 'nee:relatorio_por_tipo' %}">
+    <div>
+      <div style="font-weight:800;">Por tipo</div>
+      <div class="link-card__meta">Alunos com NEE por tipo (TEA, TDAH...)</div>
     </div>
+    <span class="pill">Abrir</span>
+  </a>
+
+  <a class="link-card" href="{% url 'nee:relatorio_por_municipio' %}">
+    <div>
+      <div style="font-weight:800;">Por município</div>
+      <div class="link-card__meta">Consolidado de alunos com NEE por município</div>
+    </div>
+    <span class="pill">Abrir</span>
+  </a>
+
+  <a class="link-card" href="{% url 'nee:relatorio_por_unidade' %}">
+    <div>
+      <div style="font-weight:800;">Por unidade</div>
+      <div class="link-card__meta">Consolidado de alunos com NEE por unidade</div>
+    </div>
+    <span class="pill">Abrir</span>
+  </a>
+
+</div>
+
   </div>
 </div>
 {% endblock %}
