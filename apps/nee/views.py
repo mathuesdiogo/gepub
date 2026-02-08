@@ -153,6 +153,10 @@ def _csv_response(filename: str) -> HttpResponse:
 
 
 def _pdf_response(request, *, template: str, filename: str, context: dict) -> HttpResponse:
+    from django.templatetags.static import static
+    logo_url = request.build_absolute_uri(static("img/logo_prefeitura.png"))
+    context = {**context, "logo_url": logo_url}
+
     """
     Gera PDF via WeasyPrint e força download.
     """
@@ -222,6 +226,12 @@ def relatorio_por_tipo(request):
             template="nee/relatorios/pdf/por_tipo.html",
             filename="nee_por_tipo.pdf",
             context={
+                "prefeitura_nome": "Prefeitura Municipal",
+                "municipio_nome": (Municipio.objects.filter(id=int(municipio_id)).values_list("nome", flat=True).first()
+                  if municipio_id.isdigit() else ""),
+                    "municipio_uf": (Municipio.objects.filter(id=int(municipio_id)).values_list("uf", flat=True).first()
+                if municipio_id.isdigit() else ""),
+
                 "title": "Relatório NEE — Por tipo",
                 "generated_at": timezone.localtime().strftime("%d/%m/%Y %H:%M"),
                 "filtros": filtros,
@@ -306,6 +316,12 @@ def relatorio_por_municipio(request):
             template="nee/relatorios/pdf/por_municipio.html",
             filename="nee_por_municipio.pdf",
             context={
+                "prefeitura_nome": "Prefeitura Municipal",
+                "municipio_nome": (Municipio.objects.filter(id=int(municipio_id)).values_list("nome", flat=True).first()
+                if municipio_id.isdigit() else ""),
+                "municipio_uf": (Municipio.objects.filter(id=int(municipio_id)).values_list("uf", flat=True).first()
+                if municipio_id.isdigit() else ""),
+
                 "title": "Relatório NEE — Por município",
                 "generated_at": timezone.localtime().strftime("%d/%m/%Y %H:%M"),
                 "filtros": filtros,
@@ -396,6 +412,15 @@ def relatorio_por_unidade(request):
             template="nee/relatorios/pdf/por_unidade.html",
             filename="nee_por_unidade.pdf",
             context={
+                "prefeitura_nome": "Prefeitura Municipal",
+                "municipio_nome": (Municipio.objects.filter(id=int(municipio_id)).values_list("nome", flat=True).first()
+                if municipio_id.isdigit() else ""),
+                "municipio_uf": (Municipio.objects.filter(id=int(municipio_id)).values_list("uf", flat=True).first()
+                if municipio_id.isdigit() else ""),
+                "secretaria_nome": (Unidade.objects.filter(id=int(unidade_id))
+                    .values_list("secretaria__nome", flat=True).first()
+                    if unidade_id.isdigit() else ""),
+
                 "title": "Relatório NEE — Por unidade",
                 "generated_at": timezone.localtime().strftime("%d/%m/%Y %H:%M"),
                 "filtros": filtros,

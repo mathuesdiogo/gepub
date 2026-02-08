@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <title>{{ title }}</title>
+
+  <style>
+    /* ✅ Página */
+    @page {
+      size: A4;
+      margin: 22mm 14mm 22mm 14mm;
+
+      /* ✅ Rodapé fixo com paginação (WeasyPrint) */
+      @bottom-left {
+        content: "GEPUB • " counter(page) " de " counter(pages);
+        font-size: 10px;
+        color: #666;
+      }
+      @bottom-right {
+        content: "{{ generated_at }}";
+        font-size: 10px;
+        color: #666;
+      }
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 12px;
+      color: #111;
+    }
+
+    /* ✅ Cabeçalho oficial */
+    .header {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      border: 1px solid #ddd;
+      padding: 10px 12px;
+      border-radius: 10px;
+    }
+
+    .logo {
+      width: 58px;
+      height: 58px;
+      object-fit: contain;
+    }
+
+    .header__text { flex: 1; }
+    .org-line { font-size: 12px; font-weight: 700; margin: 0; }
+    .sub-line { font-size: 11px; color: #444; margin: 2px 0 0; }
+    .doc-title { font-size: 16px; font-weight: 800; margin: 10px 0 6px; }
+
+    .meta {
+      font-size: 11px;
+      color: #444;
+      margin: 4px 0 12px;
+    }
+
+    .hr { height: 1px; background: #ddd; margin: 10px 0 14px; }
+
+    /* ✅ Tabelas */
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ddd; padding: 7px 8px; vertical-align: top; }
+    th { background: #f3f5f7; text-align: left; font-weight: 700; }
+    .right { text-align: right; }
+    .muted { color: #666; }
+
+    /* ✅ Badges/Resumo */
+    .kpi {
+      display: inline-block;
+      border: 1px solid #ddd;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      margin-bottom: 10px;
+      background: #fafafa;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ✅ Cabeçalho (Prefeitura / Secretaria / Município) -->
+  <div class="header">
+    {% if logo_url %}
+      <img class="logo" src="{{ logo_url }}" alt="Logo" />
+    {% endif %}
+
+    <div class="header__text">
+      <p class="org-line">
+        {{ prefeitura_nome|default:"Prefeitura Municipal" }}
+        {% if municipio_nome %} — {{ municipio_nome }}{% endif %}
+        {% if municipio_uf %}/{{ municipio_uf }}{% endif %}
+      </p>
+
+      {% if secretaria_nome %}
+        <p class="sub-line">{{ secretaria_nome }}</p>
+      {% else %}
+        <p class="sub-line">Relatórios NEE • Educação Inclusiva</p>
+      {% endif %}
+
+      <p class="sub-line muted">
+        Sistema: GEPUB (Gestão Estratégica Pública)
+      </p>
+    </div>
+  </div>
+
+  <div class="doc-title">{{ title }}</div>
+
+  <div class="meta">
+    {% if filtros %}<div><strong>Filtros:</strong> {{ filtros }}</div>{% endif %}
+  </div>
+
+  <div class="hr"></div>
+
+  {% block body %}{% endblock %}
+</body>
+</html>
