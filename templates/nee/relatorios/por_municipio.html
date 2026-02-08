@@ -23,6 +23,18 @@
       <div style="min-width:160px;">
         <label class="small">Ano letivo</label><br>
         <input name="ano" value="{{ ano }}" placeholder="Ex.: 2026" />
+    <div style="min-width:220px;">
+  <label class="small">Situação da matrícula</label><br>
+  <select name="situacao">
+    <option value="" {% if not situacao %}selected{% endif %}>(Padrão: ATIVA)</option>
+
+    <option value="ATIVA" {% if situacao == "ATIVA" %}selected{% endif %}>ATIVA</option>
+    <option value="TRANSFERIDA" {% if situacao == "TRANSFERIDA" %}selected{% endif %}>TRANSFERIDA</option>
+    <option value="CONCLUIDA" {% if situacao == "CONCLUIDA" %}selected{% endif %}>CONCLUÍDA</option>
+    <option value="CANCELADA" {% if situacao == "CANCELADA" %}selected{% endif %}>CANCELADA</option>
+  </select>
+</div>
+
       </div>
 
       <div style="min-width:280px;">
@@ -38,6 +50,7 @@
       </div>
 
       <button type="submit">Filtrar</button>
+      <button class="btn" type="submit" name="format" value="csv">Exportar CSV</button>
       <a class="link" href="{% url 'nee:relatorio_por_municipio' %}">Limpar</a>
     </form>
 
@@ -52,6 +65,7 @@
             <th style="padding:10px 12px;">Município</th>
             <th style="padding:10px 12px; width:160px;">Alunos (NEE)</th>
           </tr>
+          
         </thead>
         <tbody>
           {% for r in rows %}
