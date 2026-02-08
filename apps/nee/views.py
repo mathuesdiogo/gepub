@@ -8,6 +8,10 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
+from django.utils import timezone
+
+from weasyprint import HTML
 
 from core.rbac import get_profile, is_admin
 from educacao.models import Matricula
@@ -148,6 +152,19 @@ def _csv_response(filename: str) -> HttpResponse:
     return resp
 
 
+def _pdf_response(request, *, template: str, filename: str, context: dict) -> HttpResponse:
+    """
+    Gera PDF via WeasyPrint e força download.
+    """
+    html = render_to_string(template, context, request=request)
+    pdf_bytes = HTML(string=html, base_url=request.build_absolute_uri("/")).write_pdf()
+
+    resp = HttpResponse(pdf_bytes, content_type="application/pdf")
+    resp["Content-Disposition"] = f'attachment; filename="{filename}"'
+    resp["X-Content-Type-Options"] = "nosniff"
+    return resp
+
+
 @login_required
 def relatorio_por_tipo(request):
     ano = (request.GET.get("ano") or "").strip()
@@ -188,7 +205,7 @@ def relatorio_por_tipo(request):
     if unidade_id.isdigit():
         unidades = unidades.filter(id=int(unidade_id))
 
-    # ✅ CSV (ANTES do render)
+    # ✅ CSV
     if request.GET.get("format") == "csv":
         response = _csv_response("nee_por_tipo.csv")
         writer = csv.writer(response)
@@ -196,6 +213,22 @@ def relatorio_por_tipo(request):
         for r in rows:
             writer.writerow([r["tipo__nome"], r["total"]])
         return response
+
+    # ✅ PDF
+    if request.GET.get("format") == "pdf":
+        filtros = f"Ano={ano or '-'} | Município={municipio_id or '-'} | Unidade={unidade_id or '-'} | Situação={situacao or 'ATIVA'}"
+        return _pdf_response(
+            request,
+            template="nee/relatorios/pdf/por_tipo.html",
+            filename="nee_por_tipo.pdf",
+            context={
+                "title": "Relatório NEE — Por tipo",
+                "generated_at": timezone.localtime().strftime("%d/%m/%Y %H:%M"),
+                "filtros": filtros,
+                "rows": rows,
+                "total_alunos_nee": total_alunos_nee,
+            },
+        )
 
     return render(
         request,
@@ -252,6 +285,7 @@ def relatorio_por_municipio(request):
     if municipio_id.isdigit():
         municipios = municipios.filter(id=int(municipio_id))
 
+    # ✅ CSV
     if request.GET.get("format") == "csv":
         response = _csv_response("nee_por_municipio.csv")
         writer = csv.writer(response)
@@ -263,6 +297,22 @@ def relatorio_por_municipio(request):
                 r["total"],
             ])
         return response
+
+    # ✅ PDF (corrigido: template + filename + sem unidade_id)
+    if request.GET.get("format") == "pdf":
+        filtros = f"Ano={ano or '-'} | Município={municipio_id or '-'} | Situação={situacao or 'ATIVA'}"
+        return _pdf_response(
+            request,
+            template="nee/relatorios/pdf/por_municipio.html",
+            filename="nee_por_municipio.pdf",
+            context={
+                "title": "Relatório NEE — Por município",
+                "generated_at": timezone.localtime().strftime("%d/%m/%Y %H:%M"),
+                "filtros": filtros,
+                "rows": rows,
+                "total_alunos_nee": total_alunos_nee,
+            },
+        )
 
     return render(
         request,
@@ -323,6 +373,7 @@ def relatorio_por_unidade(request):
     if unidade_id.isdigit():
         unidades = unidades.filter(id=int(unidade_id))
 
+    # ✅ CSV
     if request.GET.get("format") == "csv":
         response = _csv_response("nee_por_unidade.csv")
         writer = csv.writer(response)
@@ -336,6 +387,22 @@ def relatorio_por_unidade(request):
                 r["total"],
             ])
         return response
+
+    # ✅ PDF (corrigido: template + filename)
+    if request.GET.get("format") == "pdf":
+        filtros = f"Ano={ano or '-'} | Município={municipio_id or '-'} | Unidade={unidade_id or '-'} | Situação={situacao or 'ATIVA'}"
+        return _pdf_response(
+            request,
+            template="nee/relatorios/pdf/por_unidade.html",
+            filename="nee_por_unidade.pdf",
+            context={
+                "title": "Relatório NEE — Por unidade",
+                "generated_at": timezone.localtime().strftime("%d/%m/%Y %H:%M"),
+                "filtros": filtros,
+                "rows": rows,
+                "total_alunos_nee": total_alunos_nee,
+            },
+        )
 
     return render(
         request,
