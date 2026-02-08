@@ -3,12 +3,15 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 from .forms import TurmaForm, AlunoForm, MatriculaForm
 from .models import Turma, Aluno, Matricula
 
-from nee.forms import AlunoNecessidadeForm
-from nee.models import AlunoNecessidade
+from nee.forms import AlunoNecessidadeForm, ApoioMatriculaForm
+from nee.models import AlunoNecessidade, ApoioMatricula
+from core.rbac import scope_filter_turmas, scope_filter_alunos, scope_filter_matriculas
+
 
 
 @login_required
@@ -16,12 +19,20 @@ def index(request):
     return render(request, "educacao/index.html")
 
 
+# -----------------------------
+# TURMAS (CRUD)
+# -----------------------------
+
 @login_required
 def turma_list(request):
     q = (request.GET.get("q") or "").strip()
     ano = (request.GET.get("ano") or "").strip()
 
-    qs = Turma.objects.select_related("unidade", "unidade__secretaria", "unidade__secretaria__municipio")
+    qs = Turma.objects.select_related(
+        "unidade",
+        "unidade__secretaria",
+        "unidade__secretaria__municipio",
+    )
 
     if ano.isdigit():
         qs = qs.filter(ano_letivo=int(ano))
@@ -34,55 +45,70 @@ def turma_list(request):
             | Q(unidade__secretaria__municipio__nome__icontains=q)
         )
 
+    # ✅ AQUI entra o RBAC (ANTES do paginator)
+    qs = scope_filter_turmas(request.user, qs)
+
     paginator = Paginator(qs, 10)
     page_obj = paginator.get_page(request.GET.get("page"))
 
-    return render(
-        request,
-        "educacao/turma_list.html",
-        {"q": q, "ano": ano, "page_obj": page_obj},
-    )
+    return render(request, "educacao/turma_list.html", {"q": q, "ano": ano, "page_obj": page_obj})
+
 
 
 @login_required
 def turma_detail(request, pk: int):
-    turma = get_object_or_404(
-        Turma.objects.select_related("unidade", "unidade__secretaria", "unidade__secretaria__municipio"),
-        pk=pk,
+    qs = Turma.objects.select_related(
+        "unidade",
+        "unidade__secretaria",
+        "unidade__secretaria__municipio",
     )
+    qs = scope_filter_turmas(request.user, qs)
+
+    turma = get_object_or_404(qs, pk=pk)
     return render(request, "educacao/turma_detail.html", {"turma": turma})
+
 
 
 @login_required
 def turma_create(request):
     if request.method == "POST":
-        form = TurmaForm(request.POST)
+        form = TurmaForm(request.POST, user=request.user)
         if form.is_valid():
             turma = form.save()
             messages.success(request, "Turma criada com sucesso.")
             return redirect("educacao:turma_detail", pk=turma.pk)
+
+        # ❗ se não validou, NÃO usa turma
         messages.error(request, "Corrija os erros do formulário.")
     else:
-        form = TurmaForm()
+        form = TurmaForm(user=request.user)
 
     return render(request, "educacao/turma_form.html", {"form": form, "mode": "create"})
 
 
 @login_required
 def turma_update(request, pk: int):
-    turma = get_object_or_404(Turma, pk=pk)
+    qs = Turma.objects.select_related(
+        "unidade",
+        "unidade__secretaria",
+        "unidade__secretaria__municipio",
+    )
+    qs = scope_filter_turmas(request.user, qs)
+    turma = get_object_or_404(qs, pk=pk)
 
     if request.method == "POST":
-        form = TurmaForm(request.POST, instance=turma)
+        form = TurmaForm(request.POST, instance=turma, user=request.user)
         if form.is_valid():
-            form.save()
+            turma = form.save()
             messages.success(request, "Turma atualizada com sucesso.")
             return redirect("educacao:turma_detail", pk=turma.pk)
         messages.error(request, "Corrija os erros do formulário.")
     else:
-        form = TurmaForm(instance=turma)
+        form = TurmaForm(instance=turma, user=request.user)
 
     return render(request, "educacao/turma_form.html", {"form": form, "mode": "update", "turma": turma})
+
+
 
 # -----------------------------
 # ALUNOS (CRUD)
@@ -111,9 +137,9 @@ def aluno_list(request):
 def aluno_detail(request, pk: int):
     aluno = get_object_or_404(Aluno, pk=pk)
 
+    # Matrículas do aluno
     matriculas = (
-        Matricula.objects
-        .select_related(
+        Matricula.objects.select_related(
             "turma",
             "turma__unidade",
             "turma__unidade__secretaria",
@@ -123,25 +149,89 @@ def aluno_detail(request, pk: int):
         .order_by("-id")
     )
 
+    # NEE do aluno
     necessidades = (
-        AlunoNecessidade.objects
-        .select_related("tipo")
+        AlunoNecessidade.objects.select_related("tipo")
         .filter(aluno=aluno)
         .order_by("-id")
     )
 
-    # adicionar necessidade
-    if request.method == "POST" and request.POST.get("_action") == "add_nee":
-        form_nee = AlunoNecessidadeForm(request.POST)
-        if form_nee.is_valid():
-            nee = form_nee.save(commit=False)
-            nee.aluno = aluno
-            nee.save()
-            messages.success(request, "Necessidade adicionada com sucesso.")
-            return redirect("educacao:aluno_detail", pk=aluno.pk)
-        messages.error(request, "Corrija os erros da necessidade.")
+    # Apoios por matrícula (todas as matrículas do aluno)
+    apoios = (
+        ApoioMatricula.objects.select_related(
+            "matricula",
+            "matricula__turma",
+            "matricula__turma__unidade",
+            "matricula__turma__unidade__secretaria",
+            "matricula__turma__unidade__secretaria__municipio",
+        )
+        .filter(matricula__aluno=aluno)
+        .order_by("-id")
+    )
+
+    # -------------------------
+    # Ações (POST) na mesma tela
+    # -------------------------
+    if request.method == "POST":
+        action = (request.POST.get("_action") or "").strip()
+
+        # 1) adicionar matrícula
+        if action == "add_matricula":
+            form_matricula = MatriculaForm(request.POST, user=request.user)
+            form_nee = AlunoNecessidadeForm(request.POST, aluno=aluno)
+            form_apoio = ApoioMatriculaForm(aluno=aluno)
+
+            if form_matricula.is_valid():
+                m = form_matricula.save(commit=False)
+                m.aluno = aluno
+                if not m.data_matricula:
+                    m.data_matricula = timezone.localdate()
+                m.save()
+                messages.success(request, "Matrícula adicionada com sucesso.")
+                return redirect("educacao:aluno_detail", pk=aluno.pk)
+
+            messages.error(request, "Corrija os erros da matrícula.")
+
+        # 2) adicionar necessidade (NEE)
+        elif action == "add_nee":
+            form_matricula = MatriculaForm(user=request.user)
+            form_nee = AlunoNecessidadeForm(request.POST, aluno=aluno)
+            form_apoio = ApoioMatriculaForm(aluno=aluno)
+
+            if form_nee.is_valid():
+                nee = form_nee.save(commit=False)
+                nee.aluno = aluno
+                nee.save()
+                messages.success(request, "Necessidade adicionada com sucesso.")
+                return redirect("educacao:aluno_detail", pk=aluno.pk)
+
+            messages.error(request, "Corrija os erros da necessidade.")
+
+        # 3) adicionar apoio por matrícula
+        elif action == "add_apoio":
+            form_matricula = MatriculaForm()
+            form_nee = AlunoNecessidadeForm(aluno=aluno)
+            form_apoio = ApoioMatriculaForm(request.POST, aluno=aluno)
+
+            if form_apoio.is_valid():
+                form_apoio.save()
+                messages.success(request, "Apoio adicionado com sucesso.")
+                return redirect("educacao:aluno_detail", pk=aluno.pk)
+
+            messages.error(request, "Corrija os erros do apoio.")
+
+        else:
+            # ação desconhecida: mantém forms vazios
+            form_matricula = MatriculaForm()
+            form_nee = AlunoNecessidadeForm(request.POST, aluno=aluno)
+            form_apoio = ApoioMatriculaForm(aluno=aluno)
+            messages.error(request, "Ação inválida.")
+
     else:
-        form_nee = AlunoNecessidadeForm()
+        # GET: forms vazios
+        form_matricula = MatriculaForm()
+        form_nee = AlunoNecessidadeForm(request.POST, aluno=aluno)
+        form_apoio = ApoioMatriculaForm(aluno=aluno)
 
     return render(
         request,
@@ -149,30 +239,12 @@ def aluno_detail(request, pk: int):
         {
             "aluno": aluno,
             "matriculas": matriculas,
+            "form_matricula": form_matricula,
             "necessidades": necessidades,
             "form_nee": form_nee,
+            "apoios": apoios,
+            "form_apoio": form_apoio,
         },
-    )
-
-
-    # form de matrícula dentro da página
-    if request.method == "POST" and request.POST.get("_action") == "add_matricula":
-        form_matricula = MatriculaForm(request.POST)
-        if form_matricula.is_valid():
-            m = form_matricula.save(commit=False)
-            m.aluno = aluno
-            from django.utils import timezone
-            m.save()
-            messages.success(request, "Matrícula adicionada com sucesso.")
-            return redirect("educacao:aluno_detail", pk=aluno.pk)
-        messages.error(request, "Corrija os erros da matrícula.")
-    else:
-        form_matricula = MatriculaForm()
-
-    return render(
-        request,
-        "educacao/aluno_detail.html",
-        {"aluno": aluno, "matriculas": matriculas, "form_matricula": form_matricula},
     )
 
 
