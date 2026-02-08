@@ -4,6 +4,9 @@ from core.rbac import get_profile, is_admin
 
 from .models import Turma, Aluno, Matricula
 
+from core.rbac import scope_filter_turmas
+
+
 
 class TurmaForm(forms.ModelForm):
     class Meta:
@@ -82,7 +85,6 @@ class MatriculaForm(forms.ModelForm):
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # organiza o select de turmas
         qs = (
             self.fields["turma"].queryset
             .select_related("unidade", "unidade__secretaria", "unidade__secretaria__municipio")
@@ -94,13 +96,3 @@ class MatriculaForm(forms.ModelForm):
             qs = scope_filter_turmas(user, qs)
 
         self.fields["turma"].queryset = qs
-
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # organiza o select de turmas
-        self.fields["turma"].queryset = (
-            self.fields["turma"].queryset.select_related("unidade")
-            .order_by("-ano_letivo", "unidade__nome", "nome")
-        )

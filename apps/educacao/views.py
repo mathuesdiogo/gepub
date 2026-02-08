@@ -229,7 +229,7 @@ def aluno_detail(request, pk: int):
 
     else:
         # GET: forms vazios
-        form_matricula = MatriculaForm()
+        form_matricula = MatriculaForm(user=request.user)
         form_nee = AlunoNecessidadeForm(request.POST, aluno=aluno)
         form_apoio = ApoioMatriculaForm(aluno=aluno)
 
