@@ -1,0 +1,29 @@
+{% extends "core/base.html" %}
+{% block title %}{{ tipo.nome }} • Tipos • NEE • GEPUB{% endblock %}
+{% block header %}NEE{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'nee:index' %}">NEE</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'nee:tipo_list' %}">Tipos</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">{{ tipo.nome }}</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 700px;">
+  <div class="card__title" style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+    <span>{{ tipo.nome }}</span>
+    <a class="link" href="{% url 'nee:tipo_update' tipo.pk %}">Editar</a>
+  </div>
+
+  <div class="card__body">
+    <p><strong>Ativo:</strong> {% if tipo.ativo %}Sim{% else %}Não{% endif %}</p>
+    <a class="link" href="{% url 'nee:tipo_list' %}">← Voltar</a>
+  </div>
+</div>
+{% endblock %}

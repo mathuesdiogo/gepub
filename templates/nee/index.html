@@ -11,10 +11,18 @@
 {% endblock %}
 
 {% block content %}
-  <div class="card">
-    <div class="card__title">Módulo NEE</div>
+  <div class="card" style="max-width: 900px;">
+    <div class="card__title">NEE</div>
     <div class="card__body">
-      Próximo passo: necessidades/deficiências, laudos, atendimentos e relatórios.
+      <div class="link-list">
+        <a class="link-card" href="{% url 'nee:tipo_list' %}">
+          <div>
+            <div style="font-weight:800;">Tipos de Necessidade</div>
+            <div class="link-card__meta">Catálogo de necessidades (TEA, TDAH, etc.)</div>
+          </div>
+          <span class="pill">Abrir</span>
+        </a>
+      </div>
     </div>
   </div>
 {% endblock %}
