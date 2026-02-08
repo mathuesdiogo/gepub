@@ -65,6 +65,7 @@
       </div>
     </div>
 
+    <!-- MATRÍCULAS -->
     <div class="form-section" style="margin-top:18px;">
       <div class="form-section__title">Matrículas</div>
 
@@ -125,6 +126,69 @@
 
           <div style="grid-column:1 / -1; display:flex; gap:10px; margin-top:6px;">
             <button type="submit">Adicionar matrícula</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- NEE -->
+    <div class="form-section" style="margin-top:22px;">
+      <div class="form-section__title">NEE • Necessidades Educacionais</div>
+
+      <div style="overflow:auto; border:1px solid rgba(255,255,255,.08); border-radius:14px;">
+        <table style="width:100%; border-collapse:collapse; min-width:900px;">
+          <thead>
+            <tr style="text-align:left; background:rgba(255,255,255,.03);">
+              <th style="padding:10px 12px;">Tipo</th>
+              <th style="padding:10px 12px; width:160px;">CID</th>
+              <th style="padding:10px 12px; width:120px;">Ativo</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for n in necessidades %}
+              <tr style="border-top:1px solid rgba(255,255,255,.06);">
+                <td style="padding:10px 12px;">{{ n.tipo.nome }}</td>
+                <td style="padding:10px 12px;">{{ n.cid|default:"—" }}</td>
+                <td style="padding:10px 12px;">{% if n.ativo %}Sim{% else %}Não{% endif %}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="3" style="padding:12px;">Nenhuma necessidade cadastrada.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:14px;">
+        <div class="small" style="margin-bottom:8px;">Adicionar necessidade</div>
+
+        <form method="post" style="display:grid; grid-template-columns: 1fr 220px; gap:12px; max-width:980px;">
+          {% csrf_token %}
+          <input type="hidden" name="_action" value="add_nee" />
+
+          <div>
+            <label class="small">Tipo</label><br>
+            {{ form_nee.tipo }}
+            {% if form_nee.tipo.errors %}<div class="small" style="color:#ffb4b4;">{{ form_nee.tipo.errors|striptags }}</div>{% endif %}
+          </div>
+
+          <div>
+            <label class="small">CID</label><br>
+            {{ form_nee.cid }}
+            {% if form_nee.cid.errors %}<div class="small" style="color:#ffb4b4;">{{ form_nee.cid.errors|striptags }}</div>{% endif %}
+          </div>
+
+          <div style="grid-column:1 / -1;">
+            <label class="small">Observação</label><br>
+            {{ form_nee.observacao }}
+            {% if form_nee.observacao.errors %}<div class="small" style="color:#ffb4b4;">{{ form_nee.observacao.errors|striptags }}</div>{% endif %}
+          </div>
+
+          <label class="small" style="display:flex; align-items:center; gap:8px;">
+            {{ form_nee.ativo }} Ativo
+          </label>
+
+          <div style="grid-column:1 / -1; display:flex; gap:10px; margin-top:6px;">
+            <button type="submit">Adicionar</button>
           </div>
         </form>
       </div>

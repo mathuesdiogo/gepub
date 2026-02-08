@@ -7,6 +7,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from .forms import TurmaForm, AlunoForm, MatriculaForm
 from .models import Turma, Aluno, Matricula
 
+from nee.forms import AlunoNecessidadeForm
+from nee.models import AlunoNecessidade
+
 
 @login_required
 def index(request):
@@ -108,13 +111,49 @@ def aluno_list(request):
 def aluno_detail(request, pk: int):
     aluno = get_object_or_404(Aluno, pk=pk)
 
-    # lista de matrículas do aluno
     matriculas = (
         Matricula.objects
-        .select_related("turma", "turma__unidade", "turma__unidade__secretaria", "turma__unidade__secretaria__municipio")
+        .select_related(
+            "turma",
+            "turma__unidade",
+            "turma__unidade__secretaria",
+            "turma__unidade__secretaria__municipio",
+        )
         .filter(aluno=aluno)
         .order_by("-id")
     )
+
+    necessidades = (
+        AlunoNecessidade.objects
+        .select_related("tipo")
+        .filter(aluno=aluno)
+        .order_by("-id")
+    )
+
+    # adicionar necessidade
+    if request.method == "POST" and request.POST.get("_action") == "add_nee":
+        form_nee = AlunoNecessidadeForm(request.POST)
+        if form_nee.is_valid():
+            nee = form_nee.save(commit=False)
+            nee.aluno = aluno
+            nee.save()
+            messages.success(request, "Necessidade adicionada com sucesso.")
+            return redirect("educacao:aluno_detail", pk=aluno.pk)
+        messages.error(request, "Corrija os erros da necessidade.")
+    else:
+        form_nee = AlunoNecessidadeForm()
+
+    return render(
+        request,
+        "educacao/aluno_detail.html",
+        {
+            "aluno": aluno,
+            "matriculas": matriculas,
+            "necessidades": necessidades,
+            "form_nee": form_nee,
+        },
+    )
+
 
     # form de matrícula dentro da página
     if request.method == "POST" and request.POST.get("_action") == "add_matricula":
@@ -122,6 +161,7 @@ def aluno_detail(request, pk: int):
         if form_matricula.is_valid():
             m = form_matricula.save(commit=False)
             m.aluno = aluno
+            from django.utils import timezone
             m.save()
             messages.success(request, "Matrícula adicionada com sucesso.")
             return redirect("educacao:aluno_detail", pk=aluno.pk)
