@@ -30,11 +30,12 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "core.middleware.RBACMiddleware", 
-     # ✅ GEPUB: força trocar senha no primeiro acesso
-    "accounts.middleware.ForcePasswordChangeMiddleware",
+    "core.middleware.RBACMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+
+    # ✅ GEPUB: força trocar senha no primeiro acesso
+    "accounts.middleware.ForcePasswordChangeMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"

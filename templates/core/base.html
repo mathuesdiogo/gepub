@@ -1,22 +1,18 @@
 {% load static %}
 
-{% if perms.org.view %}
-  ... link org ...
-{% endif %}
-
-
 <!doctype html>
 <html lang="pt-br">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}GEPUB{% endblock %}</title>
-<div class="small">ORG view? {{ perms.org.view }}</div>
 
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
 </head>
 <body>
   <div class="layout">
+
+    <!-- SIDEBAR -->
     <aside class="sidebar">
       <div class="brand">
         <div class="brand__logo">G</div>
@@ -27,96 +23,117 @@
       </div>
 
       <nav class="menu">
-  <a class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'core' %}is-active{% endif %}"
-     href="{% url 'core:dashboard' %}">Dashboard</a>
 
-  {% if perms.admin.django %}
-    <a class="menu__item" href="/admin/">Admin</a>
-  {% endif %}
+        <!-- ========================= -->
+        <!-- DASHBOARD -->
+        <!-- ========================= -->
+        <a class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'core' %}is-active{% endif %}"
+           href="{% url 'core:dashboard' %}">
+          Dashboard
+        </a>
 
-  <div class="menu__section">Módulos</div>
+        <!-- ========================= -->
+        <!-- MÓDULOS -->
+        <!-- ========================= -->
+        <div class="menu__section">Módulos</div>
 
-  {% if perms.org.view %}
-    <a class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'org' %}is-active{% endif %}"
-       href="{% url 'org:index' %}">Organização</a>
-  {% endif %}
+        {% if can_org %}
+          <a class="menu__item {% if request.resolver_match.namespace == 'org' %}is-active{% endif %}"
+             href="{% url 'org:index' %}">
+            Organização
+          </a>
+        {% endif %}
 
-  {% if perms.educacao.view %}
-    <a class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'educacao' %}is-active{% endif %}"
-       href="{% url 'educacao:index' %}">Educação</a>
-  {% endif %}
+        {% if can_edu %}
+          <a class="menu__item {% if request.resolver_match.namespace == 'educacao' %}is-active{% endif %}"
+             href="{% url 'educacao:index' %}">
+            Educação
+          </a>
+        {% endif %}
 
-  {% if perms.nee.view %}
-    <a class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'nee' %}is-active{% endif %}"
-       href="{% url 'nee:index' %}">NEE</a>
-  {% endif %}
+        {% if can_nee %}
+          <a class="menu__item {% if request.resolver_match.namespace == 'nee' %}is-active{% endif %}"
+             href="{% url 'nee:index' %}">
+            NEE
+          </a>
+        {% endif %}
 
-  <div class="menu__section">Conta</div>
+        <!-- ========================= -->
+        <!-- CONTA -->
+        <!-- ========================= -->
+        <div class="menu__section">Conta</div>
 
-  {% if perms.accounts.profile %}
-    <a class="menu__item {% if request.resolver_match and request.resolver_match.url_name == 'meu_perfil' %}is-active{% endif %}"
-       href="{% url 'accounts:meu_perfil' %}">Meu perfil</a>
+        <a class="menu__item {% if request.resolver_match.url_name == 'meu_perfil' %}is-active{% endif %}"
+           href="{% url 'accounts:meu_perfil' %}">
+          Meu perfil
+        </a>
 
-    <a class="menu__item {% if request.resolver_match and request.resolver_match.url_name == 'alterar_senha' %}is-active{% endif %}"
-       href="{% url 'accounts:alterar_senha' %}">Alterar senha</a>
-  {% endif %}
+        <a class="menu__item {% if request.resolver_match.url_name == 'alterar_senha' %}is-active{% endif %}"
+           href="{% url 'accounts:alterar_senha' %}">
+          Alterar senha
+        </a>
 
-  {% if perms.accounts.manage %}
-    <a class="menu__item {% if request.resolver_match and request.resolver_match.url_name == 'usuarios_list' %}is-active{% endif %}"
-       href="{% url 'accounts:usuarios_list' %}">Usuários</a>
-  {% endif %}
-</nav>
+        {% if perms.accounts.manage %}
+          <a class="menu__item {% if request.resolver_match.url_name == 'usuarios_list' %}is-active{% endif %}"
+             href="{% url 'accounts:usuarios_list' %}">
+            Usuários
+          </a>
+        {% endif %}
 
+        <!-- ========================= -->
+        <!-- SISTEMA -->
+        <!-- ========================= -->
+        {% if request.user.is_staff or request.user.is_superuser %}
+          <div class="menu__section">Sistema</div>
 
-{% if perms.admin.view %}
-  <a class="menu__item" href="/admin/">Admin Django</a>
-{% endif %}
+          <a class="menu__item" href="/admin/">
+            Admin Django
+          </a>
+        {% endif %}
 
+      </nav>
 
-              </nav>
-
+      <!-- FOOTER -->
       <div class="sidebar__footer">
-        <span class="small">Logado como:</span>
+        <span class="small">Logado como</span>
         <strong>{{ request.user.username }}</strong>
         <a class="link" href="{% url 'accounts:logout' %}">Sair</a>
-
       </div>
     </aside>
 
+    <!-- CONTEÚDO -->
     <main class="main">
       <header class="topbar">
-  <div>
-    <div class="topbar__title">{% block header %}Dashboard{% endblock %}</div>
+        <div>
+          <div class="topbar__title">{% block header %}Dashboard{% endblock %}</div>
 
-    {% block breadcrumbs %}
-      <div class="breadcrumbs">
-        <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
-      </div>
-    {% endblock %}
-  </div>
+          {% block breadcrumbs %}
+            <div class="breadcrumbs">
+              <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+            </div>
+          {% endblock %}
+        </div>
 
-  <div class="topbar__right">
-    <span class="pill">v0.1</span>
-  </div>
-</header>
-
+        <div class="topbar__right">
+          <span class="pill">v0.1</span>
+        </div>
+      </header>
 
       <section class="content">
-
-      {% if messages %}
-        <div class="flash-stack">
-          {% for message in messages %}
-            <div class="flash flash--{{ message.tags }}">
-              {{ message }}
-            </div>
-          {% endfor %}
-        </div>
-      {% endif %}
+        {% if messages %}
+          <div class="flash-stack">
+            {% for message in messages %}
+              <div class="flash flash--{{ message.tags }}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
 
         {% block content %}{% endblock %}
       </section>
-
     </main>
+
   </div>
 </body>
 </html>

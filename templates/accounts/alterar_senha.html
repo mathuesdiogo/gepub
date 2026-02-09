@@ -6,51 +6,45 @@
 {% block breadcrumbs %}
   <div class="breadcrumbs">
     <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
-    <span class="breadcrumbs__sep">›</span>
+    <span>›</span>
     <a class="breadcrumbs__link" href="{% url 'accounts:meu_perfil' %}">Meu perfil</a>
-    <span class="breadcrumbs__sep">›</span>
+    <span>›</span>
     <span>Alterar senha</span>
   </div>
 {% endblock %}
 
 {% block content %}
-  <div class="card" style="max-width:720px;">
-    <div class="card__title">Alterar senha</div>
-    <div class="small" style="opacity:.85; margin-bottom:10px;">
-      Por segurança, use uma senha forte (maiúsculas, minúsculas, números e símbolo).
+  <div class="card" style="max-width:560px;">
+    <div class="card__header">
+      <div style="font-weight:800; font-size:18px;">Alterar senha</div>
+      <div class="small" style="opacity:.85;">Digite uma nova senha (você será obrigado a trocar no primeiro acesso).</div>
     </div>
 
-    <form method="post" style="display:grid; gap:12px;">
-      {% csrf_token %}
+    <div class="card__body">
+      {% if error %}
+        <div class="small" style="color:#ffb4b4; margin-bottom:10px;">{{ error }}</div>
+      {% endif %}
 
-      <div>
-        <label class="small">Senha atual</label><br>
-        {{ form.old_password }}
-        {% if form.old_password.errors %}
-          <div class="small" style="color:#ffb4b4;">{{ form.old_password.errors|striptags }}</div>
-        {% endif %}
-      </div>
+      <form method="post" style="display:grid; gap:12px;">
+        {% csrf_token %}
 
-      <div>
-        <label class="small">Nova senha</label><br>
-        {{ form.new_password1 }}
-        {% if form.new_password1.errors %}
-          <div class="small" style="color:#ffb4b4;">{{ form.new_password1.errors|striptags }}</div>
-        {% endif %}
-      </div>
+        <div>
+          <label class="small">Nova senha</label><br>
+          {{ form.password1 }}
+          {% if form.password1.errors %}<div class="small" style="color:#ffb4b4;">{{ form.password1.errors|striptags }}</div>{% endif %}
+        </div>
 
-      <div>
-        <label class="small">Confirmar nova senha</label><br>
-        {{ form.new_password2 }}
-        {% if form.new_password2.errors %}
-          <div class="small" style="color:#ffb4b4;">{{ form.new_password2.errors|striptags }}</div>
-        {% endif %}
-      </div>
+        <div>
+          <label class="small">Confirmar nova senha</label><br>
+          {{ form.password2 }}
+          {% if form.password2.errors %}<div class="small" style="color:#ffb4b4;">{{ form.password2.errors|striptags }}</div>{% endif %}
+        </div>
 
-      <div style="display:flex; gap:10px; margin-top:6px;">
-        <button type="submit" class="btn btn--primary">Salvar</button>
-        <a class="btn btn--ghost" href="{% url 'accounts:meu_perfil' %}">Cancelar</a>
-      </div>
-    </form>
+        <div style="display:flex; gap:10px; margin-top:6px;">
+          <button type="submit" class="btn btn--primary">Salvar</button>
+          <a class="btn btn--ghost" href="{% url 'core:dashboard' %}">Cancelar</a>
+        </div>
+      </form>
+    </div>
   </div>
 {% endblock %}
