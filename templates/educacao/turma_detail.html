@@ -18,7 +18,10 @@
 <div class="card" style="max-width: 980px;">
   <div class="card__title" style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
     <span>{{ turma.nome }}</span>
-    <a class="link" href="{% url 'educacao:turma_update' turma.pk %}">Editar</a>
+    {% if can_edu_manage %}
+  <a class="btn" href="{% url 'educacao:turma_update' turma.pk %}">Editar</a>
+{% endif %}
+
   </div>
 
   <div class="card__body">

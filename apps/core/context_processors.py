@@ -44,3 +44,14 @@ def permissions(request):
         # adiciona usuários
         "can_users": can(u, "accounts.manage_users"),
     }
+from core.rbac import can
+
+def permissions(request):
+    u = getattr(request, "user", None)
+    return {
+        "can_org": can(u, "org.view"),
+        "can_edu": can(u, "educacao.view"),
+        "can_nee": can(u, "nee.view"),
+        "can_users": can(u, "accounts.manage_users"),
+        "can_edu_manage": can(u, "educacao.manage"),  # <<< ADICIONE ESTA
+    }

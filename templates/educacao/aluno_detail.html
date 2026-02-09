@@ -18,7 +18,10 @@
 <div class="card" style="max-width: 1100px;">
   <div class="card__title" style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
     <span>{{ aluno.nome }}</span>
-    <a class="link" href="{% url 'educacao:aluno_update' aluno.pk %}">Editar</a>
+
+    {% if can_edu_manage %}
+      <a class="link" href="{% url 'educacao:aluno_update' aluno.pk %}">Editar</a>
+    {% endif %}
   </div>
 
   <div class="card__body">
@@ -65,6 +68,12 @@
       </div>
     </div>
 
+    {% if not can_edu_manage %}
+      <div style="margin-top:14px;">
+        <span class="small">Você tem acesso somente de visualização nesta tela.</span>
+      </div>
+    {% endif %}
+
     <!-- MATRÍCULAS -->
     <div class="form-section" style="margin-top:18px;">
       <div class="form-section__title">Matrículas</div>
@@ -96,111 +105,117 @@
         </table>
       </div>
 
-      <div style="margin-top:14px;">
-        <div class="small" style="margin-bottom:8px;">Adicionar matrícula</div>
+      {% if can_edu_manage %}
+        <div style="margin-top:14px;">
+          <div class="small" style="margin-bottom:8px;">Adicionar matrícula</div>
 
-        <form method="post" style="display:grid; grid-template-columns: 1fr 220px 220px; gap:12px; max-width:980px;">
-          {% csrf_token %}
-          <input type="hidden" name="_action" value="add_matricula" />
+          <form method="post" style="display:grid; grid-template-columns: 1fr 220px 220px; gap:12px; max-width:980px;">
+            {% csrf_token %}
+            <input type="hidden" name="_action" value="add_matricula" />
 
-          <div style="grid-column:1 / -1;">
-            <label class="small">Turma</label><br>
-            {{ form_matricula.turma }}
-            {% if form_matricula.turma.errors %}<div class="small" style="color:#ffb4b4;">{{ form_matricula.turma.errors|striptags }}</div>{% endif %}
-          </div>
+            <div style="grid-column:1 / -1;">
+              <label class="small">Turma</label><br>
+              {{ form_matricula.turma }}
+              {% if form_matricula.turma.errors %}<div class="small" style="color:#ffb4b4;">{{ form_matricula.turma.errors|striptags }}</div>{% endif %}
+            </div>
 
-          <div>
-            <label class="small">Data</label><br>
-            {{ form_matricula.data_matricula }}
-          </div>
+            <div>
+              <label class="small">Data</label><br>
+              {{ form_matricula.data_matricula }}
+            </div>
 
-          <div>
-            <label class="small">Situação</label><br>
-            {{ form_matricula.situacao }}
-          </div>
+            <div>
+              <label class="small">Situação</label><br>
+              {{ form_matricula.situacao }}
+            </div>
 
-          <div style="grid-column:1 / -1;">
-            <label class="small">Observação</label><br>
-            {{ form_matricula.observacao }}
-          </div>
+            <div style="grid-column:1 / -1;">
+              <label class="small">Observação</label><br>
+              {{ form_matricula.observacao }}
+            </div>
 
-          <div style="grid-column:1 / -1; display:flex; gap:10px; margin-top:6px;">
-            <button type="submit">Adicionar matrícula</button>
-          </div>
-        </form>
-      </div>
+            <div style="grid-column:1 / -1; display:flex; gap:10px; margin-top:6px;">
+              <button type="submit">Adicionar matrícula</button>
+            </div>
+          </form>
+        </div>
+      {% endif %}
     </div>
-<div class="form-section" style="margin-top:22px;">
-  <div class="form-section__title">Apoios por Matrícula</div>
 
-  <div style="overflow:auto; border:1px solid rgba(255,255,255,.08); border-radius:14px;">
-    <table style="width:100%; border-collapse:collapse; min-width:1100px;">
-      <thead>
-        <tr style="text-align:left; background:rgba(255,255,255,.03);">
-          <th style="padding:10px 12px;">Tipo</th>
-          <th style="padding:10px 12px;">Descrição</th>
-          <th style="padding:10px 12px; width:120px;">CH/Sem</th>
-          <th style="padding:10px 12px;">Turma</th>
-          <th style="padding:10px 12px; width:90px;">Ano</th>
-          <th style="padding:10px 12px; width:120px;">Ativo</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for a in apoios %}
-          <tr style="border-top:1px solid rgba(255,255,255,.06);">
-            <td style="padding:10px 12px;">{{ a.get_tipo_display }}</td>
-            <td style="padding:10px 12px;">{{ a.descricao|default:"—" }}</td>
-            <td style="padding:10px 12px;">{{ a.carga_horaria_semanal|default:"—" }}</td>
-            <td style="padding:10px 12px;">{{ a.matricula.turma.nome }} • {{ a.matricula.turma.unidade.nome }}</td>
-            <td style="padding:10px 12px;">{{ a.matricula.turma.ano_letivo }}</td>
-            <td style="padding:10px 12px;">{% if a.ativo %}Sim{% else %}Não{% endif %}</td>
-          </tr>
-        {% empty %}
-          <tr><td colspan="6" style="padding:12px;">Nenhum apoio cadastrado.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+    <!-- APOIOS -->
+    <div class="form-section" style="margin-top:22px;">
+      <div class="form-section__title">Apoios por Matrícula</div>
 
-  <div style="margin-top:14px;">
-    <div class="small" style="margin-bottom:8px;">Adicionar apoio</div>
-
-    <form method="post" style="display:grid; grid-template-columns: 1fr 260px 200px; gap:12px; max-width:1100px;">
-      {% csrf_token %}
-      <input type="hidden" name="_action" value="add_apoio" />
-
-      <div style="grid-column:1 / -1;">
-        <label class="small">Matrícula (Turma)</label><br>
-        {{ form_apoio.matricula }}
-        {% if form_apoio.matricula.errors %}<div class="small" style="color:#ffb4b4;">{{ form_apoio.matricula.errors|striptags }}</div>{% endif %}
+      <div style="overflow:auto; border:1px solid rgba(255,255,255,.08); border-radius:14px;">
+        <table style="width:100%; border-collapse:collapse; min-width:1100px;">
+          <thead>
+            <tr style="text-align:left; background:rgba(255,255,255,.03);">
+              <th style="padding:10px 12px;">Tipo</th>
+              <th style="padding:10px 12px;">Descrição</th>
+              <th style="padding:10px 12px; width:120px;">CH/Sem</th>
+              <th style="padding:10px 12px;">Turma</th>
+              <th style="padding:10px 12px; width:90px;">Ano</th>
+              <th style="padding:10px 12px; width:120px;">Ativo</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for a in apoios %}
+              <tr style="border-top:1px solid rgba(255,255,255,.06);">
+                <td style="padding:10px 12px;">{{ a.get_tipo_display }}</td>
+                <td style="padding:10px 12px;">{{ a.descricao|default:"—" }}</td>
+                <td style="padding:10px 12px;">{{ a.carga_horaria_semanal|default:"—" }}</td>
+                <td style="padding:10px 12px;">{{ a.matricula.turma.nome }} • {{ a.matricula.turma.unidade.nome }}</td>
+                <td style="padding:10px 12px;">{{ a.matricula.turma.ano_letivo }}</td>
+                <td style="padding:10px 12px;">{% if a.ativo %}Sim{% else %}Não{% endif %}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="6" style="padding:12px;">Nenhum apoio cadastrado.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
 
-      <div>
-        <label class="small">Tipo</label><br>
-        {{ form_apoio.tipo }}
-        {% if form_apoio.tipo.errors %}<div class="small" style="color:#ffb4b4;">{{ form_apoio.tipo.errors|striptags }}</div>{% endif %}
-      </div>
+      {% if can_edu_manage %}
+        <div style="margin-top:14px;">
+          <div class="small" style="margin-bottom:8px;">Adicionar apoio</div>
 
-      <div>
-        <label class="small">CH/Sem</label><br>
-        {{ form_apoio.carga_horaria_semanal }}
-      </div>
+          <form method="post" style="display:grid; grid-template-columns: 1fr 260px 200px; gap:12px; max-width:1100px;">
+            {% csrf_token %}
+            <input type="hidden" name="_action" value="add_apoio" />
 
-      <div style="grid-column:1 / -1;">
-        <label class="small">Descrição</label><br>
-        {{ form_apoio.descricao }}
-      </div>
+            <div style="grid-column:1 / -1;">
+              <label class="small">Matrícula (Turma)</label><br>
+              {{ form_apoio.matricula }}
+              {% if form_apoio.matricula.errors %}<div class="small" style="color:#ffb4b4;">{{ form_apoio.matricula.errors|striptags }}</div>{% endif %}
+            </div>
 
-      <label class="small" style="display:flex; align-items:center; gap:8px;">
-        {{ form_apoio.ativo }} Ativo
-      </label>
+            <div>
+              <label class="small">Tipo</label><br>
+              {{ form_apoio.tipo }}
+              {% if form_apoio.tipo.errors %}<div class="small" style="color:#ffb4b4;">{{ form_apoio.tipo.errors|striptags }}</div>{% endif %}
+            </div>
 
-      <div style="grid-column:1 / -1;">
-        <button type="submit">Adicionar apoio</button>
-      </div>
-    </form>
-  </div>
-</div>
+            <div>
+              <label class="small">CH/Sem</label><br>
+              {{ form_apoio.carga_horaria_semanal }}
+            </div>
+
+            <div style="grid-column:1 / -1;">
+              <label class="small">Descrição</label><br>
+              {{ form_apoio.descricao }}
+            </div>
+
+            <label class="small" style="display:flex; align-items:center; gap:8px;">
+              {{ form_apoio.ativo }} Ativo
+            </label>
+
+            <div style="grid-column:1 / -1;">
+              <button type="submit">Adicionar apoio</button>
+            </div>
+          </form>
+        </div>
+      {% endif %}
+    </div>
 
     <!-- NEE -->
     <div class="form-section" style="margin-top:22px;">
@@ -229,40 +244,42 @@
         </table>
       </div>
 
-      <div style="margin-top:14px;">
-        <div class="small" style="margin-bottom:8px;">Adicionar necessidade</div>
+      {% if can_edu_manage %}
+        <div style="margin-top:14px;">
+          <div class="small" style="margin-bottom:8px;">Adicionar necessidade</div>
 
-        <form method="post" style="display:grid; grid-template-columns: 1fr 220px; gap:12px; max-width:980px;">
-          {% csrf_token %}
-          <input type="hidden" name="_action" value="add_nee" />
+          <form method="post" style="display:grid; grid-template-columns: 1fr 220px; gap:12px; max-width:980px;">
+            {% csrf_token %}
+            <input type="hidden" name="_action" value="add_nee" />
 
-          <div>
-            <label class="small">Tipo</label><br>
-            {{ form_nee.tipo }}
-            {% if form_nee.tipo.errors %}<div class="small" style="color:#ffb4b4;">{{ form_nee.tipo.errors|striptags }}</div>{% endif %}
-          </div>
+            <div>
+              <label class="small">Tipo</label><br>
+              {{ form_nee.tipo }}
+              {% if form_nee.tipo.errors %}<div class="small" style="color:#ffb4b4;">{{ form_nee.tipo.errors|striptags }}</div>{% endif %}
+            </div>
 
-          <div>
-            <label class="small">CID</label><br>
-            {{ form_nee.cid }}
-            {% if form_nee.cid.errors %}<div class="small" style="color:#ffb4b4;">{{ form_nee.cid.errors|striptags }}</div>{% endif %}
-          </div>
+            <div>
+              <label class="small">CID</label><br>
+              {{ form_nee.cid }}
+              {% if form_nee.cid.errors %}<div class="small" style="color:#ffb4b4;">{{ form_nee.cid.errors|striptags }}</div>{% endif %}
+            </div>
 
-          <div style="grid-column:1 / -1;">
-            <label class="small">Observação</label><br>
-            {{ form_nee.observacao }}
-            {% if form_nee.observacao.errors %}<div class="small" style="color:#ffb4b4;">{{ form_nee.observacao.errors|striptags }}</div>{% endif %}
-          </div>
+            <div style="grid-column:1 / -1;">
+              <label class="small">Observação</label><br>
+              {{ form_nee.observacao }}
+              {% if form_nee.observacao.errors %}<div class="small" style="color:#ffb4b4;">{{ form_nee.observacao.errors|striptags }}</div>{% endif %}
+            </div>
 
-          <label class="small" style="display:flex; align-items:center; gap:8px;">
-            {{ form_nee.ativo }} Ativo
-          </label>
+            <label class="small" style="display:flex; align-items:center; gap:8px;">
+              {{ form_nee.ativo }} Ativo
+            </label>
 
-          <div style="grid-column:1 / -1; display:flex; gap:10px; margin-top:6px;">
-            <button type="submit">Adicionar</button>
-          </div>
-        </form>
-      </div>
+            <div style="grid-column:1 / -1; display:flex; gap:10px; margin-top:6px;">
+              <button type="submit">Adicionar</button>
+            </div>
+          </form>
+        </div>
+      {% endif %}
     </div>
 
     <div style="margin-top:14px;">

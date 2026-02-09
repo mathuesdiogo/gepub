@@ -35,6 +35,7 @@ class RBACMiddleware:
     PUBLIC_URL_NAMES = {
         "accounts:login",
         "accounts:logout",
+        "accounts:alterar_senha",
     }
 
     def __init__(self, get_response):

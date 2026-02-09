@@ -3,7 +3,13 @@ from __future__ import annotations
 import secrets
 
 from django.contrib import messages
-from django.contrib.auth import authenticate, get_user_model, login, logout, update_session_auth_hash
+from django.contrib.auth import (
+    authenticate,
+    get_user_model,
+    login,
+    logout,
+    update_session_auth_hash,
+)
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
@@ -11,6 +17,8 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
+
+from core.rbac import get_profile, is_admin
 
 from .forms import (
     AlterarSenhaPrimeiroAcessoForm,
@@ -20,8 +28,6 @@ from .forms import (
 )
 from .models import Profile
 from .security import is_locked, register_failure, reset
-from core.rbac import get_profile, is_admin
-
 
 User = get_user_model()
 
@@ -40,8 +46,7 @@ def _can_manage_users(user) -> bool:
         return True
     p = get_profile(user)
     # MUNICIPAL / SECRETARIA / UNIDADE podem gerenciar dentro do escopo
-    return bool(p and p.ativo and p.role in {"MUNICIPAL", "SECRETARIA", "UNIDADE", "ADMIN"})
-
+    return bool(p and p.ativo and p.role in {"MUNICIPAL", "SECRETARIA", "UNIDADE"})
 
 
 def _scope_users_queryset(request):
@@ -71,7 +76,6 @@ def _scope_users_queryset(request):
         return qs.filter(profile__municipio_id=p.municipio_id)
 
     return qs.none()
-
 
 
 @require_http_methods(["GET", "POST"])
@@ -109,6 +113,10 @@ def login_view(request):
 
         reset(ip, codigo)
         login(request, user)
+
+        # ✅ blindagem: garante Profile sempre após login
+        Profile.objects.get_or_create(user=user, defaults={"ativo": True})
+
         return redirect("core:dashboard")
 
     return render(request, "accounts/login.html", {"form": form, "error": error})
@@ -117,9 +125,8 @@ def login_view(request):
 @login_required
 @require_http_methods(["GET", "POST"])
 def alterar_senha_view(request):
-    p: Profile | None = getattr(request.user, "profile", None)
-    if not p:
-        return redirect("core:dashboard")
+    # ✅ garante Profile sempre (resolve 1º login do professor/aluno/leitura etc.)
+    p, _ = Profile.objects.get_or_create(user=request.user, defaults={"ativo": True})
 
     form = AlterarSenhaPrimeiroAcessoForm(request.POST or None)
     error = None
@@ -170,10 +177,7 @@ def logout_view(request):
 @login_required
 @require_http_methods(["GET", "POST"])
 def meu_perfil(request):
-    p: Profile | None = getattr(request.user, "profile", None)
-    if not p:
-        messages.error(request, "Perfil não encontrado.")
-        return redirect("core:dashboard")
+    p, _ = Profile.objects.get_or_create(user=request.user, defaults={"ativo": True})
 
     if request.method == "POST":
         request.user.first_name = (request.POST.get("first_name") or "").strip()
@@ -234,25 +238,24 @@ def usuario_create(request):
 
         cpf_digits = _only_digits(form.cleaned_data["cpf"])
         user.set_password(cpf_digits)  # senha inicial = CPF
-        user.save()  # signals cria o Profile
+        user.save()
 
-        prof = user.profile
+        # ✅ garante profile (mesmo sem signal)
+        prof, _ = Profile.objects.get_or_create(user=user, defaults={"ativo": True})
+
+        # preenche profile
         prof.cpf = form.cleaned_data["cpf"]
         prof.role = form.cleaned_data["role"]
-        prof.ativo = bool(form.cleaned_data.get("ativo"))
-        prof.cpf = form.cleaned_data["cpf"]
-        prof.role = form.cleaned_data["role"]
-        prof.ativo = bool(form.cleaned_data.get("ativo"))
+        prof.ativo = bool(form.cleaned_data.get("ativo", True))
 
-            # Limita quais roles cada gestor pode criar
-        role_me = getattr(p_me, "role", None)
-
+        # Limita quais roles cada gestor pode criar
         allowed = {
-        "MUNICIPAL": {"SECRETARIA", "UNIDADE", "PROFESSOR", "ALUNO", "NEE", "LEITURA"},
-        "SECRETARIA": {"UNIDADE", "PROFESSOR", "ALUNO", "NEE", "LEITURA"},
-        "UNIDADE": {"PROFESSOR", "ALUNO", "NEE", "LEITURA"},
-    }
+            "MUNICIPAL": {"SECRETARIA", "UNIDADE", "PROFESSOR", "ALUNO", "NEE", "LEITURA"},
+            "SECRETARIA": {"UNIDADE", "PROFESSOR", "ALUNO", "NEE", "LEITURA"},
+            "UNIDADE": {"PROFESSOR", "ALUNO", "NEE", "LEITURA"},
+        }
 
+        role_me = getattr(p_me, "role", None)
 
         if not is_admin(request.user):
             if prof.role not in allowed.get(role_me, set()):
@@ -260,18 +263,20 @@ def usuario_create(request):
                 user.delete()
                 return redirect("accounts:usuarios_list")
 
-                # RBAC: herda escopo do criador (trava no backend)
+        # RBAC: herda escopo do criador (trava no backend)
         if not is_admin(request.user) and p_me:
             prof.municipio_id = getattr(p_me, "municipio_id", None)
             if hasattr(prof, "secretaria_id"):
                 prof.secretaria_id = getattr(p_me, "secretaria_id", None)
             prof.unidade_id = getattr(p_me, "unidade_id", None)
         else:
-            prof.municipio = form.cleaned_data.get("municipio")
-            prof.unidade = form.cleaned_data.get("unidade")
+            # Admin pode definir manualmente (se seu form tiver esses campos)
+            if "municipio" in form.cleaned_data:
+                prof.municipio = form.cleaned_data.get("municipio")
+            if "unidade" in form.cleaned_data:
+                prof.unidade = form.cleaned_data.get("unidade")
             if hasattr(prof, "secretaria") and "secretaria" in form.cleaned_data:
                 prof.secretaria = form.cleaned_data.get("secretaria")
-
 
         prof.must_change_password = True
         prof.save()
@@ -293,7 +298,7 @@ def usuario_update(request, pk: int):
         return redirect("core:dashboard")
 
     user = get_object_or_404(_scope_users_queryset(request), pk=pk)
-    prof = user.profile
+    prof, _ = Profile.objects.get_or_create(user=user, defaults={"ativo": True})
 
     initial = {
         "first_name": user.first_name,
@@ -301,12 +306,12 @@ def usuario_update(request, pk: int):
         "email": user.email,
         "cpf": prof.cpf,
         "role": prof.role,
-        "municipio": prof.municipio_id,
-        "unidade": prof.unidade_id,
+        "municipio": getattr(prof, "municipio_id", None),
+        "unidade": getattr(prof, "unidade_id", None),
         "ativo": prof.ativo,
     }
 
-    form = UsuarioUpdateForm(request.POST or None, user=request.user)
+    form = UsuarioUpdateForm(request.POST or None, initial=initial, user=request.user)
 
     if request.method == "POST" and form.is_valid():
         user.first_name = form.cleaned_data["first_name"]
@@ -314,11 +319,11 @@ def usuario_update(request, pk: int):
         user.email = form.cleaned_data["email"] or ""
         user.save()
 
-        prof.cpf = form.cleaned_data["cpf"] or prof.cpf
+        prof.cpf = form.cleaned_data.get("cpf") or prof.cpf
         prof.role = form.cleaned_data["role"]
-        prof.ativo = bool(form.cleaned_data.get("ativo"))
+        prof.ativo = bool(form.cleaned_data.get("ativo", True))
 
-       # RBAC: trava escopo no backend (não deixa mover usuário)
+        # RBAC: trava escopo no backend (não deixa mover usuário)
         p_me = get_profile(request.user)
         if not is_admin(request.user) and p_me:
             prof.municipio_id = getattr(p_me, "municipio_id", None)
@@ -326,11 +331,14 @@ def usuario_update(request, pk: int):
                 prof.secretaria_id = getattr(p_me, "secretaria_id", None)
             prof.unidade_id = getattr(p_me, "unidade_id", None)
         else:
-            prof.municipio = form.cleaned_data.get("municipio")
-            prof.unidade = form.cleaned_data.get("unidade")
+            if "municipio" in form.cleaned_data:
+                prof.municipio = form.cleaned_data.get("municipio")
+            if "unidade" in form.cleaned_data:
+                prof.unidade = form.cleaned_data.get("unidade")
             if hasattr(prof, "secretaria") and "secretaria" in form.cleaned_data:
                 prof.secretaria = form.cleaned_data.get("secretaria")
 
+        prof.save()
         messages.success(request, "Usuário atualizado.")
         return redirect("accounts:usuarios_list")
 
@@ -345,7 +353,7 @@ def usuario_reset_senha(request, pk: int):
         return redirect("core:dashboard")
 
     user = get_object_or_404(_scope_users_queryset(request), pk=pk)
-    prof = user.profile
+    prof, _ = Profile.objects.get_or_create(user=user, defaults={"ativo": True})
 
     cpf_digits = _only_digits(prof.cpf)
     if not cpf_digits:
@@ -363,12 +371,13 @@ def usuario_reset_senha(request, pk: int):
     if user.email:
         try:
             from django.core.mail import send_mail
+
             send_mail(
                 subject="GEPUB — Senha redefinida",
                 message=(
-                    f"Sua senha foi redefinida para o CPF (apenas números).\n\n"
+                    "Sua senha foi redefinida para o CPF (apenas números).\n\n"
                     f"Código de acesso: {prof.codigo_acesso}\n"
-                    f"No primeiro login, você será obrigado a criar uma nova senha."
+                    "No primeiro login, você será obrigado a criar uma nova senha."
                 ),
                 from_email=None,
                 recipient_list=[user.email],
