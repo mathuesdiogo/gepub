@@ -52,11 +52,26 @@ class MunicipioForm(forms.ModelForm):
 class SecretariaForm(forms.ModelForm):
     class Meta:
         model = Secretaria
-        fields = ["municipio", "nome", "sigla", "ativo"]
-        widgets = {
-            "nome": forms.TextInput(attrs={"placeholder": "Ex.: Secretaria Municipal de Educação"}),
-            "sigla": forms.TextInput(attrs={"placeholder": "Ex.: SEMED"}),
-        }
+        fields = "__all__"  # depois podemos restringir se você quiser
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+
+        if not user or not getattr(user, "is_authenticated", False):
+            return
+
+        from core.rbac import get_profile, is_admin
+        p = get_profile(user)
+
+        # MUNICIPAL: trava município no município do usuário
+        if (not is_admin(user)) and p and p.municipio_id:
+            if "municipio" in self.fields:
+                self.fields["municipio"].queryset = Municipio.objects.filter(id=p.municipio_id)
+                self.fields["municipio"].initial = p.municipio_id
+                self.fields["municipio"].disabled = True
+
+
 
 
 class UnidadeForm(forms.ModelForm):
@@ -88,3 +103,9 @@ class SetorForm(forms.ModelForm):
         widgets = {
             "nome": forms.TextInput(attrs={"placeholder": "Ex.: Secretaria Escolar"}),
         }
+
+class MunicipioContatoForm(forms.ModelForm):
+    class Meta:
+        model = Municipio
+        fields = ["email_prefeitura", "telefone_prefeitura", "endereco_prefeitura", "site_prefeitura"]
+

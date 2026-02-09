@@ -168,23 +168,26 @@ def get_user_perms(user) -> set[str]:
 
 def can(user, perm: str) -> bool:
     """
-    COMPATÍVEL com seu projeto:
-      - se você passar 'educacao' continua funcionando
-      - se você passar 'educacao.manage' também funciona
     Regras:
-      - se tiver perm exata, ok
-      - se for perm fina e usuário tiver macro correspondente, ok (opcional mas útil na migração)
+    - Perm fina (com ponto) exige match exato.
+      Ex.: 'org.manage_municipio' só passa se estiver exatamente no set.
+    - Perm macro (sem ponto) pode passar pelo macro correspondente das finas.
+      Ex.: se usuário tem 'org.view', então 'org' pode ser True.
     """
     perms = get_user_perms(user)
+
+    # match exato sempre ganha
     if perm in perms:
         return True
 
-    # fallback: 'educacao.manage' -> 'educacao'
+    # se for perm FINA, NÃO faz fallback para macro
     if "." in perm:
-        macro = perm.split(".", 1)[0]
-        return macro in perms
+        return False
 
-    return False
+    # se for perm MACRO (ex: 'org'), aceita se tiver qualquer perm fina daquele módulo
+    prefix = perm + "."
+    return any(p.startswith(prefix) for p in perms)
+
 
 
 # =========================
