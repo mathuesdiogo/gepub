@@ -73,12 +73,13 @@
           Alterar senha
         </a>
 
-        {% if perms.accounts.manage %}
-          <a class="menu__item {% if request.resolver_match.url_name == 'usuarios_list' %}is-active{% endif %}"
-             href="{% url 'accounts:usuarios_list' %}">
-            Usuários
-          </a>
-        {% endif %}
+        {% if can_users %}
+  <a class="menu__item {% if request.resolver_match.url_name == 'usuarios_list' %}is-active{% endif %}"
+     href="{% url 'accounts:usuarios_list' %}">
+    Usuários
+  </a>
+{% endif %}
+
 
         <!-- ========================= -->
         <!-- SISTEMA -->

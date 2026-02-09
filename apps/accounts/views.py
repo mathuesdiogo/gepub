@@ -39,14 +39,17 @@ def _can_manage_users(user) -> bool:
     if is_admin(user):
         return True
     p = get_profile(user)
-    # Gestor municipal também (dentro do município dele).
-    return bool(p and p.ativo and p.role in {"MUNICIPAL", "ADMIN"})
+    # MUNICIPAL / SECRETARIA / UNIDADE podem gerenciar dentro do escopo
+    return bool(p and p.ativo and p.role in {"MUNICIPAL", "SECRETARIA", "UNIDADE", "ADMIN"})
+
 
 
 def _scope_users_queryset(request):
     """
-    Quem pode ver/gerenciar:
+    Escopo:
     - ADMIN: todos
+    - UNIDADE: apenas usuários da unidade dele
+    - SECRETARIA: apenas usuários da secretaria dele (se existir no Profile)
     - MUNICIPAL: apenas usuários do município dele
     """
     qs = User.objects.select_related("profile").all().order_by("id")
@@ -54,10 +57,21 @@ def _scope_users_queryset(request):
         return qs
 
     p = get_profile(request.user)
-    if not p or not p.ativo or not p.municipio_id:
+    if not p or not p.ativo:
         return qs.none()
 
-    return qs.filter(profile__municipio_id=p.municipio_id)
+    # prioridade: UNIDADE > SECRETARIA > MUNICÍPIO
+    if getattr(p, "unidade_id", None):
+        return qs.filter(profile__unidade_id=p.unidade_id)
+
+    if getattr(p, "secretaria_id", None):
+        return qs.filter(profile__secretaria_id=p.secretaria_id)
+
+    if getattr(p, "municipio_id", None):
+        return qs.filter(profile__municipio_id=p.municipio_id)
+
+    return qs.none()
+
 
 
 @require_http_methods(["GET", "POST"])
@@ -206,7 +220,7 @@ def usuario_create(request):
 
     p_me = get_profile(request.user)
 
-    form = UsuarioCreateForm(request.POST or None)
+    form = UsuarioCreateForm(request.POST or None, user=request.user)
     if request.method == "POST" and form.is_valid():
         # cria User com username interno aleatório (login é via codigo_acesso)
         username = f"u{secrets.token_hex(10)}"
@@ -226,16 +240,38 @@ def usuario_create(request):
         prof.cpf = form.cleaned_data["cpf"]
         prof.role = form.cleaned_data["role"]
         prof.ativo = bool(form.cleaned_data.get("ativo"))
+        prof.cpf = form.cleaned_data["cpf"]
+        prof.role = form.cleaned_data["role"]
+        prof.ativo = bool(form.cleaned_data.get("ativo"))
 
-        # RBAC: gestor municipal só cria dentro do município dele
-        if not is_admin(request.user) and p_me and p_me.municipio_id:
-            prof.municipio_id = p_me.municipio_id
+            # Limita quais roles cada gestor pode criar
+        role_me = getattr(p_me, "role", None)
+
+        allowed = {
+        "MUNICIPAL": {"SECRETARIA", "UNIDADE", "PROFESSOR", "ALUNO", "NEE", "LEITURA"},
+        "SECRETARIA": {"UNIDADE", "PROFESSOR", "ALUNO", "NEE", "LEITURA"},
+        "UNIDADE": {"PROFESSOR", "ALUNO", "NEE", "LEITURA"},
+    }
+
+
+        if not is_admin(request.user):
+            if prof.role not in allowed.get(role_me, set()):
+                messages.error(request, "Você não pode criar esse tipo de usuário.")
+                user.delete()
+                return redirect("accounts:usuarios_list")
+
+                # RBAC: herda escopo do criador (trava no backend)
+        if not is_admin(request.user) and p_me:
+            prof.municipio_id = getattr(p_me, "municipio_id", None)
+            if hasattr(prof, "secretaria_id"):
+                prof.secretaria_id = getattr(p_me, "secretaria_id", None)
+            prof.unidade_id = getattr(p_me, "unidade_id", None)
         else:
             prof.municipio = form.cleaned_data.get("municipio")
+            prof.unidade = form.cleaned_data.get("unidade")
+            if hasattr(prof, "secretaria") and "secretaria" in form.cleaned_data:
+                prof.secretaria = form.cleaned_data.get("secretaria")
 
-        # unidade opcional (pode ser filtrado pelo municipio acima)
-        unidade = form.cleaned_data.get("unidade")
-        prof.unidade = unidade
 
         prof.must_change_password = True
         prof.save()
@@ -270,7 +306,8 @@ def usuario_update(request, pk: int):
         "ativo": prof.ativo,
     }
 
-    form = UsuarioUpdateForm(request.POST or None, initial=initial)
+    form = UsuarioUpdateForm(request.POST or None, user=request.user)
+
     if request.method == "POST" and form.is_valid():
         user.first_name = form.cleaned_data["first_name"]
         user.last_name = form.cleaned_data["last_name"]
@@ -281,15 +318,18 @@ def usuario_update(request, pk: int):
         prof.role = form.cleaned_data["role"]
         prof.ativo = bool(form.cleaned_data.get("ativo"))
 
-        # RBAC municipal: não deixa trocar município pra fora
+       # RBAC: trava escopo no backend (não deixa mover usuário)
         p_me = get_profile(request.user)
-        if not is_admin(request.user) and p_me and p_me.municipio_id:
-            prof.municipio_id = p_me.municipio_id
+        if not is_admin(request.user) and p_me:
+            prof.municipio_id = getattr(p_me, "municipio_id", None)
+            if hasattr(prof, "secretaria_id"):
+                prof.secretaria_id = getattr(p_me, "secretaria_id", None)
+            prof.unidade_id = getattr(p_me, "unidade_id", None)
         else:
             prof.municipio = form.cleaned_data.get("municipio")
-
-        prof.unidade = form.cleaned_data.get("unidade")
-        prof.save()
+            prof.unidade = form.cleaned_data.get("unidade")
+            if hasattr(prof, "secretaria") and "secretaria" in form.cleaned_data:
+                prof.secretaria = form.cleaned_data.get("secretaria")
 
         messages.success(request, "Usuário atualizado.")
         return redirect("accounts:usuarios_list")

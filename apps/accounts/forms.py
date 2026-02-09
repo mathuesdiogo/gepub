@@ -48,12 +48,55 @@ class UsuarioCreateForm(forms.Form):
 
     ativo = forms.BooleanField(label="Ativo", required=False, initial=True)
 
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop("user", None)  # <<< ESSENCIAL
+        super().__init__(*args, **kwargs)
+
+        if not user or not getattr(user, "is_authenticated", False):
+            return
+
+        p = getattr(user, "profile", None)
+        if not p:
+            return
+
+        allowed = {
+            "MUNICIPAL": {"SECRETARIA", "UNIDADE", "PROFESSOR", "ALUNO", "NEE", "LEITURA"},
+            "SECRETARIA": {"UNIDADE", "PROFESSOR", "ALUNO", "NEE", "LEITURA"},
+            "UNIDADE": {"PROFESSOR", "ALUNO", "NEE", "LEITURA"},
+        }
+
+        role_me = (p.role or "").upper()
+        if role_me in allowed:
+            self.fields["role"].choices = [
+                (value, label)
+                for (value, label) in Profile.Role.choices
+                if value in allowed[role_me]
+            ]
+
+
+        # =========================
+        # MUNICÍPIO (fixo)
+        # =========================
+        if getattr(p, "municipio_id", None):
+            self.fields["municipio"].queryset = Municipio.objects.filter(id=p.municipio_id)
+            self.fields["municipio"].initial = p.municipio_id
+            self.fields["municipio"].disabled = True
+
+        # =========================
+        # UNIDADE (fixa para gestor de escola)
+        # =========================
+        if getattr(p, "unidade_id", None):
+            self.fields["unidade"].queryset = Unidade.objects.filter(id=p.unidade_id)
+            self.fields["unidade"].initial = p.unidade_id
+            self.fields["unidade"].disabled = True
+
     def clean_cpf(self):
         cpf = (self.cleaned_data.get("cpf") or "").strip()
         digits = "".join(ch for ch in cpf if ch.isdigit())
         if len(digits) != 11:
             raise ValidationError("CPF inválido. Deve conter 11 dígitos.")
         return cpf
+
 
 
 class UsuarioUpdateForm(forms.Form):
@@ -77,6 +120,45 @@ class UsuarioUpdateForm(forms.Form):
 
     ativo = forms.BooleanField(label="Ativo", required=False)
 
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+
+        if not user or not user.is_authenticated:
+            return
+
+        p = getattr(user, "profile", None)
+        if not p:
+            return
+
+        # Mesmo filtro de roles do create
+        allowed = {
+            "MUNICIPAL": {"SECRETARIA", "UNIDADE", "PROFESSOR", "ALUNO", "NEE", "LEITURA"},
+            "SECRETARIA": {"UNIDADE", "PROFESSOR", "ALUNO", "NEE", "LEITURA"},
+            "UNIDADE": {"PROFESSOR", "ALUNO", "NEE", "LEITURA"},
+        }
+
+
+
+        if p.role in allowed:
+            self.fields["role"].choices = [
+                (r, label)
+                for r, label in Profile.Role.choices
+                if r in allowed[p.role]
+            ]
+
+        # Município fixo
+        if getattr(p, "municipio_id", None):
+            self.fields["municipio"].queryset = Municipio.objects.filter(id=p.municipio_id)
+            self.fields["municipio"].initial = p.municipio_id
+            self.fields["municipio"].disabled = True
+
+        # Unidade fixa para gestor de escola
+        if getattr(p, "unidade_id", None):
+            self.fields["unidade"].queryset = Unidade.objects.filter(id=p.unidade_id)
+            self.fields["unidade"].initial = p.unidade_id
+            self.fields["unidade"].disabled = True
+
     def clean_cpf(self):
         cpf = (self.cleaned_data.get("cpf") or "").strip()
         if not cpf:
@@ -85,6 +167,7 @@ class UsuarioUpdateForm(forms.Form):
         if len(digits) != 11:
             raise ValidationError("CPF inválido. Deve conter 11 dígitos.")
         return cpf
+
 
 class AlterarSenhaForm(forms.Form):
     old_password = forms.CharField(

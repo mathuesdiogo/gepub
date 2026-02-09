@@ -1,4 +1,4 @@
-{% if "org.view" in user_perms %}
+{% load static %}
 
 <!doctype html>
 <html lang="pt-br">
@@ -11,6 +11,16 @@
 <body>
   <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:18px;">
     <div style="width:100%; max-width:420px;">
+      {% if messages %}
+        <div class="flash-stack">
+          {% for message in messages %}
+            <div class="flash flash--{{ message.tags }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
       {% block content %}{% endblock %}
     </div>
   </div>

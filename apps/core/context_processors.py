@@ -1,5 +1,6 @@
 # apps/core/context_processors.py
 from __future__ import annotations
+from core.rbac import can
 
 from .rbac import (
     can,
@@ -28,4 +29,18 @@ def permissions(request):
         "can_nee": can(user, PERM_NEE),
         "can_accounts": can(user, PERM_ACCOUNTS),
         "can_reports": can(user, PERM_REPORTS),
+    }
+from core.rbac import can
+
+def permissions(request):
+    u = getattr(request, "user", None)
+
+    return {
+        # mantém os módulos (essas chaves precisam existir pro seu base.html)
+        "can_org": can(u, "org.view"),
+        "can_edu": can(u, "educacao.view"),
+        "can_nee": can(u, "nee.view"),
+
+        # adiciona usuários
+        "can_users": can(u, "accounts.manage_users"),
     }

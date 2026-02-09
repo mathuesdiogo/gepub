@@ -83,6 +83,7 @@ ROLE_PERMS_FINE = {
         "nee.view",
         "nee.manage",
         "reports.view",
+        "accounts.manage_users",
     },
     "UNIDADE": {
         "org.view",
@@ -91,6 +92,7 @@ ROLE_PERMS_FINE = {
         "nee.view",
         "nee.manage",
         "reports.view",
+        "accounts.manage_users",
     },
     "PROFESSOR": {
         "org.view",

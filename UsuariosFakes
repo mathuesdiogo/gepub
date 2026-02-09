@@ -1,0 +1,11 @@
+ mun1_municipal   | role=MUNICIPAL  | codigo_acesso=mun1.municipal-2026
+- mun1_leitura     | role=LEITURA    | codigo_acesso=mun1.leitura-2026
+- mun1_nee         | role=NEE        | codigo_acesso=mun1.nee-2026
+- mun1_sec_semad   | role=SECRETARIA | codigo_acesso=mun1.sec.semad-2026
+- mun1_unid_1      | role=UNIDADE    | codigo_acesso=mun1.unid.1-2026
+- mun1_prof_1      | role=PROFESSOR  | codigo_acesso=mun1.prof.1-2026
+- mun1_aluno_1     | role=ALUNO      | codigo_acesso=mun1.aluno.1-2026
+- mun2_municipal   | role=MUNICIPAL  | codigo_acesso=mun2.municipal-2026
+- mun2_leitura     | role=LEITURA    | codigo_acesso=mun2.leitura-2026
+- mun2_sec_edu     | role=SECRETARIA | codigo_acesso=mun2.sec.edu-2026
+- mun2_unid_a      | role=UNIDADE    | codigo_acesso=mun2.unid.a-2026

@@ -44,7 +44,7 @@ def municipio_list(request):
 @login_required
 def secretaria_list(request):
     q = (request.GET.get("q") or "").strip()
-    from core.rbac import get_profile, is_admin
+    municipio_id = (request.GET.get("municipio") or "").strip()
 
     p = get_profile(request.user)
     if not is_admin(request.user) and p and p.municipio_id:
@@ -52,33 +52,27 @@ def secretaria_list(request):
 
     qs = Secretaria.objects.select_related("municipio").all()
 
-    # ✅ MUNICIPAL: força o município do usuário e não aceita trocar no filtro
-    p = get_profile(request.user)
-    if not is_admin(request.user) and p and p.municipio_id:
-        municipio_id = str(p.municipio_id)
-
     if municipio_id.isdigit():
         qs = qs.filter(municipio_id=int(municipio_id))
 
     if q:
         qs = qs.filter(Q(nome__icontains=q) | Q(sigla__icontains=q) | Q(municipio__nome__icontains=q))
 
-    paginator = Paginator(qs, 10)
-    page_obj = paginator.get_page(request.GET.get("page"))
-
-    # ✅ Dropdown de municípios:
-    # ADMIN: lista todos
-    # MUNICIPAL: só o dele
     municipios = scope_filter_municipios(
         request.user,
         Municipio.objects.filter(ativo=True).order_by("nome")
     )
 
-    return render(
-        request,
-        "org/secretaria_list.html",
-        {"q": q, "municipio_id": municipio_id, "page_obj": page_obj, "municipios": municipios},
-    )
+    paginator = Paginator(qs, 10)
+    page_obj = paginator.get_page(request.GET.get("page"))
+
+    return render(request, "org/secretaria_list.html", {
+        "q": q,
+        "municipio_id": municipio_id,
+        "page_obj": page_obj,
+        "municipios": municipios,
+    })
+
 
 
 
@@ -183,9 +177,9 @@ def municipio_update(request, pk: int):
     p_me = get_profile(request.user)
 
     # MUNICIPAL só pode editar o próprio município
-    if not is_admin(request.user):
-        if not p_me or not p_me.municipio_id or int(pk) != int(p_me.municipio_id):
-            return HttpResponseForbidden("403 — Você só pode editar o seu município.")
+    p_me = get_profile(request.user)
+    if not is_admin(request.user) and p_me and p_me.role == "UNIDADE":
+        return HttpResponseForbidden("403 — Gestor de unidade não pode editar município.")
 
     municipio = get_object_or_404(Municipio, pk=pk)
 
