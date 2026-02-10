@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -6,6 +7,14 @@ class Turma(models.Model):
         "org.Unidade",
         on_delete=models.PROTECT,
         related_name="turmas",
+    )
+
+    # ✅ NOVO: vínculo professor ⇄ turma
+    professores = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        related_name="turmas_ministradas",
+        verbose_name="Professores",
     )
 
     nome = models.CharField(max_length=120)  # Ex.: 1º Ano A
@@ -40,6 +49,8 @@ class Turma(models.Model):
 
     def __str__(self) -> str:
         return f"{self.nome} ({self.ano_letivo})"
+
+
 class Aluno(models.Model):
     nome = models.CharField(max_length=180)
     data_nascimento = models.DateField(null=True, blank=True)

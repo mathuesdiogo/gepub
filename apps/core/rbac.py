@@ -10,7 +10,6 @@ from django.db.models import Exists, OuterRef
 def get_profile(user):
     if not user or not getattr(user, "is_authenticated", False):
         return None
-    # mantém compatível com seu padrão atual
     return getattr(user, "profile", None)
 
 
@@ -34,7 +33,6 @@ PERM_REPORTS = "reports"
 
 ALL_PERMS = {PERM_ORG, PERM_EDU, PERM_NEE, PERM_ACCOUNTS, PERM_REPORTS}
 
-# Matriz simples por role (LEGADO - mantém)
 ROLE_PERMS = {
     "ADMIN": ALL_PERMS,
     "MUNICIPAL": {PERM_ORG, PERM_EDU, PERM_NEE, PERM_REPORTS, PERM_ACCOUNTS},
@@ -42,14 +40,13 @@ ROLE_PERMS = {
     "UNIDADE": {PERM_EDU, PERM_NEE, PERM_REPORTS, PERM_ACCOUNTS},
     "NEE": {PERM_NEE, PERM_REPORTS, PERM_ACCOUNTS},
     "LEITURA": {PERM_REPORTS, PERM_ACCOUNTS},
-    "ALUNO": {PERM_ACCOUNTS},  # por enquanto só perfil/conta; depois evoluímos
+    "ALUNO": {PERM_ACCOUNTS},
 }
 
 
 # =========================
 # PERMISSÕES (NOVO: granular / "definitivo")
 # =========================
-# Matriz inicial de perms finas (como combinamos no RBAC definitivo)
 ROLE_PERMS_FINE = {
     "ADMIN": {
         "org.view",
@@ -96,7 +93,6 @@ ROLE_PERMS_FINE = {
     },
     "PROFESSOR": {
         "educacao.view",
-       
     },
     "ALUNO": {
         "educacao.view",
@@ -108,34 +104,22 @@ ROLE_PERMS_FINE = {
         "nee.view",
         "reports.view",
     },
-    # mantém compatibilidade com seus roles existentes:
     "NEE": {"nee.view", "nee.manage", "reports.view", "accounts.manage_users"},
     "LEITURA": {"reports.view"},
 }
 
 
 def _macro_from_fine(perm: str) -> str | None:
-    """
-    'educacao.manage' -> 'educacao'
-    'org.view' -> 'org'
-    """
     if not perm or "." not in perm:
         return None
     return perm.split(".", 1)[0]
 
 
 def get_user_perms(user) -> set[str]:
-    """
-    Retorna um set de permissões do usuário.
-    COMPATÍVEL:
-      - inclui macros ('educacao') para não quebrar suas checagens atuais
-      - inclui finas ('educacao.manage') para o RBAC definitivo
-    """
     if not user or not getattr(user, "is_authenticated", False):
         return set()
 
     if is_admin(user):
-        # admin recebe tudo (macros + finas)
         perms = set(ALL_PERMS)
         for fine in ROLE_PERMS_FINE.get("ADMIN", set()):
             perms.add(fine)
@@ -150,14 +134,10 @@ def get_user_perms(user) -> set[str]:
 
     role = getattr(p, "role", None) or "LEITURA"
 
-    # legado
     perms = set(ROLE_PERMS.get(role, set()))
-
-    # novo granular
     fine_perms = set(ROLE_PERMS_FINE.get(role, set()))
     perms |= fine_perms
 
-    # garante que quem tem perm fina também “ganha” macro correspondente
     for fp in fine_perms:
         m = _macro_from_fine(fp)
         if m:
@@ -167,27 +147,16 @@ def get_user_perms(user) -> set[str]:
 
 
 def can(user, perm: str) -> bool:
-    """
-    Regras:
-    - Perm fina (com ponto) exige match exato.
-      Ex.: 'org.manage_municipio' só passa se estiver exatamente no set.
-    - Perm macro (sem ponto) pode passar pelo macro correspondente das finas.
-      Ex.: se usuário tem 'org.view', então 'org' pode ser True.
-    """
     perms = get_user_perms(user)
 
-    # match exato sempre ganha
     if perm in perms:
         return True
 
-    # se for perm FINA, NÃO faz fallback para macro
     if "." in perm:
         return False
 
-    # se for perm MACRO (ex: 'org'), aceita se tiver qualquer perm fina daquele módulo
     prefix = perm + "."
     return any(p.startswith(prefix) for p in perms)
-
 
 
 # =========================
@@ -203,10 +172,6 @@ def _require_auth_active(user):
 
 
 def scope_filter_municipios(user, qs):
-    """
-    MUNICIPAL/SECRETARIA/UNIDADE/etc: enxerga só o município do profile.
-    ADMIN: tudo.
-    """
     if not user or not getattr(user, "is_authenticated", False):
         return qs.none()
     if is_admin(user):
@@ -223,10 +188,6 @@ def scope_filter_municipios(user, qs):
 
 
 def scope_filter_secretarias(user, qs):
-    """
-    SECRETARIA: só sua secretaria (se tiver FK).
-    Caso não tenha secretaria_id, cai para municipio_id.
-    """
     if not user or not getattr(user, "is_authenticated", False):
         return qs.none()
     if is_admin(user):
@@ -248,11 +209,6 @@ def scope_filter_secretarias(user, qs):
 
 
 def scope_filter_unidades(user, qs):
-    """
-    UNIDADE: só sua unidade (se tiver FK).
-    SECRETARIA: unidades da secretaria (se tiver FK), senão por município.
-    MUNICIPAL: unidades do município.
-    """
     if not user or not getattr(user, "is_authenticated", False):
         return qs.none()
     if is_admin(user):
@@ -268,11 +224,9 @@ def scope_filter_unidades(user, qs):
         return qs.filter(id=p.unidade_id)
 
     if role == "SECRETARIA" and getattr(p, "secretaria_id", None):
-        # assume Unidade tem FK secretaria (se não tiver, ajustamos depois)
         return qs.filter(secretaria_id=p.secretaria_id)
 
     if getattr(p, "municipio_id", None):
-        # assume Unidade -> Secretaria -> Municipio como no seu scope atual
         return qs.filter(secretaria__municipio_id=p.municipio_id)
 
     return qs.none()
@@ -280,8 +234,7 @@ def scope_filter_unidades(user, qs):
 
 def scope_filter_turmas(user, qs):
     """
-    qs: QuerySet de Turma
-    (mantido do seu arquivo, sem mudar a lógica)
+    ✅ NOVO: PROFESSOR vê apenas as turmas em que está vinculado (Turma.professores)
     """
     if not user or not getattr(user, "is_authenticated", False):
         return qs.none()
@@ -293,7 +246,13 @@ def scope_filter_turmas(user, qs):
     if not p:
         return qs.none()
 
-    if getattr(p, "role", None) == "UNIDADE" and getattr(p, "unidade_id", None):
+    role = getattr(p, "role", None)
+
+    # ✅ PROFESSOR: apenas turmas vinculadas
+    if role == "PROFESSOR":
+        return qs.filter(professores=user).distinct()
+
+    if role == "UNIDADE" and getattr(p, "unidade_id", None):
         return qs.filter(unidade_id=p.unidade_id)
 
     if getattr(p, "municipio_id", None):
@@ -303,10 +262,6 @@ def scope_filter_turmas(user, qs):
 
 
 def scope_filter_matriculas(user, qs):
-    """
-    qs: QuerySet de Matricula
-    (mantido do seu arquivo, sem mudar a lógica)
-    """
     if not user or not getattr(user, "is_authenticated", False):
         return qs.none()
 
@@ -317,7 +272,13 @@ def scope_filter_matriculas(user, qs):
     if not p:
         return qs.none()
 
-    if getattr(p, "role", None) == "UNIDADE" and getattr(p, "unidade_id", None):
+    role = getattr(p, "role", None)
+
+    # ✅ PROFESSOR: matrículas apenas das turmas dele
+    if role == "PROFESSOR":
+        return qs.filter(turma__professores=user).distinct()
+
+    if role == "UNIDADE" and getattr(p, "unidade_id", None):
         return qs.filter(turma__unidade_id=p.unidade_id)
 
     if getattr(p, "municipio_id", None):
@@ -328,10 +289,7 @@ def scope_filter_matriculas(user, qs):
 
 def scope_filter_alunos(user, qs):
     """
-    qs: QuerySet de Aluno
-    Como Aluno não tem FK direta para unidade/município, filtramos por existência de matrícula.
-    Obs.: alunos sem matrícula só aparecem para ADMIN.
-    (mantido do seu arquivo, só deixei o helper de profile/ativo)
+    ✅ NOVO: PROFESSOR vê apenas alunos matriculados em turmas dele.
     """
     if not user or not getattr(user, "is_authenticated", False):
         return qs.none()
@@ -347,7 +305,15 @@ def scope_filter_alunos(user, qs):
 
     matriculas = Matricula.objects.filter(aluno_id=OuterRef("pk"))
 
-    if getattr(p, "role", None) == "UNIDADE" and getattr(p, "unidade_id", None):
+    role = getattr(p, "role", None)
+
+    # ✅ PROFESSOR: alunos com matrícula em turmas vinculadas ao professor
+    if role == "PROFESSOR":
+        matriculas = matriculas.filter(turma__professores=user)
+        return qs.annotate(_has_scope=Exists(matriculas)).filter(_has_scope=True).distinct()
+
+    # regra antiga
+    if role == "UNIDADE" and getattr(p, "unidade_id", None):
         matriculas = matriculas.filter(turma__unidade_id=p.unidade_id)
     elif getattr(p, "municipio_id", None):
         matriculas = matriculas.filter(turma__unidade__secretaria__municipio_id=p.municipio_id)

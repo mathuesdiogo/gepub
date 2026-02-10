@@ -3,7 +3,8 @@ from __future__ import annotations
 from django import forms
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-
+from educacao.models import Turma
+from core.rbac import is_admin, scope_filter_turmas
 from org.models import Municipio, Unidade
 from .models import Profile
 from django.contrib.auth.password_validation import validate_password
@@ -45,7 +46,11 @@ class UsuarioCreateForm(forms.Form):
         queryset=Unidade.objects.filter(ativo=True).order_by("nome"),
         required=False,
     )
-
+    turmas = forms.ModelMultipleChoiceField(
+    label="Turmas (somente para Professor)",
+    queryset=Turma.objects.none(),
+    required=False,
+    )
     ativo = forms.BooleanField(label="Ativo", required=False, initial=True)
 
     def __init__(self, *args, **kwargs):
@@ -54,7 +59,10 @@ class UsuarioCreateForm(forms.Form):
 
         if not user or not getattr(user, "is_authenticated", False):
             return
-
+        qs_turmas = Turma.objects.select_related("unidade").all().order_by("-ano_letivo", "nome")
+        if user and not is_admin(user):
+            qs_turmas = scope_filter_turmas(user, qs_turmas)
+        self.fields["turmas"].queryset = qs_turmas
         p = getattr(user, "profile", None)
         if not p:
             return

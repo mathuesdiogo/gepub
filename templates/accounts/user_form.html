@@ -66,6 +66,16 @@
       {% if form.unidade.errors %}<div class="small" style="color:#ffb4b4;">{{ form.unidade.errors|striptags }}</div>{% endif %}
     </div>
 
+    {# ✅ NOVO: Turmas (para professor) #}
+    <div style="grid-column:1 / -1;">
+      <label class="small">{{ form.turmas.label }}</label><br>
+      {{ form.turmas }}
+      {% if form.turmas.errors %}<div class="small" style="color:#ffb4b4;">{{ form.turmas.errors|striptags }}</div>{% endif %}
+      <div class="small" style="opacity:.8; margin-top:4px;">
+        Selecione as turmas para vincular (apenas para usuários com função <strong>Professor</strong>).
+      </div>
+    </div>
+
     <div style="grid-column:1 / -1; display:flex; align-items:center; gap:10px;">
       {{ form.ativo }} <span class="small">{{ form.ativo.label }}</span>
     </div>

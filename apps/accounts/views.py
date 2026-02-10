@@ -41,22 +41,13 @@ def _only_digits(s: str) -> str:
 
 
 def _can_manage_users(user) -> bool:
-    # Admin global sempre.
     if is_admin(user):
         return True
     p = get_profile(user)
-    # MUNICIPAL / SECRETARIA / UNIDADE podem gerenciar dentro do escopo
     return bool(p and p.ativo and p.role in {"MUNICIPAL", "SECRETARIA", "UNIDADE"})
 
 
 def _scope_users_queryset(request):
-    """
-    Escopo:
-    - ADMIN: todos
-    - UNIDADE: apenas usuários da unidade dele
-    - SECRETARIA: apenas usuários da secretaria dele (se existir no Profile)
-    - MUNICIPAL: apenas usuários do município dele
-    """
     qs = User.objects.select_related("profile").all().order_by("id")
     if is_admin(request.user):
         return qs
@@ -65,7 +56,6 @@ def _scope_users_queryset(request):
     if not p or not p.ativo:
         return qs.none()
 
-    # prioridade: UNIDADE > SECRETARIA > MUNICÍPIO
     if getattr(p, "unidade_id", None):
         return qs.filter(profile__unidade_id=p.unidade_id)
 
@@ -114,7 +104,6 @@ def login_view(request):
         reset(ip, codigo)
         login(request, user)
 
-        # ✅ blindagem: garante Profile sempre após login
         Profile.objects.get_or_create(user=user, defaults={"ativo": True})
 
         return redirect("core:dashboard")
@@ -125,7 +114,6 @@ def login_view(request):
 @login_required
 @require_http_methods(["GET", "POST"])
 def alterar_senha_view(request):
-    # ✅ garante Profile sempre (resolve 1º login do professor/aluno/leitura etc.)
     p, _ = Profile.objects.get_or_create(user=request.user, defaults={"ativo": True})
 
     form = AlterarSenhaPrimeiroAcessoForm(request.POST or None)
@@ -139,13 +127,11 @@ def alterar_senha_view(request):
             error = "As senhas não conferem."
             return render(request, "accounts/alterar_senha.html", {"form": form, "error": error})
 
-        # bloqueia manter CPF como senha
         cpf_digits = _only_digits(p.cpf)
         if cpf_digits and _only_digits(senha1) == cpf_digits:
             error = "A nova senha não pode ser igual ao CPF."
             return render(request, "accounts/alterar_senha.html", {"form": form, "error": error})
 
-        # valida força (usa validators do Django)
         try:
             validate_password(senha1, user=request.user)
         except ValidationError as e:
@@ -171,9 +157,6 @@ def logout_view(request):
     return redirect("accounts:login")
 
 
-# =========================
-# MEU PERFIL
-# =========================
 @login_required
 @require_http_methods(["GET", "POST"])
 def meu_perfil(request):
@@ -190,9 +173,6 @@ def meu_perfil(request):
     return render(request, "accounts/meu_perfil.html", {"p": p})
 
 
-# =========================
-# GESTÃO DE USUÁRIOS (RBAC)
-# =========================
 @login_required
 def usuarios_list(request):
     if not _can_manage_users(request.user):
@@ -226,7 +206,6 @@ def usuario_create(request):
 
     form = UsuarioCreateForm(request.POST or None, user=request.user)
     if request.method == "POST" and form.is_valid():
-        # cria User com username interno aleatório (login é via codigo_acesso)
         username = f"u{secrets.token_hex(10)}"
         user = User(
             username=username,
@@ -237,18 +216,15 @@ def usuario_create(request):
         )
 
         cpf_digits = _only_digits(form.cleaned_data["cpf"])
-        user.set_password(cpf_digits)  # senha inicial = CPF
+        user.set_password(cpf_digits)
         user.save()
 
-        # ✅ garante profile (mesmo sem signal)
         prof, _ = Profile.objects.get_or_create(user=user, defaults={"ativo": True})
 
-        # preenche profile
         prof.cpf = form.cleaned_data["cpf"]
         prof.role = form.cleaned_data["role"]
         prof.ativo = bool(form.cleaned_data.get("ativo", True))
 
-        # Limita quais roles cada gestor pode criar
         allowed = {
             "MUNICIPAL": {"SECRETARIA", "UNIDADE", "PROFESSOR", "ALUNO", "NEE", "LEITURA"},
             "SECRETARIA": {"UNIDADE", "PROFESSOR", "ALUNO", "NEE", "LEITURA"},
@@ -263,23 +239,26 @@ def usuario_create(request):
                 user.delete()
                 return redirect("accounts:usuarios_list")
 
-        # RBAC: herda escopo do criador (trava no backend)
         if not is_admin(request.user) and p_me:
             prof.municipio_id = getattr(p_me, "municipio_id", None)
             if hasattr(prof, "secretaria_id"):
                 prof.secretaria_id = getattr(p_me, "secretaria_id", None)
             prof.unidade_id = getattr(p_me, "unidade_id", None)
         else:
-            # Admin pode definir manualmente (se seu form tiver esses campos)
             if "municipio" in form.cleaned_data:
                 prof.municipio = form.cleaned_data.get("municipio")
             if "unidade" in form.cleaned_data:
                 prof.unidade = form.cleaned_data.get("unidade")
-            if hasattr(prof, "secretaria") and "secretaria" in form.cleaned_data:
-                prof.secretaria = form.cleaned_data.get("secretaria")
 
         prof.must_change_password = True
         prof.save()
+
+        # ✅ NOVO: vincula turmas escolhidas (somente professor)
+        if prof.role == "PROFESSOR" and "turmas" in form.cleaned_data:
+            user.turmas_ministradas.set(form.cleaned_data.get("turmas") or [])
+        else:
+            # evita resíduos se alguém escolher turmas sem ser professor
+            user.turmas_ministradas.clear()
 
         messages.success(
             request,
@@ -309,6 +288,7 @@ def usuario_update(request, pk: int):
         "municipio": getattr(prof, "municipio_id", None),
         "unidade": getattr(prof, "unidade_id", None),
         "ativo": prof.ativo,
+        "turmas": user.turmas_ministradas.all(),
     }
 
     form = UsuarioUpdateForm(request.POST or None, initial=initial, user=request.user)
@@ -323,7 +303,6 @@ def usuario_update(request, pk: int):
         prof.role = form.cleaned_data["role"]
         prof.ativo = bool(form.cleaned_data.get("ativo", True))
 
-        # RBAC: trava escopo no backend (não deixa mover usuário)
         p_me = get_profile(request.user)
         if not is_admin(request.user) and p_me:
             prof.municipio_id = getattr(p_me, "municipio_id", None)
@@ -335,10 +314,15 @@ def usuario_update(request, pk: int):
                 prof.municipio = form.cleaned_data.get("municipio")
             if "unidade" in form.cleaned_data:
                 prof.unidade = form.cleaned_data.get("unidade")
-            if hasattr(prof, "secretaria") and "secretaria" in form.cleaned_data:
-                prof.secretaria = form.cleaned_data.get("secretaria")
 
         prof.save()
+
+        # ✅ NOVO: atualiza vínculo de turmas (somente professor)
+        if prof.role == "PROFESSOR" and "turmas" in form.cleaned_data:
+            user.turmas_ministradas.set(form.cleaned_data.get("turmas") or [])
+        else:
+            user.turmas_ministradas.clear()
+
         messages.success(request, "Usuário atualizado.")
         return redirect("accounts:usuarios_list")
 
@@ -360,14 +344,12 @@ def usuario_reset_senha(request, pk: int):
         messages.error(request, "Este usuário não tem CPF no perfil. Preencha o CPF antes de redefinir a senha.")
         return redirect("accounts:usuario_update", pk=user.pk)
 
-    # redefine senha para CPF e força troca
     user.set_password(cpf_digits)
     user.save()
 
     prof.must_change_password = True
     prof.save(update_fields=["must_change_password"])
 
-    # (opcional) e-mail — por enquanto só se seu projeto tiver EMAIL_BACKEND configurado
     if user.email:
         try:
             from django.core.mail import send_mail
