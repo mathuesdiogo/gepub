@@ -1,0 +1,134 @@
+{% extends "core/base.html" %}
+{% block title %}Dashboard • Prefeitura • GEPUB{% endblock %}
+{% block header %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:1100px;">
+  <div class="card__title" style="display:flex; justify-content:space-between; align-items:center;">
+    <span>Prefeitura • {{ municipio_nome }}</span>
+    <span class="pill">Visão municipal</span>
+  </div>
+
+  <div class="card__body">
+
+    <!-- CARDS clicáveis -->
+    <div style="display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:12px;">
+      <a class="card" href="{% url 'org:secretaria_list' %}" style="margin:0; text-decoration:none;">
+        <div class="card__body">
+          <div class="small">Secretarias</div>
+          <div style="font-size:22px;font-weight:900;">{{ secretarias_total }}</div>
+          <div class="small" style="opacity:.7;">Ver lista</div>
+        </div>
+      </a>
+
+      <a class="card" href="{% url 'org:unidade_list' %}" style="margin:0; text-decoration:none;">
+        <div class="card__body">
+          <div class="small">Unidades</div>
+          <div style="font-size:22px;font-weight:900;">{{ unidades_total }}</div>
+          <div class="small" style="opacity:.7;">Ver lista</div>
+        </div>
+      </a>
+
+      <a class="card" href="{% url 'educacao:turma_list' %}" style="margin:0; text-decoration:none;">
+        <div class="card__body">
+          <div class="small">Turmas</div>
+          <div style="font-size:22px;font-weight:900;">{{ turmas_total }}</div>
+          <div class="small" style="opacity:.7;">Abrir turmas</div>
+        </div>
+      </a>
+
+      <a class="card" href="{% url 'educacao:aluno_list' %}" style="margin:0; text-decoration:none;">
+        <div class="card__body">
+          <div class="small">Alunos</div>
+          <div style="font-size:22px;font-weight:900;">{{ alunos_total }}</div>
+          <div class="small" style="opacity:.7;">Ver alunos</div>
+        </div>
+      </a>
+
+      <!-- Matrículas: seu projeto ainda não tem rota matricula_list -->
+      <a class="card" href="{% url 'educacao:turma_list' %}" style="margin:0; text-decoration:none;">
+        <div class="card__body">
+          <div class="small">Matrículas</div>
+          <div style="font-size:22px;font-weight:900;">{{ matriculas_total }}</div>
+          <div class="small" style="opacity:.7;">Ver por turmas</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- GRÁFICOS -->
+    <div class="form-section" style="margin-top:16px;">
+      <div class="form-section__title">Indicadores</div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:10px;">
+        <div class="card" style="margin:0;">
+          <div class="card__body">
+            <div class="small" style="margin-bottom:10px;">Unidades por Secretaria (Top 8)</div>
+            <canvas id="chartUnidades" height="140"></canvas>
+          </div>
+        </div>
+
+        <div class="card" style="margin:0;">
+          <div class="card__body">
+            <div class="small" style="margin-bottom:10px;">Alunos por Secretaria (Top 8)</div>
+            <canvas id="chartAlunos" height="140"></canvas>
+          </div>
+        </div>
+      </div>
+
+      {{ chart1_labels|json_script:"c1-labels" }}
+      {{ chart1_values|json_script:"c1-values" }}
+      {{ chart2_labels|json_script:"c2-labels" }}
+      {{ chart2_values|json_script:"c2-values" }}
+
+      <script>
+        (function () {
+          if (!window.Chart) return;
+
+          const c1Labels = JSON.parse(document.getElementById("c1-labels").textContent);
+          const c1Values = JSON.parse(document.getElementById("c1-values").textContent);
+
+          const c2Labels = JSON.parse(document.getElementById("c2-labels").textContent);
+          const c2Values = JSON.parse(document.getElementById("c2-values").textContent);
+
+          const el1 = document.getElementById("chartUnidades");
+          const el2 = document.getElementById("chartAlunos");
+          if (!el1 || !el2) return;
+
+          new Chart(el1.getContext("2d"), {
+            type: "bar",
+            data: { labels: c1Labels, datasets: [{ label: "Unidades", data: c1Values, borderWidth: 1 }] },
+            options: {
+              responsive: true,
+              plugins: { legend: { display: false } },
+              scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+            }
+          });
+
+          new Chart(el2.getContext("2d"), {
+            type: "bar",
+            data: { labels: c2Labels, datasets: [{ label: "Alunos", data: c2Values, borderWidth: 1 }] },
+            options: {
+              responsive: true,
+              plugins: { legend: { display: false } },
+              scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+            }
+          });
+        })();
+      </script>
+    </div>
+
+    <!-- ÚLTIMAS SECRETARIAS -->
+    <div class="form-section" style="margin-top:16px;">
+      <div class="form-section__title">Últimas secretarias</div>
+      <ul style="margin:0; padding-left:18px;">
+        {% for s in ultimas_secretarias %}
+          <li><a class="link" href="{% url 'org:secretaria_detail' s.pk %}">{{ s.nome }}</a></li>
+        {% empty %}
+          <li class="small" style="opacity:.8;">Nenhuma secretaria cadastrada.</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
