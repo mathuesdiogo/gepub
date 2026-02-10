@@ -95,10 +95,8 @@ ROLE_PERMS_FINE = {
         "accounts.manage_users",
     },
     "PROFESSOR": {
-        "org.view",
         "educacao.view",
-        "nee.view",
-        "reports.view",
+       
     },
     "ALUNO": {
         "educacao.view",
