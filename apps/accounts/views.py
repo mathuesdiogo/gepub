@@ -159,14 +159,27 @@ def logout_view(request):
 
 @login_required
 @require_http_methods(["GET", "POST"])
+@login_required
+@require_http_methods(["GET", "POST"])
 def meu_perfil(request):
     p, _ = Profile.objects.get_or_create(user=request.user, defaults={"ativo": True})
 
     if request.method == "POST":
-        request.user.first_name = (request.POST.get("first_name") or "").strip()
-        request.user.last_name = (request.POST.get("last_name") or "").strip()
+        # Nome e CPF NÃO editáveis (mantém como está)
+        # request.user.first_name = ...
+        # request.user.last_name = ...
+
+        # Editáveis:
         request.user.email = (request.POST.get("email") or "").strip()
-        request.user.save()
+        request.user.save(update_fields=["email"])
+
+        # Se seu Profile tiver esses campos, atualiza também
+        if hasattr(p, "telefone"):
+            p.telefone = (request.POST.get("telefone") or "").strip()
+        if hasattr(p, "endereco"):
+            p.endereco = (request.POST.get("endereco") or "").strip()
+
+        p.save()
         messages.success(request, "Perfil atualizado.")
         return redirect("accounts:meu_perfil")
 

@@ -12,8 +12,8 @@
 {% endblock %}
 
 {% block content %}
-<div class="card" style="max-width:760px;">
-  <div class="small" style="opacity:.85; margin-bottom:10px;">
+<div class="card" style="max-width:860px;">
+  <div class="small" style="opacity:.85; margin-bottom:12px;">
     <div><strong>Código de acesso:</strong> {{ p.codigo_acesso }}</div>
     <div><strong>Função:</strong> {{ p.get_role_display }}</div>
   </div>
@@ -22,21 +22,39 @@
     {% csrf_token %}
 
     <div>
-      <label class="small">Nome</label><br>
-      <input name="first_name" value="{{ request.user.first_name }}" />
+      <label class="small">Nome (bloqueado)</label><br>
+      <input name="first_name" value="{{ request.user.first_name }}" readonly
+             style="opacity:.85; background:rgba(255,255,255,.04); cursor:not-allowed;" />
     </div>
 
     <div>
-      <label class="small">Sobrenome</label><br>
-      <input name="last_name" value="{{ request.user.last_name }}" />
+      <label class="small">Sobrenome (bloqueado)</label><br>
+      <input name="last_name" value="{{ request.user.last_name }}" readonly
+             style="opacity:.85; background:rgba(255,255,255,.04); cursor:not-allowed;" />
+    </div>
+
+    <div style="grid-column:1 / -1;">
+      <label class="small">CPF (bloqueado)</label><br>
+      <input value="{{ p.cpf|default:'' }}" readonly
+             style="opacity:.85; background:rgba(255,255,255,.04); cursor:not-allowed;" />
     </div>
 
     <div style="grid-column:1 / -1;">
       <label class="small">E-mail</label><br>
-      <input name="email" value="{{ request.user.email }}" />
+      <input name="email" value="{{ request.user.email|default:'' }}" />
     </div>
 
-    <div style="grid-column:1 / -1; display:flex; gap:10px; margin-top:6px;">
+    <div style="grid-column:1 / -1;">
+      <label class="small">Telefone</label><br>
+      <input name="telefone" value="{{ p.telefone|default:'' }}" placeholder="(xx) xxxxx-xxxx" />
+    </div>
+
+    <div style="grid-column:1 / -1;">
+      <label class="small">Endereço</label><br>
+      <textarea name="endereco" rows="3" style="width:100%;">{{ p.endereco|default:'' }}</textarea>
+    </div>
+
+    <div style="grid-column:1 / -1; display:flex; gap:10px; margin-top:6px; align-items:center;">
       <button class="btn" type="submit">Salvar</button>
       <a class="link" href="{% url 'accounts:alterar_senha' %}">Alterar minha senha</a>
     </div>

@@ -1,0 +1,90 @@
+{% extends "core/base.html" %}
+{% block title %}Dashboard • Professor • GEPUB{% endblock %}
+{% block header %}Dashboard{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">Professor</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:1100px;">
+  <div class="card__title" style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+    <span>Bem-vindo, {{ request.user.first_name|default:request.user.username }} 👋</span>
+    <span class="pill">Ano {{ ano_atual }}</span>
+  </div>
+
+  <div class="card__body">
+    <!-- KPIs -->
+    <div style="display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:12px; margin-bottom:14px;">
+      <div class="card" style="margin:0;">
+        <div class="card__body">
+          <div class="small">Minhas turmas</div>
+          <div style="font-size:24px; font-weight:900;">{{ turmas_total }}</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin:0;">
+        <div class="card__body">
+          <div class="small">Alunos (nas minhas turmas)</div>
+          <div style="font-size:24px; font-weight:900;">{{ alunos_total }}</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin:0;">
+        <div class="card__body">
+          <div class="small">Ações rápidas</div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;">
+            <a class="btn btn-primary" href="{% url 'educacao:turma_list' %}">Ver turmas</a>
+            <a class="btn" href="{% url 'educacao:aluno_list' %}">Ver alunos</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Minhas turmas (ano atual) -->
+    <div class="form-section" style="margin-top:10px;">
+      <div class="form-section__title">Minhas turmas ({{ ano_atual }})</div>
+
+      <div style="overflow:auto; border:1px solid rgba(255,255,255,.08); border-radius:14px;">
+        <table style="width:100%; border-collapse:collapse; min-width:900px;">
+          <thead>
+            <tr style="text-align:left; background:rgba(255,255,255,.03);">
+              <th style="padding:10px 12px;">Turma</th>
+              <th style="padding:10px 12px; width:110px;">Ano</th>
+              <th style="padding:10px 12px; width:140px;">Turno</th>
+              <th style="padding:10px 12px;">Unidade</th>
+              <th style="padding:10px 12px; width:120px;">Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for t in turmas %}
+              <tr style="border-top:1px solid rgba(255,255,255,.06);">
+                <td style="padding:10px 12px;">
+                  <a class="link" href="{% url 'educacao:turma_detail' t.pk %}">{{ t.nome }}</a>
+                </td>
+                <td style="padding:10px 12px;">{{ t.ano_letivo }}</td>
+                <td style="padding:10px 12px;">{{ t.get_turno_display }}</td>
+                <td style="padding:10px 12px;">{{ t.unidade.nome }}</td>
+                <td style="padding:10px 12px;">
+                  <a class="link" href="{% url 'educacao:turma_detail' t.pk %}">Abrir</a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="5" style="padding:12px;">Nenhuma turma vinculada para {{ ano_atual }}.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:10px;">
+        <span class="small">Dica:</span>
+        <span class="small" style="opacity:.85;">as turmas aparecem aqui quando o gestor vincula você a uma turma no cadastro de usuários.</span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

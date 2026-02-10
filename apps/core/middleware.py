@@ -36,6 +36,7 @@ class RBACMiddleware:
         "accounts:login",
         "accounts:logout",
         "accounts:alterar_senha",
+        "accounts:meu_perfil",
     }
 
     def __init__(self, get_response):
