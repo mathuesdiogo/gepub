@@ -1,13 +1,17 @@
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
-from django.shortcuts import render
+from django.contrib import messages
+from django.db.models import Count, Q
+from django.http import HttpResponseForbidden
+from django.shortcuts import render, redirect
 from django.utils import timezone
+
 
 from accounts.models import Profile
 from core.rbac import can, get_profile
 from educacao.models import Matricula
 from .forms import AlunoAvisoForm, AlunoArquivoForm
 from .models import AlunoAviso, AlunoArquivo
+
 from core.rbac import (
     get_profile,
     is_admin,
@@ -119,9 +123,10 @@ def dashboard(request):
 
         # Listas
         "ultimas_secretarias": secretarias_qs.order_by("-id")[:5],
-        "ultimos_alunos": alunos_qs.select_related(
-            "matricula__turma__unidade"
+        "ultimos_alunos": alunos_qs.prefetch_related(
+            "matriculas__turma__unidade"
         ).order_by("-id")[:5],
+
 
         # Gráficos
         "chart1_labels": [i["secretaria__nome"] for i in graf_unidades_por_secretaria],

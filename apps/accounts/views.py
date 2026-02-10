@@ -157,9 +157,7 @@ def logout_view(request):
     return redirect("accounts:login")
 
 
-@login_required
-@require_http_methods(["GET", "POST"])
-@login_required
+
 @require_http_methods(["GET", "POST"])
 def meu_perfil(request):
     p, _ = Profile.objects.get_or_create(user=request.user, defaults={"ativo": True})
@@ -305,10 +303,12 @@ def usuario_update(request, pk: int):
     }
 
     form = UsuarioUpdateForm(
-    request.POST or None,
-    instance=user,
-    user=request.user
-)
+        request.POST or None,
+        user=request.user,
+        edited_user=user,
+        initial=initial,
+    )
+
 
 
     if request.method == "POST" and form.is_valid():
