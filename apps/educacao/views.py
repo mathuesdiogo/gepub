@@ -1,8 +1,9 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Q
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -14,7 +15,7 @@ from core.rbac import (
     scope_filter_matriculas,
 )
 
-from .forms import TurmaForm, AlunoForm, MatriculaForm
+from .forms import TurmaForm, AlunoForm, MatriculaForm, AlunoCreateComTurmaForm
 from .models import Turma, Aluno, Matricula
 
 from nee.forms import AlunoNecessidadeForm, ApoioMatriculaForm
@@ -54,7 +55,6 @@ def turma_list(request):
             | Q(unidade__secretaria__municipio__nome__icontains=q)
         )
 
-    # ✅ RBAC (ANTES do paginator)
     qs = scope_filter_turmas(request.user, qs)
 
     paginator = Paginator(qs, 10)
@@ -136,7 +136,6 @@ def aluno_list(request):
             | Q(nome_mae__icontains=q)
         )
 
-    # ✅ RBAC: aluno é por matrícula → turma → unidade
     qs = scope_filter_alunos(request.user, qs)
 
     paginator = Paginator(qs, 10)
@@ -148,11 +147,20 @@ def aluno_list(request):
 @login_required
 @require_perm("educacao.view")
 def aluno_detail(request, pk: int):
-    # ✅ RBAC: o próprio aluno precisa estar no escopo
     aluno_qs = scope_filter_alunos(request.user, Aluno.objects.all())
-    aluno = get_object_or_404(aluno_qs, pk=pk)
 
-    # Matrículas do aluno (também no escopo)
+    try:
+        aluno = get_object_or_404(aluno_qs, pk=pk)
+    except Http404:
+        # ✅ caso especial continua existindo (não atrapalha):
+        recent = request.session.get("recent_alunos", [])
+        if pk in recent and can(request.user, "educacao.manage"):
+            aluno = get_object_or_404(Aluno.objects.all(), pk=pk)
+            if Matricula.objects.filter(aluno=aluno).exists():
+                raise
+        else:
+            raise
+
     matriculas_qs = (
         Matricula.objects.select_related(
             "aluno",
@@ -167,14 +175,12 @@ def aluno_detail(request, pk: int):
     matriculas_qs = scope_filter_matriculas(request.user, matriculas_qs)
     matriculas = matriculas_qs
 
-    # NEE do aluno (permitimos ver se o aluno está no escopo)
     necessidades = (
         AlunoNecessidade.objects.select_related("tipo")
         .filter(aluno=aluno)
         .order_by("-id")
     )
 
-    # Apoios por matrícula (somente dentro do escopo)
     apoios_qs = (
         ApoioMatricula.objects.select_related(
             "matricula",
@@ -186,21 +192,17 @@ def aluno_detail(request, pk: int):
         .filter(matricula__aluno=aluno)
         .order_by("-id")
     )
-    # scope via matrículas
-    allowed_matriculas = scope_filter_matriculas(request.user, Matricula.objects.filter(aluno=aluno)).values_list("id", flat=True)
+    allowed_matriculas = scope_filter_matriculas(
+        request.user, Matricula.objects.filter(aluno=aluno)
+    ).values_list("id", flat=True)
     apoios = apoios_qs.filter(matricula_id__in=allowed_matriculas)
 
-    # -------------------------
-    # Ações (POST) na mesma tela
-    # -------------------------
     if request.method == "POST":
         action = (request.POST.get("_action") or "").strip()
 
-        # Ações que alteram dados exigem manage
         if action in {"add_matricula", "add_nee", "add_apoio"} and not can(request.user, "educacao.manage"):
             return HttpResponseForbidden("403 — Você não tem permissão para alterar dados de Educação.")
 
-        # 1) adicionar matrícula
         if action == "add_matricula":
             form_matricula = MatriculaForm(request.POST, user=request.user)
             form_nee = AlunoNecessidadeForm(request.POST, aluno=aluno)
@@ -210,7 +212,6 @@ def aluno_detail(request, pk: int):
                 m = form_matricula.save(commit=False)
                 m.aluno = aluno
 
-                # ✅ RBAC: turma escolhida tem que estar no escopo
                 turma_ok = scope_filter_turmas(request.user, Turma.objects.filter(pk=m.turma_id)).exists()
                 if not turma_ok:
                     return HttpResponseForbidden("403 — Turma fora do seu escopo.")
@@ -218,12 +219,18 @@ def aluno_detail(request, pk: int):
                 if not m.data_matricula:
                     m.data_matricula = timezone.localdate()
                 m.save()
+
+                recent = request.session.get("recent_alunos", [])
+                if aluno.pk in recent:
+                    recent.remove(aluno.pk)
+                    request.session["recent_alunos"] = recent
+                    request.session.modified = True
+
                 messages.success(request, "Matrícula adicionada com sucesso.")
                 return redirect("educacao:aluno_detail", pk=aluno.pk)
 
             messages.error(request, "Corrija os erros da matrícula.")
 
-        # 2) adicionar necessidade (NEE)
         elif action == "add_nee":
             form_matricula = MatriculaForm(user=request.user)
             form_nee = AlunoNecessidadeForm(request.POST, aluno=aluno)
@@ -238,7 +245,6 @@ def aluno_detail(request, pk: int):
 
             messages.error(request, "Corrija os erros da necessidade.")
 
-        # 3) adicionar apoio por matrícula
         elif action == "add_apoio":
             form_matricula = MatriculaForm(user=request.user)
             form_nee = AlunoNecessidadeForm(aluno=aluno)
@@ -247,7 +253,6 @@ def aluno_detail(request, pk: int):
             if form_apoio.is_valid():
                 apoio = form_apoio.save(commit=False)
 
-                # ✅ RBAC: matrícula selecionada precisa estar no escopo
                 matricula_ok = scope_filter_matriculas(
                     request.user,
                     Matricula.objects.filter(pk=apoio.matricula_id, aluno=aluno),
@@ -262,14 +267,11 @@ def aluno_detail(request, pk: int):
             messages.error(request, "Corrija os erros do apoio.")
 
         else:
-            # ação desconhecida: mantém forms vazios
             form_matricula = MatriculaForm(user=request.user)
             form_nee = AlunoNecessidadeForm(request.POST, aluno=aluno)
             form_apoio = ApoioMatriculaForm(aluno=aluno)
             messages.error(request, "Ação inválida.")
-
     else:
-        # GET: forms vazios
         form_matricula = MatriculaForm(user=request.user)
         form_nee = AlunoNecessidadeForm(aluno=aluno)
         form_apoio = ApoioMatriculaForm(aluno=aluno)
@@ -292,15 +294,30 @@ def aluno_detail(request, pk: int):
 @login_required
 @require_perm("educacao.manage")
 def aluno_create(request):
+    """
+    ✅ Novo fluxo: cria o aluno e já matricula em uma turma do escopo do usuário.
+    Isso elimina 404 e elimina aluno "sumido" na lista.
+    """
     if request.method == "POST":
-        form = AlunoForm(request.POST)
+        form = AlunoCreateComTurmaForm(request.POST, user=request.user)
         if form.is_valid():
-            aluno = form.save()
-            messages.success(request, "Aluno criado com sucesso.")
+            with transaction.atomic():
+                turma = form.cleaned_data["turma"]
+                aluno = form.save()
+
+                Matricula.objects.create(
+                    aluno=aluno,
+                    turma=turma,
+                    data_matricula=timezone.localdate(),
+                    situacao=Matricula.Situacao.ATIVA,
+                )
+
+            messages.success(request, "Aluno criado e matriculado com sucesso.")
             return redirect("educacao:aluno_detail", pk=aluno.pk)
+
         messages.error(request, "Corrija os erros do formulário.")
     else:
-        form = AlunoForm()
+        form = AlunoCreateComTurmaForm(user=request.user)
 
     return render(request, "educacao/aluno_form.html", {"form": form, "mode": "create"})
 
@@ -308,7 +325,6 @@ def aluno_create(request):
 @login_required
 @require_perm("educacao.manage")
 def aluno_update(request, pk: int):
-    # ✅ RBAC: só edita aluno que está no escopo (via matrículas)
     aluno_qs = scope_filter_alunos(request.user, Aluno.objects.all())
     aluno = get_object_or_404(aluno_qs, pk=pk)
 

@@ -16,10 +16,9 @@
 <div class="card">
   <div class="card__title" style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
     <span>Alunos</span>
-   {% if can_edu_manage %}
-  <a class="btn btn-primary" href="{% url 'educacao:aluno_create' %}">Novo Aluno</a>
-{% endif %}
-
+    {% if can_edu_manage %}
+      <a class="btn btn-primary" href="{% url 'educacao:aluno_create' %}">Novo Aluno</a>
+    {% endif %}
   </div>
 
   <div class="card__body">
@@ -45,6 +44,7 @@
             <th style="padding:10px 12px; width:140px;">Ações</th>
           </tr>
         </thead>
+
         <tbody>
           {% for a in page_obj %}
             <tr style="border-top:1px solid rgba(255,255,255,.06);">
@@ -55,14 +55,15 @@
               <td style="padding:10px 12px;">{{ a.nis|default:"—" }}</td>
               <td style="padding:10px 12px;">{% if a.ativo %}Sim{% else %}Não{% endif %}</td>
               <td style="padding:10px 12px;">
-              {% if can_edu_manage %}
-  <a class="link" href="{% url 'educacao:aluno_update' aluno.pk %}">Editar</a>
-{% endif %}
-
+                {% if can_edu_manage and a.pk %}
+                  <a class="link" href="{% url 'educacao:aluno_update' a.pk %}">Editar</a>
+                {% endif %}
               </td>
             </tr>
           {% empty %}
-            <tr><td colspan="5" style="padding:12px;">Nenhum aluno encontrado.</td></tr>
+            <tr>
+              <td colspan="5" style="padding:12px;">Nenhum aluno encontrado.</td>
+            </tr>
           {% endfor %}
         </tbody>
       </table>

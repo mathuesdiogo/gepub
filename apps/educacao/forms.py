@@ -1,7 +1,6 @@
 from django import forms
 
 from core.rbac import get_profile, is_admin, scope_filter_turmas
-
 from org.models import Unidade
 from .models import Turma, Aluno, Matricula
 
@@ -54,18 +53,82 @@ class AlunoForm(forms.ModelForm):
     class Meta:
         model = Aluno
         fields = "__all__"
+        widgets = {
+            "data_nascimento": forms.DateInput(
+                attrs={
+                    "type": "date",
+                    "title": "Selecione no calendário ou digite a data",
+                }
+            ),
+            "cpf": forms.TextInput(
+                attrs={
+                    "placeholder": "123.456.789-00",
+                    "inputmode": "numeric",
+                    "maxlength": "14",
+                    "title": "Formato: 123.456.789-00",
+                }
+            ),
+            "telefone": forms.TextInput(
+                attrs={
+                    "placeholder": "(98) 99999-9999",
+                    "inputmode": "tel",
+                    "title": "Ex.: (98) 99999-9999",
+                }
+            ),
+            "email": forms.EmailInput(
+                attrs={
+                    "placeholder": "nome@exemplo.com",
+                    "inputmode": "email",
+                    "title": "Ex.: nome@exemplo.com",
+                }
+            ),
+            "nis": forms.TextInput(
+                attrs={
+                    "placeholder": "Ex.: 12345678901",
+                    "inputmode": "numeric",
+                    "title": "Digite apenas números (se houver)",
+                }
+            ),
+        }
+
+
+class AlunoCreateComTurmaForm(AlunoForm):
+    """
+    Cria Aluno e já seleciona uma Turma para matricular no mesmo POST.
+    Isso evita o aluno "sumir" do escopo (porque o escopo de Aluno é por matrícula).
+    """
+    turma = forms.ModelChoiceField(
+        queryset=Turma.objects.none(),
+        required=True,  # ✅ recomendado: aluno não fica "solto"
+        label="Turma",
+        help_text="Selecione a turma para já matricular o aluno.",
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+
+        qs = Turma.objects.select_related(
+            "unidade",
+            "unidade__secretaria",
+            "unidade__secretaria__municipio",
+        ).order_by("-ano_letivo", "nome")  # ✅ removido filtro ativo=True
+
+        if self.user and getattr(self.user, "is_authenticated", False) and not is_admin(self.user):
+            qs = scope_filter_turmas(self.user, qs)
+
+        self.fields["turma"].queryset = qs
 
 
 class MatriculaForm(forms.ModelForm):
     class Meta:
         model = Matricula
         fields = [
-        "turma",
-        "data_matricula",
-        "situacao",
-    ]
-
-        
+            "turma",
+            "data_matricula",
+            "situacao",
+            "observacao",
+        ]
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user", None)
