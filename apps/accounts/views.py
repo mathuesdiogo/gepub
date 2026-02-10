@@ -291,7 +291,12 @@ def usuario_update(request, pk: int):
         "turmas": user.turmas_ministradas.all(),
     }
 
-    form = UsuarioUpdateForm(request.POST or None, initial=initial, user=request.user)
+    form = UsuarioUpdateForm(
+    request.POST or None,
+    instance=user,
+    user=request.user
+)
+
 
     if request.method == "POST" and form.is_valid():
         user.first_name = form.cleaned_data["first_name"]

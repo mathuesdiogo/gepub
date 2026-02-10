@@ -1,4 +1,6 @@
 from __future__ import annotations
+from educacao.models import Turma
+from core.rbac import is_admin, scope_filter_turmas
 
 from django import forms
 from django.contrib.auth import get_user_model
@@ -53,9 +55,17 @@ class UsuarioCreateForm(forms.Form):
     )
     ativo = forms.BooleanField(label="Ativo", required=False, initial=True)
 
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop("user", None)  # <<< ESSENCIAL
+    def __init__(self, *args, user=None, **kwargs):
+        instance = kwargs.get("instance")  # <-- PEGA o usuário sendo editado
         super().__init__(*args, **kwargs)
+        self.user = user
+
+        # ========= TURMAS (somente Professor) =========
+        if "turmas" in self.fields and instance:
+            # popula o campo com as turmas já vinculadas ao professor
+            self.fields["turmas"].initial = instance.turmas_ministradas.all()
+
+
 
         if not user or not getattr(user, "is_authenticated", False):
             return
@@ -125,13 +135,34 @@ class UsuarioUpdateForm(forms.Form):
         queryset=Unidade.objects.filter(ativo=True).order_by("nome"),
         required=False,
     )
+    turmas = forms.ModelMultipleChoiceField(
+        label="Turmas (somente para Professor)",
+        queryset=Turma.objects.none(),
+        required=False,
+    )
+
 
     ativo = forms.BooleanField(label="Ativo", required=False)
 
     def __init__(self, *args, user=None, **kwargs):
+        kwargs.pop("instance", None)   # <<< USUÁRIO QUE ESTÁ SENDO EDITADO
+        edited_user = kwargs.pop("edited_user", None)
         super().__init__(*args, **kwargs)
         self.user = user
 
+        # queryset de turmas (com escopo)
+        qs_turmas = Turma.objects.select_related("unidade").all().order_by("-ano_letivo", "nome")
+        if user and user.is_authenticated and not is_admin(user):
+            qs_turmas = scope_filter_turmas(user, qs_turmas)
+        self.fields["turmas"].queryset = qs_turmas
+
+        # preenche seleção atual (se o usuário editado for professor e já tiver vínculo)
+        if edited_user and hasattr(edited_user, "turmas_ministradas"):
+            self.fields["turmas"].initial = list(
+                edited_user.turmas_ministradas.values_list("pk", flat=True)
+            )
+
+        # ==== (mantém o resto do seu __init__ como já está) ====
         if not user or not user.is_authenticated:
             return
 
@@ -139,42 +170,25 @@ class UsuarioUpdateForm(forms.Form):
         if not p:
             return
 
-        # Mesmo filtro de roles do create
         allowed = {
             "MUNICIPAL": {"SECRETARIA", "UNIDADE", "PROFESSOR", "ALUNO", "NEE", "LEITURA"},
             "SECRETARIA": {"UNIDADE", "PROFESSOR", "ALUNO", "NEE", "LEITURA"},
             "UNIDADE": {"PROFESSOR", "ALUNO", "NEE", "LEITURA"},
         }
 
-
-
         if p.role in allowed:
-            self.fields["role"].choices = [
-                (r, label)
-                for r, label in Profile.Role.choices
-                if r in allowed[p.role]
-            ]
+            self.fields["role"].choices = [(r, label) for r, label in Profile.Role.choices if r in allowed[p.role]]
 
-        # Município fixo
         if getattr(p, "municipio_id", None):
             self.fields["municipio"].queryset = Municipio.objects.filter(id=p.municipio_id)
             self.fields["municipio"].initial = p.municipio_id
             self.fields["municipio"].disabled = True
 
-        # Unidade fixa para gestor de escola
         if getattr(p, "unidade_id", None):
             self.fields["unidade"].queryset = Unidade.objects.filter(id=p.unidade_id)
             self.fields["unidade"].initial = p.unidade_id
             self.fields["unidade"].disabled = True
 
-    def clean_cpf(self):
-        cpf = (self.cleaned_data.get("cpf") or "").strip()
-        if not cpf:
-            return ""
-        digits = "".join(ch for ch in cpf if ch.isdigit())
-        if len(digits) != 11:
-            raise ValidationError("CPF inválido. Deve conter 11 dígitos.")
-        return cpf
 
 
 class AlterarSenhaForm(forms.Form):
