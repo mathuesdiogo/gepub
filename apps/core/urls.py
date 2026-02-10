@@ -4,5 +4,8 @@ from . import views
 app_name = "core"
 
 urlpatterns = [
-    path("", views.dashboard, name="dashboard"),
+    path("", views.dashboard, name="dashboard"),  # ✅ raiz /
+    path("aluno/", views.dashboard_aluno, name="dashboard_aluno"),
+    path("avisos/novo/", views.aviso_create, name="aviso_create"),
+    path("arquivos/novo/", views.arquivo_create, name="arquivo_create"),
 ]

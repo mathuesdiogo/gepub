@@ -95,8 +95,8 @@ ROLE_PERMS_FINE = {
         "educacao.view",
     },
     "ALUNO": {
-        "educacao.view",
-        "nee.view",
+        
+        
     },
     "VISUALIZACAO": {
         "org.view",

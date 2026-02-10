@@ -1,11 +1,14 @@
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 # Quick-start development settings
 SECRET_KEY = "django-insecure-8_e=r^-puj+)gz6_^^up^l2a(61*m)@z!r!l7%*%n@y5gbu+jr"
 DEBUG = True
 ALLOWED_HOSTS = []
+
 
 INSTALLED_APPS = [
     "django.contrib.admin",
