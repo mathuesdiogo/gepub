@@ -17,8 +17,8 @@
   <div class="card__title" style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
     <span>Turmas</span>
     {% if can_edu_manage %}
-  <a class="btn btn-primary" href="{% url 'educacao:turma_create' %}">Nova Turma</a>
-{% endif %}
+      <a class="btn btn-primary" href="{% url 'educacao:turma_create' %}">Nova Turma</a>
+    {% endif %}
   </div>
 
   <div class="card__body">
@@ -62,10 +62,9 @@
               <td style="padding:10px 12px;">{{ t.unidade.nome }}</td>
               <td style="padding:10px 12px;">{{ t.unidade.secretaria.nome }}</td>
               <td style="padding:10px 12px;">
-               {% if can_edu_manage %}
-  <a class="link" href="{% url 'educacao:turma_update' turma.pk %}">Editar</a>
-{% endif %}
-
+                {% if can_edu_manage and t.pk %}
+                  <a class="link" href="{% url 'educacao:turma_update' t.pk %}">Editar</a>
+                {% endif %}
               </td>
             </tr>
           {% empty %}

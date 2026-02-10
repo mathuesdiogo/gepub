@@ -95,4 +95,68 @@
     </div>
   {% endif %}
 </div>
+<style>
+  /* Box bonito para multi-select */
+  .turmas-box {
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.03);
+    border-radius: 14px;
+    padding: 10px 12px;
+  }
+  .turmas-box select {
+    width: 100%;
+    min-height: 160px;         /* altura “bonita” */
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(0,0,0,.15);
+    color: inherit;
+    padding: 10px;
+    outline: none;
+  }
+  .turmas-help {
+    margin-top: 6px;
+    opacity: .8;
+    font-size: 12px;
+  }
+</style>
+
+<script>
+  (function () {
+    function byName(name) {
+      return document.querySelector(`[name="${name}"]`);
+    }
+
+    const roleSelect = byName("role");
+    const turmasSelect = byName("turmas");
+
+    if (!roleSelect || !turmasSelect) return;
+
+    // wrapper (a div pai do campo turmas)
+    // pega o container mais próximo (o seu template usa <div style="grid-column:1 / -1;">)
+    const turmasWrap = turmasSelect.closest("div");
+
+    // aplica classe de estilo no wrapper
+    if (turmasWrap) turmasWrap.classList.add("turmas-box");
+
+    // dica de seleção múltipla
+    const help = document.createElement("div");
+    help.className = "turmas-help";
+    help.innerHTML = "Selecione uma ou mais turmas (PC: Ctrl/⌘ + clique).";
+    if (turmasWrap) turmasWrap.appendChild(help);
+
+    function syncVisibility() {
+      const isProfessor = roleSelect.value === "PROFESSOR";
+      if (turmasWrap) turmasWrap.style.display = isProfessor ? "" : "none";
+
+      // se não for professor, limpa seleção para não “vazar” vínculo indevido
+      if (!isProfessor) {
+        for (const opt of turmasSelect.options) opt.selected = false;
+      }
+    }
+
+    roleSelect.addEventListener("change", syncVisibility);
+    syncVisibility(); // roda ao carregar
+  })();
+</script>
+
 {% endblock %}
