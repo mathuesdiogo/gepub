@@ -4,14 +4,15 @@ from django.db.models import Count, Q
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.utils import timezone
-
+from django.shortcuts import redirect
 import json
-
+from django.db.models import Count
 from accounts.models import Profile
 from core.rbac import can, get_profile
 from educacao.models import Matricula
 from .forms import AlunoAvisoForm, AlunoArquivoForm
 from .models import AlunoAviso, AlunoArquivo
+from educacao.models import Matricula
 
 from core.rbac import (
     get_profile,
@@ -26,7 +27,7 @@ from core.rbac import (
 
 from org.models import Municipio, Secretaria, Unidade, Setor
 from educacao.models import Turma, Aluno, Matricula
-
+from django.shortcuts import redirect
 
 @login_required
 def dashboard(request):
@@ -170,17 +171,22 @@ def dashboard(request):
 
         # ========= GRÁFICO 1: Unidades por Secretaria (Top 8) =========
         graf_unidades_por_secretaria = list(
-            unidades_qs.values("secretaria__id", "secretaria__nome")
+            Unidade.objects
+            .filter(secretaria__in=secretarias_qs)
+            .values("secretaria__nome")
             .annotate(total=Count("id"))
             .order_by("-total")[:8]
         )
 
         # ========= GRÁFICO 2: Alunos por Secretaria (Top 8) =========
         graf_alunos_por_secretaria = list(
-            matriculas_qs.values("turma__unidade__secretaria__id", "turma__unidade__secretaria__nome")
-            .annotate(total=Count("aluno_id", distinct=True))
+            Matricula.objects
+            .filter(turma__unidade__secretaria__in=secretarias_qs)
+            .values("turma__unidade__secretaria__nome")
+            .annotate(total=Count("aluno", distinct=True))
             .order_by("-total")[:8]
         )
+
 
         ctx = {
             "municipio_nome": getattr(p.municipio, "nome", "—") if getattr(p, "municipio_id", None) else "—",
@@ -195,15 +201,15 @@ def dashboard(request):
             # Listas
             "ultimas_secretarias": secretarias_qs.order_by("-id")[:5],
             "ultimos_alunos": alunos_qs.prefetch_related(
-                "matriculas__turma__unidade"
+            "matriculas__turma__unidade"
             ).order_by("-id")[:5],
 
-            # Gráficos
+            # ✅ Gráficos (JSON válido pro JS)
             "chart1_labels": [i["secretaria__nome"] for i in graf_unidades_por_secretaria],
             "chart1_values": [i["total"] for i in graf_unidades_por_secretaria],
-
             "chart2_labels": [i["turma__unidade__secretaria__nome"] for i in graf_alunos_por_secretaria],
             "chart2_values": [i["total"] for i in graf_alunos_por_secretaria],
+
         }
 
         return render(request, "core/dashboard_municipal.html", ctx)
@@ -352,3 +358,10 @@ def arquivo_create(request):
         return redirect("core:dashboard")
 
     return render(request, "core/arquivo_form.html", {"form": form})
+
+def change_theme(request, theme: str):
+    allowed = {"azul", "dark", "midnight", "kassy"}
+    if theme in allowed:
+        request.session["theme"] = theme
+        request.session.modified = True
+    return redirect(request.META.get("HTTP_REFERER", "core:dashboard"))

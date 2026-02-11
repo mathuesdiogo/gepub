@@ -1,7 +1,7 @@
 {% load static %}
 
 <!doctype html>
-<html lang="pt-br">
+<html lang="pt-br" data-theme="{{ request.session.theme|default:'azul' }}">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -23,18 +23,11 @@
       </div>
 
       <nav class="menu">
-
-        <!-- ========================= -->
-        <!-- DASHBOARD -->
-        <!-- ========================= -->
         <a class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'core' %}is-active{% endif %}"
            href="{% url 'core:dashboard' %}">
           Dashboard
         </a>
 
-        <!-- ========================= -->
-        <!-- MÓDULOS -->
-        <!-- ========================= -->
         <div class="menu__section">Módulos</div>
 
         {% if can_org %}
@@ -58,9 +51,6 @@
           </a>
         {% endif %}
 
-        <!-- ========================= -->
-        <!-- CONTA -->
-        <!-- ========================= -->
         <div class="menu__section">Conta</div>
 
         <a class="menu__item {% if request.resolver_match.url_name == 'meu_perfil' %}is-active{% endif %}"
@@ -74,27 +64,18 @@
         </a>
 
         {% if can_users %}
-  <a class="menu__item {% if request.resolver_match.url_name == 'usuarios_list' %}is-active{% endif %}"
-     href="{% url 'accounts:usuarios_list' %}">
-    Usuários
-  </a>
-{% endif %}
-
-
-        <!-- ========================= -->
-        <!-- SISTEMA -->
-        <!-- ========================= -->
-        {% if request.user.is_staff or request.user.is_superuser %}
-          <div class="menu__section">Sistema</div>
-
-          <a class="menu__item" href="/admin/">
-            Admin Django
+          <a class="menu__item {% if request.resolver_match.url_name == 'usuarios_list' %}is-active{% endif %}"
+             href="{% url 'accounts:usuarios_list' %}">
+            Usuários
           </a>
         {% endif %}
 
+        {% if request.user.is_staff or request.user.is_superuser %}
+          <div class="menu__section">Sistema</div>
+          <a class="menu__item" href="/admin/">Admin Django</a>
+        {% endif %}
       </nav>
 
-      <!-- FOOTER -->
       <div class="sidebar__footer">
         <span class="small">Logado como</span>
         <strong>{{ request.user.username }}</strong>
@@ -105,7 +86,7 @@
     <!-- CONTEÚDO -->
     <main class="main">
       <header class="topbar">
-        <div>
+        <div class="topbar__left">
           <div class="topbar__title">{% block header %}Dashboard{% endblock %}</div>
 
           {% block breadcrumbs %}
@@ -116,7 +97,34 @@
         </div>
 
         <div class="topbar__right">
-          <span class="pill">v0.1</span>
+          <!-- ✅ SELECT DE TEMA NO CABEÇALHO (não empurra layout) -->
+          <div class="theme-select-wrap">
+            <span class="small" style="margin-right:8px;">Tema</span>
+            <select class="theme-select"
+                    onchange="window.location.href=this.value">
+              <option value="{% url 'core:change_theme' 'azul' %}"
+                {% if request.session.theme|default:'azul' == 'azul' %}selected{% endif %}>
+                Azul institucional
+              </option>
+
+              <option value="{% url 'core:change_theme' 'dark' %}"
+                {% if request.session.theme == 'dark' %}selected{% endif %}>
+                Dark administrativo
+              </option>
+
+              <option value="{% url 'core:change_theme' 'midnight' %}"
+                {% if request.session.theme == 'midnight' %}selected{% endif %}>
+                Midnight
+              </option>
+
+              <option value="{% url 'core:change_theme' 'kassy' %}"
+                {% if request.session.theme == 'kassy' %}selected{% endif %}>
+                Kassy
+              </option>
+            </select>
+          </div>
+
+          <span class="pill">GEPUB</span>
         </div>
       </header>
 
@@ -136,6 +144,5 @@
     </main>
 
   </div>
-  <script src="{% static 'vendor/chartjs/chart.js' %}"></script>
 </body>
 </html>

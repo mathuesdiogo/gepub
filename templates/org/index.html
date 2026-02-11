@@ -21,6 +21,7 @@
 
   <div class="card__body">
     <div class="link-list">
+      {% if request.user.profile.role == "ADMIN" %}
       <a class="link-card" href="{% url 'org:municipio_list' %}">
         <div>
           <div style="font-weight:800;">Municípios</div>
@@ -28,6 +29,7 @@
         </div>
         <span class="pill">Abrir</span>
       </a>
+      {% endif %}
 
       <a class="link-card" href="{% url 'org:secretaria_list' %}">
   <div>

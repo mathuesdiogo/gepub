@@ -81,40 +81,71 @@
       {{ chart2_values|json_script:"c2-values" }}
 
       <script>
-        (function () {
-          if (!window.Chart) return;
+  (function () {
+    function renderCharts() {
+      const c1Labels = JSON.parse(document.getElementById("c1-labels").textContent || "[]");
+      const c1Values = JSON.parse(document.getElementById("c1-values").textContent || "[]");
 
-          const c1Labels = JSON.parse(document.getElementById("c1-labels").textContent);
-          const c1Values = JSON.parse(document.getElementById("c1-values").textContent);
+      const c2Labels = JSON.parse(document.getElementById("c2-labels").textContent || "[]");
+      const c2Values = JSON.parse(document.getElementById("c2-values").textContent || "[]");
 
-          const c2Labels = JSON.parse(document.getElementById("c2-labels").textContent);
-          const c2Values = JSON.parse(document.getElementById("c2-values").textContent);
+      const el1 = document.getElementById("chartUnidades");
+      const el2 = document.getElementById("chartAlunos");
+      if (!el1 || !el2) return;
 
-          const el1 = document.getElementById("chartUnidades");
-          const el2 = document.getElementById("chartAlunos");
-          if (!el1 || !el2) return;
+      // Se não tiver dado, evita gráfico "vazio" sem feedback
+      if (!c1Labels.length || !c1Values.length) {
+        el1.parentElement.insertAdjacentHTML(
+          "beforeend",
+          '<div class="small" style="opacity:.75;margin-top:6px;">Sem dados para exibir.</div>'
+        );
+      } else {
+        new Chart(el1.getContext("2d"), {
+          type: "bar",
+          data: { labels: c1Labels, datasets: [{ label: "Unidades", data: c1Values, borderWidth: 1 }] },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+          }
+        });
+      }
 
-          new Chart(el1.getContext("2d"), {
-            type: "bar",
-            data: { labels: c1Labels, datasets: [{ label: "Unidades", data: c1Values, borderWidth: 1 }] },
-            options: {
-              responsive: true,
-              plugins: { legend: { display: false } },
-              scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-            }
-          });
+      if (!c2Labels.length || !c2Values.length) {
+        el2.parentElement.insertAdjacentHTML(
+          "beforeend",
+          '<div class="small" style="opacity:.75;margin-top:6px;">Sem dados para exibir.</div>'
+        );
+      } else {
+        new Chart(el2.getContext("2d"), {
+          type: "bar",
+          data: { labels: c2Labels, datasets: [{ label: "Alunos", data: c2Values, borderWidth: 1 }] },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+          }
+        });
+      }
+    }
 
-          new Chart(el2.getContext("2d"), {
-            type: "bar",
-            data: { labels: c2Labels, datasets: [{ label: "Alunos", data: c2Values, borderWidth: 1 }] },
-            options: {
-              responsive: true,
-              plugins: { legend: { display: false } },
-              scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-            }
-          });
-        })();
-      </script>
+    function ensureChartJs(cb) {
+      if (window.Chart) return cb();
+
+      // carrega Chart.js só se ainda não existir (CDN)
+      const s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js";
+      s.onload = cb;
+      s.onerror = function () {
+        console.warn("Chart.js não carregou. Verifique internet ou inclua Chart.js no static.");
+      };
+      document.head.appendChild(s);
+    }
+
+    ensureChartJs(renderCharts);
+  })();
+</script>
+
     </div>
 
     <!-- ÚLTIMAS SECRETARIAS -->

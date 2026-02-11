@@ -68,8 +68,9 @@
                 <td style="padding:10px 12px;">{% if m.ativo %}Sim{% else %}Não{% endif %}</td>
                 <td style="padding:10px 12px;">
                   {% if request.user.profile.role != "UNIDADE" %}
-  <a class="link" href="{% url 'org:secretaria_update' obj.pk %}">Editar</a>
-{% endif %}
+                      <a class="link" href="{% url 'org:municipio_update' m.pk %}">Editar</a>
+                    {% endif %}
+
 
                 </td>
               </tr>
