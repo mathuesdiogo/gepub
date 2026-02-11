@@ -1,161 +1,399 @@
 from __future__ import annotations
 
+import random
+import string
+from datetime import date, timedelta
+
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from django.utils import timezone
 
-from org.models import Municipio, Secretaria, Unidade
+
+def _rand_name(prefix: str, n: int) -> str:
+    return f"{prefix} {n:02d}"
+
+
+def _rand_code(length: int = 8) -> str:
+    # Código de acesso (ex: 8 dígitos/letras)
+    alphabet = string.digits
+    return "".join(random.choice(alphabet) for _ in range(length))
+
+
+def _has_field(model, field_name: str) -> bool:
+    try:
+        model._meta.get_field(field_name)
+        return True
+    except Exception:
+        return False
+
+
+def _get_field_names(model) -> set[str]:
+    return {f.name for f in model._meta.get_fields()}
+
+
+def _set_if_hasattr(obj, attr: str, value):
+    if hasattr(obj, attr):
+        setattr(obj, attr, value)
+
+
+def _pick_fk_field(model, candidates: list[str]) -> str | None:
+    names = _get_field_names(model)
+    for c in candidates:
+        if c in names:
+            return c
+    return None
+
+
+def _bulk_create(model, objs, batch_size=2000):
+    if not objs:
+        return []
+    return model.objects.bulk_create(objs, batch_size=batch_size, ignore_conflicts=False)
 
 
 class Command(BaseCommand):
-    help = "Cria dados de teste (2 municípios, secretarias, unidades e usuários com roles) para validar RBAC."
+    help = "Seed massivo do GEPUB (municípios/secretarias/unidades/setores/turmas/alunos/usuários/NEE)"
 
     def add_arguments(self, parser):
-        parser.add_argument(
-            "--flush",
-            action="store_true",
-            help="Apaga dados (usuários não-superuser, organização e educação/nee se existirem) antes de criar.",
-        )
-        parser.add_argument(
-            "--password",
-            type=str,
-            default="123456",
-            help="Senha padrão para os usuários criados (default: 123456).",
-        )
+        parser.add_argument("--municipios", type=int, default=10)
+        parser.add_argument("--secretarias", type=int, default=10)
+        parser.add_argument("--unidades", type=int, default=10)
+        parser.add_argument("--setores", type=int, default=10)
+        parser.add_argument("--turmas", type=int, default=10)  # por unidade
+        parser.add_argument("--alunos", type=int, default=10)  # por turma
+        parser.add_argument("--users-per-role", type=int, default=10)
+        parser.add_argument("--necessidades", type=int, default=10)
+        parser.add_argument("--code-len", type=int, default=8)
+        parser.add_argument("--dry-run", action="store_true")
 
     @transaction.atomic
-    def handle(self, *args, **options):
-        flush = options["flush"]
-        password = options["password"]
+    def handle(self, *args, **opts):
+        dry = opts["dry_run"]
+
+        municipios_n = opts["municipios"]
+        secretarias_n = opts["secretarias"]
+        unidades_n = opts["unidades"]
+        setores_n = opts["setores"]
+        turmas_n = opts["turmas"]
+        alunos_n = opts["alunos"]
+        users_per_role = opts["users_per_role"]
+        necessidades_n = opts["necessidades"]
+        code_len = opts["code_len"]
+
+        # Imports tardios (pra não quebrar loading do Django)
+        from org.models import Municipio, Secretaria, Unidade, Setor
+        from educacao.models import Turma, Aluno, Matricula
+        from accounts.models import Profile
+
+        # NEE (opcional)
+        TipoNecessidade = None
+        try:
+            from nee.models import TipoNecessidade as _TipoNec
+            TipoNecessidade = _TipoNec
+        except Exception:
+            TipoNecessidade = None
 
         User = get_user_model()
 
-        if flush:
-            self.stdout.write(self.style.WARNING("Limpando dados..."))
+        self.stdout.write(self.style.WARNING("SEED GEPUB: iniciando..."))
 
-            # EDUCAÇÃO (se existir)
-            try:
-                from educacao.models import Matricula, Turma, Aluno
-                Matricula.objects.all().delete()
-                Turma.objects.all().delete()
-                Aluno.objects.all().delete()
-            except Exception:
-                pass
+        # ----------------------------
+        # 1) Municípios
+        # ----------------------------
+        mun_objs = []
+        for i in range(1, municipios_n + 1):
+            mun = Municipio()
+            # campos comuns
+            if _has_field(Municipio, "nome"):
+                mun.nome = _rand_name("Prefeitura", i)
+            if _has_field(Municipio, "ativo"):
+                mun.ativo = True
+            mun_objs.append(mun)
 
-            # NEE (se existir)
-            try:
-                from nee.models import Atendimento, Avaliacao, Encaminhamento
-                Atendimento.objects.all().delete()
-                Avaliacao.objects.all().delete()
-                Encaminhamento.objects.all().delete()
-            except Exception:
-                pass
+        if dry:
+            self.stdout.write(f"[dry-run] Criaria {len(mun_objs)} municípios")
+            return
 
-            # ORG
-            Unidade.objects.all().delete()
-            Secretaria.objects.all().delete()
-            Municipio.objects.all().delete()
+        municipios = _bulk_create(Municipio, mun_objs, batch_size=500)
+        municipios = list(Municipio.objects.all().order_by("id")[:municipios_n])
+        self.stdout.write(self.style.SUCCESS(f"Municípios: {len(municipios)}"))
 
-            # USERS (mantém superuser)
-            User.objects.exclude(is_superuser=True).delete()
+        # ----------------------------
+        # 2) Secretarias
+        # ----------------------------
+        sec_mun_fk = _pick_fk_field(Secretaria, ["municipio", "prefeitura"])
+        sec_objs = []
+        sec_index = 1
+        for m in municipios:
+            for j in range(1, secretarias_n + 1):
+                s = Secretaria()
+                if sec_mun_fk:
+                    setattr(s, f"{sec_mun_fk}_id", m.id)
+                if _has_field(Secretaria, "nome"):
+                    s.nome = _rand_name(f"Secretaria {m.id}", j)
+                if _has_field(Secretaria, "ativo"):
+                    s.ativo = True
+                sec_objs.append(s)
+                sec_index += 1
 
-        self.stdout.write(self.style.SUCCESS("Criando municípios..."))
-
-        m1 = Municipio.objects.create(
-            nome="Governador Nunes Freire",
-            uf="MA",
-            cnpj_prefeitura="00.000.000/0001-00",
-            razao_social_prefeitura="Prefeitura Municipal de Governador Nunes Freire",
-            nome_fantasia_prefeitura="Prefeitura de Governador Nunes Freire",
-            endereco_prefeitura="Centro, Governador Nunes Freire - MA",
-            telefone_prefeitura="(98) 99999-0000",
-            email_prefeitura="contato@gnf.ma.gov.br",
-            site_prefeitura="https://gnf.ma.gov.br",
-            nome_prefeito="Prefeito(a) Teste",
-            ativo=True,
+        _bulk_create(Secretaria, sec_objs, batch_size=2000)
+        secretarias = list(
+            Secretaria.objects.select_related(sec_mun_fk if sec_mun_fk else None).all()
         )
+        self.stdout.write(self.style.SUCCESS(f"Secretarias: {len(secretarias)}"))
 
-        m2 = Municipio.objects.create(
-            nome="Município Teste 2",
-            uf="MA",
-            cnpj_prefeitura="11.111.111/0001-11",
-            razao_social_prefeitura="Prefeitura Municipal do Município Teste 2",
-            nome_fantasia_prefeitura="Prefeitura do Município Teste 2",
-            endereco_prefeitura="Centro, Município Teste 2 - MA",
-            telefone_prefeitura="(98) 99999-1111",
-            email_prefeitura="contato@teste2.ma.gov.br",
-            site_prefeitura="https://teste2.ma.gov.br",
-            nome_prefeito="Prefeito(a) Teste 2",
-            ativo=True,
-        )
+        # ----------------------------
+        # 3) Unidades
+        # ----------------------------
+        uni_sec_fk = _pick_fk_field(Unidade, ["secretaria"])
+        uni_objs = []
+        for s in secretarias:
+            for k in range(1, unidades_n + 1):
+                u = Unidade()
+                if uni_sec_fk:
+                    setattr(u, f"{uni_sec_fk}_id", s.id)
+                if _has_field(Unidade, "nome"):
+                    u.nome = _rand_name(f"Unidade {s.id}", k)
+                if _has_field(Unidade, "ativo"):
+                    u.ativo = True
+                uni_objs.append(u)
 
-        self.stdout.write(self.style.SUCCESS("Criando secretarias/unidades..."))
+        _bulk_create(Unidade, uni_objs, batch_size=5000)
+        unidades = list(Unidade.objects.all())
+        self.stdout.write(self.style.SUCCESS(f"Unidades: {len(unidades)}"))
 
-        def mk_secretaria(mun: Municipio, nome: str, sigla: str):
-            # Ajuste aqui se seu model de Secretaria não tiver "sigla"
-            kwargs = {"municipio": mun, "nome": nome}
-            try:
-                obj = Secretaria.objects.create(**kwargs, sigla=sigla)  # type: ignore
-            except TypeError:
-                obj = Secretaria.objects.create(**kwargs)
-            return obj
+        # ----------------------------
+        # 4) Setores
+        # ----------------------------
+        set_uni_fk = _pick_fk_field(Setor, ["unidade"])
+        set_objs = []
+        for u in unidades:
+            for t in range(1, setores_n + 1):
+                st = Setor()
+                if set_uni_fk:
+                    setattr(st, f"{set_uni_fk}_id", u.id)
+                if _has_field(Setor, "nome"):
+                    st.nome = _rand_name(f"Setor {u.id}", t)
+                if _has_field(Setor, "ativo"):
+                    st.ativo = True
+                set_objs.append(st)
 
-        def mk_unidade(sec: Secretaria, nome: str):
-            # Ajuste aqui se sua Unidade tiver campos obrigatórios extras
-            return Unidade.objects.create(secretaria=sec, nome=nome)
+        _bulk_create(Setor, set_objs, batch_size=10000)
+        setores = list(Setor.objects.all())
+        self.stdout.write(self.style.SUCCESS(f"Setores: {len(setores)}"))
 
-        s1a = mk_secretaria(m1, "Secretaria de Educação", "SEMED")
-        s1b = mk_secretaria(m1, "Secretaria de Saúde", "SEMUS")
-        u1a = mk_unidade(s1a, "Escola Municipal 1")
-        u1b = mk_unidade(s1a, "Escola Municipal 2")
+        # ----------------------------
+        # 5) Turmas (por unidade)
+        # ----------------------------
+        tur_objs = []
+        ano = timezone.localdate().year
+        turnos = ["MANHA", "TARDE", "NOITE", "INTEGRAL"]
+        for u in unidades:
+            for i in range(1, turmas_n + 1):
+                tr = Turma()
+                tr.unidade_id = u.id
+                tr.nome = f"Turma {i:02d}"
+                tr.ano_letivo = ano
+                tr.turno = random.choice(turnos)
+                tr.ativo = True
+                tur_objs.append(tr)
 
-        s2a = mk_secretaria(m2, "Secretaria de Educação", "SEMED")
-        u2a = mk_unidade(s2a, "Escola Teste 2 - A")
+        _bulk_create(Turma, tur_objs, batch_size=5000)
+        turmas = list(Turma.objects.select_related("unidade").all())
+        self.stdout.write(self.style.SUCCESS(f"Turmas: {len(turmas)}"))
 
-        self.stdout.write(self.style.SUCCESS("Criando usuários..."))
+        # ----------------------------
+        # 6) Alunos + Matrículas (por turma)
+        # ----------------------------
+        alunos_objs = []
+        matriculas_objs = []
+        base_birth = date(2010, 1, 1)
+        for tr in turmas:
+            for i in range(1, alunos_n + 1):
+                a = Aluno()
+                a.nome = f"Aluno {tr.id}-{i:02d}"
+                a.data_nascimento = base_birth + timedelta(days=random.randint(0, 5000))
+                a.cpf = ""  # opcional
+                a.nis = ""
+                a.nome_mae = f"Mãe {tr.id}-{i:02d}"
+                a.nome_pai = f"Pai {tr.id}-{i:02d}"
+                a.telefone = ""
+                a.email = ""
+                a.endereco = ""
+                a.ativo = True
+                alunos_objs.append(a)
 
-        def create_user(username: str, role: str, *, municipio=None, secretaria=None, unidade=None):
-            u = User.objects.create_user(username=username, password=password)
-            # Profile automático (se você usa signals). Se não existir, vai dar erro aqui — aí me avisa.
-            p = u.profile
-            p.role = role
+        # primeiro cria alunos
+        created_alunos = _bulk_create(Aluno, alunos_objs, batch_size=10000)
+        # pega IDs reais (bulk_create já retorna com PK no SQLite/Django 5 normalmente,
+        # mas pra garantir, buscamos por prefixo)
+        # Vamos mapear por nome:
+        alunos_qs = Aluno.objects.filter(nome__startswith="Aluno ").values_list("id", "nome")
+        aluno_id_by_nome = {n: i for i, n in alunos_qs}
 
-            # Setar escopo se os campos existirem no Profile
-            if hasattr(p, "municipio"):
-                p.municipio = municipio
-            if hasattr(p, "secretaria"):
-                p.secretaria = secretaria
-            if hasattr(p, "unidade"):
-                p.unidade = unidade
+        for tr in turmas:
+            for i in range(1, alunos_n + 1):
+                nome = f"Aluno {tr.id}-{i:02d}"
+                aluno_id = aluno_id_by_nome.get(nome)
+                if not aluno_id:
+                    continue
+                m = Matricula()
+                m.aluno_id = aluno_id
+                m.turma_id = tr.id
+                m.data_matricula = timezone.localdate()
+                m.situacao = Matricula.Situacao.ATIVA
+                m.observacao = ""
+                matriculas_objs.append(m)
 
-            p.save()
-            return u
+        _bulk_create(Matricula, matriculas_objs, batch_size=20000)
+        self.stdout.write(self.style.SUCCESS(f"Alunos: {Aluno.objects.count()} | Matrículas: {Matricula.objects.count()}"))
 
-        created = []
+        # ----------------------------
+        # 7) Tipos de Necessidade (NEE)
+        # ----------------------------
+        if TipoNecessidade:
+            tipo_objs = []
+            for i in range(1, necessidades_n + 1):
+                tn = TipoNecessidade()
+                # campos comuns
+                if _has_field(TipoNecessidade, "nome"):
+                    tn.nome = f"Tipo Necessidade {i:02d}"
+                if _has_field(TipoNecessidade, "descricao"):
+                    tn.descricao = f"Descrição {i:02d}"
+                if _has_field(TipoNecessidade, "ativo"):
+                    tn.ativo = True
+                tipo_objs.append(tn)
+            _bulk_create(TipoNecessidade, tipo_objs, batch_size=200)
+            self.stdout.write(self.style.SUCCESS(f"Tipos de Necessidade: {TipoNecessidade.objects.count()}"))
+        else:
+            self.stdout.write(self.style.WARNING("NEE: TipoNecessidade não encontrado (ok)."))
 
-        # Município 1
-        created.append(create_user("mun1_municipal", "MUNICIPAL", municipio=m1))
-        created.append(create_user("mun1_leitura", "LEITURA", municipio=m1))
-        created.append(create_user("mun1_nee", "NEE", municipio=m1))
-        created.append(create_user("mun1_sec_semad", "SECRETARIA", municipio=m1, secretaria=s1a))
-        created.append(create_user("mun1_unid_1", "UNIDADE", municipio=m1, secretaria=s1a, unidade=u1a))
-        created.append(create_user("mun1_prof_1", "PROFESSOR", municipio=m1, unidade=u1a))
-        created.append(create_user("mun1_aluno_1", "ALUNO", municipio=m1, unidade=u1a))
+        # ----------------------------
+        # 8) Usuários + Profiles (10 por papel, exceto ADMIN)
+        # ----------------------------
+        # papéis conhecidos do seu RBAC
+        roles = ["MUNICIPAL", "SECRETARIA", "UNIDADE", "PROFESSOR", "ALUNO", "LEITURA", "VISUALIZACAO", "NEE"]
 
-        # Município 2
-        created.append(create_user("mun2_municipal", "MUNICIPAL", municipio=m2))
-        created.append(create_user("mun2_leitura", "LEITURA", municipio=m2))
-        created.append(create_user("mun2_sec_edu", "SECRETARIA", municipio=m2, secretaria=s2a))
-        created.append(create_user("mun2_unid_a", "UNIDADE", municipio=m2, secretaria=s2a, unidade=u2a))
+        # Detecta campos do Profile para escopo
+        profile_fields = _get_field_names(Profile)
+        prof_has_mun = "municipio" in profile_fields
+        prof_has_sec = "secretaria" in profile_fields
+        prof_has_uni = "unidade" in profile_fields
+        prof_has_codigo = any(n in profile_fields for n in ["codigo", "codigo_acesso", "codigo_login", "access_code"])
 
-        self.stdout.write(self.style.SUCCESS("\n✅ Seed concluído! Dados de login:"))
-        self.stdout.write(self.style.WARNING(f"Senha padrão: {password}\n"))
+        # campo de código no Profile (se existir)
+        profile_code_field = None
+        for cand in ["codigo_acesso", "codigo", "codigo_login", "access_code"]:
+            if cand in profile_fields:
+                profile_code_field = cand
+                break
 
-        for u in created:
-            p = u.profile
-            codigo = getattr(p, "codigo_acesso", None)
-            self.stdout.write(
-                f"- {u.username:16} | role={p.role:10} | codigo_acesso={codigo}"
-            )
+        # campo de código no User (se existir)
+        user_fields = _get_field_names(User)
+        user_code_field = None
+        for cand in ["codigo_acesso", "codigo", "access_code"]:
+            if cand in user_fields:
+                user_code_field = cand
+                break
 
-        self.stdout.write(self.style.SUCCESS("\nUse o codigo_acesso + senha para entrar no login.\n"))
+        created_users = 0
+        for role in roles:
+            for i in range(1, users_per_role + 1):
+                code = _rand_code(code_len)
+                username = f"{role.lower()}_{i:02d}_{code}"
+
+                u = User.objects.create_user(
+                    username=username,
+                    password="12345678",  # dev only
+                )
+                _set_if_hasattr(u, "first_name", role.title())
+                _set_if_hasattr(u, "last_name", f"Teste {i:02d}")
+                _set_if_hasattr(u, "email", f"{username}@teste.local")
+
+                if user_code_field:
+                    setattr(u, user_code_field, code)
+                    u.save(update_fields=[user_code_field])
+
+                # Profile
+                p = getattr(u, "profile", None)
+                if not p:
+                    # se o Profile não for criado automaticamente, cria aqui
+                    p = Profile(user=u)
+
+                if "role" in profile_fields:
+                    p.role = role
+                if "ativo" in profile_fields:
+                    p.ativo = True
+
+                # código de acesso no Profile
+                if profile_code_field:
+                    setattr(p, profile_code_field, code)
+
+                # escopo por role
+                if role == "MUNICIPAL" and prof_has_mun:
+                    m = random.choice(municipios)
+                    p.municipio_id = m.id
+
+                if role == "SECRETARIA":
+                    if prof_has_sec:
+                        s = random.choice(secretarias)
+                        p.secretaria_id = s.id
+                    elif prof_has_mun:
+                        m = random.choice(municipios)
+                        p.municipio_id = m.id
+
+                if role == "UNIDADE":
+                    if prof_has_uni:
+                        u0 = random.choice(unidades)
+                        p.unidade_id = u0.id
+                    elif prof_has_mun:
+                        m = random.choice(municipios)
+                        p.municipio_id = m.id
+
+                if role == "PROFESSOR":
+                    # opcional: vincular turmas depois (ManyToMany), se existir
+                    if prof_has_uni:
+                        u0 = random.choice(unidades)
+                        p.unidade_id = u0.id
+                    elif prof_has_mun:
+                        m = random.choice(municipios)
+                        p.municipio_id = m.id
+
+                if role == "ALUNO":
+                    # para ALUNO, normalmente não precisa de escopo, pois o portal é travado.
+                    pass
+
+                if role in {"LEITURA", "VISUALIZACAO", "NEE"}:
+                    if prof_has_mun:
+                        m = random.choice(municipios)
+                        p.municipio_id = m.id
+
+                p.save()
+                created_users += 1
+
+        self.stdout.write(self.style.SUCCESS(f"Usuários criados: {created_users} (senha dev: 12345678)"))
+
+        # ----------------------------
+        # 9) (Opcional) Vincular Professores a turmas (ManyToMany)
+        # ----------------------------
+        # Se quiser, vincula aleatoriamente cada professor a 2 turmas do seu escopo
+        try:
+            from accounts.models import Profile as _Profile
+            profs = User.objects.filter(profile__role="PROFESSOR").select_related("profile")
+            for u in profs:
+                qs = Turma.objects.all()
+                # tenta escopo por unidade/município do profile
+                pr = u.profile
+                if getattr(pr, "unidade_id", None):
+                    qs = qs.filter(unidade_id=pr.unidade_id)
+                elif getattr(pr, "municipio_id", None):
+                    qs = qs.filter(unidade__secretaria__municipio_id=pr.municipio_id)
+
+                picked = list(qs.order_by("?")[:2])
+                for t in picked:
+                    t.professores.add(u)
+            self.stdout.write(self.style.SUCCESS("Professores vinculados a turmas (2 cada, aleatório)."))
+        except Exception:
+            self.stdout.write(self.style.WARNING("Vínculo professor⇄turma não aplicado (ok)."))
+
+        self.stdout.write(self.style.SUCCESS("SEED GEPUB: concluído ✅"))

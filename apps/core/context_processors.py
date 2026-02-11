@@ -16,4 +16,5 @@ def permissions(request):
         "can_nee": can(u, "nee.view"),
         "can_users": can(u, "accounts.manage_users"),
         "can_edu_manage": can(u, "educacao.manage"),
+        "can_org_municipios": can(u, "org.municipios.view") or can(u, "org.manage") or (getattr(u, "is_superuser", False)),
     }

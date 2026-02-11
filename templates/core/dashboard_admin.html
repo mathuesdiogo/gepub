@@ -1,0 +1,178 @@
+{% extends "core/base.html" %}
+{% block title %}Dashboard Admin • GEPUB{% endblock %}
+{% block header %}Dashboard • Admin{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">Dashboard Admin</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div style="display:grid; gap:14px;">
+
+  <!-- Atalhos -->
+  <div class="card">
+    <div class="card__title">Acessos rápidos</div>
+    <div class="card__body" style="display:flex; flex-wrap:wrap; gap:10px;">
+      <a class="btn btn-primary" href="{% url 'org:index' %}">Organização</a>
+      <a class="btn btn-primary" href="{% url 'educacao:index' %}">Educação</a>
+      {% if can_nee %}
+        <a class="btn btn-primary" href="{% url 'nee:index' %}">NEE</a>
+      {% endif %}
+      {% if can_users %}
+        <a class="btn btn-primary" href="{% url 'accounts:usuarios_list' %}">Usuários</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Cards KPI -->
+  <div style="display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:12px;">
+    <div class="card">
+      <div class="card__title">Prefeituras</div>
+      <div class="card__body">
+        <div style="font-size:28px; font-weight:700;">{{ kpis.municipios|default:"0" }}</div>
+        <div class="small" style="opacity:.8;">Municípios cadastrados</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__title">Usuários</div>
+      <div class="card__body">
+        <div style="font-size:28px; font-weight:700;">{{ kpis.usuarios }}</div>
+        <div class="small" style="opacity:.8;">Total no sistema</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__title">Estrutura</div>
+      <div class="card__body">
+        <div class="small" style="opacity:.9;">
+          Secretarias: <b>{{ kpis.secretarias }}</b><br>
+          Unidades: <b>{{ kpis.unidades }}</b><br>
+          Setores: <b>{{ kpis.setores }}</b>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__title">Educação</div>
+      <div class="card__body">
+        <div class="small" style="opacity:.9;">
+          Turmas: <b>{{ kpis.turmas }}</b><br>
+          Alunos: <b>{{ kpis.alunos }}</b><br>
+          Matrículas: <b>{{ kpis.matriculas }}</b>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráficos -->
+  <div style="display:grid; grid-template-columns: 1.2fr .8fr; gap:12px;">
+    <div class="card">
+      <div class="card__title">Usuários por perfil</div>
+      <div class="card__body">
+        <canvas id="chartRoles" height="120"></canvas>
+        <div class="small" style="opacity:.75; margin-top:6px;">
+          Distribuição de perfis (admin não incluso se você quiser).
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__title">Estrutura por Prefeitura (Top 10)</div>
+      <div class="card__body">
+        <canvas id="chartMun" height="120"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabelas -->
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+    <div class="card">
+      <div class="card__title">Top Prefeituras por Unidades</div>
+      <div class="card__body" style="overflow:auto;">
+        <table style="width:100%; border-collapse:collapse; min-width:520px;">
+          <thead>
+            <tr style="text-align:left; background:rgba(255,255,255,.03);">
+              <th style="padding:10px 12px;">Município</th>
+              <th style="padding:10px 12px; width:140px;">Secretarias</th>
+              <th style="padding:10px 12px; width:120px;">Unidades</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in top_municipios %}
+              <tr style="border-top:1px solid rgba(255,255,255,.06);">
+                <td style="padding:10px 12px;">{{ row.nome }}</td>
+                <td style="padding:10px 12px;">{{ row.secretarias }}</td>
+                <td style="padding:10px 12px;">{{ row.unidades }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="3" style="padding:12px;">Sem dados.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__title">Top Unidades por Turmas</div>
+      <div class="card__body" style="overflow:auto;">
+        <table style="width:100%; border-collapse:collapse; min-width:520px;">
+          <thead>
+            <tr style="text-align:left; background:rgba(255,255,255,.03);">
+              <th style="padding:10px 12px;">Unidade</th>
+              <th style="padding:10px 12px; width:120px;">Turmas</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in top_unidades %}
+              <tr style="border-top:1px solid rgba(255,255,255,.06);">
+                <td style="padding:10px 12px;">{{ u.nome }}</td>
+                <td style="padding:10px 12px;">{{ u.turmas }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="2" style="padding:12px;">Sem dados.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Chart.js (CDN simples) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  const rolesLabels = {{ chart_roles.labels|safe }};
+  const rolesValues = {{ chart_roles.values|safe }};
+
+  new Chart(document.getElementById('chartRoles'), {
+    type: 'bar',
+    data: {
+      labels: rolesLabels,
+      datasets: [{ label: 'Usuários', data: rolesValues }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+
+  const munLabels = {{ chart_municipios.labels|safe }};
+  const munValues = {{ chart_municipios.values|safe }};
+
+  new Chart(document.getElementById('chartMun'), {
+    type: 'doughnut',
+    data: {
+      labels: munLabels,
+      datasets: [{ data: munValues }]
+    },
+    options: { responsive: true }
+  });
+</script>
+{% endblock %}

@@ -5,6 +5,7 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.utils import timezone
 
+import json
 
 from accounts.models import Profile
 from core.rbac import can, get_profile
@@ -23,7 +24,7 @@ from core.rbac import (
     scope_filter_matriculas,
 )
 
-from org.models import Municipio, Secretaria, Unidade
+from org.models import Municipio, Secretaria, Unidade, Setor
 from educacao.models import Turma, Aluno, Matricula
 
 
@@ -33,14 +34,92 @@ def dashboard(request):
     p = get_profile(user)
 
     # ===== ADMIN =====
-    if is_admin(user):
-        ctx = {
+    if is_admin(user) or getattr(user, "is_superuser", False):
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+
+        # KPIs gerais (sempre presentes)
+        kpis = {
             "municipios": Municipio.objects.count(),
+            "usuarios": User.objects.count(),
             "secretarias": Secretaria.objects.count(),
             "unidades": Unidade.objects.count(),
+            "setores": Setor.objects.count(),
             "turmas": Turma.objects.count(),
             "alunos": Aluno.objects.count(),
             "matriculas": Matricula.objects.count(),
+        }
+
+        # ===== Usuários por perfil =====
+        roles_qs = (
+            Profile.objects.values("role")
+            .annotate(total=Count("id"))
+            .order_by("-total")
+        )
+        role_labels = [r["role"] or "SEM_ROLE" for r in roles_qs]
+        role_values = [r["total"] for r in roles_qs]
+
+        chart_roles = {
+            "labels": json.dumps(role_labels),
+            "values": json.dumps(role_values),
+        }
+
+        # ===== Estrutura por Prefeitura (Top 10) =====
+        # Fazemos via agregação (evita depender de related_name reverso)
+        # Unidades por município
+        unidades_por_municipio = list(
+            Unidade.objects.values(
+                "secretaria__municipio_id",
+                "secretaria__municipio__nome",
+            )
+            .annotate(unidades=Count("id"))
+            .order_by("-unidades")[:10]
+        )
+
+        # Secretarias por município
+        secretarias_por_municipio = list(
+            Secretaria.objects.values("municipio_id", "municipio__nome")
+            .annotate(secretarias=Count("id"))
+        )
+        sec_map = {r["municipio_id"]: r["secretarias"] for r in secretarias_por_municipio}
+
+        # Lista final para tabela (nome, secretarias, unidades)
+        top_municipios = []
+        for r in unidades_por_municipio:
+            mid = r["secretaria__municipio_id"]
+            top_municipios.append(
+                {
+                    "id": mid,
+                    "nome": r["secretaria__municipio__nome"] or "—",
+                    "secretarias": sec_map.get(mid, 0),
+                    "unidades": r["unidades"],
+                }
+            )
+
+        # ===== Top Unidades por Turmas =====
+        top_unidades_raw = list(
+            Turma.objects.values("unidade_id", "unidade__nome")
+            .annotate(turmas=Count("id"))
+            .order_by("-turmas", "unidade__nome")[:10]
+        )
+        top_unidades = [{"id": r["unidade_id"], "nome": r["unidade__nome"] or "—", "turmas": r["turmas"]} for r in top_unidades_raw]
+
+        chart_municipios = {
+            "labels": json.dumps([m["nome"] for m in top_municipios]),
+            "values": json.dumps([m["unidades"] for m in top_municipios]),
+        }
+
+        ctx = {
+            "kpis": kpis,
+            "chart_roles": chart_roles,
+            "chart_municipios": chart_municipios,
+            "top_municipios": top_municipios,
+            "top_unidades": top_unidades,
+            # atalhos (se seu template usar)
+            "can_nee": True,
+            "can_users": True,
+            # opcional: lista recente
             "ultimos_municipios": Municipio.objects.order_by("-id")[:5],
         }
         return render(request, "core/dashboard_admin.html", ctx)
@@ -51,7 +130,7 @@ def dashboard(request):
 
     role = p.role
 
-    # ===== PROFESSOR ===== (você já curtiu, mantém)
+    # ===== PROFESSOR =====
     if role == "PROFESSOR":
         ano_atual = timezone.now().date().year
         turmas_qs = (
@@ -77,7 +156,7 @@ def dashboard(request):
             },
         )
 
-   # ===== MUNICIPAL =====
+    # ===== MUNICIPAL =====
     if role == "MUNICIPAL":
         secretarias_qs = scope_filter_secretarias(user, Secretaria.objects.all()).select_related("municipio")
         unidades_qs = scope_filter_unidades(user, Unidade.objects.all()).select_related(
@@ -95,49 +174,39 @@ def dashboard(request):
             .annotate(total=Count("id"))
             .order_by("-total")[:8]
         )
-        chart1_labels = [r["secretaria__nome"] or "—" for r in graf_unidades_por_secretaria]
-        chart1_values = [r["total"] for r in graf_unidades_por_secretaria]
 
         # ========= GRÁFICO 2: Alunos por Secretaria (Top 8) =========
-        # alunos distintos via matrículas (melhor indicador)
         graf_alunos_por_secretaria = list(
             matriculas_qs.values("turma__unidade__secretaria__id", "turma__unidade__secretaria__nome")
             .annotate(total=Count("aluno_id", distinct=True))
             .order_by("-total")[:8]
         )
-        chart2_labels = [r["turma__unidade__secretaria__nome"] or "—" for r in graf_alunos_por_secretaria]
-        chart2_values = [r["total"] for r in graf_alunos_por_secretaria]
-
-        municipio_id = getattr(p, "municipio_id", None)
-        municipio_nome = getattr(getattr(p, "municipio", None), "nome", "—") if municipio_id else "—"
 
         ctx = {
-        "municipio_nome": getattr(p.municipio, "nome", "—") if getattr(p, "municipio_id", None) else "—",
+            "municipio_nome": getattr(p.municipio, "nome", "—") if getattr(p, "municipio_id", None) else "—",
 
-        # KPIs
-        "secretarias_total": secretarias_qs.count(),
-        "unidades_total": unidades_qs.count(),
-        "turmas_total": turmas_qs.count(),
-        "alunos_total": alunos_qs.count(),
-        "matriculas_total": matriculas_qs.count(),
+            # KPIs
+            "secretarias_total": secretarias_qs.count(),
+            "unidades_total": unidades_qs.count(),
+            "turmas_total": turmas_qs.count(),
+            "alunos_total": alunos_qs.count(),
+            "matriculas_total": matriculas_qs.count(),
 
-        # Listas
-        "ultimas_secretarias": secretarias_qs.order_by("-id")[:5],
-        "ultimos_alunos": alunos_qs.prefetch_related(
-            "matriculas__turma__unidade"
-        ).order_by("-id")[:5],
+            # Listas
+            "ultimas_secretarias": secretarias_qs.order_by("-id")[:5],
+            "ultimos_alunos": alunos_qs.prefetch_related(
+                "matriculas__turma__unidade"
+            ).order_by("-id")[:5],
 
+            # Gráficos
+            "chart1_labels": [i["secretaria__nome"] for i in graf_unidades_por_secretaria],
+            "chart1_values": [i["total"] for i in graf_unidades_por_secretaria],
 
-        # Gráficos
-        "chart1_labels": [i["secretaria__nome"] for i in graf_unidades_por_secretaria],
-        "chart1_values": [i["total"] for i in graf_unidades_por_secretaria],
-
-        "chart2_labels": [i["turma__unidade__secretaria__nome"] for i in graf_alunos_por_secretaria],
-        "chart2_values": [i["total"] for i in graf_alunos_por_secretaria],
-    }
+            "chart2_labels": [i["turma__unidade__secretaria__nome"] for i in graf_alunos_por_secretaria],
+            "chart2_values": [i["total"] for i in graf_alunos_por_secretaria],
+        }
 
         return render(request, "core/dashboard_municipal.html", ctx)
-
 
     # ===== SECRETARIA =====
     if role == "SECRETARIA":
@@ -186,10 +255,8 @@ def dashboard(request):
     # ===== OUTROS (ALUNO, NEE, LEITURA etc.) =====
     return render(request, "core/dashboard_default.html")
 
+
 def _portal_manage_allowed(user) -> bool:
-    # Quem pode postar aviso/arquivo (ajuste depois se quiser)
-    # - Admin sempre
-    # - Gestores e professor (coordenação/professor)
     return bool(
         can(user, "educacao.manage") or can(user, "org.manage_unidade") or can(user, "org.manage_secretaria")
         or can(user, "org.manage_municipio") or (get_profile(user) and get_profile(user).role == "PROFESSOR")
@@ -198,25 +265,22 @@ def _portal_manage_allowed(user) -> bool:
 
 @login_required
 def dashboard_aluno(request):
-    """
-    Dashboard exclusivo do ALUNO.
-    Mostra avisos e arquivos por:
-    - aluno direto
-    - turmas do aluno (matrículas)
-    - unidade/secretaria/município (via turma->unidade->secretaria->municipio)
-    """
     p = get_profile(request.user)
     if not p or p.role != "ALUNO":
         return redirect("core:dashboard")
 
     if not p.aluno_id:
-        # Sem vínculo ainda — vai ver dashboard vazio com alerta
         return render(request, "core/dashboard_aluno.html", {"sem_vinculo": True, "avisos": [], "arquivos": []})
 
     aluno_id = p.aluno_id
 
     matriculas = (
-        Matricula.objects.select_related("turma", "turma__unidade", "turma__unidade__secretaria", "turma__unidade__secretaria__municipio")
+        Matricula.objects.select_related(
+            "turma",
+            "turma__unidade",
+            "turma__unidade__secretaria",
+            "turma__unidade__secretaria__municipio",
+        )
         .filter(aluno_id=aluno_id)
     )
 
