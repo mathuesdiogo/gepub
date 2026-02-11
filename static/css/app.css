@@ -1,285 +1,511 @@
-:root{
-  --bg:#0b1220;
-  --panel:#0f1b31;
-  --panel-2:#0c1628;          /* ✅ nome que você usa nos inputs */
-  --text:#e7eefc;
-  --muted:#a9b6d3;
-  --stroke:rgba(255,255,255,.08);
-  --accent:#5aa6ff;
-  --accent-stroke:rgba(90,166,255,.38); /* ✅ estava faltando */
+/* ==========================================================
+   GEPUB • app.css (v3)
+   4 temas:
+   - azul      => Azul institucional (mantido bom)
+   - kassy     => "padrão antigo" do sistema (dark azul clássico)
+   - dark      => SUAP (verde/teal, claro e clean)
+   - midnight  => GOV.BR (azul gov, claro e institucional)
+   ========================================================== */
 
+/* ==========================================================
+   THEME TOKENS (somente variáveis)
+   ========================================================== */
+
+/* ====== AZUL INSTITUCIONAL (MANTIDO) ====== */
+:root,
+[data-theme="azul"]{
+  --bg:#F6F8FC;
+  --bg2:#EEF3FB;
+
+  --bg-blob-1: rgba(22,120,255,.14);
+  --bg-blob-2: rgba(14,110,139,.10);
+  --bg-blob-3: rgba(140,190,255,.10);
+
+  --surface:#FFFFFF;
+  --surface-2:#F3F6FB;
+
+  --text:#0E2238;
+  --muted:#6A7B8D;
+
+  --sidebar:#0E6E8B;
+  --sidebar-2:#0B5F79;
+  --sidebar-text:#EAF6FF;
+  --sidebar-muted: rgba(234,246,255,.78);
+  --sidebar-item: rgba(255,255,255,.10);
+  --sidebar-item-hover: rgba(255,255,255,.16);
+  --sidebar-item-active: rgba(255,255,255,.22);
+
+  --primary:#1678FF;
+  --primary-2:#0F63E6;
+
+  --border: rgba(14,34,56,.10);
+  --border-2: rgba(14,34,56,.06);
+
+  --shadow: 0 12px 28px rgba(14,34,56,.10);
+  --shadow-soft: 0 8px 18px rgba(14,34,56,.08);
+
+  --r-lg:18px;
+  --r-md:14px;
+  --r-sm:12px;
+
+  --focus: rgba(22,120,255,.22);
+  --success:#1FAD66;
+  --warn:#F2A23A;
+  --danger:#E5484D;
 }
 
-*{box-sizing:border-box}
-html,body{height:100%}
-html, body{ height:100%; }
+/* ====== KASSY = PADRÃO ANTIGO (dark-azul clássico, SEM ficar preto) ====== */
+[data-theme="kassy"]{
+  --bg:#0B1630;
+  --bg2:#0A1D3A;
 
+  --bg-blob-1: rgba(23,113,255,.10);
+  --bg-blob-2: rgba(0,210,255,.08);
+  --bg-blob-3: rgba(255,255,255,.04);
+
+  --surface:#0F2448;
+  --surface-2:#102B57;
+
+  --text:#EAF2FF;
+  --muted:#AFC0D8;
+
+  --sidebar:#0B2A57;
+  --sidebar-2:#081E3E;
+  --sidebar-text:#EAF2FF;
+  --sidebar-muted: rgba(234,242,255,.72);
+  --sidebar-item: rgba(255,255,255,.08);
+  --sidebar-item-hover: rgba(255,255,255,.12);
+  --sidebar-item-active: rgba(255,255,255,.18);
+
+  --primary:#3B82F6;
+  --primary-2:#2563EB;
+
+  --border: rgba(255,255,255,.12);
+  --border-2: rgba(255,255,255,.08);
+
+  --shadow: 0 16px 40px rgba(0,0,0,.40);
+  --shadow-soft: 0 10px 22px rgba(0,0,0,.30);
+
+  --r-lg:18px;
+  --r-md:14px;
+  --r-sm:12px;
+
+  --focus: rgba(59,130,246,.22);
+  --success:#22C55E;
+  --warn:#F59E0B;
+  --danger:#EF4444;
+}
+
+/* ====== DARK = SUAP (verde/teal, fundo claro, SUAP-like) ======
+   Nota: o Design System do SUAP tem tema "Padrão" e foco em paletas acessíveis. :contentReference[oaicite:1]{index=1}
+*/
+[data-theme="dark"]{
+  /* fundo claro */
+  --bg:#F4F7F6;
+  --bg2:#EAF2EF;
+
+  /* identidade SUAP: verde/teal */
+  --bg-blob-1: rgba(0,149,120,.14);
+  --bg-blob-2: rgba(0,104,86,.10);
+  --bg-blob-3: rgba(38,200,160,.10);
+
+  --surface:#FFFFFF;
+  --surface-2:#F2FBF7;
+
+  --text:#0F2A25;
+  --muted:#5E7A73;
+
+  --sidebar:#0A5F4E;
+  --sidebar-2:#084D40;
+  --sidebar-text:#E9FFF8;
+  --sidebar-muted: rgba(233,255,248,.74);
+  --sidebar-item: rgba(255,255,255,.10);
+  --sidebar-item-hover: rgba(255,255,255,.16);
+  --sidebar-item-active: rgba(255,255,255,.22);
+
+  --primary:#0B8F74;
+  --primary-2:#08735F;
+
+  --border: rgba(15,42,37,.10);
+  --border-2: rgba(15,42,37,.06);
+
+  --shadow: 0 12px 28px rgba(15,42,37,.10);
+  --shadow-soft: 0 8px 18px rgba(15,42,37,.08);
+
+  --r-lg:18px;
+  --r-md:14px;
+  --r-sm:12px;
+
+  --focus: rgba(11,143,116,.22);
+  --success:#1FAD66;
+  --warn:#F2A23A;
+  --danger:#E5484D;
+}
+
+/* ====== MIDNIGHT = GOV.BR (azul gov, claro e institucional) ======
+   GOV/DS reforça uso do azul padrão do governo (ex: #1351B4 aparece amplamente em estilos gov)
+   e o DS oficial detalha fundamentos de cores. :contentReference[oaicite:2]{index=2}
+*/
+[data-theme="midnight"]{
+  --bg:#F7F8FA;
+  --bg2:#EEF2F7;
+
+  --bg-blob-1: rgba(19,81,180,.14);   /* Azul gov */
+  --bg-blob-2: rgba(19,81,180,.08);
+  --bg-blob-3: rgba(0,0,0,.03);
+
+  --surface:#FFFFFF;
+  --surface-2:#F3F6FB;
+
+  --text:#1B1F23;
+  --muted:#667085;
+
+  --sidebar:#1351B4;   /* GOV */
+  --sidebar-2:#0F3F8E;
+  --sidebar-text:#FFFFFF;
+  --sidebar-muted: rgba(255,255,255,.78);
+  --sidebar-item: rgba(255,255,255,.12);
+  --sidebar-item-hover: rgba(255,255,255,.18);
+  --sidebar-item-active: rgba(255,255,255,.24);
+
+  --primary:#1351B4;
+  --primary-2:#0F3F8E;
+
+  --border: rgba(27,31,35,.10);
+  --border-2: rgba(27,31,35,.06);
+
+  --shadow: 0 12px 28px rgba(27,31,35,.10);
+  --shadow-soft: 0 8px 18px rgba(27,31,35,.08);
+
+  --r-lg:18px;
+  --r-md:14px;
+  --r-sm:12px;
+
+  --focus: rgba(19,81,180,.20);
+  --success:#168821;
+  --warn:#F2A23A;
+  --danger:#D92D20;
+}
+
+/* ==========================================================
+   BASE / RESET
+   ========================================================== */
+
+*{ box-sizing:border-box; }
+html, body{ height:100%; }
 body{
   margin:0;
-  background:
-    radial-gradient(1200px 700px at 20% 0%, rgba(90,166,255,.12), transparent 60%),
-    radial-gradient(900px 600px at 90% 10%, rgba(120,90,255,.10), transparent 55%),
-    var(--bg);
-  background-attachment: fixed;   /* ✅ mantém o fundo fixo ao rolar */
-  background-repeat: no-repeat;
-  background-size: cover;
-  color: var(--text);
+  color:var(--text);
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial;
+
+  background:
+    radial-gradient(1200px 800px at 12% 0%, var(--bg-blob-1), transparent 62%),
+    radial-gradient(1000px 700px at 92% 8%, var(--bg-blob-2), transparent 58%),
+    radial-gradient(900px 650px at 60% 90%, var(--bg-blob-3), transparent 60%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+  background-attachment: fixed;
+  background-repeat:no-repeat;
+  background-size:cover;
 }
 
+a{ color:inherit; text-decoration:none; }
+.small{ font-size:12px; color:var(--muted); }
+.link{ color:var(--primary); font-weight:800; }
+.link:hover{ text-decoration:underline; }
 
+/* ==========================================================
+   LAYOUT
+   ========================================================== */
 
-.layout{display:flex; min-height:100vh}
+.layout{ display:flex; min-height:100vh; }
+.main{ flex:1; display:flex; flex-direction:column; min-width:0; }
+.content{ padding:18px; }
+
+/* ==========================================================
+   SIDEBAR
+   ========================================================== */
 
 .sidebar{
   width:280px;
-  background:linear-gradient(180deg,var(--panel),var(--panel2));
-  border-right:1px solid var(--stroke);
-  padding:16px;
-  display:flex;
-  flex-direction:column;
-  gap:18px;
+  padding:16px 14px;
+  background: linear-gradient(180deg, var(--sidebar) 0%, var(--sidebar-2) 100%);
+  color: var(--sidebar-text);
+  box-shadow: 8px 0 30px rgba(0,0,0,.12);
+  position:relative;
 }
 
-.brand{display:flex; gap:12px; align-items:center}
+.brand{ display:flex; align-items:center; gap:12px; padding:8px 10px; }
 .brand__logo{
-  width:42px;height:42px;border-radius:14px;
-  background:rgba(90,166,255,.15);
-  border:1px solid rgba(90,166,255,.35);
+  width:44px; height:44px;
+  border-radius:16px;
   display:flex; align-items:center; justify-content:center;
-  font-weight:800; color:var(--accent);
+  background: rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.18);
+  font-weight:900;
 }
-.brand__name{font-weight:800; letter-spacing:.4px}
-.brand__sub{font-size:12px; color:var(--muted); margin-top:2px}
+.brand__name{ font-weight:900; letter-spacing:.3px; }
+.brand__sub{ font-size:12px; margin-top:2px; color:var(--sidebar-muted); }
 
-.menu{display:flex; flex-direction:column; gap:6px}
-.menu__section{margin-top:12px; font-size:12px; color:var(--muted); opacity:.9}
-.menu__item{
-  padding:10px 12px;
-  border-radius:12px;
-  text-decoration:none;
-  color:var(--text);
-  border:1px solid transparent;
-  background:rgba(255,255,255,.02);
+.menu{ display:flex; flex-direction:column; gap:8px; margin-top:6px; }
+.menu__section{
+  margin-top:10px;
+  padding:6px 10px 2px;
+  font-size:11px;
+  letter-spacing:.6px;
+  text-transform:uppercase;
+  color:var(--sidebar-muted);
 }
-.menu__item:hover{border-color:var(--stroke)}
+.menu__item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:14px;
+  color:var(--sidebar-text);
+  background: var(--sidebar-item);
+  border:1px solid rgba(255,255,255,.10);
+  transition: .18s ease;
+}
+.menu__item:hover{
+  background: var(--sidebar-item-hover);
+  border-color: rgba(255,255,255,.18);
+  transform: translateY(-1px);
+}
 .menu__item.is-active{
-  background:rgba(90,166,255,.12);
-  border-color:rgba(90,166,255,.25);
+  background: var(--sidebar-item-active);
+  border-color: rgba(255,255,255,.22);
 }
 
 .sidebar__footer{
-  margin-top:auto;
-  padding-top:14px;
-  border-top:1px solid var(--stroke);
-  display:flex;
-  flex-direction:column;
-  gap:6px;
+  position:absolute;
+  left:14px; right:14px; bottom:14px;
+  padding:12px 12px;
+  border-radius:16px;
+  background: rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.16);
 }
-.small{font-size:12px; color:var(--muted)}
-.link{color:var(--accent); text-decoration:none}
-.link:hover{text-decoration:underline}
 
-.main{flex:1; display:flex; flex-direction:column}
+/* ==========================================================
+   TOPBAR
+   ========================================================== */
+
 .topbar{
   height:64px;
-  border-bottom:1px solid var(--stroke);
   display:flex;
   align-items:center;
   justify-content:space-between;
   padding:0 18px;
-  background:rgba(255,255,255,.02);
+  background: rgba(255,255,255,.72);
+  backdrop-filter: blur(12px);
+  border-bottom:1px solid var(--border);
 }
-.topbar__title{font-weight:700}
+
+/* nos temas escuros, topbar vira vidro */
+[data-theme="kassy"] .topbar{
+  background: rgba(255,255,255,.06);
+  backdrop-filter: blur(14px);
+}
+
+.topbar__left{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.topbar__title{ font-weight:900; }
+.topbar__right{ display:flex; align-items:center; gap:12px; }
+
 .pill{
   font-size:12px;
-  padding:6px 10px;
+  padding:8px 12px;
   border-radius:999px;
-  border:1px solid var(--stroke);
-  color:var(--muted);
+  border:1px solid var(--border);
+  background: rgba(255,255,255,.55);
+  color: var(--muted);
 }
-
-.content{padding:18px}
-.grid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(240px,1fr));
-  gap:14px;
-}
-.card{
-  border:1px solid var(--stroke);
-  background:rgba(255,255,255,.03);
-  border-radius:18px;
-  padding:14px;
-  box-shadow:0 10px 30px rgba(0,0,0,.2);
-}
-.card__title{font-weight:700; margin-bottom:8px}
-.card__body{color:var(--muted); line-height:1.45}
-
-.flash-stack{display:flex; flex-direction:column; gap:10px; margin-bottom:14px;}
-.flash{
-  border:1px solid var(--stroke);
-  background:rgba(255,255,255,.04);
-  border-radius:14px;
-  padding:10px 12px;
-  color:var(--text);
-}
-.flash--success{border-color:rgba(70, 200, 120, .35); background:rgba(70, 200, 120, .10);}
-.flash--error, .flash--danger{border-color:rgba(255, 90, 90, .35); background:rgba(255, 90, 90, .10);}
-.flash--warning{border-color:rgba(255, 200, 80, .35); background:rgba(255, 200, 80, .10);}
-.flash--info{border-color:rgba(90,166,255,.35); background:rgba(90,166,255,.10);}
-
-.breadcrumbs{
-  margin-top:6px;
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  color:var(--muted);
-  font-size:12px;
-}
-.breadcrumbs__link{
-  color:var(--muted);
-  text-decoration:none;
-}
-.breadcrumbs__link:hover{color:var(--text); text-decoration:underline;}
-.breadcrumbs__sep{opacity:.6;}
-.breadcrumbs__current{color:var(--text); font-weight:600;}
-
-/* Cards */
-.card{
-  background: var(--panel);
-  border: 1px solid var(--stroke);
-  border-radius: 18px;
-  box-shadow: 0 14px 35px rgba(0,0,0,.25);
-}
-.card__title{
-  padding: 14px 16px;
-  font-weight: 800;
-  letter-spacing: .2px;
-  border-bottom: 1px solid rgba(255,255,255,.07);
-}
-.card__body{ padding: 14px 16px; }
-
-/* Inputs padrão (escuros e maiores) */
-input, select, textarea{
-  width:100%;
-  box-sizing:border-box;
-  padding:12px 14px;
-  border-radius: 14px;
-  border:2.5px solid var(--stroke);
-  background: var(--panel-2);
-  color: var(--text);
-  outline:none;
-  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
-}
-
-textarea{ resize: vertical; min-height: 90px; }
-
-input::placeholder, textarea::placeholder{ color: rgba(255,255,255,.45); }
-
-input:focus, select:focus, textarea:focus{
-  border-color: var(--accent-stroke);
-  box-shadow: 0 0 0 4px rgba(90,166,255,.14);
+[data-theme="kassy"] .pill{
   background: rgba(255,255,255,.06);
 }
 
-/* Checkbox */
-input[type="checkbox"]{
+/* Select de tema */
+.theme-select-wrap{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px 10px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background: rgba(255,255,255,.55);
+}
+[data-theme="kassy"] .theme-select-wrap{
+  background: rgba(255,255,255,.06);
+}
+.theme-select{
   width:auto;
-  padding:0;
-  border-radius: 6px;
-}
-
-/* Botões */
-button{
-  padding: 12px 14px;
-  border-radius: 14px;
-  border:1px solid var(--accent-stroke);
-  background: var(--accent);
+  min-width:190px;
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background: rgba(255,255,255,.88);
   color: var(--text);
-  font-weight: 800;
-  cursor: pointer;
+  outline:none;
 }
-button:hover{ filter: brightness(1.05); }
-
-/* Links */
-.link{
-  color: rgba(155,205,255,.95);
-  text-decoration: none;
+[data-theme="kassy"] .theme-select{
+  background: rgba(255,255,255,.07);
 }
-.link:hover{ text-decoration: underline; }
 
-/* Pequenos textos */
-.small{ font-size: 12px; color: var(--muted); }
+/* ==========================================================
+   CARDS
+   ========================================================== */
 
-.form-section{
-  border: 1.5px solid var(--stroke);
-  background: rgba(255,255,255,.03);
-  border-radius: 16px;
-  padding: 12px;
+.card{
+  background: var(--surface);
+  border:1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow);
+  padding:14px;
 }
-.form-section__title{
-  margin-bottom: 14px;
+.card__title{
+  font-weight:900;
+  margin-bottom:10px;
+}
+.card__body{
   color: var(--muted);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .2px;
+  line-height: 1.35;
 }
 
-.form-section{
-  border: 1.5px solid var(--stroke);
-  background: rgba(255,255,255,.03);
-  border-radius: 16px;
-  padding: 12px;
+/* ==========================================================
+   FORMS
+   ========================================================== */
+
+input, select, textarea{
+  width:100%;
+  padding:12px 14px;
+  border-radius: var(--r-md);
+  border:1.5px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  outline:none;
+  transition: .18s ease;
 }
-.form-section__title{
-  margin-bottom: 10px;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .2px;
+input::placeholder, textarea::placeholder{ opacity:.75; }
+input:focus, select:focus, textarea:focus{
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--focus);
 }
 
-/* Espaçamento padrão entre campos */
-label.small{
-  display: block;
-  margin-bottom: 6px;
+/* ==========================================================
+   BUTTONS
+   ========================================================== */
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:10px 14px;
+  border-radius: 14px;
+  border:1px solid var(--border);
+  font-weight:900;
+  cursor:pointer;
+  background: rgba(255,255,255,.70);
+}
+[data-theme="kassy"] .btn{
+  background: rgba(255,255,255,.06);
 }
 
-/* Espaço entre grupos de formulário */
-.form-section{
-  margin-top: 22px;
+.btn-primary,
+button{
+  border: 1px solid rgba(255,255,255,.10);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
+  color:#fff;
+  font-weight:1000;
+  box-shadow: 0 10px 26px rgba(0,0,0,.18);
+}
+.btn-primary:hover,
+button:hover{
+  filter:brightness(1.05);
+  transform: translateY(-1px);
 }
 
-/* Título de seção mais “respirado” */
-.form-section__title{
-  margin-bottom: 16px;
-}
+/* ==========================================================
+   TABLES
+   ========================================================== */
 
-.link-list{
-  display: grid;
-  gap: 10px;             /* controla o espaçamento vertical */
-  margin-top: 10px;
-}
+table{ width:100%; border-collapse:collapse; }
+thead tr{ background: rgba(0,0,0,.03); }
+[data-theme="kassy"] thead tr{ background: rgba(255,255,255,.06); }
+
+th, td{ padding:10px 12px; border-top:1px solid var(--border-2); }
+tbody tr:hover{ background: rgba(19,81,180,.06); }
+
+/* ==========================================================
+   BREADCRUMBS
+   ========================================================== */
+
+.breadcrumbs{ display:flex; gap:8px; align-items:center; color:var(--muted); font-size:12px; }
+.breadcrumbs__link{ color:var(--muted); }
+.breadcrumbs__link:hover{ color:var(--text); }
+.breadcrumbs__sep{ opacity:.6; }
+.breadcrumbs__current{ color:var(--text); font-weight:800; }
+
+/* ==========================================================
+   LINK-CARD (Org/Edu Index)
+   ========================================================== */
 
 .link-card{
   display:flex;
-  align-items:center;
   justify-content:space-between;
-  padding: 12px 14px;
-  border-radius: 14px;
-  border: 1.5px solid var(--stroke);
-  background: rgba(255,255,255,.03);
-  text-decoration: none;
+  align-items:center;
+  gap:16px;
+
+  padding:16px 18px;
+  border-radius: var(--r-lg);
+
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-soft);
+
   color: var(--text);
+  transition: .18s ease;
 }
-
 .link-card:hover{
-  background: rgba(255,255,255,.05);
-  border-color: rgba(255,255,255,.14);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+  border-color: rgba(19,81,180,.22);
 }
-
 .link-card__meta{
+  font-size: 13px;
   color: var(--muted);
+  margin-top: 4px;
+}
+.link-card .pill{
   font-size: 12px;
+  font-weight: 900;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
+  color: #fff;
+  white-space: nowrap;
 }
 
+/* ==========================================================
+   LISTS inside card body (deixa bonito sem quebrar layout)
+   ========================================================== */
+
+.card__body ul{
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+.card__body li{
+  padding: 12px 12px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.card__body li strong,
+.card__body li b{
+  display:block;
+  font-weight:900;
+  color:var(--text);
+  margin-bottom:2px;
+}
