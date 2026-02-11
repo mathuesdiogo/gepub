@@ -1,7 +1,19 @@
 /* ==========================================================
-   LAYOUT
+   LAYOUT PRINCIPAL — GEPUB
    ========================================================== */
 
-.layout{ display:flex; min-height:100vh; }
-.main{ flex:1; display:flex; flex-direction:column; min-width:0; }
-.content{ padding:18px; }
+.app-shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+}
+
+.main {
+  padding: var(--space-6);
+}
+
+@media (max-width: 1024px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+}

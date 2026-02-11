@@ -1,10 +1,25 @@
 /* ==========================================================
-   TABLES
+   TABLES — Ant Design Style
    ========================================================== */
 
-table{ width:100%; border-collapse:collapse; }
-thead tr{ background: rgba(0,0,0,.03); }
-[data-theme="kassy"] thead tr{ background: rgba(255,255,255,.06); }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
 
-th, td{ padding:10px 12px; border-top:1px solid var(--border-2); }
-tbody tr:hover{ background: rgba(19,81,180,.06); }
+thead {
+  background: var(--gray-100);
+}
+
+th, td {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-light);
+}
+
+tbody tr:hover {
+  background: var(--gray-50);
+}

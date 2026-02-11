@@ -1,44 +1,22 @@
 /* ==========================================================
-   CARDS
+   CARDS — Limpo e profissional
    ========================================================== */
 
-.card{
-  background: var(--surface);
-  border:1px solid var(--border);
-  border-radius: var(--r-lg);
-  box-shadow: var(--shadow);
-  padding:14px;
-}
-.card__title{
-  font-weight:900;
-  margin-bottom:10px;
-}
-.card__body{
-  color: var(--muted);
-  line-height: 1.35;
+.card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow .2s ease;
 }
 
-/* ==========================================================
-   LISTS inside card body (deixa bonito sem quebrar layout)
-   ========================================================== */
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
 
-.card__body ul{
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 10px;
-}
-.card__body li{
-  padding: 12px 12px;
-  border-radius: var(--r-md);
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-}
-.card__body li strong,
-.card__body li b{
-  display:block;
-  font-weight:900;
-  color:var(--text);
-  margin-bottom:2px;
+.card__title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: var(--space-4);
 }

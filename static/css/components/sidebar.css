@@ -1,63 +1,37 @@
 /* ==========================================================
-   SIDEBAR
+   SIDEBAR — Educacional Moderno
    ========================================================== */
 
-.sidebar{
-  width:280px;
-  padding:16px 14px;
-  background: linear-gradient(180deg, var(--sidebar) 0%, var(--sidebar-2) 100%);
-  color: var(--sidebar-text);
-  box-shadow: 8px 0 30px rgba(0,0,0,.12);
-  position:relative;
+.sidebar {
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border-light);
+  padding: var(--space-6) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
 }
 
-.brand{ display:flex; align-items:center; gap:12px; padding:8px 10px; }
-.brand__logo{
-  width:44px; height:44px;
-  border-radius:16px;
-  display:flex; align-items:center; justify-content:center;
-  background: rgba(255,255,255,.14);
-  border:1px solid rgba(255,255,255,.18);
-  font-weight:900;
-}
-.brand__name{ font-weight:900; letter-spacing:.3px; }
-.brand__sub{ font-size:12px; margin-top:2px; color:var(--sidebar-muted); }
-
-.menu{ display:flex; flex-direction:column; gap:8px; margin-top:6px; }
-.menu__section{
-  margin-top:10px;
-  padding:6px 10px 2px;
-  font-size:11px;
-  letter-spacing:.6px;
-  text-transform:uppercase;
-  color:var(--sidebar-muted);
-}
-.menu__item{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:10px 12px;
-  border-radius:14px;
-  color:var(--sidebar-text);
-  background: var(--sidebar-item);
-  border:1px solid rgba(255,255,255,.10);
-  transition: .18s ease;
-}
-.menu__item:hover{
-  background: var(--sidebar-item-hover);
-  border-color: rgba(255,255,255,.18);
-  transform: translateY(-1px);
-}
-.menu__item.is-active{
-  background: var(--sidebar-item-active);
-  border-color: rgba(255,255,255,.22);
+.sidebar .logo {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary-600);
+  margin-bottom: var(--space-6);
 }
 
-.sidebar__footer{
-  position:absolute;
-  left:14px; right:14px; bottom:14px;
-  padding:12px 12px;
-  border-radius:16px;
-  background: rgba(255,255,255,.10);
-  border:1px solid rgba(255,255,255,.16);
+.sidebar a {
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: all .2s ease;
+}
+
+.sidebar a:hover {
+  background: var(--primary-50);
+  color: var(--primary-600);
+}
+
+.sidebar a.active {
+  background: var(--primary-100);
+  color: var(--primary-700);
 }
