@@ -178,8 +178,8 @@ def municipio_update(request, pk: int):
 
     # MUNICIPAL só pode editar o próprio município
     p_me = get_profile(request.user)
-    if not is_admin(request.user) and p_me and p_me.role == "UNIDADE":
-        return HttpResponseForbidden("403 — Gestor de unidade não pode editar município.")
+    if not is_admin(request.user):
+        return HttpResponseForbidden("403 — Apenas administrador pode editar município.")
 
     municipio = get_object_or_404(Municipio, pk=pk)
 
