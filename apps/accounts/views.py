@@ -163,21 +163,22 @@ def meu_perfil(request):
     p, _ = Profile.objects.get_or_create(user=request.user, defaults={"ativo": True})
 
     if request.method == "POST":
-        # Nome e CPF NÃO editáveis (mantém como está)
-        # request.user.first_name = ...
-        # request.user.last_name = ...
 
-        # Editáveis:
         request.user.email = (request.POST.get("email") or "").strip()
         request.user.save(update_fields=["email"])
 
-        # Se seu Profile tiver esses campos, atualiza também
         if hasattr(p, "telefone"):
             p.telefone = (request.POST.get("telefone") or "").strip()
+
         if hasattr(p, "endereco"):
             p.endereco = (request.POST.get("endereco") or "").strip()
 
+        # FOTO
+        if request.FILES.get("foto"):
+            p.foto = request.FILES["foto"]
+
         p.save()
+
         messages.success(request, "Perfil atualizado.")
         return redirect("accounts:meu_perfil")
 

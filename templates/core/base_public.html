@@ -8,21 +8,21 @@
   <title>{% block title %}GEPUB{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
 </head>
-<body>
-  <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:18px;">
-    <div style="width:100%; max-width:420px;">
-      {% if messages %}
-        <div class="flash-stack">
-          {% for message in messages %}
-            <div class="flash flash--{{ message.tags }}">
-              {{ message }}
-            </div>
-          {% endfor %}
-        </div>
-      {% endif %}
+<body class="public-body">
 
-      {% block content %}{% endblock %}
+  {% if messages %}
+    <div class="public-flash">
+      <div class="flash-stack">
+        {% for message in messages %}
+          <div class="flash flash--{{ message.tags }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
     </div>
-  </div>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+
 </body>
 </html>

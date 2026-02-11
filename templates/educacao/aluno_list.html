@@ -16,6 +16,11 @@
 <div class="card">
   <div class="card__title" style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
     <span>Alunos</span>
+    <div style="display:flex; gap:10px; align-items:center;">
+  <a class="btn" href="?{% if q %}q={{ q|urlencode }}&{% endif %}export=csv">Exportar CSV</a>
+  <a class="btn" href="?{% if q %}q={{ q|urlencode }}&{% endif %}export=pdf">Exportar PDF</a>
+</div>
+
     {% if can_edu_manage %}
       <a class="btn btn-primary" href="{% url 'educacao:aluno_create' %}">Novo Aluno</a>
     {% endif %}

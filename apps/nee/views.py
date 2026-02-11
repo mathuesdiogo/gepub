@@ -257,91 +257,35 @@ def relatorio_por_tipo(request):
 
 
 @login_required
+@login_required
 def relatorio_por_municipio(request):
-    ano = (request.GET.get("ano") or "").strip()
-    municipio_id = (request.GET.get("municipio") or "").strip()
-    situacao = (request.GET.get("situacao") or "").strip()
+    from django.core.exceptions import PermissionDenied
 
-    municipio_id, _unidade_id = _aplicar_rbac_relatorios(request, municipio_id, "")
+    # ❌ Só ADMIN pode acessar
+    if not is_admin(request.user):
+        raise PermissionDenied
 
-    matriculas = _matriculas_base()
-    matriculas = _aplicar_filtros_matriculas(matriculas, ano, municipio_id, "", situacao)
+    qs = Municipio.objects.filter(ativo=True)
 
-    alunos_ids = matriculas.values_list("aluno_id", flat=True).distinct()
+    dados = []
+    for m in qs:
+        total = AlunoNecessidade.objects.filter(
+            aluno__matriculas__turma__unidade__secretaria__municipio=m
+        ).values("aluno").distinct().count()
 
-    total_alunos_nee = (
-        AlunoNecessidade.objects
-        .filter(aluno_id__in=alunos_ids, ativo=True, tipo__ativo=True)
-        .values("aluno_id")
-        .distinct()
-        .count()
-    )
-
-    rows = (
-        AlunoNecessidade.objects
-        .filter(aluno_id__in=alunos_ids, ativo=True, tipo__ativo=True)
-        .values(
-            "aluno__matriculas__turma__unidade__secretaria__municipio__nome",
-            "aluno__matriculas__turma__unidade__secretaria__municipio__uf",
-        )
-        .annotate(total=Count("aluno_id", distinct=True))
-        .order_by(
-            "-total",
-            "aluno__matriculas__turma__unidade__secretaria__municipio__nome",
-        )
-    )
-
-    municipios = Municipio.objects.filter(ativo=True).order_by("nome")
-    if municipio_id.isdigit():
-        municipios = municipios.filter(id=int(municipio_id))
-
-    # ✅ CSV
-    if request.GET.get("format") == "csv":
-        response = _csv_response("nee_por_municipio.csv")
-        writer = csv.writer(response)
-        writer.writerow(["Município", "UF", "Total de alunos com NEE"])
-        for r in rows:
-            writer.writerow([
-                r["aluno__matriculas__turma__unidade__secretaria__municipio__nome"],
-                r["aluno__matriculas__turma__unidade__secretaria__municipio__uf"],
-                r["total"],
-            ])
-        return response
-
-    # ✅ PDF (corrigido: template + filename + sem unidade_id)
-    if request.GET.get("format") == "pdf":
-        filtros = f"Ano={ano or '-'} | Município={municipio_id or '-'} | Situação={situacao or 'ATIVA'}"
-        return _pdf_response(
-            request,
-            template="nee/relatorios/pdf/por_municipio.html",
-            filename="nee_por_municipio.pdf",
-            context={
-                "prefeitura_nome": "Prefeitura Municipal",
-                "municipio_nome": (Municipio.objects.filter(id=int(municipio_id)).values_list("nome", flat=True).first()
-                if municipio_id.isdigit() else ""),
-                "municipio_uf": (Municipio.objects.filter(id=int(municipio_id)).values_list("uf", flat=True).first()
-                if municipio_id.isdigit() else ""),
-
-                "title": "Relatório NEE — Por município",
-                "generated_at": timezone.localtime().strftime("%d/%m/%Y %H:%M"),
-                "filtros": filtros,
-                "rows": rows,
-                "total_alunos_nee": total_alunos_nee,
-            },
-        )
+        dados.append({
+            "municipio": m.nome,
+            "total": total,
+        })
 
     return render(
         request,
-        "nee/relatorios/por_municipio.html",
+        "nee/relatorio_por_municipio.html",
         {
-            "rows": rows,
-            "ano": ano,
-            "municipio_id": municipio_id,
-            "situacao": situacao,
-            "municipios": municipios,
-            "total_alunos_nee": total_alunos_nee,
+            "dados": dados,
         },
     )
+
 
 
 @login_required

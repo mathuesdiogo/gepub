@@ -1,0 +1,10 @@
+/* ==========================================================
+   TABLES
+   ========================================================== */
+
+table{ width:100%; border-collapse:collapse; }
+thead tr{ background: rgba(0,0,0,.03); }
+[data-theme="kassy"] thead tr{ background: rgba(255,255,255,.06); }
+
+th, td{ padding:10px 12px; border-top:1px solid var(--border-2); }
+tbody tr:hover{ background: rgba(19,81,180,.06); }

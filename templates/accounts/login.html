@@ -1,44 +1,85 @@
 {% extends "core/base_public.html" %}
+{% load static %}
 
 {% block title %}Entrar • GEPUB{% endblock %}
 
 {% block content %}
-  <div class="card">
-    <div class="card__title" style="display:flex; align-items:center; gap:10px;">
-      <span class="pill">GEPUB</span>
-      <span>Entrar</span>
+<div class="login-page">
+  <div class="login-frame">
+
+    <!-- ESQUERDA: FORM (SEM LOGO/NOME) -->
+    <div class="login-left">
+      <div class="login-left__inner">
+
+        <h1 class="login-title">Entrar</h1>
+        <p class="login-subtitle">Use seu <b>código de acesso</b> e senha para acessar o painel.</p>
+
+        {% if error %}
+          <div class="login-alert">
+            <b>Atenção:</b> {{ error }}
+          </div>
+        {% endif %}
+
+        <form method="post" class="login-form">
+          {% csrf_token %}
+
+          <div class="login-field">
+            <label>Código de acesso</label>
+            <input
+              name="codigo_acesso"
+              autocomplete="username"
+              required
+              placeholder="Ex.: MUN-000123"
+            >
+          </div>
+
+          <div class="login-field">
+            <label>Senha</label>
+            <input
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              required
+              placeholder="Digite sua senha"
+            >
+          </div>
+
+          <button type="submit" class="login-btn">
+            Entrar
+          </button>
+
+          <div class="login-help">
+            <div>Primeiro acesso? Sua senha inicial é seu <b>CPF</b>.</div>
+            <div class="login-help__small">Se precisar, peça ao administrador para resetar sua senha.</div>
+          </div>
+        </form>
+
+      </div>
     </div>
 
-    <div class="card__body">
-      <p style="margin-top:0;">
-        Use seu <strong>código de acesso</strong> e senha para entrar.
-        No primeiro acesso, a senha inicial é o <strong>CPF</strong>.
-      </p>
+    <!-- DIREITA: PAINEL AZUL (COM LOGO + NOME) -->
+    <div class="login-right">
+      <div class="login-right__inner">
 
-      {% if error %}
-        <p style="margin:10px 0; color:#ffb4b4;"><strong>{{ error }}</strong></p>
-      {% endif %}
-
-      <form method="post" style="display:flex; flex-direction:column; gap:10px;">
-        {% csrf_token %}
-
-        <div>
-          <label class="small">Código de acesso</label><br>
-          <input name="codigo_acesso" autocomplete="username" required
-                 style="width:100%; padding:10px 12px; border-radius:12px; border:2px solid rgba(90,166,255,.35); background:rgba(255,255,255,.03); color:inherit;">
+        <div class="login-right__brand">
+          <div class="login-right__logo">
+            <img src="{% static 'img/logo_prefeitura.png' %}" alt="GEPUB" onerror="this.style.display='none'">
+          </div>
+          <div class="login-right__brandtext">
+            <div class="login-right__sub">Gestão Estratégica Pública</div>
+          </div>
         </div>
 
-        <div>
-          <label class="small">Senha</label><br>
-          <input name="password" type="password" autocomplete="current-password" required
-                 style="width:100%; padding:10px 12px; border-radius:12px; border:2px solid rgba(90,166,255,.35); background:rgba(255,255,255,.03); color:inherit;">
+        <div class="login-right__text">
+          <div class="login-right__headline">Gestão pública em um só lugar</div>
+          <div class="login-right__desc">
+            Organização, Educação e NEE com acesso por perfil, relatórios e auditoria.
+          </div>
         </div>
 
-        <button type="submit"
-                style="padding:10px 12px; border-radius:12px; border:1px solid rgba(90,166,255,.35); background:rgba(90,166,255,.15); color:inherit; font-weight:800;">
-          Entrar
-        </button>
-      </form>
+      </div>
     </div>
+
   </div>
+</div>
 {% endblock %}

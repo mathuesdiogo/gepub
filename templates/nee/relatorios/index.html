@@ -26,6 +26,7 @@
     <span class="pill">Abrir</span>
   </a>
 
+  {% if request.user.is_superuser %}
   <a class="link-card" href="{% url 'nee:relatorio_por_municipio' %}">
     <div>
       <div style="font-weight:800;">Por município</div>
@@ -33,6 +34,8 @@
     </div>
     <span class="pill">Abrir</span>
   </a>
+{% endif %}
+
 
   <a class="link-card" href="{% url 'nee:relatorio_por_unidade' %}">
     <div>

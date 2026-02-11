@@ -10,12 +10,18 @@
     <span class="breadcrumbs__sep">/</span>
     <span class="breadcrumbs__current">Setores</span>
   </div>
+  
 {% endblock %}
 
 {% block content %}
 <div class="card">
   <div class="card__title" style="display:flex; justify-content:space-between;">
     <span>Setores</span>
+    <div style="display:flex; gap:10px; align-items:center;">
+  <a class="btn" href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if unidade_id %}unidade={{ unidade_id }}&{% endif %}export=csv">Exportar CSV</a>
+  <a class="btn" href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if unidade_id %}unidade={{ unidade_id }}&{% endif %}export=pdf">Exportar PDF</a>
+</div>
+
     <a class="link" href="{% url 'org:setor_create' %}">+ Novo setor</a>
   </div>
 

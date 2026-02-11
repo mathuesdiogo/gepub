@@ -1,5 +1,8 @@
 from django.conf import settings
 from django.db import models
+from io import BytesIO
+from PIL import Image
+from django.core.files.base import ContentFile
 
 
 class Turma(models.Model):
@@ -14,36 +17,26 @@ class Turma(models.Model):
         settings.AUTH_USER_MODEL,
         blank=True,
         related_name="turmas_ministradas",
-        verbose_name="Professores",
     )
 
-    nome = models.CharField(max_length=120)  # Ex.: 1º Ano A
-    ano_letivo = models.PositiveIntegerField(default=2026)
-    turno = models.CharField(
-        max_length=20,
-        choices=[
-            ("MANHA", "Manhã"),
-            ("TARDE", "Tarde"),
-            ("NOITE", "Noite"),
-            ("INTEGRAL", "Integral"),
-        ],
-        default="MANHA",
-    )
+    nome = models.CharField(max_length=160)
+    ano_letivo = models.IntegerField(default=2026)
+
+    class Turno(models.TextChoices):
+        MANHA = "MANHA", "Manhã"
+        TARDE = "TARDE", "Tarde"
+        NOITE = "NOITE", "Noite"
+
+    turno = models.CharField(max_length=20, choices=Turno.choices, default=Turno.MANHA)
     ativo = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = "Turma"
         verbose_name_plural = "Turmas"
         ordering = ["-ano_letivo", "nome"]
-        constraints = [
-            models.UniqueConstraint(
-                fields=["unidade", "ano_letivo", "nome"],
-                name="uniq_turma_por_unidade_ano_nome",
-            )
-        ]
         indexes = [
+            models.Index(fields=["nome"]),
             models.Index(fields=["ano_letivo"]),
-            models.Index(fields=["turno"]),
             models.Index(fields=["ativo"]),
         ]
 
@@ -53,6 +46,15 @@ class Turma(models.Model):
 
 class Aluno(models.Model):
     nome = models.CharField(max_length=180)
+
+    # ✅ FOTO DO ALUNO
+    foto = models.ImageField(
+        upload_to="alunos/",
+        blank=True,
+        null=True,
+        verbose_name="Foto",
+    )
+
     data_nascimento = models.DateField(null=True, blank=True)
     cpf = models.CharField(max_length=14, blank=True, default="")
     nis = models.CharField(max_length=20, blank=True, default="")
@@ -76,6 +78,33 @@ class Aluno(models.Model):
 
     def __str__(self) -> str:
         return self.nome
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        # Crop/resize automático da foto
+        if self.foto:
+            try:
+                img = Image.open(self.foto)
+                img = img.convert("RGB")
+
+                w, h = img.size
+                side = min(w, h)
+                left = (w - side) // 2
+                top = (h - side) // 2
+                img = img.crop((left, top, left + side, top + side))
+
+                img = img.resize((512, 512), Image.LANCZOS)
+
+                buf = BytesIO()
+                img.save(buf, format="JPEG", quality=88, optimize=True)
+
+                file_name = self.foto.name.rsplit(".", 1)[0] + ".jpg"
+                self.foto.save(file_name, ContentFile(buf.getvalue()), save=False)
+
+                super().save(update_fields=["foto"])
+            except Exception:
+                pass
 
 
 class Matricula(models.Model):
@@ -113,7 +142,8 @@ class Matricula(models.Model):
         ]
         indexes = [
             models.Index(fields=["situacao"]),
+            models.Index(fields=["data_matricula"]),
         ]
 
     def __str__(self) -> str:
-        return f"{self.aluno} → {self.turma}"
+        return f"{self.aluno} → {self.turma} ({self.situacao})"

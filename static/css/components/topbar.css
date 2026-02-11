@@ -1,0 +1,64 @@
+
+/* ==========================================================
+   TOPBAR
+   ========================================================== */
+
+.topbar{
+  height:64px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 18px;
+  background: rgba(255,255,255,.72);
+  backdrop-filter: blur(12px);
+  border-bottom:1px solid var(--border);
+}
+
+/* nos temas escuros, topbar vira vidro */
+[data-theme="kassy"] .topbar{
+  background: rgba(255,255,255,.06);
+  backdrop-filter: blur(14px);
+}
+
+.topbar__left{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.topbar__title{ font-weight:900; }
+.topbar__right{ display:flex; align-items:center; gap:12px; }
+
+.pill{
+  font-size:12px;
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background: rgba(255,255,255,.55);
+  color: var(--muted);
+}
+[data-theme="kassy"] .pill{
+  background: rgba(255,255,255,.06);
+}
+
+/* Select de tema */
+.theme-select-wrap{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px 10px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background: rgba(255,255,255,.55);
+}
+[data-theme="kassy"] .theme-select-wrap{
+  background: rgba(255,255,255,.06);
+}
+.theme-select{
+  width:auto;
+  min-width:190px;
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background: rgba(255,255,255,.88);
+  color: var(--text);
+  outline:none;
+}
+[data-theme="kassy"] .theme-select{
+  background: rgba(255,255,255,.07);
+}

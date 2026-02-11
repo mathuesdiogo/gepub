@@ -1,0 +1,33 @@
+/* ==========================================================
+   BUTTONS
+   ========================================================== */
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:10px 14px;
+  border-radius: 14px;
+  border:1px solid var(--border);
+  font-weight:900;
+  cursor:pointer;
+  background: rgba(255,255,255,.70);
+}
+[data-theme="kassy"] .btn{
+  background: rgba(255,255,255,.06);
+}
+
+.btn-primary,
+button{
+  border: 1px solid rgba(255,255,255,.10);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
+  color:#fff;
+  font-weight:1000;
+  box-shadow: 0 10px 26px rgba(0,0,0,.18);
+}
+.btn-primary:hover,
+button:hover{
+  filter:brightness(1.05);
+  transform: translateY(-1px);
+}

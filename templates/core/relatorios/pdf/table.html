@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <title>{{ title }}</title>
+
+  <style>
+    :root{
+      --blue: #1f4e79;          /* azul institucional */
+      --blue-2: #173b5a;
+      --ink: #111318;
+      --muted: #5b6675;
+      --line: #d7dde6;
+      --bg-soft: #f5f7fb;
+      --bg-row: #f7f9fc;
+    }
+
+    /* Paginação real (WeasyPrint suporta counter(page) e counter(pages)) */
+    @page {
+      size: A4;
+      margin: 16mm 14mm 16mm 14mm;
+
+      @bottom-left {
+        content: "GEPUB — Gestão Estratégica Pública";
+        font-size: 9.5px;
+        color: #4c5563;
+      }
+
+      @bottom-right {
+        content: "Página " counter(page) " de " counter(pages);
+        font-size: 9.5px;
+        color: #4c5563;
+      }
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      font-size: 11px;
+      line-height: 1.25;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--blue), var(--blue-2));
+      color: #fff;
+    }
+
+    .logo {
+      width: 52px;
+      height: 52px;
+      object-fit: contain;
+      background: rgba(255,255,255,.08);
+      border-radius: 10px;
+      padding: 6px;
+    }
+
+    .header__center {
+      flex: 1;
+      text-align: center; /* ✅ Título centralizado */
+    }
+
+    .title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+
+    .subtitle {
+      margin: 4px 0 0 0;
+      font-size: 12px;
+      font-weight: 600;
+      opacity: .95;
+    }
+
+    .header__right {
+      width: 140px;
+      text-align: right;
+      font-size: 10px;
+      opacity: .95;
+    }
+
+    .meta {
+      margin-top: 8px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 12px;
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .meta .chip {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 10px;
+      padding: 8px 10px;
+    }
+
+    .meta b { color: #2a3340; }
+
+    .filters {
+      margin-top: 10px;
+      border: 1px solid var(--line);
+      background: var(--bg-soft);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 10.5px;
+      color: #384252;
+    }
+
+    .filters b { color: #1f2a38; }
+
+    .table-wrap {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10.5px;
+    }
+
+    thead th {
+      background: rgba(31,78,121,.95);
+      color: #fff;
+      text-align: left;
+      padding: 9px 9px;
+      font-weight: 800;
+      letter-spacing: .2px;
+      border-right: 1px solid rgba(255,255,255,.15);
+    }
+
+    thead th:last-child { border-right: 0; }
+
+    tbody td {
+      padding: 8px 9px;
+      vertical-align: top;
+      border-top: 1px solid #eef2f7;
+      color: #19202b;
+    }
+
+    tbody tr:nth-child(even) td {
+      background: var(--bg-row);
+    }
+
+    .footer-extra {
+      margin-top: 12px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: #fff;
+    }
+
+    .hash {
+      font-size: 10px;
+      color: #3a4453;
+    }
+
+    .hash code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 10px;
+      background: #f2f4f8;
+      border: 1px solid #e2e8f0;
+      padding: 2px 6px;
+      border-radius: 8px;
+    }
+
+    .qr {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 10px;
+      color: #3a4453;
+    }
+
+    .qr img {
+      width: 54px;
+      height: 54px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 6px;
+    }
+
+    /* evita quebrar linha feio em células curtas */
+    td, th { word-break: break-word; }
+  </style>
+</head>
+
+<body>
+
+  <!-- Cabeçalho azul institucional -->
+  <div class="header">
+    <img class="logo" src="{{ logo_url }}" alt="Logo" />
+    <div class="header__center">
+      <p class="title">{{ title }}</p>
+      {% if subtitle %}
+        <p class="subtitle">{{ subtitle }}</p>
+      {% endif %}
+    </div>
+    <div class="header__right">
+      <div><b>GEPUB</b></div>
+      <div>Relatório</div>
+    </div>
+  </div>
+
+  <!-- Metadados -->
+  <div class="meta">
+    <div class="chip"><b>Impresso por:</b> {{ printed_by }}</div>
+    <div class="chip"><b>Data/hora:</b> {{ printed_at }}</div>
+  </div>
+
+  <!-- Filtros -->
+  {% if filtros %}
+    <div class="filters"><b>Filtros:</b> {{ filtros }}</div>
+  {% endif %}
+
+  <!-- Tabela -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          {% for h in headers %}
+            <th>{{ h }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+          <tr>
+            {% for c in r %}
+              <td>{{ c }}</td>
+            {% endfor %}
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="{{ headers|length }}">Sem dados.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Rodapé extra (hash + QR) -->
+  <div class="footer-extra">
+    <div class="hash">
+      <b>ID do relatório:</b> <code>{{ report_hash }}</code><br/>
+      <span style="color:#677386;">Use este ID para auditoria/validação do documento.</span>
+    </div>
+
+    <div class="qr">
+      {% if qr_data_uri %}
+        <img src="{{ qr_data_uri }}" alt="QR Code" />
+        <div>
+          <b>QR de validação</b><br/>
+          <span style="color:#677386;">Escaneie para identificar este relatório.</span>
+        </div>
+      {% else %}
+        <div>
+          <b>Validação</b><br/>
+          <span style="color:#677386;">QR indisponível (instale <code>qrcode</code>).</span>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</body>
+</html>

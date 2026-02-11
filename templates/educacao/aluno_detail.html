@@ -25,48 +25,106 @@
   </div>
 
   <div class="card__body">
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; max-width:980px;">
-      <div>
-        <div class="small">CPF</div>
-        <div style="font-weight:800;">{{ aluno.cpf|default:"—" }}</div>
-      </div>
-      <div>
-        <div class="small">NIS</div>
-        <div style="font-weight:800;">{{ aluno.nis|default:"—" }}</div>
-      </div>
-
-      <div>
-        <div class="small">Nascimento</div>
-        <div style="font-weight:800;">{{ aluno.data_nascimento|date:"d/m/Y"|default:"—" }}</div>
-      </div>
-      <div>
-        <div class="small">Ativo</div>
-        <div style="font-weight:800;">{% if aluno.ativo %}Sim{% else %}Não{% endif %}</div>
+    <div style="display:flex; gap:18px; flex-wrap:wrap; align-items:flex-start;">
+      <!-- FOTO (clicável) -->
+      <div style="flex:0 0 110px;">
+        <button type="button" id="openAlunoFoto" class="avatar-btn" aria-label="Ver foto do aluno"
+                style="border:0; padding:0; background:transparent; cursor:pointer;">
+          <div class="avatar-lg">
+            {% if aluno.foto %}
+              <img src="{{ aluno.foto.url }}" alt="Foto de {{ aluno.nome }}"
+                   style="width:100%; height:100%; object-fit:cover;">
+            {% else %}
+              <span class="avatar-initial">{{ aluno.nome|default:""|slice:":1" }}</span>
+            {% endif %}
+          </div>
+        </button>
+        <div class="small" style="opacity:.7; margin-top:6px;">Clique para ampliar</div>
       </div>
 
-      <div>
-        <div class="small">Mãe</div>
-        <div style="font-weight:800;">{{ aluno.nome_mae|default:"—" }}</div>
-      </div>
-      <div>
-        <div class="small">Pai</div>
-        <div style="font-weight:800;">{{ aluno.nome_pai|default:"—" }}</div>
-      </div>
+      <!-- DADOS -->
+      <div style="flex:1; min-width:280px;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; max-width:980px;">
+          <div>
+            <div class="small">CPF</div>
+            <div style="font-weight:800;">{{ aluno.cpf|default:"—" }}</div>
+          </div>
+          <div>
+            <div class="small">NIS</div>
+            <div style="font-weight:800;">{{ aluno.nis|default:"—" }}</div>
+          </div>
 
-      <div>
-        <div class="small">Telefone</div>
-        <div style="font-weight:800;">{{ aluno.telefone|default:"—" }}</div>
-      </div>
-      <div>
-        <div class="small">E-mail</div>
-        <div style="font-weight:800;">{{ aluno.email|default:"—" }}</div>
-      </div>
+          <div>
+            <div class="small">Nascimento</div>
+            <div style="font-weight:800;">{{ aluno.data_nascimento|date:"d/m/Y"|default:"—" }}</div>
+          </div>
+          <div>
+            <div class="small">Ativo</div>
+            <div style="font-weight:800;">
+              {% if aluno.ativo %}
+                <span class="status-badge status-badge--ok">Ativo</span>
+              {% else %}
+                <span class="status-badge status-badge--no">Inativo</span>
+              {% endif %}
+            </div>
+          </div>
 
-      <div style="grid-column:1 / -1;">
-        <div class="small">Endereço</div>
-        <div style="font-weight:800; white-space:pre-wrap;">{{ aluno.endereco|default:"—" }}</div>
+          <div>
+            <div class="small">Mãe</div>
+            <div style="font-weight:800;">{{ aluno.nome_mae|default:"—" }}</div>
+          </div>
+          <div>
+            <div class="small">Pai</div>
+            <div style="font-weight:800;">{{ aluno.nome_pai|default:"—" }}</div>
+          </div>
+
+          <div>
+            <div class="small">Telefone</div>
+            <div style="font-weight:800;">{{ aluno.telefone|default:"—" }}</div>
+          </div>
+          <div>
+            <div class="small">E-mail</div>
+            <div style="font-weight:800;">{{ aluno.email|default:"—" }}</div>
+          </div>
+
+          <div style="grid-column:1 / -1;">
+            <div class="small">Endereço</div>
+            <div style="font-weight:800; white-space:pre-wrap;">{{ aluno.endereco|default:"—" }}</div>
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- MODAL FOTO -->
+    <div id="alunoFotoModal" class="modal" aria-hidden="true">
+      <div class="modal__backdrop" data-close="1"></div>
+      <div class="modal__panel" role="dialog" aria-modal="true" aria-label="Foto do aluno">
+        <button type="button" class="modal__close" data-close="1" aria-label="Fechar">×</button>
+        {% if aluno.foto %}
+          <img src="{{ aluno.foto.url }}" alt="Foto de {{ aluno.nome }}" class="modal__img">
+        {% else %}
+          <div class="modal__empty">
+            <div class="avatar-xl">
+              <span class="avatar-initial">{{ aluno.nome|default:""|slice:":1" }}</span>
+            </div>
+            <div style="margin-top:10px; font-weight:900;">Sem foto cadastrada</div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <script>
+      (function(){
+        const btn = document.getElementById("openAlunoFoto");
+        const modal = document.getElementById("alunoFotoModal");
+        if(!btn || !modal) return;
+        const open = () => { modal.setAttribute("aria-hidden","false"); modal.classList.add("is-open"); };
+        const close = () => { modal.setAttribute("aria-hidden","true"); modal.classList.remove("is-open"); };
+        btn.addEventListener("click", open);
+        modal.addEventListener("click", (e)=>{ if(e.target && e.target.dataset && e.target.dataset.close) close(); });
+        document.addEventListener("keydown", (e)=>{ if(e.key === "Escape" && modal.classList.contains("is-open")) close(); });
+      })();
+    </script>
 
     {% if not can_edu_manage %}
       <div style="margin-top:14px;">
@@ -74,217 +132,367 @@
       </div>
     {% endif %}
 
-    <!-- MATRÍCULAS -->
-    <div class="form-section" style="margin-top:18px;">
-      <div class="form-section__title">Matrículas</div>
+    <!-- =========================
+         MATRÍCULAS
+         ========================= -->
+ <div class="aluno-blocks" style="grid-template-columns: 1fr;">
 
-      <div style="overflow:auto; border:1px solid rgba(255,255,255,.08); border-radius:14px;">
-        <table style="width:100%; border-collapse:collapse; min-width:980px;">
-          <thead>
-            <tr style="text-align:left; background:rgba(255,255,255,.03);">
-              <th style="padding:10px 12px;">Turma</th>
-              <th style="padding:10px 12px;">Unidade</th>
-              <th style="padding:10px 12px; width:140px;">Ano</th>
-              <th style="padding:10px 12px; width:160px;">Situação</th>
-              <th style="padding:10px 12px; width:160px;">Data</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for m in matriculas %}
-              <tr style="border-top:1px solid rgba(255,255,255,.06);">
-                <td style="padding:10px 12px;">{{ m.turma.nome }}</td>
-                <td style="padding:10px 12px;">{{ m.turma.unidade.nome }}</td>
-                <td style="padding:10px 12px;">{{ m.turma.ano_letivo }}</td>
-                <td style="padding:10px 12px;">{{ m.get_situacao_display }}</td>
-                <td style="padding:10px 12px;">{{ m.data_matricula|date:"d/m/Y"|default:"—" }}</td>
-              </tr>
-            {% empty %}
-              <tr><td colspan="5" style="padding:12px;">Nenhuma matrícula ainda.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
+  <!-- =========================
+       MATRÍCULAS (TOPO, largura toda da grade)
+       ========================= -->
+  <div class="s-card">
+    <div class="s-head">
+      <div class="s-head__left">
+        <div class="s-title">Matrículas</div>
+        <div class="s-sub">Turmas vinculadas ao aluno</div>
       </div>
 
-      {% if can_edu_manage %}
-        <div style="margin-top:14px;">
-          <div class="small" style="margin-bottom:8px;">Adicionar matrícula</div>
+      <div class="s-head__right">
+        
+      </div>
+    </div>
 
-          <form method="post" style="display:grid; grid-template-columns: 1fr 220px 220px; gap:12px; max-width:980px;">
-            {% csrf_token %}
-            <input type="hidden" name="_action" value="add_matricula" />
+    <details class="s-acc" open>
+      <summary>
+        <span class="s-acc__label"><span class="chev"></span> Ver matrículas</span>
+        <span class="small" style="opacity:.75;">Detalhes e histórico</span>
+      </summary>
 
-            <div style="grid-column:1 / -1;">
-              <label class="small">Turma</label><br>
-              {{ form_matricula.turma }}
-              {% if form_matricula.turma.errors %}<div class="small" style="color:#ffb4b4;">{{ form_matricula.turma.errors|striptags }}</div>{% endif %}
-            </div>
-
-            <div>
-              <label class="small">Data</label><br>
-              {{ form_matricula.data_matricula }}
-            </div>
-
-            <div>
-              <label class="small">Situação</label><br>
-              {{ form_matricula.situacao }}
-            </div>
-
-            <div style="grid-column:1 / -1;">
-              <label class="small">Observação</label><br>
-              {{ form_matricula.observacao }}
-            </div>
-
-            <div style="grid-column:1 / -1; display:flex; gap:10px; margin-top:6px;">
-              <button type="submit">Adicionar matrícula</button>
-            </div>
-          </form>
+      <div class="s-body">
+        <div class="s-tablewrap">
+          <table style="width:100%; border-collapse:collapse; min-width:980px;">
+            <thead>
+              <tr style="text-align:left; background:rgba(255,255,255,.03);">
+                <th style="padding:10px 12px;">Turma</th>
+                <th style="padding:10px 12px;">Unidade</th>
+                <th style="padding:10px 12px; width:140px;">Ano</th>
+                <th style="padding:10px 12px; width:160px;">Situação</th>
+                <th style="padding:10px 12px; width:160px;">Data</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for m in matriculas %}
+                <tr style="border-top:1px solid rgba(255,255,255,.06);">
+                  <td style="padding:10px 12px;">
+                    <a class="link" href="{% url 'educacao:turma_detail' m.turma.pk %}">{{ m.turma.nome }}</a>
+                  </td>
+                  <td style="padding:10px 12px;">{{ m.turma.unidade.nome }}</td>
+                  <td style="padding:10px 12px;">{{ m.turma.ano_letivo }}</td>
+                  <td style="padding:10px 12px;">{{ m.get_situacao_display }}</td>
+                  <td style="padding:10px 12px;">{{ m.data_matricula|date:"d/m/Y"|default:"—" }}</td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="5" style="padding:12px;">Nenhuma matrícula encontrada.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
-      {% endif %}
+
+        {% if can_edu_manage %}
+          <details style="margin-top:12px;" {% if form_matricula.errors %}open{% endif %}>
+            <summary class="link" style="cursor:pointer; font-weight:900;">Adicionar matrícula aqui</summary>
+            <div class="mini">
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="_action" value="add_matricula">
+                {{ form_matricula.as_p }}
+                <button type="submit" class="btn btn-primary">Salvar matrícula</button>
+              </form>
+            </div>
+          </details>
+        {% endif %}
+      </div>
+    </details>
+  </div>
+
+  <!-- =========================
+       LINHA DE BAIXO: 2 COLUNAS (NEE / APOIOS)
+       ========================= -->
+  <div class="aluno-blocks" style="grid-template-columns: 1fr 1fr; margin-top:0;">
+    <!-- NEE -->
+    <div class="s-card">
+      <div class="s-head">
+        <div class="s-head__left">
+          <div class="s-title">NEE • Necessidades</div>
+          <div class="s-sub">Tipos vinculados ao aluno</div>
+        </div>
+
+        <div class="s-head__right">
+          <span class="s-pill">{{ necessidades|length }}</span>
+        </div>
+      </div>
+
+      <details class="s-acc" open>
+        <summary>
+          <span class="s-acc__label"><span class="chev"></span> Ver necessidades</span>
+          <span class="small" style="opacity:.75;">Lista e cadastro</span>
+        </summary>
+
+        <div class="s-body">
+          <div class="chips">
+            {% for n in necessidades %}
+              <span class="pill">{{ n.tipo.nome }}</span>
+            {% empty %}
+              <span class="small">Nenhuma necessidade vinculada.</span>
+            {% endfor %}
+          </div>
+
+          {% if can_edu_manage %}
+            <details style="margin-top:12px;" {% if form_nee.errors %}open{% endif %}>
+              <summary class="link" style="cursor:pointer; font-weight:900;">Cadastrar necessidade (NEE)</summary>
+              <div class="mini">
+                <form method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="_action" value="add_nee">
+                  {{ form_nee.as_p }}
+                  <button type="submit" class="btn btn-primary">Salvar necessidade</button>
+                </form>
+              </div>
+            </details>
+          {% endif %}
+        </div>
+      </details>
     </div>
 
     <!-- APOIOS -->
-    <div class="form-section" style="margin-top:22px;">
-      <div class="form-section__title">Apoios por Matrícula</div>
+    <div class="s-card">
+      <div class="s-head">
+        <div class="s-head__left">
+          <div class="s-title">Apoios / Acompanhamentos</div>
+          <div class="s-sub">Registros por matrícula</div>
+        </div>
 
-      <div style="overflow:auto; border:1px solid rgba(255,255,255,.08); border-radius:14px;">
-        <table style="width:100%; border-collapse:collapse; min-width:1100px;">
-          <thead>
-            <tr style="text-align:left; background:rgba(255,255,255,.03);">
-              <th style="padding:10px 12px;">Tipo</th>
-              <th style="padding:10px 12px;">Descrição</th>
-              <th style="padding:10px 12px; width:120px;">CH/Sem</th>
-              <th style="padding:10px 12px;">Turma</th>
-              <th style="padding:10px 12px; width:90px;">Ano</th>
-              <th style="padding:10px 12px; width:120px;">Ativo</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for a in apoios %}
-              <tr style="border-top:1px solid rgba(255,255,255,.06);">
-                <td style="padding:10px 12px;">{{ a.get_tipo_display }}</td>
-                <td style="padding:10px 12px;">{{ a.descricao|default:"—" }}</td>
-                <td style="padding:10px 12px;">{{ a.carga_horaria_semanal|default:"—" }}</td>
-                <td style="padding:10px 12px;">{{ a.matricula.turma.nome }} • {{ a.matricula.turma.unidade.nome }}</td>
-                <td style="padding:10px 12px;">{{ a.matricula.turma.ano_letivo }}</td>
-                <td style="padding:10px 12px;">{% if a.ativo %}Sim{% else %}Não{% endif %}</td>
-              </tr>
-            {% empty %}
-              <tr><td colspan="6" style="padding:12px;">Nenhum apoio cadastrado.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
+        <div class="s-head__right">
+          <span class="s-pill">{{ apoios|length }}</span>
+        </div>
       </div>
 
-      {% if can_edu_manage %}
-        <div style="margin-top:14px;">
-          <div class="small" style="margin-bottom:8px;">Adicionar apoio</div>
+      <details class="s-acc">
+        <summary>
+          <span class="s-acc__label"><span class="chev"></span> Ver apoios</span>
+          <span class="small" style="opacity:.75;">Histórico e cadastro</span>
+        </summary>
 
-          <form method="post" style="display:grid; grid-template-columns: 1fr 260px 200px; gap:12px; max-width:1100px;">
-            {% csrf_token %}
-            <input type="hidden" name="_action" value="add_apoio" />
+        <div class="s-body">
+          {% for a in apoios %}
+            <div class="mini">
+              <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                <div style="font-weight:900;">
+                  {{ a.matricula.turma.nome }} — {{ a.matricula.turma.unidade.nome }}
+                </div>
+                <div class="small" style="opacity:.75;">#{{ a.id }}</div>
+              </div>
 
-            <div style="grid-column:1 / -1;">
-              <label class="small">Matrícula (Turma)</label><br>
-              {{ form_apoio.matricula }}
-              {% if form_apoio.matricula.errors %}<div class="small" style="color:#ffb4b4;">{{ form_apoio.matricula.errors|striptags }}</div>{% endif %}
+              <div style="margin-top:6px; white-space:pre-wrap;">
+                {{ a.observacao|default:a.descricao|default:"" }}
+              </div>
             </div>
+          {% empty %}
+            <span class="small">Nenhum apoio/acompanhamento registrado.</span>
+          {% endfor %}
 
-            <div>
-              <label class="small">Tipo</label><br>
-              {{ form_apoio.tipo }}
-              {% if form_apoio.tipo.errors %}<div class="small" style="color:#ffb4b4;">{{ form_apoio.tipo.errors|striptags }}</div>{% endif %}
-            </div>
-
-            <div>
-              <label class="small">CH/Sem</label><br>
-              {{ form_apoio.carga_horaria_semanal }}
-            </div>
-
-            <div style="grid-column:1 / -1;">
-              <label class="small">Descrição</label><br>
-              {{ form_apoio.descricao }}
-            </div>
-
-            <label class="small" style="display:flex; align-items:center; gap:8px;">
-              {{ form_apoio.ativo }} Ativo
-            </label>
-
-            <div style="grid-column:1 / -1;">
-              <button type="submit">Adicionar apoio</button>
-            </div>
-          </form>
+          {% if can_edu_manage %}
+            <details style="margin-top:12px;" {% if form_apoio.errors %}open{% endif %}>
+              <summary class="link" style="cursor:pointer; font-weight:900;">Cadastrar apoio</summary>
+              <div class="mini">
+                <form method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="_action" value="add_apoio">
+                  {{ form_apoio.as_p }}
+                  <button type="submit" class="btn btn-primary">Salvar apoio</button>
+                </form>
+              </div>
+            </details>
+          {% endif %}
         </div>
-      {% endif %}
-    </div>
-
-    <!-- NEE -->
-    <div class="form-section" style="margin-top:22px;">
-      <div class="form-section__title">NEE • Necessidades Educacionais</div>
-
-      <div style="overflow:auto; border:1px solid rgba(255,255,255,.08); border-radius:14px;">
-        <table style="width:100%; border-collapse:collapse; min-width:900px;">
-          <thead>
-            <tr style="text-align:left; background:rgba(255,255,255,.03);">
-              <th style="padding:10px 12px;">Tipo</th>
-              <th style="padding:10px 12px; width:160px;">CID</th>
-              <th style="padding:10px 12px; width:120px;">Ativo</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for n in necessidades %}
-              <tr style="border-top:1px solid rgba(255,255,255,.06);">
-                <td style="padding:10px 12px;">{{ n.tipo.nome }}</td>
-                <td style="padding:10px 12px;">{{ n.cid|default:"—" }}</td>
-                <td style="padding:10px 12px;">{% if n.ativo %}Sim{% else %}Não{% endif %}</td>
-              </tr>
-            {% empty %}
-              <tr><td colspan="3" style="padding:12px;">Nenhuma necessidade cadastrada.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-
-      {% if can_edu_manage %}
-        <div style="margin-top:14px;">
-          <div class="small" style="margin-bottom:8px;">Adicionar necessidade</div>
-
-          <form method="post" style="display:grid; grid-template-columns: 1fr 220px; gap:12px; max-width:980px;">
-            {% csrf_token %}
-            <input type="hidden" name="_action" value="add_nee" />
-
-            <div>
-              <label class="small">Tipo</label><br>
-              {{ form_nee.tipo }}
-              {% if form_nee.tipo.errors %}<div class="small" style="color:#ffb4b4;">{{ form_nee.tipo.errors|striptags }}</div>{% endif %}
-            </div>
-
-            <div>
-              <label class="small">CID</label><br>
-              {{ form_nee.cid }}
-              {% if form_nee.cid.errors %}<div class="small" style="color:#ffb4b4;">{{ form_nee.cid.errors|striptags }}</div>{% endif %}
-            </div>
-
-            <div style="grid-column:1 / -1;">
-              <label class="small">Observação</label><br>
-              {{ form_nee.observacao }}
-              {% if form_nee.observacao.errors %}<div class="small" style="color:#ffb4b4;">{{ form_nee.observacao.errors|striptags }}</div>{% endif %}
-            </div>
-
-            <label class="small" style="display:flex; align-items:center; gap:8px;">
-              {{ form_nee.ativo }} Ativo
-            </label>
-
-            <div style="grid-column:1 / -1; display:flex; gap:10px; margin-top:6px;">
-              <button type="submit">Adicionar</button>
-            </div>
-          </form>
-        </div>
-      {% endif %}
-    </div>
-
-    <div style="margin-top:14px;">
-      <a class="link" href="{% url 'educacao:aluno_list' %}">← Voltar para lista</a>
+      </details>
     </div>
   </div>
+
 </div>
+
+
+
+<style>
+  /* GRID dos blocos */
+  .aluno-blocks{
+    display:grid;
+    grid-template-columns: 1.1fr .9fr;
+    gap:14px;
+    margin-top:18px;
+    align-items:start;
+  }
+  @media (max-width: 1100px){
+    .aluno-blocks{ grid-template-columns: 1fr; }
+  }
+
+  /* Card base clean */
+  .s-card{
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:16px;
+    background: rgba(255,255,255,.035);
+    overflow:hidden;
+  }
+  /* Se você estiver no tema claro, isso mantém clean */
+  body[data-theme*="claro"] .s-card,
+  body[data-theme*="Azul"] .s-card,
+  body[data-theme*="institucional"] .s-card{
+    border:1px solid rgba(0,0,0,.08);
+    background: rgba(255,255,255,.85);
+  }
+
+  /* Header do bloco */
+  .s-head{
+    padding:12px 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .s-head__left{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    min-width:0;
+  }
+  .s-title{
+    font-weight:900;
+    letter-spacing:.2px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .s-sub{
+    font-size:12px;
+    opacity:.75;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .s-head__right{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex:0 0 auto;
+  }
+
+  .s-pill{
+    padding:6px 10px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:800;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.05);
+    opacity:.95;
+  }
+  body[data-theme*="claro"] .s-pill,
+  body[data-theme*="Azul"] .s-pill,
+  body[data-theme*="institucional"] .s-pill{
+    border:1px solid rgba(0,0,0,.10);
+    background: rgba(0,0,0,.03);
+  }
+
+  /* Accordion com chevron */
+  .s-acc{
+    border-top:1px solid rgba(255,255,255,.08);
+  }
+  body[data-theme*="claro"] .s-acc,
+  body[data-theme*="Azul"] .s-acc,
+  body[data-theme*="institucional"] .s-acc{
+    border-top:1px solid rgba(0,0,0,.08);
+  }
+
+  .s-acc > summary{
+    list-style:none;
+    cursor:pointer;
+    padding:12px 14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    user-select:none;
+  }
+  .s-acc > summary::-webkit-details-marker{ display:none; }
+
+  .s-acc__label{
+    font-weight:900;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .chev{
+    width:10px;
+    height:10px;
+    border-right:2px solid rgba(255,255,255,.55);
+    border-bottom:2px solid rgba(255,255,255,.55);
+    transform: rotate(-45deg);
+    transition: transform .18s ease;
+    margin-top:2px;
+  }
+  body[data-theme*="claro"] .chev,
+  body[data-theme*="Azul"] .chev,
+  body[data-theme*="institucional"] .chev{
+    border-right:2px solid rgba(0,0,0,.45);
+    border-bottom:2px solid rgba(0,0,0,.45);
+  }
+  details[open] > summary .chev{
+    transform: rotate(45deg);
+  }
+
+  .s-body{
+    padding:0 14px 14px;
+  }
+
+  /* Blocos internos (tabela/listas) mais organizados */
+  .s-tablewrap{
+    overflow:auto;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:14px;
+    margin-top:10px;
+  }
+  body[data-theme*="claro"] .s-tablewrap,
+  body[data-theme*="Azul"] .s-tablewrap,
+  body[data-theme*="institucional"] .s-tablewrap{
+    border:1px solid rgba(0,0,0,.08);
+  }
+
+  .chips{
+    margin-top:10px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  /* Mini cards (apoios) */
+  .mini{
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.03);
+    border-radius:14px;
+    padding:10px 12px;
+    margin-top:10px;
+  }
+  body[data-theme*="claro"] .mini,
+  body[data-theme*="Azul"] .mini,
+  body[data-theme*="institucional"] .mini{
+    border:1px solid rgba(0,0,0,.08);
+    background: rgba(255,255,255,.75);
+  }
+
+  /* Botão padrão dentro do header para não “quebrar” visual */
+  .btn.btn-soft{
+    border-radius:999px;
+    padding:8px 12px;
+    background: rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.12);
+  }
+  body[data-theme*="claro"] .btn.btn-soft,
+  body[data-theme*="Azul"] .btn.btn-soft,
+  body[data-theme*="institucional"] .btn.btn-soft{
+    background: rgba(0,0,0,.03);
+    border:1px solid rgba(0,0,0,.10);
+  }
+</style>
+
+
 {% endblock %}

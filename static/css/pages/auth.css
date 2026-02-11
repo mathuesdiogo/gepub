@@ -1,0 +1,17 @@
+/* ==========================================================
+   AUTH — layout desktop largo (sem aparência de celular)
+   ========================================================== */
+
+/* quebra qualquer container do base_public */
+.auth-page{
+  width: 100%;
+}
+.auth-page .container,
+.auth-page .page,
+.auth-page .wrap,
+.auth-page main{
+  max-width: none !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}

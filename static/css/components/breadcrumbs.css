@@ -1,0 +1,9 @@
+/* ==========================================================
+   BREADCRUMBS
+   ========================================================== */
+
+.breadcrumbs{ display:flex; gap:8px; align-items:center; color:var(--muted); font-size:12px; }
+.breadcrumbs__link{ color:var(--muted); }
+.breadcrumbs__link:hover{ color:var(--text); }
+.breadcrumbs__sep{ opacity:.6; }
+.breadcrumbs__current{ color:var(--text); font-weight:800; }
