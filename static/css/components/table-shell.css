@@ -1,0 +1,96 @@
+/* Table Shell */
+.table-shell{
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-card);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+}
+
+.table-shell__scroll{
+  overflow: auto;
+}
+
+.table-shell__table{
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 820px;
+}
+
+.table-shell__table thead th{
+  text-align: left;
+  background: var(--color-neutral-50);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.table-shell__table tbody td{
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border-light);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.table-shell__table tbody tr:nth-child(even) td{
+  background: rgba(17,24,39,.02);
+}
+
+.table-shell__table tbody tr:hover td{
+  background: var(--color-primary-50);
+  color: var(--color-text-primary);
+}
+
+.table-shell__table tbody tr:last-child td{
+  border-bottom: 0;
+}
+/* Table Shell — contraste estilo "aluno_list" */
+.table-shell{
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-card);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+}
+
+.table-shell__scroll{ overflow:auto; }
+
+.table-shell__table{
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 820px;
+}
+
+/* Cabeçalho com mais contraste */
+.table-shell__table thead th{
+  text-align: left;
+  background: var(--color-neutral-100); /* ↑ mais contraste */
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  padding: 12px 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Linhas e células */
+.table-shell__table tbody td{
+  padding: 12px 12px;
+  border-bottom: 1px solid var(--color-border-light);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* Zebra (mais forte) */
+.table-shell__table tbody tr:nth-child(even) td{
+  background: var(--color-primary-50); /* ↑ contraste */
+}
+
+/* Hover (bem visível) */
+.table-shell__table tbody tr:hover td{
+  background: var(--color-primary-100);
+  color: var(--color-text-primary);
+}
+
+.table-shell__table tbody tr:last-child td{ border-bottom: 0; }

@@ -1,169 +1,261 @@
+/* =========================================================
+   GEPUB — SIDEBAR (AZUL SÓLIDO, ESTILO IMAGEM)
+   - Sem gradiente
+   - Ícones brancos
+   - Ativo em formato pill
+   ========================================================= */
+
 .sidebar{
-  background: var(--sidebar-bg);
-  border-right: 1px solid var(--sidebar-border);
-  padding: 14px;
-  color: var(--sidebar-text);
+  background: #2D6FD3; /* azul da imagem (sólido) */
+  color: rgba(255,255,255,.92);
+  padding: 18px;
+  border-right: 0;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Header */
+/* Linha separadora suave (como na imagem) */
 .sidebar__header{
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 14px;
+  padding: 10px 6px 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(255,255,255,.18);
 }
 
-/* Brand */
 .brand{
   display: flex;
   align-items: center;
   gap: 12px;
   min-width: 0;
 }
+
 .brand__logo{
-  width: 44px;
-  height: 44px;
-  border-radius: 16px;
-  background: rgba(255,255,255,.18);
-  border: 1px solid rgba(255,255,255,.22);
-  color: #fff;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
   display: grid;
   place-items: center;
+  background: rgba(255,255,255,.14);
+  border: 1px solid rgba(255,255,255,.20);
+  color: #fff;
   font-weight: 900;
-  box-shadow: 0 10px 22px rgba(2,6,23,.18);
-}
-.brand__text{ min-width: 0; }
-.brand__name{ font-weight: 900; line-height: 1.1; color: #fff; }
-.brand__sub{
-  font-size: 12px;
-  color: var(--sidebar-muted);
-  line-height: 1.1;
-  margin-top: 2px;
 }
 
-/* Toggle */
+.brand__name{
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: .2px;
+  line-height: 1.1;
+}
+
+.brand__sub{
+  margin-top: 2px;
+  font-size: 12px;
+  color: rgba(255,255,255,.78);
+}
+
+/* Botão do toggle (hamburger) */
 .sidebar__toggle{
   width: 44px;
   height: 44px;
-  border-radius: 16px;
-  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.20);
   background: rgba(255,255,255,.12);
   color: #fff;
   cursor: pointer;
-  box-shadow: 0 10px 22px rgba(2,6,23,.16);
 }
+
 .sidebar__toggle:hover{
   background: rgba(255,255,255,.18);
-  border-color: rgba(255,255,255,.28);
 }
 
-/* Menu */
+.sidebar__toggle:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255,255,255,.22);
+}
+
+/* MENU */
 .menu{
   display: grid;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.menu__section{
-  margin-top: 10px;
-  font-size: 11px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,.60);
-  padding: 10px 10px 6px;
+  gap: 10px;
+  padding: 10px 6px;
 }
 
 .menu__item{
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 11px 12px;
+  gap: 14px;
+  padding: 14px 14px;
   border-radius: 16px;
-  border: 1px solid transparent;
-  color: var(--sidebar-text);
-  background: transparent;
+  color: #fff;
   text-decoration: none;
-  transition: transform .08s ease, background .12s ease, border-color .12s ease;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: background .12s ease, transform .08s ease;
 }
 
 .menu__item:hover{
-  background: var(--sidebar-surface);
-  border-color: rgba(255,255,255,.18);
-  text-decoration: none;
+  background: rgba(0,0,0,.12);
 }
+
+.menu__item:active{ transform: translateY(1px); }
 
 .menu__item.is-active{
-  background: rgba(255,255,255,.20);
-  border-color: rgba(255,255,255,.30);
-  box-shadow: 0 10px 18px rgba(2,6,23,.14);
+  background: rgba(0,0,0,.18); /* “pill” mais escuro */
 }
 
+/* Ícone à esquerda */
 .menu__icon{
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 14px;
   display: grid;
   place-items: center;
-  background: rgba(255,255,255,.14);
-  border: 1px solid rgba(255,255,255,.18);
+  background: transparent; /* na imagem, ícone solto */
+  border: 0;
   color: #fff;
-  font-weight: 900;
+  flex: 0 0 auto;
+  font-size: 22px;
+}
+
+/* Se dentro tiver <i class="fa-..."> */
+.menu__icon i{
+  font-size: 22px;
+  line-height: 1;
+}
+
+/* Label */
+.menu__label{
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: .2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Separador antes de ajuda/sair (como na imagem) */
+.menu__divider{
+  margin: 8px 0;
+  border-top: 1px solid rgba(255,255,255,.18);
+}
+
+.sidebar__footer{
+  position: static;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,.18);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+
+.sidebar__avatar{
+  width: 54px;
+  height: 54px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.20);
+  border: 1px solid rgba(255,255,255,.22);
   flex: 0 0 auto;
 }
 
-.menu__item.is-active .menu__icon{
-  background: rgba(255,255,255,.22);
-  border-color: rgba(255,255,255,.30);
+.sidebar__user-info{
+  min-width: 0;
+}
+
+.sidebar__user-name{
+  color: #fff;
+  font-weight: 800;
+  font-size: 20px;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar__user-role{
+  color: rgba(255,255,255,.78);
+  font-size: 16px;
+  margin-top: 2px;
+}
+
+/* Collapsed */
+body.sidebar-collapsed .brand__text{ display: none; }
+body.sidebar-collapsed .menu__label{ display: none; }
+
+body.sidebar-collapsed .sidebar__footer{
+  justify-content: center;
+}
+
+body.sidebar-collapsed .sidebar__user-info{
+  display: none;
+}
+/* ======================================================
+   SIDEBAR LAYOUT: header topo, menu rola, footer fixo
+   ====================================================== */
+
+.sidebar{
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Menu ocupa o espaço do meio e rola */
+.menu{
+  flex: 1 1 auto;
+  overflow: auto;
+  padding-bottom: 14px; /* respiro antes do footer */
+}
+
+/* Footer sempre no final, sem ser “empurrado” */
+.sidebar__footer{
+  flex: 0 0 auto;
+  margin-top: 14px;
+}
+/* ======================================================
+   COMPACT MODE: alinhado e elegante (igual sistemas SaaS)
+   ====================================================== */
+
+.menu{
+  gap: 8px;
+}
+
+.menu__item{
+  padding: 10px 12px;      /* menor */
+  border-radius: 14px;
+  gap: 12px;
+}
+
+.menu__icon{
+  width: 34px;             /* menor */
+  height: 34px;
+  border-radius: 12px;
+  font-size: 18px;         /* menor */
+}
+
+.menu__icon i{
+  font-size: 18px;
 }
 
 .menu__label{
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 650;
+  font-size: 15px;         /* bem mais harmônico */
+  font-weight: 700;
 }
 
-/* Footer */
-.sidebar__footer{
-  margin-top: 18px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255,255,255,.18);
-  display: grid;
-  gap: 10px;
-}
-.sidebar__footer-row{ display: grid; gap: 4px; }
-.sidebar__footer-row .small{ color: rgba(255,255,255,.70); }
-.sidebar__user{
-  color: rgba(255,255,255,.95);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+/* Sections menores */
+.menu__section{
+  margin-top: 12px;
+  font-size: 10px;
+  letter-spacing: .14em;
+  padding: 8px 10px 4px;
 }
 
-.sidebar__logout{
-  display: inline-flex;
-  width: fit-content;
-  padding: 10px 12px;
-  border-radius: 14px;
-  background: rgba(255,255,255,.12);
-  border: 1px solid rgba(255,255,255,.20);
-  color: #fff;
-  text-decoration: none;
+/* Deixar “Sair” mais discreto (não competir com módulos) */
+.menu__item[href*="logout"]{
+  margin-top: 6px;
+  background: rgba(192, 9, 9, 0.08);
 }
-.sidebar__logout:hover{
-  background: rgba(255,255,255,.18);
-  border-color: rgba(255,255,255,.28);
-  text-decoration: none;
-}
-
-/* --- COLLAPSED STATE --- */
-body.sidebar-collapsed .brand__text{ display: none; }
-body.sidebar-collapsed .menu__section{ display: none; }
-body.sidebar-collapsed .menu__item{
-  justify-content: center;
-  padding: 10px;
-}
-body.sidebar-collapsed .menu__label{ display: none; }
-body.sidebar-collapsed .sidebar__footer-row{ display: none; }
-body.sidebar-collapsed .sidebar__footer{ align-items: center; }

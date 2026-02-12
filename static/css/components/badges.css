@@ -1,33 +1,40 @@
-/* Avatar */
-.avatar-lg{
-  width: 96px;
-  height: 96px;
-  border-radius: 18px;
-  overflow: hidden;
-  background: rgba(255,255,255,.08);
-  border: 1px solid rgba(255,255,255,.14);
-  display:flex;
-  align-items:center;
-  justify-content:center;
+/* =========================================================
+   GEPUB — BADGES / PILLS
+   ========================================================= */
+
+.badge{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border-light);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  background: var(--color-neutral-50);
 }
 
-/* Badge ativo/inativo */
-.status-badge{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: .2px;
-  border: 1px solid rgba(255,255,255,.14);
+.badge--primary{
+  background: var(--color-primary-50);
+  border-color: var(--color-primary-200);
+  color: var(--color-primary-700);
 }
-.status-badge--ok{
-  background: rgba(34,197,94,.18);
-  border-color: rgba(34,197,94,.28);
+
+.badge--success{
+  background: rgba(22,163,74,.10);
+  border-color: rgba(22,163,74,.25);
+  color: var(--color-success-500);
 }
-.status-badge--no{
-  background: rgba(239,68,68,.18);
-  border-color: rgba(239,68,68,.28);
+
+.badge--warning{
+  background: rgba(245,158,11,.12);
+  border-color: rgba(245,158,11,.25);
+  color: #9A5A00;
+}
+
+.badge--danger{
+  background: rgba(220,38,38,.10);
+  border-color: rgba(220,38,38,.25);
+  color: var(--color-danger-500);
 }

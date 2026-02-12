@@ -1,53 +1,171 @@
+/* =========================================================
+   GEPUB DESIGN SYSTEM — TOKENS (CANON + LEGACY ALIASES)
+   - Canon: novas variáveis oficiais (color-*, space-*, radius-*, shadow-*)
+   - Legacy: aliases para não quebrar CSS existente (primary, bg, surface, sidebar-*, etc.)
+   ========================================================= */
+
 :root {
-  /* Brand / Primary */
-  --primary: #1a73e8;
-  --primary-700: #0b57d0;
-  --primary-900: #0a2e6e;
-  --primary-100: #e8f0fe;
 
-  /* Backgrounds */
-  --bg: #f5f7fb;            /* fundo geral (quase cinza) */
-  --surface: #ffffff;       /* cards / painéis */
-  --surface-2: #f1f4fa;     /* variação leve */
-  --surface-3: #e9eef8;     /* variação um pouco mais forte */
-  --border: #dfe5ef;
+  /* ======================================================
+     CANON — COLOR SYSTEM
+     ====================================================== */
 
-  /* Sidebar (novo) */
-  --sidebar-bg: linear-gradient(180deg, #0b57d0 0%, #0a3d93 55%, #082f6b 100%);
-  --sidebar-surface: rgba(255,255,255,.10);
-  --sidebar-surface-2: rgba(255,255,255,.16);
-  --sidebar-border: rgba(255,255,255,.15);
-  --sidebar-text: rgba(255,255,255,.92);
-  --sidebar-muted: rgba(255,255,255,.72);
+  /* Primary — Azul Institucional */
+  --color-primary-50:  #EEF4FD;
+  --color-primary-100: #D8E6FA;
+  --color-primary-200: #B0CDF5;
+  --color-primary-300: #89B3EF;
+  --color-primary-400: #629AEA;
+  --color-primary-500: #1F5FBF; /* Oficial */
+  --color-primary-600: #184DA0;
+  --color-primary-700: #123B80;
+  --color-primary-800: #0C2960;
+  --color-primary-900: #061740;
+
+  /* Neutrals */
+  --color-neutral-50:  #F9FAFB;
+  --color-neutral-100: #F3F4F6;
+  --color-neutral-200: #E5E7EB;
+  --color-neutral-300: #D1D5DB;
+  --color-neutral-400: #9CA3AF;
+  --color-neutral-500: #6B7280;
+  --color-neutral-600: #4B5563;
+  --color-neutral-700: #374151;
+  --color-neutral-800: #1F2937;
+  --color-neutral-900: #111827;
+
+  /* Semantic */
+  --color-success-500: #16A34A;
+  --color-warning-500: #F59E0B;
+  --color-danger-500:  #DC2626;
+  --color-info-500:    #0284C7;
+
+  /* Background / Surface */
+  --color-bg-body: var(--color-neutral-100);
+  --color-bg-card: #FFFFFF;
 
   /* Text */
-  --text: #0f172a;
-  --muted: #5b677a;
-  --muted-2: #8a96ab;
+  --color-text-primary:   var(--color-neutral-800);
+  --color-text-secondary: var(--color-neutral-600);
+  --color-text-muted:     var(--color-neutral-500);
+
+  /* Borders */
+  --color-border-light:   var(--color-neutral-200);
+  --color-border-default: var(--color-neutral-300);
+
+
+  /* ======================================================
+     CANON — TYPOGRAPHY
+     ====================================================== */
+
+  --font-family-base: "Open Sans", system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, sans-serif;
+
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+
+  --font-size-xs: 0.75rem;   /* 12px */
+  --font-size-sm: 0.875rem;  /* 14px */
+  --font-size-md: 1rem;      /* 16px */
+  --font-size-lg: 1.125rem;  /* 18px */
+  --font-size-xl: 1.25rem;   /* 20px */
+  --font-size-2xl: 1.5rem;   /* 24px */
+  --font-size-3xl: 1.875rem; /* 30px */
+  --font-size-4xl: 2.25rem;  /* 36px */
+
+
+  /* ======================================================
+     CANON — SPACING (4px scale)
+     ====================================================== */
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+
+  /* ======================================================
+     CANON — RADIUS
+     ====================================================== */
+
+  --radius-sm: 6px;
+  --radius-md: 8px;    /* Oficial */
+  --radius-lg: 12px;
+  --radius-pill: 9999px;
+
+
+  /* ======================================================
+     CANON — SHADOWS
+     ====================================================== */
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.10);
+
+  --focus-ring: 0 0 0 3px rgba(31, 95, 191, 0.25);
+
+
+  /* ======================================================
+     LEGACY ALIASES — NÃO QUEBRAR O CSS ATUAL
+     (o seu sidebar/base/components atuais usam esses nomes)
+     ====================================================== */
+
+  /* Brand */
+  --primary: var(--color-primary-500);
+  --primary-700: var(--color-primary-600);
+  --primary-900: var(--color-primary-800);
+  --primary-100: var(--color-primary-100);
+
+  /* Backgrounds / Surfaces */
+  --bg: var(--color-bg-body);
+  --surface: var(--color-bg-card);
+  --surface-2: #F1F4FA;
+  --surface-3: #E9EEF8;
+  --border: var(--color-border-light);
+
+  /* Text */
+  --text: var(--color-text-primary);
+  --muted: var(--color-text-secondary);
+  --muted-2: var(--color-text-muted);
 
   /* Status */
-  --success: #16a34a;
-  --warning: #f59e0b;
-  --danger: #ef4444;
+  --success: var(--color-success-500);
+  --warning: var(--color-warning-500);
+  --danger:  var(--color-danger-500);
 
-  /* Radius / Shadow (mais “presença”) */
-  --radius: 18px;
-  --radius-sm: 14px;
-  --shadow: 0 12px 32px rgba(2, 6, 23, 0.10);
-  --shadow-soft: 0 10px 22px rgba(2, 6, 23, 0.08);
-  --shadow-card: 0 10px 18px rgba(2, 6, 23, 0.06);
+  /* Radius / Shadow (mantém compatibilidade, mas harmônico) */
+  --radius: var(--radius-lg);
+  --shadow: var(--shadow-lg);
+  --shadow-soft: var(--shadow-md);
+  --shadow-card: var(--shadow-sm);
 
-  /* Layout */
+  /* Layout (mantém o que o sidebar espera) */
   --sidebar-w: 288px;
   --sidebar-w-collapsed: 92px;
   --topbar-h: 72px;
 
-  /* Spacing */
+  /* Spacing legado */
   --pad: 18px;
   --gap: 16px;
 
-  /* Focus */
-  --focus: 0 0 0 4px rgba(26, 115, 232, 0.25);
+  /* Focus legado */
+  --focus: var(--focus-ring);
+
+  /* Sidebar legado (por enquanto compatível; vamos redesenhar depois) */
+  --sidebar-bg: #FFFFFF;
+  --sidebar-surface: rgba(31,95,191,.08);
+  --sidebar-surface-2: rgba(31,95,191,.12);
+  --sidebar-border: rgba(17,24,39,.10);
+  --sidebar-text: rgba(17,24,39,.92);
+  --sidebar-muted: rgba(75,85,99,.85);
 }
 
 /* Estado recolhido */

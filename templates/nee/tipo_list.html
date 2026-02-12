@@ -1,62 +1,42 @@
 {% extends "core/base.html" %}
-{% block title %}Tipos de Necessidade • NEE • GEPUB{% endblock %}
-{% block header %}NEE{% endblock %}
+{% block title %}Alunos • Educação • GEPUB{% endblock %}
+{% block header %}Educação{% endblock %}
 
 {% block breadcrumbs %}
   <div class="breadcrumbs">
     <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
     <span class="breadcrumbs__sep">/</span>
-    <a class="breadcrumbs__link" href="{% url 'nee:index' %}">NEE</a>
+    <a class="breadcrumbs__link" href="{% url 'educacao:index' %}">Educação</a>
     <span class="breadcrumbs__sep">/</span>
-    <span class="breadcrumbs__current">Tipos</span>
+    <span class="breadcrumbs__current">Alunos</span>
   </div>
 {% endblock %}
 
 {% block content %}
-<div class="card">
-  <div class="card__title" style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-    <span>Tipos de Necessidade</span>
-    <a class="link" href="{% url 'nee:tipo_create' %}">+ Novo tipo</a>
-  </div>
+  <div class="card">
+    <div class="card__body">
 
-  <div class="card__body">
-    <form method="get" style="display:flex; gap:10px; flex-wrap:wrap; align-items:end; margin-bottom:12px;">
-      <div style="min-width:260px; flex:1;">
-        <label class="small">Buscar</label><br>
-        <input name="q" value="{{ q }}" placeholder="Ex.: TEA, TDAH..." />
-      </div>
-      <button type="submit">Filtrar</button>
-      {% if q %}
-        <a class="link" href="{% url 'nee:tipo_list' %}">Limpar</a>
-      {% endif %}
-    </form>
+      {% include "core/partials/page_head.html" with
+        title="Alunos"
+        subtitle="Gerencie os alunos cadastrados"
+        actions=actions
+      %}
 
-    <div style="overflow:auto; border:1px solid rgba(255,255,255,.08); border-radius:14px;">
-      <table style="width:100%; border-collapse:collapse; min-width:700px;">
-        <thead>
-          <tr style="text-align:left; background:rgba(255,255,255,.03);">
-            <th style="padding:10px 12px;">Nome</th>
-            <th style="padding:10px 12px; width:120px;">Ativo</th>
-            <th style="padding:10px 12px; width:140px;">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for t in page_obj %}
-            <tr style="border-top:1px solid rgba(255,255,255,.06);">
-              <td style="padding:10px 12px;">
-                <a class="link" href="{% url 'nee:tipo_detail' t.pk %}">{{ t.nome }}</a>
-              </td>
-              <td style="padding:10px 12px;">{% if t.ativo %}Sim{% else %}Não{% endif %}</td>
-              <td style="padding:10px 12px;">
-                <a class="link" href="{% url 'nee:tipo_update' t.pk %}">Editar</a>
-              </td>
-            </tr>
-          {% empty %}
-            <tr><td colspan="3" style="padding:12px;">Nenhum tipo encontrado.</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
+      {% include "core/partials/filter_bar.html" with
+        q=q
+        action_url=action_url
+        clear_url=clear_url
+      %}
+
+      {% include "core/partials/table_shell.html" with
+        headers=headers
+        rows=rows
+        page_obj=page_obj
+        q=q
+        empty_title="Nenhum aluno encontrado"
+        empty_text="Tente ajustar sua busca ou filtros."
+      %}
+
     </div>
   </div>
-</div>
 {% endblock %}

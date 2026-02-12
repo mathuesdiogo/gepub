@@ -1,0 +1,44 @@
+<div class="table-shell">
+  <div class="table-shell__scroll">
+    <table class="table-shell__table">
+      <thead>
+        <tr>
+          {% for h in headers %}
+            <th style="{% if h.width %}width:{{ h.width }};{% endif %}">{{ h.label }}</th>
+          {% endfor %}
+          <th style="width:140px;">Ações</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for row in rows %}
+          <tr>
+            {% for cell in row.cells %}
+              <td>
+                {% if cell.url %}
+                  <a class="link" href="{{ cell.url }}">{{ cell.text }}</a>
+                {% else %}
+                  {{ cell.text }}
+                {% endif %}
+              </td>
+            {% endfor %}
+
+            <td>
+              {% if row.can_edit %}
+                <a class="link" href="{{ row.edit_url }}">Editar</a>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="{{ headers|length|add:1 }}">
+              {% include "core/partials/empty_state.html" with empty_title=empty_title empty_text=empty_text %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% include "core/partials/pagination.html" with page_obj=page_obj q=q ano=ano %}
+</div>

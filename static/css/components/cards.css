@@ -45,3 +45,27 @@
 .kpi__label{ color: var(--muted); font-size: 12px; }
 .kpi__value{ font-size: 22px; font-weight: 950; color: var(--primary-700); line-height: 1.1; }
 .kpi__link{ font-size: 12px; color: var(--primary); }
+
+/* =========================================================
+   COMPAT — Card no formato atual do projeto
+   (.card > .card__title + .card__body)
+   ========================================================= */
+
+.card > .card__title{
+  padding: var(--space-6);
+  border-bottom: 1px solid var(--color-border-light);
+  background: var(--color-neutral-50);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+
+  /* segura templates que já usam title como "barra" com ações */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.card > .card__body{
+  padding: var(--space-6);
+}

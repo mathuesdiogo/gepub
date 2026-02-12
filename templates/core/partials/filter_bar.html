@@ -1,0 +1,18 @@
+<form class="filter-bar" method="get" action="{{ action_url|default:'' }}">
+  <div class="filter-bar__field">
+    <label class="small">Buscar</label>
+    <input name="q" value="{{ q|default:'' }}" placeholder="{{ placeholder|default:'Buscar...' }}" />
+  </div>
+
+  {% if extra_filters %}
+    {{ extra_filters|safe }}
+  {% endif %}
+
+  <div class="filter-bar__actions">
+    <button type="submit" class="btn">Filtrar</button>
+
+    {% if q or has_filters %}
+      <a class="link" href="{{ clear_url }}">Limpar</a>
+    {% endif %}
+  </div>
+</form>

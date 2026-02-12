@@ -8,10 +8,12 @@
   <title>{% block title %}GEPUB{% endblock %}</title>
 
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
+
+  <!-- Font Awesome (CDN) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
 <body class="theme-institucional">
-  <a class="skip-link" href="#conteudo">Pular para conteúdo</a>
 
   <div class="layout">
 
@@ -19,7 +21,9 @@
     <aside class="sidebar" aria-label="Menu lateral">
       <div class="sidebar__header">
         <div class="brand">
-          <div class="brand__logo" aria-hidden="true">G</div>
+          <div class="brand__logo" aria-hidden="true">
+            <i class="fa-solid fa-cube"></i>
+          </div>
           <div class="brand__text">
             <div class="brand__name">GEPUB</div>
             <div class="brand__sub">Gestão Estratégica Pública</div>
@@ -34,7 +38,7 @@
           aria-pressed="false"
           title="Recolher menu"
         >
-          ☰
+          <i class="fa-solid fa-bars"></i>
         </button>
       </div>
 
@@ -45,7 +49,7 @@
           href="{% url 'core:dashboard' %}"
           title="Dashboard"
         >
-          <span class="menu__icon" aria-hidden="true">D</span>
+          <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-house"></i></span>
           <span class="menu__label">Dashboard</span>
         </a>
 
@@ -57,7 +61,7 @@
             href="{% url 'org:index' %}"
             title="Organização"
           >
-            <span class="menu__icon" aria-hidden="true">O</span>
+            <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-sitemap"></i></span>
             <span class="menu__label">Organização</span>
           </a>
         {% endif %}
@@ -68,7 +72,7 @@
             href="{% url 'educacao:index' %}"
             title="Educação"
           >
-            <span class="menu__icon" aria-hidden="true">E</span>
+            <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-book-open"></i></span>
             <span class="menu__label">Educação</span>
           </a>
         {% endif %}
@@ -79,7 +83,7 @@
             href="{% url 'nee:index' %}"
             title="NEE"
           >
-            <span class="menu__icon" aria-hidden="true">N</span>
+            <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-universal-access"></i></span>
             <span class="menu__label">NEE</span>
           </a>
         {% endif %}
@@ -91,7 +95,7 @@
           href="{% url 'accounts:meu_perfil' %}"
           title="Meu perfil"
         >
-          <span class="menu__icon" aria-hidden="true">P</span>
+          <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-user"></i></span>
           <span class="menu__label">Meu perfil</span>
         </a>
 
@@ -100,7 +104,7 @@
           href="{% url 'accounts:alterar_senha' %}"
           title="Alterar senha"
         >
-          <span class="menu__icon" aria-hidden="true">S</span>
+          <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-key"></i></span>
           <span class="menu__label">Alterar senha</span>
         </a>
 
@@ -110,7 +114,7 @@
             href="{% url 'accounts:usuarios_list' %}"
             title="Usuários"
           >
-            <span class="menu__icon" aria-hidden="true">U</span>
+            <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-users"></i></span>
             <span class="menu__label">Usuários</span>
           </a>
         {% endif %}
@@ -118,19 +122,42 @@
         {% if request.user.is_staff or request.user.is_superuser %}
           <div class="menu__section">Sistema</div>
           <a class="menu__item" href="/admin/" title="Admin Django">
-            <span class="menu__icon" aria-hidden="true">A</span>
+            <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-gear"></i></span>
             <span class="menu__label">Admin Django</span>
           </a>
         {% endif %}
+
+        <!-- Sair como item alinhado -->
+        <a class="menu__item" href="{% url 'accounts:logout' %}" title="Sair">
+          <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-power-off"></i></span>
+          <span class="menu__label">Sair</span>
+        </a>
+
       </nav>
 
+      <!-- Rodapé do usuário: nome + função -->
       <div class="sidebar__footer">
-        <div class="sidebar__footer-row">
-          <span class="small">Logado como</span>
-          <strong class="sidebar__user">{{ request.user.username }}</strong>
+        <div class="sidebar__avatar" aria-hidden="true"></div>
+
+        <div class="sidebar__user-info">
+          <div class="sidebar__user-name">
+            {% if request.user.is_authenticated %}
+              {{ request.user.get_full_name|default:request.user.username }}
+            {% else %}
+              Visitante
+            {% endif %}
+          </div>
+
+          <div class="sidebar__user-role">
+            {% if request.user.is_authenticated %}
+              {{ request.user.groups.first.name|default:"Usuário" }}
+            {% else %}
+              —
+            {% endif %}
+          </div>
         </div>
-        <a class="link sidebar__logout" href="{% url 'accounts:logout' %}">Sair</a>
       </div>
+
     </aside>
 
     <!-- CONTEÚDO -->
@@ -151,6 +178,7 @@
         </div>
       </header>
 
+      <!-- ✅ APENAS UM content -->
       <section class="content">
         {% if messages %}
           <div class="flash-stack">

@@ -1,0 +1,86 @@
+/* =========================================================
+   GEPUB — ALERTS / FEEDBACK
+   Compatível com Django messages (geralmente .messages li)
+   ========================================================= */
+
+.alert{
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+  background: #fff;
+  box-shadow: var(--shadow-xs);
+}
+
+.alert__title{
+  margin: 0;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.alert__text{
+  margin: 2px 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+/* Variantes */
+.alert--success{
+  border-color: rgba(22,163,74,.25);
+  background: rgba(22,163,74,.08);
+}
+
+.alert--warning{
+  border-color: rgba(245,158,11,.28);
+  background: rgba(245,158,11,.10);
+}
+
+.alert--danger{
+  border-color: rgba(220,38,38,.25);
+  background: rgba(220,38,38,.08);
+}
+
+.alert--info{
+  border-color: rgba(2,132,199,.25);
+  background: rgba(2,132,199,.08);
+}
+
+/* Django messages (sem mexer no HTML) */
+.messages{
+  list-style: none;
+  margin: 0 0 var(--space-6);
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.messages li{
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+  background: #fff;
+  box-shadow: var(--shadow-xs);
+  color: var(--color-text-secondary);
+}
+
+.messages li.success{
+  border-color: rgba(22,163,74,.25);
+  background: rgba(22,163,74,.08);
+}
+
+.messages li.warning{
+  border-color: rgba(245,158,11,.28);
+  background: rgba(245,158,11,.10);
+}
+
+.messages li.error{
+  border-color: rgba(220,38,38,.25);
+  background: rgba(220,38,38,.08);
+}
+
+.messages li.info{
+  border-color: rgba(2,132,199,.25);
+  background: rgba(2,132,199,.08);
+}

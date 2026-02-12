@@ -1,10 +1,237 @@
+/* =========================================================
+   GEPUB DESIGN SYSTEM — LAYOUT
+   Estrutura global (wrappers, containers, grids)
+   Sem depender de classes novas nos templates
+   ========================================================= */
+
+
+/* ======================================================
+   CONTAINERS
+   ====================================================== */
+
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding-left: var(--space-6);
+  padding-right: var(--space-6);
+}
+
+.container-sm { max-width: 720px; }
+.container-md { max-width: 960px; }
+.container-lg { max-width: 1200px; }
+.container-xl { max-width: 1440px; }
+
+
+/* ======================================================
+   PAGE WRAPPER (compatível com dashboards)
+   - Ajuda qualquer <main> ou área central
+   ====================================================== */
+
+main {
+  display: block;
+  min-width: 0; /* evita overflow em grids */
+}
+
+/* Se existir um wrapper principal dentro do main, melhora espaçamento */
+main > .container,
+main .container {
+  padding-top: var(--space-6);
+  padding-bottom: var(--space-10);
+}
+
+
+/* ======================================================
+   SECTION SPACING
+   ====================================================== */
+
+.section {
+  padding-top: var(--space-8);
+  padding-bottom: var(--space-8);
+}
+
+.section-sm {
+  padding-top: var(--space-6);
+  padding-bottom: var(--space-6);
+}
+
+.section-lg {
+  padding-top: var(--space-12);
+  padding-bottom: var(--space-12);
+}
+
+
+/* ======================================================
+   FLEX HELPERS (layout utility-style)
+   ====================================================== */
+
+.l-row {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  min-width: 0;
+}
+
+.l-row-between {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.l-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.l-stack-sm { gap: var(--space-2); }
+.l-stack-lg { gap: var(--space-6); }
+
+
+/* ======================================================
+   GRID SYSTEM (simples e eficaz)
+   ====================================================== */
+
+.l-grid {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+/* Grid responsivo por colunas */
+.l-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.l-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.l-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+/* Responsivo (sem depender de framework) */
+@media (max-width: 1024px) {
+  .l-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .l-grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+
+  .l-grid-4,
+  .l-grid-3,
+  .l-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ======================================================
+   CARD-LIKE SURFACES (estrutura, não componente final)
+   ====================================================== */
+
+.surface {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+}
+
+.surface-pad {
+  padding: var(--space-6);
+}
+
+@media (max-width: 640px) {
+  .surface-pad {
+    padding: var(--space-4);
+  }
+}
+
+
+/* ======================================================
+   PAGE HEADER (títulos e ações)
+   ====================================================== */
+
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+  min-width: 0;
+}
+
+.page-title {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.page-subtitle {
+  margin: 0;
+  margin-top: var(--space-1);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+
+/* ======================================================
+   CONTENT WRAPPERS (para tabelas e listas)
+   ====================================================== */
+
+.content-block {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden; /* bom para tabelas */
+}
+
+.content-block__body {
+  padding: var(--space-6);
+}
+
+@media (max-width: 640px) {
+  .content-block__body {
+    padding: var(--space-4);
+  }
+}
+
+
+/* ======================================================
+   VISIBILITY HELPERS
+   ====================================================== */
+
+.hidden {
+  display: none !important;
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+/* =========================================================
+   GEPUB — CORE LAYOUT
+   Estrutura base (sidebar + main/topbar + content)
+   ========================================================= */
+
 .layout{
   display: grid;
   grid-template-columns: var(--sidebar-w) 1fr;
   min-height: 100vh;
+  width: 100%;
+  background: var(--bg);
 }
 
-/* sidebar fixed + main scroll */
+/* Sidebar fixo */
 .sidebar{
   position: sticky;
   top: 0;
@@ -12,6 +239,7 @@
   overflow: hidden;
 }
 
+/* Área principal: topbar + conteúdo */
 .main{
   min-width: 0;
   display: grid;
@@ -19,6 +247,110 @@
 }
 
 .content{
-  padding: 22px;
   min-width: 0;
+  padding: var(--space-6);
+}
+
+/* Responsivo */
+@media (max-width: 920px){
+  .layout{
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar{
+    position: relative;
+    height: auto;
+  }
+}
+
+/* Estado recolhido (mantém 92px, conforme tokens) */
+body.sidebar-collapsed .layout{
+  grid-template-columns: var(--sidebar-w-collapsed) 1fr;
+}
+/* ======================================================
+   FIX: Sidebar + main lado a lado (evita cair pra baixo)
+   ====================================================== */
+
+.layout{
+  display: grid !important;
+  grid-template-columns: var(--sidebar-w) 1fr !important;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* sidebar ocupa a primeira coluna */
+.sidebar{
+  grid-column: 1;
+  width: var(--sidebar-w);
+}
+
+/* conteúdo ocupa a segunda coluna */
+.main{
+  grid-column: 2;
+  min-width: 0;
+}
+
+/* estado recolhido */
+body.sidebar-collapsed .layout{
+  grid-template-columns: var(--sidebar-w-collapsed) 1fr !important;
+}
+
+@media (max-width: 920px){
+  .layout{
+    grid-template-columns: 1fr !important;
+  }
+  .sidebar{
+    width: 100%;
+  }
+  .main{
+    grid-column: 1;
+  }
+}
+/* ======================================================
+   SCROLL MODE: só conteúdo rola, sidebar fixa
+   ====================================================== */
+
+html, body{
+  height: 100%;
+}
+
+body{
+  overflow: hidden; /* impede a página inteira de rolar */
+}
+
+/* O shell ocupa a tela toda */
+.layout{
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Sidebar fixa, rola apenas com mouse nela */
+.sidebar{
+  height: 100vh;
+  overflow: auto;               /* sidebar rola se precisar */
+  overscroll-behavior: contain; /* evita “puxar” a página */
+}
+
+/* Área principal rola */
+.main{
+  height: 100vh;
+  overflow: hidden; /* quem rola é o content */
+  min-width: 0;
+}
+
+/* Conteúdo rola */
+.content{
+  height: calc(100vh - var(--topbar-h));
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* No mobile, volta a rolagem normal (mais amigável) */
+@media (max-width: 920px){
+  body{ overflow: auto; }
+  .layout{ height: auto; overflow: visible; }
+  .sidebar{ height: auto; overflow: visible; }
+  .main{ height: auto; overflow: visible; }
+  .content{ height: auto; overflow: visible; }
 }

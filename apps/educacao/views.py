@@ -7,7 +7,7 @@ from django.http import HttpResponseForbidden, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.db.models import Count
-
+from django.urls import reverse
 from accounts.models import Profile
 from core.decorators import require_perm
 from core.rbac import (
@@ -59,7 +59,7 @@ def turma_list(request):
 
     qs = scope_filter_turmas(request.user, qs)
 
-    # ✅ EXPORT (CSV/PDF) com template padrão
+    # Export (mantém do jeito que já está no seu arquivo)
     from core.exports import export_csv, export_pdf_table
     export = (request.GET.get("export") or "").strip().lower()
     if export in ("csv", "pdf"):
@@ -75,38 +75,123 @@ def turma_list(request):
             )
         )
 
-        headers = ["Turma", "Ano", "Turno", "Unidade", "Secretaria", "Município", "Ativo"]
-        rows = [
-            [
-                nome or "",
-                str(ano_letivo or ""),
-                str(turno or ""),
-                unidade or "",
-                secretaria or "",
-                municipio or "",
-                "Sim" if ativo else "Não",
-            ]
-            for (nome, ano_letivo, turno, unidade, secretaria, municipio, ativo) in items
-        ]
+        headers_export = ["Turma", "Ano", "Turno", "Unidade", "Secretaria", "Município", "Ativo"]
+        rows = []
+        for t in page_obj:
+            rows.append({
+                "cells": [
+                    {"text": t.nome, "url": reverse("educacao:turma_detail", args=[t.pk])},
+                    {"text": str(t.ano_letivo or "—")},
+                    {"text": t.get_turno_display() if hasattr(t, "get_turno_display") else "—"},
+                    {"text": getattr(getattr(t, "unidade", None), "nome", "—")},
+                    {"text": getattr(getattr(getattr(t, "unidade", None), "secretaria", None), "nome", "—")},
+                ],
+                "can_edit": bool(can_edu_manage and t.pk),
+                "edit_url": reverse("educacao:turma_update", args=[t.pk]) if t.pk else "",
+            })
+
 
         if export == "csv":
-            return export_csv("turmas.csv", headers, rows)
+            return export_csv("turmas.csv", headers_export, rows_export)
 
         filtros = f"Ano={ano or '-'} | Busca={q or '-'}"
         return export_pdf_table(
             request,
             filename="turmas.pdf",
             title="Relatório — Turmas",
-            headers=headers,
-            rows=rows,
+            headers=headers_export,
+            rows=rows_export,
             filtros=filtros,
         )
 
     paginator = Paginator(qs, 10)
     page_obj = paginator.get_page(request.GET.get("page"))
 
-    return render(request, "educacao/turma_list.html", {"q": q, "ano": ano, "page_obj": page_obj})
+    can_edu_manage = can(request.user, "educacao.manage")
 
+    # Actions do header
+    # mantém filtros atuais na query (q + ano)
+    qs_query = []
+    if q:
+        qs_query.append(f"q={q}")
+    if ano:
+        qs_query.append(f"ano={ano}")
+    base_query = "&".join(qs_query)
+
+    def qjoin(extra: str) -> str:
+        return f"?{base_query + ('&' if base_query else '')}{extra}"
+
+    actions = [
+        {
+            "label": "Exportar CSV",
+            "url": qjoin("export=csv"),
+            "icon": "fa-solid fa-file-csv",
+            "variant": "btn--ghost",
+        },
+        {
+            "label": "Exportar PDF",
+            "url": qjoin("export=pdf"),
+            "icon": "fa-solid fa-file-pdf",
+            "variant": "btn--ghost",
+        },
+    ]
+    if can_edu_manage:
+        actions.append(
+            {
+                "label": "Nova Turma",
+                "url": reverse("educacao:turma_create"),
+                "icon": "fa-solid fa-plus",
+                "variant": "btn-primary",
+            }
+        )
+
+        headers = [
+        {"label": "Turma"},
+        {"label": "Ano", "width": "110px"},
+        {"label": "Turno", "width": "140px"},
+        {"label": "Unidade"},
+        {"label": "Secretaria"},
+    ]
+
+    rows = []
+    for t in page_obj:
+        rows.append({
+            "cells": [
+                {"text": t.nome, "url": reverse("educacao:turma_detail", args=[t.pk])},
+                {"text": str(t.ano_letivo or "—")},
+                {"text": t.get_turno_display() if hasattr(t, "get_turno_display") else "—"},
+                {"text": getattr(getattr(t, "unidade", None), "nome", "—")},
+                {"text": getattr(getattr(getattr(t, "unidade", None), "secretaria", None), "nome", "—")},
+            ],
+            "can_edit": bool(can_edu_manage and t.pk),
+            "edit_url": reverse("educacao:turma_update", args=[t.pk]) if t.pk else "",
+        })
+
+
+    # Filtros extras (campo Ano) — HTML pronto e seguro
+    extra_filters = f"""
+      <div class="filter-bar__field" style="min-width:160px; flex:0 0 180px;">
+        <label class="small">Ano letivo</label>
+        <input name="ano" value="{ano}" placeholder="Ex.: 2026" />
+      </div>
+    """
+
+    return render(
+        request,
+        "educacao/turma_list.html",
+        {
+            "q": q,
+            "ano": ano,
+            "page_obj": page_obj,
+            "actions": actions,
+            "headers": headers,
+            "rows": rows,
+            "action_url": reverse("educacao:turma_list"),
+            "clear_url": reverse("educacao:turma_list"),
+            "has_filters": bool(ano),
+            "extra_filters": extra_filters,
+        },
+    )
 
 @require_perm("educacao.view")
 @login_required
@@ -259,34 +344,84 @@ def aluno_list(request):
 
     qs = scope_filter_alunos(request.user, qs)
 
-    # ✅ EXPORT (CSV/PDF) com template padrão (UTF-8)
+    # Export mantém igual (já está ótimo)
     from core.exports import export_csv, export_pdf_table
     export = (request.GET.get("export") or "").strip().lower()
 
     if export in ("csv", "pdf"):
         items = list(qs.order_by("nome").values_list("nome", "cpf", "nis", "ativo"))
-
-        headers = ["Nome", "CPF", "NIS", "Ativo"]
-        rows = [
+        headers_export = ["Nome", "CPF", "NIS", "Ativo"]
+        rows_export = [
             [nome or "", cpf or "", nis or "", "Sim" if ativo else "Não"]
             for (nome, cpf, nis, ativo) in items
         ]
 
         if export == "csv":
-            return export_csv("alunos.csv", headers, rows)
+            return export_csv("alunos.csv", headers_export, rows_export)
 
         filtros = f"Busca={q or '-'}"
         return export_pdf_table(
             request,
             filename="alunos.pdf",
             title="Relatório — Alunos",
-            headers=headers,
-            rows=rows,
+            headers=headers_export,
+            rows=rows_export,
             filtros=filtros,
         )
 
     paginator = Paginator(qs, 10)
     page_obj = paginator.get_page(request.GET.get("page"))
+
+    # flags pro template (antes você usava can_edu_manage no template, mas não passava aqui)
+    can_edu_manage = can(request.user, "educacao.manage")
+
+    # actions do PageHead
+    base_q = f"q={q}" if q else ""
+    actions = [
+        {
+            "label": "Exportar CSV",
+            "url": f"?{base_q + ('&' if base_q else '')}export=csv",
+            "icon": "fa-solid fa-file-csv",
+            "variant": "btn--ghost",
+        },
+        {
+            "label": "Exportar PDF",
+            "url": f"?{base_q + ('&' if base_q else '')}export=pdf",
+            "icon": "fa-solid fa-file-pdf",
+            "variant": "btn--ghost",
+        },
+    ]
+    if can_edu_manage:
+        actions.append(
+            {
+                "label": "Novo Aluno",
+                "url": reverse("educacao:aluno_create"),
+                "icon": "fa-solid fa-plus",
+                "variant": "btn-primary",
+            }
+        )
+
+    headers = [
+        {"label": "Nome"},
+        {"label": "CPF", "width": "160px"},
+        {"label": "NIS", "width": "160px"},
+        {"label": "Ativo", "width": "140px"},
+    ]
+
+    rows = []
+    for a in page_obj:
+        rows.append({
+            "cells": [
+                {"text": a.nome, "url": reverse("educacao:aluno_detail", args=[a.pk])},
+                {"text": a.cpf or "—"},
+                {"text": a.nis or "—"},
+                {"text": "Sim" if a.ativo else "Não"},
+            ],
+            "can_edit": bool(can_edu_manage and a.pk),
+            "edit_url": reverse("educacao:aluno_update", args=[a.pk]) if a.pk else "",
+        })
+
+
 
     return render(
         request,
@@ -294,6 +429,11 @@ def aluno_list(request):
         {
             "q": q,
             "page_obj": page_obj,
+            "actions": actions,
+            "headers": headers,
+            "rows": rows,
+            "action_url": reverse("educacao:aluno_list"),
+            "clear_url": reverse("educacao:aluno_list"),
         },
     )
 

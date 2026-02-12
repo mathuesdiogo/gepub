@@ -16,6 +16,13 @@
 @import url("./components/badges.css");
 @import url("./components/link-card.css");
 @import url("./components/modal.css");
+@import "./components/alerts.css";
+@import "./components/dashboard-blocks.css";
+@import "./components/page-head.css";
+@import "./components/filter-bar.css";
+@import "./components/table-shell.css";
+@import "./components/empty-state.css";
+@import "./components/pagination.css";
 
 /* Utilities */
 @import url("./core/utilities.css");

@@ -1,54 +1,177 @@
-* { box-sizing: border-box; }
-html, body { height: 100%; }
+/* =========================================================
+   GEPUB DESIGN SYSTEM — BASE
+   Reset leve + tipografia global + acessibilidade
+   NÃO altera estrutura de layout
+   ========================================================= */
+
+
+/* ======================================================
+   RESET GLOBAL
+   ====================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-  background: var(--bg);
-  color: var(--text);
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-md);
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Links / text */
-a { color: var(--primary); text-decoration: none; }
-a:hover { text-decoration: underline; }
 
-.small { font-size: 12px; color: var(--muted); }
-.link { color: var(--primary); }
-.pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--muted);
+/* ======================================================
+   HEADINGS (Escala Tipográfica Oficial)
+   ====================================================== */
+
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+  margin-bottom: var(--space-4);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+  color: var(--color-text-primary);
 }
 
-/* Skip link */
-.skip-link {
-  position: absolute;
-  left: -999px;
-  top: 10px;
-  padding: 10px 12px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  z-index: 9999;
-}
-.skip-link:focus { left: 10px; outline: none; box-shadow: var(--focus); }
+h1 { font-size: var(--font-size-3xl); }
+h2 { font-size: var(--font-size-2xl); }
+h3 { font-size: var(--font-size-xl); }
+h4 { font-size: var(--font-size-lg); }
+h5 { font-size: var(--font-size-md); }
+h6 { font-size: var(--font-size-sm); }
 
-/* Flash */
-.flash-stack { display: grid; gap: 10px; margin-bottom: 12px; }
-.flash {
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-}
-.flash--success { border-color: rgba(22,163,74,.35); }
-.flash--error, .flash--danger { border-color: rgba(239,68,68,.35); }
-.flash--warning { border-color: rgba(245,158,11,.35); }
 
-/* Focus */
-:focus { outline: none; }
-:focus-visible { box-shadow: var(--focus); border-radius: 10px; }
+/* ======================================================
+   PARAGRAPHS & TEXT
+   ====================================================== */
+
+p {
+  margin-top: 0;
+  margin-bottom: var(--space-4);
+  color: var(--color-text-secondary);
+}
+
+small {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+
+/* ======================================================
+   LINKS
+   ====================================================== */
+
+a {
+  color: var(--color-primary-600);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--color-primary-700);
+}
+
+a:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--radius-sm);
+}
+
+
+/* ======================================================
+   LISTS
+   ====================================================== */
+
+ul, ol {
+  margin-top: 0;
+  margin-bottom: var(--space-4);
+  padding-left: var(--space-6);
+}
+
+
+/* ======================================================
+   IMAGES
+   ====================================================== */
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+
+/* ======================================================
+   TABLE BASE NORMALIZATION
+   (não estiliza ainda, só normaliza)
+   ====================================================== */
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th,
+td {
+  text-align: left;
+  vertical-align: middle;
+}
+
+
+/* ======================================================
+   FORM ELEMENT BASE NORMALIZATION
+   (sem interferir nos componentes ainda)
+   ====================================================== */
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+
+/* ======================================================
+   HR
+   ====================================================== */
+
+hr {
+  border: none;
+  border-top: 1px solid var(--color-border-light);
+  margin: var(--space-6) 0;
+}
+
+
+/* ======================================================
+   SELECTION
+   ====================================================== */
+
+::selection {
+  background-color: var(--color-primary-200);
+  color: var(--color-neutral-900);
+}

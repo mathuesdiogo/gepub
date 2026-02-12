@@ -1,0 +1,6 @@
+<div class="empty-state">
+  <h3 class="empty-state__title">{{ empty_title|default:"Nenhum registro encontrado" }}</h3>
+  {% if empty_text %}
+    <p class="empty-state__text">{{ empty_text }}</p>
+  {% endif %}
+</div>
