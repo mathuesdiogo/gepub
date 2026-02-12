@@ -1,165 +1,131 @@
-{% extends "core/base.html" %}
+{% extends "core/dashboard.html" %}
+
 {% block title %}Dashboard • Prefeitura • GEPUB{% endblock %}
-{% block header %}Dashboard{% endblock %}
 
-{% block content %}
-<div class="card" style="max-width:1100px;">
-  <div class="card__title" style="display:flex; justify-content:space-between; align-items:center;">
-    <span>Prefeitura • {{ municipio_nome }}</span>
-    <span class="pill">Visão municipal</span>
-  </div>
+{% block dashboard_title %}
+Prefeitura • {{ municipio_nome }}
+{% endblock %}
 
-  <div class="card__body">
+{% block dashboard_badge %}
+<span class="dashboard-badge">Visão municipal</span>
+{% endblock %}
 
-    <!-- CARDS clicáveis -->
-    <div style="display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:12px;">
-      <a class="card" href="{% url 'org:secretaria_list' %}" style="margin:0; text-decoration:none;">
-        <div class="card__body">
-          <div class="small">Secretarias</div>
-          <div style="font-size:22px;font-weight:900;">{{ secretarias_total }}</div>
-          <div class="small" style="opacity:.7;">Ver lista</div>
-        </div>
-      </a>
+{% block dashboard_metrics %}
+<div class="dashboard-metrics">
 
-      <a class="card" href="{% url 'org:unidade_list' %}" style="margin:0; text-decoration:none;">
-        <div class="card__body">
-          <div class="small">Unidades</div>
-          <div style="font-size:22px;font-weight:900;">{{ unidades_total }}</div>
-          <div class="small" style="opacity:.7;">Ver lista</div>
-        </div>
-      </a>
+  <a class="metric-card" href="{% url 'org:secretaria_list' %}">
+    <div class="metric-label">Secretarias</div>
+    <div class="metric-value">{{ secretarias_total }}</div>
+    <div class="metric-meta">Ver lista</div>
+  </a>
 
-      <a class="card" href="{% url 'educacao:turma_list' %}" style="margin:0; text-decoration:none;">
-        <div class="card__body">
-          <div class="small">Turmas</div>
-          <div style="font-size:22px;font-weight:900;">{{ turmas_total }}</div>
-          <div class="small" style="opacity:.7;">Abrir turmas</div>
-        </div>
-      </a>
+  <a class="metric-card" href="{% url 'org:unidade_list' %}">
+    <div class="metric-label">Unidades</div>
+    <div class="metric-value">{{ unidades_total }}</div>
+    <div class="metric-meta">Ver lista</div>
+  </a>
 
-      <a class="card" href="{% url 'educacao:aluno_list' %}" style="margin:0; text-decoration:none;">
-        <div class="card__body">
-          <div class="small">Alunos</div>
-          <div style="font-size:22px;font-weight:900;">{{ alunos_total }}</div>
-          <div class="small" style="opacity:.7;">Ver alunos</div>
-        </div>
-      </a>
+  <a class="metric-card" href="{% url 'educacao:turma_list' %}">
+    <div class="metric-label">Turmas</div>
+    <div class="metric-value">{{ turmas_total }}</div>
+    <div class="metric-meta">Abrir turmas</div>
+  </a>
 
-      <!-- Matrículas: seu projeto ainda não tem rota matricula_list -->
-      <a class="card" href="{% url 'educacao:turma_list' %}" style="margin:0; text-decoration:none;">
-        <div class="card__body">
-          <div class="small">Matrículas</div>
-          <div style="font-size:22px;font-weight:900;">{{ matriculas_total }}</div>
-          <div class="small" style="opacity:.7;">Ver por turmas</div>
-        </div>
-      </a>
+  <a class="metric-card" href="{% url 'educacao:aluno_list' %}">
+    <div class="metric-label">Alunos</div>
+    <div class="metric-value">{{ alunos_total }}</div>
+    <div class="metric-meta">Ver alunos</div>
+  </a>
+
+  <a class="metric-card" href="{% url 'educacao:turma_list' %}">
+    <div class="metric-label">Matrículas</div>
+    <div class="metric-value">{{ matriculas_total }}</div>
+    <div class="metric-meta">Ver por turmas</div>
+  </a>
+
+</div>
+{% endblock %}
+
+{% block dashboard_sections %}
+
+<div class="dashboard-section">
+  <div class="dashboard-section-title">Indicadores</div>
+
+  <div class="dashboard-charts">
+
+    <div class="chart-card">
+      <canvas id="chartUnidades" height="140"></canvas>
     </div>
 
-    <!-- GRÁFICOS -->
-    <div class="form-section" style="margin-top:16px;">
-      <div class="form-section__title">Indicadores</div>
+    <div class="chart-card">
+      <canvas id="chartAlunos" height="140"></canvas>
+    </div>
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:10px;">
-        <div class="card" style="margin:0;">
-          <div class="card__body">
-            <div class="small" style="margin-bottom:10px;">Unidades por Secretaria (Top 8)</div>
-            <canvas id="chartUnidades" height="140"></canvas>
-          </div>
-        </div>
+  </div>
 
-        <div class="card" style="margin:0;">
-          <div class="card__body">
-            <div class="small" style="margin-bottom:10px;">Alunos por Secretaria (Top 8)</div>
-            <canvas id="chartAlunos" height="140"></canvas>
-          </div>
-        </div>
-      </div>
+  {{ chart1_labels|json_script:"c1-labels" }}
+  {{ chart1_values|json_script:"c1-values" }}
+  {{ chart2_labels|json_script:"c2-labels" }}
+  {{ chart2_values|json_script:"c2-values" }}
 
-      {{ chart1_labels|json_script:"c1-labels" }}
-      {{ chart1_values|json_script:"c1-values" }}
-      {{ chart2_labels|json_script:"c2-labels" }}
-      {{ chart2_values|json_script:"c2-values" }}
+</div>
 
-      <script>
-  (function () {
-    function renderCharts() {
-      const c1Labels = JSON.parse(document.getElementById("c1-labels").textContent || "[]");
-      const c1Values = JSON.parse(document.getElementById("c1-values").textContent || "[]");
+<div class="dashboard-section">
+  <div class="dashboard-section-title">Últimas secretarias</div>
 
-      const c2Labels = JSON.parse(document.getElementById("c2-labels").textContent || "[]");
-      const c2Values = JSON.parse(document.getElementById("c2-values").textContent || "[]");
+  <ul class="dashboard-list">
+    {% for s in ultimas_secretarias %}
+      <li>
+        <a href="{% url 'org:secretaria_detail' s.pk %}">
+          {{ s.nome }}
+        </a>
+      </li>
+    {% empty %}
+      <li>Nenhuma secretaria cadastrada.</li>
+    {% endfor %}
+  </ul>
+</div>
 
-      const el1 = document.getElementById("chartUnidades");
-      const el2 = document.getElementById("chartAlunos");
-      if (!el1 || !el2) return;
+<script>
+(function () {
+  function renderCharts() {
+    const c1Labels = JSON.parse(document.getElementById("c1-labels").textContent || "[]");
+    const c1Values = JSON.parse(document.getElementById("c1-values").textContent || "[]");
 
-      // Se não tiver dado, evita gráfico "vazio" sem feedback
-      if (!c1Labels.length || !c1Values.length) {
-        el1.parentElement.insertAdjacentHTML(
-          "beforeend",
-          '<div class="small" style="opacity:.75;margin-top:6px;">Sem dados para exibir.</div>'
-        );
-      } else {
-        new Chart(el1.getContext("2d"), {
-          type: "bar",
-          data: { labels: c1Labels, datasets: [{ label: "Unidades", data: c1Values, borderWidth: 1 }] },
-          options: {
-            responsive: true,
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-          }
-        });
-      }
+    const c2Labels = JSON.parse(document.getElementById("c2-labels").textContent || "[]");
+    const c2Values = JSON.parse(document.getElementById("c2-values").textContent || "[]");
 
-      if (!c2Labels.length || !c2Values.length) {
-        el2.parentElement.insertAdjacentHTML(
-          "beforeend",
-          '<div class="small" style="opacity:.75;margin-top:6px;">Sem dados para exibir.</div>'
-        );
-      } else {
-        new Chart(el2.getContext("2d"), {
-          type: "bar",
-          data: { labels: c2Labels, datasets: [{ label: "Alunos", data: c2Values, borderWidth: 1 }] },
-          options: {
-            responsive: true,
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-          }
-        });
-      }
+    const el1 = document.getElementById("chartUnidades");
+    const el2 = document.getElementById("chartAlunos");
+
+    if (!window.Chart) return;
+
+    if (c1Labels.length && c1Values.length) {
+      new Chart(el1, {
+        type: "bar",
+        data: { labels: c1Labels, datasets: [{ data: c1Values }] },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+      });
     }
 
-    function ensureChartJs(cb) {
-      if (window.Chart) return cb();
-
-      // carrega Chart.js só se ainda não existir (CDN)
-      const s = document.createElement("script");
-      s.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js";
-      s.onload = cb;
-      s.onerror = function () {
-        console.warn("Chart.js não carregou. Verifique internet ou inclua Chart.js no static.");
-      };
-      document.head.appendChild(s);
+    if (c2Labels.length && c2Values.length) {
+      new Chart(el2, {
+        type: "bar",
+        data: { labels: c2Labels, datasets: [{ data: c2Values }] },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+      });
     }
+  }
 
-    ensureChartJs(renderCharts);
-  })();
+  if (window.Chart) {
+    renderCharts();
+  } else {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js";
+    s.onload = renderCharts;
+    document.head.appendChild(s);
+  }
+})();
 </script>
 
-    </div>
-
-    <!-- ÚLTIMAS SECRETARIAS -->
-    <div class="form-section" style="margin-top:16px;">
-      <div class="form-section__title">Últimas secretarias</div>
-      <ul style="margin:0; padding-left:18px;">
-        {% for s in ultimas_secretarias %}
-          <li><a class="link" href="{% url 'org:secretaria_detail' s.pk %}">{{ s.nome }}</a></li>
-        {% empty %}
-          <li class="small" style="opacity:.8;">Nenhuma secretaria cadastrada.</li>
-        {% endfor %}
-      </ul>
-    </div>
-
-  </div>
-</div>
 {% endblock %}

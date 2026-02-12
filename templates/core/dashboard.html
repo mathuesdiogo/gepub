@@ -1,49 +1,39 @@
 {% extends "core/base.html" %}
 
 {% block title %}Dashboard • GEPUB{% endblock %}
-{% block header %}Dashboard{% endblock %}
+{% block header %}{% block dashboard_header %}Dashboard{% endblock %}{% endblock %}
 
 {% block breadcrumbs %}
   <div class="breadcrumbs">
     <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
     <span class="breadcrumbs__sep">/</span>
-    <span class="breadcrumbs__current">Dashboard</span>
+    <span class="breadcrumbs__current">{% block dashboard_breadcrumb %}Dashboard{% endblock %}</span>
   </div>
 {% endblock %}
 
-
 {% block content %}
-  <div class="grid">
-    <div class="card">
-      <div class="card__title">Pessoas</div>
-      <div class="card__body">
-        Cadastros base (Aluno, Responsável, Servidor).<br>
-        <a class="link" href="{% url 'pessoas:index' %}">Abrir módulo</a>
-      </div>
+<div class="dashboard">
+
+  <!-- HEADER PERSONALIZÁVEL -->
+  <div class="dashboard-header">
+    <div class="dashboard-title">
+      {% block dashboard_title %}
+        Painel Geral
+      {% endblock %}
     </div>
 
-    <div class="card">
-      <div class="card__title">Organização</div>
-      <div class="card__body">
-        Unidades, escolas e estrutura administrativa.<br>
-        <a class="link" href="{% url 'org:index' %}">Abrir módulo</a>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card__title">Educação</div>
-      <div class="card__body">
-        Turmas, matrículas e ano letivo.<br>
-        <a class="link" href="{% url 'educacao:index' %}">Abrir módulo</a>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card__title">NEE</div>
-      <div class="card__body">
-        Necessidades especiais, laudos e acompanhamentos.<br>
-        <a class="link" href="{% url 'nee:index' %}">Abrir módulo</a>
-      </div>
+    <div>
+      {% block dashboard_badge %}{% endblock %}
     </div>
   </div>
+
+  <!-- MÉTRICAS -->
+  {% block dashboard_metrics %}
+  {% endblock %}
+
+  <!-- SEÇÕES -->
+  {% block dashboard_sections %}
+  {% endblock %}
+
+</div>
 {% endblock %}

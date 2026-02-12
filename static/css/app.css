@@ -1,24 +1,22 @@
-/* CORE */
-@import "core/tokens.css";
-@import "core/base.css";
-@import "core/layout.css";
-@import "core/utilities.css";
+/* GEPUB - CSS Loader (somente tema institucional) */
 
-/* COMPONENTS */
-@import "components/cards.css";
-@import "components/forms.css";
-@import "components/tables.css";
-@import "components/sidebar.css";
-@import "components/topbar.css";
-@import "components/dashboard.css";
+/* Core */
+@import url("./core/tokens.css");
+@import url("./core/base.css");
+@import url("./core/layout.css");
 
-/* PAGES */
-@import "pages/login.css";
-@import "pages/perfil.css";
-@import "pages/aluno.css";
+/* Components */
+@import url("./components/sidebar.css");
+@import url("./components/topbar.css");
+@import url("./components/breadcrumbs.css");
+@import url("./components/buttons.css");
+@import url("./components/forms.css");
+@import url("./components/cards.css");
+@import url("./components/tables.css");
+@import url("./components/badges.css");
+@import url("./components/link-card.css");
+@import url("./components/modal.css");
 
-/* THEMES */
-@import "themes/default.css";
-@import "themes/institucional.css";
-@import "themes/swap.css";
-@import "themes/gov.css";
+/* Utilities */
+@import url("./core/utilities.css");
+@import url("pages/dashboard.css");

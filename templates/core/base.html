@@ -1,7 +1,7 @@
 {% load static %}
 
 <!doctype html>
-<html lang="pt-br" data-theme="{{ request.session.theme|default:'azul' }}">
+<html lang="pt-br">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -9,82 +9,132 @@
 
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
 </head>
-<body>
+
+<body class="theme-institucional">
+  <a class="skip-link" href="#conteudo">Pular para conteúdo</a>
+
   <div class="layout">
 
     <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand__logo">G</div>
-        <div class="brand__text">
-          <div class="brand__name">GEPUB</div>
-          <div class="brand__sub">Gestão Estratégica Pública</div>
+    <aside class="sidebar" aria-label="Menu lateral">
+      <div class="sidebar__header">
+        <div class="brand">
+          <div class="brand__logo" aria-hidden="true">G</div>
+          <div class="brand__text">
+            <div class="brand__name">GEPUB</div>
+            <div class="brand__sub">Gestão Estratégica Pública</div>
+          </div>
         </div>
+
+        <button
+          type="button"
+          class="sidebar__toggle"
+          id="sidebarToggle"
+          aria-label="Recolher menu"
+          aria-pressed="false"
+          title="Recolher menu"
+        >
+          ☰
+        </button>
       </div>
 
       <nav class="menu">
-        <a class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'core' %}is-active{% endif %}"
-           href="{% url 'core:dashboard' %}">
-          Dashboard
+
+        <a
+          class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'core' %}is-active{% endif %}"
+          href="{% url 'core:dashboard' %}"
+          title="Dashboard"
+        >
+          <span class="menu__icon" aria-hidden="true">D</span>
+          <span class="menu__label">Dashboard</span>
         </a>
 
         <div class="menu__section">Módulos</div>
 
         {% if can_org %}
-          <a class="menu__item {% if request.resolver_match.namespace == 'org' %}is-active{% endif %}"
-             href="{% url 'org:index' %}">
-            Organização
+          <a
+            class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'org' %}is-active{% endif %}"
+            href="{% url 'org:index' %}"
+            title="Organização"
+          >
+            <span class="menu__icon" aria-hidden="true">O</span>
+            <span class="menu__label">Organização</span>
           </a>
         {% endif %}
 
         {% if can_edu %}
-          <a class="menu__item {% if request.resolver_match.namespace == 'educacao' %}is-active{% endif %}"
-             href="{% url 'educacao:index' %}">
-            Educação
+          <a
+            class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'educacao' %}is-active{% endif %}"
+            href="{% url 'educacao:index' %}"
+            title="Educação"
+          >
+            <span class="menu__icon" aria-hidden="true">E</span>
+            <span class="menu__label">Educação</span>
           </a>
         {% endif %}
 
         {% if can_nee %}
-          <a class="menu__item {% if request.resolver_match.namespace == 'nee' %}is-active{% endif %}"
-             href="{% url 'nee:index' %}">
-            NEE
+          <a
+            class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'nee' %}is-active{% endif %}"
+            href="{% url 'nee:index' %}"
+            title="NEE"
+          >
+            <span class="menu__icon" aria-hidden="true">N</span>
+            <span class="menu__label">NEE</span>
           </a>
         {% endif %}
 
         <div class="menu__section">Conta</div>
 
-        <a class="menu__item {% if request.resolver_match.url_name == 'meu_perfil' %}is-active{% endif %}"
-           href="{% url 'accounts:meu_perfil' %}">
-          Meu perfil
+        <a
+          class="menu__item {% if request.resolver_match and request.resolver_match.url_name == 'meu_perfil' %}is-active{% endif %}"
+          href="{% url 'accounts:meu_perfil' %}"
+          title="Meu perfil"
+        >
+          <span class="menu__icon" aria-hidden="true">P</span>
+          <span class="menu__label">Meu perfil</span>
         </a>
 
-        <a class="menu__item {% if request.resolver_match.url_name == 'alterar_senha' %}is-active{% endif %}"
-           href="{% url 'accounts:alterar_senha' %}">
-          Alterar senha
+        <a
+          class="menu__item {% if request.resolver_match and request.resolver_match.url_name == 'alterar_senha' %}is-active{% endif %}"
+          href="{% url 'accounts:alterar_senha' %}"
+          title="Alterar senha"
+        >
+          <span class="menu__icon" aria-hidden="true">S</span>
+          <span class="menu__label">Alterar senha</span>
         </a>
 
         {% if can_users %}
-          <a class="menu__item {% if request.resolver_match.url_name == 'usuarios_list' %}is-active{% endif %}"
-             href="{% url 'accounts:usuarios_list' %}">
-            Usuários
+          <a
+            class="menu__item {% if request.resolver_match and request.resolver_match.url_name == 'usuarios_list' %}is-active{% endif %}"
+            href="{% url 'accounts:usuarios_list' %}"
+            title="Usuários"
+          >
+            <span class="menu__icon" aria-hidden="true">U</span>
+            <span class="menu__label">Usuários</span>
           </a>
         {% endif %}
 
         {% if request.user.is_staff or request.user.is_superuser %}
           <div class="menu__section">Sistema</div>
-          <a class="menu__item" href="/admin/">Admin Django</a>
+          <a class="menu__item" href="/admin/" title="Admin Django">
+            <span class="menu__icon" aria-hidden="true">A</span>
+            <span class="menu__label">Admin Django</span>
+          </a>
         {% endif %}
       </nav>
 
       <div class="sidebar__footer">
-        <span class="small">Logado como</span>
-        <strong>{{ request.user.username }}</strong>
-        <a class="link" href="{% url 'accounts:logout' %}">Sair</a>
+        <div class="sidebar__footer-row">
+          <span class="small">Logado como</span>
+          <strong class="sidebar__user">{{ request.user.username }}</strong>
+        </div>
+        <a class="link sidebar__logout" href="{% url 'accounts:logout' %}">Sair</a>
       </div>
     </aside>
 
     <!-- CONTEÚDO -->
-    <main class="main">
+    <main class="main" id="conteudo">
       <header class="topbar">
         <div class="topbar__left">
           <div class="topbar__title">{% block header %}Dashboard{% endblock %}</div>
@@ -97,33 +147,6 @@
         </div>
 
         <div class="topbar__right">
-          <!-- ✅ SELECT DE TEMA NO CABEÇALHO (não empurra layout) -->
-          <div class="theme-select-wrap">
-            <span class="small" style="margin-right:8px;">Tema</span>
-            <select class="theme-select"
-                    onchange="window.location.href=this.value">
-              <option value="{% url 'core:change_theme' 'azul' %}"
-                {% if request.session.theme|default:'azul' == 'azul' %}selected{% endif %}>
-                Azul institucional
-              </option>
-
-              <option value="{% url 'core:change_theme' 'dark' %}"
-                {% if request.session.theme == 'dark' %}selected{% endif %}>
-                Dark administrativo
-              </option>
-
-              <option value="{% url 'core:change_theme' 'midnight' %}"
-                {% if request.session.theme == 'midnight' %}selected{% endif %}>
-                Midnight
-              </option>
-
-              <option value="{% url 'core:change_theme' 'kassy' %}"
-                {% if request.session.theme == 'kassy' %}selected{% endif %}>
-                Kassy
-              </option>
-            </select>
-          </div>
-
           <span class="pill">GEPUB</span>
         </div>
       </header>
@@ -144,5 +167,34 @@
     </main>
 
   </div>
+
+  <script>
+    (function () {
+      const key = "gepub.sidebar.collapsed";
+      const btn = document.getElementById("sidebarToggle");
+
+      function apply(state) {
+        document.body.classList.toggle("sidebar-collapsed", state);
+        if (btn) {
+          btn.setAttribute("aria-pressed", state ? "true" : "false");
+          btn.setAttribute("aria-label", state ? "Expandir menu" : "Recolher menu");
+          btn.title = state ? "Expandir menu" : "Recolher menu";
+        }
+      }
+
+      const saved = localStorage.getItem(key);
+      apply(saved === "1");
+
+      if (btn) {
+        btn.addEventListener("click", function () {
+          const now = !document.body.classList.contains("sidebar-collapsed");
+          localStorage.setItem(key, now ? "1" : "0");
+          apply(now);
+        });
+      }
+    })();
+  </script>
+
+  <script src="{% static 'vendor/chartjs/chart.js' %}"></script>
 </body>
 </html>

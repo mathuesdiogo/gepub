@@ -1,25 +1,103 @@
 /* ==========================================================
-   TABLES — Ant Design Style
+   TABLES — Institucional Clean (Google Admin Style)
    ========================================================== */
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: var(--bg-surface);
-  border-radius: var(--radius-md);
+.table-wrapper {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
   overflow: hidden;
 }
 
+/* Base */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
+  color: var(--text);
+}
+
+/* Head */
 thead {
-  background: var(--gray-100);
+  background: var(--surface-2);
 }
 
-th, td {
-  padding: 12px 14px;
-  text-align: left;
-  border-bottom: 1px solid var(--border-light);
+thead th {
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: .02em;
+  color: var(--muted);
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
 }
 
-tbody tr:hover {
-  background: var(--gray-50);
+/* Body */
+tbody td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  transition: background .12s ease;
+}
+
+/* Zebra */
+tbody tr:nth-child(even) td {
+  background: var(--surface-2);
+}
+
+/* Hover */
+tbody tr:hover td {
+  background: var(--primary-100);
+}
+
+/* Última linha */
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Links dentro da tabela */
+table a {
+  color: var(--primary-700);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+table a:hover {
+  text-decoration: underline;
+}
+
+/* Status badges dentro da tabela */
+.table-status {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 999px;
+}
+
+.table-status.success {
+  background: rgba(22,163,74,.15);
+  color: var(--success);
+}
+
+.table-status.warning {
+  background: rgba(245,158,11,.15);
+  color: var(--warning);
+}
+
+.table-status.danger {
+  background: rgba(239,68,68,.15);
+  color: var(--danger);
+}
+
+/* Responsividade */
+@media (max-width: 900px) {
+  table {
+    font-size: 13px;
+  }
+
+  th, td {
+    padding: 10px 12px;
+  }
 }

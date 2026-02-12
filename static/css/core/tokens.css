@@ -1,95 +1,56 @@
-/* ==========================================================
-   GEPUB DESIGN SYSTEM — TOKENS
-   Tema padrão: Azul Institucional Claro
-   ========================================================== */
-
 :root {
+  /* Brand / Primary */
+  --primary: #1a73e8;
+  --primary-700: #0b57d0;
+  --primary-900: #0a2e6e;
+  --primary-100: #e8f0fe;
 
-  /* =======================================================
-     🎨 CORES PRINCIPAIS
-     ======================================================= */
+  /* Backgrounds */
+  --bg: #f5f7fb;            /* fundo geral (quase cinza) */
+  --surface: #ffffff;       /* cards / painéis */
+  --surface-2: #f1f4fa;     /* variação leve */
+  --surface-3: #e9eef8;     /* variação um pouco mais forte */
+  --border: #dfe5ef;
 
-  --primary-50:  #eef4ff;
-  --primary-100: #d9e6ff;
-  --primary-200: #b8d2ff;
-  --primary-300: #8db6ff;
-  --primary-400: #5c92ff;
-  --primary-500: #2563eb; /* COR OFICIAL */
-  --primary-600: #1d4ed8;
-  --primary-700: #1e40af;
-  --primary-800: #1e3a8a;
+  /* Sidebar (novo) */
+  --sidebar-bg: linear-gradient(180deg, #0b57d0 0%, #0a3d93 55%, #082f6b 100%);
+  --sidebar-surface: rgba(255,255,255,.10);
+  --sidebar-surface-2: rgba(255,255,255,.16);
+  --sidebar-border: rgba(255,255,255,.15);
+  --sidebar-text: rgba(255,255,255,.92);
+  --sidebar-muted: rgba(255,255,255,.72);
 
-  /* Estados */
+  /* Text */
+  --text: #0f172a;
+  --muted: #5b677a;
+  --muted-2: #8a96ab;
+
+  /* Status */
   --success: #16a34a;
-  --danger:  #dc2626;
   --warning: #f59e0b;
-  --info:    #0284c7;
+  --danger: #ef4444;
 
-  /* =======================================================
-     🎨 ESCALA DE CINZA (estilo Google)
-     ======================================================= */
+  /* Radius / Shadow (mais “presença”) */
+  --radius: 18px;
+  --radius-sm: 14px;
+  --shadow: 0 12px 32px rgba(2, 6, 23, 0.10);
+  --shadow-soft: 0 10px 22px rgba(2, 6, 23, 0.08);
+  --shadow-card: 0 10px 18px rgba(2, 6, 23, 0.06);
 
-  --gray-50:  #f8fafc;
-  --gray-100: #f1f5f9;
-  --gray-200: #e2e8f0;
-  --gray-300: #cbd5e1;
-  --gray-400: #94a3b8;
-  --gray-500: #64748b;
-  --gray-600: #475569;
-  --gray-700: #334155;
-  --gray-800: #1e293b;
-  --gray-900: #0f172a;
+  /* Layout */
+  --sidebar-w: 288px;
+  --sidebar-w-collapsed: 92px;
+  --topbar-h: 72px;
 
-  /* =======================================================
-     🧱 FUNDOS
-     ======================================================= */
+  /* Spacing */
+  --pad: 18px;
+  --gap: 16px;
 
-  --bg-main: var(--gray-100);
-  --bg-surface: #ffffff;
-  --bg-soft: var(--gray-50);
+  /* Focus */
+  --focus: 0 0 0 4px rgba(26, 115, 232, 0.25);
+}
 
-  /* =======================================================
-     📝 TEXTO
-     ======================================================= */
-
-  --text-primary: var(--gray-900);
-  --text-secondary: var(--gray-600);
-  --text-muted: var(--gray-500);
-  --text-inverse: #ffffff;
-
-  /* =======================================================
-     🧱 BORDAS
-     ======================================================= */
-
-  --border-light: var(--gray-200);
-  --border-medium: var(--gray-300);
-
-  /* =======================================================
-     📐 RADIUS
-     ======================================================= */
-
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
-
-  /* =======================================================
-     🌫 SOMBRAS (Ant Design Inspired)
-     ======================================================= */
-
-  --shadow-sm: 0 1px 2px rgba(0,0,0,.05);
-  --shadow-md: 0 4px 12px rgba(0,0,0,.08);
-  --shadow-lg: 0 10px 24px rgba(0,0,0,.12);
-
-  /* =======================================================
-     📏 ESPAÇAMENTO (escala 8px)
-     ======================================================= */
-
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-10: 40px;
+/* Estado recolhido */
+body.sidebar-collapsed {
+  --sidebar-w: var(--sidebar-w-collapsed);
 }
