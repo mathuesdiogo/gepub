@@ -1,0 +1,20 @@
+<div class="stack">
+  {% if fields %}
+    <div class="stack">
+      {% for f in fields %}
+        <div>
+          <div class="small">{{ f.label }}</div>
+          <div><strong>{{ f.value|default:"—" }}</strong></div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if pills %}
+    <div class="stack">
+      {% for p in pills %}
+        <span class="pill">{{ p.label }}: <strong>{{ p.value }}</strong></span>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>

@@ -455,7 +455,6 @@ def unidade_list(request):
         Municipio.objects.filter(ativo=True).order_by("nome"),
     )
 
-    # secretarias dentro do escopo dos municípios visíveis
     secretarias_qs = Secretaria.objects.select_related("municipio").filter(
         ativo=True,
         municipio__in=municipios
@@ -573,7 +572,7 @@ def unidade_list(request):
         })
 
     # =============================
-    # EXTRA FILTERS (3 selects) via filter_select genérico
+    # EXTRA FILTERS (3 selects)
     # =============================
     options_municipios = [{"value": str(m.id), "label": f"{m.nome} / {m.uf}"} for m in municipios]
     options_secretarias = [{"value": str(s.id), "label": f"{s.nome} ({s.municipio.uf})"} for s in secretarias]
@@ -596,22 +595,28 @@ def unidade_list(request):
         request=request,
     )
 
-    return render(
-    request,
-    "org/unidade_form.html",
-    {
-        "form": form,
-        "mode": "create",
-        "actions": actions,
-        "cancel_url": reverse("org:unidade_list"),
-        "action_url": reverse("org:unidade_create"),
+    # ✅ autocomplete do buscar
+    autocomplete_url = reverse("org:unidade_autocomplete")
+    autocomplete_href = reverse("org:unidade_list") + "?q={q}"
 
-        # ✅ títulos prontos pro template (sem expressão no include)
-        "page_title": "Nova Unidade",
-        "page_subtitle": "Cadastro e manutenção de unidade",
-        "submit_label": "Criar",
-    },
-)
+    # ✅ RENDER CORRETO (LISTA)
+    return render(request, "org/unidade_list.html", {
+        "q": q,
+        "municipio_id": municipio_id,
+        "secretaria_id": secretaria_id,
+        "tipo": tipo,
+        "page_obj": page_obj,
+        "actions": actions,
+        "headers": headers,
+        "rows": rows,
+        "action_url": reverse("org:unidade_list"),
+        "clear_url": reverse("org:unidade_list"),
+        "has_filters": bool(municipio_id or secretaria_id or tipo),
+        "extra_filters": extra_filters,
+        "autocomplete_url": autocomplete_url,
+        "autocomplete_href": autocomplete_href,
+    })
+
 
 
 
@@ -803,54 +808,135 @@ def setor_list(request):
 def unidade_detail(request, pk: int):
     from core.rbac import scope_filter_unidades
 
-    qs = scope_filter_unidades(
-        request.user,
-        Unidade.objects.select_related(
-            "secretaria",
-            "secretaria__municipio",
+    unidade = get_object_or_404(
+        scope_filter_unidades(
+            request.user,
+            Unidade.objects.select_related("secretaria", "secretaria__municipio"),
         ),
-    )
-    unidade = get_object_or_404(qs, pk=pk)
-
-    # Turmas da unidade (para exibir na página)
-    turmas = (
-        Turma.objects
-        .filter(unidade_id=unidade.id)
-        .order_by("-ano_letivo", "nome")
+        pk=pk,
     )
 
-    # Setores (se você estiver exibindo em algum lugar)
-    setores = (
-        Setor.objects
-        .filter(unidade_id=unidade.id)
-        .order_by("nome")
+    can_org_manage = (
+        can(request.user, "org.manage")
+        or can(request.user, "org.manage_unidade")
+        or request.user.is_staff
+        or request.user.is_superuser
     )
 
-    # Usuários por unidade (se Profile tiver unidade)
+    # ---------- Actions (PageHead) ----------
+    actions = [
+        {
+            "label": "Voltar",
+            "url": reverse("org:unidade_list"),
+            "icon": "fa-solid fa-arrow-left",
+            "variant": "btn--ghost",
+        }
+    ]
+    if can_org_manage:
+        actions.append(
+            {
+                "label": "Editar",
+                "url": reverse("org:unidade_update", args=[unidade.pk]),
+                "icon": "fa-solid fa-pen",
+                "variant": "btn-primary",
+            }
+        )
+
+    # ---------- KPIs (sem template legacy) ----------
+    turmas_qs = Turma.objects.filter(unidade_id=unidade.id).order_by("-ano_letivo", "nome")
+    turmas_total = turmas_qs.count()
+
     usuarios_total = 0
     professores_total = 0
     auxiliares_total = 0
+    roles_rows = []
 
+    # usuários por role (se existir Profile.unidade)
     try:
         if any(getattr(f, "name", None) == "unidade" for f in Profile._meta.get_fields()):
             profiles = Profile.objects.filter(unidade_id=unidade.id)
             usuarios_total = profiles.count()
             professores_total = profiles.filter(role="PROFESSOR").count()
             auxiliares_total = profiles.filter(role__icontains="AUX").count()
-    except Exception:
-        pass
 
-    ctx = {
-        "unidade": unidade,
-        "turmas": turmas,
-        "setores": setores,
-        "turmas_total": turmas.count(),
-        "setores_total": setores.count(),
+            roles_agg = list(
+                profiles.values("role")
+                .annotate(total=Count("id"))
+                .order_by("role")
+            )
+            for r in roles_agg:
+                roles_rows.append({
+                    "cells": [
+                        {"text": (r.get("role") or "—"), "url": ""},
+                        {"text": str(r.get("total") or 0), "url": ""},
+                    ],
+                    "can_edit": False,
+                    "edit_url": "",
+                })
+    except Exception:
+        roles_rows = []
+
+    # ---------- TableShell: Turmas ----------
+    headers_turmas = [
+        {"label": "Turma"},
+        {"label": "Ano letivo", "width": "140px"},
+        {"label": "Alunos", "width": "140px"},
+        {"label": "Ativa", "width": "110px"},
+    ]
+
+    rows_turmas = []
+    for t in turmas_qs:
+        rows_turmas.append({
+            "cells": [
+                {"text": t.nome, "url": reverse("educacao:turma_detail", args=[t.pk])},
+                {"text": str(getattr(t, "ano_letivo", "") or "—"), "url": ""},
+                {"text": str(getattr(t, "alunos_total", 0) or 0), "url": ""},
+                {"text": "Sim" if getattr(t, "ativo", False) else "Não", "url": ""},
+            ],
+            "can_edit": False,
+            "edit_url": "",
+        })
+
+    # ---------- TableShell: Usuários por perfil ----------
+    headers_roles = [
+        {"label": "Perfil"},
+        {"label": "Total", "width": "120px"},
+    ]
+
+    # ---------- Dados do topo ----------
+    unidade_tipo = (
+        unidade.get_tipo_display()
+        if hasattr(unidade, "get_tipo_display")
+        else (getattr(unidade, "tipo", "") or "—")
+    )
+    secretaria_nome = getattr(getattr(unidade, "secretaria", None), "nome", "—") or "—"
+    secretaria_id = getattr(unidade, "secretaria_id", None)
+
+    return render(request, "org/unidade_detail.html", {
+        "actions": actions,
+
+        # dados simples para o resumo do topo (sem HTML complexo)
+        "page_title": unidade.nome,
+        "page_subtitle": "Detalhes da unidade e visão geral",
+        "unidade_tipo": unidade_tipo,
+        "unidade_ativo": bool(getattr(unidade, "ativo", False)),
+        "secretaria_nome": secretaria_nome,
+        "secretaria_id": secretaria_id,
+
+        "turmas_total": turmas_total,
         "usuarios_total": usuarios_total,
         "professores_total": professores_total,
         "auxiliares_total": auxiliares_total,
-    }
-    return render(request, "org/unidade_detail.html", ctx)
+
+        # tables
+        "headers_turmas": headers_turmas,
+        "rows_turmas": rows_turmas,
+        "headers_roles": headers_roles,
+        "rows_roles": roles_rows,
+        "has_roles": bool(roles_rows),
+    })
+
+
 
 @login_required
 def setor_autocomplete(request):
@@ -934,36 +1020,64 @@ def unidade_create(request):
 
 @login_required
 def unidade_update(request, pk: int):
-    block = _deny_manage_org(request)
-    if block:
-        return block
+    # Permissão: manter padrão do projeto (sem helper inexistente)
+    can_manage = (
+        can(request.user, "org.manage")
+        or can(request.user, "org.manage_unidade")
+        or request.user.is_staff
+        or request.user.is_superuser
+    )
+    if not can_manage:
+        messages.error(request, "Você não tem permissão para editar unidades.")
+        return redirect("org:unidade_list")
 
     from core.rbac import scope_filter_unidades
 
-    qs = scope_filter_unidades(
-        request.user,
-        Unidade.objects.select_related("secretaria", "secretaria__municipio"),
+    obj = get_object_or_404(
+        scope_filter_unidades(
+            request.user,
+            Unidade.objects.select_related("secretaria", "secretaria__municipio"),
+        ),
+        pk=pk,
     )
-    unidade = get_object_or_404(qs, pk=pk)
 
     if request.method == "POST":
         try:
-            form = UnidadeForm(request.POST, instance=unidade, user=request.user)
+            form = UnidadeForm(request.POST, instance=obj, user=request.user)
         except TypeError:
-            form = UnidadeForm(request.POST, instance=unidade)
+            form = UnidadeForm(request.POST, instance=obj)
 
         if form.is_valid():
             obj = form.save()
             messages.success(request, "Unidade atualizada com sucesso.")
             return redirect("org:unidade_detail", pk=obj.pk)
+
         messages.error(request, "Corrija os erros do formulário.")
     else:
         try:
-            form = UnidadeForm(instance=unidade, user=request.user)
+            form = UnidadeForm(instance=obj, user=request.user)
         except TypeError:
-            form = UnidadeForm(instance=unidade)
+            form = UnidadeForm(instance=obj)
 
-    return render(request, "org/unidade_form.html", {"form": form, "mode": "update", "unidade": unidade})
+    # --------- padrão componentizado (igual create) ----------
+    page_title = "Editar unidade"
+    page_subtitle = obj.nome
+    actions = [
+        {"label": "Voltar", "url": reverse("org:unidade_detail", args=[obj.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+    ]
+
+    return render(request, "org/unidade_form.html", {
+        "form": form,
+        "mode": "update",
+
+        # padrão do template novo
+        "page_title": page_title,
+        "page_subtitle": page_subtitle,
+        "actions": actions,
+        "submit_label": "Salvar alterações",
+        "cancel_url": reverse("org:unidade_detail", args=[obj.pk]),
+        "action_url": reverse("org:unidade_update", args=[obj.pk]),
+    })
 
 
 @login_required

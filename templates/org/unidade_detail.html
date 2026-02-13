@@ -1,101 +1,31 @@
 {% extends "core/base.html" %}
-{% block title %}{{ unidade.nome }} • Unidades • Organização • GEPUB{% endblock %}
+{% block title %}{{ page_title }} • Unidades • Organização • GEPUB{% endblock %}
 {% block header %}Organização{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'org:index' %}">Organização</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'org:unidade_list' %}">Unidades</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">{{ page_title }}</span>
+  </div>
+{% endblock %}
 
 {% block content %}
 <div class="card">
-  <div class="card__title" style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
-    <span>{{ unidade.nome }}</span>
-    {% if can_org_manage %}
-      <a class="btn" href="{% url 'org:unidade_update' unidade.pk %}">Editar</a>
-    {% endif %}
-  </div>
-
   <div class="card__body">
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:860px;">
-      <div>
-        <div class="small">Tipo</div>
-        <div style="font-weight:900;">{{ unidade.tipo|default:"—" }}</div>
-      </div>
-      <div>
-        <div class="small">Ativo</div>
-        <div style="font-weight:900;">{% if unidade.ativo %}Sim{% else %}Não{% endif %}</div>
-      </div>
-      <div style="grid-column:1 / -1;">
-        <div class="small">Secretaria</div>
-        <div style="font-weight:900;">
-          <a class="link" href="{% url 'org:secretaria_detail' unidade.secretaria_id %}">{{ unidade.secretaria.nome }}</a>
-        </div>
-      </div>
-    </div>
 
-    <hr style="margin:14px 0;">
+    {% include "core/partials/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+    {% include "core/partials/detail_summary.html" with fields=fields pills=pills %}
+    {% include "core/partials/table_shell.html" with headers=headers_turmas rows=rows_turmas page_obj=None q="" empty_title="Nenhuma turma cadastrada" empty_text="Cadastre turmas para esta unidade e elas aparecerão aqui." %}
 
-    <div style="display:flex; gap:12px; flex-wrap:wrap;">
-      <span class="pill">Turmas: <strong style="margin-left:6px;">{{ turmas_total }}</strong></span>
-      <span class="pill">Usuários: <strong style="margin-left:6px;">{{ usuarios_total }}</strong></span>
-      <span class="pill">Professores: <strong style="margin-left:6px;">{{ professores_total }}</strong></span>
-      <span class="pill">Auxiliares: <strong style="margin-left:6px;">{{ auxiliares_total }}</strong></span>
-    </div>
-
-    <div style="margin-top:16px;">
-      <div style="font-weight:900; margin-bottom:8px;">Turmas da unidade</div>
-
-      <div style="overflow:auto; border:1px solid rgba(255,255,255,.08); border-radius:14px;">
-        <table style="width:100%; border-collapse:collapse; min-width:860px;">
-          <thead>
-            <tr style="text-align:left; background:rgba(255,255,255,.03);">
-              <th style="padding:10px 12px;">Turma</th>
-              <th style="padding:10px 12px; width:140px;">Ano Letivo</th>
-              <th style="padding:10px 12px; width:140px;">Alunos</th>
-              <th style="padding:10px 12px; width:140px;">Ativa</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for t in turmas %}
-              <tr style="border-top:1px solid rgba(255,255,255,.06);">
-                <td style="padding:10px 12px;">
-                  <a class="link" href="{% url 'educacao:turma_detail' t.pk %}">{{ t.nome }}</a>
-                </td>
-                <td style="padding:10px 12px;">{{ t.ano_letivo|default:"—" }}</td>
-                <td style="padding:10px 12px;">{{ t.alunos_total|default:0 }}</td>
-                <td style="padding:10px 12px;">{% if t.ativo %}Sim{% else %}Não{% endif %}</td>
-              </tr>
-            {% empty %}
-              <tr><td colspan="4" style="padding:12px;">Nenhuma turma cadastrada nesta unidade.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    {% if usuarios_por_role %}
-      <div style="margin-top:16px;">
-        <div style="font-weight:900; margin-bottom:8px;">Usuários por perfil (na unidade)</div>
-        <div style="overflow:auto; border:1px solid rgba(255,255,255,.08); border-radius:14px;">
-          <table style="width:100%; border-collapse:collapse; min-width:520px;">
-            <thead>
-              <tr style="text-align:left; background:rgba(255,255,255,.03);">
-                <th style="padding:10px 12px;">Perfil</th>
-                <th style="padding:10px 12px; width:120px;">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for r in usuarios_por_role %}
-                <tr style="border-top:1px solid rgba(255,255,255,.06);">
-                  <td style="padding:10px 12px;">{{ r.role }}</td>
-                  <td style="padding:10px 12px;">{{ r.total }}</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
+    {% if has_roles %}
+      {% include "core/partials/table_shell.html" with headers=headers_roles rows=rows_roles page_obj=None q="" empty_title="Sem usuários vinculados" empty_text="Nenhum usuário encontrado para esta unidade." %}
     {% endif %}
 
-    <div style="margin-top:12px;">
-      <a class="link" href="{% url 'org:unidade_list' %}">← Voltar para lista</a>
-    </div>
   </div>
 </div>
 {% endblock %}
