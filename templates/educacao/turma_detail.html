@@ -23,176 +23,101 @@
 {{ evol_labels|json_script:"ev-labels" }}
 {{ evol_values|json_script:"ev-values" }}
 
-<div class="flex-between mb-20">
-  <div>
-    <div style="font-weight:1000; font-size:18px;">{{ turma.nome }}</div>
-    <div class="small">Turma • {{ turma.ano_letivo }} • {{ turma.turno }}</div>
-  </div>
+<div class="card">
+  <div class="card__body">
 
-  <div class="flex" style="gap:10px; align-items:center;">
-    {% if can_edu_manage %}
-      <a class="btn" href="{% url 'educacao:turma_update' turma.pk %}">Editar</a>
-    {% endif %}
-    <a class="link" href="{% url 'educacao:turma_list' %}">Voltar</a>
-  </div>
-</div>
+{% include "core/partials/page_head.html" with title=turma.nome subtitle="Turma • "|add:turma.ano_letivo|add:" • "|add:turma.turno actions=actions %}
 
-<!-- GRID DASHBOARD (mantido como você fez, sem desconfigurar) -->
-<div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px; align-items:start;">
+    <div class="dash-grid">
 
-  <!-- Card: Informações -->
-  <div class="card">
-    <div class="card__title">Informações da turma</div>
-    <div class="card__body" style="color:var(--text);">
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-        <div>
-          <div class="small">Ano Letivo</div>
-          <div style="font-weight:900;">{{ turma.ano_letivo }}</div>
-        </div>
-        <div>
-          <div class="small">Turno</div>
-          <div style="font-weight:900;">{{ turma.turno }}</div>
-        </div>
-
-        <div style="grid-column:1/-1;">
-          <div class="small">Unidade</div>
-          <div style="font-weight:900;">
-            <a class="link" href="{% url 'org:unidade_detail' turma.unidade_id %}">{{ turma.unidade.nome }}</a>
+      <div class="card dash-col-6">
+        <div class="card__title">Informações da turma</div>
+        <div class="card__body">
+          <div class="detail-grid">
+            <div>
+              <div class="small">Ano letivo</div>
+              <div class="detail-value">{{ turma.ano_letivo }}</div>
+            </div>
+            <div>
+              <div class="small">Turno</div>
+              <div class="detail-value">{{ turma.turno }}</div>
+            </div>
+            <div class="detail-wide">
+              <div class="small">Unidade</div>
+              <div class="detail-value"><a class="link" href="{% url 'org:unidade_detail' turma.unidade_id %}">{{ turma.unidade.nome }}</a></div>
+            </div>
+            <div>
+              <div class="small">Secretaria</div>
+              <div class="detail-value">{{ turma.unidade.secretaria.nome }}</div>
+            </div>
+            <div>
+              <div class="small">Município</div>
+              <div class="detail-value">{{ turma.unidade.secretaria.municipio.nome }}</div>
+            </div>
           </div>
         </div>
-
-        <div>
-          <div class="small">Secretaria</div>
-          <div style="font-weight:900;">{{ turma.unidade.secretaria.nome }}</div>
-        </div>
-        <div>
-          <div class="small">Município</div>
-          <div style="font-weight:900;">{{ turma.unidade.secretaria.municipio.nome }}</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Card: KPIs rápidos -->
-  <div class="card">
-    <div class="card__title">Resumo</div>
-    <div class="card__body">
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <span class="pill">Alunos <strong style="margin-left:6px;">{{ alunos_total }}</strong></span>
-        <span class="pill">Professores <strong style="margin-left:6px;">{{ professores_total }}</strong></span>
-        <span class="pill">Ativos <strong style="margin-left:6px;">{{ alunos_ativos }}</strong></span>
-        <span class="pill">Inativos <strong style="margin-left:6px;">{{ alunos_inativos }}</strong></span>
       </div>
 
-      <div class="small" style="margin-top:10px; opacity:.9;">
-        Clique nos blocos abaixo para expandir listas.
-      </div>
-    </div>
-  </div>
-
-  <!-- Card: Gráfico NEE -->
-  <div class="card">
-    <div class="card__title">Necessidades (NEE) na turma</div>
-    <div class="card__body">
-      <canvas id="chartNee" height="140"></canvas>
-      <div class="small" style="margin-top:6px; opacity:.75;">Distribuição por tipo de necessidade.</div>
-    </div>
-  </div>
-
-  <!-- Card: Status -->
-  <div class="card">
-    <div class="card__title">Ativos vs Inativos</div>
-    <div class="card__body">
-      <canvas id="chartStatus" height="140"></canvas>
-      <div class="small" style="margin-top:6px; opacity:.75;">Situação dos alunos matriculados.</div>
-    </div>
-  </div>
-
-  <!-- Card: Evolução -->
-  <div class="card" style="grid-column:1/-1;">
-    <div class="card__title">Evolução por ano letivo</div>
-    <div class="card__body">
-      <canvas id="chartEvol" height="110"></canvas>
-      <div class="small" style="margin-top:6px; opacity:.75;">Comparação por ano (mesmo nome de turma e mesma unidade).</div>
-    </div>
-  </div>
-
-  <!-- Card: Alunos (colapsável) -->
-  <div class="card">
-    <div class="card__title">Alunos</div>
-    <div class="card__body">
-      <details>
-        <summary style="cursor:pointer; font-weight:900;">
-          Ver alunos da turma ({{ alunos_total }})
-        </summary>
-
-        {% if alunos %}
-          <div style="margin-top:10px; overflow:auto; border:1px solid rgba(255,255,255,.08); border-radius:14px;">
-            <table style="width:100%; border-collapse:collapse; min-width:680px;">
-              <thead>
-                <tr style="text-align:left; background:rgba(255,255,255,.03);">
-                  <th style="padding:10px 12px;">Nome</th>
-                  <th style="padding:10px 12px; width:160px;">CPF</th>
-                  <th style="padding:10px 12px; width:120px;">Ativo</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for aluno in alunos %}
-                  <tr style="border-top:1px solid rgba(255,255,255,.06);">
-                    <td style="padding:10px 12px;">
-                      <a class="link" href="{% url 'educacao:aluno_detail' aluno.pk %}">{{ aluno.nome }}</a>
-                    </td>
-                    <td style="padding:10px 12px;">{{ aluno.cpf|default:"—" }}</td>
-                    <td style="padding:10px 12px;">{% if aluno.ativo %}Sim{% else %}Não{% endif %}</td>
-                  </tr>
-                {% empty %}
-                  <tr><td colspan="3" style="padding:12px;">Nenhum aluno matriculado nesta turma.</td></tr>
-                {% endfor %}
-              </tbody>
-            </table>
+      <div class="card dash-col-6">
+        <div class="card__title">Resumo</div>
+        <div class="card__body">
+          <div class="pill-row">
+            <span class="pill">Alunos <strong>{{ alunos_total }}</strong></span>
+            <span class="pill">Professores <strong>{{ professores_total }}</strong></span>
+            <span class="pill">Ativos <strong>{{ alunos_ativos }}</strong></span>
+            <span class="pill">Inativos <strong>{{ alunos_inativos }}</strong></span>
           </div>
-        {% else %}
-          {% include "core/partials/empty_state.html" with title="Nenhum aluno" text="Nenhum aluno matriculado nesta turma." %}
-        {% endif %}
-      </details>
+          <div class="small">Clique nos blocos abaixo para expandir listas.</div>
+        </div>
+      </div>
+
+      <div class="card dash-col-6">
+        <div class="card__title">Necessidades (NEE) na turma</div>
+        <div class="card__body">
+          <canvas id="chartNee" height="140"></canvas>
+          <div class="small">Distribuição por tipo de necessidade.</div>
+        </div>
+      </div>
+
+      <div class="card dash-col-6">
+        <div class="card__title">Ativos vs Inativos</div>
+        <div class="card__body">
+          <canvas id="chartStatus" height="140"></canvas>
+          <div class="small">Situação dos alunos matriculados.</div>
+        </div>
+      </div>
+
+      <div class="card dash-col-12">
+        <div class="card__title">Evolução por ano letivo</div>
+        <div class="card__body">
+          <canvas id="chartEvol" height="110"></canvas>
+          <div class="small">Comparação por ano (mesmo nome de turma e mesma unidade).</div>
+        </div>
+      </div>
+
+      <div class="card dash-col-6">
+        <div class="card__title">Alunos</div>
+        <div class="card__body">
+          <details>
+            <summary class="link">Ver alunos da turma ({{ alunos_total }})</summary>
+{% include "core/partials/table_shell.html" with headers=headers_alunos rows=rows_alunos page_obj=None empty_title="Nenhum aluno" empty_text="Nenhum aluno matriculado nesta turma." %}
+          </details>
+        </div>
+      </div>
+
+      <div class="card dash-col-6">
+        <div class="card__title">Professores</div>
+        <div class="card__body">
+          <details>
+            <summary class="link">Ver professores ({{ professores_total }})</summary>
+{% include "core/partials/table_shell.html" with headers=headers_professores rows=rows_professores page_obj=None empty_title="Nenhum professor" empty_text="Nenhum professor encontrado (ou perfil não vincula unidade)." %}
+          </details>
+        </div>
+      </div>
+
     </div>
+
   </div>
-
-  <!-- Card: Professores (colapsável) -->
-  <div class="card">
-    <div class="card__title">Professores</div>
-    <div class="card__body">
-      <details>
-        <summary style="cursor:pointer; font-weight:900;">
-          Ver professores ({{ professores_total }})
-        </summary>
-
-        {% if professores %}
-          <div style="margin-top:10px; overflow:auto; border:1px solid rgba(255,255,255,.08); border-radius:14px;">
-            <table style="width:100%; border-collapse:collapse; min-width:520px;">
-              <thead>
-                <tr style="text-align:left; background:rgba(255,255,255,.03);">
-                  <th style="padding:10px 12px;">Usuário</th>
-                  <th style="padding:10px 12px;">Perfil</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for p in professores %}
-                  <tr style="border-top:1px solid rgba(255,255,255,.06);">
-                    <td style="padding:10px 12px;">{{ p.user.username }}</td>
-                    <td style="padding:10px 12px;">{{ p.role }}</td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        {% else %}
-          {% include "core/partials/empty_state.html" with title="Nenhum professor" text="Nenhum professor encontrado (ou perfil não vincula unidade)." %}
-        {% endif %}
-      </details>
-    </div>
-  </div>
-
 </div>
 
 <script>
@@ -209,10 +134,8 @@
   function renderCharts() {
     const neeLabels = JSON.parse(document.getElementById("nee-labels").textContent || "[]");
     const neeValues = JSON.parse(document.getElementById("nee-values").textContent || "[]");
-
     const stLabels = JSON.parse(document.getElementById("st-labels").textContent || "[]");
     const stValues = JSON.parse(document.getElementById("st-values").textContent || "[]");
-
     const evLabels = JSON.parse(document.getElementById("ev-labels").textContent || "[]");
     const evValues = JSON.parse(document.getElementById("ev-values").textContent || "[]");
 

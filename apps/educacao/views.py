@@ -325,9 +325,28 @@ def turma_detail(request, pk):
     )
     turma = get_object_or_404(turma_qs, pk=pk)
 
+    can_edu_manage = can(request.user, "educacao.manage")
+
+    actions = [
+        {
+            "label": "Voltar",
+            "url": reverse("educacao:turma_list"),
+            "icon": "fa-solid fa-arrow-left",
+            "variant": "btn--ghost",
+        }
+    ]
+    if can_edu_manage:
+        actions.append(
+            {
+                "label": "Editar",
+                "url": reverse("educacao:turma_update", args=[turma.pk]),
+                "icon": "fa-solid fa-pen",
+                "variant": "btn-primary",
+            }
+        )
+
     matriculas_qs = (
-        Matricula.objects
-        .filter(turma_id=turma.id)
+        Matricula.objects.filter(turma_id=turma.id)
         .select_related("aluno")
         .order_by("aluno__nome")
     )
@@ -336,13 +355,11 @@ def turma_detail(request, pk):
     alunos_total = len(alunos)
 
     alunos_ativos = (
-        Matricula.objects
-        .filter(turma_id=turma.id, aluno__ativo=True)
+        Matricula.objects.filter(turma_id=turma.id, aluno__ativo=True)
         .values("aluno_id").distinct().count()
     )
     alunos_inativos = (
-        Matricula.objects
-        .filter(turma_id=turma.id, aluno__ativo=False)
+        Matricula.objects.filter(turma_id=turma.id, aluno__ativo=False)
         .values("aluno_id").distinct().count()
     )
 
@@ -350,8 +367,7 @@ def turma_detail(request, pk):
     professores_total = 0
     if any(getattr(f, "name", None) == "unidade" for f in Profile._meta.get_fields()):
         professores_qs = (
-            Profile.objects
-            .filter(unidade_id=turma.unidade_id, role="PROFESSOR")
+            Profile.objects.filter(unidade_id=turma.unidade_id, role="PROFESSOR")
             .select_related("user")
             .order_by("user__username")
         )
@@ -359,8 +375,7 @@ def turma_detail(request, pk):
         professores_total = professores_qs.count()
 
     necessidades_rows = list(
-        Matricula.objects
-        .filter(
+        Matricula.objects.filter(
             turma_id=turma.id,
             aluno__necessidades__ativo=True,
             aluno__necessidades__tipo__ativo=True,
@@ -374,8 +389,7 @@ def turma_detail(request, pk):
     nee_values = [r["total"] for r in necessidades_rows]
 
     evol_rows = list(
-        Turma.objects
-        .filter(unidade_id=turma.unidade_id, nome=turma.nome)
+        Turma.objects.filter(unidade_id=turma.unidade_id, nome=turma.nome)
         .values("ano_letivo")
         .annotate(total=Count("matriculas__aluno_id", distinct=True))
         .order_by("ano_letivo")
@@ -383,23 +397,65 @@ def turma_detail(request, pk):
     evol_labels = [str(r["ano_letivo"]) for r in evol_rows]
     evol_values = [r["total"] for r in evol_rows]
 
+    # ---------- TableShell: Alunos ----------
+    headers_alunos = [
+        {"label": "Nome"},
+        {"label": "CPF", "width": "180px"},
+        {"label": "Ativo", "width": "110px"},
+    ]
+    rows_alunos = []
+    for a in alunos:
+        rows_alunos.append({
+            "cells": [
+                {"text": a.nome, "url": reverse("educacao:aluno_detail", args=[a.pk])},
+                {"text": getattr(a, "cpf", None) or "—", "url": ""},
+                {"text": "Sim" if getattr(a, "ativo", False) else "Não", "url": ""},
+            ],
+            "can_edit": False,
+            "edit_url": "",
+        })
+
+    # ---------- TableShell: Professores ----------
+    headers_professores = [
+        {"label": "Usuário"},
+        {"label": "Perfil"},
+    ]
+    rows_professores = []
+    for p in professores:
+        rows_professores.append({
+            "cells": [
+                {"text": getattr(getattr(p, "user", None), "username", "—") or "—", "url": ""},
+                {"text": getattr(p, "role", "") or "—", "url": ""},
+            ],
+            "can_edit": False,
+            "edit_url": "",
+        })
+
     ctx = {
         "turma": turma,
+        "can_edu_manage": can_edu_manage,
+        "actions": actions,
+
         "alunos_total": alunos_total,
         "professores_total": professores_total,
         "alunos_ativos": alunos_ativos,
         "alunos_inativos": alunos_inativos,
-        "alunos": alunos,
-        "professores": professores,
+
         "nee_labels": nee_labels,
         "nee_values": nee_values,
         "status_labels": ["Ativos", "Inativos"],
         "status_values": [alunos_ativos, alunos_inativos],
         "evol_labels": evol_labels,
         "evol_values": evol_values,
+
+        "headers_alunos": headers_alunos,
+        "rows_alunos": rows_alunos,
+        "headers_professores": headers_professores,
+        "rows_professores": rows_professores,
     }
 
     return render(request, "educacao/turma_detail.html", ctx)
+
 
 
 @login_required
