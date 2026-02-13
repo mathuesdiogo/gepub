@@ -576,12 +576,7 @@ def aluno_detail(request, pk: int):
         else:
             raise
 
-    # ---------------------------
-    # Permissões para o template
-    # ---------------------------
     can_edu_manage = can(request.user, "educacao.manage")
-    # Use a permissão que você já usa no seu RBAC para NEE.
-    # Se no seu projeto a perm é "nee.manage", mantém assim.
     can_nee_manage = can(request.user, "nee.manage") or can_edu_manage
 
     matriculas_qs = (
@@ -595,6 +590,7 @@ def aluno_detail(request, pk: int):
         .filter(aluno=aluno)
         .order_by("-id")
     )
+
     matriculas_qs = scope_filter_matriculas(request.user, matriculas_qs)
     matriculas = matriculas_qs
 
@@ -622,6 +618,10 @@ def aluno_detail(request, pk: int):
 
     apoios = apoios_qs.filter(matricula_id__in=allowed_matriculas)
 
+    # =========================
+    # POST
+    # =========================
+
     if request.method == "POST":
         action = (request.POST.get("_action") or "").strip()
 
@@ -645,14 +645,8 @@ def aluno_detail(request, pk: int):
 
                 if not m.data_matricula:
                     m.data_matricula = timezone.localdate()
+
                 m.save()
-
-                recent = request.session.get("recent_alunos", [])
-                if aluno.pk in recent:
-                    recent.remove(aluno.pk)
-                    request.session["recent_alunos"] = recent
-                    request.session.modified = True
-
                 messages.success(request, "Matrícula adicionada com sucesso.")
                 return redirect("educacao:aluno_detail", pk=aluno.pk)
 
@@ -684,6 +678,7 @@ def aluno_detail(request, pk: int):
                     request.user,
                     Matricula.objects.filter(pk=apoio.matricula_id, aluno=aluno),
                 ).exists()
+
                 if not matricula_ok:
                     return HttpResponseForbidden("403 — Matrícula fora do seu escopo.")
 
@@ -693,35 +688,77 @@ def aluno_detail(request, pk: int):
 
             messages.error(request, "Corrija os erros do apoio.")
 
-        else:
-            form_matricula = MatriculaForm(user=request.user)
-            form_nee = AlunoNecessidadeForm(request.POST, aluno=aluno)
-            form_apoio = ApoioMatriculaForm(aluno=aluno)
-            messages.error(request, "Ação inválida.")
     else:
         form_matricula = MatriculaForm(user=request.user)
         form_nee = AlunoNecessidadeForm(aluno=aluno)
         form_apoio = ApoioMatriculaForm(aluno=aluno)
+
+    # =========================
+    # DETAIL SUMMARY
+    # =========================
+
+    fields = [
+        {"label": "CPF", "value": aluno.cpf or "—"},
+        {"label": "NIS", "value": aluno.nis or "—"},
+        {"label": "Nascimento", "value": aluno.data_nascimento.strftime("%d/%m/%Y") if aluno.data_nascimento else "—"},
+        {"label": "Mãe", "value": aluno.nome_mae or "—"},
+        {"label": "Pai", "value": aluno.nome_pai or "—"},
+        {"label": "Telefone", "value": aluno.telefone or "—"},
+        {"label": "E-mail", "value": aluno.email or "—"},
+        {"label": "Endereço", "value": aluno.endereco or "—"},
+    ]
+
+    pills = [
+        {
+            "label": "Status",
+            "value": "Ativo" if aluno.ativo else "Inativo",
+            "variant": "success" if aluno.ativo else "danger",
+        }
+    ]
+
+    headers_matriculas = [
+        {"label": "Turma"},
+        {"label": "Unidade"},
+        {"label": "Ano", "width": "120px"},
+        {"label": "Situação", "width": "140px"},
+        {"label": "Data", "width": "140px"},
+    ]
+
+    rows_matriculas = []
+
+    for m in matriculas:
+        rows_matriculas.append({
+            "cells": [
+                {
+                    "text": m.turma.nome,
+                    "url": reverse("educacao:turma_detail", args=[m.turma.pk]),
+                },
+                {"text": m.turma.unidade.nome},
+                {"text": str(m.turma.ano_letivo)},
+                {"text": m.get_situacao_display()},
+                {"text": m.data_matricula.strftime("%d/%m/%Y") if m.data_matricula else "—"},
+            ],
+            "can_edit": False,
+            "edit_url": "",
+        })
 
     return render(
         request,
         "educacao/aluno_detail.html",
         {
             "aluno": aluno,
+            "fields": fields,
+            "pills": pills,
+            "headers_matriculas": headers_matriculas,
+            "rows_matriculas": rows_matriculas,
             "matriculas": matriculas,
             "form_matricula": form_matricula,
-
-            # NEE
             "necessidades": necessidades,
             "form_nee": form_nee,
-
-            # Apoios (acompanhamentos)
             "apoios": apoios,
-            "acompanhamentos": apoios,  # ✅ alias pro template se ele usa esse nome
+            "acompanhamentos": apoios,
             "form_apoio": form_apoio,
             "allowed_matriculas": list(allowed_matriculas),
-
-            # Flags de permissão pro template mostrar botões
             "can_edu_manage": can_edu_manage,
             "can_nee_manage": can_nee_manage,
         },
