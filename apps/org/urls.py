@@ -36,5 +36,11 @@ urlpatterns = [
     path("setores/novo/", views.setor_create, name="setor_create"),
     path("setores/<int:pk>/", views.setor_detail, name="setor_detail"),
     path("setores/<int:pk>/editar/", views.setor_update, name="setor_update"),
+    
+    # Autocomplete endpoints
+    path("autocomplete/secretarias/", views.secretaria_autocomplete, name="secretaria_autocomplete"),
+    path("autocomplete/unidades/", views.unidade_autocomplete, name="unidade_autocomplete"),
+    path("autocomplete/setores/", views.setor_autocomplete, name="setor_autocomplete"),
+    path("autocomplete/municipios/", views.municipio_autocomplete, name="municipio_autocomplete"),
 
 ]

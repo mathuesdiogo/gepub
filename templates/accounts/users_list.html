@@ -4,79 +4,19 @@
 {% block header %}Usuários{% endblock %}
 
 {% block breadcrumbs %}
-<div class="breadcrumbs">
-  <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
-  <span class="breadcrumbs__sep">›</span>
-  <span>Usuários</span>
-</div>
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">Usuários</span>
+  </div>
 {% endblock %}
 
 {% block content %}
-<div class="stack" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
-  <form method="get" style="display:flex; gap:10px; align-items:center;">
-    <input name="q" value="{{ q }}" placeholder="Buscar por nome, e-mail, código..." />
-    <button class="btn" type="submit">Buscar</button>
-    {% if q %}<a class="link" href="{% url 'accounts:usuarios_list' %}">Limpar</a>{% endif %}
-  </form>
-
-  <a class="btn" href="{% url 'accounts:usuario_create' %}">+ Novo usuário</a>
-</div>
-
-<div class="card" style="margin-top:12px;">
-  <div style="overflow:auto;">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nome</th>
-          <th>Código</th>
-          <th>Função</th>
-          <th>Município</th>
-          <th>Unidade</th>
-          <th>Ativo</th>
-          <th style="text-align:right;">Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for u in page_obj %}
-          <tr>
-            <td>{{ u.id }}</td>
-            <td>{{ u.get_full_name|default:u.username }}</td>
-            <td>{{ u.profile.codigo_acesso }}</td>
-            <td>{{ u.profile.get_role_display }}</td>
-            <td>{{ u.profile.municipio|default:"-" }}</td>
-            <td>{{ u.profile.unidade|default:"-" }}</td>
-            <td>{% if u.profile.ativo %}Sim{% else %}Não{% endif %}</td>
-            <td style="text-align:right; white-space:nowrap;">
-              <a class="link" href="{% url 'accounts:usuario_update' u.id %}">Editar</a>
-              <span style="opacity:.4;"> | </span>
-              <form method="post" action="{% url 'accounts:usuario_reset_senha' u.id %}" style="display:inline;">
-                {% csrf_token %}
-                <button class="link" type="submit" style="border:0; background:transparent; padding:0; cursor:pointer;">
-                  Redefinir senha
-                </button>
-              </form>
-            </td>
-          </tr>
-        {% empty %}
-          <tr><td colspan="8" class="small">Nenhum usuário encontrado.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+<div class="card">
+  <div class="card__body">
+{% include "core/partials/page_head.html" with title="Usuários" subtitle="Gerencie contas, perfis e acessos" actions=actions %}
+{% include "core/partials/filter_bar.html" with q=q placeholder="Buscar por nome, e-mail, código..." action_url=action_url clear_url=clear_url has_filters=has_filters %}
+{% include "core/partials/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q actions_partial=actions_partial empty_title="Nenhum usuário encontrado" empty_text="Tente ajustar sua busca." %}
   </div>
-</div>
-
-<div style="margin-top:12px;">
-  {% if page_obj.has_other_pages %}
-    <div class="pagination">
-      {% if page_obj.has_previous %}
-        <a class="link" href="?q={{ q }}&page={{ page_obj.previous_page_number }}">‹ anterior</a>
-      {% endif %}
-      <span class="small">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-      {% if page_obj.has_next %}
-        <a class="link" href="?q={{ q }}&page={{ page_obj.next_page_number }}">próxima ›</a>
-      {% endif %}
-    </div>
-  {% endif %}
 </div>
 {% endblock %}

@@ -4,12 +4,13 @@ from django.core.paginator import Paginator
 from django.db.models import Q, Count
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
-
+from django.urls import reverse
 from accounts.models import Profile
 from core.decorators import require_perm
 from core.rbac import get_profile, is_admin, scope_filter_municipios
 from org.models import Municipio, Secretaria, Unidade, Setor
 from educacao.models import Turma  # usado em contagens
+from django.http import JsonResponse
 
 
 from .forms import MunicipioForm, SecretariaForm, UnidadeForm, SetorForm, MunicipioContatoForm
@@ -49,10 +50,57 @@ def municipio_list(request):
     if q:
         qs = qs.filter(Q(nome__icontains=q) | Q(uf__icontains=q))
 
-    paginator = Paginator(qs, 10)
+    paginator = Paginator(qs.order_by("nome"), 10)
     page_obj = paginator.get_page(request.GET.get("page"))
 
-    return render(request, "org/municipio_list.html", {"q": q, "page_obj": page_obj})
+    # ✅ actions do PageHead (município geralmente é admin)
+    actions = []
+    if is_admin(request.user):
+        actions.append({
+            "label": "Novo município",
+            "url": reverse("org:municipio_create"),
+            "icon": "fa-solid fa-plus",
+            "variant": "btn-primary",
+        })
+
+    # ✅ tabela (TableShell)
+    headers = [
+        {"label": "Município"},
+        {"label": "UF", "width": "90px"},
+        {"label": "Ativo", "width": "90px"},
+    ]
+
+    rows = []
+    for m in page_obj:
+        rows.append({
+            "obj": m,
+            "cells": [
+                {"text": m.nome, "url": reverse("org:municipio_detail", args=[m.pk])},
+                {"text": m.uf or "—", "url": ""},
+                {"text": "Sim" if m.ativo else "Não", "url": ""},
+            ],
+            "can_edit": bool(is_admin(request.user)),
+            "edit_url": reverse("org:municipio_update", args=[m.pk]) if is_admin(request.user) else "",
+        })
+
+    return render(
+        request,
+        "org/municipio_list.html",
+        {
+            "q": q,
+            "page_obj": page_obj,
+            "actions": actions,
+            "headers": headers,
+            "rows": rows,
+            "action_url": reverse("org:municipio_list"),
+            "clear_url": reverse("org:municipio_list"),
+            "has_filters": bool(q),
+            "autocomplete_url": reverse("org:municipio_autocomplete"),
+            "autocomplete_href": reverse("org:municipio_list") + "?q={q}",
+
+        },
+    )
+
 
 
 @login_required
@@ -678,3 +726,71 @@ def setor_update(request, pk: int):
             form = SetorForm(instance=setor)
 
     return render(request, "org/setor_form.html", {"form": form, "mode": "update", "setor": setor})
+
+
+@login_required
+def secretaria_autocomplete(request):
+    q = request.GET.get("q", "").strip()
+
+    qs = Secretaria.objects.all()
+    if q:
+        qs = qs.filter(nome__icontains=q)
+
+    data = {
+        "results": [
+            {"id": s.id, "text": s.nome}
+            for s in qs.order_by("nome")[:10]
+        ]
+    }
+    return JsonResponse(data)
+
+
+@login_required
+def unidade_autocomplete(request):
+    q = request.GET.get("q", "").strip()
+
+    qs = Unidade.objects.select_related("secretaria")
+    if q:
+        qs = qs.filter(nome__icontains=q)
+
+    data = {
+        "results": [
+            {"id": u.id, "text": f"{u.nome} — {u.secretaria.nome}"}
+            for u in qs.order_by("nome")[:10]
+        ]
+    }
+    return JsonResponse(data)
+
+
+@login_required
+def setor_autocomplete(request):
+    q = request.GET.get("q", "").strip()
+
+    qs = Setor.objects.select_related("unidade")
+    if q:
+        qs = qs.filter(nome__icontains=q)
+
+    data = {
+        "results": [
+            {"id": s.id, "text": f"{s.nome} ({s.unidade.nome})"}
+            for s in qs.order_by("nome")[:10]
+        ]
+    }
+    return JsonResponse(data)
+
+
+@login_required
+def municipio_autocomplete(request):
+    q = request.GET.get("q", "").strip()
+
+    qs = Municipio.objects.all()
+    if q:
+        qs = qs.filter(nome__icontains=q)
+
+    data = {
+        "results": [
+            {"id": m.id, "text": f"{m.nome}/{m.uf}"}
+            for m in qs.order_by("nome")[:10]
+        ]
+    }
+    return JsonResponse(data)

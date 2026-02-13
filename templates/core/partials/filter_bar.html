@@ -1,7 +1,17 @@
-<form class="filter-bar" method="get" action="{{ action_url|default:'' }}">
-  <div class="filter-bar__field">
+<form class="filter-bar" method="get" action="{{ action_url|default:'' }}" {% if form_attrs %}{{ form_attrs|safe }}{% endif %}>
+  <div class="filter-bar__field" style="position:relative;">
     <label class="small">Buscar</label>
-    <input name="q" value="{{ q|default:'' }}" placeholder="{{ placeholder|default:'Buscar...' }}" />
+
+    <input
+      name="q"
+      value="{{ q|default:'' }}"
+      placeholder="{{ placeholder|default:'Buscar...' }}"
+      autocomplete="off"
+      {% if input_attrs %}{{ input_attrs|safe }}{% endif %}
+    />
+
+    {# Dropdown overlay (só aparece quando autocomplete.js preencher) #}
+    <div class="suggest" style="display:none; position:absolute; top:100%; left:0; right:0; z-index:60; margin-top:6px;"></div>
   </div>
 
   {% if extra_filters %}

@@ -2,26 +2,23 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.http import HttpResponseForbidden, Http404
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils import timezone
-from django.db.models import Count
 from django.urls import reverse
-from accounts.models import Profile
+from django.utils import timezone
+
 from core.decorators import require_perm
-from core.rbac import (
-    can,
-    scope_filter_turmas,
-    scope_filter_alunos,
-    scope_filter_matriculas,
-)
+from core.rbac import can, scope_filter_turmas, scope_filter_alunos, scope_filter_matriculas
 
 from .forms import TurmaForm, AlunoForm, MatriculaForm, AlunoCreateComTurmaForm
 from .models import Turma, Aluno, Matricula
 
 from nee.forms import AlunoNecessidadeForm, ApoioMatriculaForm
 from nee.models import AlunoNecessidade, ApoioMatricula
+from django.http import JsonResponse
+from accounts.models import Profile
+
 
 
 @login_required
@@ -192,7 +189,126 @@ def turma_list(request):
             "extra_filters": extra_filters,
         },
     )
+@login_required
+@require_perm("educacao.view")
+def matricula_create(request):
+    if not can(request.user, "educacao.manage"):
+        messages.error(request, "Você não tem permissão para realizar matrículas.")
+        return redirect("educacao:index")
 
+    q = (request.GET.get("q") or "").strip()
+    aluno_id = (request.GET.get("aluno") or "").strip()
+    unidade_id = (request.GET.get("unidade") or "").strip()
+
+    alunos_qs = scope_filter_alunos(request.user, Aluno.objects.all())
+    turmas_base_qs = scope_filter_turmas(
+        request.user,
+        Turma.objects.select_related("unidade", "unidade__secretaria", "unidade__secretaria__municipio")
+    )
+
+    # ---- busca de aluno (somente para selecionar) ----
+    alunos_result = alunos_qs
+    if q:
+        alunos_result = alunos_result.filter(
+            Q(nome__icontains=q) | Q(cpf__icontains=q) | Q(nis__icontains=q) | Q(nome_mae__icontains=q)
+        )
+    alunos_result = alunos_result.order_by("nome")[:25]
+
+    # ---- initial do form ----
+    initial = {}
+    if aluno_id.isdigit():
+        initial["aluno"] = int(aluno_id)
+    if unidade_id.isdigit():
+        initial["unidade"] = int(unidade_id)
+
+    form = MatriculaForm(request.POST or None, initial=initial)
+
+    # limitar aluno ao escopo
+    if "aluno" in form.fields:
+        form.fields["aluno"].queryset = alunos_qs.order_by("nome")
+
+    # ✅ Unidade (escola): filtra turmas
+    # Se seu MatriculaForm NÃO tem o campo "unidade", você precisa adicionar no form (eu te passo já já).
+    if "unidade" in form.fields:
+        # opcional: restringir unidades via turmas_base_qs (somente unidades que aparecem no escopo)
+        unidades_ids = turmas_base_qs.values_list("unidade_id", flat=True).distinct()
+        form.fields["unidade"].queryset = form.fields["unidade"].queryset.filter(id__in=unidades_ids)
+
+    turmas_qs = turmas_base_qs
+    unidade_selecionada = None
+
+    # pega unidade do POST primeiro (quando o usuário escolhe no form)
+    unidade_sel = (request.POST.get("unidade") or unidade_id or "").strip()
+    if unidade_sel.isdigit():
+        unidade_selecionada = int(unidade_sel)
+        turmas_qs = turmas_qs.filter(unidade_id=unidade_selecionada)
+
+    if "turma" in form.fields:
+        form.fields["turma"].queryset = turmas_qs.order_by("-ano_letivo", "nome")
+
+    # ---- salvar ----
+    if request.method == "POST":
+        if form.is_valid():
+            m = form.save(commit=False)
+
+            if not alunos_qs.filter(pk=m.aluno_id).exists():
+                messages.error(request, "Aluno fora do seu escopo.")
+                return redirect("educacao:matricula_create")
+
+            # proteção turma escopo (já filtrada, mas garante)
+            if not turmas_base_qs.filter(pk=m.turma_id).exists():
+                messages.error(request, "Turma fora do seu escopo.")
+                return redirect("educacao:matricula_create")
+
+            if Matricula.objects.filter(aluno=m.aluno, turma=m.turma).exists():
+                messages.warning(request, "Esse aluno já possui matrícula nessa turma.")
+            else:
+                m.save()
+                messages.success(request, "Matrícula realizada com sucesso.")
+                return redirect(reverse("educacao:matricula_create") + f"?aluno={m.aluno_id}")
+
+    # ---- lista de alunos (para selecionar) ----
+    headers = [
+        {"label": "Aluno"},
+        {"label": "CPF", "width": "160px"},
+        {"label": "NIS", "width": "160px"},
+    ]
+
+    rows = []
+    for a in alunos_result:
+        url = reverse("educacao:matricula_create") + f"?q={q}&aluno={a.pk}"
+        if unidade_id:
+            url += f"&unidade={unidade_id}"
+        rows.append({
+            "cells": [
+                {"text": a.nome, "url": reverse("educacao:aluno_detail", args=[a.pk])},
+                {"text": a.cpf or "—", "url": ""},
+                {"text": a.nis or "—", "url": ""},
+            ],
+            "can_edit": True,
+            "edit_url": url,
+        })
+
+    actions = []
+
+    return render(request, "educacao/matricula_create.html", {
+        "q": q,
+        "unidade": unidade_id,
+        "alunos_result": alunos_result,
+        "page_obj": None,
+        "headers": headers,
+        "rows": rows,
+        "actions": actions,
+        "action_url": reverse("educacao:matricula_create"),
+        "clear_url": reverse("educacao:matricula_create"),
+        "has_filters": bool(q),
+        "form": form,
+        "actions_partial": "educacao/partials/matricula_pick_action.html",
+    })
+
+    
+    
+    
 @require_perm("educacao.view")
 @login_required
 def turma_detail(request, pk):
@@ -655,3 +771,31 @@ def aluno_update(request, pk: int):
         "educacao/aluno_form.html",
         {"form": form, "mode": "update", "aluno": aluno},
     )
+
+
+@login_required
+@require_perm("educacao.view")
+def api_alunos_suggest(request):
+    if not can(request.user, "educacao.manage"):
+        return JsonResponse({"results": []})
+
+    q = (request.GET.get("q") or "").strip()
+    if len(q) < 2:
+        return JsonResponse({"results": []})
+
+    alunos_qs = scope_filter_alunos(request.user, Aluno.objects.all())
+
+    qs = alunos_qs.filter(
+        Q(nome__icontains=q) | Q(cpf__icontains=q) | Q(nis__icontains=q)
+    ).order_by("nome")[:10]
+
+    results = []
+    for a in qs:
+        results.append({
+            "id": a.id,
+            "nome": a.nome,
+            "cpf": a.cpf or "",
+            "nis": a.nis or "",
+        })
+
+    return JsonResponse({"results": results})

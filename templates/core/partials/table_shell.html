@@ -1,3 +1,5 @@
+{# templates/core/partials/table_shell.html #}
+
 <div class="table-shell">
   <div class="table-shell__scroll">
     <table class="table-shell__table">
@@ -24,8 +26,13 @@
             {% endfor %}
 
             <td>
-              {% if row.can_edit %}
-                <a class="link" href="{{ row.edit_url }}">Editar</a>
+              {# Se a tela quiser ações custom (ex.: form POST com csrf), passa actions_partial #}
+              {% if actions_partial %}
+                {% include actions_partial with row=row %}
+              {% else %}
+                {% if row.can_edit %}
+                  <a class="link" href="{{ row.edit_url }}">Editar</a>
+                {% endif %}
               {% endif %}
             </td>
           </tr>
@@ -40,5 +47,6 @@
     </table>
   </div>
 
+  {# Paginação mantendo filtros comuns (q/ano). Se não existir, o include ignora. #}
   {% include "core/partials/pagination.html" with page_obj=page_obj q=q ano=ano %}
 </div>

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import secrets
-
+from django.urls import reverse  # garanta esse import
 from django.contrib import messages
 from django.contrib.auth import (
     authenticate,
@@ -17,7 +17,9 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
+from django.http import JsonResponse
 
+from django.contrib.auth.models import User
 from core.rbac import get_profile, is_admin
 
 from .forms import (
@@ -185,6 +187,8 @@ def meu_perfil(request):
     return render(request, "accounts/meu_perfil.html", {"p": p})
 
 
+from django.urls import reverse  # garanta esse import
+
 @login_required
 def usuarios_list(request):
     if not _can_manage_users(request.user):
@@ -204,7 +208,69 @@ def usuarios_list(request):
 
     paginator = Paginator(qs, 15)
     page_obj = paginator.get_page(request.GET.get("page"))
-    return render(request, "accounts/users_list.html", {"q": q, "page_obj": page_obj})
+
+    # PageHead actions
+    actions = [
+        {
+            "label": "Novo usuário",
+            "url": reverse("accounts:usuario_create"),
+            "icon": "fa-solid fa-user-plus",
+            "variant": "btn-primary",
+        }
+    ]
+
+    headers = [
+        {"label": "ID", "width": "80px"},
+        {"label": "Nome"},
+        {"label": "Código", "width": "120px"},
+        {"label": "Função", "width": "140px"},
+        {"label": "Município"},
+        {"label": "Unidade"},
+        {"label": "Ativo", "width": "90px"},
+    ]
+
+    rows = []
+    for u in page_obj:
+        prof = getattr(u, "profile", None)
+
+        nome = (u.get_full_name() or "").strip() or u.username
+        codigo = getattr(prof, "codigo_acesso", "") or "—"
+        role = getattr(prof, "get_role_display", None)
+        role_txt = role() if callable(role) else (getattr(prof, "role", None) or "—")
+
+        municipio = getattr(prof, "municipio", None)
+        unidade = getattr(prof, "unidade", None)
+
+        ativo = getattr(prof, "ativo", None)
+        ativo_txt = "Sim" if ativo else "Não"
+
+        rows.append({
+            "obj": u,  # <- usado no actions_partial
+            "cells": [
+                {"text": str(u.id), "url": ""},  # pode virar link depois
+                {"text": nome, "url": ""},       # se quiser link pro editar, dá pra pôr aqui
+                {"text": str(codigo), "url": ""},
+                {"text": str(role_txt), "url": ""},
+                {"text": str(municipio or "-"), "url": ""},
+                {"text": str(unidade or "-"), "url": ""},
+                {"text": ativo_txt, "url": ""},
+            ],
+            "can_edit": True,  # quem vê essa tela já passou no _can_manage_users
+            "edit_url": reverse("accounts:usuario_update", args=[u.id]),
+        })
+
+    return render(request, "accounts/users_list.html", {
+        "q": q,
+        "page_obj": page_obj,
+        "actions": actions,
+        "headers": headers,
+        "rows": rows,
+        "action_url": reverse("accounts:usuarios_list"),
+        "clear_url": reverse("accounts:usuarios_list"),
+        "has_filters": bool(q),
+        "actions_partial": "accounts/partials/user_row_actions.html",
+    })
+
 
 
 @login_required
@@ -391,3 +457,29 @@ def usuario_reset_senha(request, pk: int):
         messages.success(request, "Senha redefinida para o CPF. (Usuário não tem e-mail cadastrado.)")
 
     return redirect("accounts:usuarios_list")
+
+@login_required
+def usuario_autocomplete(request):
+    q = request.GET.get("q", "").strip()
+
+    qs = User.objects.select_related("profile")
+
+    if q:
+        qs = qs.filter(
+            Q(first_name__icontains=q)
+            | Q(last_name__icontains=q)
+            | Q(username__icontains=q)
+            | Q(profile__codigo_acesso__icontains=q)
+        )
+
+    data = {
+        "results": [
+            {
+                "id": u.id,
+                "text": f"{u.get_full_name() or u.username}"
+            }
+            for u in qs.order_by("first_name")[:10]
+        ]
+    }
+
+    return JsonResponse(data)

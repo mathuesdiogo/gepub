@@ -3,6 +3,7 @@ from django import forms
 from core.rbac import get_profile, is_admin, scope_filter_turmas
 from org.models import Unidade
 from .models import Turma, Aluno, Matricula
+from educacao.models import Matricula, Aluno, Turma  # ajuste se seus imports forem diferentes
 
 
 class TurmaForm(forms.ModelForm):
@@ -144,3 +145,37 @@ class MatriculaForm(forms.ModelForm):
             qs = scope_filter_turmas(self.user, qs)
 
         self.fields["turma"].queryset = qs
+        
+class MatriculaQuickForm(forms.ModelForm):
+    aluno = forms.ModelChoiceField(queryset=Aluno.objects.all(), label="Aluno", required=True)
+    unidade = forms.ModelChoiceField(queryset=Unidade.objects.all(), label="Unidade (Escola)", required=True)
+
+    class Meta:
+        model = Matricula
+        fields = ["aluno", "unidade", "turma", "data_matricula"]  # remova data_matricula se não existir
+
+    def __init__(self, *args, aluno_qs=None, turma_qs=None, unidade_qs=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if aluno_qs is not None:
+            self.fields["aluno"].queryset = aluno_qs
+
+        if unidade_qs is not None:
+            self.fields["unidade"].queryset = unidade_qs
+
+        # Turmas começam vazias até escolher unidade
+        self.fields["turma"].queryset = Turma.objects.none()
+
+        # Se unidade já veio (GET ou POST), filtra turmas por unidade
+        unidade_id = None
+        if self.data.get("unidade"):
+            unidade_id = self.data.get("unidade")
+        elif self.initial.get("unidade"):
+            unidade_id = self.initial.get("unidade")
+
+        if unidade_id and str(unidade_id).isdigit():
+            base = turma_qs if turma_qs is not None else Turma.objects.all()
+            self.fields["turma"].queryset = base.filter(unidade_id=int(unidade_id)).order_by("-ano_letivo", "nome")
+
+        if "data_matricula" in self.fields:
+            self.fields["data_matricula"].widget.attrs.setdefault("placeholder", "dd/mm/aaaa")

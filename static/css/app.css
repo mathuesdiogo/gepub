@@ -23,6 +23,7 @@
 @import "./components/table-shell.css";
 @import "./components/empty-state.css";
 @import "./components/pagination.css";
+@import url("./components/suggest.css");
 
 /* Utilities */
 @import url("./core/utilities.css");
