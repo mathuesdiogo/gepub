@@ -10,7 +10,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.utils import timezone
-
+from django.urls import reverse
 from weasyprint import HTML
 
 from core.rbac import get_profile, is_admin
@@ -33,20 +33,77 @@ def index(request):
 def tipo_list(request):
     q = (request.GET.get("q") or "").strip()
 
-    qs = TipoNecessidade.objects.all()
+    qs = TipoNecessidade.objects.all().order_by("nome")
     if q:
         qs = qs.filter(Q(nome__icontains=q))
 
     paginator = Paginator(qs, 10)
     page_obj = paginator.get_page(request.GET.get("page"))
 
-    return render(request, "nee/tipo_list.html", {"q": q, "page_obj": page_obj})
+    actions = [
+        {"label": "Voltar", "url": reverse("nee:index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+        {"label": "Novo tipo", "url": reverse("nee:tipo_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"},
+    ]
+
+    headers = [
+        {"label": "Nome"},
+        {"label": "Ativo", "width": "110px"},
+    ]
+
+    rows = []
+    for t in page_obj.object_list:
+        rows.append({
+            "cells": [
+                {"text": t.nome, "url": reverse("nee:tipo_detail", args=[t.pk])},
+                {"text": "Sim" if t.ativo else "Não", "url": ""},
+            ],
+            "can_edit": False,
+            "edit_url": "",
+        })
+
+    action_url = reverse("nee:tipo_list")
+    clear_url = reverse("nee:tipo_list")
+    has_filters = bool(q)
+
+    return render(request, "nee/tipo_list.html", {
+        "q": q,
+        "page_obj": page_obj,
+        "actions": actions,
+        "headers": headers,
+        "rows": rows,
+        "action_url": action_url,
+        "clear_url": clear_url,
+        "has_filters": has_filters,
+        "extra_filters": [],
+    })
+
 
 
 @login_required
 def tipo_detail(request, pk: int):
     tipo = get_object_or_404(TipoNecessidade, pk=pk)
-    return render(request, "nee/tipo_detail.html", {"tipo": tipo})
+
+    actions = [
+        {"label": "Voltar", "url": reverse("nee:tipo_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+        {"label": "Editar", "url": reverse("nee:tipo_update", args=[tipo.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"},
+    ]
+
+    fields = [
+        {"label": "Nome", "value": tipo.nome},
+    ]
+    pills = [
+        {"label": "Status", "value": "Ativo" if tipo.ativo else "Inativo", "variant": "success" if tipo.ativo else "danger"},
+    ]
+
+    return render(request, "nee/tipo_detail.html", {
+        "tipo": tipo,
+        "actions": actions,
+        "page_title": tipo.nome,
+        "page_subtitle": "Detalhes do tipo de necessidade",
+        "fields": fields,
+        "pills": pills,
+    })
+
 
 
 @login_required

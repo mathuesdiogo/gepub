@@ -3,39 +3,28 @@
 {% block header %}NEE{% endblock %}
 
 {% block breadcrumbs %}
-  <div class="breadcrumbs">
-    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
-    <span class="breadcrumbs__sep">/</span>
-    <a class="breadcrumbs__link" href="{% url 'nee:index' %}">NEE</a>
-    <span class="breadcrumbs__sep">/</span>
-    <a class="breadcrumbs__link" href="{% url 'nee:tipo_list' %}">Tipos</a>
-    <span class="breadcrumbs__sep">/</span>
-    <span class="breadcrumbs__current">{% if mode == "create" %}Novo{% else %}Editar{% endif %}</span>
-  </div>
+<div class="breadcrumbs">
+  <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+  <span class="breadcrumbs__sep">/</span>
+  <a class="breadcrumbs__link" href="{% url 'nee:index' %}">NEE</a>
+  <span class="breadcrumbs__sep">/</span>
+  <a class="breadcrumbs__link" href="{% url 'nee:tipo_list' %}">Tipos</a>
+  <span class="breadcrumbs__sep">/</span>
+  <span class="breadcrumbs__current">{% if mode == "create" %}Novo{% else %}Editar{% endif %}</span>
+</div>
 {% endblock %}
 
 {% block content %}
-<div class="card" style="max-width: 700px;">
-  <div class="card__title">{% if mode == "create" %}Novo Tipo{% else %}Editar Tipo{% endif %}</div>
+<div class="card">
   <div class="card__body">
-    <form method="post" style="display:grid; gap:14px;">
-      {% csrf_token %}
 
-      <div>
-        <label class="small">Nome</label><br>
-        {{ form.nome }}
-        {% if form.nome.errors %}<div class="small" style="color:#ffb4b4;">{{ form.nome.errors|striptags }}</div>{% endif %}
-      </div>
+{% if mode == "create" %}{% include "core/partials/page_head.html" with title="Novo Tipo de Necessidade" subtitle="Cadastre um novo tipo (TEA, TDAH, etc.)" actions=actions %}{% else %}{% include "core/partials/page_head.html" with title="Editar Tipo de Necessidade" subtitle="Atualize as informações do tipo" actions=actions %}{% endif %}
 
-      <label class="small" style="display:flex; align-items:center; gap:8px;">
-        {{ form.ativo }} Ativo
-      </label>
+<form method="post">
+  {% csrf_token %}
+  {% include "core/partials/form_shell.html" with form=form %}
+</form>
 
-      <div style="display:flex; gap:10px;">
-        <button type="submit">Salvar</button>
-        <a class="link" href="{% url 'nee:tipo_list' %}">Cancelar</a>
-      </div>
-    </form>
   </div>
 </div>
 {% endblock %}
