@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% block title %}{% if mode == "create" %}Nova Unidade{% else %}Editar Unidade{% endif %} • Organização • GEPUB{% endblock %}
+{% block title %}{{ page_title }} • Organização • GEPUB{% endblock %}
 {% block header %}Organização{% endblock %}
 
 {% block breadcrumbs %}
@@ -10,79 +10,17 @@
     <span class="breadcrumbs__sep">/</span>
     <a class="breadcrumbs__link" href="{% url 'org:unidade_list' %}">Unidades</a>
     <span class="breadcrumbs__sep">/</span>
-    <span class="breadcrumbs__current">{% if mode == "create" %}Nova{% else %}Editar{% endif %}</span>
+    <span class="breadcrumbs__current">{{ page_title }}</span>
   </div>
 {% endblock %}
 
 {% block content %}
-  <div class="card" style="max-width: 980px;">
-    <div class="card__title">
-      {% if mode == "create" %}Nova Unidade{% else %}Editar Unidade{% endif %}
-    </div>
+<div class="card">
+  <div class="card__body">
 
-    <div class="card__body">
-      <form method="post" style="display:grid; grid-template-columns: 1fr 180px; gap:16px; max-width:860px;">
-        {% csrf_token %}
+    {% include "core/partials/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+    {% include "core/partials/form_shell.html" with form=form submit_label=submit_label cancel_url=cancel_url action_url=action_url %}
 
-        <div style="grid-column:1 / -1;">
-          <label class="small">Secretaria</label><br>
-          {{ form.secretaria }}
-          {% if form.secretaria.errors %}<div class="small" style="color:#ffb4b4;">{{ form.secretaria.errors|striptags }}</div>{% endif %}
-        </div>
-
-        <div style="grid-column:1 / -1;">
-          <label class="small">Nome</label><br>
-          {{ form.nome }}
-          {% if form.nome.errors %}<div class="small" style="color:#ffb4b4;">{{ form.nome.errors|striptags }}</div>{% endif %}
-        </div>
-
-        <div>
-          <label class="small">Tipo</label><br>
-          {{ form.tipo }}
-          {% if form.tipo.errors %}<div class="small" style="color:#ffb4b4;">{{ form.tipo.errors|striptags }}</div>{% endif %}
-        </div>
-
-        <div style="display:flex; align-items:end; padding-bottom:2px;">
-          <label class="small" style="display:flex; align-items:center; gap:8px;">
-            {{ form.ativo }} Ativo
-          </label>
-        </div>
-
-        <div>
-          <label class="small">Código INEP</label><br>
-          {{ form.codigo_inep }}
-          {% if form.codigo_inep.errors %}<div class="small" style="color:#ffb4b4;">{{ form.codigo_inep.errors|striptags }}</div>{% endif %}
-        </div>
-
-        <div>
-          <label class="small">CNPJ</label><br>
-          {{ form.cnpj }}
-          {% if form.cnpj.errors %}<div class="small" style="color:#ffb4b4;">{{ form.cnpj.errors|striptags }}</div>{% endif %}
-        </div>
-
-        <div>
-          <label class="small">Telefone</label><br>
-          {{ form.telefone }}
-          {% if form.telefone.errors %}<div class="small" style="color:#ffb4b4;">{{ form.telefone.errors|striptags }}</div>{% endif %}
-        </div>
-
-        <div>
-          <label class="small">E-mail</label><br>
-          {{ form.email }}
-          {% if form.email.errors %}<div class="small" style="color:#ffb4b4;">{{ form.email.errors|striptags }}</div>{% endif %}
-        </div>
-
-        <div style="grid-column:1 / -1;">
-          <label class="small">Endereço</label><br>
-          {{ form.endereco }}
-          {% if form.endereco.errors %}<div class="small" style="color:#ffb4b4;">{{ form.endereco.errors|striptags }}</div>{% endif %}
-        </div>
-
-        <div style="grid-column:1 / -1; display:flex; gap:10px; margin-top:6px;">
-          <button type="submit">Salvar</button>
-          <a class="link" href="{% url 'org:unidade_list' %}">Cancelar</a>
-        </div>
-      </form>
-    </div>
   </div>
+</div>
 {% endblock %}

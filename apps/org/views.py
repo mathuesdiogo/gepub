@@ -12,10 +12,8 @@ from org.models import Municipio, Secretaria, Unidade, Setor
 from educacao.models import Turma  # usado em contagens
 from django.http import JsonResponse
 from django.template.loader import render_to_string
-
-
-
-
+from django.shortcuts import redirect, render
+from core.rbac import can
 from .forms import MunicipioForm, SecretariaForm, UnidadeForm, SetorForm, MunicipioContatoForm
 
 
@@ -422,11 +420,13 @@ def unidade_list(request):
     secretaria_id = (request.GET.get("secretaria") or "").strip()
     tipo = (request.GET.get("tipo") or "").strip()
 
+    # trava município do perfil (não-admin)
     p = get_profile(request.user)
     if not is_admin(request.user) and p and p.municipio_id:
         municipio_id = str(p.municipio_id)
 
     from core.rbac import scope_filter_unidades
+
     qs = scope_filter_unidades(
         request.user,
         Unidade.objects.select_related("secretaria", "secretaria__municipio").all()
@@ -439,68 +439,181 @@ def unidade_list(request):
     if tipo:
         qs = qs.filter(tipo=tipo)
     if q:
-        qs = qs.filter(Q(nome__icontains=q) | Q(secretaria__nome__icontains=q) | Q(secretaria__municipio__nome__icontains=q))
+        qs = qs.filter(
+            Q(nome__icontains=q)
+            | Q(codigo_inep__icontains=q)
+            | Q(cnpj__icontains=q)
+            | Q(secretaria__nome__icontains=q)
+            | Q(secretaria__municipio__nome__icontains=q)
+        )
 
+    # =============================
+    # BASE DE FILTROS (selects)
+    # =============================
+    municipios = scope_filter_municipios(
+        request.user,
+        Municipio.objects.filter(ativo=True).order_by("nome"),
+    )
+
+    # secretarias dentro do escopo dos municípios visíveis
+    secretarias_qs = Secretaria.objects.select_related("municipio").filter(
+        ativo=True,
+        municipio__in=municipios
+    )
+    if municipio_id.isdigit():
+        secretarias_qs = secretarias_qs.filter(municipio_id=int(municipio_id))
+    secretarias = secretarias_qs.order_by("nome")
+
+    # =============================
+    # EXPORTAÇÃO
+    # =============================
     from core.exports import export_csv, export_pdf_table
     export = (request.GET.get("export") or "").strip().lower()
 
     if export in ("csv", "pdf"):
         items = list(
             qs.order_by("nome").values_list(
-                "nome", "tipo", "secretaria__nome", "secretaria__municipio__nome", "ativo"
+                "nome",
+                "tipo",
+                "codigo_inep",
+                "cnpj",
+                "secretaria__nome",
+                "secretaria__municipio__nome",
+                "secretaria__municipio__uf",
+                "ativo",
             )
         )
-        headers = ["Unidade", "Tipo", "Secretaria", "Município", "Ativo"]
-        rows = [
-            [n or "", t or "", s or "", m or "", "Sim" if a else "Não"]
-            for (n, t, s, m, a) in items
+
+        headers_export = ["Unidade", "Tipo", "INEP", "CNPJ", "Secretaria", "Município", "UF", "Ativo"]
+        rows_export = [
+            [
+                nome or "",
+                str(tipo_val or ""),
+                inep or "",
+                cnpj or "",
+                secretaria_nome or "",
+                municipio_nome or "",
+                uf or "",
+                "Sim" if ativo else "Não",
+            ]
+            for (nome, tipo_val, inep, cnpj, secretaria_nome, municipio_nome, uf, ativo) in items
         ]
 
         if export == "csv":
-            return export_csv("unidades.csv", headers, rows)
+            return export_csv("unidades.csv", headers_export, rows_export)
 
-        foptions_secretarias = [
-    {"value": str(s.id), "label": s.nome}
-    for s in secretarias
-]
+        filtros = f"Município={municipio_id or '-'} | Secretaria={secretaria_id or '-'} | Tipo={tipo or '-'} | Busca={q or '-'}"
+        return export_pdf_table(
+            request,
+            filename="unidades.pdf",
+            title="Relatório — Unidades",
+            headers=headers_export,
+            rows=rows_export,
+            filtros=filtros,
+        )
 
-    extra_filters = render_to_string(
+    # =============================
+    # PAGINAÇÃO
+    # =============================
+    paginator = Paginator(qs.order_by("nome"), 10)
+    page_obj = paginator.get_page(request.GET.get("page"))
+
+    # =============================
+    # ACTIONS (PageHead)
+    # =============================
+    qs_query = []
+    if q:
+        qs_query.append(f"q={q}")
+    if municipio_id:
+        qs_query.append(f"municipio={municipio_id}")
+    if secretaria_id:
+        qs_query.append(f"secretaria={secretaria_id}")
+    if tipo:
+        qs_query.append(f"tipo={tipo}")
+    base_query = "&".join(qs_query)
+
+    def qjoin(extra: str) -> str:
+        return f"?{base_query + ('&' if base_query else '')}{extra}"
+
+    actions = [
+        {"label": "Exportar CSV", "url": qjoin("export=csv"), "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
+        {"label": "Exportar PDF", "url": qjoin("export=pdf"), "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
+        {"label": "Nova Unidade", "url": reverse("org:unidade_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"},
+    ]
+
+    # =============================
+    # TABLE (TableShell)
+    # =============================
+    headers = [
+        {"label": "Unidade"},
+        {"label": "Tipo", "width": "140px"},
+        {"label": "INEP", "width": "140px"},
+        {"label": "CNPJ", "width": "170px"},
+        {"label": "Secretaria"},
+        {"label": "Município"},
+        {"label": "Ativo", "width": "90px"},
+    ]
+
+    rows = []
+    for u in page_obj:
+        municipio_nome = getattr(getattr(getattr(u, "secretaria", None), "municipio", None), "nome", "—") or "—"
+        municipio_uf = getattr(getattr(getattr(u, "secretaria", None), "municipio", None), "uf", "") or ""
+        rows.append({
+            "cells": [
+                {"text": u.nome, "url": reverse("org:unidade_detail", args=[u.pk])},
+                {"text": u.get_tipo_display() if hasattr(u, "get_tipo_display") else (u.tipo or "—"), "url": ""},
+                {"text": u.codigo_inep or "—", "url": ""},
+                {"text": u.cnpj or "—", "url": ""},
+                {"text": getattr(getattr(u, "secretaria", None), "nome", "—") or "—", "url": ""},
+                {"text": (f"{municipio_nome} / {municipio_uf}" if municipio_uf else municipio_nome), "url": ""},
+                {"text": "Sim" if getattr(u, "ativo", False) else "Não", "url": ""},
+            ],
+            "can_edit": True,
+            "edit_url": reverse("org:unidade_update", args=[u.pk]) if u.pk else "",
+        })
+
+    # =============================
+    # EXTRA FILTERS (3 selects) via filter_select genérico
+    # =============================
+    options_municipios = [{"value": str(m.id), "label": f"{m.nome} / {m.uf}"} for m in municipios]
+    options_secretarias = [{"value": str(s.id), "label": f"{s.nome} ({s.municipio.uf})"} for s in secretarias]
+    options_tipos = [{"value": str(value), "label": str(label)} for (value, label) in Unidade.Tipo.choices]
+
+    extra_filters = ""
+    extra_filters += render_to_string(
         "core/partials/filter_select.html",
-        {
-            "name": "secretaria",
-            "label": "Secretaria",
-            "value": secretaria_id,
-            "empty_label": "Todas",
-            "options": options_secretarias,
-        },
+        {"name": "municipio", "label": "Município", "value": municipio_id, "empty_label": "Todos", "options": options_municipios},
+        request=request,
+    )
+    extra_filters += render_to_string(
+        "core/partials/filter_select.html",
+        {"name": "secretaria", "label": "Secretaria", "value": secretaria_id, "empty_label": "Todas", "options": options_secretarias},
+        request=request,
+    )
+    extra_filters += render_to_string(
+        "core/partials/filter_select.html",
+        {"name": "tipo", "label": "Tipo", "value": tipo, "empty_label": "Todos", "options": options_tipos},
         request=request,
     )
 
-
-    paginator = Paginator(qs, 10)
-    page_obj = paginator.get_page(request.GET.get("page"))
-
-    municipios = scope_filter_municipios(request.user, Municipio.objects.filter(ativo=True).order_by("nome"))
-
-    secretarias_qs = Secretaria.objects.select_related("municipio").filter(ativo=True)
-    if municipio_id.isdigit():
-        secretarias_qs = secretarias_qs.filter(municipio_id=int(municipio_id))
-    secretarias = secretarias_qs.order_by("nome")
-
     return render(
-        request,
-        "org/unidade_list.html",
-        {
-            "q": q,
-            "municipio_id": municipio_id,
-            "secretaria_id": secretaria_id,
-            "tipo": tipo,
-            "page_obj": page_obj,
-            "municipios": municipios,
-            "secretarias": secretarias,
-            "tipos": Unidade.Tipo.choices,
-        },
-    )
+    request,
+    "org/unidade_form.html",
+    {
+        "form": form,
+        "mode": "create",
+        "actions": actions,
+        "cancel_url": reverse("org:unidade_list"),
+        "action_url": reverse("org:unidade_create"),
+
+        # ✅ títulos prontos pro template (sem expressão no include)
+        "page_title": "Nova Unidade",
+        "page_subtitle": "Cadastro e manutenção de unidade",
+        "submit_label": "Criar",
+    },
+)
+
+
 
 
 # =============================
@@ -512,32 +625,30 @@ def setor_list(request):
     q = (request.GET.get("q") or "").strip()
     unidade_id = (request.GET.get("unidade") or "").strip()
 
+    # escopo de unidades do usuário
+    from core.rbac import scope_filter_unidades
+    unidades_scope = scope_filter_unidades(
+        request.user,
+        Unidade.objects.select_related("secretaria", "secretaria__municipio").all()
+    )
+
     qs = Setor.objects.select_related(
         "unidade",
         "unidade__secretaria",
         "unidade__secretaria__municipio",
-    )
+    ).filter(unidade_id__in=unidades_scope.values_list("id", flat=True))
 
-    # Filtro por unidade
+    # filtros
     if unidade_id.isdigit():
         qs = qs.filter(unidade_id=int(unidade_id))
 
-    # Filtro busca
     if q:
         qs = qs.filter(
             Q(nome__icontains=q)
             | Q(unidade__nome__icontains=q)
             | Q(unidade__secretaria__nome__icontains=q)
+            | Q(unidade__secretaria__municipio__nome__icontains=q)
         )
-
-    # 🔐 Aplica escopo do usuário
-    from core.rbac import scope_filter_unidades
-    qs = qs.filter(
-        unidade_id__in=scope_filter_unidades(
-            request.user,
-            Unidade.objects.all()
-        ).values_list("id", flat=True)
-    )
 
     # =============================
     # EXPORTAÇÃO CSV / PDF
@@ -552,56 +663,140 @@ def setor_list(request):
                 "unidade__nome",
                 "unidade__secretaria__nome",
                 "unidade__secretaria__municipio__nome",
+                "unidade__secretaria__municipio__uf",
+                "ativo",
             )
         )
 
-        headers = ["Setor", "Unidade", "Secretaria", "Município"]
-
-        rows = [
+        headers_export = ["Setor", "Unidade", "Secretaria", "Município", "UF", "Ativo"]
+        rows_export = [
             [
-                nome or "",
+                setor or "",
                 unidade or "",
                 secretaria or "",
                 municipio or "",
+                uf or "",
+                "Sim" if ativo else "Não",
             ]
-            for (nome, unidade, secretaria, municipio) in items
+            for (setor, unidade, secretaria, municipio, uf, ativo) in items
         ]
 
         if export == "csv":
-            return export_csv("setores.csv", headers, rows)
+            return export_csv("setores.csv", headers_export, rows_export)
 
         filtros = f"Unidade={unidade_id or '-'} | Busca={q or '-'}"
-
         return export_pdf_table(
             request,
             filename="setores.pdf",
             title="Relatório — Setores",
-            headers=headers,
-            rows=rows,
+            headers=headers_export,
+            rows=rows_export,
             filtros=filtros,
         )
 
     # =============================
-    # Paginação normal
+    # PAGINAÇÃO
     # =============================
     paginator = Paginator(qs.order_by("nome"), 10)
     page_obj = paginator.get_page(request.GET.get("page"))
 
-    unidades = scope_filter_unidades(
-        request.user,
-        Unidade.objects.filter(ativo=True)
-    ).order_by("nome")
+    # =============================
+    # ACTIONS (PageHead)
+    # =============================
+    qs_query = []
+    if q:
+        qs_query.append(f"q={q}")
+    if unidade_id:
+        qs_query.append(f"unidade={unidade_id}")
+    base_query = "&".join(qs_query)
 
-    return render(
-        request,
-        "org/setor_list.html",
+    def qjoin(extra: str) -> str:
+        return f"?{base_query + ('&' if base_query else '')}{extra}"
+
+    actions = [
+        {"label": "Exportar CSV", "url": qjoin("export=csv"), "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
+        {"label": "Exportar PDF", "url": qjoin("export=pdf"), "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
+        {"label": "Novo Setor", "url": reverse("org:setor_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"},
+    ]
+
+    # =============================
+    # TABLE (TableShell)
+    # =============================
+    headers = [
+        {"label": "Setor"},
+        {"label": "Unidade"},
+        {"label": "Secretaria"},
+        {"label": "Município"},
+        {"label": "Ativo", "width": "90px"},
+    ]
+
+    rows = []
+    for s in page_obj:
+        unidade_nome = getattr(getattr(s, "unidade", None), "nome", "—") or "—"
+        secretaria_nome = getattr(getattr(getattr(s, "unidade", None), "secretaria", None), "nome", "—") or "—"
+        mun = getattr(getattr(getattr(s, "unidade", None), "secretaria", None), "municipio", None)
+        mun_nome = getattr(mun, "nome", "—") or "—"
+        mun_uf = getattr(mun, "uf", "") or ""
+
+        rows.append({
+            "cells": [
+                {"text": s.nome, "url": reverse("org:setor_detail", args=[s.pk])},
+                {"text": unidade_nome, "url": ""},
+                {"text": secretaria_nome, "url": ""},
+                {"text": (f"{mun_nome} / {mun_uf}" if mun_uf else mun_nome), "url": ""},
+                {"text": "Sim" if getattr(s, "ativo", False) else "Não", "url": ""},
+            ],
+            "can_edit": True,
+            "edit_url": reverse("org:setor_update", args=[s.pk]) if s.pk else "",
+        })
+
+    # =============================
+    # EXTRA FILTERS (Select Unidade) usando filter_select genérico
+    # =============================
+    options_unidades = []
+    for u in unidades_scope.order_by("nome"):
+        mun = getattr(getattr(u, "secretaria", None), "municipio", None)
+        mun_uf = getattr(mun, "uf", "") or ""
+        options_unidades.append({
+            "value": str(u.id),
+            "label": f"{u.nome} ({mun_uf})" if mun_uf else u.nome,
+        })
+
+    extra_filters = render_to_string(
+        "core/partials/filter_select.html",
         {
-            "q": q,
-            "unidade_id": unidade_id,
-            "page_obj": page_obj,
-            "unidades": unidades,
+            "name": "unidade",
+            "label": "Unidade",
+            "value": unidade_id,
+            "empty_label": "Todas",
+            "options": options_unidades,
         },
+        request=request,
     )
+
+    return render(request, "org/setor_list.html", {
+        "q": q,
+        "unidade_id": unidade_id,
+        "page_obj": page_obj,
+        "actions": actions,
+        "headers": headers,
+        "rows": rows,
+        "action_url": reverse("org:setor_list"),
+        "clear_url": reverse("org:setor_list"),
+        "has_filters": bool(unidade_id),
+        "extra_filters": extra_filters,
+        "autocomplete_url": reverse("org:setor_autocomplete"),
+        "autocomplete_href": reverse("org:setor_list") + "?q={q}",
+
+
+        # ✅ autocomplete do buscar
+        "autocomplete_url": reverse("org:setor_autocomplete"),
+        "autocomplete_href": reverse("org:setor_list") + "?q={q}",
+        "autocomplete_url": reverse("org:setor_autocomplete"),
+        "autocomplete_href": reverse("org:setor_list") + "?q={q}",
+
+    })
+
 
 
 @login_required
@@ -657,12 +852,52 @@ def unidade_detail(request, pk: int):
     }
     return render(request, "org/unidade_detail.html", ctx)
 
+@login_required
+def setor_autocomplete(request):
+    q = (request.GET.get("q") or "").strip()
+    if len(q) < 2:
+        return JsonResponse({"results": []})
+
+    from core.rbac import scope_filter_unidades
+
+    unidades_scope = scope_filter_unidades(
+        request.user,
+        Unidade.objects.select_related("secretaria", "secretaria__municipio").all()
+    )
+
+    qs = Setor.objects.select_related("unidade").filter(
+        unidade_id__in=unidades_scope.values_list("id", flat=True)
+    )
+
+    qs = qs.filter(
+        Q(nome__icontains=q) | Q(unidade__nome__icontains=q)
+    ).order_by("nome")[:10]
+
+    return JsonResponse({
+        "results": [
+            {"id": s.id, "text": s.nome, "meta": (s.unidade.nome if s.unidade_id else "")}
+            for s in qs
+        ]
+    })
+
+
+# from .forms import UnidadeForm   # (já deve estar importado no seu arquivo)
 
 @login_required
 def unidade_create(request):
-    block = _deny_manage_org(request)
-    if block:
-        return block
+    # ✅ bloqueio direto (sem depender de _deny_manage_org)
+    if not (can(request.user, "org.manage") or can(request.user, "org.manage_unidade") or request.user.is_staff or request.user.is_superuser):
+        messages.error(request, "Você não tem permissão para cadastrar unidades.")
+        return redirect("org:unidade_list")
+
+    actions = [
+        {
+            "label": "Voltar",
+            "url": reverse("org:unidade_list"),
+            "icon": "fa-solid fa-arrow-left",
+            "variant": "btn--ghost",
+        }
+    ]
 
     if request.method == "POST":
         try:
@@ -674,6 +909,7 @@ def unidade_create(request):
             obj = form.save()
             messages.success(request, "Unidade criada com sucesso.")
             return redirect("org:unidade_detail", pk=obj.pk)
+
         messages.error(request, "Corrija os erros do formulário.")
     else:
         try:
@@ -681,7 +917,19 @@ def unidade_create(request):
         except TypeError:
             form = UnidadeForm()
 
-    return render(request, "org/unidade_form.html", {"form": form, "mode": "create"})
+    return render(
+        request,
+        "org/unidade_form.html",
+        {
+            "form": form,
+            "mode": "create",
+            "actions": actions,
+            "cancel_url": reverse("org:unidade_list"),
+            "action_url": reverse("org:unidade_create"),
+        },
+    )
+
+
 
 
 @login_required
@@ -860,22 +1108,6 @@ def unidade_autocomplete(request):
     }
     return JsonResponse(data)
 
-
-@login_required
-def setor_autocomplete(request):
-    q = request.GET.get("q", "").strip()
-
-    qs = Setor.objects.select_related("unidade")
-    if q:
-        qs = qs.filter(nome__icontains=q)
-
-    data = {
-        "results": [
-            {"id": s.id, "text": f"{s.nome} ({s.unidade.nome})"}
-            for s in qs.order_by("nome")[:10]
-        ]
-    }
-    return JsonResponse(data)
 
 
 @login_required

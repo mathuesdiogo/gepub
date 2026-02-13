@@ -15,7 +15,7 @@
 <div class="card">
   <div class="card__body">
 {% include "core/partials/page_head.html" with title="Usuários" subtitle="Gerencie contas, perfis e acessos" actions=actions %}
-{% include "core/partials/filter_bar.html" with q=q placeholder="Buscar por nome, e-mail, código..." action_url=action_url clear_url=clear_url has_filters=has_filters %}
+{% include "core/partials/filter_bar.html" with q=q placeholder="Buscar por nome, e-mail, código..." action_url=action_url clear_url=clear_url extra_filters=extra_filters has_filters=has_filters input_attrs=input_attrs %}
 {% include "core/partials/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q actions_partial=actions_partial empty_title="Nenhum usuário encontrado" empty_text="Tente ajustar sua busca." %}
   </div>
 </div>

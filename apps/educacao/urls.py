@@ -16,5 +16,6 @@ urlpatterns = [
     path("alunos/<int:pk>/editar/", views.aluno_update, name="aluno_update"),
     path("matriculas/nova/", views.matricula_create, name="matricula_create"),
     path("api/alunos-suggest/", views.api_alunos_suggest, name="api_alunos_suggest"),
+    path("api/turmas-suggest/", views.api_turmas_suggest, name="api_turmas_suggest"),
 
 ]

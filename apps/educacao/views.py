@@ -7,7 +7,7 @@ from django.http import HttpResponseForbidden, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
-
+from django.http import JsonResponse
 from core.decorators import require_perm
 from core.rbac import can, scope_filter_turmas, scope_filter_alunos, scope_filter_matriculas
 
@@ -187,6 +187,9 @@ def turma_list(request):
             "clear_url": reverse("educacao:turma_list"),
             "has_filters": bool(ano),
             "extra_filters": extra_filters,
+            "autocomplete_url": reverse("educacao:api_turmas_suggest"),
+            "autocomplete_href": reverse("educacao:turma_list") + "?q={q}",
+
         },
     )
 @login_required
@@ -550,6 +553,9 @@ def aluno_list(request):
             "rows": rows,
             "action_url": reverse("educacao:aluno_list"),
             "clear_url": reverse("educacao:aluno_list"),
+            "autocomplete_url": reverse("educacao:api_alunos_suggest"),
+            "autocomplete_href": reverse("educacao:aluno_list") + "?q={q}",
+
         },
     )
 
@@ -796,6 +802,33 @@ def api_alunos_suggest(request):
             "nome": a.nome,
             "cpf": a.cpf or "",
             "nis": a.nis or "",
+        })
+
+    return JsonResponse({"results": results})
+@login_required
+@require_perm("educacao.view")
+def api_turmas_suggest(request):
+    q = (request.GET.get("q") or "").strip()
+    if len(q) < 2:
+        return JsonResponse({"results": []})
+
+    qs = scope_filter_turmas(
+        request.user,
+        Turma.objects.select_related("unidade")
+    )
+
+    qs = qs.filter(
+        Q(nome__icontains=q)
+        | Q(unidade__nome__icontains=q)
+        | Q(ano_letivo__icontains=q)
+    ).order_by("-ano_letivo", "nome")[:10]
+
+    results = []
+    for t in qs:
+        results.append({
+            "id": t.id,
+            "text": f"{t.nome} ({t.ano_letivo})",
+            "meta": getattr(getattr(t, "unidade", None), "nome", "") or "",
         })
 
     return JsonResponse({"results": results})

@@ -14,6 +14,8 @@ urlpatterns = [
     path("usuarios/novo/", views.usuario_create, name="usuario_create"),
     path("usuarios/<int:pk>/editar/", views.usuario_update, name="usuario_update"),
     path("usuarios/<int:pk>/reset-senha/", views.usuario_reset_senha, name="usuario_reset_senha"),
-    path("autocomplete/usuarios/", views.usuario_autocomplete, name="usuario_autocomplete"),
+    path("api/users-suggest/", views.users_autocomplete, name="users_autocomplete"),
+
+
 ]
 

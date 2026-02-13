@@ -18,10 +18,19 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
-
+from django.urls import reverse 
 from django.contrib.auth.models import User
 from core.rbac import get_profile, is_admin
 
+
+
+from django.shortcuts import render
+from django.contrib.auth import get_user_model
+
+from core.decorators import require_perm
+from core.rbac import can
+
+User = get_user_model()
 from .forms import (
     AlterarSenhaPrimeiroAcessoForm,
     LoginCodigoForm,
@@ -187,43 +196,46 @@ def meu_perfil(request):
     return render(request, "accounts/meu_perfil.html", {"p": p})
 
 
-from django.urls import reverse  # garanta esse import
-
 @login_required
+@require_perm("accounts.manage_users")
 def usuarios_list(request):
-    if not _can_manage_users(request.user):
-        messages.error(request, "Você não tem permissão para gerenciar usuários.")
-        return redirect("core:dashboard")
-
     q = (request.GET.get("q") or "").strip()
-    qs = _scope_users_queryset(request)
+
+    qs = User.objects.select_related("profile").all()
 
     if q:
         qs = qs.filter(
-            Q(first_name__icontains=q)
-            | Q(last_name__icontains=q)
+            Q(username__icontains=q)
             | Q(email__icontains=q)
+            | Q(first_name__icontains=q)
+            | Q(last_name__icontains=q)
             | Q(profile__codigo_acesso__icontains=q)
         )
 
-    paginator = Paginator(qs, 15)
+    qs = qs.order_by("first_name", "last_name", "username")
+
+    paginator = Paginator(qs, 10)
     page_obj = paginator.get_page(request.GET.get("page"))
 
-    # PageHead actions
-    actions = [
-        {
-            "label": "Novo usuário",
-            "url": reverse("accounts:usuario_create"),
-            "icon": "fa-solid fa-user-plus",
-            "variant": "btn-primary",
-        }
-    ]
+    # ✅ perm correta do RBAC
+    can_manage = can(request.user, "accounts.manage_users") or request.user.is_staff or request.user.is_superuser
+
+    actions = []
+    if can_manage:
+        actions.append(
+            {
+                "label": "Novo usuário",
+                "url": reverse("accounts:usuario_create"),
+                "icon": "fa-solid fa-plus",
+                "variant": "btn-primary",
+            }
+        )
 
     headers = [
         {"label": "ID", "width": "80px"},
         {"label": "Nome"},
-        {"label": "Código", "width": "120px"},
-        {"label": "Função", "width": "140px"},
+        {"label": "Código", "width": "140px"},
+        {"label": "Função", "width": "160px"},
         {"label": "Município"},
         {"label": "Unidade"},
         {"label": "Ativo", "width": "90px"},
@@ -231,45 +243,54 @@ def usuarios_list(request):
 
     rows = []
     for u in page_obj:
-        prof = getattr(u, "profile", None)
+        nome = (u.get_full_name() or u.username).strip()
+        profile = getattr(u, "profile", None)
 
-        nome = (u.get_full_name() or "").strip() or u.username
-        codigo = getattr(prof, "codigo_acesso", "") or "—"
-        role = getattr(prof, "get_role_display", None)
-        role_txt = role() if callable(role) else (getattr(prof, "role", None) or "—")
+        codigo = getattr(profile, "codigo_acesso", "") if profile else ""
+        role = (profile.get_role_display() if profile and hasattr(profile, "get_role_display") else "")
+        municipio = str(getattr(profile, "municipio", "") or "—") if profile else "—"
+        unidade = str(getattr(profile, "unidade", "") or "—") if profile else "—"
+        ativo = "Sim" if (getattr(profile, "ativo", False) if profile else getattr(u, "is_active", False)) else "Não"
 
-        municipio = getattr(prof, "municipio", None)
-        unidade = getattr(prof, "unidade", None)
+        rows.append(
+            {
+                "cells": [
+                    {"text": str(u.id), "url": ""},
+                    {"text": nome, "url": ""},
+                    {"text": codigo or "—", "url": ""},
+                    {"text": role or "—", "url": ""},
+                    {"text": municipio, "url": ""},
+                    {"text": unidade, "url": ""},
+                    {"text": ativo, "url": ""},
+                ],
+                "can_edit": bool(can_manage),
+                "edit_url": reverse("accounts:usuario_update", args=[u.id]) if can_manage else "",
+            }
+        )
 
-        ativo = getattr(prof, "ativo", None)
-        ativo_txt = "Sim" if ativo else "Não"
+    # ✅ autocomplete (tem que existir no accounts/urls.py com name="users_autocomplete")
+    autocomplete_url = reverse("accounts:users_autocomplete")
+    autocomplete_href = reverse("accounts:usuarios_list") + "?q={q}"
+    input_attrs = f'data-autocomplete-url="{autocomplete_url}" data-autocomplete-href="{autocomplete_href}"'
 
-        rows.append({
-            "obj": u,  # <- usado no actions_partial
-            "cells": [
-                {"text": str(u.id), "url": ""},  # pode virar link depois
-                {"text": nome, "url": ""},       # se quiser link pro editar, dá pra pôr aqui
-                {"text": str(codigo), "url": ""},
-                {"text": str(role_txt), "url": ""},
-                {"text": str(municipio or "-"), "url": ""},
-                {"text": str(unidade or "-"), "url": ""},
-                {"text": ativo_txt, "url": ""},
-            ],
-            "can_edit": True,  # quem vê essa tela já passou no _can_manage_users
-            "edit_url": reverse("accounts:usuario_update", args=[u.id]),
-        })
-
-    return render(request, "accounts/users_list.html", {
-        "q": q,
-        "page_obj": page_obj,
-        "actions": actions,
-        "headers": headers,
-        "rows": rows,
-        "action_url": reverse("accounts:usuarios_list"),
-        "clear_url": reverse("accounts:usuarios_list"),
-        "has_filters": bool(q),
-        "actions_partial": "accounts/partials/user_row_actions.html",
-    })
+    return render(
+        request,
+        "accounts/users_list.html",
+        {
+            "q": q,
+            "page_obj": page_obj,
+            "actions": actions,
+            "headers": headers,
+            "rows": rows,
+            "action_url": reverse("accounts:usuarios_list"),
+            "clear_url": reverse("accounts:usuarios_list"),
+            "has_filters": False,
+            "extra_filters": "",
+            "autocomplete_url": autocomplete_url,
+            "autocomplete_href": autocomplete_href,
+            "input_attrs": input_attrs,
+        },
+    )
 
 
 
@@ -459,7 +480,7 @@ def usuario_reset_senha(request, pk: int):
     return redirect("accounts:usuarios_list")
 
 @login_required
-def usuario_autocomplete(request):
+def users_autocomplete(request):
     q = request.GET.get("q", "").strip()
 
     qs = User.objects.select_related("profile")
@@ -483,3 +504,28 @@ def usuario_autocomplete(request):
     }
 
     return JsonResponse(data)
+
+@login_required
+@require_perm("accounts.manage_users")
+def users_autocomplete(request):
+    q = (request.GET.get("q") or "").strip()
+    if len(q) < 2:
+        return JsonResponse({"results": []})
+
+    qs = User.objects.select_related("profile").all()
+
+    qs = qs.filter(
+        Q(username__icontains=q)
+        | Q(email__icontains=q)
+        | Q(first_name__icontains=q)
+        | Q(last_name__icontains=q)
+        | Q(profile__codigo_acesso__icontains=q)
+    ).order_by("first_name", "last_name", "username")[:10]
+
+    results = []
+    for u in qs:
+        nome = (u.get_full_name() or u.username).strip()
+        meta = u.email or ""
+        results.append({"id": u.id, "text": nome, "meta": meta})
+
+    return JsonResponse({"results": results})
