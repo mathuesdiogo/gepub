@@ -229,3 +229,50 @@
     max-height: 220px !important;
   }
 }
+/* Turma detail – mantém o layout original, só tirando inline */
+
+.turma-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:14px;
+  align-items:start;
+}
+
+.turma-full{
+  grid-column: 1 / -1;
+}
+
+.turma-info-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:12px;
+}
+
+.turma-wide{
+  grid-column: 1 / -1;
+}
+
+.turma-strong{
+  font-weight:900;
+}
+
+.turma-summary{
+  cursor:pointer;
+  font-weight:900;
+}
+
+.turma-muted{
+  margin-top:10px;
+  opacity:.9;
+}
+
+.pill-row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+@media (max-width: 920px){
+  .turma-grid{ grid-template-columns: 1fr; }
+}

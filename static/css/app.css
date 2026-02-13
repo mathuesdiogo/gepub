@@ -24,7 +24,8 @@
 @import "./components/empty-state.css";
 @import "./components/pagination.css";
 @import url("./components/suggest.css");
-
+@import url("./components/actions.css");
+@import "components/dropdown.css";
 /* Utilities */
 @import url("./core/utilities.css");
 @import url("pages/dashboard.css");

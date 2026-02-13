@@ -11,6 +11,8 @@
 
   <!-- Font Awesome (CDN) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  {% block extra_css %}{% endblock %}
 </head>
 
 <body class="theme-institucional">
@@ -127,7 +129,6 @@
           </a>
         {% endif %}
 
-        <!-- Sair como item alinhado -->
         <a class="menu__item" href="{% url 'accounts:logout' %}" title="Sair">
           <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-power-off"></i></span>
           <span class="menu__label">Sair</span>
@@ -135,7 +136,6 @@
 
       </nav>
 
-      <!-- Rodapé do usuário: nome + função -->
       <div class="sidebar__footer">
         <div class="sidebar__avatar" aria-hidden="true"></div>
 
@@ -160,8 +160,9 @@
 
     </aside>
 
-    <!-- CONTEÚDO -->
+    <!-- MAIN -->
     <main class="main" id="conteudo">
+
       <header class="topbar">
         <div class="topbar__left">
           <div class="topbar__title">{% block header %}Dashboard{% endblock %}</div>
@@ -178,26 +179,33 @@
         </div>
       </header>
 
-      <!-- ✅ APENAS UM content -->
+      <!-- ✅ Conteúdo rolável (conforme layout.css) -->
       <section class="content">
+
         {% if messages %}
-          <div class="flash-stack">
+          <div class="alert-stack">
             {% for message in messages %}
-              <div class="flash flash--{{ message.tags }}">
+              <div class="alert alert--{{ message.tags }}">
                 {{ message }}
+                <button type="button" class="alert__close" aria-label="Fechar">&times;</button>
               </div>
             {% endfor %}
           </div>
         {% endif %}
 
         {% block content %}{% endblock %}
+
       </section>
     </main>
 
   </div>
 
+  <!-- ✅ scripts globais realmente necessários -->
+  <script src="{% static 'js/autocomplete.js' %}"></script>
+
   <script>
     (function () {
+      // Sidebar collapse (global)
       const key = "gepub.sidebar.collapsed";
       const btn = document.getElementById("sidebarToggle");
 
@@ -215,16 +223,52 @@
 
       if (btn) {
         btn.addEventListener("click", function () {
-          const now = !document.body.classList.contains("sidebar-collapsed");
-          localStorage.setItem(key, now ? "1" : "0");
-          apply(now);
+          const next = !document.body.classList.contains("sidebar-collapsed");
+          localStorage.setItem(key, next ? "1" : "0");
+          apply(next);
         });
       }
+
+      // Alerts (global)
+      document.addEventListener("click", function (e) {
+        const close = e.target.closest(".alert__close");
+        if (!close) return;
+
+        const alert = close.closest(".alert");
+        if (!alert) return;
+
+        alert.classList.add("alert--closing");
+        setTimeout(() => alert.remove(), 250);
+      });
+
+      document.querySelectorAll(".alert").forEach(alert => {
+        setTimeout(() => {
+          if (!alert.parentNode) return;
+          alert.classList.add("alert--closing");
+          setTimeout(() => alert.remove(), 250);
+        }, 4000);
+      });
+
+      // Action menu (dropdown actions)
+      document.addEventListener("click", function () {
+        document.querySelectorAll(".action-menu").forEach(m => m.classList.remove("action-menu--open"));
+      });
+
+      document.addEventListener("click", function (e) {
+        const btn = e.target.closest(".action-menu__button");
+        if (!btn) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const menu = btn.closest(".action-menu");
+        if (!menu) return;
+
+        menu.classList.toggle("action-menu--open");
+      });
     })();
   </script>
 
-  <script src="{% static 'vendor/chartjs/chart.js' %}"></script>
-  <script src="{% static 'js/autocomplete.js' %}"></script>
-
+  {% block extra_js %}{% endblock %}
 </body>
 </html>

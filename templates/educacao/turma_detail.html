@@ -2,6 +2,18 @@
 {% block title %}{{ turma.nome }} • Turmas • Educação • GEPUB{% endblock %}
 {% block header %}Educação{% endblock %}
 
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'educacao:index' %}">Educação</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'educacao:turma_list' %}">Turmas</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">{{ turma.nome }}</span>
+  </div>
+{% endblock %}
+
 {% block content %}
 
 {{ nee_labels|json_script:"nee-labels" }}
@@ -11,13 +23,13 @@
 {{ evol_labels|json_script:"ev-labels" }}
 {{ evol_values|json_script:"ev-values" }}
 
-<div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px;">
+<div class="flex-between mb-20">
   <div>
     <div style="font-weight:1000; font-size:18px;">{{ turma.nome }}</div>
     <div class="small">Turma • {{ turma.ano_letivo }} • {{ turma.turno }}</div>
   </div>
 
-  <div style="display:flex; gap:10px; align-items:center;">
+  <div class="flex" style="gap:10px; align-items:center;">
     {% if can_edu_manage %}
       <a class="btn" href="{% url 'educacao:turma_update' turma.pk %}">Editar</a>
     {% endif %}
@@ -25,8 +37,9 @@
   </div>
 </div>
 
-<!-- GRID DASHBOARD -->
+<!-- GRID DASHBOARD (mantido como você fez, sem desconfigurar) -->
 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px; align-items:start;">
+
   <!-- Card: Informações -->
   <div class="card">
     <div class="card__title">Informações da turma</div>
@@ -113,30 +126,34 @@
           Ver alunos da turma ({{ alunos_total }})
         </summary>
 
-        <div style="margin-top:10px; overflow:auto; border:1px solid rgba(255,255,255,.08); border-radius:14px;">
-          <table style="width:100%; border-collapse:collapse; min-width:680px;">
-            <thead>
-              <tr style="text-align:left; background:rgba(255,255,255,.03);">
-                <th style="padding:10px 12px;">Nome</th>
-                <th style="padding:10px 12px; width:160px;">CPF</th>
-                <th style="padding:10px 12px; width:120px;">Ativo</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for aluno in alunos %}
-                <tr style="border-top:1px solid rgba(255,255,255,.06);">
-                  <td style="padding:10px 12px;">
-                    <a class="link" href="{% url 'educacao:aluno_detail' aluno.pk %}">{{ aluno.nome }}</a>
-                  </td>
-                  <td style="padding:10px 12px;">{{ aluno.cpf|default:"—" }}</td>
-                  <td style="padding:10px 12px;">{% if aluno.ativo %}Sim{% else %}Não{% endif %}</td>
+        {% if alunos %}
+          <div style="margin-top:10px; overflow:auto; border:1px solid rgba(255,255,255,.08); border-radius:14px;">
+            <table style="width:100%; border-collapse:collapse; min-width:680px;">
+              <thead>
+                <tr style="text-align:left; background:rgba(255,255,255,.03);">
+                  <th style="padding:10px 12px;">Nome</th>
+                  <th style="padding:10px 12px; width:160px;">CPF</th>
+                  <th style="padding:10px 12px; width:120px;">Ativo</th>
                 </tr>
-              {% empty %}
-                <tr><td colspan="3" style="padding:12px;">Nenhum aluno matriculado nesta turma.</td></tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {% for aluno in alunos %}
+                  <tr style="border-top:1px solid rgba(255,255,255,.06);">
+                    <td style="padding:10px 12px;">
+                      <a class="link" href="{% url 'educacao:aluno_detail' aluno.pk %}">{{ aluno.nome }}</a>
+                    </td>
+                    <td style="padding:10px 12px;">{{ aluno.cpf|default:"—" }}</td>
+                    <td style="padding:10px 12px;">{% if aluno.ativo %}Sim{% else %}Não{% endif %}</td>
+                  </tr>
+                {% empty %}
+                  <tr><td colspan="3" style="padding:12px;">Nenhum aluno matriculado nesta turma.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          {% include "core/partials/empty_state.html" with title="Nenhum aluno" text="Nenhum aluno matriculado nesta turma." %}
+        {% endif %}
       </details>
     </div>
   </div>
@@ -170,11 +187,12 @@
             </table>
           </div>
         {% else %}
-          <div class="small" style="margin-top:10px;">Nenhum professor encontrado (ou perfil não vincula unidade).</div>
+          {% include "core/partials/empty_state.html" with title="Nenhum professor" text="Nenhum professor encontrado (ou perfil não vincula unidade)." %}
         {% endif %}
       </details>
     </div>
   </div>
+
 </div>
 
 <script>
@@ -203,7 +221,6 @@
     const cEv  = document.getElementById("chartEvol");
     if (!cNee || !cSt || !cEv || !window.Chart) return;
 
-    // NEE
     if (neeLabels.length && neeValues.length) {
       new Chart(cNee.getContext("2d"), {
         type: "bar",
@@ -212,14 +229,12 @@
       });
     }
 
-    // Status
     new Chart(cSt.getContext("2d"), {
       type: "doughnut",
       data: { labels: stLabels, datasets: [{ data: stValues, borderWidth: 0 }] },
       options: { responsive:true, plugins:{ legend:{ position:"bottom" } } }
     });
 
-    // Evolução
     if (evLabels.length && evValues.length) {
       new Chart(cEv.getContext("2d"), {
         type: "line",

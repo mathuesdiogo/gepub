@@ -1,167 +1,73 @@
 /* =========================================================
-   GEPUB — DASHBOARD BLOCKS
-   Blocos de métricas/atalhos (visual de produto)
+   Dashboard Blocks (details) — blindado contra overrides
    ========================================================= */
-
-.dash-grid{
+.card .dashboard-blocks{
   display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
 }
 
-.dash-col-3{ grid-column: span 3; }
-.dash-col-4{ grid-column: span 4; }
-.dash-col-6{ grid-column: span 6; }
-.dash-col-12{ grid-column: span 12; }
-
-@media (max-width: 1024px){
-  .dash-col-3, .dash-col-4{ grid-column: span 6; }
-}
-
-@media (max-width: 640px){
-  .dash-col-3, .dash-col-4, .dash-col-6{ grid-column: span 12; }
-}
-
-/* Card de métrica */
-.metric{
+.card .dashboard-block{
+  display: block;
   background: var(--color-bg-card);
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-lg);
+  padding: var(--space-4);
   box-shadow: var(--shadow-xs);
-  padding: var(--space-6);
-  display: grid;
-  gap: var(--space-2);
 }
 
-.metric__label{
-  font-size: var(--font-size-xs);
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-  margin: 0;
-}
-
-.metric__value{
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-  margin: 0;
-  line-height: 1.1;
-}
-
-.metric__hint{
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  margin: 0;
-}
-
-/* Barra de destaque (opcional) */
-.metric--primary{
-  border-color: var(--color-primary-200);
-  background: linear-gradient(180deg, var(--color-primary-50), #fff);
-}
-
-/* ==========================================================
-   DASHBOARD (NOVO MODELO) — .dashboard / .metric-card
-   Mantém compatibilidade com o CSS sec-* já existente
-   ========================================================== */
-
-.dashboard{
-  max-width: 1200px;
-  margin: 0 auto;
-  display: grid;
-  gap: var(--space-4);
-}
-
-/* Header */
-.dashboard-header{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  flex-wrap: wrap;
-}
-
-.dashboard-title{
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-}
-
-.dashboard-badge{
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 10px;
-  border-radius: var(--radius-pill);
-  background: var(--color-primary-50);
-  border: 1px solid var(--color-primary-200);
-  color: var(--color-primary-700);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-}
-
-/* Métricas */
-.dashboard-metrics{
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-}
-
-@media (max-width: 1024px){
-  .dashboard-metrics{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-@media (max-width: 640px){
-  .dashboard-metrics{ grid-template-columns: 1fr; }
-}
-
-/* Card métrica clicável */
-.metric-card{
-  display: grid;
-  gap: 6px;
-  padding: 16px 16px;
-  border-radius: 18px;
+/* blindagem para links virarem “card” de verdade */
+.card a.dashboard-block{
   text-decoration: none;
-  border: 1px solid var(--color-border-light);
-  background: linear-gradient(180deg, var(--color-primary-50), #fff 65%);
+  color: inherit;
+}
+
+/* tipografia interna */
+.card .dashboard-block__label{
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-1) 0;
+}
+
+.card .dashboard-block__value{
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  line-height: 1.1;
+  margin: 0;
+}
+
+.card .dashboard-block__meta{
+  margin-top: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* hover sutil no padrão institucional */
+.card .dashboard-block--link{
+  cursor: pointer;
+}
+
+.card .dashboard-block--link:hover{
+  border-color: var(--color-border);
   box-shadow: var(--shadow-sm);
-  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-  min-height: 120px;
 }
 
-.metric-card:hover{
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--color-primary-200);
-}
+/* =========================================================
+   Variantes de cor (suaves e legíveis)
+   ========================================================= */
+.card .dashboard-block--primary{ background:#EFF6FF; border-color:#BFDBFE; }
+.card .dashboard-block--primary .dashboard-block__value{ color:#1D4ED8; }
 
-.metric-label{
-  font-size: 13px;
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-secondary);
-}
+.card .dashboard-block--success{ background:#ECFDF5; border-color:#A7F3D0; }
+.card .dashboard-block--success .dashboard-block__value{ color:#047857; }
 
-.metric-value{
-  font-size: 34px;
-  font-weight: var(--font-weight-bold);
-  line-height: 1.05;
-  color: var(--color-text-primary);
-}
+.card .dashboard-block--info{ background:#F5F3FF; border-color:#DDD6FE; }
+.card .dashboard-block--info .dashboard-block__value{ color:#6D28D9; }
 
-.metric-meta{
-  font-size: 13px;
-  color: var(--color-primary-700);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
+.card .dashboard-block--warning{ background:#FFF7ED; border-color:#FED7AA; }
+.card .dashboard-block--warning .dashboard-block__value{ color:#C2410C; }
 
-/* Seções (quando existir) */
-.dashboard-section{
-  display: grid;
-  gap: var(--space-3);
-}
-
-.dashboard-section-title{
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-}
+.card .dashboard-block--neutral{ background:#F9FAFB; border-color:#E5E7EB; }
+.card .dashboard-block--neutral .dashboard-block__value{ color:#374151; }

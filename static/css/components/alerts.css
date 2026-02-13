@@ -84,3 +84,75 @@
   border-color: rgba(2,132,199,.25);
   background: rgba(2,132,199,.08);
 }
+/* animação entrada */
+.alert,
+.flash{
+  animation: alertFadeIn .25s ease-out;
+}
+
+@keyframes alertFadeIn{
+  from{
+    opacity:0;
+    transform: translateY(-6px);
+  }
+  to{
+    opacity:1;
+    transform: translateY(0);
+  }
+}
+
+/* animação saída (se usar JS para fechar) */
+.alert.is-hiding,
+.flash.is-hiding{
+  animation: alertFadeOut .2s ease-in forwards;
+}
+
+@keyframes alertFadeOut{
+  to{
+    opacity:0;
+    transform: translateY(-4px);
+  }
+}
+/* ============================
+   ALERT ANIMATION
+============================ */
+
+.alert {
+  position: relative;
+  padding: 14px 16px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  font-weight: 500;
+  animation: alertSlide 0.35s ease forwards;
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+@keyframes alertSlide {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+}
+
+@keyframes alertFadeOut {
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.alert__close {
+  position: absolute;
+  right: 10px;
+  top: 8px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  opacity: .6;
+}
+
+.alert__close:hover {
+  opacity: 1;
+}

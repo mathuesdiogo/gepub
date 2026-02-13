@@ -300,7 +300,10 @@ def secretaria_list(request):
 
 @login_required
 def secretaria_detail(request, pk: int):
-    secretaria = get_object_or_404(Secretaria.objects.select_related("municipio"), pk=pk)
+    secretaria = get_object_or_404(
+        Secretaria.objects.select_related("municipio"),
+        pk=pk
+    )
 
     block = _ensure_in_scope_or_403(request.user, secretaria.municipio_id)
     if block:
@@ -310,21 +313,27 @@ def secretaria_detail(request, pk: int):
 
     unidades_qs = scope_filter_unidades(
         request.user,
-        Unidade.objects.select_related("secretaria").filter(secretaria_id=secretaria.id)
+        Unidade.objects.select_related("secretaria")
+        .filter(secretaria_id=secretaria.id)
     ).order_by("nome")
 
     unidade_ids = list(unidades_qs.values_list("id", flat=True))
 
     turmas_map = {
         row["unidade_id"]: row["total"]
-        for row in Turma.objects.filter(unidade_id__in=unidade_ids).values("unidade_id").annotate(total=Count("id"))
+        for row in Turma.objects
+        .filter(unidade_id__in=unidade_ids)
+        .values("unidade_id")
+        .annotate(total=Count("id"))
     }
 
     setores_map = {
         row["unidade_id"]: row["total"]
-        for row in Setor.objects.filter(unidade_id__in=unidade_ids).values("unidade_id").annotate(total=Count("id"))
+        for row in Setor.objects
+        .filter(unidade_id__in=unidade_ids)
+        .values("unidade_id")
+        .annotate(total=Count("id"))
     }
-    setores_total = sum(setores_map.values()) if setores_map else 0
 
     users_map = {}
     prof_map = {}
@@ -332,34 +341,101 @@ def secretaria_detail(request, pk: int):
 
     if unidade_ids and _profile_has_field("unidade"):
         qs_profiles = Profile.objects.filter(unidade_id__in=unidade_ids)
-        users_map = {row["unidade_id"]: row["total"] for row in qs_profiles.values("unidade_id").annotate(total=Count("id"))}
-        prof_map = {row["unidade_id"]: row["total"] for row in qs_profiles.filter(role="PROFESSOR").values("unidade_id").annotate(total=Count("id"))}
-        aux_map = {row["unidade_id"]: row["total"] for row in qs_profiles.filter(role__icontains="AUX").values("unidade_id").annotate(total=Count("id"))}
 
-    unidades_view = []
+        users_map = {
+            row["unidade_id"]: row["total"]
+            for row in qs_profiles
+            .values("unidade_id")
+            .annotate(total=Count("id"))
+        }
+
+        prof_map = {
+            row["unidade_id"]: row["total"]
+            for row in qs_profiles
+            .filter(role="PROFESSOR")
+            .values("unidade_id")
+            .annotate(total=Count("id"))
+        }
+
+        aux_map = {
+            row["unidade_id"]: row["total"]
+            for row in qs_profiles
+            .filter(role__icontains="AUX")
+            .values("unidade_id")
+            .annotate(total=Count("id"))
+        }
+
+    # 🔹 TABLE_SHELL HEADERS
+    headers = [
+        {"label": "Unidade"},
+        {"label": "Tipo", "width": "140px"},
+        {"label": "Turmas", "width": "100px"},
+        {"label": "Setores", "width": "100px"},
+        {"label": "Usuários", "width": "100px"},
+        {"label": "Ativa", "width": "100px"},
+    ]
+
+    # 🔹 TABLE_SHELL ROWS
+    rows = []
+
     for u in unidades_qs:
         uid = u.id
-        unidades_view.append({
-            "id": uid,
-            "nome": u.nome,
-            "tipo": getattr(u, "tipo", None),
-            "ativo": getattr(u, "ativo", True),
-            "turmas_total": turmas_map.get(uid, 0),
-            "setores_total": setores_map.get(uid, 0),
-            "usuarios_total": users_map.get(uid, 0),
-            "professores_total": prof_map.get(uid, 0),
-            "auxiliares_total": aux_map.get(uid, 0),
+
+        rows.append({
+            "cells": [
+                {
+                    "text": u.nome,
+                    "url": reverse("org:unidade_detail", args=[uid]),
+                },
+                {
+                    "text": getattr(u, "get_tipo_display", lambda: getattr(u, "tipo", "—"))(),
+                    "url": "",
+                },
+                {
+                    "text": str(turmas_map.get(uid, 0)),
+                    "url": "",
+                },
+                {
+                    "text": str(setores_map.get(uid, 0)),
+                    "url": "",
+                },
+                {
+                    "text": str(users_map.get(uid, 0)),
+                    "url": "",
+                },
+                {
+                    "text": "Sim" if getattr(u, "ativo", True) else "Não",
+                    "url": "",
+                },
+            ],
+            "can_edit": False,
+            "edit_url": "",
+        })
+
+    # 🔹 ACTIONS (PageHead)
+    actions = []
+
+    if can(request.user, "org.manage"):
+        actions.append({
+            "label": "Editar",
+            "url": reverse("org:secretaria_update", args=[secretaria.pk]),
+            "icon": "fa-solid fa-pen",
+            "variant": "btn-primary",
         })
 
     ctx = {
         "secretaria": secretaria,
-        "unidades_total": len(unidades_view),
-        "setores_total": setores_total,
-        "turmas_total": sum(x["turmas_total"] for x in unidades_view),
-        "usuarios_total": sum(x["usuarios_total"] for x in unidades_view),
-        "unidades": unidades_view,
+        "unidades_total": unidades_qs.count(),
+        "turmas_total": sum(turmas_map.values()) if turmas_map else 0,
+        "setores_total": sum(setores_map.values()) if setores_map else 0,
+        "usuarios_total": sum(users_map.values()) if users_map else 0,
+        "headers": headers,
+        "rows": rows,
+        "actions": actions,
     }
+
     return render(request, "org/secretaria_detail.html", ctx)
+
 
 
 @login_required

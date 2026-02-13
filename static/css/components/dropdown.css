@@ -1,0 +1,54 @@
+/* =========================================================
+   GEPUB — ACTION DROPDOWN
+   Compatível com suggest.css e table_shell
+   ========================================================= */
+
+.dropdown{
+  position:relative;
+  display:inline-block;
+}
+
+.dropdown__menu{
+  position:absolute;
+  right:0;
+  top:110%;
+  min-width:190px;
+  background:#fff;
+  border:1px solid var(--color-border-light);
+  border-radius:12px;
+  box-shadow: var(--shadow-md);
+  padding:6px;
+  z-index:90;
+  animation: dropdownIn .14s ease;
+}
+
+@keyframes dropdownIn{
+  from{
+    opacity:0;
+    transform: translateY(-6px);
+  }
+  to{
+    opacity:1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown__item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:9px 10px;
+  border-radius:8px;
+  color:var(--color-text-primary);
+  text-decoration:none;
+  cursor:pointer;
+  transition: background .12s ease;
+}
+
+.dropdown__item:hover{
+  background:var(--color-neutral-50);
+}
+
+.dropdown__item--danger{
+  color:#dc2626;
+}
