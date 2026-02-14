@@ -14,11 +14,11 @@ from django.utils import timezone
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from weasyprint import HTML
-from core.models import DocumentoEmitido
-from core.exports import _try_make_qr_data_uri
-from core.rbac import get_profile, is_admin
-from educacao.models import Matricula
-from org.models import Municipio, Unidade
+from apps.core.models import DocumentoEmitido
+from apps.core.exports import _try_make_qr_data_uri
+from apps.core.rbac import get_profile, is_admin
+from apps.educacao.models import Matricula
+from apps.org.models import Municipio, Unidade
 
 from .forms import TipoNecessidadeForm
 from .models import AlunoNecessidade, TipoNecessidade

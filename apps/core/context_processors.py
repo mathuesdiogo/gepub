@@ -1,7 +1,7 @@
 # apps/core/context_processors.py
 from __future__ import annotations
 
-from core.rbac import can
+from apps.core.rbac import can
 
 
 def permissions(request):

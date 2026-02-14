@@ -1,9 +1,9 @@
 from django import forms
 
-from core.rbac import get_profile, is_admin, scope_filter_turmas
-from org.models import Unidade
+from apps.core.rbac import get_profile, is_admin, scope_filter_turmas
+from apps.org.models import Unidade
 from .models import Turma, Aluno, Matricula
-from educacao.models import Matricula, Aluno, Turma  # ajuste se seus imports forem diferentes
+from apps.educacao.models import Matricula, Aluno, Turma  # ajuste se seus imports forem diferentes
 
 
 class TurmaForm(forms.ModelForm):

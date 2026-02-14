@@ -20,15 +20,16 @@ from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 from django.urls import reverse 
 from django.contrib.auth.models import User
-from core.rbac import get_profile, is_admin
+from apps.core.rbac import get_profile, is_admin
 
 
 
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
 
-from core.decorators import require_perm
-from core.rbac import can
+from apps.core.decorators import require_perm
+from apps.core.rbac import can, get_profile, is_admin
+
 
 User = get_user_model()
 from .forms import (

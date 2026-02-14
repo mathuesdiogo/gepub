@@ -7,7 +7,7 @@ from django.conf import settings
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect
 
-from core.rbac import can
+from apps.core.rbac import can
 
 
 def require_perm(perm: str):

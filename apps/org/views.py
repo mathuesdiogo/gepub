@@ -5,15 +5,16 @@ from django.db.models import Q, Count
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from accounts.models import Profile
-from core.decorators import require_perm
-from core.rbac import get_profile, is_admin, scope_filter_municipios
-from org.models import Municipio, Secretaria, Unidade, Setor
-from educacao.models import Turma  # usado em contagens
+from apps.accounts.models import Profile
+from apps.core.decorators import require_perm
+from apps.core.rbac import get_profile, is_admin, scope_filter_municipios
+from apps.core.rbac import can
+from apps.org.models import Municipio, Secretaria, Unidade, Setor
+from apps.educacao.models import Turma, Matricula  # usado em contagens
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.shortcuts import redirect, render
-from core.rbac import can
+
 from .forms import MunicipioForm, SecretariaForm, UnidadeForm, SetorForm, MunicipioContatoForm
 
 
@@ -110,7 +111,46 @@ def municipio_detail(request, pk: int):
     block = _ensure_in_scope_or_403(request.user, municipio.id)
     if block:
         return block
-    return render(request, "org/municipio_detail.html", {"municipio": municipio})
+
+    secretarias_qs = Secretaria.objects.filter(municipio_id=municipio.id)
+    unidades_qs = Unidade.objects.filter(secretaria__municipio_id=municipio.id)
+    setores_qs = Setor.objects.filter(unidade__secretaria__municipio_id=municipio.id)
+
+    secretarias_total = secretarias_qs.count()
+    unidades_total = unidades_qs.count()
+    setores_total = setores_qs.count()
+
+    top_secretarias = list(secretarias_qs.order_by("nome")[:5])
+    top_unidades = list(unidades_qs.order_by("nome")[:5])
+    top_setores = list(setores_qs.order_by("nome")[:5])
+
+    # ✅ Cards (dashboard blocks) clicáveis
+    summary_items = [
+        {"label": "Secretarias", "value": secretarias_total, "href": reverse("org:secretaria_list") + f"?municipio={municipio.id}", "meta": "Ver todas"},
+        {"label": "Unidades", "value": unidades_total, "href": reverse("org:unidade_list") + f"?municipio={municipio.id}", "meta": "Ver todas"},
+        {"label": "Setores", "value": setores_total, "href": reverse("org:setor_list") + f"?municipio={municipio.id}", "meta": "Ver todos"},
+    ]
+
+    actions = [
+        {"label": "Voltar", "url": reverse("org:municipio_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+    ]
+    if can(request.user, "org.manage") or request.user.is_staff or request.user.is_superuser:
+        actions.append({"label": "Editar", "url": reverse("org:municipio_update", args=[municipio.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+
+    return render(request, "org/municipio_detail.html", {
+        "municipio": municipio,
+        "actions": actions,
+        "summary_items": summary_items,
+        "top_secretarias": top_secretarias,
+        "top_unidades": top_unidades,
+        "top_setores": top_setores,
+        "secretarias_total": secretarias_total,
+        "unidades_total": unidades_total,
+        "setores_total": setores_total,
+    })
+
+
+
 
 
 @login_required
@@ -189,7 +229,7 @@ def secretaria_list(request):
     )
 
     # export (mantém seu jeito)
-    from core.exports import export_csv, export_pdf_table
+    from apps.core.exports import export_csv, export_pdf_table
     export = (request.GET.get("export") or "").strip().lower()
 
     if export in ("csv", "pdf"):
@@ -309,7 +349,7 @@ def secretaria_detail(request, pk: int):
     if block:
         return block
 
-    from core.rbac import scope_filter_unidades
+    from apps.core.rbac import scope_filter_unidades
 
     unidades_qs = scope_filter_unidades(
         request.user,
@@ -501,7 +541,7 @@ def unidade_list(request):
     if not is_admin(request.user) and p and p.municipio_id:
         municipio_id = str(p.municipio_id)
 
-    from core.rbac import scope_filter_unidades
+    from apps.core.rbac import scope_filter_unidades
 
     qs = scope_filter_unidades(
         request.user,
@@ -542,7 +582,7 @@ def unidade_list(request):
     # =============================
     # EXPORTAÇÃO
     # =============================
-    from core.exports import export_csv, export_pdf_table
+    from apps.core.exports import export_csv, export_pdf_table
     export = (request.GET.get("export") or "").strip().lower()
 
     if export in ("csv", "pdf"):
@@ -707,7 +747,7 @@ def setor_list(request):
     unidade_id = (request.GET.get("unidade") or "").strip()
 
     # escopo de unidades do usuário
-    from core.rbac import scope_filter_unidades
+    from apps.core.rbac import scope_filter_unidades
     unidades_scope = scope_filter_unidades(
         request.user,
         Unidade.objects.select_related("secretaria", "secretaria__municipio").all()
@@ -734,7 +774,7 @@ def setor_list(request):
     # =============================
     # EXPORTAÇÃO CSV / PDF
     # =============================
-    from core.exports import export_csv, export_pdf_table
+    from apps.core.exports import export_csv, export_pdf_table
     export = (request.GET.get("export") or "").strip().lower()
 
     if export in ("csv", "pdf"):
@@ -856,33 +896,25 @@ def setor_list(request):
     )
 
     return render(request, "org/setor_list.html", {
-        "q": q,
-        "unidade_id": unidade_id,
-        "page_obj": page_obj,
-        "actions": actions,
-        "headers": headers,
-        "rows": rows,
-        "action_url": reverse("org:setor_list"),
-        "clear_url": reverse("org:setor_list"),
-        "has_filters": bool(unidade_id),
-        "extra_filters": extra_filters,
-        "autocomplete_url": reverse("org:setor_autocomplete"),
-        "autocomplete_href": reverse("org:setor_list") + "?q={q}",
-
-
-        # ✅ autocomplete do buscar
-        "autocomplete_url": reverse("org:setor_autocomplete"),
-        "autocomplete_href": reverse("org:setor_list") + "?q={q}",
-        "autocomplete_url": reverse("org:setor_autocomplete"),
-        "autocomplete_href": reverse("org:setor_list") + "?q={q}",
-
-    })
+    "q": q,
+    "unidade_id": unidade_id,
+    "page_obj": page_obj,
+    "actions": actions,
+    "headers": headers,
+    "rows": rows,
+    "action_url": reverse("org:setor_list"),
+    "clear_url": reverse("org:setor_list"),
+    "has_filters": bool(unidade_id),
+    "extra_filters": extra_filters,
+    "autocomplete_url": reverse("org:setor_autocomplete"),
+    "autocomplete_href": reverse("org:setor_list") + "?q={q}",
+})
 
 
 
 @login_required
 def unidade_detail(request, pk: int):
-    from core.rbac import scope_filter_unidades
+    from apps.core.rbac import scope_filter_unidades
 
     unidade = get_object_or_404(
         scope_filter_unidades(
@@ -1020,7 +1052,7 @@ def setor_autocomplete(request):
     if len(q) < 2:
         return JsonResponse({"results": []})
 
-    from core.rbac import scope_filter_unidades
+    from apps.core.rbac import scope_filter_unidades
 
     unidades_scope = scope_filter_unidades(
         request.user,
@@ -1107,7 +1139,7 @@ def unidade_update(request, pk: int):
         messages.error(request, "Você não tem permissão para editar unidades.")
         return redirect("org:unidade_list")
 
-    from core.rbac import scope_filter_unidades
+    from apps.core.rbac import scope_filter_unidades
 
     obj = get_object_or_404(
         scope_filter_unidades(
@@ -1167,16 +1199,65 @@ def setor_detail(request, pk: int):
         pk=pk,
     )
 
-    # Protege por escopo: se a unidade do setor não estiver no escopo do usuário, 404
-    from core.rbac import scope_filter_unidades
+    from apps.core.rbac import scope_filter_unidades
+
     unidade_ok = scope_filter_unidades(
         request.user,
         Unidade.objects.filter(pk=setor.unidade_id),
     ).exists()
+
     if not unidade_ok:
         raise Http404
 
-    return render(request, "org/setor_detail.html", {"setor": setor})
+    can_manage = (
+        can(request.user, "org.manage")
+        or can(request.user, "org.manage_unidade")
+        or request.user.is_staff
+        or request.user.is_superuser
+    )
+
+    actions = [
+        {
+            "label": "Voltar",
+            "url": reverse("org:setor_list"),
+            "icon": "fa-solid fa-arrow-left",
+            "variant": "btn--ghost",
+        }
+    ]
+
+    if can_manage:
+        actions.append({
+            "label": "Editar",
+            "url": reverse("org:setor_update", args=[setor.pk]),
+            "icon": "fa-solid fa-pen",
+            "variant": "btn-primary",
+        })
+
+    unidade = setor.unidade
+    secretaria = unidade.secretaria
+    municipio = secretaria.municipio
+
+    fields = [
+        {"label": "Unidade", "value": unidade.nome},
+        {"label": "Secretaria", "value": secretaria.nome},
+        {"label": "Município", "value": f"{municipio.nome}/{municipio.uf}"},
+    ]
+
+    pills = [
+        {
+            "label": "Ativo",
+            "value": "Sim" if setor.ativo else "Não",
+            "variant": "success" if setor.ativo else "danger",
+        }
+    ]
+
+    return render(request, "org/setor_detail.html", {
+        "page_title": setor.nome,
+        "page_subtitle": "Detalhes do setor",
+        "actions": actions,
+        "fields": fields,
+        "pills": pills,
+    })
 
 
 @login_required
@@ -1195,7 +1276,7 @@ def setor_create(request):
             obj = form.save(commit=False)
 
             # trava unidade no escopo
-            from core.rbac import scope_filter_unidades
+            from apps.core.rbac import scope_filter_unidades
             unidade_ok = scope_filter_unidades(
                 request.user,
                 Unidade.objects.filter(pk=obj.unidade_id),
@@ -1226,7 +1307,7 @@ def setor_update(request, pk: int):
     setor = get_object_or_404(Setor, pk=pk)
 
     # Protege por escopo
-    from core.rbac import scope_filter_unidades
+    from apps.core.rbac import scope_filter_unidades
     unidade_ok = scope_filter_unidades(
         request.user,
         Unidade.objects.filter(pk=setor.unidade_id),

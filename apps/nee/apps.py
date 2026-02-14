@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
-
 class NeeConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'nee'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "apps.nee"
+    label = "nee"

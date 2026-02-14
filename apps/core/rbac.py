@@ -301,7 +301,7 @@ def scope_filter_alunos(user, qs):
     if not p:
         return qs.none()
 
-    from educacao.models import Matricula  # evita import circular
+    from apps.educacao.models import Matricula  # evita import circular
 
     matriculas = Matricula.objects.filter(aluno_id=OuterRef("pk"))
 

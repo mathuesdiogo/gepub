@@ -81,14 +81,14 @@ class Command(BaseCommand):
         code_len = opts["code_len"]
 
         # Imports tardios (pra não quebrar loading do Django)
-        from org.models import Municipio, Secretaria, Unidade, Setor
-        from educacao.models import Turma, Aluno, Matricula
-        from accounts.models import Profile
+        from apps.org.models import Municipio, Secretaria, Unidade, Setor
+        from apps.educacao.models import Turma, Aluno, Matricula
+        from apps.accounts.models import Profile
 
         # NEE (opcional)
         TipoNecessidade = None
         try:
-            from nee.models import TipoNecessidade as _TipoNec
+            from apps.nee.models import TipoNecessidade as _TipoNec
             TipoNecessidade = _TipoNec
         except Exception:
             TipoNecessidade = None
@@ -378,7 +378,7 @@ class Command(BaseCommand):
         # ----------------------------
         # Se quiser, vincula aleatoriamente cada professor a 2 turmas do seu escopo
         try:
-            from accounts.models import Profile as _Profile
+            from apps.accounts.models import Profile as _Profile
             profs = User.objects.filter(profile__role="PROFESSOR").select_related("profile")
             for u in profs:
                 qs = Turma.objects.all()

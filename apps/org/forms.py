@@ -61,7 +61,7 @@ class SecretariaForm(forms.ModelForm):
         if not user or not getattr(user, "is_authenticated", False):
             return
 
-        from core.rbac import get_profile, is_admin
+        from apps.core.rbac import get_profile, is_admin
         p = get_profile(user)
 
         # MUNICIPAL: trava município no município do usuário

@@ -8,16 +8,16 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.http import JsonResponse
-from core.decorators import require_perm
-from core.rbac import can, scope_filter_turmas, scope_filter_alunos, scope_filter_matriculas
+from apps.core.decorators import require_perm
+from apps.core.rbac import can, scope_filter_turmas, scope_filter_alunos, scope_filter_matriculas
+
 
 from .forms import TurmaForm, AlunoForm, MatriculaForm, AlunoCreateComTurmaForm
 from .models import Turma, Aluno, Matricula
-
-from nee.forms import AlunoNecessidadeForm, ApoioMatriculaForm
-from nee.models import AlunoNecessidade, ApoioMatricula
+from apps.nee.forms import AlunoNecessidadeForm, ApoioMatriculaForm
+from apps.nee.models import AlunoNecessidade, ApoioMatricula
 from django.http import JsonResponse
-from accounts.models import Profile
+from apps.accounts.models import Profile
 
 
 
@@ -57,7 +57,7 @@ def turma_list(request):
     qs = scope_filter_turmas(request.user, qs)
 
     # Export (mantém do jeito que já está no seu arquivo)
-    from core.exports import export_csv, export_pdf_table
+    from apps.core.exports import export_csv, export_pdf_table
     export = (request.GET.get("export") or "").strip().lower()
     if export in ("csv", "pdf"):
         items = list(
@@ -520,7 +520,7 @@ def aluno_list(request):
     qs = scope_filter_alunos(request.user, qs)
 
     # Export mantém igual (já está ótimo)
-    from core.exports import export_csv, export_pdf_table
+    from apps.core.exports import export_csv, export_pdf_table
     export = (request.GET.get("export") or "").strip().lower()
 
     if export in ("csv", "pdf"):

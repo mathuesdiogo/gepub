@@ -1,13 +1,10 @@
 from __future__ import annotations
-from educacao.models import Turma
-from core.rbac import is_admin, scope_filter_turmas
-
+from apps.educacao.models import Turma
+from apps.core.rbac import is_admin, scope_filter_turmas
 from django import forms
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from educacao.models import Turma
-from core.rbac import is_admin, scope_filter_turmas
-from org.models import Municipio, Unidade
+from apps.org.models import Municipio, Unidade
 from .models import Profile
 from django.contrib.auth.password_validation import validate_password
 User = get_user_model()
