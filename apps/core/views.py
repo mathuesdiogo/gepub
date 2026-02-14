@@ -4,6 +4,7 @@ from django.db.models import Count, Q
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.utils import timezone
+from django.urls import reverse
 import json
 
 from apps.accounts.models import Profile
@@ -24,6 +25,92 @@ from .forms import AlunoAvisoForm, AlunoArquivoForm
 from .models import AlunoAviso, AlunoArquivo
 
 
+# =========================================================
+# ATALHOS POR CÓDIGO (NOVO)
+# =========================================================
+# Regras:
+# - code: string do código digitado (ex: "201")
+# - label: aparece em mensagens/ajuda
+# - url_name: nome da URL (reverse)
+# - perm: (opcional) permissão RBAC exigida para redirecionar
+# - args/kwargs: (opcional) para reverse
+CODE_ROUTES = {
+    # Core
+    "101": {"label": "Dashboard", "url_name": "core:dashboard"},
+
+    # Organização
+    "201": {"label": "Municípios", "url_name": "org:municipio_list", "perm": "org.view"},
+    "202": {"label": "Secretarias", "url_name": "org:secretaria_list", "perm": "org.view"},
+    "203": {"label": "Unidades", "url_name": "org:unidade_list", "perm": "org.view"},
+    "204": {"label": "Setores", "url_name": "org:setor_list", "perm": "org.view"},
+
+    # Educação
+    "301": {"label": "Alunos", "url_name": "educacao:aluno_list", "perm": "educacao.view"},
+    "302": {"label": "Turmas", "url_name": "educacao:turma_list", "perm": "educacao.view"},
+    "303": {"label": "Nova Matrícula", "url_name": "educacao:matricula_create", "perm": "educacao.manage"},
+
+    # NEE
+    "501": {"label": "NEE • Tipos", "url_name": "nee:tipo_list", "perm": "nee.view"},
+    "502": {"label": "NEE • Relatórios", "url_name": "nee:relatorios_index", "perm": "nee.view"},
+
+    # ✅ EXEMPLO (quando você souber o nome real da URL):
+    # "401": {"label": "Alterar senha", "url_name": "accounts:alterar_senha", "perm": "accounts.view"},
+}
+
+
+def _resolve_code_to_url(user, code: str):
+    """
+    Retorna URL (str) se o código existir e o usuário puder acessar.
+    Caso contrário, retorna None.
+    """
+    if not code:
+        return None
+
+    code = (code or "").strip().upper()
+    # aceita "401", "#401", "COD401" etc. — você pode padronizar como quiser
+    if code.startswith("#"):
+        code = code[1:]
+    if code.startswith("COD"):
+        code = code[3:].strip()
+
+    entry = CODE_ROUTES.get(code)
+    if not entry:
+        return None
+
+    perm = entry.get("perm")
+    if perm and not (can(user, perm) or is_admin(user) or getattr(user, "is_superuser", False) or getattr(user, "is_staff", False)):
+        return None
+
+    try:
+        return reverse(entry["url_name"], args=entry.get("args", None), kwargs=entry.get("kwargs", None))
+    except Exception:
+        return None
+
+
+@login_required
+def go_code(request, codigo: str = ""):
+    """
+    Recebe o código via:
+    - /go/<codigo>/
+    - /go/?c=<codigo>
+    Redireciona para a tela.
+    """
+    code = (codigo or request.GET.get("c") or request.POST.get("c") or "").strip()
+    url = _resolve_code_to_url(request.user, code)
+
+    if url:
+        return redirect(url)
+
+    # fallback: mostra erro e lista códigos disponíveis (sem template novo)
+    messages.error(request, "Código inválido ou sem permissão para acessar.")
+    # Opcional: se quiser, volta para o referer
+    back = request.META.get("HTTP_REFERER")
+    return redirect(back or "core:dashboard")
+
+
+# =========================================================
+# SEU CÓDIGO ATUAL (dashboard_view, aviso_create, arquivo_create)
+# =========================================================
 def _portal_manage_allowed(user) -> bool:
     return bool(
         can(user, "educacao.manage")
@@ -35,6 +122,75 @@ def _portal_manage_allowed(user) -> bool:
         or getattr(user, "is_superuser", False)
         or getattr(user, "is_staff", False)
     )
+
+@login_required
+def guia_telas(request):
+    q = (request.GET.get("q") or "").strip()
+
+    # ---------- Actions (PageHead) ----------
+    actions = [
+        {
+            "label": "Voltar",
+            "url": reverse("core:dashboard"),
+            "icon": "fa-solid fa-arrow-left",
+            "variant": "btn--ghost",
+        }
+    ]
+
+    # ---------- TableShell ----------
+    headers = [
+        {"label": "Código", "width": "120px"},
+        {"label": "Tela"},
+        {"label": "Módulo", "width": "160px"},
+    ]
+
+    rows = []
+    # ordena por número quando possível
+    def _sort_key(item):
+        code = item[0]
+        try:
+            return int(code)
+        except Exception:
+            return 999999
+
+    for code, entry in sorted(CODE_ROUTES.items(), key=_sort_key):
+        url = _resolve_code_to_url(request.user, code)
+        if not url:
+            continue  # sem permissão ou inválido
+
+        label = entry.get("label") or "—"
+        url_name = entry.get("url_name") or ""
+        modulo = (url_name.split(":")[0] if ":" in url_name else "core").upper()
+
+        # filtro de busca (por código, label ou módulo)
+        if q:
+            hay = f"{code} {label} {modulo} {url_name}".lower()
+            if q.lower() not in hay:
+                continue
+
+        rows.append({
+            "cells": [
+                {"text": code, "url": url},
+                {"text": label, "url": url},
+                {"text": modulo, "url": url},
+            ],
+            "can_edit": False,
+            "edit_url": "",
+        })
+
+    action_url = reverse("core:guia_telas")
+    clear_url = reverse("core:guia_telas")
+    has_filters = bool(q)
+
+    return render(request, "core/guia_telas.html", {
+        "actions": actions,
+        "q": q,
+        "action_url": action_url,
+        "clear_url": clear_url,
+        "has_filters": has_filters,
+        "headers": headers,
+        "rows": rows,
+    })
 
 
 @login_required

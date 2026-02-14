@@ -1,0 +1,19 @@
+{% extends "core/base.html" %}
+{% block title %}Guia de telas • GEPUB{% endblock %}
+{% block header %}Ajuda{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">Guia de telas</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+{% include "core/partials/page_head.html" with title="Guia de telas" subtitle="Use códigos para acessar telas rapidamente (ex: 201, 301, 502)" actions=actions %}
+{% include "core/partials/filter_bar.html" with q=q placeholder="Buscar por código, nome da tela ou módulo..." action_url=action_url clear_url=clear_url extra_filters="" has_filters=has_filters input_attrs="" %}
+{% include "core/partials/table_shell.html" with headers=headers rows=rows page_obj=None q=q empty_title="Nenhuma tela encontrada" empty_text="Tente buscar por outro termo ou código." %}
+</div></div>
+{% endblock %}
