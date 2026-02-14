@@ -1,82 +1,24 @@
 {% extends "core/base.html" %}
-{% block title %}Relatório por tipo • NEE • GEPUB{% endblock %}
+{% block title %}Relatório • Por tipo • NEE • GEPUB{% endblock %}
 {% block header %}NEE{% endblock %}
 
 {% block breadcrumbs %}
-  <div class="breadcrumbs">
-    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
-    <span class="breadcrumbs__sep">/</span>
-    <a class="breadcrumbs__link" href="{% url 'nee:index' %}">NEE</a>
-    <span class="breadcrumbs__sep">/</span>
-    <a class="breadcrumbs__link" href="{% url 'nee:relatorios_index' %}">Relatórios</a>
-    <span class="breadcrumbs__sep">/</span>
-    <span class="breadcrumbs__current">Por tipo</span>
-  </div>
+<div class="breadcrumbs">
+  <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+  <span class="breadcrumbs__sep">/</span>
+  <a class="breadcrumbs__link" href="{% url 'nee:index' %}">NEE</a>
+  <span class="breadcrumbs__sep">/</span>
+  <a class="breadcrumbs__link" href="{% url 'nee:relatorios_index' %}">Relatórios</a>
+  <span class="breadcrumbs__sep">/</span>
+  <span class="breadcrumbs__current">Por tipo</span>
+</div>
 {% endblock %}
 
 {% block content %}
-<div class="card">
-  <div class="card__title">NEE por tipo</div>
-
-  <div class="card__body">
-    <form method="get" style="display:flex; gap:10px; flex-wrap:wrap; align-items:end; margin-bottom:12px;">
-      <div style="min-width:160px;">
-        <label class="small">Ano letivo</label><br>
-        <input name="ano" value="{{ ano }}" placeholder="Ex.: 2026" />
-      </div>
-
-      <div style="min-width:160px;">
-        <label class="small">Município (id)</label><br>
-        <input name="municipio" value="{{ municipio_id }}" placeholder="opcional" />
-      </div>
-
-      <div style="min-width:160px;">
-        <label class="small">Unidade (id)</label><br>
-        <input name="unidade" value="{{ unidade_id }}" placeholder="opcional" />
-      </div>
-        <div style="min-width:220px;">
-  <label class="small">Situação da matrícula</label><br>
-  <select name="situacao">
-    <option value="" {% if not situacao %}selected{% endif %}>(Padrão: ATIVA)</option>
-
-    <option value="ATIVA" {% if situacao == "ATIVA" %}selected{% endif %}>ATIVA</option>
-    <option value="TRANSFERIDA" {% if situacao == "TRANSFERIDA" %}selected{% endif %}>TRANSFERIDA</option>
-    <option value="CONCLUIDA" {% if situacao == "CONCLUIDA" %}selected{% endif %}>CONCLUÍDA</option>
-    <option value="CANCELADA" {% if situacao == "CANCELADA" %}selected{% endif %}>CANCELADA</option>
-  </select>
-</div>
-
-      <button type="submit">Filtrar</button>
-      <button class="btn" type="submit" name="format" value="csv">Exportar CSV</button>
-      <button class="btn" type="submit" name="format" value="pdf">Baixar PDF</button>
-      <a class="link" href="{% url 'nee:relatorio_por_tipo' %}">Limpar</a>
-    </form>
-
-    <div class="kpi">
-  <strong>Total de alunos com NEE:</strong> {{ total_alunos_nee }}
-</div>
-
-
-    <div style="overflow:auto; border:1px solid rgba(255,255,255,.08); border-radius:14px;">
-      <table style="width:100%; border-collapse:collapse; min-width:760px;">
-        <thead>
-          <tr style="text-align:left; background:rgba(255,255,255,.03);">
-            <th style="padding:10px 12px;">Tipo</th>
-            <th style="padding:10px 12px; width:160px;">Alunos</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for r in rows %}
-            <tr style="border-top:1px solid rgba(255,255,255,.06);">
-              <td style="padding:10px 12px;">{{ r.tipo__nome }}</td>
-              <td style="padding:10px 12px; font-weight:800;">{{ r.total }}</td>
-            </tr>
-          {% empty %}
-            <tr><td colspan="2" style="padding:12px;">Nenhum dado para o filtro selecionado.</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
+<div class="card"><div class="card__body">
+{% include "core/partials/page_head.html" with title="Relatório NEE — Por tipo" subtitle="Alunos com NEE agrupados por tipo (com filtros e exportação)" actions=actions %}
+{% include "core/partials/filter_bar.html" with q=q placeholder="Buscar tipo..." action_url=action_url clear_url=clear_url has_filters=has_filters extra_filters=extra_filters %}
+{% include "core/partials/detail_summary.html" with fields=summary_fields pills=summary_pills %}
+{% include "core/partials/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q empty_title="Sem dados" empty_text="Tente ajustar filtros (ano/município/unidade/situação) ou sua busca." %}
+</div></div>
 {% endblock %}
