@@ -1,28 +1,30 @@
 {% extends "nee/relatorios/pdf/base_pdf.html" %}
 
 {% block body %}
-  <div style="margin-bottom:10px;">
-    <strong>Total de alunos com NEE:</strong> {{ total_alunos_nee }}
+
+  <div class="kpi">
+    <strong>Total de municípios listados:</strong> {{ rows|length }}
   </div>
 
   <table>
     <thead>
       <tr>
         <th>Município</th>
-        <th>UF</th>
-        <th class="right">Total</th>
+        <th class="right">Total de alunos com NEE</th>
       </tr>
     </thead>
     <tbody>
       {% for r in rows %}
         <tr>
-          <td>{{ r.aluno__matriculas__turma__unidade__secretaria__municipio__nome }}</td>
-          <td>{{ r.aluno__matriculas__turma__unidade__secretaria__municipio__uf }}</td>
+          <td>{{ r.municipio }}</td>
           <td class="right">{{ r.total }}</td>
         </tr>
       {% empty %}
-        <tr><td colspan="3">Sem dados para os filtros selecionados.</td></tr>
+        <tr>
+          <td colspan="2">Sem dados.</td>
+        </tr>
       {% endfor %}
     </tbody>
   </table>
+
 {% endblock %}
