@@ -14,7 +14,8 @@ from django.utils import timezone
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from weasyprint import HTML
-
+from core.models import DocumentoEmitido
+from core.exports import _try_make_qr_data_uri
 from core.rbac import get_profile, is_admin
 from educacao.models import Matricula
 from org.models import Municipio, Unidade
@@ -207,17 +208,41 @@ def _csv_response(filename: str) -> HttpResponse:
     return resp
 
 
+
 def _pdf_response(request, *, template: str, filename: str, context: dict) -> HttpResponse:
     from django.templatetags.static import static
+
+    # 1️⃣ Criar registro do documento
+    documento = DocumentoEmitido.objects.create(
+        tipo=context.get("title", "RELATORIO"),
+        titulo=context.get("title", "Relatório"),
+        gerado_por=request.user,
+        origem_url=request.build_absolute_uri(),
+    )
+
+    validation_url = request.build_absolute_uri(
+        reverse("core:validar_documento", args=[documento.codigo])
+    )
+
+    qr_data_uri = _try_make_qr_data_uri(validation_url)
+
     logo_url = request.build_absolute_uri(static("img/logo_prefeitura.png"))
-    context = {**context, "logo_url": logo_url}
+
+    context = {
+        **context,
+        "logo_url": logo_url,
+        "printed_by": request.user.get_username(),
+        "source_url": request.build_absolute_uri(),
+        "validation_code": documento.codigo,
+        "validation_url": validation_url,
+        "qr_data_uri": qr_data_uri,
+    }
 
     html = render_to_string(template, context, request=request)
     pdf_bytes = HTML(string=html, base_url=request.build_absolute_uri("/")).write_pdf()
 
     resp = HttpResponse(pdf_bytes, content_type="application/pdf")
     resp["Content-Disposition"] = f'attachment; filename="{filename}"'
-    resp["X-Content-Type-Options"] = "nosniff"
     return resp
 
 
@@ -261,6 +286,7 @@ def _build_extra_filters_html(*, ano: str, municipio_id: str, unidade_id: str, s
     }))
 
     return mark_safe("".join(parts))
+
 
 
 @login_required
