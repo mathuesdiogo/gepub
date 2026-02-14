@@ -1,109 +1,155 @@
-/* static/css/components/badges.css */
+/* =========================================================
+   GEPUB — BADGES / STATUS (SUAP-inspired)
+   - "Situações" no estilo pill pastel
+   - Suporta: .status status-CLASS  (como na referência)
+   - Também aceita: .status.CLASS / .status--CLASS / .status-CLASS
+   ========================================================= */
 
-/* ===== Status / Situações (pílulas) =====
-   Suporta:
-   - .status + variações .info .alert .success .error .default .final .extra1..extra7 .disabled
-   - compat: .status--info etc.
-*/
-
-.status {
-  --_bg: #E5E7EB;
-  --_bd: #D1D5DB;
-  --_fg: #111827;
-
+.badge{
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 5px 10px;
+  gap: 6px;
+
+  padding: 6px 10px;
   border-radius: 999px;
-  border: 1px solid var(--_bd);
-  background: var(--_bg);
-  color: var(--_fg);
+
+  border: 1px solid rgba(17, 24, 39, 0.12);
+  background: rgba(243, 244, 246, 0.90);
+
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1;
-  box-shadow: inset 0 -1px 0 rgba(15, 23, 42, 0.05);
+  color: rgba(17, 24, 39, 0.85);
 }
 
-/* ícone opcional dentro (se usar <i>) */
-.status i {
+/* ===== Situações (pílulas) ===== */
+.status{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 6px 12px;
+  border-radius: 999px;
+
+  border: 1px solid rgba(17, 24, 39, 0.12);
+  background: rgba(243, 244, 246, 0.90);
+
   font-size: 12px;
-  opacity: 0.9;
+  font-weight: 700;
+  line-height: 1;
+  color: rgba(17, 24, 39, 0.80);
+
+  white-space: nowrap;
 }
 
+/* Base SUAP-ish: cores pastel + borda suave */
 .status.info,
-.status--info {
-  --_bg: #D6EEFF;
-  --_bd: #B9DBF6;
-  --_fg: #0b2a44;
+.status--info,
+.status-info{
+  background: rgba(210, 236, 255, 0.75);
+  border-color: rgba(59, 130, 246, 0.28);
+  color: rgba(29, 78, 216, 0.95);
 }
 
 .status.alert,
-.status.warning,
 .status--alert,
-.status--warning {
-  --_bg: #FFF4C2;
-  --_bd: #F0DE93;
-  --_fg: #3b2f00;
+.status-warning,
+.status.warning,
+.status--warning{
+  background: rgba(255, 247, 204, 0.78);
+  border-color: rgba(245, 158, 11, 0.30);
+  color: rgba(146, 64, 14, 0.95);
 }
 
 .status.success,
-.status--success {
-  --_bg: #DDF6E5;
-  --_bd: #B9E1C3;
-  --_fg: #0f3a1c;
+.status--success,
+.status-success,
+.status.concluido,
+.status--concluido,
+.status.finalizado,
+.status--finalizado{
+  background: rgba(220, 248, 223, 0.72);
+  border-color: rgba(34, 197, 94, 0.30);
+  color: rgba(21, 128, 61, 0.95);
 }
 
 .status.error,
-.status.danger,
 .status--error,
-.status--danger {
-  --_bg: #F9D2D2;
-  --_bd: #F0B6B6;
-  --_fg: #4a1111;
+.status-danger,
+.status.danger,
+.status--danger,
+.status.cancelado,
+.status--cancelado{
+  background: rgba(255, 220, 220, 0.72);
+  border-color: rgba(239, 68, 68, 0.30);
+  color: rgba(153, 27, 27, 0.95);
 }
 
 .status.default,
-.status--default {
-  --_bg: #E5E7EB;
-  --_bd: #D1D5DB;
-  --_fg: #111827;
+.status--default{
+  background: rgba(229, 231, 235, 0.85);
+  border-color: rgba(107, 114, 128, 0.22);
+  color: rgba(55, 65, 81, 0.92);
 }
 
 .status.final,
-.status--final {
-  --_bg: #404040;
-  --_bd: #2f2f2f;
-  --_fg: #ffffff;
+.status--final{
+  background: rgba(31, 41, 55, 0.10);
+  border-color: rgba(31, 41, 55, 0.22);
+  color: rgba(17, 24, 39, 0.90);
 }
 
-/* Extras (cores suaves, como no exemplo) */
-.status.extra1,
-.status--extra1 { --_bg:#F8E7D0; --_bd:#EED6B4; --_fg:#4b2f12; }
-
+/* Extras (mantém o "ar" do SUAP: cores suaves diferentes) */
+.status.extra,
+.status--extra{
+  background: rgba(253, 230, 198, 0.70);
+  border-color: rgba(251, 146, 60, 0.28);
+  color: rgba(154, 52, 18, 0.95);
+}
 .status.extra2,
-.status--extra2 { --_bg:#E6E0FF; --_bd:#CFC5FF; --_fg:#2b1f4d; }
-
+.status--extra2{
+  background: rgba(233, 213, 255, 0.65);
+  border-color: rgba(168, 85, 247, 0.28);
+  color: rgba(107, 33, 168, 0.95);
+}
 .status.extra3,
-.status--extra3 { --_bg:#EAF5D5; --_bd:#D1E8A8; --_fg:#233b11; }
-
+.status--extra3{
+  background: rgba(236, 253, 245, 0.70);
+  border-color: rgba(16, 185, 129, 0.28);
+  color: rgba(6, 95, 70, 0.95);
+}
 .status.extra4,
-.status--extra4 { --_bg:#F6D6EA; --_bd:#EAB5D8; --_fg:#4a1330; }
-
+.status--extra4{
+  background: rgba(251, 207, 232, 0.60);
+  border-color: rgba(236, 72, 153, 0.28);
+  color: rgba(131, 24, 67, 0.95);
+}
 .status.extra5,
-.status--extra5 { --_bg:#D7F2F6; --_bd:#B6E3EC; --_fg:#0f3a42; }
-
+.status--extra5{
+  background: rgba(207, 250, 254, 0.65);
+  border-color: rgba(6, 182, 212, 0.28);
+  color: rgba(14, 116, 144, 0.95);
+}
 .status.extra6,
-.status--extra6 { --_bg:#E9E1D8; --_bd:#D6C7B8; --_fg:#2f1f15; }
-
+.status--extra6{
+  background: rgba(245, 245, 220, 0.72);
+  border-color: rgba(120, 113, 108, 0.22);
+  color: rgba(68, 64, 60, 0.95);
+}
 .status.extra7,
-.status--extra7 { --_bg:#DEE2EA; --_bd:#C7CFDC; --_fg:#1f2a3a; }
+.status--extra7{
+  background: rgba(226, 232, 240, 0.78);
+  border-color: rgba(100, 116, 139, 0.22);
+  color: rgba(51, 65, 85, 0.95);
+}
 
+/* Disabled */
 .status.disabled,
-.status--disabled {
-  --_bg: #D1D5DB;
-  --_bd: #BFC5CF;
-  --_fg: #6B7280;
-  opacity: 0.75;
-  filter: grayscale(0.25);
+.status--disabled,
+.status-disabled{
+  background: rgba(229, 231, 235, 0.75);
+  border-color: rgba(156, 163, 175, 0.30);
+  color: rgba(107, 114, 128, 0.95);
+  opacity: 0.85;
+  filter: grayscale(0.2);
 }
