@@ -1,55 +1,31 @@
 {% extends "core/base.html" %}
+
 {% block title %}{% if mode == "create" %}Nova Turma{% else %}Editar Turma{% endif %} • Educação • GEPUB{% endblock %}
 {% block header %}Educação{% endblock %}
 
 {% block breadcrumbs %}
-  <div class="breadcrumbs">
-    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
-    <span class="breadcrumbs__sep">/</span>
-    <a class="breadcrumbs__link" href="{% url 'educacao:index' %}">Educação</a>
-    <span class="breadcrumbs__sep">/</span>
-    <a class="breadcrumbs__link" href="{% url 'educacao:turma_list' %}">Turmas</a>
-    <span class="breadcrumbs__sep">/</span>
-    <span class="breadcrumbs__current">{% if mode == "create" %}Nova{% else %}Editar{% endif %}</span>
-  </div>
+<div class="breadcrumbs">
+  <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+  <span class="breadcrumbs__sep">/</span>
+  <a class="breadcrumbs__link" href="{% url 'educacao:index' %}">Educação</a>
+  <span class="breadcrumbs__sep">/</span>
+  <a class="breadcrumbs__link" href="{% url 'educacao:turma_list' %}">Turmas</a>
+  <span class="breadcrumbs__sep">/</span>
+  <span class="breadcrumbs__current">{% if mode == "create" %}Nova{% else %}Editar{% endif %}</span>
+</div>
 {% endblock %}
 
 {% block content %}
-<div class="card" style="max-width: 980px;">
-  <div class="card__title">{% if mode == "create" %}Nova Turma{% else %}Editar Turma{% endif %}</div>
+<div class="card">
   <div class="card__body">
-    <form method="post" style="display:grid; grid-template-columns: 1fr 220px; gap:16px; max-width:860px;">
-      {% csrf_token %}
 
-      <div style="grid-column:1 / -1;">
-        <label class="small">Unidade</label><br>
-        {{ form.unidade }}
-        {% if form.unidade.errors %}<div class="small" style="color:#ffb4b4;">{{ form.unidade.errors|striptags }}</div>{% endif %}
-      </div>
+{% if mode == "create" %}{% include "core/partials/page_head.html" with title="Nova Turma" subtitle="Preencha as informações da turma" actions=None %}{% else %}{% include "core/partials/page_head.html" with title="Editar Turma" subtitle="Atualize as informações da turma" actions=None %}{% endif %}
 
-      <div style="grid-column:1 / -1;">
-        <label class="small">Nome</label><br>
-        {{ form.nome }}
-        {% if form.nome.errors %}<div class="small" style="color:#ffb4b4;">{{ form.nome.errors|striptags }}</div>{% endif %}
-      </div>
+<form method="post">
+  {% csrf_token %}
+  {% include "core/partials/form_shell.html" with form=form %}
+</form>
 
-      <div>
-        <label class="small">Ano letivo</label><br>
-        {{ form.ano_letivo }}
-        {% if form.ano_letivo.errors %}<div class="small" style="color:#ffb4b4;">{{ form.ano_letivo.errors|striptags }}</div>{% endif %}
-      </div>
-
-      <div>
-        <label class="small">Turno</label><br>
-        {{ form.turno }}
-        {% if form.turno.errors %}<div class="small" style="color:#ffb4b4;">{{ form.turno.errors|striptags }}</div>{% endif %}
-      </div>
-
-      <div style="grid-column:1 / -1; display:flex; gap:10px; margin-top:6px;">
-        <button type="submit">Salvar</button>
-        <a class="link" href="{% url 'educacao:turma_list' %}">Cancelar</a>
-      </div>
-    </form>
   </div>
 </div>
 {% endblock %}

@@ -1,39 +1,24 @@
 {% extends "core/base.html" %}
 
 {% block title %}Dashboard • GEPUB{% endblock %}
-{% block header %}{% block dashboard_header %}Dashboard{% endblock %}{% endblock %}
+{% block header %}Dashboard{% endblock %}
 
 {% block breadcrumbs %}
   <div class="breadcrumbs">
     <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
     <span class="breadcrumbs__sep">/</span>
-    <span class="breadcrumbs__current">{% block dashboard_breadcrumb %}Dashboard{% endblock %}</span>
+    <span class="breadcrumbs__current">Dashboard</span>
   </div>
 {% endblock %}
 
 {% block content %}
+<div class="card"><div class="card__body">
+
+{% include "core/partials/page_head.html" with title=page_title subtitle=page_subtitle actions=None %}
+
 <div class="dashboard">
-
-  <!-- HEADER PERSONALIZÁVEL -->
-  <div class="dashboard-header">
-    <div class="dashboard-title">
-      {% block dashboard_title %}
-        Painel Geral
-      {% endblock %}
-    </div>
-
-    <div>
-      {% block dashboard_badge %}{% endblock %}
-    </div>
-  </div>
-
-  <!-- MÉTRICAS -->
-  {% block dashboard_metrics %}
-  {% endblock %}
-
-  <!-- SEÇÕES -->
-  {% block dashboard_sections %}
-  {% endblock %}
-
+  {% include dash_template %}
 </div>
+
+</div></div>
 {% endblock %}

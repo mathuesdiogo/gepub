@@ -1,0 +1,15 @@
+<div class="dashboard-header">
+  <div class="dashboard-title">Professor • {{ user.get_full_name }}</div>
+</div>
+
+<div class="dashboard-metrics">
+  <div class="metric-card">
+    <div class="metric-label">Minhas Turmas</div>
+    <div class="metric-value">{{ turmas_total }}</div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-label">Meus Alunos</div>
+    <div class="metric-value">{{ alunos_total }}</div>
+  </div>
+</div>

@@ -11,10 +11,38 @@
   {% endif %}
 
   {% if pills %}
-    <div class="stack">
+    {% with has_links=False %}
       {% for p in pills %}
-        <span class="pill">{{ p.label }}: <strong>{{ p.value }}</strong></span>
+        {% if p.href %}{% with has_links=True %}{% endwith %}{% endif %}
       {% endfor %}
-    </div>
+    {% endwith %}
+
+    {# ✅ Se tiver href → vira cards (dashboard blocks) #}
+    {% if pills.0.href %}
+      <div class="dashboard-metrics">
+        {% for p in pills %}
+          {% if p.href %}
+            <a class="metric-card" href="{{ p.href }}">
+              <div class="metric-label">{{ p.label }}</div>
+              <div class="metric-value">{{ p.value }}</div>
+              <div class="metric-meta">{{ p.meta|default:"Ver lista" }}</div>
+            </a>
+          {% else %}
+            <div class="metric-card" style="pointer-events:none;">
+              <div class="metric-label">{{ p.label }}</div>
+              <div class="metric-value">{{ p.value }}</div>
+              <div class="metric-meta">{{ p.meta|default:"—" }}</div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% else %}
+      {# fallback antigo: pills simples #}
+      <div class="stack">
+        {% for p in pills %}
+          <span class="pill">{{ p.label }}: <strong>{{ p.value }}</strong></span>
+        {% endfor %}
+      </div>
+    {% endif %}
   {% endif %}
 </div>

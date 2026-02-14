@@ -71,3 +71,52 @@
 
 .card .dashboard-block--neutral{ background:#F9FAFB; border-color:#E5E7EB; }
 .card .dashboard-block--neutral .dashboard-block__value{ color:#374151; }
+
+/* =========================================================
+   DASHBOARD — SEÇÕES / LISTAS / CHARTS (padronizado)
+   ========================================================= */
+
+.dash-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.dashboard-charts{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+@media (max-width: 900px){
+  .dashboard-charts{ grid-template-columns: 1fr; }
+}
+
+.chart-card{
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  padding: var(--space-4);
+}
+
+.dash-chart{
+  width:100%;
+  overflow:hidden;
+}
+
+.dashboard-list{
+  margin: 0;
+  padding-left: 18px;
+  display:grid;
+  gap: 6px;
+}
+
+.dash-table{
+  overflow:auto;
+}
+
+/* Evita “gráfico gigante” em telas grandes */
+.dashboard canvas{
+  max-height: 340px;
+}

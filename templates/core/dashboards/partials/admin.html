@@ -1,0 +1,161 @@
+<div class="dash-grid">
+
+  <div class="dash-col-12">
+    <div class="card">
+      <div class="card__title">Acessos rápidos</div>
+      <div class="card__body">
+        <div class="dash-actions">
+          <a class="btn btn-primary" href="{% url 'org:index' %}"><i class="fa-solid fa-sitemap"></i> Organização</a>
+          <a class="btn btn-primary" href="{% url 'educacao:index' %}"><i class="fa-solid fa-graduation-cap"></i> Educação</a>
+          {% if can_nee %}
+            <a class="btn btn-primary" href="{% url 'nee:index' %}"><i class="fa-solid fa-wheelchair"></i> NEE</a>
+          {% endif %}
+          {% if can_users %}
+            <a class="btn btn-primary" href="{% url 'accounts:usuarios_list' %}"><i class="fa-solid fa-users"></i> Usuários</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-col-3">
+    <a class="metric-card" href="{% url 'org:municipio_list' %}">
+      <div class="metric-label">Prefeituras</div>
+      <div class="metric-value">{{ kpis.municipios|default:"0" }}</div>
+      <div class="metric-meta">Ver lista</div>
+    </a>
+  </div>
+
+  <div class="dash-col-3">
+    <a class="metric-card" href="{% url 'accounts:usuarios_list' %}">
+      <div class="metric-label">Usuários</div>
+      <div class="metric-value">{{ kpis.usuarios|default:"0" }}</div>
+      <div class="metric-meta">Gerenciar</div>
+    </a>
+  </div>
+
+  <div class="dash-col-3">
+    <a class="metric-card" href="{% url 'org:secretaria_list' %}">
+      <div class="metric-label">Secretarias</div>
+      <div class="metric-value">{{ kpis.secretarias|default:"0" }}</div>
+      <div class="metric-meta">Ver lista</div>
+    </a>
+  </div>
+
+  <div class="dash-col-3">
+    <a class="metric-card" href="{% url 'org:unidade_list' %}">
+      <div class="metric-label">Unidades</div>
+      <div class="metric-value">{{ kpis.unidades|default:"0" }}</div>
+      <div class="metric-meta">Ver lista</div>
+    </a>
+  </div>
+
+  <div class="dash-col-6">
+    <div class="card">
+      <div class="card__title">Usuários por perfil</div>
+      <div class="card__body">
+        <div class="dash-chart">
+          <canvas id="chartRoles" height="140"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-col-6">
+    <div class="card">
+      <div class="card__title">Estrutura por Prefeitura (Top 10)</div>
+      <div class="card__body">
+        <div class="dash-chart">
+          <canvas id="chartMun" height="140"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-col-6">
+    <div class="card">
+      <div class="card__title">Top Prefeituras por Unidades</div>
+      <div class="card__body dash-table">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Município</th>
+              <th style="width:140px;">Secretarias</th>
+              <th style="width:120px;">Unidades</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in top_municipios %}
+              <tr>
+                <td>{{ row.nome }}</td>
+                <td>{{ row.secretarias }}</td>
+                <td>{{ row.unidades }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="3">Sem dados.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-col-6">
+    <div class="card">
+      <div class="card__title">Top Unidades por Turmas</div>
+      <div class="card__body dash-table">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Unidade</th>
+              <th style="width:120px;">Turmas</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in top_unidades %}
+              <tr>
+                <td>{{ u.nome }}</td>
+                <td>{{ u.turmas }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="2">Sem dados.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  function loadChart(cb){
+    if (window.Chart) return cb();
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js";
+    s.onload = cb;
+    document.head.appendChild(s);
+  }
+
+  loadChart(function(){
+    const rolesLabels = {{ chart_roles.labels|safe }};
+    const rolesValues = {{ chart_roles.values|safe }};
+
+    new Chart(document.getElementById('chartRoles'), {
+      type: 'bar',
+      data: { labels: rolesLabels, datasets: [{ data: rolesValues }] },
+      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+
+    const munLabels = {{ chart_municipios.labels|safe }};
+    const munValues = {{ chart_municipios.values|safe }};
+
+    new Chart(document.getElementById('chartMun'), {
+      type: 'doughnut',
+      data: { labels: munLabels, datasets: [{ data: munValues }] },
+      options: { responsive: true }
+    });
+  });
+})();
+</script>

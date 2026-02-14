@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% block title %}{{ secretaria.nome }} • Secretarias • Organização • GEPUB{% endblock %}
+{% block title %}{{ page_title }} • Setores • Organização • GEPUB{% endblock %}
 {% block header %}Organização{% endblock %}
 
 {% block breadcrumbs %}
@@ -8,90 +8,19 @@
     <span class="breadcrumbs__sep">/</span>
     <a class="breadcrumbs__link" href="{% url 'org:index' %}">Organização</a>
     <span class="breadcrumbs__sep">/</span>
-    <a class="breadcrumbs__link" href="{% url 'org:secretaria_list' %}">Secretarias</a>
+    <a class="breadcrumbs__link" href="{% url 'org:setor_list' %}">Setores</a>
     <span class="breadcrumbs__sep">/</span>
-    <span class="breadcrumbs__current">{{ secretaria.nome }}</span>
+    <span class="breadcrumbs__current">{{ page_title }}</span>
   </div>
 {% endblock %}
 
 {% block content %}
 <div class="card">
-  <div class="card__title" style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
-    <span>{{ secretaria.nome }}</span>
-
-    <div style="display:flex; gap:10px; align-items:center;">
-      {% if can_org_manage %}
-        <a class="btn" href="{% url 'org:secretaria_update' secretaria.pk %}">Editar</a>
-      {% endif %}
-    </div>
-  </div>
-
   <div class="card__body">
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:860px;">
-      <div>
-        <div class="small">Sigla</div>
-        <div style="font-weight:900;">{{ secretaria.sigla|default:"—" }}</div>
-      </div>
 
-      <div>
-        <div class="small">Ativo</div>
-        <div style="font-weight:900;">{% if secretaria.ativo %}Sim{% else %}Não{% endif %}</div>
-      </div>
+{% include "core/partials/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+{% include "core/partials/detail_summary.html" with fields=fields pills=pills %}
 
-      <div style="grid-column:1 / -1;">
-        <div class="small">Município</div>
-        <div style="font-weight:900;">{{ secretaria.municipio.nome|default:"—" }}</div>
-      </div>
-    </div>
-
-    <hr style="margin:14px 0;">
-
-    <div style="display:flex; gap:12px; flex-wrap:wrap;">
-      <span class="pill">Unidades: <strong style="margin-left:6px;">{{ unidades_total }}</strong></span>
-      <span class="pill">Turmas: <strong style="margin-left:6px;">{{ turmas_total }}</strong></span>
-      <span class="pill">Usuários: <strong style="margin-left:6px;">{{ usuarios_total }}</strong></span>
-    </div>
-
-    <div style="margin-top:14px;">
-      <div style="font-weight:900; margin-bottom:8px;">Unidades vinculadas</div>
-
-      <div style="overflow:auto; border:1px solid rgba(255,255,255,.08); border-radius:14px;">
-        <table style="width:100%; border-collapse:collapse; min-width:820px;">
-          <thead>
-            <tr style="text-align:left; background:rgba(255,255,255,.03);">
-              <th style="padding:10px 12px;">Unidade</th>
-              <th style="padding:10px 12px; width:140px;">Tipo</th>
-              <th style="padding:10px 12px; width:120px;">Turmas</th>
-              <th style="padding:10px 12px; width:120px;">Usuários</th>
-              <th style="padding:10px 12px; width:140px;">Professores</th>
-              <th style="padding:10px 12px; width:140px;">Auxiliares</th>
-              <th style="padding:10px 12px; width:120px;">Ativo</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for u in unidades %}
-              <tr style="border-top:1px solid rgba(255,255,255,.06);">
-                <td style="padding:10px 12px;">
-                  <a class="link" href="{% url 'org:unidade_detail' u.id %}">{{ u.nome }}</a>
-                </td>
-                <td style="padding:10px 12px;">{{ u.tipo|default:"—" }}</td>
-                <td style="padding:10px 12px;">{{ u.turmas_total }}</td>
-                <td style="padding:10px 12px;">{{ u.usuarios_total }}</td>
-                <td style="padding:10px 12px;">{{ u.professores_total }}</td>
-                <td style="padding:10px 12px;">{{ u.auxiliares_total }}</td>
-                <td style="padding:10px 12px;">{% if u.ativo %}Sim{% else %}Não{% endif %}</td>
-              </tr>
-            {% empty %}
-              <tr><td colspan="7" style="padding:12px;">Nenhuma unidade vinculada a esta secretaria.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-
-      <div style="margin-top:12px;">
-        <a class="link" href="{% url 'org:secretaria_list' %}">← Voltar para lista</a>
-      </div>
-    </div>
   </div>
 </div>
 {% endblock %}

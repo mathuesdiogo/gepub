@@ -6,79 +6,72 @@
 {% block breadcrumbs %}
 <div class="breadcrumbs">
   <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
-  <span class="breadcrumbs__sep">›</span>
-  <span>Meu perfil</span>
+  <span class="breadcrumbs__sep">/</span>
+  <span class="breadcrumbs__current">Meu perfil</span>
 </div>
 {% endblock %}
 
 {% block content %}
-<div class="card" style="max-width:900px; margin:auto;">
+<div class="card"><div class="card__body">
 
-  <div style="display:flex; gap:30px; align-items:flex-start; flex-wrap:wrap;">
+{% include "core/partials/page_head.html" with title="Meu perfil" subtitle="Gerencie suas informações pessoais" actions=None %}
 
-    <!-- FOTO -->
-    <div style="flex:0 0 220px; text-align:center;">
-      {% if p.foto %}
-        <img src="{{ p.foto.url }}" 
-             style="width:200px; height:200px; object-fit:cover; border-radius:16px; border:1px solid rgba(0,0,0,.1);" />
-      {% else %}
-        <div style="width:200px; height:200px; border-radius:16px; background:rgba(0,0,0,.05);
-                    display:flex; align-items:center; justify-content:center; font-size:14px;">
-          Sem foto
-        </div>
-      {% endif %}
-    </div>
+<div class="profile-grid">
 
-    <!-- FORM -->
-    <form method="post" enctype="multipart/form-data"
-          style="flex:1; display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
-      {% csrf_token %}
-
-      <div>
-        <label class="small">Nome (bloqueado)</label><br>
-        <input value="{{ request.user.first_name }}" readonly
-               style="opacity:.8; background:rgba(0,0,0,.04);" />
-      </div>
-
-      <div>
-        <label class="small">Sobrenome (bloqueado)</label><br>
-        <input value="{{ request.user.last_name }}" readonly
-               style="opacity:.8; background:rgba(0,0,0,.04);" />
-      </div>
-
-      <div style="grid-column:1 / -1;">
-        <label class="small">CPF (bloqueado)</label><br>
-        <input value="{{ p.cpf|default:'' }}" readonly
-               style="opacity:.8; background:rgba(0,0,0,.04);" />
-      </div>
-
-      <div style="grid-column:1 / -1;">
-        <label class="small">E-mail</label><br>
-        <input name="email" value="{{ request.user.email|default:'' }}" />
-      </div>
-
-      <div style="grid-column:1 / -1;">
-        <label class="small">Telefone</label><br>
-        <input name="telefone" value="{{ p.telefone|default:'' }}" />
-      </div>
-
-      <div style="grid-column:1 / -1;">
-        <label class="small">Endereço</label><br>
-        <textarea name="endereco" rows="3" style="width:100%;">{{ p.endereco|default:'' }}</textarea>
-      </div>
-
-      <div style="grid-column:1 / -1;">
-        <label class="small">Foto de perfil</label><br>
-        <input type="file" name="foto" accept="image/*">
-      </div>
-
-      <div style="grid-column:1 / -1; display:flex; gap:12px; margin-top:10px;">
-        <button class="btn btn-primary" type="submit">Salvar</button>
-        <a class="link" href="{% url 'accounts:alterar_senha' %}">Alterar senha</a>
-      </div>
-
-    </form>
+  <div class="profile-photo">
+    {% if p.foto %}
+      <img src="{{ p.foto.url }}" class="profile-photo__img">
+    {% else %}
+      <div class="profile-photo__placeholder">Sem foto</div>
+    {% endif %}
   </div>
 
+  <form method="post" enctype="multipart/form-data" class="profile-form">
+    {% csrf_token %}
+
+    <div class="form-field">
+      <label class="small">Nome</label>
+      <input value="{{ request.user.first_name }}" readonly>
+    </div>
+
+    <div class="form-field">
+      <label class="small">Sobrenome</label>
+      <input value="{{ request.user.last_name }}" readonly>
+    </div>
+
+    <div class="form-field full">
+      <label class="small">CPF</label>
+      <input value="{{ p.cpf|default:'' }}" readonly>
+    </div>
+
+    <div class="form-field full">
+      <label class="small">E-mail</label>
+      <input name="email" value="{{ request.user.email|default:'' }}">
+    </div>
+
+    <div class="form-field full">
+      <label class="small">Telefone</label>
+      <input name="telefone" value="{{ p.telefone|default:'' }}">
+    </div>
+
+    <div class="form-field full">
+      <label class="small">Endereço</label>
+      <textarea name="endereco" rows="3">{{ p.endereco|default:'' }}</textarea>
+    </div>
+
+    <div class="form-field full">
+      <label class="small">Foto de perfil</label>
+      <input type="file" name="foto" accept="image/*">
+    </div>
+
+    <div class="form-actions full">
+      <button class="btn btn-primary" type="submit">Salvar</button>
+      <a class="btn btn--ghost" href="{% url 'accounts:alterar_senha' %}">Alterar senha</a>
+    </div>
+
+  </form>
+
 </div>
+
+</div></div>
 {% endblock %}

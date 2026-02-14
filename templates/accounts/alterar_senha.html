@@ -4,47 +4,32 @@
 {% block header %}Conta{% endblock %}
 
 {% block breadcrumbs %}
-  <div class="breadcrumbs">
-    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
-    <span>›</span>
-    <a class="breadcrumbs__link" href="{% url 'accounts:meu_perfil' %}">Meu perfil</a>
-    <span>›</span>
-    <span>Alterar senha</span>
-  </div>
+<div class="breadcrumbs">
+  <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+  <span class="breadcrumbs__sep">/</span>
+  <a class="breadcrumbs__link" href="{% url 'accounts:meu_perfil' %}">Meu perfil</a>
+  <span class="breadcrumbs__sep">/</span>
+  <span class="breadcrumbs__current">Alterar senha</span>
+</div>
 {% endblock %}
 
 {% block content %}
-  <div class="card" style="max-width:560px;">
-    <div class="card__header">
-      <div style="font-weight:800; font-size:18px;">Alterar senha</div>
-      <div class="small" style="opacity:.85;">Digite uma nova senha (você será obrigado a trocar no primeiro acesso).</div>
-    </div>
+<div class="card"><div class="card__body">
 
-    <div class="card__body">
-      {% if error %}
-        <div class="small" style="color:#ffb4b4; margin-bottom:10px;">{{ error }}</div>
-      {% endif %}
+{% include "core/partials/page_head.html" with title="Alterar senha" subtitle="Defina uma nova senha para sua conta" actions=None %}
 
-      <form method="post" style="display:grid; gap:12px;">
-        {% csrf_token %}
+{% if error %}
+  <div class="alert alert--error">{{ error }}</div>
+{% endif %}
 
-        <div>
-          <label class="small">Nova senha</label><br>
-          {{ form.password1 }}
-          {% if form.password1.errors %}<div class="small" style="color:#ffb4b4;">{{ form.password1.errors|striptags }}</div>{% endif %}
-        </div>
+<form method="post" class="form-vertical">
+  {% csrf_token %}
 
-        <div>
-          <label class="small">Confirmar nova senha</label><br>
-          {{ form.password2 }}
-          {% if form.password2.errors %}<div class="small" style="color:#ffb4b4;">{{ form.password2.errors|striptags }}</div>{% endif %}
-        </div>
+  {% include "core/partials/form_shell.html" with form=form %}
 
-        <div style="display:flex; gap:10px; margin-top:6px;">
-          <button type="submit" class="btn btn--primary">Salvar</button>
-          <a class="btn btn--ghost" href="{% url 'core:dashboard' %}">Cancelar</a>
-        </div>
-      </form>
-    </div>
-  </div>
+
+
+</form>
+
+</div></div>
 {% endblock %}
