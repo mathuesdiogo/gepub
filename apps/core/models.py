@@ -4,7 +4,7 @@ from __future__ import annotations
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
-
+import uuid
 
 class AlunoAviso(models.Model):
     """
@@ -69,3 +69,27 @@ class AlunoArquivo(models.Model):
 
     def __str__(self) -> str:
         return self.titulo
+class DocumentoEmitido(models.Model):
+    """
+    Registro de documentos emitidos pelo sistema (validação pública).
+    """
+
+    codigo = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    tipo = models.CharField(max_length=120)
+    titulo = models.CharField(max_length=255)
+    gerado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="documentos_emitidos",
+    )
+    gerado_em = models.DateTimeField(default=timezone.now)
+    origem_url = models.TextField(blank=True)
+    ativo = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["-gerado_em"]
+
+    def __str__(self):
+        return f"{self.tipo} — {self.codigo}"

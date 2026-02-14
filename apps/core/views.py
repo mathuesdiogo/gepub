@@ -13,7 +13,8 @@ from educacao.models import Matricula
 from .forms import AlunoAvisoForm, AlunoArquivoForm
 from .models import AlunoAviso, AlunoArquivo
 from educacao.models import Matricula
-
+from .models import DocumentoEmitido
+from django.shortcuts import get_object_or_404
 from core.rbac import (
     get_profile,
     is_admin,
@@ -365,3 +366,11 @@ def change_theme(request, theme: str):
         request.session["theme"] = theme
         request.session.modified = True
     return redirect(request.META.get("HTTP_REFERER", "core:dashboard"))
+
+
+def validar_documento(request, codigo):
+    documento = get_object_or_404(DocumentoEmitido, codigo=codigo)
+
+    return render(request, "core/validar_documento.html", {
+        "documento": documento,
+    })

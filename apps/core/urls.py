@@ -9,4 +9,5 @@ urlpatterns = [
     path("avisos/novo/", views.aviso_create, name="aviso_create"),
     path("arquivos/novo/", views.arquivo_create, name="arquivo_create"),
     path("tema/<str:theme>/", views.change_theme, name="change_theme"),
+    path("validar/<uuid:codigo>/", views.validar_documento, name="validar_documento"),
 ]
