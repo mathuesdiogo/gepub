@@ -1,40 +1,109 @@
-/* =========================================================
-   GEPUB — BADGES / PILLS
-   ========================================================= */
+/* static/css/components/badges.css */
 
-.badge{
+/* ===== Status / Situações (pílulas) =====
+   Suporta:
+   - .status + variações .info .alert .success .error .default .final .extra1..extra7 .disabled
+   - compat: .status--info etc.
+*/
+
+.status {
+  --_bg: #E5E7EB;
+  --_bd: #D1D5DB;
+  --_fg: #111827;
+
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--color-border-light);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-  background: var(--color-neutral-50);
+  gap: 8px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--_bd);
+  background: var(--_bg);
+  color: var(--_fg);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  box-shadow: inset 0 -1px 0 rgba(15, 23, 42, 0.05);
 }
 
-.badge--primary{
-  background: var(--color-primary-50);
-  border-color: var(--color-primary-200);
-  color: var(--color-primary-700);
+/* ícone opcional dentro (se usar <i>) */
+.status i {
+  font-size: 12px;
+  opacity: 0.9;
 }
 
-.badge--success{
-  background: rgba(22,163,74,.10);
-  border-color: rgba(22,163,74,.25);
-  color: var(--color-success-500);
+.status.info,
+.status--info {
+  --_bg: #D6EEFF;
+  --_bd: #B9DBF6;
+  --_fg: #0b2a44;
 }
 
-.badge--warning{
-  background: rgba(245,158,11,.12);
-  border-color: rgba(245,158,11,.25);
-  color: #9A5A00;
+.status.alert,
+.status.warning,
+.status--alert,
+.status--warning {
+  --_bg: #FFF4C2;
+  --_bd: #F0DE93;
+  --_fg: #3b2f00;
 }
 
-.badge--danger{
-  background: rgba(220,38,38,.10);
-  border-color: rgba(220,38,38,.25);
-  color: var(--color-danger-500);
+.status.success,
+.status--success {
+  --_bg: #DDF6E5;
+  --_bd: #B9E1C3;
+  --_fg: #0f3a1c;
+}
+
+.status.error,
+.status.danger,
+.status--error,
+.status--danger {
+  --_bg: #F9D2D2;
+  --_bd: #F0B6B6;
+  --_fg: #4a1111;
+}
+
+.status.default,
+.status--default {
+  --_bg: #E5E7EB;
+  --_bd: #D1D5DB;
+  --_fg: #111827;
+}
+
+.status.final,
+.status--final {
+  --_bg: #404040;
+  --_bd: #2f2f2f;
+  --_fg: #ffffff;
+}
+
+/* Extras (cores suaves, como no exemplo) */
+.status.extra1,
+.status--extra1 { --_bg:#F8E7D0; --_bd:#EED6B4; --_fg:#4b2f12; }
+
+.status.extra2,
+.status--extra2 { --_bg:#E6E0FF; --_bd:#CFC5FF; --_fg:#2b1f4d; }
+
+.status.extra3,
+.status--extra3 { --_bg:#EAF5D5; --_bd:#D1E8A8; --_fg:#233b11; }
+
+.status.extra4,
+.status--extra4 { --_bg:#F6D6EA; --_bd:#EAB5D8; --_fg:#4a1330; }
+
+.status.extra5,
+.status--extra5 { --_bg:#D7F2F6; --_bd:#B6E3EC; --_fg:#0f3a42; }
+
+.status.extra6,
+.status--extra6 { --_bg:#E9E1D8; --_bd:#D6C7B8; --_fg:#2f1f15; }
+
+.status.extra7,
+.status--extra7 { --_bg:#DEE2EA; --_bd:#C7CFDC; --_fg:#1f2a3a; }
+
+.status.disabled,
+.status--disabled {
+  --_bg: #D1D5DB;
+  --_bd: #BFC5CF;
+  --_fg: #6B7280;
+  opacity: 0.75;
+  filter: grayscale(0.25);
 }

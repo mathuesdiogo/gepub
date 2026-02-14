@@ -1,158 +1,203 @@
-/* =========================================================
-   GEPUB — ALERTS / FEEDBACK
-   Compatível com Django messages (geralmente .messages li)
-   ========================================================= */
+/* static/css/components/alerts.css */
 
-.alert{
-  display: flex;
-  gap: var(--space-3);
-  align-items: flex-start;
-  padding: var(--space-4) var(--space-5);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border-light);
-  background: #fff;
-  box-shadow: var(--shadow-xs);
-}
-
-.alert__title{
-  margin: 0;
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-}
-
-.alert__text{
-  margin: 2px 0 0;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-}
-
-/* Variantes */
-.alert--success{
-  border-color: rgba(22,163,74,.25);
-  background: rgba(22,163,74,.08);
-}
-
-.alert--warning{
-  border-color: rgba(245,158,11,.28);
-  background: rgba(245,158,11,.10);
-}
-
-.alert--danger{
-  border-color: rgba(220,38,38,.25);
-  background: rgba(220,38,38,.08);
-}
-
-.alert--info{
-  border-color: rgba(2,132,199,.25);
-  background: rgba(2,132,199,.08);
-}
-
-/* Django messages (sem mexer no HTML) */
-.messages{
-  list-style: none;
-  margin: 0 0 var(--space-6);
-  padding: 0;
-  display: grid;
-  gap: var(--space-3);
-}
-
-.messages li{
-  padding: var(--space-4) var(--space-5);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border-light);
-  background: #fff;
-  box-shadow: var(--shadow-xs);
-  color: var(--color-text-secondary);
-}
-
-.messages li.success{
-  border-color: rgba(22,163,74,.25);
-  background: rgba(22,163,74,.08);
-}
-
-.messages li.warning{
-  border-color: rgba(245,158,11,.28);
-  background: rgba(245,158,11,.10);
-}
-
-.messages li.error{
-  border-color: rgba(220,38,38,.25);
-  background: rgba(220,38,38,.08);
-}
-
-.messages li.info{
-  border-color: rgba(2,132,199,.25);
-  background: rgba(2,132,199,.08);
-}
-/* animação entrada */
-.alert,
-.flash{
-  animation: alertFadeIn .25s ease-out;
-}
-
-@keyframes alertFadeIn{
-  from{
-    opacity:0;
-    transform: translateY(-6px);
-  }
-  to{
-    opacity:1;
-    transform: translateY(0);
-  }
-}
-
-/* animação saída (se usar JS para fechar) */
-.alert.is-hiding,
-.flash.is-hiding{
-  animation: alertFadeOut .2s ease-in forwards;
-}
-
-@keyframes alertFadeOut{
-  to{
-    opacity:0;
-    transform: translateY(-4px);
-  }
-}
-/* ============================
-   ALERT ANIMATION
-============================ */
+/* ===== Alerts (estilo SUAP inspirado) =====
+   Suporta:
+   - .alert (base)
+   - .alert.warning | .alert.danger | .alert.info | .alert.light
+   - .alert--warning | .alert--danger | .alert--info | .alert--light (compat)
+*/
 
 .alert {
+  --_bg: #EEF2F7;
+  --_bd: #D7DEE8;
+  --_fg: #1f2937;
+  --_ico: #64748b;
+
   position: relative;
-  padding: 14px 16px;
+  display: block;
+  padding: 12px 14px 12px 46px;
+  border: 1px solid var(--_bd);
+  background: var(--_bg);
+  color: var(--_fg);
   border-radius: 12px;
-  margin-bottom: 12px;
-  font-weight: 500;
-  animation: alertSlide 0.35s ease forwards;
-  opacity: 0;
-  transform: translateY(-6px);
+  line-height: 1.35;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.03);
 }
 
-@keyframes alertSlide {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
+.alert + .alert {
+  margin-top: 10px;
 }
 
-@keyframes alertFadeOut {
-  to {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
+.alert > :first-child {
+  margin-top: 0;
+}
+.alert > :last-child {
+  margin-bottom: 0;
 }
 
-.alert__close {
+.alert strong {
+  font-weight: 700;
+}
+
+/* Conteúdo complexo (listas dentro do alerta) */
+.alert ul,
+.alert ol {
+  margin: 8px 0 0 18px;
+  padding: 0;
+}
+.alert li {
+  margin: 4px 0;
+}
+
+/* Ícone (círculo à esquerda) */
+.alert::before {
+  content: "i";
   position: absolute;
-  right: 10px;
-  top: 8px;
-  background: transparent;
-  border: 0;
-  cursor: pointer;
-  opacity: .6;
+  left: 14px;
+  top: 12px;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 12px;
+  color: #fff;
+  background: var(--_ico);
 }
 
-.alert__close:hover {
-  opacity: 1;
+/* ===== Variantes ===== */
+.alert.warning,
+.alert--warning {
+  --_bg: #FFF7CC;
+  --_bd: #F3E39A;
+  --_fg: #3b2f00;
+  --_ico: #C59B00;
+}
+.alert.warning::before,
+.alert--warning::before {
+  content: "!";
+}
+
+.alert.danger,
+.alert--danger,
+.alert.error,
+.alert--error {
+  --_bg: #F9D2D2;
+  --_bd: #F0B6B6;
+  --_fg: #4a1111;
+  --_ico: #C03535;
+}
+.alert.danger::before,
+.alert--danger::before,
+.alert.error::before,
+.alert--error::before {
+  content: "!";
+}
+
+.alert.info,
+.alert--info {
+  --_bg: #CFEAFF;
+  --_bd: #B8DAF7;
+  --_fg: #0b2a44;
+  --_ico: #2F7DB8;
+}
+.alert.info::before,
+.alert--info::before {
+  content: "i";
+}
+
+.alert.light,
+.alert--light {
+  --_bg: #E5E7EB;
+  --_bd: #D1D5DB;
+  --_fg: #111827;
+  --_ico: #6B7280;
+}
+.alert.light::before,
+.alert--light::before {
+  content: "?";
+}
+
+/* ===== Mensagens do Django (ul.messages / .messages) ===== */
+.messages {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 14px 0;
+}
+
+.messages li {
+  margin: 0 0 10px 0;
+}
+
+/* Se teu template renderiza mensagens como <li class="success">...</li> */
+.messages li {
+  /* herda estilo de .alert sem precisar mudar HTML */
+  position: relative;
+  display: block;
+  padding: 12px 14px 12px 46px;
+  border: 1px solid #D7DEE8;
+  background: #EEF2F7;
+  color: #1f2937;
+  border-radius: 12px;
+  line-height: 1.35;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.03);
+}
+
+.messages li::before {
+  content: "i";
+  position: absolute;
+  left: 14px;
+  top: 12px;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 12px;
+  color: #fff;
+  background: #64748b;
+}
+
+.messages li.success {
+  border-color: #B9E1C3;
+  background: #DDF6E5;
+  color: #0f3a1c;
+}
+.messages li.success::before {
+  content: "✓";
+  background: #2E9B4D;
+}
+
+.messages li.warning {
+  border-color: #F3E39A;
+  background: #FFF7CC;
+  color: #3b2f00;
+}
+.messages li.warning::before {
+  content: "!";
+  background: #C59B00;
+}
+
+.messages li.error,
+.messages li.danger {
+  border-color: #F0B6B6;
+  background: #F9D2D2;
+  color: #4a1111;
+}
+.messages li.error::before,
+.messages li.danger::before {
+  content: "!";
+  background: #C03535;
+}
+
+.messages li.info {
+  border-color: #B8DAF7;
+  background: #CFEAFF;
+  color: #0b2a44;
+}
+.messages li.info::before {
+  content: "i";
+  background: #2F7DB8;
 }
