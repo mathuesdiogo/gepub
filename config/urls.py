@@ -6,13 +6,14 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("accounts/", include("accounts.urls", namespace="accounts")),
-    path("org/", include("org.urls", namespace="org")),
-    path("educacao/", include("educacao.urls", namespace="educacao")),
-    path("nee/", include("nee.urls", namespace="nee")),
 
-    # ✅ raiz do sistema (dashboard /)
-    path("", include("core.urls", namespace="core")),
+    path("accounts/", include(("apps.accounts.urls", "accounts"), namespace="accounts")),
+    path("org/", include(("apps.org.urls", "org"), namespace="org")),
+    path("educacao/", include(("apps.educacao.urls", "educacao"), namespace="educacao")),
+    path("nee/", include(("apps.nee.urls", "nee"), namespace="nee")),
+
+    # raiz
+    path("", include(("apps.core.urls", "core"), namespace="core")),
 ]
 
 if settings.DEBUG:

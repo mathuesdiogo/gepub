@@ -19,13 +19,18 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 
     # Apps do GEPUB
-    "core",
-    "accounts",
-    "pessoas",
-    "org",
-    "educacao",
-    "nee",
+    "apps.core",
+    "apps.accounts",
+    "apps.pessoas",
+    "apps.org",
+    "apps.educacao",
+    "apps.nee",
 ]
+
+
+
+
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -34,12 +39,11 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
 
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    
+    "apps.accounts.middleware.ForcePasswordChangeMiddleware",
+    "apps.core.middleware.RBACMiddleware",
 
-    # ✅ força trocar senha antes de aplicar RBAC
-    "accounts.middleware.ForcePasswordChangeMiddleware",
 
-    # ✅ RBAC do sistema
-    "core.middleware.RBACMiddleware",
 
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -59,7 +63,8 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "core.context_processors.permissions",
+                "apps.core.context_processors.permissions",
+
             ],
         },
     },
