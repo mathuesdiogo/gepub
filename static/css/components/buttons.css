@@ -1,83 +1,241 @@
+/* =========================================================
+   Buttons • GEPUB (visual SUAP-like)
+   - mantém classes do projeto (.btn, .btn-primary, .btn--ghost...)
+   - adiciona aliases estilo SUAP (.btn.success, .btn_success etc.)
+   ========================================================= */
+
+:root{
+  /* shape */
+  --btn-radius: 999px;      /* pill */
+  --btn-h: 34px;
+  --btn-h-lg: 40px;
+  --btn-pad-x: 14px;
+  --btn-gap: 8px;
+
+  /* typography */
+  --btn-fw: 800;
+  --btn-fs: 13px;
+
+  /* base */
+  --btn-border: rgba(0,0,0,.08);
+  --btn-shadow: 0 1px 0 rgba(0,0,0,.08), 0 6px 18px rgba(0,0,0,.06);
+  --btn-shadow-hover: 0 1px 0 rgba(0,0,0,.08), 0 10px 24px rgba(0,0,0,.10);
+
+  /* focus */
+  --btn-focus: rgba(37, 99, 235, .25);
+
+  /* palette (ajusta se quiser puxar mais pro azul do GEPUB) */
+  --c-primary: #0d6efd;   /* edição */
+  --c-success: #16a34a;   /* confirmação */
+  --c-warning: #b59b00;   /* atenção */
+  --c-danger:  #dc2626;   /* remoção */
+  --c-default: #cfcfcf;   /* informações */
+  --c-action:  #4b5563;   /* ações secundárias */
+
+  --c-text-dark: rgba(17,24,39,.92);
+  --c-text-light: rgba(255,255,255,.96);
+}
+
 /* Base */
-.btn{
-  display:inline-flex;
-  align-items:center;
-  gap: var(--space-2);
-  padding: 8px 14px;
-  border-radius: var(--radius-md);
-  border:1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-  font-weight: var(--font-weight-medium);
-  cursor:pointer;
-  transition: all .12s ease;
+.btn,
+a.btn,
+button.btn{
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--btn-gap);
+
+  height: var(--btn-h);
+  padding: 0 var(--btn-pad-x);
+
+  border-radius: var(--btn-radius);
+  border: 1px solid var(--btn-border);
+
+  font-size: var(--btn-fs);
+  font-weight: var(--btn-fw);
+  letter-spacing: .2px;
+
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+
+  transition: transform .08s ease, box-shadow .15s ease, filter .15s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
+  box-shadow: var(--btn-shadow);
 }
 
+/* ícone FA dentro */
+.btn i{
+  font-size: .95em;
+  opacity: .95;
+}
+
+/* hover / active */
 .btn:hover{
-  background: var(--surface-2);
+  box-shadow: var(--btn-shadow-hover);
+  filter: brightness(1.02);
+}
+.btn:active{
+  transform: translateY(1px);
+  box-shadow: var(--btn-shadow);
 }
 
-/* Primary (ação principal) */
-.btn-primary{
-  background: var(--primary);
-  border-color: var(--primary);
-  color:#fff;
-}
-.btn-primary:hover{
-  background: color-mix(in srgb, var(--primary) 85%, black);
+/* focus acessível */
+.btn:focus,
+.btn:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 4px var(--btn-focus), var(--btn-shadow-hover);
 }
 
-/* Success (confirmação) */
+/* tamanhos (se você já usa) */
+.btn--sm,
+.btn-sm{
+  height: 30px;
+  padding: 0 12px;
+  font-size: 12.5px;
+}
+.btn--lg,
+.btn-lg{
+  height: var(--btn-h-lg);
+  padding: 0 16px;
+  font-size: 14px;
+}
+
+/* disabled */
+.btn[disabled],
+.btn.disabled,
+.btn--disabled,
+a.btn[aria-disabled="true"]{
+  opacity: .55;
+  cursor: not-allowed;
+  pointer-events: none;
+  box-shadow: none;
+}
+
+/* =========================================================
+   VARIANTES (GEPUB)
+   ========================================================= */
+
+/* primary (editar/ação principal) */
+.btn-primary,
+.btn--primary{
+  background: linear-gradient(180deg, rgba(13,110,253,1), rgba(10,88,202,1));
+  border-color: rgba(13,110,253,.35);
+  color: var(--c-text-light);
+}
+.btn-primary:hover,
+.btn--primary:hover{ filter: brightness(1.03); }
+
+/* success (confirmar/salvar quando for “confirmar”) */
+.btn--success,
 .btn-success{
-  background: var(--success);
-  border-color: var(--success);
-  color:#fff;
+  background: linear-gradient(180deg, rgba(22,163,74,1), rgba(18,131,60,1));
+  border-color: rgba(22,163,74,.35);
+  color: var(--c-text-light);
 }
 
-/* Danger (remoção) */
+/* warning (atenção) */
+.btn--warning,
+.btn-warning{
+  background: linear-gradient(180deg, rgba(181,155,0,1), rgba(147,126,0,1));
+  border-color: rgba(181,155,0,.35);
+  color: var(--c-text-light);
+}
+
+/* danger (remover) */
+.btn--danger,
 .btn-danger{
-  background: var(--danger);
-  border-color: var(--danger);
-  color:#fff;
+  background: linear-gradient(180deg, rgba(220,38,38,1), rgba(185,28,28,1));
+  border-color: rgba(220,38,38,.35);
+  color: var(--c-text-light);
 }
 
-/* Ghost */
-.btn--ghost{
+/* default/info (cinza claro) */
+.btn--default,
+.btn-default{
+  background: linear-gradient(180deg, rgba(235,235,235,1), rgba(215,215,215,1));
+  border-color: rgba(0,0,0,.08);
+  color: var(--c-text-dark);
+}
+
+/* action/secondary (cinza escuro) */
+.btn--secondary,
+.btn-secondary{
+  background: linear-gradient(180deg, rgba(75,85,99,1), rgba(55,65,81,1));
+  border-color: rgba(75,85,99,.35);
+  color: var(--c-text-light);
+}
+
+/* ghost (ex: “Voltar”, “Ver todas”, “Abrir” se você quiser como botão leve) */
+.btn--ghost,
+.btn-ghost{
+  background: transparent;
+  border-color: rgba(15,23,42,.18);
+  color: rgba(15,23,42,.82);
+  box-shadow: none;
+}
+.btn--ghost:hover,
+.btn-ghost:hover{
+  background: rgba(2,6,23,.06);
+  box-shadow: none;
+}
+
+/* link-like */
+.btn--link,
+.btn-link{
   background: transparent;
   border-color: transparent;
+  box-shadow: none;
+  padding: 0 8px;
+  height: auto;
+  color: rgba(13,110,253,.95);
 }
-.btn--ghost:hover{
-  background: var(--surface-2);
-  border-color: var(--border);
-}
-/* ======================================================
-   EXTENSÕES FINAIS — GEPUB BUTTONS
-   ====================================================== */
-
-/* SUCCESS */
-.btn--success{
-  background:#16a34a;
-  border-color:#16a34a;
-  color:#fff;
-}
-.btn--success:hover{
-  background:#15803d;
+.btn--link:hover,
+.btn-link:hover{
+  text-decoration: underline;
 }
 
-/* DANGER */
-.btn--danger{
-  background:#dc2626;
-  border-color:#dc2626;
-  color:#fff;
-}
-.btn--danger:hover{
-  background:#b91c1c;
+/* =========================================================
+   ALIASES (SUAP da referência)
+   - .btn.success / .btn.primary / .btn.default etc.
+   - .btn_success / .btn_primary / ...
+   ========================================================= */
+
+.btn.success, .btn_success{ background: linear-gradient(180deg, var(--c-success), rgba(18,131,60,1)); border-color: rgba(22,163,74,.35); color: var(--c-text-light); }
+.btn.primary, .btn_primary{ background: linear-gradient(180deg, var(--c-primary), rgba(10,88,202,1)); border-color: rgba(13,110,253,.35); color: var(--c-text-light); }
+.btn.warning, .btn_warning{ background: linear-gradient(180deg, var(--c-warning), rgba(147,126,0,1)); border-color: rgba(181,155,0,.35); color: var(--c-text-light); }
+.btn.danger,  .btn_danger{  background: linear-gradient(180deg, var(--c-danger), rgba(185,28,28,1)); border-color: rgba(220,38,38,.35); color: var(--c-text-light); }
+.btn.default, .btn_default{ background: linear-gradient(180deg, rgba(235,235,235,1), rgba(215,215,215,1)); border-color: rgba(0,0,0,.08); color: var(--c-text-dark); }
+.btn.action,  .btn_action{  background: linear-gradient(180deg, var(--c-action), rgba(55,65,81,1)); border-color: rgba(75,85,99,.35); color: var(--c-text-light); }
+
+/* comportamento SUAP “disabled” */
+.btn.disabled, .btn_disabled{
+  opacity: .55;
+  pointer-events: none;
+  box-shadow: none;
 }
 
-/* ACTION ICON BUTTON */
-.btn--icon{
-  width:34px;
-  height:34px;
-  padding:0;
-  border-radius:10px;
+/* (opcional) “disable_on_click” estilo SUAP */
+.btn.disable_on_click,
+.btn_disable_on_click{
+  position: relative;
+}
+.btn.disable_on_click.is-loading,
+.btn_disable_on_click.is-loading{
+  opacity: .75;
+  pointer-events: none;
+}
+
+/* =========================================================
+   Tema escuro (se seu layout alterna)
+   Mantém botões legíveis no dark
+   ========================================================= */
+body[data-theme*="dark"] .btn--ghost,
+body[data-theme*="midnight"] .btn--ghost{
+  border-color: rgba(255,255,255,.18);
+  color: rgba(255,255,255,.92);
+}
+body[data-theme*="dark"] .btn--ghost:hover,
+body[data-theme*="midnight"] .btn--ghost:hover{
+  background: rgba(255,255,255,.08);
 }
