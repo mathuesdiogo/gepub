@@ -273,7 +273,6 @@ def secretaria_list(request):
     q = (request.GET.get("q") or "").strip()
     municipio_id = (request.GET.get("municipio") or "").strip()
 
-    # mantém seu padrão de escopo por município via profile
     p = get_profile(request.user)
     if not is_admin(request.user) and p and getattr(p, "municipio_id", None):
         municipio_id = str(p.municipio_id)
@@ -290,103 +289,51 @@ def secretaria_list(request):
             | Q(municipio__nome__icontains=q)
         )
 
-    # municípios para o select (também com escopo)
-    municipios = scope_filter_municipios(
-        request.user,
-        Municipio.objects.filter(ativo=True).order_by("nome"),
-    )
-
-    # export (mantém seu jeito)
-    from apps.core.exports import export_csv, export_pdf_table
-    export = (request.GET.get("export") or "").strip().lower()
-
-    if export in ("csv", "pdf"):
-        items = list(qs.order_by("nome").values_list("nome", "sigla", "municipio__nome"))
-        headers_export = ["Nome", "Sigla", "Município"]
-        rows_export = [[nome or "", sigla or "", municipio or ""] for (nome, sigla, municipio) in items]
-
-        if export == "csv":
-            return export_csv("secretarias.csv", headers_export, rows_export)
-
-        filtros = f"Município={municipio_id or '-'} | Busca={q or '-'}"
-        return export_pdf_table(
-            request,
-            filename="secretarias.pdf",
-            title="Relatório — Secretarias",
-            headers=headers_export,
-            rows=rows_export,
-            filtros=filtros,
-        )
-
     paginator = Paginator(qs.order_by("nome"), 10)
     page_obj = paginator.get_page(request.GET.get("page"))
 
-    # actions do header (PageHead)
-    qs_query = []
-    if q:
-        qs_query.append(f"q={q}")
-    if municipio_id:
-        qs_query.append(f"municipio={municipio_id}")
-    base_query = "&".join(qs_query)
-
-    def qjoin(extra: str) -> str:
-        return f"?{base_query + ('&' if base_query else '')}{extra}"
-
-    actions = [
-        {"label": "Exportar CSV", "url": qjoin("export=csv"), "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
-        {"label": "Exportar PDF", "url": qjoin("export=pdf"), "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
-    ]
-
-    # se você tiver permissão/botão de criar, deixe; senão pode remover esse bloco
+    actions = []
     if is_admin(request.user):
-        actions.append(
-            {"label": "Nova Secretaria", "url": reverse("org:secretaria_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"}
-        )
+        actions.append({
+            "label": "Nova Secretaria",
+            "url": reverse("org:secretaria_create"),
+            "icon": "fa-solid fa-plus",
+            "variant": "btn-primary",
+        })
 
-    # tabela (TableShell)
     headers = [
         {"label": "Nome"},
-        {"label": "Sigla", "width": "140px"},
+        {"label": "Sigla", "width": "120px"},
         {"label": "Município"},
         {"label": "Ativo", "width": "90px"},
     ]
 
     rows = []
+    can_edit = bool(is_admin(request.user))
+
     for s in page_obj:
+        ativo_html = (
+            f'<span class="status {"success" if getattr(s, "ativo", False) else "danger"}">'
+            f'{"Sim" if getattr(s, "ativo", False) else "Não"}'
+            f"</span>"
+        )
+
         rows.append({
             "cells": [
                 {"text": s.nome, "url": reverse("org:secretaria_detail", args=[s.pk])},
                 {"text": s.sigla or "—", "url": ""},
                 {"text": getattr(s.municipio, "nome", "—") or "—", "url": ""},
-                {"text": "Sim" if getattr(s, "ativo", False) else "Não", "url": ""},
+                {"html": ativo_html, "safe": True},
             ],
-            "can_edit": bool(is_admin(request.user)),
-            "edit_url": reverse("org:secretaria_update", args=[s.pk]) if is_admin(request.user) else "",
+            "can_edit": can_edit,
+            "edit_url": reverse("org:secretaria_update", args=[s.pk]) if can_edit else "",
         })
 
-    # filtro extra (select município) via partial
-    # opções do select (sempre value/label)
-    options_municipios = [
-        {"value": str(m.id), "label": f"{m.nome} / {m.uf}"}
-        for m in municipios
+    breadcrumbs = [
+        {"label": "Início", "url": reverse("core:dashboard")},
+        {"label": "Organização", "url": reverse("org:index")},
+        {"label": "Secretarias", "url": None},
     ]
-
-    extra_filters = render_to_string(
-        "core/partials/filter_select.html",
-        {
-            "name": "municipio",
-            "label": "Município",
-            "value": municipio_id,
-            "empty_label": "Todos",
-            "options": options_municipios,
-        },
-        request=request,
-    )
-
-
-    # autocomplete
-    autocomplete_url = reverse("org:secretaria_autocomplete")
-    autocomplete_href = reverse("org:secretaria_list") + "?q={q}"
 
     return render(request, "org/secretaria_list.html", {
         "q": q,
@@ -398,10 +345,11 @@ def secretaria_list(request):
         "action_url": reverse("org:secretaria_list"),
         "clear_url": reverse("org:secretaria_list"),
         "has_filters": bool(q or municipio_id),
-        "extra_filters": extra_filters,
-        "autocomplete_url": autocomplete_url,
-        "autocomplete_href": autocomplete_href,
-    })
+        "autocomplete_url": reverse("org:secretaria_autocomplete"),
+        "autocomplete_href": reverse("org:secretaria_list") + "?q={q}",
+        "breadcrumbs": breadcrumbs,
+})
+
 
 
 
@@ -519,6 +467,13 @@ def secretaria_detail(request, pk: int):
             "can_edit": False,
             "edit_url": "",
         })
+        breadcrumbs = [
+    {"label": "Início", "url": reverse("core:dashboard")},
+    {"label": "Organização", "url": reverse("org:index")},
+    {"label": "Secretarias", "url": reverse("org:secretaria_list")},
+    {"label": secretaria.nome, "url": None},
+]
+
 
     # 🔹 ACTIONS (PageHead)
     actions = []
@@ -540,6 +495,8 @@ def secretaria_detail(request, pk: int):
         "headers": headers,
         "rows": rows,
         "actions": actions,
+        "breadcrumbs": breadcrumbs,
+
     }
 
     return render(request, "org/secretaria_detail.html", ctx)
@@ -564,14 +521,28 @@ def secretaria_create(request):
     else:
         form = SecretariaForm(user=request.user)
 
-    return render(request, "org/secretaria_form.html", {"form": form, "mode": "create"})
+    breadcrumbs = [
+        {"label": "Início", "url": reverse("core:dashboard")},
+        {"label": "Organização", "url": reverse("org:index")},
+        {"label": "Secretarias", "url": reverse("org:secretaria_list")},
+        {"label": "Nova", "url": None},
+    ]
+
+    return render(request, "org/secretaria_form.html", {
+        "form": form,
+        "mode": "create",
+        "breadcrumbs": breadcrumbs,
+        "cancel_url": reverse("org:secretaria_list"),
+        "submit_label": "Salvar secretaria",
+    })
+
 
 
 @login_required
 @require_perm("org.manage_secretaria")
 def secretaria_update(request, pk: int):
-    p_me = get_profile(request.user)
     secretaria = get_object_or_404(Secretaria, pk=pk)
+    p_me = get_profile(request.user)
 
     if (not is_admin(request.user)) and p_me and p_me.municipio_id:
         if secretaria.municipio_id != p_me.municipio_id:
@@ -580,17 +551,30 @@ def secretaria_update(request, pk: int):
     if request.method == "POST":
         form = SecretariaForm(request.POST, instance=secretaria, user=request.user)
         if form.is_valid():
-            obj = form.save(commit=False)
-            if (not is_admin(request.user)) and p_me and p_me.municipio_id:
-                obj.municipio_id = p_me.municipio_id
-            obj.save()
+            obj = form.save()
             messages.success(request, "Secretaria atualizada com sucesso.")
             return redirect("org:secretaria_detail", pk=obj.pk)
         messages.error(request, "Corrija os erros do formulário.")
     else:
         form = SecretariaForm(instance=secretaria, user=request.user)
 
-    return render(request, "org/secretaria_form.html", {"form": form, "mode": "update", "secretaria": secretaria})
+    breadcrumbs = [
+        {"label": "Início", "url": reverse("core:dashboard")},
+        {"label": "Organização", "url": reverse("org:index")},
+        {"label": "Secretarias", "url": reverse("org:secretaria_list")},
+        {"label": secretaria.nome, "url": reverse("org:secretaria_detail", args=[secretaria.pk])},
+        {"label": "Editar", "url": None},
+    ]
+
+    return render(request, "org/secretaria_form.html", {
+        "form": form,
+        "mode": "update",
+        "secretaria": secretaria,
+        "breadcrumbs": breadcrumbs,
+        "cancel_url": reverse("org:secretaria_detail", args=[secretaria.pk]),
+        "submit_label": "Salvar alterações",
+    })
+
 
 
 # =============================
