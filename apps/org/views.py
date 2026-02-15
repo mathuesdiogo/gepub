@@ -210,7 +210,19 @@ def municipio_update(request, pk: int):
     else:
         form = FormClass(instance=municipio)
 
-    return render(request, "org/municipio_form.html", {"form": form, "mode": "update", "municipio": municipio})
+    return render(
+    request,
+    "org/municipio_form.html",
+    {
+        "form": form,
+        "mode": "update",
+        "municipio": municipio,
+        "page_title": "Editar Município",
+        "page_subtitle": "Atualize as informações do município",
+        "cancel_url": reverse("org:municipio_detail", args=[municipio.pk]),
+        "submit_label": "Salvar alterações",
+    },
+)
 
 
 # =============================
