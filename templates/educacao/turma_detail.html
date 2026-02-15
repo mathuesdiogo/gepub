@@ -26,7 +26,7 @@
 <div class="card">
   <div class="card__body">
 
-{% include "core/partials/page_head.html" with title=turma.nome subtitle="Turma • "|add:turma.ano_letivo|add:" • "|add:turma.turno actions=actions %}
+{% include "core/partials/components/layout/page_head.html" with title=turma.nome subtitle="Turma • "|add:turma.ano_letivo|add:" • "|add:turma.turno actions=actions %}
 
     <div class="dash-grid">
 
@@ -100,7 +100,7 @@
         <div class="card__body">
           <details>
             <summary class="link">Ver alunos da turma ({{ alunos_total }})</summary>
-{% include "core/partials/table_shell.html" with headers=headers_alunos rows=rows_alunos page_obj=None empty_title="Nenhum aluno" empty_text="Nenhum aluno matriculado nesta turma." %}
+{% include "core/partials/components/data/table_shell.html" with headers=headers_alunos rows=rows_alunos page_obj=None empty_title="Nenhum aluno" empty_text="Nenhum aluno matriculado nesta turma." %}
           </details>
         </div>
       </div>
@@ -110,7 +110,7 @@
         <div class="card__body">
           <details>
             <summary class="link">Ver professores ({{ professores_total }})</summary>
-{% include "core/partials/table_shell.html" with headers=headers_professores rows=rows_professores page_obj=None empty_title="Nenhum professor" empty_text="Nenhum professor encontrado (ou perfil não vincula unidade)." %}
+{% include "core/partials/components/data/table_shell.html" with headers=headers_professores rows=rows_professores page_obj=None empty_title="Nenhum professor" empty_text="Nenhum professor encontrado (ou perfil não vincula unidade)." %}
           </details>
         </div>
       </div>

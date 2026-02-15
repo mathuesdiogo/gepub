@@ -16,7 +16,7 @@
 
 {% block content %}
 <div class="card"><div class="card__body">
-{% include "core/partials/page_head.html" with title="Relatório NEE — Por município" subtitle="Somente administradores" actions=actions %}
-{% include "core/partials/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q empty_title="Sem dados" empty_text="Nenhum município encontrado." %}
+{% include "core/partials/components/layout/page_head.html" with title="Relatório NEE — Por município" subtitle="Somente administradores" actions=actions %}
+{% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q empty_title="Sem dados" empty_text="Nenhum município encontrado." %}
 </div></div>
 {% endblock %}

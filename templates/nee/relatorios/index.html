@@ -14,7 +14,7 @@
 
 {% block content %}
 <div class="card"><div class="card__body">
-{% include "core/partials/page_head.html" with title="Relatórios NEE" subtitle="Indicadores e exportações (CSV/PDF)" actions=actions %}
+{% include "core/partials/components/layout/page_head.html" with title="Relatórios NEE" subtitle="Indicadores e exportações (CSV/PDF)" actions=actions %}
 <div class="link-list">
   <a class="link-card" href="{% url 'nee:relatorio_por_tipo' %}"><div><div class="link-card__title">Por tipo</div><div class="link-card__meta">Total de alunos com NEE agrupado por tipo</div></div><span class="pill">Abrir</span></a>
   <a class="link-card" href="{% url 'nee:relatorio_por_unidade' %}"><div><div class="link-card__title">Por unidade</div><div class="link-card__meta">Total de alunos com NEE por município/secretaria/unidade</div></div><span class="pill">Abrir</span></a>

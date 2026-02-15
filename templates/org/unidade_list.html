@@ -17,7 +17,7 @@
 <div class="card">
   <div class="card__body">
 
-    {% include "core/partials/page_head.html" with title="Unidades" subtitle="Gerencie as unidades por município, secretaria e tipo" actions=actions %}
+    {% include "core/partials/components/layout/page_head.html" with title="Unidades" subtitle="Gerencie as unidades por município, secretaria e tipo" actions=actions %}
 
     <section class="section">
       <header class="section__head">
@@ -31,7 +31,7 @@
       </header>
 
       <div class="section__body">
-        {% include "core/partials/filter_bar.html" with q=q placeholder="Nome, INEP, CNPJ, secretaria ou município..." action_url=action_url clear_url=clear_url extra_filters=extra_filters has_filters=has_filters input_attrs='data-autocomplete-url="'|add:autocomplete_url|add:'" data-autocomplete-href="'|add:autocomplete_href|add:'"' %}
+        {% include "core/partials/components/layout/filter_bar.html" with q=q placeholder="Nome, INEP, CNPJ, secretaria ou município..." action_url=action_url clear_url=clear_url extra_filters=extra_filters has_filters=has_filters input_attrs='data-autocomplete-url="'|add:autocomplete_url|add:'" data-autocomplete-href="'|add:autocomplete_href|add:'"' %}
       </div>
     </section>
 
@@ -44,7 +44,7 @@
       </header>
 
       <div class="section__body">
-        {% include "core/partials/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q empty_title="Nenhuma unidade encontrada" empty_text="Tente ajustar sua busca e/ou filtros." %}
+        {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q empty_title="Nenhuma unidade encontrada" empty_text="Tente ajustar sua busca e/ou filtros." %}
       </div>
     </section>
 

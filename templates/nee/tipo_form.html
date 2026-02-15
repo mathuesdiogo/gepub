@@ -18,11 +18,11 @@
 <div class="card">
   <div class="card__body">
 
-{% if mode == "create" %}{% include "core/partials/page_head.html" with title="Novo Tipo de Necessidade" subtitle="Cadastre um novo tipo (TEA, TDAH, etc.)" actions=actions %}{% else %}{% include "core/partials/page_head.html" with title="Editar Tipo de Necessidade" subtitle="Atualize as informações do tipo" actions=actions %}{% endif %}
+{% if mode == "create" %}{% include "core/partials/components/layout/page_head.html" with title="Novo Tipo de Necessidade" subtitle="Cadastre um novo tipo (TEA, TDAH, etc.)" actions=actions %}{% else %}{% include "core/partials/components/layout/page_head.html" with title="Editar Tipo de Necessidade" subtitle="Atualize as informações do tipo" actions=actions %}{% endif %}
 
 <form method="post">
   {% csrf_token %}
-  {% include "core/partials/form_shell.html" with form=form %}
+  {% include "core/partials/components/forms/form_shell.html" with form=form %}
 </form>
 
   </div>

@@ -18,12 +18,12 @@
 <div class="card">
   <div class="card__body">
 
-    {% include "core/partials/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
-    {% include "core/partials/detail_summary.html" with fields=fields pills=pills %}
-    {% include "core/partials/table_shell.html" with headers=headers_turmas rows=rows_turmas page_obj=None q="" empty_title="Nenhuma turma cadastrada" empty_text="Cadastre turmas para esta unidade e elas aparecerão aqui." %}
+    {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+    {% include "core/partials/components/layout/detail_summary.html" with fields=fields pills=pills %}
+    {% include "core/partials/components/data/table_shell.html" with headers=headers_turmas rows=rows_turmas page_obj=None q="" empty_title="Nenhuma turma cadastrada" empty_text="Cadastre turmas para esta unidade e elas aparecerão aqui." %}
 
     {% if has_roles %}
-      {% include "core/partials/table_shell.html" with headers=headers_roles rows=rows_roles page_obj=None q="" empty_title="Sem usuários vinculados" empty_text="Nenhum usuário encontrado para esta unidade." %}
+      {% include "core/partials/components/data/table_shell.html" with headers=headers_roles rows=rows_roles page_obj=None q="" empty_title="Sem usuários vinculados" empty_text="Nenhum usuário encontrado para esta unidade." %}
     {% endif %}
 
   </div>

@@ -17,8 +17,8 @@
 {% block content %}
 <div class="card"><div class="card__body">
 
-{% include "core/partials/page_head.html" with title=municipio.nome subtitle="Detalhes do município e atalhos" actions=actions %}
-{% include "core/partials/detail_summary.html" with pills=summary_items %}
+{% include "core/partials/components/layout/page_head.html" with title=municipio.nome subtitle="Detalhes do município e atalhos" actions=actions %}
+{% include "core/partials/components/layout/detail_summary.html" with pills=summary_items %}
 
   <div class="detail-section">
     <div class="detail-section__title">Prefeitura de {{ municipio.nome }}</div>
@@ -72,7 +72,7 @@
           {% endfor %}
         </ul>
       {% else %}
-        {% include "core/partials/empty_state.html" with empty_title="Nenhuma secretaria cadastrada" empty_text="Este município ainda não possui secretarias vinculadas." %}
+        {% include "core/partials/components/feedback/empty_state.html" with empty_title="Nenhuma secretaria cadastrada" empty_text="Este município ainda não possui secretarias vinculadas." %}
       {% endif %}
     </div>
   </div>
@@ -95,7 +95,7 @@
           {% endfor %}
         </ul>
       {% else %}
-        {% include "core/partials/empty_state.html" with empty_title="Nenhuma unidade cadastrada" empty_text="Este município ainda não possui unidades vinculadas." %}
+        {% include "core/partials/components/feedback/empty_state.html" with empty_title="Nenhuma unidade cadastrada" empty_text="Este município ainda não possui unidades vinculadas." %}
       {% endif %}
     </div>
   </div>
@@ -118,7 +118,7 @@
           {% endfor %}
         </ul>
       {% else %}
-        {% include "core/partials/empty_state.html" with empty_title="Nenhum setor cadastrado" empty_text="Este município ainda não possui setores vinculados." %}
+        {% include "core/partials/components/feedback/empty_state.html" with empty_title="Nenhum setor cadastrado" empty_text="Este município ainda não possui setores vinculados." %}
       {% endif %}
     </div>
   </div>

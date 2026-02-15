@@ -18,9 +18,9 @@
 <div class="card">
   <div class="card__body">
 
-{% include "core/partials/page_head.html" with title=aluno.nome subtitle="Detalhes do aluno" actions=None %}
+{% include "core/partials/components/layout/page_head.html" with title=aluno.nome subtitle="Detalhes do aluno" actions=None %}
 
-{% include "core/partials/detail_summary.html" with fields=fields pills=pills %}
+{% include "core/partials/components/layout/detail_summary.html" with fields=fields pills=pills %}
 
 <hr class="divider">
 
@@ -29,7 +29,7 @@
 <div class="section">
   <div class="section__title">Matrículas</div>
 
-{% include "core/partials/table_shell.html" with headers=headers_matriculas rows=rows_matriculas page_obj=None empty_title="Nenhuma matrícula" empty_text="Este aluno ainda não possui matrícula." %}
+{% include "core/partials/components/data/table_shell.html" with headers=headers_matriculas rows=rows_matriculas page_obj=None empty_title="Nenhuma matrícula" empty_text="Este aluno ainda não possui matrícula." %}
 
 {% if can_edu_manage %}
 <div class="form-section">
