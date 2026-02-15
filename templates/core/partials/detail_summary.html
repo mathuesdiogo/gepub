@@ -1,48 +1,25 @@
-<div class="stack">
+<div class="detail-summary">
+
   {% if fields %}
-    <div class="stack">
-      {% for f in fields %}
-        <div>
-          <div class="small">{{ f.label }}</div>
-          <div><strong>{{ f.value|default:"—" }}</strong></div>
-        </div>
-      {% endfor %}
-    </div>
+  <div class="detail-summary__fields">
+    {% for item in fields %}
+      <div class="detail-summary__item">
+        <span class="detail-summary__label">{{ item.label }}</span>
+        <span class="detail-summary__value">{{ item.value }}</span>
+      </div>
+    {% endfor %}
+  </div>
   {% endif %}
 
   {% if pills %}
-    {% with has_links=False %}
-      {% for p in pills %}
-        {% if p.href %}{% with has_links=True %}{% endwith %}{% endif %}
-      {% endfor %}
-    {% endwith %}
-
-    {# ✅ Se tiver href → vira cards (dashboard blocks) #}
-    {% if pills.0.href %}
-      <div class="dashboard-metrics">
-        {% for p in pills %}
-          {% if p.href %}
-            <a class="metric-card" href="{{ p.href }}">
-              <div class="metric-label">{{ p.label }}</div>
-              <div class="metric-value">{{ p.value }}</div>
-              <div class="metric-meta">{{ p.meta|default:"Ver lista" }}</div>
-            </a>
-          {% else %}
-            <div class="metric-card" style="pointer-events:none;">
-              <div class="metric-label">{{ p.label }}</div>
-              <div class="metric-value">{{ p.value }}</div>
-              <div class="metric-meta">{{ p.meta|default:"—" }}</div>
-            </div>
-          {% endif %}
-        {% endfor %}
+  <div class="detail-summary__pills">
+    {% for pill in pills %}
+      <div class="detail-summary__pill">
+        <span class="detail-summary__pill-value">{{ pill.value }}</span>
+        <span class="detail-summary__pill-label">{{ pill.label }}</span>
       </div>
-    {% else %}
-      {# fallback antigo: pills simples #}
-      <div class="stack">
-        {% for p in pills %}
-          <span class="pill">{{ p.label }}: <strong>{{ p.value }}</strong></span>
-        {% endfor %}
-      </div>
-    {% endif %}
+    {% endfor %}
+  </div>
   {% endif %}
+
 </div>

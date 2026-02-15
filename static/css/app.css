@@ -52,6 +52,8 @@
 @import url("./components/steps.css");
 @import url("./components/timeline.css");
 @import url("./components/calendar.css");
+@import "components/detail-summary.css";
+
 
 /* -----------------------
    Pages (ajustes por página)

@@ -1,30 +1,14 @@
 {% extends "core/base.html" %}
-
-{% block title %}{% if mode == "create" %}Nova Turma{% else %}Editar Turma{% endif %} • Educação • GEPUB{% endblock %}
+{% block title %}{% if mode == "update" %}Editar Turma{% else %}Nova Turma{% endif %} • Educação • GEPUB{% endblock %}
 {% block header %}Educação{% endblock %}
-
-{% block breadcrumbs %}
-<div class="breadcrumbs">
-  <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
-  <span class="breadcrumbs__sep">/</span>
-  <a class="breadcrumbs__link" href="{% url 'educacao:index' %}">Educação</a>
-  <span class="breadcrumbs__sep">/</span>
-  <a class="breadcrumbs__link" href="{% url 'educacao:turma_list' %}">Turmas</a>
-  <span class="breadcrumbs__sep">/</span>
-  <span class="breadcrumbs__current">{% if mode == "create" %}Nova{% else %}Editar{% endif %}</span>
-</div>
-{% endblock %}
 
 {% block content %}
 <div class="card">
   <div class="card__body">
 
-{% if mode == "create" %}{% include "core/partials/components/layout/page_head.html" with title="Nova Turma" subtitle="Preencha as informações da turma" actions=None %}{% else %}{% include "core/partials/components/layout/page_head.html" with title="Editar Turma" subtitle="Atualize as informações da turma" actions=None %}{% endif %}
+    {% if mode == "create" %}{% include "core/partials/components/layout/page_head.html" with title="Nova Turma" subtitle="Preencha as informações da turma" actions=None %}{% else %}{% include "core/partials/components/layout/page_head.html" with title="Editar Turma" subtitle="Atualize as informações da turma" actions=None %}{% endif %}
 
-<form method="post">
-  {% csrf_token %}
-  {% include "core/partials/components/forms/form_shell.html" with form=form %}
-</form>
+    {% include "core/partials/form_shell.html" with form=form cancel_url=cancel_url submit_label=submit_label action_url=action_url %}
 
   </div>
 </div>

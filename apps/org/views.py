@@ -585,204 +585,82 @@ def secretaria_update(request, pk: int):
 def unidade_list(request):
     q = (request.GET.get("q") or "").strip()
     municipio_id = (request.GET.get("municipio") or "").strip()
-    secretaria_id = (request.GET.get("secretaria") or "").strip()
-    tipo = (request.GET.get("tipo") or "").strip()
 
-    # trava município do perfil (não-admin)
     p = get_profile(request.user)
-    if not is_admin(request.user) and p and p.municipio_id:
+    if not is_admin(request.user) and p and getattr(p, "municipio_id", None):
         municipio_id = str(p.municipio_id)
 
-    from apps.core.rbac import scope_filter_unidades
-
-    qs = scope_filter_unidades(
-        request.user,
-        Unidade.objects.select_related("secretaria", "secretaria__municipio").all()
-    )
+    qs = Unidade.objects.select_related("secretaria__municipio").all()
 
     if municipio_id.isdigit():
         qs = qs.filter(secretaria__municipio_id=int(municipio_id))
-    if secretaria_id.isdigit():
-        qs = qs.filter(secretaria_id=int(secretaria_id))
-    if tipo:
-        qs = qs.filter(tipo=tipo)
+
     if q:
         qs = qs.filter(
             Q(nome__icontains=q)
-            | Q(codigo_inep__icontains=q)
-            | Q(cnpj__icontains=q)
             | Q(secretaria__nome__icontains=q)
             | Q(secretaria__municipio__nome__icontains=q)
         )
 
-    # =============================
-    # BASE DE FILTROS (selects)
-    # =============================
-    municipios = scope_filter_municipios(
-        request.user,
-        Municipio.objects.filter(ativo=True).order_by("nome"),
-    )
-
-    secretarias_qs = Secretaria.objects.select_related("municipio").filter(
-        ativo=True,
-        municipio__in=municipios
-    )
-    if municipio_id.isdigit():
-        secretarias_qs = secretarias_qs.filter(municipio_id=int(municipio_id))
-    secretarias = secretarias_qs.order_by("nome")
-
-    # =============================
-    # EXPORTAÇÃO
-    # =============================
-    from apps.core.exports import export_csv, export_pdf_table
-    export = (request.GET.get("export") or "").strip().lower()
-
-    if export in ("csv", "pdf"):
-        items = list(
-            qs.order_by("nome").values_list(
-                "nome",
-                "tipo",
-                "codigo_inep",
-                "cnpj",
-                "secretaria__nome",
-                "secretaria__municipio__nome",
-                "secretaria__municipio__uf",
-                "ativo",
-            )
-        )
-
-        headers_export = ["Unidade", "Tipo", "INEP", "CNPJ", "Secretaria", "Município", "UF", "Ativo"]
-        rows_export = [
-            [
-                nome or "",
-                str(tipo_val or ""),
-                inep or "",
-                cnpj or "",
-                secretaria_nome or "",
-                municipio_nome or "",
-                uf or "",
-                "Sim" if ativo else "Não",
-            ]
-            for (nome, tipo_val, inep, cnpj, secretaria_nome, municipio_nome, uf, ativo) in items
-        ]
-
-        if export == "csv":
-            return export_csv("unidades.csv", headers_export, rows_export)
-
-        filtros = f"Município={municipio_id or '-'} | Secretaria={secretaria_id or '-'} | Tipo={tipo or '-'} | Busca={q or '-'}"
-        return export_pdf_table(
-            request,
-            filename="unidades.pdf",
-            title="Relatório — Unidades",
-            headers=headers_export,
-            rows=rows_export,
-            filtros=filtros,
-        )
-
-    # =============================
-    # PAGINAÇÃO
-    # =============================
     paginator = Paginator(qs.order_by("nome"), 10)
     page_obj = paginator.get_page(request.GET.get("page"))
 
-    # =============================
-    # ACTIONS (PageHead)
-    # =============================
-    qs_query = []
-    if q:
-        qs_query.append(f"q={q}")
-    if municipio_id:
-        qs_query.append(f"municipio={municipio_id}")
-    if secretaria_id:
-        qs_query.append(f"secretaria={secretaria_id}")
-    if tipo:
-        qs_query.append(f"tipo={tipo}")
-    base_query = "&".join(qs_query)
+    actions = []
+    if is_admin(request.user):
+        actions.append({
+            "label": "Nova Unidade",
+            "url": reverse("org:unidade_create"),
+            "icon": "fa-solid fa-plus",
+            "variant": "btn-primary",
+        })
 
-    def qjoin(extra: str) -> str:
-        return f"?{base_query + ('&' if base_query else '')}{extra}"
-
-    actions = [
-        {"label": "Exportar CSV", "url": qjoin("export=csv"), "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
-        {"label": "Exportar PDF", "url": qjoin("export=pdf"), "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
-        {"label": "Nova Unidade", "url": reverse("org:unidade_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"},
-    ]
-
-    # =============================
-    # TABLE (TableShell)
-    # =============================
     headers = [
-        {"label": "Unidade"},
-        {"label": "Tipo", "width": "140px"},
-        {"label": "INEP", "width": "140px"},
-        {"label": "CNPJ", "width": "170px"},
+        {"label": "Nome"},
         {"label": "Secretaria"},
         {"label": "Município"},
         {"label": "Ativo", "width": "90px"},
     ]
 
     rows = []
+    can_edit = bool(is_admin(request.user))
+
     for u in page_obj:
-        municipio_nome = getattr(getattr(getattr(u, "secretaria", None), "municipio", None), "nome", "—") or "—"
-        municipio_uf = getattr(getattr(getattr(u, "secretaria", None), "municipio", None), "uf", "") or ""
+        ativo_html = (
+            f'<span class="status {"success" if getattr(u, "ativo", False) else "danger"}">'
+            f'{"Sim" if getattr(u, "ativo", False) else "Não"}'
+            f"</span>"
+        )
+
         rows.append({
             "cells": [
                 {"text": u.nome, "url": reverse("org:unidade_detail", args=[u.pk])},
-                {"text": u.get_tipo_display() if hasattr(u, "get_tipo_display") else (u.tipo or "—"), "url": ""},
-                {"text": u.codigo_inep or "—", "url": ""},
-                {"text": u.cnpj or "—", "url": ""},
-                {"text": getattr(getattr(u, "secretaria", None), "nome", "—") or "—", "url": ""},
-                {"text": (f"{municipio_nome} / {municipio_uf}" if municipio_uf else municipio_nome), "url": ""},
-                {"text": "Sim" if getattr(u, "ativo", False) else "Não", "url": ""},
+                {"text": getattr(u.secretaria, "nome", "—") or "—", "url": ""},
+                {"text": getattr(u.secretaria.municipio, "nome", "—") or "—", "url": ""},
+                {"html": ativo_html, "safe": True},
             ],
-            "can_edit": True,
-            "edit_url": reverse("org:unidade_update", args=[u.pk]) if u.pk else "",
+            "can_edit": can_edit,
+            "edit_url": reverse("org:unidade_update", args=[u.pk]) if can_edit else "",
         })
 
-    # =============================
-    # EXTRA FILTERS (3 selects)
-    # =============================
-    options_municipios = [{"value": str(m.id), "label": f"{m.nome} / {m.uf}"} for m in municipios]
-    options_secretarias = [{"value": str(s.id), "label": f"{s.nome} ({s.municipio.uf})"} for s in secretarias]
-    options_tipos = [{"value": str(value), "label": str(label)} for (value, label) in Unidade.Tipo.choices]
+    breadcrumbs = [
+        {"label": "Início", "url": reverse("core:dashboard")},
+        {"label": "Organização", "url": reverse("org:index")},
+        {"label": "Unidades", "url": None},
+    ]
 
-    extra_filters = ""
-    extra_filters += render_to_string(
-        "core/partials/filter_select.html",
-        {"name": "municipio", "label": "Município", "value": municipio_id, "empty_label": "Todos", "options": options_municipios},
-        request=request,
-    )
-    extra_filters += render_to_string(
-        "core/partials/filter_select.html",
-        {"name": "secretaria", "label": "Secretaria", "value": secretaria_id, "empty_label": "Todas", "options": options_secretarias},
-        request=request,
-    )
-    extra_filters += render_to_string(
-        "core/partials/filter_select.html",
-        {"name": "tipo", "label": "Tipo", "value": tipo, "empty_label": "Todos", "options": options_tipos},
-        request=request,
-    )
-
-    # ✅ autocomplete do buscar
-    autocomplete_url = reverse("org:unidade_autocomplete")
-    autocomplete_href = reverse("org:unidade_list") + "?q={q}"
-
-    # ✅ RENDER CORRETO (LISTA)
     return render(request, "org/unidade_list.html", {
         "q": q,
         "municipio_id": municipio_id,
-        "secretaria_id": secretaria_id,
-        "tipo": tipo,
         "page_obj": page_obj,
         "actions": actions,
         "headers": headers,
         "rows": rows,
         "action_url": reverse("org:unidade_list"),
         "clear_url": reverse("org:unidade_list"),
-        "has_filters": bool(municipio_id or secretaria_id or tipo),
-        "extra_filters": extra_filters,
-        "autocomplete_url": autocomplete_url,
-        "autocomplete_href": autocomplete_href,
+        "has_filters": bool(q or municipio_id),
+        "autocomplete_url": reverse("org:unidade_autocomplete"),
+        "autocomplete_href": reverse("org:unidade_list") + "?q={q}",
+        "breadcrumbs": breadcrumbs,
     })
 
 
@@ -966,6 +844,7 @@ def setor_list(request):
 
 @login_required
 def unidade_detail(request, pk: int):
+    from django.urls import NoReverseMatch
     from apps.core.rbac import scope_filter_unidades
 
     unidade = get_object_or_404(
@@ -976,42 +855,34 @@ def unidade_detail(request, pk: int):
         pk=pk,
     )
 
+    # Permissões (mantém padrão do projeto)
     can_org_manage = (
         can(request.user, "org.manage")
         or can(request.user, "org.manage_unidade")
         or request.user.is_staff
         or request.user.is_superuser
+        or is_admin(request.user)
     )
 
-    # ---------- Actions (PageHead) ----------
+    # Actions do PageHead (Editar Unidade deve aparecer aqui)
     actions = [
-        {
-            "label": "Voltar",
-            "url": reverse("org:unidade_list"),
-            "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
-        }
+        {"label": "Voltar", "url": reverse("org:unidade_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
     ]
     if can_org_manage:
         actions.append(
-            {
-                "label": "Editar",
-                "url": reverse("org:unidade_update", args=[unidade.pk]),
-                "icon": "fa-solid fa-pen",
-                "variant": "btn-primary",
-            }
+            {"label": "Editar", "url": reverse("org:unidade_update", args=[unidade.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"}
         )
 
-    # ---------- KPIs (sem template legacy) ----------
+    # Turmas da unidade
     turmas_qs = Turma.objects.filter(unidade_id=unidade.id).order_by("-ano_letivo", "nome")
     turmas_total = turmas_qs.count()
 
+    # Usuários por role (se existir Profile.unidade_id)
     usuarios_total = 0
     professores_total = 0
     auxiliares_total = 0
     roles_rows = []
 
-    # usuários por role (se existir Profile.unidade)
     try:
         if any(getattr(f, "name", None) == "unidade" for f in Profile._meta.get_fields()):
             profiles = Profile.objects.filter(unidade_id=unidade.id)
@@ -1020,15 +891,13 @@ def unidade_detail(request, pk: int):
             auxiliares_total = profiles.filter(role__icontains="AUX").count()
 
             roles_agg = list(
-                profiles.values("role")
-                .annotate(total=Count("id"))
-                .order_by("role")
+                profiles.values("role").annotate(total=Count("id")).order_by("role")
             )
             for r in roles_agg:
                 roles_rows.append({
                     "cells": [
                         {"text": (r.get("role") or "—"), "url": ""},
-                        {"text": str(r.get("total") or 0), "url": ""},
+                        {"html": f'<span class="text-center">{str(r.get("total") or 0)}</span>', "safe": True},
                     ],
                     "can_edit": False,
                     "edit_url": "",
@@ -1036,66 +905,103 @@ def unidade_detail(request, pk: int):
     except Exception:
         roles_rows = []
 
-    # ---------- TableShell: Turmas ----------
-    headers_turmas = [
-        {"label": "Turma"},
-        {"label": "Ano letivo", "width": "140px"},
-        {"label": "Alunos", "width": "140px"},
-        {"label": "Ativa", "width": "110px"},
-    ]
-
-    rows_turmas = []
-    for t in turmas_qs:
-        rows_turmas.append({
-            "cells": [
-                {"text": t.nome, "url": reverse("educacao:turma_detail", args=[t.pk])},
-                {"text": str(getattr(t, "ano_letivo", "") or "—"), "url": ""},
-                {"text": str(getattr(t, "alunos_total", 0) or 0), "url": ""},
-                {"text": "Sim" if getattr(t, "ativo", False) else "Não", "url": ""},
-            ],
-            "can_edit": False,
-            "edit_url": "",
-        })
-
-    # ---------- TableShell: Usuários por perfil ----------
-    headers_roles = [
-        {"label": "Perfil"},
-        {"label": "Total", "width": "120px"},
-    ]
-
-    # ---------- Dados do topo ----------
+    # Detail summary (igual município/secretaria)
     unidade_tipo = (
         unidade.get_tipo_display()
         if hasattr(unidade, "get_tipo_display")
         else (getattr(unidade, "tipo", "") or "—")
     )
     secretaria_nome = getattr(getattr(unidade, "secretaria", None), "nome", "—") or "—"
-    secretaria_id = getattr(unidade, "secretaria_id", None)
+    municipio_nome = getattr(getattr(getattr(unidade, "secretaria", None), "municipio", None), "nome", "—") or "—"
+
+    fields = [
+        {"label": "Tipo", "value": unidade_tipo},
+        {"label": "Secretaria", "value": secretaria_nome},
+        {"label": "Município", "value": municipio_nome},
+    ]
+
+    pills = [
+        {"label": "Turmas", "value": turmas_total},
+        {"label": "Usuários", "value": usuarios_total},
+        {"label": "Professores", "value": professores_total},
+        {"label": "Auxiliares", "value": auxiliares_total},
+    ]
+
+    # TableShell: Turmas (com centralização + badge + ação)
+    headers_turmas = [
+        {"label": "Turma"},
+        {"label": "Ano letivo", "width": "140px"},
+        {"label": "Alunos", "width": "120px"},
+        {"label": "Ativa", "width": "110px"},
+    ]
+
+    can_edit_turma = (
+        can(request.user, "educacao.manage")
+        or can(request.user, "educacao.manage_turma")
+        or request.user.is_staff
+        or request.user.is_superuser
+        or is_admin(request.user)
+    )
+
+    rows_turmas = []
+    for t in turmas_qs:
+        ano_val = str(getattr(t, "ano_letivo", "") or "—")
+        alunos_val = str(getattr(t, "alunos_total", 0) or 0)
+
+        ativo_html = (
+            f'<span class="status {"success" if getattr(t, "ativo", False) else "danger"}">'
+            f'{"Sim" if getattr(t, "ativo", False) else "Não"}'
+            f"</span>"
+        )
+
+        # Edit URL da turma (sem quebrar se o nome da rota for diferente)
+        turma_edit_url = ""
+        if can_edit_turma:
+            try:
+                turma_edit_url = reverse("educacao:turma_update", args=[t.pk])
+            except NoReverseMatch:
+                turma_edit_url = ""
+
+        rows_turmas.append({
+            "cells": [
+                {"text": t.nome, "url": reverse("educacao:turma_detail", args=[t.pk])},
+                {"html": f'<span class="text-center">{ano_val}</span>', "safe": True},
+                {"html": f'<span class="text-center">{alunos_val}</span>', "safe": True},
+                {"html": f'<span class="text-center">{ativo_html}</span>', "safe": True},
+            ],
+            "can_edit": bool(turma_edit_url),
+            "edit_url": turma_edit_url,
+        })
+
+    headers_roles = [
+        {"label": "Perfil"},
+        {"label": "Total", "width": "120px"},
+    ]
+
+    breadcrumbs = [
+        {"label": "Início", "url": reverse("core:dashboard")},
+        {"label": "Organização", "url": reverse("org:index")},
+        {"label": "Unidades", "url": reverse("org:unidade_list")},
+        {"label": unidade.nome, "url": None},
+    ]
 
     return render(request, "org/unidade_detail.html", {
+        "breadcrumbs": breadcrumbs,
         "actions": actions,
 
-        # dados simples para o resumo do topo (sem HTML complexo)
         "page_title": unidade.nome,
-        "page_subtitle": "Detalhes da unidade e visão geral",
-        "unidade_tipo": unidade_tipo,
-        "unidade_ativo": bool(getattr(unidade, "ativo", False)),
-        "secretaria_nome": secretaria_nome,
-        "secretaria_id": secretaria_id,
+        "page_subtitle": "Detalhes da unidade e turmas vinculadas",
 
-        "turmas_total": turmas_total,
-        "usuarios_total": usuarios_total,
-        "professores_total": professores_total,
-        "auxiliares_total": auxiliares_total,
+        "fields": fields,
+        "pills": pills,
 
-        # tables
         "headers_turmas": headers_turmas,
         "rows_turmas": rows_turmas,
+
         "headers_roles": headers_roles,
         "rows_roles": roles_rows,
         "has_roles": bool(roles_rows),
     })
-
 
 
 @login_required
@@ -1130,114 +1036,69 @@ def setor_autocomplete(request):
 # from .forms import UnidadeForm   # (já deve estar importado no seu arquivo)
 
 @login_required
+@require_perm("org.manage_unidade")
 def unidade_create(request):
-    # ✅ bloqueio direto (sem depender de _deny_manage_org)
-    if not (can(request.user, "org.manage") or can(request.user, "org.manage_unidade") or request.user.is_staff or request.user.is_superuser):
-        messages.error(request, "Você não tem permissão para cadastrar unidades.")
-        return redirect("org:unidade_list")
-
-    actions = [
-        {
-            "label": "Voltar",
-            "url": reverse("org:unidade_list"),
-            "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
-        }
-    ]
-
     if request.method == "POST":
-        try:
-            form = UnidadeForm(request.POST, user=request.user)
-        except TypeError:
-            form = UnidadeForm(request.POST)
-
+        form = UnidadeForm(request.POST)
         if form.is_valid():
-            obj = form.save()
+            unidade = form.save()
             messages.success(request, "Unidade criada com sucesso.")
-            return redirect("org:unidade_detail", pk=obj.pk)
-
+            return redirect("org:unidade_detail", pk=unidade.pk)
         messages.error(request, "Corrija os erros do formulário.")
     else:
-        try:
-            form = UnidadeForm(user=request.user)
-        except TypeError:
-            form = UnidadeForm()
+        form = UnidadeForm()
 
-    return render(
-        request,
-        "org/unidade_form.html",
-        {
-            "form": form,
-            "mode": "create",
-            "actions": actions,
-            "cancel_url": reverse("org:unidade_list"),
-            "action_url": reverse("org:unidade_create"),
-        },
-    )
+    breadcrumbs = [
+        {"label": "Início", "url": reverse("core:dashboard")},
+        {"label": "Organização", "url": reverse("org:index")},
+        {"label": "Unidades", "url": reverse("org:unidade_list")},
+        {"label": "Nova", "url": None},
+    ]
 
+    return render(request, "org/unidade_form.html", {
+        "form": form,
+        "mode": "create",
+        "breadcrumbs": breadcrumbs,
+        "cancel_url": reverse("org:unidade_list"),
+        "submit_label": "Salvar unidade",
+        "action_url": reverse("org:unidade_create"),
+    })
 
 
 
 @login_required
+@require_perm("org.manage_unidade")
 def unidade_update(request, pk: int):
-    # Permissão: manter padrão do projeto (sem helper inexistente)
-    can_manage = (
-        can(request.user, "org.manage")
-        or can(request.user, "org.manage_unidade")
-        or request.user.is_staff
-        or request.user.is_superuser
-    )
-    if not can_manage:
-        messages.error(request, "Você não tem permissão para editar unidades.")
-        return redirect("org:unidade_list")
-
-    from apps.core.rbac import scope_filter_unidades
-
-    obj = get_object_or_404(
-        scope_filter_unidades(
-            request.user,
-            Unidade.objects.select_related("secretaria", "secretaria__municipio"),
-        ),
-        pk=pk,
-    )
+    unidade = get_object_or_404(Unidade, pk=pk)
 
     if request.method == "POST":
-        try:
-            form = UnidadeForm(request.POST, instance=obj, user=request.user)
-        except TypeError:
-            form = UnidadeForm(request.POST, instance=obj)
-
+        form = UnidadeForm(request.POST, instance=unidade)
         if form.is_valid():
             obj = form.save()
             messages.success(request, "Unidade atualizada com sucesso.")
             return redirect("org:unidade_detail", pk=obj.pk)
-
         messages.error(request, "Corrija os erros do formulário.")
     else:
-        try:
-            form = UnidadeForm(instance=obj, user=request.user)
-        except TypeError:
-            form = UnidadeForm(instance=obj)
+        form = UnidadeForm(instance=unidade)
 
-    # --------- padrão componentizado (igual create) ----------
-    page_title = "Editar unidade"
-    page_subtitle = obj.nome
-    actions = [
-        {"label": "Voltar", "url": reverse("org:unidade_detail", args=[obj.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+    breadcrumbs = [
+        {"label": "Início", "url": reverse("core:dashboard")},
+        {"label": "Organização", "url": reverse("org:index")},
+        {"label": "Unidades", "url": reverse("org:unidade_list")},
+        {"label": unidade.nome, "url": reverse("org:unidade_detail", args=[unidade.pk])},
+        {"label": "Editar", "url": None},
     ]
 
     return render(request, "org/unidade_form.html", {
         "form": form,
         "mode": "update",
-
-        # padrão do template novo
-        "page_title": page_title,
-        "page_subtitle": page_subtitle,
-        "actions": actions,
+        "unidade": unidade,
+        "breadcrumbs": breadcrumbs,
+        "cancel_url": reverse("org:unidade_detail", args=[unidade.pk]),
         "submit_label": "Salvar alterações",
-        "cancel_url": reverse("org:unidade_detail", args=[obj.pk]),
-        "action_url": reverse("org:unidade_update", args=[obj.pk]),
+        "action_url": reverse("org:unidade_update", args=[unidade.pk]),
     })
+
 
 
 @login_required
