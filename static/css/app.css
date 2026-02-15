@@ -18,6 +18,7 @@
 @import url("./components/topbar.css");
 @import url("./components/breadcrumbs.css");
 @import "components/navigation.css";
+@import "components/navigation.css";
 
 @import url("./components/buttons.css");
 @import url("./components/dropdown.css");

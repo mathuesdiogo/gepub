@@ -148,3 +148,36 @@ canvas {
 .profile-form .full{
   grid-column:1 / -1;
 }
+/* ======================================================
+   TOPBAR — Atalho por código
+   ====================================================== */
+.topbar-go{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.topbar-go__icon{
+  opacity:.75;
+  font-size:14px;
+}
+
+.topbar-go__input{
+  height:36px;
+  padding:0 12px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  min-width: 220px;
+  outline: none;
+}
+
+.topbar-go__input:focus{
+  border-color: var(--primary);
+}
+
+@media (max-width: 920px){
+  .topbar-go__input{ min-width: 160px; }
+  .topbar-go__btn{ display:none; }
+}

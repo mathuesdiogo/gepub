@@ -1,93 +1,158 @@
-<div class="dashboard-header">
-  <div class="dashboard-title">Prefeitura • {{ municipio_nome }}</div>
-  <div><span class="dashboard-badge">Visão municipal</span></div>
-</div>
+{% load static %}
 
-<div class="dashboard-metrics">
-  <a class="metric-card" href="{% url 'org:secretaria_list' %}">
-    <div class="metric-label">Secretarias</div>
-    <div class="metric-value">{{ secretarias_total }}</div>
-    <div class="metric-meta">Ver lista</div>
-  </a>
+<div class="dash">
 
-  <a class="metric-card" href="{% url 'org:unidade_list' %}">
-    <div class="metric-label">Unidades</div>
-    <div class="metric-value">{{ unidades_total }}</div>
-    <div class="metric-meta">Ver lista</div>
-  </a>
+  <!-- KPI CARDS (clicáveis) -->
+  <div class="kpi-grid">
+    <a class="kpi-card kpi-card--blue" href="{% url 'org:secretaria_list' %}">
+      <div class="kpi-card__icon"><i class="fa-solid fa-building-columns"></i></div>
+      <div class="kpi-card__meta">
+        <div class="kpi-card__label">Secretarias</div>
+        <div class="kpi-card__value">{{ secretarias_total|default:0 }}</div>
+        <div class="kpi-card__hint">Ver lista</div>
+      </div>
+    </a>
 
-  <a class="metric-card" href="{% url 'educacao:turma_list' %}">
-    <div class="metric-label">Turmas</div>
-    <div class="metric-value">{{ turmas_total }}</div>
-    <div class="metric-meta">Abrir turmas</div>
-  </a>
+    <a class="kpi-card kpi-card--indigo" href="{% url 'org:unidade_list' %}">
+      <div class="kpi-card__icon"><i class="fa-solid fa-school"></i></div>
+      <div class="kpi-card__meta">
+        <div class="kpi-card__label">Unidades</div>
+        <div class="kpi-card__value">{{ unidades_total|default:0 }}</div>
+        <div class="kpi-card__hint">Ver lista</div>
+      </div>
+    </a>
 
-  <a class="metric-card" href="{% url 'educacao:aluno_list' %}">
-    <div class="metric-label">Alunos</div>
-    <div class="metric-value">{{ alunos_total }}</div>
-    <div class="metric-meta">Ver alunos</div>
-  </a>
+    <a class="kpi-card kpi-card--green" href="{% url 'educacao:turma_list' %}">
+      <div class="kpi-card__icon"><i class="fa-solid fa-users"></i></div>
+      <div class="kpi-card__meta">
+        <div class="kpi-card__label">Turmas</div>
+        <div class="kpi-card__value">{{ turmas_total|default:0 }}</div>
+        <div class="kpi-card__hint">Abrir turmas</div>
+      </div>
+    </a>
 
-  <a class="metric-card" href="{% url 'educacao:turma_list' %}">
-    <div class="metric-label">Matrículas</div>
-    <div class="metric-value">{{ matriculas_total }}</div>
-    <div class="metric-meta">Ver por turmas</div>
-  </a>
-</div>
+    <a class="kpi-card kpi-card--amber" href="{% url 'educacao:aluno_list' %}">
+      <div class="kpi-card__icon"><i class="fa-solid fa-user-graduate"></i></div>
+      <div class="kpi-card__meta">
+        <div class="kpi-card__label">Alunos</div>
+        <div class="kpi-card__value">{{ alunos_total|default:0 }}</div>
+        <div class="kpi-card__hint">Ver alunos</div>
+      </div>
+    </a>
 
-<div class="dashboard-section">
-  <div class="dashboard-section-title">Indicadores</div>
-
-  <div class="dashboard-charts">
-    <div class="chart-card"><canvas id="chartUnidades" height="140"></canvas></div>
-    <div class="chart-card"><canvas id="chartAlunos" height="140"></canvas></div>
+    <a class="kpi-card kpi-card--slate" href="{% url 'educacao:matricula_create' %}">
+      <div class="kpi-card__icon"><i class="fa-solid fa-id-card-clip"></i></div>
+      <div class="kpi-card__meta">
+        <div class="kpi-card__label">Matrículas</div>
+        <div class="kpi-card__value">{{ matriculas_total|default:0 }}</div>
+        <div class="kpi-card__hint">Ver por turmas</div>
+      </div>
+    </a>
   </div>
 
-  {{ chart1_labels|json_script:"c1-labels" }}
-  {{ chart1_values|json_script:"c1-values" }}
-  {{ chart2_labels|json_script:"c2-labels" }}
-  {{ chart2_values|json_script:"c2-values" }}
+  <!-- GRÁFICOS / INDICADORES (se existirem) -->
+  <div class="dash-grid">
+    <div class="dash-card">
+      <div class="dash-card__head">
+        <div>
+          <div class="dash-card__title">Unidades por secretaria</div>
+          <div class="dash-card__sub small">Top secretarias por quantidade de unidades</div>
+        </div>
+      </div>
+      <div class="dash-card__body">
+        <canvas id="chartUnidadesSecretaria" height="140"></canvas>
+      </div>
+    </div>
+
+    <div class="dash-card">
+      <div class="dash-card__head">
+        <div>
+          <div class="dash-card__title">Alunos por secretaria</div>
+          <div class="dash-card__sub small">Top secretarias por alunos matriculados</div>
+        </div>
+      </div>
+      <div class="dash-card__body">
+        <canvas id="chartAlunosSecretaria" height="140"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- LISTAS -->
+  <div class="dash-grid dash-grid--2">
+    <!-- ÚLTIMAS SECRETARIAS -->
+    <div class="dash-card">
+      <div class="dash-card__head">
+        <div>
+          <div class="dash-card__title">Últimas secretarias</div>
+          <div class="dash-card__sub small">Cadastros recentes</div>
+        </div>
+        <a class="btn btn--ghost" href="{% url 'org:secretaria_list' %}"><i class="fa-solid fa-list"></i> Ver todas</a>
+      </div>
+
+      <div class="dash-table">
+        <div class="dash-table__head small">
+          <div>Secretaria</div>
+          <div class="dash-table__right">Ação</div>
+        </div>
+
+        {% for s in ultimas_secretarias %}
+          <div class="dash-table__row">
+            <div class="dash-table__left">
+              <div class="dash-table__primary">{{ s.nome }}</div>
+              <div class="dash-table__muted small">{{ s.municipio.nome|default:"—" }}</div>
+            </div>
+            <div class="dash-table__right">
+              <a class="btn btn--ghost" href="{% url 'org:secretaria_detail' s.pk %}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir</a>
+            </div>
+          </div>
+        {% empty %}
+          <div class="dash-empty">
+            <div class="dash-empty__title">Nenhuma secretaria</div>
+            <div class="dash-empty__text">Ainda não há secretarias cadastradas.</div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- ÚLTIMOS ALUNOS -->
+    <div class="dash-card">
+      <div class="dash-card__head">
+        <div>
+          <div class="dash-card__title">Últimos alunos</div>
+          <div class="dash-card__sub small">Cadastros recentes</div>
+        </div>
+        <a class="btn btn--ghost" href="{% url 'educacao:aluno_list' %}"><i class="fa-solid fa-list"></i> Ver todos</a>
+      </div>
+
+      <div class="dash-table">
+        <div class="dash-table__head small">
+          <div>Aluno</div>
+          <div class="dash-table__right">Ação</div>
+        </div>
+
+        {% for a in ultimos_alunos %}
+          <div class="dash-table__row">
+            <div class="dash-table__left">
+              <div class="dash-table__primary">{{ a.nome }}</div>
+              <div class="dash-table__muted small">
+                {% if a.matriculas.all %}
+                  {% with m=a.matriculas.all.0 %}
+                    {{ m.turma.nome }} • {{ m.turma.unidade.nome }}
+                  {% endwith %}
+                {% endif %}
+              </div>
+            </div>
+            <div class="dash-table__right">
+              <a class="btn btn--ghost" href="{% url 'educacao:aluno_detail' a.pk %}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir</a>
+            </div>
+          </div>
+        {% empty %}
+          <div class="dash-empty">
+            <div class="dash-empty__title">Nenhum aluno</div>
+            <div class="dash-empty__text">Ainda não há alunos cadastrados.</div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
 </div>
-
-<div class="dashboard-section">
-  <div class="dashboard-section-title">Últimas secretarias</div>
-
-  <ul class="dashboard-list">
-    {% for s in ultimas_secretarias %}
-      <li><a href="{% url 'org:secretaria_detail' s.pk %}">{{ s.nome }}</a></li>
-    {% empty %}
-      <li>Nenhuma secretaria cadastrada.</li>
-    {% endfor %}
-  </ul>
-</div>
-
-<script>
-(function () {
-  function renderCharts() {
-    const c1Labels = JSON.parse(document.getElementById("c1-labels").textContent || "[]");
-    const c1Values = JSON.parse(document.getElementById("c1-values").textContent || "[]");
-    const c2Labels = JSON.parse(document.getElementById("c2-labels").textContent || "[]");
-    const c2Values = JSON.parse(document.getElementById("c2-values").textContent || "[]");
-    const el1 = document.getElementById("chartUnidades");
-    const el2 = document.getElementById("chartAlunos");
-    if (!window.Chart) return;
-
-    if (c1Labels.length && c1Values.length) {
-      new Chart(el1, { type: "bar", data: { labels: c1Labels, datasets: [{ data: c1Values }] },
-        options: { responsive: true, plugins: { legend: { display: false } } } });
-    }
-    if (c2Labels.length && c2Values.length) {
-      new Chart(el2, { type: "bar", data: { labels: c2Labels, datasets: [{ data: c2Values }] },
-        options: { responsive: true, plugins: { legend: { display: false } } } });
-    }
-  }
-
-  if (window.Chart) renderCharts();
-  else {
-    const s = document.createElement("script");
-    s.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js";
-    s.onload = renderCharts;
-    document.head.appendChild(s);
-  }
-})();
-</script>

@@ -4,82 +4,84 @@
 {% block title %}Entrar • GEPUB{% endblock %}
 
 {% block content %}
-<div class="login-page">
-  <div class="login-frame">
+<link rel="stylesheet" href="{% static 'css/login_gepub.css' %}">
 
-    <!-- ESQUERDA: FORM (SEM LOGO/NOME) -->
-    <div class="login-left">
-      <div class="login-left__inner">
+<div class="login">
 
-        <h1 class="login-title">Entrar</h1>
-        <p class="login-subtitle">Use seu <b>código de acesso</b> e senha para acessar o painel.</p>
+  <!-- LADO ESQUERDO (INSTITUCIONAL) -->
+  <div class="login__left">
+    <div class="login__left-inner">
 
-        {% if error %}
-          <div class="login-alert">
-            <b>Atenção:</b> {{ error }}
-          </div>
-        {% endif %}
-
-        <form method="post" class="login-form">
-          {% csrf_token %}
-
-          <div class="login-field">
-            <label>Código de acesso</label>
-            <input
-              name="codigo_acesso"
-              autocomplete="username"
-              required
-              placeholder="Ex.: MUN-000123"
-            >
-          </div>
-
-          <div class="login-field">
-            <label>Senha</label>
-            <input
-              name="password"
-              type="password"
-              autocomplete="current-password"
-              required
-              placeholder="Digite sua senha"
-            >
-          </div>
-
-          <button type="submit" class="login-btn">
-            Entrar
-          </button>
-
-          <div class="login-help">
-            <div>Primeiro acesso? Sua senha inicial é seu <b>CPF</b>.</div>
-            <div class="login-help__small">Se precisar, peça ao administrador para resetar sua senha.</div>
-          </div>
-        </form>
-
-      </div>
-    </div>
-
-    <!-- DIREITA: PAINEL AZUL (COM LOGO + NOME) -->
-    <div class="login-right">
-      <div class="login-right__inner">
-
-        <div class="login-right__brand">
-          <div class="login-right__logo">
-            <img src="{% static 'img/logo_prefeitura.png' %}" alt="GEPUB" onerror="this.style.display='none'">
-          </div>
-          <div class="login-right__brandtext">
-            <div class="login-right__sub">Gestão Estratégica Pública</div>
-          </div>
+      <div class="login__brand">
+        <div class="login__logo">
+          GEPUB
         </div>
-
-        <div class="login-right__text">
-          <div class="login-right__headline">Gestão pública em um só lugar</div>
-          <div class="login-right__desc">
-            Organização, Educação e NEE com acesso por perfil, relatórios e auditoria.
-          </div>
+        <div class="login__brand-sub">
+          Gestão Estratégica Pública
         </div>
-
       </div>
-    </div>
 
+      <div class="login__headline">
+        Um sistema público desenvolvido para
+        <strong>organizar, integrar e validar</strong>
+        informações da gestão municipal.
+      </div>
+
+      <div class="login__features">
+        <div>✔ Organização Estrutural</div>
+        <div>✔ Gestão Educacional</div>
+        <div>✔ NEE e Relatórios com Validação</div>
+        <div>✔ Controle por Perfil (RBAC)</div>
+      </div>
+
+      <div class="login__footer-left">
+        Transparência • Auditoria • Segurança
+      </div>
+
+    </div>
   </div>
+
+  <!-- LADO DIREITO (FORMULÁRIO) -->
+  <div class="login__right">
+    <div class="login__card">
+
+      <h1 class="login__title">Login</h1>
+      <p class="login__subtitle">
+        Acesse o GEPUB com seu código institucional.
+      </p>
+
+      {% if error %}
+      <div class="login__error">
+        {{ error }}
+      </div>
+      {% endif %}
+
+      <form method="post" class="login__form">
+        {% csrf_token %}
+
+        <div class="login__field">
+          <label>Código de acesso</label>
+          <input type="text" name="codigo_acesso" required>
+        </div>
+
+        <div class="login__field">
+          <label>Senha</label>
+          <input type="password" name="password" required>
+        </div>
+
+        <button type="submit" class="login__button">
+          Acessar Sistema
+        </button>
+
+        <div class="login__help">
+          Primeira senha padrão: <strong>CPF</strong><br>
+          Em caso de dúvidas, procure o administrador.
+        </div>
+      </form>
+
+    </div>
+  </div>
+
 </div>
+
 {% endblock %}

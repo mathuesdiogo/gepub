@@ -1,102 +1,324 @@
-/* =========================================================
-   GEPUB — FORMS
-   Compatível com HTML atual (inputs sem classes + .login-field)
-   ========================================================= */
+/* ==========================================================
+   GEPUB — FORM SYSTEM
+   ========================================================== */
 
-label{
-  display: inline-block;
-  margin-bottom: var(--space-2);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
+:root {
+  --form-border: #d9e2e7;
+  --form-bg: #ffffff;
+  --form-focus: #1abc9c;
+  --form-radius: 10px;
+  --form-padding: 14px;
+  --form-label: #2c3e50;
+  --form-text: #34495e;
+  --form-muted: #7f8c8d;
+  --form-error: #e74c3c;
 }
 
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="number"],
-input[type="date"],
-input[type="tel"],
-input[type="search"],
-select,
-textarea{
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-light);
-  background: #fff;
-  color: var(--color-text-primary);
-  box-shadow: var(--shadow-xs);
-  transition: border-color .12s ease, box-shadow .12s ease, background .12s ease;
+/* ==========================================================
+   FORM CONTAINER
+   ========================================================== */
+
+.form-container {
+  background: var(--form-bg);
+  padding: 24px;
+  border-radius: var(--form-radius);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.05);
 }
 
-textarea{ min-height: 110px; resize: vertical; }
+/* ==========================================================
+   GRID
+   ========================================================== */
 
-input::placeholder,
-textarea::placeholder{
-  color: var(--color-text-muted);
-}
-
-input:focus,
-select:focus,
-textarea:focus{
-  outline: none;
-  border-color: var(--color-primary-300);
-  box-shadow: var(--focus-ring);
-}
-
-select{
-  appearance: none;
-  background-image:
-    linear-gradient(45deg, transparent 50%, var(--color-text-muted) 50%),
-    linear-gradient(135deg, var(--color-text-muted) 50%, transparent 50%);
-  background-position:
-    calc(100% - 18px) 50%,
-    calc(100% - 12px) 50%;
-  background-size: 6px 6px, 6px 6px;
-  background-repeat: no-repeat;
-  padding-right: 34px;
-}
-
-/* Grupos usados no login */
-.login-field{
+.form-grid {
   display: grid;
-  gap: var(--space-2);
-  margin-bottom: var(--space-4);
+  gap: 20px;
 }
 
-/* Seções de formulário (já existem) */
-.form-section{
-  padding: var(--space-6);
-  border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-lg);
-  background: var(--color-bg-card);
-  box-shadow: var(--shadow-xs);
+.form-grid.cols-2 {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
-.form-section__title{
-  margin: 0 0 var(--space-4);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
+.form-grid.cols-3 {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
-/* Erros do Django */
-.errorlist{
-  margin: var(--space-2) 0 0;
-  padding-left: var(--space-4);
-  color: var(--color-danger-500);
-  font-size: var(--font-size-sm);
+/* ==========================================================
+   FIELD GROUP
+   ========================================================== */
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.helptext{
-  display: block;
-  margin-top: var(--space-2);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--form-label);
 }
-/* Inputs em filtros/listas: um pouco mais “alto” e confortável */
-.content input[name="q"],
-.content input[type="search"]{
-  height: 42px;
+
+/* ==========================================================
+   INPUTS
+   ========================================================== */
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: var(--form-padding);
+  border: 1px solid var(--form-border);
+  border-radius: var(--form-radius);
+  font-size: 14px;
+  color: var(--form-text);
+  background: #f9fbfc;
+  transition: all 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--form-focus);
+  box-shadow: 0 0 0 3px rgba(26,188,156,0.15);
+  outline: none;
+  background: #ffffff;
+}
+
+/* ==========================================================
+   HELP TEXT
+   ========================================================== */
+
+.form-help {
+  font-size: 12px;
+  color: var(--form-muted);
+}
+
+/* ==========================================================
+   ERROR STATE
+   ========================================================== */
+
+.form-group.error input,
+.form-group.error select,
+.form-group.error textarea {
+  border-color: var(--form-error);
+  background: #fff6f6;
+}
+
+.form-error-text {
+  font-size: 12px;
+  color: var(--form-error);
+}
+
+/* ==========================================================
+   ACTION BAR
+   ========================================================== */
+
+.form-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* ==========================================================
+   SEARCH AND FILTERS
+   ========================================================== */
+
+.search-and-filters {
+  background: #f4f7f9;
+  padding: 20px;
+  border-radius: var(--form-radius);
+  display: grid;
+  gap: 16px;
+}
+
+.search-and-filters.large-filters {
+  padding: 30px;
+}
+
+.search-and-filters .filter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ==========================================================
+   SWITCH
+   ========================================================== */
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #ccc;
+  border-radius: 34px;
+  transition: 0.3s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+.switch input:checked + .slider {
+  background-color: var(--form-focus);
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+/* ==========================================================
+   CHECKBOX STYLED
+   ========================================================== */
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.checkbox-container input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--form-focus);
+  cursor: pointer;
+}
+
+/* ==========================================================
+   STAR RATING
+   ========================================================== */
+
+.stars {
+  display: flex;
+  gap: 6px;
+  font-size: 18px;
+}
+
+.stars .fa-star {
+  color: #ccc;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.stars .fa-star.active {
+  color: #27ae60;
+}
+/* ==========================================================
+   GEPUB — FORM FALLBACK (pega forms "crus" sem .form-group)
+   Deixa igual referência: bem arredondado e clean
+   ========================================================== */
+
+:root {
+  --input-radius: 14px;          /* mais arredondado (referência) */
+  --input-padding-y: 12px;
+  --input-padding-x: 14px;
+  --input-border: #d6e0e6;
+  --input-bg: #ffffff;
+  --input-bg-soft: #f8fbfd;
+  --input-focus: #1abc9c;
+  --input-text: #243447;
+  --input-muted: #6b7a88;
+}
+
+/* alvo: forms dentro do layout padrão (cards) */
+.card__body form input:not([type="checkbox"]):not([type="radio"]),
+.card__body form select,
+.card__body form textarea,
+.form-shell input:not([type="checkbox"]):not([type="radio"]),
+.form-shell select,
+.form-shell textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--input-padding-y) var(--input-padding-x);
+  border: 1px solid var(--input-border);
+  border-radius: var(--input-radius);
+  background: var(--input-bg-soft);
+  color: var(--input-text);
+  font-size: 14px;
+  line-height: 1.2;
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+  outline: none;
+}
+
+.card__body form textarea,
+.form-shell textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* foco bonito (igual referência) */
+.card__body form input:focus,
+.card__body form select:focus,
+.card__body form textarea:focus,
+.form-shell input:focus,
+.form-shell select:focus,
+.form-shell textarea:focus {
+  background: var(--input-bg);
+  border-color: var(--input-focus);
+  box-shadow: 0 0 0 4px rgba(26, 188, 156, 0.16);
+}
+
+/* labels (quando estão “crus” tipo: Nome: <input>) */
+.card__body form label,
+.card__body form .small,
+.form-shell label,
+.form-shell .small {
+  color: var(--input-muted);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* dá espaçamento entre linhas do form cru */
+.card__body form p,
+.card__body form .form-row,
+.form-shell .form-row {
+  margin: 0 0 14px;
+}
+
+/* input file fica menos feio */
+.card__body form input[type="file"],
+.form-shell input[type="file"] {
+  padding: 10px 12px;
+  background: var(--input-bg);
+}
+
+/* checkbox/radio continuam nativos, só alinhamento */
+.card__body form input[type="checkbox"],
+.card__body form input[type="radio"],
+.form-shell input[type="checkbox"],
+.form-shell input[type="radio"] {
+  transform: scale(1.05);
+}
+
+/* se tiver campo com erro do Django */
+.errorlist,
+ul.errorlist {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fff2f2;
+  border: 1px solid #ffd0d0;
+  color: #b42318;
+  list-style: none;
+  font-size: 13px;
 }

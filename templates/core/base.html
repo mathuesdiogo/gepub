@@ -8,6 +8,7 @@
   <title>{% block title %}GEPUB{% endblock %}</title>
 
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
+<link rel="stylesheet" href="{% static 'css/components/sections.css' %}">
 
   <!-- Font Awesome (CDN) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -130,6 +131,16 @@
             <span class="menu__label">Usuários</span>
           </a>
         {% endif %}
+            <div class="menu__section">Ajuda</div>
+
+<a
+  class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'core' and request.resolver_match.url_name == 'guia_telas' %}is-active{% endif %}"
+  href="{% url 'core:guia_telas' %}"
+  title="Guia de Telas"
+>
+  <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-hashtag"></i></span>
+  <span class="menu__label">Guia de Telas</span>
+</a>
 
         {% if request.user.is_staff or request.user.is_superuser %}
           <div class="menu__section">Sistema</div>
@@ -185,8 +196,15 @@
         </div>
 
         <div class="topbar__right">
-          <span class="pill">GEPUB</span>
-        </div>
+  <form class="topbar-go" method="get" action="{% url 'core:go_code' %}">
+    <i class="fa-solid fa-magnifying-glass topbar-go__icon" aria-hidden="true"></i>
+    <input class="topbar-go__input" type="text" name="c" inputmode="numeric" autocomplete="off" placeholder="Ir para código… (ex: 201)" />
+    <button class="btn btn--ghost topbar-go__btn" type="submit">Ir</button>
+  </form>
+
+  <span class="pill">GEPUB</span>
+</div>
+
       </header>
 
       <!-- ✅ Conteúdo rolável (conforme layout.css) -->

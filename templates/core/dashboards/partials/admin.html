@@ -1,95 +1,110 @@
-<div class="dash-grid">
+<div class="dash-actions">
+  <a class="btn btn-primary" href="{% url 'org:municipio_list' %}"><i class="fa-solid fa-city"></i> Municípios</a>
+  <a class="btn btn-primary" href="{% url 'accounts:usuarios_list' %}"><i class="fa-solid fa-users"></i> Usuários</a>
+  <a class="btn btn-primary" href="{% url 'nee:relatorios_index' %}"><i class="fa-solid fa-file-lines"></i> Relatórios NEE</a>
+</div>
 
-  <div class="dash-col-12">
-    <div class="card">
-      <div class="card__title">Acessos rápidos</div>
-      <div class="card__body">
-        <div class="dash-actions">
-          <a class="btn btn-primary" href="{% url 'org:index' %}"><i class="fa-solid fa-sitemap"></i> Organização</a>
-          <a class="btn btn-primary" href="{% url 'educacao:index' %}"><i class="fa-solid fa-graduation-cap"></i> Educação</a>
-          {% if can_nee %}
-            <a class="btn btn-primary" href="{% url 'nee:index' %}"><i class="fa-solid fa-wheelchair"></i> NEE</a>
-          {% endif %}
-          {% if can_users %}
-            <a class="btn btn-primary" href="{% url 'accounts:usuarios_list' %}"><i class="fa-solid fa-users"></i> Usuários</a>
-          {% endif %}
-        </div>
+<div class="dash-grid dash-col-3">
+  <a class="metric-card metric-card--primary" href="{% url 'org:municipio_list' %}">
+    <div class="metric-label">Municípios</div>
+    <div class="metric-value">{{ kpis.municipios }}</div>
+    <div class="metric-meta">Prefeituras cadastradas</div>
+  </a>
+
+  <a class="metric-card metric-card--blue" href="{% url 'accounts:usuarios_list' %}">
+    <div class="metric-label">Usuários</div>
+    <div class="metric-value">{{ kpis.usuarios }}</div>
+    <div class="metric-meta">Contas no sistema</div>
+  </a>
+
+  <a class="metric-card metric-card--green" href="{% url 'org:secretaria_list' %}">
+    <div class="metric-label">Secretarias</div>
+    <div class="metric-value">{{ kpis.secretarias }}</div>
+    <div class="metric-meta">Estrutura organizacional</div>
+  </a>
+
+  <a class="metric-card" href="{% url 'org:unidade_list' %}">
+    <div class="metric-label">Unidades</div>
+    <div class="metric-value">{{ kpis.unidades }}</div>
+    <div class="metric-meta">Escolas / unidades</div>
+  </a>
+
+  <div class="metric-card">
+    <div class="metric-label">Setores</div>
+    <div class="metric-value">{{ kpis.setores }}</div>
+    <div class="metric-meta">Departamentos</div>
+  </div>
+
+  <a class="metric-card" href="{% url 'educacao:turma_list' %}">
+    <div class="metric-label">Turmas</div>
+    <div class="metric-value">{{ kpis.turmas }}</div>
+    <div class="metric-meta">Ano letivo e histórico</div>
+  </a>
+
+  <a class="metric-card" href="{% url 'educacao:aluno_list' %}">
+    <div class="metric-label">Alunos</div>
+    <div class="metric-value">{{ kpis.alunos }}</div>
+    <div class="metric-meta">Cadastros</div>
+  </a>
+
+  <div class="metric-card">
+    <div class="metric-label">Matrículas</div>
+    <div class="metric-value">{{ kpis.matriculas }}</div>
+    <div class="metric-meta">Vínculos turma ↔ aluno</div>
+  </div>
+</div>
+
+<div class="dash-two">
+  <div class="dash-card">
+    <div class="dash-card__head">
+      <div>
+        <div class="dash-card__title">Usuários por perfil</div>
+        <div class="dash-card__sub">Distribuição de acessos no sistema</div>
       </div>
+    </div>
+    <div class="dash-card__body">
+      <canvas id="chartRoles" height="160"></canvas>
     </div>
   </div>
 
-  <div class="dash-col-3">
-    <a class="metric-card" href="{% url 'org:municipio_list' %}">
-      <div class="metric-label">Prefeituras</div>
-      <div class="metric-value">{{ kpis.municipios|default:"0" }}</div>
-      <div class="metric-meta">Ver lista</div>
-    </a>
-  </div>
-
-  <div class="dash-col-3">
-    <a class="metric-card" href="{% url 'accounts:usuarios_list' %}">
-      <div class="metric-label">Usuários</div>
-      <div class="metric-value">{{ kpis.usuarios|default:"0" }}</div>
-      <div class="metric-meta">Gerenciar</div>
-    </a>
-  </div>
-
-  <div class="dash-col-3">
-    <a class="metric-card" href="{% url 'org:secretaria_list' %}">
-      <div class="metric-label">Secretarias</div>
-      <div class="metric-value">{{ kpis.secretarias|default:"0" }}</div>
-      <div class="metric-meta">Ver lista</div>
-    </a>
-  </div>
-
-  <div class="dash-col-3">
-    <a class="metric-card" href="{% url 'org:unidade_list' %}">
-      <div class="metric-label">Unidades</div>
-      <div class="metric-value">{{ kpis.unidades|default:"0" }}</div>
-      <div class="metric-meta">Ver lista</div>
-    </a>
-  </div>
-
-  <div class="dash-col-6">
-    <div class="card">
-      <div class="card__title">Usuários por perfil</div>
-      <div class="card__body">
-        <div class="dash-chart">
-          <canvas id="chartRoles" height="140"></canvas>
-        </div>
+  <div class="dash-card">
+    <div class="dash-card__head">
+      <div>
+        <div class="dash-card__title">Unidades por município (Top 10)</div>
+        <div class="dash-card__sub">Maiores estruturas por prefeitura</div>
       </div>
     </div>
-  </div>
-
-  <div class="dash-col-6">
-    <div class="card">
-      <div class="card__title">Estrutura por Prefeitura (Top 10)</div>
-      <div class="card__body">
-        <div class="dash-chart">
-          <canvas id="chartMun" height="140"></canvas>
-        </div>
-      </div>
+    <div class="dash-card__body">
+      <canvas id="chartMunicipios" height="160"></canvas>
     </div>
   </div>
+</div>
 
-  <div class="dash-col-6">
-    <div class="card">
-      <div class="card__title">Top Prefeituras por Unidades</div>
-      <div class="card__body dash-table">
+<div class="dash-two">
+  <div class="dash-card">
+    <div class="dash-card__head">
+      <div>
+        <div class="dash-card__title">Top municípios</div>
+        <div class="dash-card__sub">Secretarias e unidades</div>
+      </div>
+      <a class="btn btn--ghost" href="{% url 'org:municipio_list' %}"><i class="fa-solid fa-list"></i> Ver todos</a>
+    </div>
+    <div class="dash-card__body">
+      <div class="dash-table">
         <table class="table">
           <thead>
             <tr>
               <th>Município</th>
-              <th style="width:140px;">Secretarias</th>
-              <th style="width:120px;">Unidades</th>
+              <th>Secretarias</th>
+              <th>Unidades</th>
             </tr>
           </thead>
           <tbody>
-            {% for row in top_municipios %}
+            {% for m in top_municipios %}
               <tr>
-                <td>{{ row.nome }}</td>
-                <td>{{ row.secretarias }}</td>
-                <td>{{ row.unidades }}</td>
+                <td><a class="link" href="{% url 'org:municipio_detail' m.id %}">{{ m.nome }}</a></td>
+                <td>{{ m.secretarias }}</td>
+                <td>{{ m.unidades }}</td>
               </tr>
             {% empty %}
               <tr><td colspan="3">Sem dados.</td></tr>
@@ -100,21 +115,27 @@
     </div>
   </div>
 
-  <div class="dash-col-6">
-    <div class="card">
-      <div class="card__title">Top Unidades por Turmas</div>
-      <div class="card__body dash-table">
+  <div class="dash-card">
+    <div class="dash-card__head">
+      <div>
+        <div class="dash-card__title">Top unidades por turmas</div>
+        <div class="dash-card__sub">Unidades com mais turmas</div>
+      </div>
+      <a class="btn btn--ghost" href="{% url 'org:unidade_list' %}"><i class="fa-solid fa-list"></i> Ver todas</a>
+    </div>
+    <div class="dash-card__body">
+      <div class="dash-table">
         <table class="table">
           <thead>
             <tr>
               <th>Unidade</th>
-              <th style="width:120px;">Turmas</th>
+              <th>Turmas</th>
             </tr>
           </thead>
           <tbody>
             {% for u in top_unidades %}
               <tr>
-                <td>{{ u.nome }}</td>
+                <td><a class="link" href="{% url 'org:unidade_detail' u.id %}">{{ u.nome }}</a></td>
                 <td>{{ u.turmas }}</td>
               </tr>
             {% empty %}
@@ -125,36 +146,33 @@
       </div>
     </div>
   </div>
-
 </div>
 
 <script>
 (function () {
-  function loadChart(cb){
+  function ensureChart(cb){
     if (window.Chart) return cb();
-    const s = document.createElement("script");
+    var s = document.createElement("script");
     s.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js";
     s.onload = cb;
     document.head.appendChild(s);
   }
 
-  loadChart(function(){
-    const rolesLabels = {{ chart_roles.labels|safe }};
-    const rolesValues = {{ chart_roles.values|safe }};
-
-    new Chart(document.getElementById('chartRoles'), {
-      type: 'bar',
-      data: { labels: rolesLabels, datasets: [{ data: rolesValues }] },
-      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+  ensureChart(function () {
+    const roleLabels = {{ chart_roles.labels|safe }};
+    const roleValues = {{ chart_roles.values|safe }};
+    new Chart(document.getElementById("chartRoles"), {
+      type: "doughnut",
+      data: { labels: roleLabels, datasets: [{ data: roleValues }] },
+      options: { responsive: true, plugins: { legend: { position: "bottom" } } }
     });
 
     const munLabels = {{ chart_municipios.labels|safe }};
     const munValues = {{ chart_municipios.values|safe }};
-
-    new Chart(document.getElementById('chartMun'), {
-      type: 'doughnut',
+    new Chart(document.getElementById("chartMunicipios"), {
+      type: "bar",
       data: { labels: munLabels, datasets: [{ data: munValues }] },
-      options: { responsive: true }
+      options: { responsive: true, plugins: { legend: { display:false } }, scales: { y: { beginAtZero: true } } }
     });
   });
 })();

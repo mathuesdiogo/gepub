@@ -1262,9 +1262,17 @@ def setor_detail(request, pk: int):
 
 @login_required
 def setor_create(request):
-    block = _deny_manage_org(request)
-    if block:
-        return block
+    # ✅ Permissão no mesmo padrão de unidade_create (sem _deny_manage_org)
+    can_manage = (
+        can(request.user, "org.manage")
+        or can(request.user, "org.manage_unidade")
+        or can(request.user, "org.manage_secretaria")
+        or request.user.is_staff
+        or request.user.is_superuser
+    )
+    if not can_manage:
+        messages.error(request, "Você não tem permissão para cadastrar setores.")
+        return redirect("org:setor_list")
 
     if request.method == "POST":
         try:
@@ -1300,9 +1308,17 @@ def setor_create(request):
 
 @login_required
 def setor_update(request, pk: int):
-    block = _deny_manage_org(request)
-    if block:
-        return block
+    # ✅ Permissão no mesmo padrão de unidade_update (sem _deny_manage_org)
+    can_manage = (
+        can(request.user, "org.manage")
+        or can(request.user, "org.manage_unidade")
+        or can(request.user, "org.manage_secretaria")
+        or request.user.is_staff
+        or request.user.is_superuser
+    )
+    if not can_manage:
+        messages.error(request, "Você não tem permissão para editar setores.")
+        return redirect("org:setor_list")
 
     setor = get_object_or_404(Setor, pk=pk)
 
@@ -1344,7 +1360,6 @@ def setor_update(request, pk: int):
             form = SetorForm(instance=setor)
 
     return render(request, "org/setor_form.html", {"form": form, "mode": "update", "setor": setor})
-
 
 @login_required
 def secretaria_autocomplete(request):

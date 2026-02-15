@@ -1,0 +1,534 @@
+/* =====================================================================
+   GEPUB • Caixas / Seções (inspirado no SUAP)
+   Arquivo: /static/css/components/sections.css
+   ===================================================================== */
+
+/* Tokens mínimos (não vira framework) */
+:root{
+  --radius-lg: 14px;
+  --radius-md: 12px;
+  --radius-sm: 10px;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.06);
+
+  --border: rgba(0,0,0,.12);
+  --border-soft: rgba(0,0,0,.08);
+
+  --bg: #fff;
+  --bg-soft: rgba(0,0,0,.02);
+
+  --head-bg: rgba(0, 140, 120, .08);   /* suave “verde/azulado” SUAP-like */
+  --head-border: rgba(0, 140, 120, .20);
+
+  --text: rgba(0,0,0,.78);
+  --muted: rgba(0,0,0,.55);
+
+  --success-bg: rgba(46, 204, 113, .14);
+  --success-br: rgba(46, 204, 113, .40);
+
+  --info-bg: rgba(52, 152, 219, .14);
+  --info-br: rgba(52, 152, 219, .40);
+
+  --warning-bg: rgba(241, 196, 15, .16);
+  --warning-br: rgba(241, 196, 15, .45);
+
+  --danger-bg: rgba(231, 76, 60, .14);
+  --danger-br: rgba(231, 76, 60, .45);
+
+  --gap: 16px;
+  --pad: 16px;
+}
+
+/* ---------------------------------------------------------------------
+   A) Accordion/Box (a “barra” de abrir/fechar como nas imagens)
+   --------------------------------------------------------------------- */
+
+.accordion,
+.box,
+.section {
+  background: var(--bg);
+  border: 1px solid var(--head-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.accordion + .accordion,
+.box + .box,
+.section + .section { margin-top: 12px; }
+
+/* Cabeçalho do accordion */
+.accordion__head,
+.box__head,
+.section__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 12px 14px;
+  background: var(--head-bg);
+  border-bottom: 1px solid var(--head-border);
+}
+
+/* Lado esquerdo: título */
+.accordion__title,
+.box__title,
+.section__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+/* Ícone opcional no título */
+.accordion__title i,
+.box__title i,
+.section__title i { opacity: .85; }
+
+/* Lado direito: “Atualizado em …” + chevron */
+.accordion__meta,
+.box__meta,
+.section__meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: .92rem;
+  white-space: nowrap;
+}
+
+.accordion__toggle,
+.box__toggle,
+.section__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  background: rgba(255,255,255,.7);
+  cursor: pointer;
+}
+
+/* Corpo do accordion */
+.accordion__body,
+.box__body,
+.section__body {
+  padding: var(--pad);
+}
+
+/* Variante: iniciar fechado (se você usar com JS/aria) */
+.is-collapsed > .accordion__body,
+.is-collapsed > .box__body,
+.is-collapsed > .section__body { display: none; }
+
+/* ---------------------------------------------------------------------
+   B) Containers “Exibição:” + grids (como nas imagens)
+   --------------------------------------------------------------------- */
+
+.exibicao,
+.exhibition {
+  margin-top: 6px;
+}
+
+.exibicao__label,
+.exhibition__label {
+  color: var(--muted);
+  font-weight: 600;
+  margin: 0 0 10px 0;
+}
+
+.flex-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+}
+
+/* ---------------------------------------------------------------------
+   C) Boxes (services / texts / infos) = ul.flex-container.boxes ...
+      Compatível com o HTML SUAP das imagens
+   --------------------------------------------------------------------- */
+
+.flex-container.boxes {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Item padrão */
+.flex-container.boxes > .box-item,
+.flex-container.boxes > li.box-item {
+  position: relative;
+
+  flex: 1 1 320px;
+  min-width: 260px;
+
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Compact (tabela de referência SUAP) */
+.flex-container.boxes.compact > .box-item,
+.flex-container.boxes.compact > li.box-item {
+  padding: 12px;
+}
+
+/* Linkable = item inteiro clicável */
+.flex-container.boxes.linkable > .box-item,
+.flex-container.boxes.linkable > li.box-item {
+  cursor: pointer;
+}
+.flex-container.boxes.linkable > .box-item:hover,
+.flex-container.boxes.linkable > li.box-item:hover {
+  border-color: var(--head-border);
+  background: rgba(0,0,0,.01);
+}
+
+/* Flex vertical no conteúdo */
+.flex-container.boxes.flex > .box-item,
+.flex-container.boxes.flex > li.box-item {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Text center (Caixa Textos) */
+.flex-container.boxes.text-center > .box-item,
+.flex-container.boxes.text-center > li.box-item {
+  text-align: center;
+}
+
+/* Ajustes de largura (Caixa Textos) */
+.flex-container.boxes.flex-basis-240 > .box-item,
+.flex-container.boxes.flex-basis-240 > li.box-item { flex-basis: 240px; }
+
+.flex-container.boxes.flex-basis-400 > .box-item,
+.flex-container.boxes.flex-basis-400 > li.box-item { flex-basis: 400px; }
+
+/* Padding menor */
+.flex-container.boxes.sm > .box-item,
+.flex-container.boxes.sm > li.box-item { padding: 12px; }
+
+/* Título e subtítulo */
+.box-item h4, .box-item .title,
+.box-item h5 {
+  margin: 0;
+  color: var(--text);
+}
+.box-item h4, .box-item .title { font-weight: 700; }
+.box-item h5 { font-weight: 600; color: var(--muted); margin-top: 6px; }
+
+/* “status” no topo (ex: Situação) */
+.box-item .status {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+
+  font-size: .82rem;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  background: rgba(255,255,255,.85);
+  color: var(--muted);
+}
+
+/* Ícone grande opcional (ex: lock/user) */
+.box-item .fa, .box-item .fas, .box-item .far, .box-item i.fa-solid {
+  margin-top: 18px;
+}
+
+/* Número/estatística grande (ex: 45,67) */
+.box-item .stat {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin: 10px 0 6px 0;
+  color: rgba(0,0,0,.62);
+}
+
+/* Notes/pills (pendências 17) */
+.box-item .notes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.box-item .note {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border-soft);
+  color: var(--muted);
+}
+
+/* Listas numeradas dentro da box */
+.box-item .numbered-list {
+  margin: 10px 0 0 0;
+  padding-left: 20px;
+  color: var(--muted);
+}
+.box-item .numbered-list .list-item a {
+  color: rgba(0, 120, 105, .95);
+  text-decoration: none;
+}
+.box-item .numbered-list .list-item a:hover { text-decoration: underline; }
+
+/* Rodapé (mensagem rodapé do exemplo) */
+.box-item footer {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, .06);
+  color: rgba(0,0,0,.60);
+}
+
+/* Estados (OPTIONAL_CLASS_CHILD) */
+.box-item.error{
+  background: var(--danger-bg);
+  border-color: var(--danger-br);
+}
+.box-item.info{
+  background: var(--info-bg);
+  border-color: var(--info-br);
+}
+.box-item.success{
+  background: var(--success-bg);
+  border-color: var(--success-br);
+}
+.box-item.warning{
+  background: var(--warning-bg);
+  border-color: var(--warning-br);
+}
+
+/* ---------------------------------------------------------------------
+   D) Board (boards + board-container) como nas imagens
+   --------------------------------------------------------------------- */
+
+.boards {
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  background: rgba(0,0,0,.01);
+}
+
+.board-container{
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  background: rgba(255,255,255,.65);
+}
+
+.board-container + .board-container { margin-top: 12px; }
+
+/* Parent warning (OPTIONAL_CLASS_PARENT em board) */
+.boards.warning{ background: rgba(241,196,15,.18); border-color: rgba(241,196,15,.40); }
+
+/* Cards dentro do board (Título A/B/C) */
+.board-container .card,
+.board-container .board-card{
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  background: var(--bg);
+  box-shadow: var(--shadow-sm);
+}
+
+.board-container .board-card + .board-card,
+.board-container .card + .card { margin-top: 12px; }
+
+.board-container .board-card strong,
+.board-container .card strong { color: var(--text); }
+
+/* ---------------------------------------------------------------------
+   E) General Box (amarelado com actions, tabs/pills) como nas imagens
+   --------------------------------------------------------------------- */
+
+.general-box{
+  position: relative;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--warning-br);
+  background: rgba(241, 196, 15, .16);
+  padding: 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Indented */
+.general-box.indented{ margin-left: 18px; }
+
+/* Danger/Success */
+.general-box.danger{
+  border-color: var(--danger-br);
+  background: var(--danger-bg);
+}
+.general-box.success{
+  border-color: var(--success-br);
+  background: var(--success-bg);
+}
+
+.general-box .primary-info .title{
+  margin: 0;
+  font-weight: 800;
+  color: rgba(0, 120, 105, .95);
+}
+
+.general-box .primary-info small{ color: var(--muted); font-weight: 700; }
+
+/* Action bar (usa teus botões já padronizados) */
+.general-box .action-bar{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+/* “linha” de infos secundárias (created/open/modified) */
+.general-box .secondary-info{
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(0,0,0,.18);
+}
+
+/* ---------------------------------------------------------------------
+   F) Totalizadores (total-container / total-item) como nas imagens
+   --------------------------------------------------------------------- */
+
+.total-container{
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+}
+
+.total-container .total-item{
+  flex: 1 1 240px;
+  min-width: 220px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 14px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--head-border);
+  background: rgba(0, 140, 120, .06);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+}
+
+/* Sem ícone (no-icon) */
+.total-container.no-icon .total-item i,
+.total-container.no-icon .total-item .fa,
+.total-container.no-icon .total-item .fas { display:none; }
+
+/* Pequeno */
+.total-container.sm .total-item { padding: 12px; }
+
+/* Texto */
+.total-item .description{
+  margin: 0;
+  color: var(--muted);
+  font-weight: 700;
+}
+.total-item .total{
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 900;
+  line-height: 1;
+  color: rgba(0,0,0,.70);
+}
+
+/* Estados */
+.total-container .total-item.error{
+  background: var(--danger-bg);
+  border-color: var(--danger-br);
+}
+.total-container .total-item.info{
+  background: var(--info-bg);
+  border-color: var(--info-br);
+}
+.total-container .total-item.success{
+  background: var(--success-bg);
+  border-color: var(--success-br);
+}
+.total-container .total-item.warning{
+  background: var(--warning-bg);
+  border-color: var(--warning-br);
+}
+
+/* ---------------------------------------------------------------------
+   G) Gallery (Fotos) como nas imagens
+   --------------------------------------------------------------------- */
+
+.gallery{
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+}
+
+.gallery-item{
+  flex: 1 1 360px;
+  min-width: 260px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  padding: 14px;
+}
+
+.gallery-item .title{
+  margin: 0;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.gallery-item .description{
+  margin: 6px 0 10px 0;
+  color: var(--muted);
+}
+
+.gallery-item .btn.float-end{
+  float: right;
+  margin-top: -2px;
+}
+
+.gallery-item .image img{
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border-soft);
+  background: rgba(0,0,0,.02);
+}
+
+/* Responsivo */
+@media (max-width: 720px){
+  .flex-container { gap: 12px; }
+  .flex-container.boxes > .box-item,
+  .flex-container.boxes > li.box-item{
+    flex-basis: 100%;
+    min-width: 0;
+  }
+  .total-container .total-item{
+    flex-basis: 100%;
+    min-width: 0;
+  }
+  .gallery-item{
+    flex-basis: 100%;
+    min-width: 0;
+  }
+}

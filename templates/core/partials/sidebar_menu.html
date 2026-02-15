@@ -29,7 +29,6 @@
     <i class="fa-solid fa-users"></i><span>Turmas</span>
   </a>
 
-  {# ✅ Matrículas (por enquanto aponta para a tela que você já tem: matricula_create/painel) #}
   <a class="menu__item" href="{% url 'educacao:matricula_create' %}">
     <i class="fa-solid fa-id-card-clip"></i><span>Matrículas</span>
   </a>
@@ -48,5 +47,13 @@
 
   <a class="menu__item" href="{% url 'accounts:usuarios_list' %}">
     <i class="fa-solid fa-user-shield"></i><span>Usuários</span>
+  </a>
+</div>
+
+<div class="menu__section">
+  <div class="menu__title">Ajuda</div>
+
+  <a class="menu__item" href="{% url 'core:guia_telas' %}">
+    <i class="fa-solid fa-hashtag"></i><span>Guia de Telas</span>
   </a>
 </div>

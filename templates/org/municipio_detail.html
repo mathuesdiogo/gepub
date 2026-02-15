@@ -46,36 +46,85 @@
     </div>
   </div>
 
-  <div class="triple-grid">
+<ul class="nav-tabs">
+  <li class="active"><a href="#tab-secretarias">Secretarias</a></li>
+  <li><a href="#tab-unidades">Unidades</a></li>
+  <li><a href="#tab-setores">Setores</a></li>
+</ul>
 
+<div class="tab-content">
+
+  <div id="tab-secretarias" class="tab-pane active">
     <div class="mini-panel">
-      <div class="mini-panel__head"><strong>Secretarias</strong><a class="link small" href="{% url 'org:secretaria_list' %}?municipio={{ municipio.id }}">Ver todas</a></div>
+      <div class="mini-panel__head">
+        <strong>Secretarias</strong>
+        <a class="link small" href="{% url 'org:secretaria_list' %}?municipio={{ municipio.id }}">Ver todas</a>
+      </div>
+
       {% if top_secretarias %}
-        <ul class="mini-list">{% for s in top_secretarias %}<li><a class="link" href="{% url 'org:secretaria_detail' s.pk %}">{{ s.nome }}</a></li>{% endfor %}</ul>
+        <ul class="mini-list">
+          {% for s in top_secretarias %}
+            <li>
+              <a class="link" href="{% url 'org:secretaria_detail' s.pk %}">
+                {{ s.nome }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
       {% else %}
         {% include "core/partials/empty_state.html" with empty_title="Nenhuma secretaria cadastrada" empty_text="Este município ainda não possui secretarias vinculadas." %}
       {% endif %}
     </div>
+  </div>
 
+  <div id="tab-unidades" class="tab-pane">
     <div class="mini-panel">
-      <div class="mini-panel__head"><strong>Unidades</strong><a class="link small" href="{% url 'org:unidade_list' %}?municipio={{ municipio.id }}">Ver todas</a></div>
+      <div class="mini-panel__head">
+        <strong>Unidades</strong>
+        <a class="link small" href="{% url 'org:unidade_list' %}?municipio={{ municipio.id }}">Ver todas</a>
+      </div>
+
       {% if top_unidades %}
-        <ul class="mini-list">{% for u in top_unidades %}<li><a class="link" href="{% url 'org:unidade_detail' u.pk %}">{{ u.nome }}</a></li>{% endfor %}</ul>
+        <ul class="mini-list">
+          {% for u in top_unidades %}
+            <li>
+              <a class="link" href="{% url 'org:unidade_detail' u.pk %}">
+                {{ u.nome }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
       {% else %}
         {% include "core/partials/empty_state.html" with empty_title="Nenhuma unidade cadastrada" empty_text="Este município ainda não possui unidades vinculadas." %}
       {% endif %}
     </div>
+  </div>
 
+  <div id="tab-setores" class="tab-pane">
     <div class="mini-panel">
-      <div class="mini-panel__head"><strong>Setores</strong><a class="link small" href="{% url 'org:setor_list' %}?municipio={{ municipio.id }}">Ver todos</a></div>
+      <div class="mini-panel__head">
+        <strong>Setores</strong>
+        <a class="link small" href="{% url 'org:setor_list' %}?municipio={{ municipio.id }}">Ver todos</a>
+      </div>
+
       {% if top_setores %}
-        <ul class="mini-list">{% for s in top_setores %}<li><a class="link" href="{% url 'org:setor_detail' s.pk %}">{{ s.nome }}</a></li>{% endfor %}</ul>
+        <ul class="mini-list">
+          {% for s in top_setores %}
+            <li>
+              <a class="link" href="{% url 'org:setor_detail' s.pk %}">
+                {{ s.nome }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
       {% else %}
         {% include "core/partials/empty_state.html" with empty_title="Nenhum setor cadastrado" empty_text="Este município ainda não possui setores vinculados." %}
       {% endif %}
     </div>
-
   </div>
+
+</div>
+
 
   <div class="detail-footer">
     <a class="link" href="{% url 'org:municipio_list' %}">← Voltar para lista</a>

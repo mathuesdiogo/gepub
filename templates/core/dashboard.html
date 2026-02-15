@@ -1,5 +1,4 @@
 {% extends "core/base.html" %}
-
 {% block title %}Dashboard • GEPUB{% endblock %}
 {% block header %}Dashboard{% endblock %}
 
@@ -13,12 +12,7 @@
 
 {% block content %}
 <div class="card"><div class="card__body">
-
-{% include "core/partials/page_head.html" with title=page_title subtitle=page_subtitle actions=None %}
-
-<div class="dashboard">
-  {% include dash_template %}
-</div>
-
+{% include "core/partials/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+{% include dash_template %}
 </div></div>
 {% endblock %}
