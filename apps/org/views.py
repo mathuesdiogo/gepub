@@ -65,7 +65,6 @@ def municipio_list(request):
     paginator = Paginator(qs.order_by("nome"), 10)
     page_obj = paginator.get_page(request.GET.get("page"))
 
-    # ✅ actions do PageHead
     actions = []
     if is_admin(request.user):
         actions.append({
@@ -75,7 +74,6 @@ def municipio_list(request):
             "variant": "btn-primary",
         })
 
-    # ✅ headers (SEM coluna "Ações" aqui — o TableShell renderiza a coluna de ações)
     headers = [
         {"label": "Município"},
         {"label": "UF", "width": "90px"},
@@ -103,6 +101,12 @@ def municipio_list(request):
             "edit_url": reverse("org:municipio_update", args=[m.pk]) if can_edit else "",
         })
 
+    breadcrumbs = [
+        {"label": "Início", "url": reverse("core:dashboard")},
+        {"label": "Organização", "url": reverse("org:index")},
+        {"label": "Municípios", "url": None},
+    ]
+
     return render(
         request,
         "org/municipio_list.html",
@@ -117,8 +121,11 @@ def municipio_list(request):
             "has_filters": bool(q),
             "autocomplete_url": reverse("org:municipio_autocomplete"),
             "autocomplete_href": reverse("org:municipio_list") + "?q={q}",
+            "breadcrumbs": breadcrumbs,
         },
     )
+
+
 
 
 
@@ -133,57 +140,81 @@ def municipio_detail(request, pk: int):
     unidades_qs = Unidade.objects.filter(secretaria__municipio_id=municipio.id)
     setores_qs = Setor.objects.filter(unidade__secretaria__municipio_id=municipio.id)
 
-    secretarias_total = secretarias_qs.count()
-    unidades_total = unidades_qs.count()
-    setores_total = setores_qs.count()
-
-    top_secretarias = list(secretarias_qs.order_by("nome")[:5])
-    top_unidades = list(unidades_qs.order_by("nome")[:5])
-    top_setores = list(setores_qs.order_by("nome")[:5])
-
-    # ✅ Cards (dashboard blocks) clicáveis
     summary_items = [
-        {"label": "Secretarias", "value": secretarias_total, "href": reverse("org:secretaria_list") + f"?municipio={municipio.id}", "meta": "Ver todas"},
-        {"label": "Unidades", "value": unidades_total, "href": reverse("org:unidade_list") + f"?municipio={municipio.id}", "meta": "Ver todas"},
-        {"label": "Setores", "value": setores_total, "href": reverse("org:setor_list") + f"?municipio={municipio.id}", "meta": "Ver todos"},
+        {"label": "Secretarias", "value": secretarias_qs.count(), "href": reverse("org:secretaria_list") + f"?municipio={municipio.id}", "meta": "Ver todas"},
+        {"label": "Unidades", "value": unidades_qs.count(), "href": reverse("org:unidade_list") + f"?municipio={municipio.id}", "meta": "Ver todas"},
+        {"label": "Setores", "value": setores_qs.count(), "href": reverse("org:setor_list") + f"?municipio={municipio.id}", "meta": "Ver todos"},
     ]
 
     actions = [
         {"label": "Voltar", "url": reverse("org:municipio_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
     ]
-    if can(request.user, "org.manage") or request.user.is_staff or request.user.is_superuser:
-        actions.append({"label": "Editar", "url": reverse("org:municipio_update", args=[municipio.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+    if is_admin(request.user):
+        actions.append({
+            "label": "Editar",
+            "url": reverse("org:municipio_update", args=[municipio.pk]),
+            "icon": "fa-solid fa-pen",
+            "variant": "btn-primary",
+        })
 
-    return render(request, "org/municipio_detail.html", {
-        "municipio": municipio,
-        "actions": actions,
-        "summary_items": summary_items,
-        "top_secretarias": top_secretarias,
-        "top_unidades": top_unidades,
-        "top_setores": top_setores,
-        "secretarias_total": secretarias_total,
-        "unidades_total": unidades_total,
-        "setores_total": setores_total,
-    })
+    breadcrumbs = [
+        {"label": "Início", "url": reverse("core:dashboard")},
+        {"label": "Organização", "url": reverse("org:index")},
+        {"label": "Municípios", "url": reverse("org:municipio_list")},
+        {"label": municipio.nome, "url": None},
+    ]
+
+    return render(
+        request,
+        "org/municipio_detail.html",
+        {
+            "municipio": municipio,
+            "actions": actions,
+            "summary_items": summary_items,
+            "breadcrumbs": breadcrumbs,
+        },
+    )
 
 
 
 
 
 @login_required
-@require_perm("org.manage_municipio")
 def municipio_create(request):
+    if not is_admin(request.user):
+        return HttpResponseForbidden("403 — Apenas administrador pode criar município.")
+
     if request.method == "POST":
         form = MunicipioForm(request.POST)
         if form.is_valid():
-            municipio = form.save()
+            obj = form.save()
             messages.success(request, "Município criado com sucesso.")
-            return redirect("org:municipio_detail", pk=municipio.pk)
+            return redirect("org:municipio_detail", pk=obj.pk)
         messages.error(request, "Corrija os erros do formulário.")
     else:
         form = MunicipioForm()
 
-    return render(request, "org/municipio_form.html", {"form": form, "mode": "create"})
+    breadcrumbs = [
+        {"label": "Início", "url": reverse("core:dashboard")},
+        {"label": "Organização", "url": reverse("org:index")},
+        {"label": "Municípios", "url": reverse("org:municipio_list")},
+        {"label": "Novo", "url": None},
+    ]
+
+    return render(
+        request,
+        "org/municipio_form.html",
+        {
+            "form": form,
+            "mode": "create",
+            "breadcrumbs": breadcrumbs,
+            "cancel_url": reverse("org:municipio_list"),
+            "submit_label": "Salvar município",
+        },
+    )
+
+
+
 
 
 @login_required
@@ -210,19 +241,27 @@ def municipio_update(request, pk: int):
     else:
         form = FormClass(instance=municipio)
 
+    breadcrumbs = [
+        {"label": "Início", "url": reverse("core:dashboard")},
+        {"label": "Organização", "url": reverse("org:index")},
+        {"label": "Municípios", "url": reverse("org:municipio_list")},
+        {"label": municipio.nome, "url": reverse("org:municipio_detail", args=[municipio.pk])},
+        {"label": "Editar", "url": None},
+    ]
+
     return render(
-    request,
-    "org/municipio_form.html",
-    {
-        "form": form,
-        "mode": "update",
-        "municipio": municipio,
-        "page_title": "Editar Município",
-        "page_subtitle": "Atualize as informações do município",
-        "cancel_url": reverse("org:municipio_detail", args=[municipio.pk]),
-        "submit_label": "Salvar alterações",
-    },
-)
+        request,
+        "org/municipio_form.html",
+        {
+            "form": form,
+            "mode": "update",
+            "municipio": municipio,
+            "breadcrumbs": breadcrumbs,
+            "cancel_url": reverse("org:municipio_detail", args=[municipio.pk]),
+            "submit_label": "Salvar alterações",
+        },
+    )
+
 
 
 # =============================

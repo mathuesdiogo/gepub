@@ -8,7 +8,6 @@
   <title>{% block title %}GEPUB{% endblock %}</title>
 
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
-<link rel="stylesheet" href="{% static 'css/components/sections.css' %}">
 
   <!-- Font Awesome (CDN) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -188,11 +187,7 @@
         <div class="topbar__left">
           <div class="topbar__title">{% block header %}Dashboard{% endblock %}</div>
 
-          {% block breadcrumbs %}
-            <div class="breadcrumbs">
-              <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
-            </div>
-          {% endblock %}
+            {% block breadcrumbs %}{% if breadcrumbs %}{% include "core/partials/components/layout/breadcrumbs.html" with items=breadcrumbs %}{% endif %}{% endblock %}
         </div>
 
         <div class="topbar__right">

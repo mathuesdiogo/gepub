@@ -4,19 +4,6 @@
 {% endblock %}
 {% block header %}Organização{% endblock %}
 
-{% block breadcrumbs %}
-<div class="breadcrumbs">
-  <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
-  <span class="breadcrumbs__sep">/</span>
-  <a class="breadcrumbs__link" href="{% url 'org:index' %}">Organização</a>
-  <span class="breadcrumbs__sep">/</span>
-  <a class="breadcrumbs__link" href="{% url 'org:municipio_list' %}">Municípios</a>
-  <span class="breadcrumbs__sep">/</span>
-  <span class="breadcrumbs__current">
-    {% if mode == "update" %}Editar{% else %}Novo{% endif %}
-  </span>
-</div>
-{% endblock %}
 
 {% block content %}
 <div class="card card--form">
