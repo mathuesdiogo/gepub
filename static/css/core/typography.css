@@ -1,0 +1,50 @@
+/* Tipografia e elementos semânticos (apoio a páginas de documentação e conteúdo) */
+
+p { margin: 0 0 var(--space-3, .75rem); }
+small, .text-small { font-size: .875em; color: var(--color-muted, #6b7280); }
+
+code, kbd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: .875em;
+}
+
+code {
+  background: var(--color-muted-bg, #f3f4f6);
+  border: 1px solid var(--color-border, #e5e7eb);
+  padding: .1rem .35rem;
+  border-radius: var(--radius-sm, .375rem);
+}
+
+pre {
+  background: var(--color-muted-bg, #f3f4f6);
+  border: 1px solid var(--color-border, #e5e7eb);
+  padding: 1rem;
+  border-radius: var(--radius-md, .5rem);
+  overflow: auto;
+  margin: 0 0 var(--space-4, 1rem);
+}
+
+pre code { background: transparent; border: 0; padding: 0; }
+
+kbd {
+  background: var(--color-surface, #fff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  padding: .12rem .35rem;
+  border-bottom-width: 2px;
+  border-radius: var(--radius-sm, .375rem);
+}
+
+mark {
+  background: color-mix(in srgb, var(--color-warning, #f59e0b) 25%, transparent);
+  padding: 0 .15rem;
+  border-radius: .25rem;
+}
+
+abbr[title] {
+  text-decoration: underline dotted;
+  cursor: help;
+}
+
+dl { margin: 0 0 var(--space-4, 1rem); }
+dt { font-weight: 600; }
+dd { margin: 0 0 var(--space-2, .5rem); color: var(--color-muted, #6b7280); }

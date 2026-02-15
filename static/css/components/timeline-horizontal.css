@@ -1,0 +1,54 @@
+/* 9) TIMELINE HORIZONTAL (tabela) */
+
+.timeline-horizontal{
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.timeline-horizontal th,
+.timeline-horizontal td{
+  border-right: 1px solid rgba(0,0,0,.08);
+  border-bottom: 1px solid rgba(0,0,0,.08);
+  padding: 10px 10px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: .92rem;
+}
+
+.timeline-horizontal th:last-child,
+.timeline-horizontal td:last-child{ border-right: none; }
+
+.timeline-horizontal tr:last-child td{ border-bottom: none; }
+
+.timeline-horizontal th{
+  background: rgba(0,0,0,.03);
+  font-weight: 900;
+  color: rgba(0,0,0,.70);
+}
+
+.timeline-horizontal .marker{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 52px;
+  height: 52px;
+  padding: 0 10px;
+
+  border-radius: 999px;
+  background: rgba(52,152,219,.25);
+  border: 1px solid rgba(52,152,219,.45);
+
+  font-weight: 900;
+  color: rgba(0,0,0,.65);
+}
+
+/* células preenchidas */
+.timeline-horizontal td.default{ background: rgba(52,152,219,.35); }
+.timeline-horizontal td.final{ background: rgba(231,76,60,.20); }

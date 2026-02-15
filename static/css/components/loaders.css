@@ -1,0 +1,41 @@
+/* 2) LOADERS (page-loader e loader circular) */
+
+.page-loader{
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: rgba(0,0,0,.06);
+  overflow: hidden;
+}
+.page-loader::before{
+  content: "";
+  position: absolute;
+  height: 100%;
+  width: 38%;
+  left: -38%;
+  background: var(--brand);
+  animation: gepub-page-loader 1.1s ease-in-out infinite;
+}
+@keyframes gepub-page-loader{
+  0%{ left: -38%; }
+  50%{ left: 35%; }
+  100%{ left: 110%; }
+}
+
+/* donut loader */
+.loader{
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  margin: 18px auto;
+
+  border: 10px solid rgba(0,0,0,.10);
+  border-top-color: var(--brand);
+  animation: gepub-spin 1s linear infinite;
+}
+@keyframes gepub-spin{
+  to{ transform: rotate(360deg); }
+}

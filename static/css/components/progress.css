@@ -1,0 +1,49 @@
+/* 3) PROGRESS BAR */
+
+.progress{
+  position: relative;
+  width: 100%;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(0,0,0,.10);
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,.10);
+  margin: 10px 0;
+}
+
+.progress .progress-bar{
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: rgba(0,0,0,.22);
+}
+
+.progress > span{
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+
+  font-weight: 800;
+  font-size: .82rem;
+  color: rgba(0,0,0,.55);
+}
+
+/* Cores (SUAP-like) */
+.progress.progress-success .progress-bar{ background: rgba(46,204,113,.55); }
+.progress.progress-info .progress-bar{ background: rgba(52,152,219,.55); }
+.progress.progress-warning .progress-bar{ background: rgba(241,196,15,.70); }
+.progress.progress-danger .progress-bar{ background: rgba(231,76,60,.55); }
+.progress.progress-default .progress-bar{ background: rgba(0,0,0,.18); }
+
+.progress-description{
+  margin-top: -4px;
+  margin-bottom: 14px;
+  color: var(--muted);
+  font-size: .95rem;
+}
