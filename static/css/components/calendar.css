@@ -1,150 +1,271 @@
-/* 10) CALENDÁRIOS (anual e mensal + legenda) */
+/* static/css/components/calendar.css */
 
-.calendario{
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: #fff;
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-  padding: 10px;
+/* ===== Toolbar ===== */
+.calendar-toolbar{
+  display:flex;
+  gap:16px;
+  align-items:flex-end;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  margin-bottom:14px;
 }
 
-.calendario table{
-  width: 100%;
-  border-collapse: collapse;
+.calendar-toolbar__left{
+  display:flex;
+  gap:16px;
+  align-items:flex-end;
+  flex-wrap:wrap;
 }
 
-.calendario caption{
-  font-weight: 900;
-  color: rgba(0,0,0,.70);
-  padding: 10px 0;
+.calendar-toolbar__right{
+  display:flex;
+  gap:10px;
+  align-items:center;
 }
 
-.calendario th.semana{
-  background: rgba(0,0,0,.04);
-  color: rgba(0,0,0,.65);
-  font-weight: 900;
-  padding: 10px 0;
+.calendar-range{
+  font-weight:700;
+  padding:6px 10px;
+  border:1px solid var(--border, #e6e8ee);
+  border-radius:999px;
+  background:var(--surface-2, #f7f8fb);
+}
+
+/* Campo Município mais bonito */
+.field{ display:flex; flex-direction:column; gap:6px; }
+.field__label{ font-size:12px; color:var(--muted, #667085); font-weight:600; }
+.input{
+  border:1px solid var(--border, #e6e8ee);
+  border-radius:10px;
+  padding:10px 12px;
+  outline:none;
+  background:#fff;
+}
+.input--sm{ padding:8px 10px; min-width:240px; }
+
+/* ===== Filtros (checkbox pill) ===== */
+.calendar-filters{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.cal-check{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  border:1px solid var(--border, #e6e8ee);
+  border-radius:999px;
+  padding:7px 10px;
+  background:var(--surface-2, #f7f8fb);
+  cursor:pointer;
+  user-select:none;
+}
+.cal-check__input{
+  position:absolute;
+  opacity:0;
+  pointer-events:none;
+}
+.cal-check__box{
+  width:14px;
+  height:14px;
+  border-radius:4px;
+  border:2px solid currentColor;
+  display:inline-block;
+  position:relative;
+}
+.cal-check__text{
+  font-weight:700;
+  font-size:12px;
+}
+
+/* Cores por tipo */
+.cal-check--ferias{ color:#2563eb; }  /* azul */
+.cal-check--feriado{ color:#dc2626; } /* vermelho */
+.cal-check--evento{ color:#7c3aed; }  /* roxo */
+
+/* Marcado -> fundo suave */
+.cal-check--ferias .cal-check__input:checked ~ .cal-check__box,
+.cal-check--feriado .cal-check__input:checked ~ .cal-check__box,
+.cal-check--evento .cal-check__input:checked ~ .cal-check__box{
+  background:currentColor;
+}
+.cal-check--ferias .cal-check__input:checked ~ .cal-check__box::after,
+.cal-check--feriado .cal-check__input:checked ~ .cal-check__box::after,
+.cal-check--evento .cal-check__input:checked ~ .cal-check__box::after{
+  content:"";
+  position:absolute;
+  inset:2px;
+  background:#fff;
+  border-radius:2px;
+  opacity:.0; /* só pra dar “peso” no preenchimento sem ficar branco demais */
+}
+
+/* ===== 3-up layout ===== */
+.calendar-3up{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(220px, 1fr));
+  gap:12px;
+  align-items:start;
+}
+
+/* Em telas menores: 2 e 1 coluna */
+@media (max-width: 1100px){
+  .calendar-3up{ grid-template-columns:repeat(2, minmax(240px, 1fr)); }
+}
+@media (max-width: 760px){
+  .calendar-3up{ grid-template-columns:1fr; }
+  .input--sm{ min-width:100%; }
+}
+
+/* ===== Month card ===== */
+.cal{
+  border:1px solid var(--border, #e6e8ee);
+  border-radius:14px;
+  background:#fff;
+  overflow:hidden;
+}
+
+.cal__header{
+  padding:10px 12px;
+  border-bottom:1px solid var(--border, #e6e8ee);
+  background:var(--surface-2, #f7f8fb);
+}
+.cal__title{
+  font-weight:800;
+  font-size:14px;
+}
+
+/* ===== Grid ===== */
+.cal__grid{ display:block; }
+.cal__row{
+  display:grid;
+  grid-template-columns:repeat(7, 1fr);
+}
+.cal__row--head{
+  background:#fff;
+  border-bottom:1px solid var(--border, #e6e8ee);
+}
+
+.cal__cell{
+  min-height:44px;
+  padding:8px;
+  border-right:1px solid var(--border, #e6e8ee);
+  border-bottom:1px solid var(--border, #e6e8ee);
+  background:#fff;
+}
+.cal__row .cal__cell:last-child{ border-right:none; }
+
+.cal__dow{
+  min-height:auto;
+  padding:8px 6px;
+  font-size:11px;
+  font-weight:800;
+  color:var(--muted, #667085);
+  text-align:center;
+}
+.cal__dow--weekend{ color:#dc2626; } /* sábado/domingo em vermelho */
+
+/* Day cells */
+.cal__day{
+  text-align:left;
+  cursor:pointer;
+  transition: background .15s ease, transform .05s ease;
+  border:none;
+}
+.cal__day:hover{ background:#f6f8ff; }
+.cal__day:active{ transform:scale(.99); }
+.cal__day--weekend .cal__num{ color:#dc2626; font-weight:900; }
+
+.cal__num{
+  display:inline-flex;
+  width:26px;
+  height:26px;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  font-weight:800;
+  font-size:12px;
+  background:#f2f4f7;
+  color:#344054;
+}
+
+.cal__cell--empty{
+  background:#fafafa;
+}
+
+/* Marquinhas de eventos (quando você plugar) */
+.cal__marks{
+  display:flex;
+  gap:4px;
+  margin-top:6px;
+  flex-wrap:wrap;
+}
+.cal__mark{
+  width:8px;
+  height:8px;
+  border-radius:999px;
+  background:#999;
+}
+.cal__mark--ferias{ background:#2563eb; }
+.cal__mark--feriado{ background:#dc2626; }
+.cal__mark--evento{ background:#7c3aed; }
+
+/* --- Calendar popover (evento) --- */
+.cal-popover {
+  position: fixed;
+  z-index: 9999;
+  width: min(360px, calc(100vw - 24px));
+  background: var(--surface, #fff);
   border: 1px solid rgba(0,0,0,.08);
+  border-radius: 14px;
+  box-shadow: 0 18px 40px rgba(0,0,0,.18);
+  padding: 12px;
 }
 
-.calendario td{
-  border: 1px solid rgba(0,0,0,.08);
-  height: 62px;
-  vertical-align: top;
-  padding: 8px;
-  position: relative;
-  background: #fff;
-}
-
-.calendario td.vazio{ background: rgba(0,0,0,.03); }
-
-.calendario td > span{
-  display: inline-flex;
-  width: 26px;
-  height: 26px;
-  border-radius: 999px;
+.cal-popover__head {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  font-weight: 900;
-  color: rgba(0,0,0,.60);
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.cal-popover__title {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.cal-popover__close {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 10px;
+}
+
+.cal-popover__close:hover {
   background: rgba(0,0,0,.06);
 }
 
-/* finais de semana */
-.calendario td.fds{
-  background: rgba(0,0,0,.03);
-}
+.cal-popover .field { margin-top: 10px; }
+.cal-popover .field:first-child { margin-top: 0; }
 
-/* dia de hoje */
-.calendario td.hoje{
-  outline: 3px solid rgba(0, 140, 120, .22);
-  outline-offset: -3px;
-}
-
-/* tipos */
-.calendario td.feriado,
-.calendario li.feriado{ background: var(--danger-bg); border-color: var(--danger-br); }
-
-.calendario td.ferias,
-.calendario li.ferias{ background: var(--success-bg); border-color: var(--success-br); }
-
-.calendario td.recesso,
-.calendario li.recesso{ background: var(--warning-bg); border-color: var(--warning-br); }
-
-.calendario td.evento,
-.calendario li.evento{ background: var(--info-bg); border-color: var(--info-br); }
-
-.calendario td.conflito,
-.calendario li.conflito{
-  background: rgba(150, 0, 0, .16);
-  border-color: rgba(150, 0, 0, .45);
-}
-
-/* eventos dentro do dia (mensal) */
-.calendario-eventos{
-  list-style: none;
-  padding: 8px 0 0 0;
-  margin: 0;
-  display: grid;
-  gap: 6px;
-}
-
-.calendario-eventos li{
-  border-radius: 12px;
-  padding: 8px 10px;
-  border: 1px solid rgba(0,0,0,.10);
-  background: rgba(0,0,0,.03);
-  color: rgba(0,0,0,.70);
-  font-weight: 700;
-  font-size: .85rem;
-  line-height: 1.2;
-}
-
-.calendario-eventos li strong{
-  display: block;
-  font-weight: 900;
-  margin-bottom: 4px;
-}
-
-/* cores por tipo (mensal) */
-.calendario-eventos li.success{ background: var(--success-bg); border-color: var(--success-br); }
-.calendario-eventos li.error{ background: var(--danger-bg); border-color: var(--danger-br); }
-.calendario-eventos li.info{ background: var(--info-bg); border-color: var(--info-br); }
-.calendario-eventos li.alert{ background: var(--warning-bg); border-color: var(--warning-br); }
-
-/* Legenda (pílulas) */
-.legenda{
+.cal-popover__footer {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  list-style: none;
-  padding: 10px 0 0 0;
-  margin: 0;
-}
-
-.legenda li{
-  display: inline-flex;
-  align-items: center;
   gap: 8px;
-
-  padding: 8px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(0,0,0,.12);
-  background: rgba(0,0,0,.04);
-  color: rgba(0,0,0,.65);
-  font-weight: 800;
-  font-size: .86rem;
+  justify-content: flex-end;
+  margin-top: 12px;
 }
 
-/* ---------------------------------------------------------------------
-   Ajustes gerais responsivos para widgets
-   --------------------------------------------------------------------- */
-@media (max-width: 720px){
-  .steps span[class^="step-"]{
-    margin-right: 8px;
-    padding: 10px 12px;
-  }
-  .steps span[class^="step-"]::after{ display:none; }
-  .calendario td{ height: 54px; padding: 6px; }
+.cal-popover__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: transparent;
 }
+
+/* garante que o clique no dia funciona */
+.cal__day, .cal__cell.cal__day { cursor: pointer; }
