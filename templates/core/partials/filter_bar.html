@@ -1,28 +1,36 @@
-<form class="filter-bar" method="get" action="{{ action_url|default:'' }}" {% if form_attrs %}{{ form_attrs|safe }}{% endif %}>
-  <div class="filter-bar__field" style="position:relative;">
-    <label class="small">Buscar</label>
+<div class="filter-bar">
+  <form method="get" action="{{ action_url|default:'' }}" class="filter-bar__form">
+    
+    <div class="filter-bar__group">
+      <label class="filter-bar__label">Buscar</label>
 
-    <input
-      name="q"
-      value="{{ q|default:'' }}"
-      placeholder="{{ placeholder|default:'Buscar...' }}"
-      autocomplete="off"
-      {% if input_attrs %}{{ input_attrs|safe }}{% endif %}
-    />
+      <div class="filter-bar__controls">
+        <input
+          type="search"
+          name="q"
+          value="{{ q|default:'' }}"
+          placeholder="{{ placeholder|default:'Buscar...' }}"
+          class="filter-bar__input"
+          {% if input_attrs %}{{ input_attrs|safe }}{% endif %}
+        />
 
-    {# Dropdown overlay (só aparece quando autocomplete.js preencher) #}
-    <div class="suggest" style="display:none; position:absolute; top:100%; left:0; right:0; z-index:60; margin-top:6px;"></div>
-  </div>
+        <button type="submit" class="btn btn-primary">
+          Filtrar
+        </button>
 
-  {% if extra_filters %}
-    {{ extra_filters|safe }}
-  {% endif %}
+        {% if clear_url and has_filters %}
+          <a href="{{ clear_url }}" class="btn btn-ghost">
+            Limpar
+          </a>
+        {% endif %}
+      </div>
+    </div>
 
-  <div class="filter-bar__actions">
-    <button type="submit" class="btn">Filtrar</button>
-
-    {% if q or has_filters %}
-      <a class="link" href="{{ clear_url }}">Limpar</a>
+    {% if extra_filters %}
+      <div class="filter-bar__extras">
+        {{ extra_filters|safe }}
+      </div>
     {% endif %}
-  </div>
-</form>
+
+  </form>
+</div>

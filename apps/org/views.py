@@ -43,6 +43,16 @@ def index(request):
 # Municípios (CRUD)
 # =============================
 
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.shortcuts import render
+from django.urls import reverse
+
+# assume que você já tem:
+# - scope_filter_municipios(user, qs)
+# - is_admin(user)
+
 @login_required
 def municipio_list(request):
     q = (request.GET.get("q") or "").strip()
@@ -55,7 +65,7 @@ def municipio_list(request):
     paginator = Paginator(qs.order_by("nome"), 10)
     page_obj = paginator.get_page(request.GET.get("page"))
 
-    # ✅ actions do PageHead (município geralmente é admin)
+    # ✅ actions do PageHead
     actions = []
     if is_admin(request.user):
         actions.append({
@@ -65,7 +75,7 @@ def municipio_list(request):
             "variant": "btn-primary",
         })
 
-    # ✅ tabela (TableShell)
+    # ✅ headers (SEM coluna "Ações" aqui — o TableShell renderiza a coluna de ações)
     headers = [
         {"label": "Município"},
         {"label": "UF", "width": "90px"},
@@ -73,16 +83,24 @@ def municipio_list(request):
     ]
 
     rows = []
+    can_edit = bool(is_admin(request.user))
+
     for m in page_obj:
+        ativo_html = (
+            f'<span class="status {"success" if m.ativo else "danger"}">'
+            f'{"Sim" if m.ativo else "Não"}'
+            f"</span>"
+        )
+
         rows.append({
             "obj": m,
             "cells": [
                 {"text": m.nome, "url": reverse("org:municipio_detail", args=[m.pk])},
                 {"text": m.uf or "—", "url": ""},
-                {"text": "Sim" if m.ativo else "Não", "url": ""},
+                {"html": ativo_html, "safe": True},
             ],
-            "can_edit": bool(is_admin(request.user)),
-            "edit_url": reverse("org:municipio_update", args=[m.pk]) if is_admin(request.user) else "",
+            "can_edit": can_edit,
+            "edit_url": reverse("org:municipio_update", args=[m.pk]) if can_edit else "",
         })
 
     return render(
@@ -99,7 +117,6 @@ def municipio_list(request):
             "has_filters": bool(q),
             "autocomplete_url": reverse("org:municipio_autocomplete"),
             "autocomplete_href": reverse("org:municipio_list") + "?q={q}",
-
         },
     )
 

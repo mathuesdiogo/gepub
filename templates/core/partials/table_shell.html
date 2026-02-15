@@ -1,0 +1,54 @@
+<div class="table-shell">
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          {% for h in headers %}
+            <th 
+              {% if h.width %}style="width:{{ h.width }};"{% endif %}
+              class="{% if h.label == 'UF' or h.label == 'Ativo' %}text-center{% endif %}">
+              {{ h.label }}
+            </th>
+          {% endfor %}
+          <th class="text-center" style="width:90px;">Ações</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for row in rows %}
+          <tr>
+            {% for cell in row.cells %}
+              <td class="{% if forloop.counter > 1 %}text-center{% endif %}">
+                {% if cell.html %}
+                  {% if cell.safe %}{{ cell.html|safe }}{% else %}{{ cell.html }}{% endif %}
+                {% elif cell.url %}
+                  <a href="{{ cell.url }}" class="link-action">
+                    {{ cell.text }}
+                  </a>
+                {% else %}
+                  {{ cell.text }}
+                {% endif %}
+              </td>
+            {% endfor %}
+
+            <td class="text-center">
+              {% if row.can_edit %}
+                <a href="{{ row.edit_url }}" class="btn btn-ghost btn-sm">
+                  <i class="fa-solid fa-pen"></i>
+                </a>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="{{ headers|length|add:1 }}">
+              {% include "core/partials/empty_state.html" with empty_title=empty_title empty_text=empty_text %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% include "core/partials/pagination.html" with page_obj=page_obj q=q %}
+</div>

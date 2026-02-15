@@ -15,120 +15,149 @@
 {% endblock %}
 
 {% block content %}
-<div class="card"><div class="card__body">
+<div class="card">
+  <div class="card__body">
 
-{% include "core/partials/components/layout/page_head.html" with title=municipio.nome subtitle="Detalhes do município e atalhos" actions=actions %}
-{% include "core/partials/components/layout/detail_summary.html" with pills=summary_items %}
+    {% include "core/partials/components/layout/page_head.html" with title=municipio.nome subtitle="Detalhes do município e atalhos" actions=actions %}
+    {% include "core/partials/components/layout/detail_summary.html" with pills=summary_items %}
 
-  <div class="detail-section">
-    <div class="detail-section__title">Prefeitura de {{ municipio.nome }}</div>
-    <div class="detail-grid">
-      <div class="detail-wide">
-        <div class="small">Endereço</div>
-        <div class="detail-value detail-pre">{{ municipio.endereco_prefeitura|default:"—" }}</div>
+    <section class="section">
+      <header class="section__head">
+        <h3 class="section__title">
+          <i class="fa-solid fa-building-columns"></i>
+          Prefeitura de {{ municipio.nome }}
+        </h3>
+      </header>
+
+      <div class="section__body">
+        <div class="detail-grid">
+          <div class="detail-wide">
+            <div class="small">Endereço</div>
+            <div class="detail-value detail-pre">{{ municipio.endereco_prefeitura|default:"—" }}</div>
+          </div>
+
+          <div>
+            <div class="small">Telefone</div>
+            <div class="detail-value">{{ municipio.telefone_prefeitura|default:"—" }}</div>
+          </div>
+
+          <div>
+            <div class="small">E-mail</div>
+            <div class="detail-value">{{ municipio.email|default:"—" }}</div>
+          </div>
+
+          <div class="detail-wide">
+            <div class="small">Site</div>
+            {% if municipio.site_prefeitura %}
+              <div class="detail-value">
+                <a class="link" href="{{ municipio.site_prefeitura }}" target="_blank" rel="noopener">Abrir site</a>
+              </div>
+            {% else %}
+              <div class="detail-value">—</div>
+            {% endif %}
+          </div>
+        </div>
       </div>
-      <div>
-        <div class="small">Telefone</div>
-        <div class="detail-value">{{ municipio.telefone_prefeitura|default:"—" }}</div>
+    </section>
+
+    <ul class="nav-tabs">
+      <li class="active"><a href="#tab-secretarias">Secretarias</a></li>
+      <li><a href="#tab-unidades">Unidades</a></li>
+      <li><a href="#tab-setores">Setores</a></li>
+    </ul>
+
+    <div class="tab-content">
+
+      <div id="tab-secretarias" class="tab-pane active">
+        <section class="section section--compact">
+          <header class="section__head">
+            <h3 class="section__title">
+              <i class="fa-solid fa-sitemap"></i>
+              Secretarias
+            </h3>
+            <div class="section__meta">
+              <a class="link small" href="{% url 'org:secretaria_list' %}?municipio={{ municipio.id }}">Ver todas</a>
+            </div>
+          </header>
+
+          <div class="section__body">
+            {% if top_secretarias %}
+              <ul class="mini-list">
+                {% for s in top_secretarias %}
+                  <li>
+                    <a class="link" href="{% url 'org:secretaria_detail' s.pk %}">{{ s.nome }}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              {% include "core/partials/components/feedback/empty_state.html" with empty_title="Nenhuma secretaria cadastrada" empty_text="Este município ainda não possui secretarias vinculadas." %}
+            {% endif %}
+          </div>
+        </section>
       </div>
-      <div>
-        <div class="small">E-mail</div>
-        <div class="detail-value">{{ municipio.email|default:"—" }}</div>
+
+      <div id="tab-unidades" class="tab-pane">
+        <section class="section section--compact">
+          <header class="section__head">
+            <h3 class="section__title">
+              <i class="fa-solid fa-school"></i>
+              Unidades
+            </h3>
+            <div class="section__meta">
+              <a class="link small" href="{% url 'org:unidade_list' %}?municipio={{ municipio.id }}">Ver todas</a>
+            </div>
+          </header>
+
+          <div class="section__body">
+            {% if top_unidades %}
+              <ul class="mini-list">
+                {% for u in top_unidades %}
+                  <li>
+                    <a class="link" href="{% url 'org:unidade_detail' u.pk %}">{{ u.nome }}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              {% include "core/partials/components/feedback/empty_state.html" with empty_title="Nenhuma unidade cadastrada" empty_text="Este município ainda não possui unidades vinculadas." %}
+            {% endif %}
+          </div>
+        </section>
       </div>
-      <div class="detail-wide">
-        <div class="small">Site</div>
-        {% if municipio.site_prefeitura %}
-          <div class="detail-value"><a class="link" href="{{ municipio.site_prefeitura }}" target="_blank" rel="noopener">Abrir site</a></div>
-        {% else %}
-          <div class="detail-value">—</div>
-        {% endif %}
+
+      <div id="tab-setores" class="tab-pane">
+        <section class="section section--compact">
+          <header class="section__head">
+            <h3 class="section__title">
+              <i class="fa-solid fa-diagram-project"></i>
+              Setores
+            </h3>
+            <div class="section__meta">
+              <a class="link small" href="{% url 'org:setor_list' %}?municipio={{ municipio.id }}">Ver todos</a>
+            </div>
+          </header>
+
+          <div class="section__body">
+            {% if top_setores %}
+              <ul class="mini-list">
+                {% for s in top_setores %}
+                  <li>
+                    <a class="link" href="{% url 'org:setor_detail' s.pk %}">{{ s.nome }}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              {% include "core/partials/components/feedback/empty_state.html" with empty_title="Nenhum setor cadastrado" empty_text="Este município ainda não possui setores vinculados." %}
+            {% endif %}
+          </div>
+        </section>
       </div>
+
     </div>
-  </div>
 
-<ul class="nav-tabs">
-  <li class="active"><a href="#tab-secretarias">Secretarias</a></li>
-  <li><a href="#tab-unidades">Unidades</a></li>
-  <li><a href="#tab-setores">Setores</a></li>
-</ul>
-
-<div class="tab-content">
-
-  <div id="tab-secretarias" class="tab-pane active">
-    <div class="mini-panel">
-      <div class="mini-panel__head">
-        <strong>Secretarias</strong>
-        <a class="link small" href="{% url 'org:secretaria_list' %}?municipio={{ municipio.id }}">Ver todas</a>
-      </div>
-
-      {% if top_secretarias %}
-        <ul class="mini-list">
-          {% for s in top_secretarias %}
-            <li>
-              <a class="link" href="{% url 'org:secretaria_detail' s.pk %}">
-                {{ s.nome }}
-              </a>
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        {% include "core/partials/components/feedback/empty_state.html" with empty_title="Nenhuma secretaria cadastrada" empty_text="Este município ainda não possui secretarias vinculadas." %}
-      {% endif %}
+    <div class="detail-footer">
+      <a class="link" href="{% url 'org:municipio_list' %}">← Voltar para lista</a>
     </div>
+
   </div>
-
-  <div id="tab-unidades" class="tab-pane">
-    <div class="mini-panel">
-      <div class="mini-panel__head">
-        <strong>Unidades</strong>
-        <a class="link small" href="{% url 'org:unidade_list' %}?municipio={{ municipio.id }}">Ver todas</a>
-      </div>
-
-      {% if top_unidades %}
-        <ul class="mini-list">
-          {% for u in top_unidades %}
-            <li>
-              <a class="link" href="{% url 'org:unidade_detail' u.pk %}">
-                {{ u.nome }}
-              </a>
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        {% include "core/partials/components/feedback/empty_state.html" with empty_title="Nenhuma unidade cadastrada" empty_text="Este município ainda não possui unidades vinculadas." %}
-      {% endif %}
-    </div>
-  </div>
-
-  <div id="tab-setores" class="tab-pane">
-    <div class="mini-panel">
-      <div class="mini-panel__head">
-        <strong>Setores</strong>
-        <a class="link small" href="{% url 'org:setor_list' %}?municipio={{ municipio.id }}">Ver todos</a>
-      </div>
-
-      {% if top_setores %}
-        <ul class="mini-list">
-          {% for s in top_setores %}
-            <li>
-              <a class="link" href="{% url 'org:setor_detail' s.pk %}">
-                {{ s.nome }}
-              </a>
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        {% include "core/partials/components/feedback/empty_state.html" with empty_title="Nenhum setor cadastrado" empty_text="Este município ainda não possui setores vinculados." %}
-      {% endif %}
-    </div>
-  </div>
-
 </div>
-
-
-  <div class="detail-footer">
-    <a class="link" href="{% url 'org:municipio_list' %}">← Voltar para lista</a>
-  </div>
-
-</div></div>
 {% endblock %}

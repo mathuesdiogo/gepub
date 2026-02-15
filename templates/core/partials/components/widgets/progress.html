@@ -1,0 +1,30 @@
+{# 
+  Component: Progress Bar
+  Uso:
+  {% include "core/partials/components/widgets/progress.html" 
+     with value=75 label="Matrículas concluídas" show_percent=True 
+  %}
+#}
+
+{% if value is not None %}
+<div class="progress-wrapper">
+
+  {% if label %}
+    <div class="progress-label">
+      {{ label }}
+      {% if show_percent %}
+        <span class="progress-percent">{{ value }}%</span>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <div class="progress">
+    <div class="progress-bar" style="width: {{ value }}%;"></div>
+  </div>
+
+</div>
+{% else %}
+  {% include "core/partials/components/feedback/empty_state.html" 
+     with empty_title="Sem progresso" 
+          empty_text="Nenhum dado disponível." %}
+{% endif %}
