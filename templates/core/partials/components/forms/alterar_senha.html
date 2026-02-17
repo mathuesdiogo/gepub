@@ -1,0 +1,35 @@
+{% extends "core/base.html" %}
+
+{% block title %}Alterar senha • GEPUB{% endblock %}
+{% block header %}Conta{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+  <span class="breadcrumbs__sep">/</span>
+  <a class="breadcrumbs__link" href="{% url 'accounts:meu_perfil' %}">Meu perfil</a>
+  <span class="breadcrumbs__sep">/</span>
+  <span class="breadcrumbs__current">Alterar senha</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+
+{% include "core/partials/components/layout/page_head.html" with title="Alterar senha" subtitle="Defina uma nova senha para sua conta" actions=None %}
+
+{% if error %}
+  <div class="alert alert--error">{{ error }}</div>
+{% endif %}
+
+<form method="post" class="form-vertical">
+  {% csrf_token %}
+
+  {% include "core/partials/components/forms/form_shell.html" with form=form %}
+
+
+
+</form>
+
+</div></div>
+{% endblock %}

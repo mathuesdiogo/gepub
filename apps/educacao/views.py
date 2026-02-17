@@ -7,13 +7,13 @@ from django.http import HttpResponseForbidden, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from django.http import JsonResponse
 from apps.core.decorators import require_perm
-from apps.core.rbac import can, scope_filter_turmas, scope_filter_alunos, scope_filter_matriculas
+from apps.core.rbac import can, scope_filter_unidades, scope_filter_turmas, scope_filter_alunos, scope_filter_matriculas
 
 
 from .forms import TurmaForm, AlunoForm, MatriculaForm, AlunoCreateComTurmaForm
 from .models import Turma, Aluno, Matricula
+from apps.org.models import Unidade
 from apps.nee.forms import AlunoNecessidadeForm, ApoioMatriculaForm
 from apps.nee.models import AlunoNecessidade, ApoioMatricula
 from django.http import JsonResponse
@@ -24,7 +24,25 @@ from apps.accounts.models import Profile
 @login_required
 @require_perm("educacao.view")
 def index(request):
-    return render(request, "educacao/index.html")
+    user = request.user
+
+    # KPIs do módulo Educação (com escopo por perfil)
+    unidades_qs = scope_filter_unidades(user, Unidade.objects.all())
+    turmas_qs = scope_filter_turmas(user, Turma.objects.all())
+    alunos_qs = scope_filter_alunos(user, Aluno.objects.all())
+    matriculas_qs = scope_filter_matriculas(user, Matricula.objects.all())
+
+    ctx = {
+        "page_title": "Educação",
+        "page_subtitle": "Painel do módulo",
+        "unidades_total": unidades_qs.count(),
+        "turmas_total": turmas_qs.count(),
+        "alunos_total": alunos_qs.count(),
+        "matriculas_total": matriculas_qs.count(),
+        "can_nee_view": can(user, "nee.view"),
+        "can_edu_manage": can(user, "educacao.manage"),
+    }
+    return render(request, "educacao/index.html", ctx)
 
 
 # -----------------------------
@@ -56,37 +74,29 @@ def turma_list(request):
 
     qs = scope_filter_turmas(request.user, qs)
 
-    # Export (mantém do jeito que já está no seu arquivo)
+
+    # Export (CSV/PDF) — usa o queryset filtrado (sem depender da paginação)
     from apps.core.exports import export_csv, export_pdf_table
     export = (request.GET.get("export") or "").strip().lower()
     if export in ("csv", "pdf"):
-        items = list(
-            qs.order_by("-ano_letivo", "nome").values_list(
-                "nome",
-                "ano_letivo",
-                "turno",
-                "unidade__nome",
-                "unidade__secretaria__nome",
-                "unidade__secretaria__municipio__nome",
-                "ativo",
-            )
+        turmas_export = qs.order_by("-ano_letivo", "nome").select_related(
+            "unidade",
+            "unidade__secretaria",
+            "unidade__secretaria__municipio",
         )
 
         headers_export = ["Turma", "Ano", "Turno", "Unidade", "Secretaria", "Município", "Ativo"]
-        rows = []
-        for t in page_obj:
-            rows.append({
-                "cells": [
-                    {"text": t.nome, "url": reverse("educacao:turma_detail", args=[t.pk])},
-                    {"text": str(t.ano_letivo or "—")},
-                    {"text": t.get_turno_display() if hasattr(t, "get_turno_display") else "—"},
-                    {"text": getattr(getattr(t, "unidade", None), "nome", "—")},
-                    {"text": getattr(getattr(getattr(t, "unidade", None), "secretaria", None), "nome", "—")},
-                ],
-                "can_edit": bool(can_edu_manage and t.pk),
-                "edit_url": reverse("educacao:turma_update", args=[t.pk]) if t.pk else "",
-            })
-
+        rows_export = []
+        for t in turmas_export:
+            rows_export.append([
+                getattr(t, "nome", "") or "—",
+                str(getattr(t, "ano_letivo", "") or "—"),
+                t.get_turno_display() if hasattr(t, "get_turno_display") else (getattr(t, "turno", "") or "—"),
+                getattr(getattr(t, "unidade", None), "nome", "—"),
+                getattr(getattr(getattr(t, "unidade", None), "secretaria", None), "nome", "—"),
+                getattr(getattr(getattr(getattr(t, "unidade", None), "secretaria", None), "municipio", None), "nome", "—"),
+                "Sim" if getattr(t, "ativo", False) else "Não",
+            ])
 
         if export == "csv":
             return export_csv("turmas.csv", headers_export, rows_export)
