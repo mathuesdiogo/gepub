@@ -490,3 +490,39 @@ def arquivo_create(request):
         return redirect("core:dashboard")
 
     return render(request, "core/arquivo_form.html", {"form": form})
+
+@login_required
+def portal(request):
+    u = request.user
+    modules = [
+        {
+            "key": "educacao",
+            "title": "Educação",
+            "desc": "Escolas, turmas, alunos, matrículas e relatórios.",
+            "icon": "fa-solid fa-graduation-cap",
+            "url": "educacao:index",
+            "enabled": can(u, "educacao.view"),
+            "color": "kpi-blue",
+        },
+        {
+            "key": "nee",
+            "title": "NEE",
+            "desc": "Necessidades Educacionais Especiais e relatórios institucionais.",
+            "icon": "fa-solid fa-wheelchair",
+            "url": "nee:relatorios_index",
+            "enabled": can(u, "nee.view"),
+            "color": "kpi-purple",
+        },
+        {
+            "key": "saude",
+            "title": "Saúde",
+            "desc": "Unidades, profissionais e atendimentos.",
+            "icon": "fa-solid fa-heart-pulse",
+            "url": "saude:index",
+            "enabled": can(u, "saude.view"),
+            "color": "kpi-green",
+            },
+    ]
+
+    modules = [m for m in modules if m["enabled"]]
+    return render(request, "core/portal.html", {"modules": modules})

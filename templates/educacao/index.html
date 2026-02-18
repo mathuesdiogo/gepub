@@ -1,6 +1,5 @@
-{% extends "core/base.html" %}
+{% extends "educacao/base_modulo.html" %}
 {% block title %}Educação • GEPUB{% endblock %}
-{% block header %}Educação{% endblock %}
 
 {% block breadcrumbs %}
   <div class="breadcrumbs">
@@ -10,10 +9,10 @@
   </div>
 {% endblock %}
 
-{% block content %}
+{% block module_content %}
   <div class="sec-dashboard">
     <div class="card"><div class="card__body">
-      {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=None %}
+      {% include "core/partials/components/layout/page_head.html" with title="Educação" subtitle="Resumo do módulo e atalhos" actions=None %}
 
       <div class="sec-metrics">
         <a class="sec-kpi kpi-green" href="{% url 'org:unidade_list' %}">

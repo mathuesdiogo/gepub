@@ -61,24 +61,34 @@ class Secretaria(models.Model):
 
 
 class Unidade(models.Model):
+    """
+    Unidade institucional da prefeitura.
+
+    IMPORTANTE: aqui 'tipo' representa o MÓDULO/SECRETARIA (Educação, Saúde, etc.),
+    pois é isso que permite o GEPUB ser multi-secretaria com base única.
+    """
     class Tipo(models.TextChoices):
-        ESCOLA = "ESCOLA", "Escola"
-        CRECHE = "CRECHE", "Creche"
-        SECRETARIA = "SECRETARIA", "Secretaria/Órgão"
-        OUTRO = "OUTRO", "Outro"
+        EDUCACAO = "EDUCACAO", "Educação"
+        SAUDE = "SAUDE", "Saúde"
+        AGRICULTURA = "AGRICULTURA", "Agricultura"
+        INFRAESTRUTURA = "INFRAESTRUTURA", "Infraestrutura"
+        ASSISTENCIA = "ASSISTENCIA", "Assistência Social"
+        OUTROS = "OUTROS", "Outros"
 
     secretaria = models.ForeignKey(
         Secretaria,
         on_delete=models.PROTECT,
         related_name="unidades",
+        null=True,
+        blank=True,
     )
 
-    nome = models.CharField(max_length=180)
-    tipo = models.CharField(max_length=20, choices=Tipo.choices, default=Tipo.ESCOLA)
+    nome = models.CharField(max_length=180, default="", blank=True)
+    tipo = models.CharField(max_length=20, choices=Tipo.choices, default=Tipo.EDUCACAO)
 
-    # Identificadores (opcionais)
-    codigo_inep = models.CharField("Código INEP", max_length=20, blank=True, default="")
-    cnpj = models.CharField("CNPJ", max_length=18, blank=True, default="")
+    # Identificadores / registros (opcionais)
+    codigo_inep = models.CharField("Código INEP", max_length=32, blank=True, default="")
+    cnpj = models.CharField("CNPJ", max_length=32, blank=True, default="")
 
     # Contato / endereço (opcionais)
     email = models.EmailField("E-mail", blank=True, default="")
@@ -105,12 +115,12 @@ class Unidade(models.Model):
         ]
 
     def __str__(self) -> str:
-        return self.nome
+        return self.nome or f"Unidade #{self.pk}"
 
 
 class Setor(models.Model):
     unidade = models.ForeignKey(
-        Unidade,
+        "org.Unidade",
         on_delete=models.PROTECT,
         related_name="setores",
     )

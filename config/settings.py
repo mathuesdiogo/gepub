@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     "apps.org",
     "apps.educacao",
     "apps.nee",
+    "apps.saude",
 ]
 
 

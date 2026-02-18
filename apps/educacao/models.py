@@ -20,7 +20,7 @@ class Turma(models.Model):
     )
 
     nome = models.CharField(max_length=160)
-    ano_letivo = models.IntegerField(default=2026)
+    ano_letivo = models.PositiveIntegerField(db_index=True)
 
     class Turno(models.TextChoices):
         MANHA = "MANHA", "Manhã"

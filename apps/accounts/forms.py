@@ -42,8 +42,9 @@ class UsuarioCreateForm(forms.Form):
     )
     unidade = forms.ModelChoiceField(
         label="Unidade",
-        queryset=Unidade.objects.filter(ativo=True).order_by("nome"),
+        queryset=Unidade.objects.none(),
         required=False,
+
     )
     turmas = forms.ModelMultipleChoiceField(
     label="Turmas (somente para Professor)",
@@ -56,6 +57,28 @@ class UsuarioCreateForm(forms.Form):
         instance = kwargs.get("instance")  # <-- PEGA o usuário sendo editado
         super().__init__(*args, **kwargs)
         self.user = user
+        
+                # =========================
+        # UNIDADES (queryset seguro: evita quebrar projeto no import)
+        # =========================
+        unidade_qs = Unidade.objects.all()
+
+        # filtra por ativo se existir
+        try:
+            Unidade._meta.get_field("ativo")
+            unidade_qs = unidade_qs.filter(ativo=True)
+        except Exception:
+            pass
+
+        # ordena por nome se existir
+        try:
+            Unidade._meta.get_field("nome")
+            unidade_qs = unidade_qs.order_by("nome")
+        except Exception:
+            pass
+
+        self.fields["unidade"].queryset = unidade_qs
+
 
         # ========= TURMAS (somente Professor) =========
         if "turmas" in self.fields and instance:
@@ -129,9 +152,10 @@ class UsuarioUpdateForm(forms.Form):
     )
     unidade = forms.ModelChoiceField(
         label="Unidade",
-        queryset=Unidade.objects.filter(ativo=True).order_by("nome"),
+        queryset=Unidade.objects.none(),
         required=False,
     )
+
     turmas = forms.ModelMultipleChoiceField(
         label="Turmas (somente para Professor)",
         queryset=Turma.objects.none(),
@@ -146,6 +170,27 @@ class UsuarioUpdateForm(forms.Form):
         edited_user = kwargs.pop("edited_user", None)
         super().__init__(*args, **kwargs)
         self.user = user
+                # =========================
+        # UNIDADES (queryset seguro)
+        # =========================
+        unidade_qs = Unidade.objects.all()
+
+        # filtra por ativo se existir
+        try:
+            Unidade._meta.get_field("ativo")
+            unidade_qs = unidade_qs.filter(ativo=True)
+        except Exception:
+            pass
+
+        # ordena por nome se existir
+        try:
+            Unidade._meta.get_field("nome")
+            unidade_qs = unidade_qs.order_by("nome")
+        except Exception:
+            pass
+
+        self.fields["unidade"].queryset = unidade_qs
+
 
         # queryset de turmas (com escopo)
         qs_turmas = Turma.objects.select_related("unidade").all().order_by("-ano_letivo", "nome")

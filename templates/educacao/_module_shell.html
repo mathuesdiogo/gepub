@@ -1,0 +1,10 @@
+{# Casco do módulo Educação: menu lateral + conteúdo #}
+<div class="module-shell">
+  <aside class="module-shell__aside">
+    {% include "educacao/_menu_modulo.html" %}
+  </aside>
+
+  <main class="module-shell__main">
+    {% block module_content %}{% endblock %}
+  </main>
+</div>

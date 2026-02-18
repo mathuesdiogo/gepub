@@ -1,6 +1,5 @@
-{% extends "core/base.html" %}
+{% extends "educacao/base_modulo.html" %}
 {% block title %}Nova Matrícula • Educação • GEPUB{% endblock %}
-{% block header %}Educação{% endblock %}
 
 {% block breadcrumbs %}
   <div class="breadcrumbs">
@@ -12,151 +11,40 @@
   </div>
 {% endblock %}
 
-{% block content %}
-<div class="card">
-  <div class="card__body">
+{% block module_content %}
+  <div class="card">
+    <div class="card__body">
 
-    {% include "core/partials/components/layout/page_head.html" with title="Nova matrícula" subtitle="Selecione o aluno e preencha os dados da matrícula" actions=actions %}
+      {% include "core/partials/components/layout/page_head.html" with title="Nova matrícula" subtitle="Busque o aluno e confirme os dados" actions=actions%}
 
-    <div class="card" style="margin-top:12px;">
-      <div class="card__body">
-
-        <!-- Buscar aluno (dentro do bloco Matrícula) -->
-        <div style="margin-bottom:12px;">
-          <div class="small" style="opacity:.75; margin-bottom:8px;">Buscar aluno</div>
-
-          <form class="filter-bar" method="get" action="{{ action_url }}" id="alunoSearchForm" style="position:relative;">
-  <div class="filter-bar__field" style="flex:1;">
-    <label class="small">Buscar aluno</label>
-    <input name="q" id="alunoSearchInput" value="{{ q }}" placeholder="Digite nome, CPF, código, NIS..." autocomplete="off" />
-  </div>
-
-  {% if unidade %}
-    <input type="hidden" name="unidade" value="{{ unidade }}">
-  {% endif %}
-
-  <div class="filter-bar__actions">
-    <button type="submit" class="btn">Buscar</button>
-    {% if q %}
-      <a class="link" href="{{ clear_url }}">Limpar</a>
-    {% endif %}
-  </div>
-
-  <!-- Dropdown overlay -->
-  <div id="alunoSuggest" class="suggest" style="display:none; position:absolute; top:100%; left:0; right:0; z-index:50; margin-top:6px;"></div>
-</form>
-
-          {% if alunos_result %}
-            <div class="card" style="margin-top:10px;">
-              <div class="card__body" style="padding:10px;">
-                {% for a in alunos_result %}
-                  <a class="link" style="display:block; padding:8px 10px; border-radius:10px;" href="{% url 'educacao:matricula_create' %}?q={{ q|urlencode }}&aluno={{ a.id }}{% if unidade %}&unidade={{ unidade }}{% endif %}">
-                    <div style="font-weight:600;">{{ a.nome }}</div>
-                    <div class="small" style="opacity:.75;">CPF: {{ a.cpf|default:"—" }} • NIS: {{ a.nis|default:"—" }}</div>
-                  </a>
-                {% endfor %}
-              </div>
-            </div>
-          {% elif q %}
-            <div class="small" style="opacity:.75; margin-top:10px;">Nenhum aluno encontrado.</div>
-          {% endif %}
-
-          <div class="small" style="opacity:.7; margin-top:8px;">
-            Clique em um aluno da lista acima para preencher o campo “Aluno” do formulário.
-          </div>
+      <div class="section">
+        <div class="section__header">
+          <div class="section__title">Buscar aluno</div>
+          <div class="section__meta">Digite ao menos 2 caracteres</div>
         </div>
 
-        <hr style="opacity:.12; margin:14px 0;">
+        {% url "educacao:api_alunos_suggest" as ac_url %}
+        {% url "educacao:matricula_create" as ac_href %}
 
-        <!-- Formulário de matrícula -->
-        <div class="small" style="opacity:.75; margin-bottom:8px;">Matrícula</div>
+        {% include "core/partials/components/layout/filter_bar.html" with q=q placeholder="Digite nome, CPF ou NIS..." action_url=action_url clear_url=clear_url has_filters=has_filters input_attrs='data-autocomplete="1" data-autocomplete-url="'|add:ac_url|add:'" data-autocomplete-href="'|add:ac_href|add:'?q={q}"'%}
 
-        <form method="post">
-          {% csrf_token %}
-          {{ form.as_p }}
+        {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Nenhum aluno encontrado" empty_text="Tente ajustar sua busca."%}
 
-          <div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
-            <button class="btn btn-primary" type="submit">Confirmar matrícula</button>
-            <a class="link" href="{% url 'educacao:matricula_create' %}">Nova matrícula</a>
-          </div>
-        </form>
-
+        <div class="small">
+          Clique em “Selecionar” para preencher o aluno no formulário.
+        </div>
       </div>
+
+      <hr class="divider">
+
+      <div class="section">
+        <div class="section__header">
+          <div class="section__title">Dados da matrícula</div>
+        </div>
+
+        {% include "core/partials/components/forms/form_shell.html" with form=form cancel_url=clear_url submit_label="Confirmar matrícula"%}
+      </div>
+
     </div>
-
   </div>
-</div>
-<script>
-(function(){
-  const input = document.getElementById("alunoSearchInput");
-  const box = document.getElementById("alunoSuggest");
-  const form = document.getElementById("alunoSearchForm");
-  if(!input || !box || !form) return;
-
-  const endpoint = "{% url 'educacao:api_alunos_suggest' %}";
-  let t = null;
-  let last = "";
-  let abort = null;
-
-  function hide(){
-    box.style.display = "none";
-    box.innerHTML = "";
-  }
-
-  function show(items){
-    if(!items || !items.length){ hide(); return; }
-    box.innerHTML = items.map(a => {
-      const meta = [];
-      if(a.cpf) meta.push("CPF: " + a.cpf);
-      if(a.nis) meta.push("NIS: " + a.nis);
-      const href = new URL(window.location.href);
-      href.searchParams.set("aluno", a.id);
-      href.searchParams.set("q", input.value.trim());
-      return `
-        <a class="suggest__item" href="${href.toString()}">
-          <div class="suggest__title">${a.nome}</div>
-          <div class="suggest__meta">${meta.join(" • ")}</div>
-        </a>
-      `;
-    }).join("");
-    box.style.display = "block";
-  }
-
-  async function fetchSuggest(q){
-    if(abort) abort.abort();
-    abort = new AbortController();
-    const url = endpoint + "?q=" + encodeURIComponent(q);
-    const res = await fetch(url, {signal: abort.signal, headers: {"X-Requested-With": "fetch"}});
-    if(!res.ok) return [];
-    const data = await res.json();
-    return data.results || [];
-  }
-
-  input.addEventListener("input", () => {
-    const q = input.value.trim();
-    if(q.length < 2){ hide(); return; }
-    if(q === last) return;
-    last = q;
-
-    clearTimeout(t);
-    t = setTimeout(async () => {
-      try{
-        const items = await fetchSuggest(q);
-        show(items);
-      }catch(e){
-        // abort/cancel: ignora
-      }
-    }, 250);
-  });
-
-  // fechar ao clicar fora
-  document.addEventListener("click", (e) => {
-    if(form.contains(e.target)) return;
-    hide();
-  });
-
-  // Enter mantém o submit normal (vai renderizar a lista abaixo, se você ainda quiser)
-})();
-</script>
-
 {% endblock %}

@@ -1,48 +1,68 @@
+from django.core.cache import cache
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Q, Count
-from django.http import HttpResponseForbidden, Http404
+from django.http import HttpResponseForbidden, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from apps.core.decorators import require_perm
-from apps.core.rbac import can, scope_filter_unidades, scope_filter_turmas, scope_filter_alunos, scope_filter_matriculas
+from django.utils.html import escape
+from apps.org.models import Unidade
+from .models import Turma, Aluno, Matricula
 
+from apps.core.decorators import require_perm
+from apps.core.rbac import (
+    can,
+    scope_filter_unidades,
+    scope_filter_turmas,
+    scope_filter_alunos,
+    scope_filter_matriculas,
+)
+
+from apps.accounts.models import Profile
+from apps.nee.forms import AlunoNecessidadeForm, ApoioMatriculaForm
+from apps.nee.models import AlunoNecessidade, ApoioMatricula
 
 from .forms import TurmaForm, AlunoForm, MatriculaForm, AlunoCreateComTurmaForm
 from .models import Turma, Aluno, Matricula
-from apps.org.models import Unidade
-from apps.nee.forms import AlunoNecessidadeForm, ApoioMatriculaForm
-from apps.nee.models import AlunoNecessidade, ApoioMatricula
-from django.http import JsonResponse
-from apps.accounts.models import Profile
 
 
+# -----------------------------
+# DASHBOARD (MÓDULO EDUCAÇÃO)
+# -----------------------------
 
 @login_required
 @require_perm("educacao.view")
 def index(request):
     user = request.user
+    cache_key = f"edu_dashboard_{user.id}"
 
-    # KPIs do módulo Educação (com escopo por perfil)
-    unidades_qs = scope_filter_unidades(user, Unidade.objects.all())
-    turmas_qs = scope_filter_turmas(user, Turma.objects.all())
-    alunos_qs = scope_filter_alunos(user, Aluno.objects.all())
-    matriculas_qs = scope_filter_matriculas(user, Matricula.objects.all())
+    data = cache.get(cache_key)
 
-    ctx = {
-        "page_title": "Educação",
-        "page_subtitle": "Painel do módulo",
-        "unidades_total": unidades_qs.count(),
-        "turmas_total": turmas_qs.count(),
-        "alunos_total": alunos_qs.count(),
-        "matriculas_total": matriculas_qs.count(),
-        "can_nee_view": can(user, "nee.view"),
-        "can_edu_manage": can(user, "educacao.manage"),
-    }
-    return render(request, "educacao/index.html", ctx)
+    if data is None:
+        unidades_total = scope_filter_unidades(user, Unidade.objects.all()).count()
+        turmas_total = scope_filter_turmas(user, Turma.objects.all()).count()
+        alunos_total = scope_filter_alunos(user, Aluno.objects.all()).count()
+        matriculas_total = scope_filter_matriculas(user, Matricula.objects.all()).count()
+
+        data = {
+            "unidades_total": unidades_total,
+            "turmas_total": turmas_total,
+            "alunos_total": alunos_total,
+            "matriculas_total": matriculas_total,
+        }
+
+        cache.set(cache_key, data, 300)
+
+    # flags fora do cache (não polui cache)
+    data["can_edu_manage"] = can(user, "educacao.manage")
+    data["can_nee_view"] = can(user, "nee.view")
+
+    return render(request, "educacao/index.html", data)
+
+
 
 
 # -----------------------------
@@ -55,10 +75,26 @@ def turma_list(request):
     q = (request.GET.get("q") or "").strip()
     ano = (request.GET.get("ano") or "").strip()
 
-    qs = Turma.objects.select_related(
-        "unidade",
-        "unidade__secretaria",
-        "unidade__secretaria__municipio",
+    # Queryset base: evita N+1 e evita carregar campos desnecessários
+    # IMPORTANTE: se usar .only(), inclua TODOS os campos que você acessa no template/loop,
+    # senão o Django faz query extra por objeto (ruim com muitos dados).
+    qs = (
+        Turma.objects.select_related(
+            "unidade",
+            "unidade__secretaria",
+            "unidade__secretaria__municipio",
+        )
+        .only(
+            "id",
+            "nome",
+            "ano_letivo",
+            "turno",
+            "ativo",
+            "unidade_id",
+            "unidade__nome",
+            "unidade__secretaria__nome",
+            "unidade__secretaria__municipio__nome",
+        )
     )
 
     if ano.isdigit():
@@ -74,29 +110,36 @@ def turma_list(request):
 
     qs = scope_filter_turmas(request.user, qs)
 
-
     # Export (CSV/PDF) — usa o queryset filtrado (sem depender da paginação)
     from apps.core.exports import export_csv, export_pdf_table
+
     export = (request.GET.get("export") or "").strip().lower()
     if export in ("csv", "pdf"):
-        turmas_export = qs.order_by("-ano_letivo", "nome").select_related(
-            "unidade",
-            "unidade__secretaria",
-            "unidade__secretaria__municipio",
-        )
+        turmas_export = qs.order_by("-ano_letivo", "nome")
 
-        headers_export = ["Turma", "Ano", "Turno", "Unidade", "Secretaria", "Município", "Ativo"]
+        headers_export = [
+            "Turma",
+            "Ano",
+            "Turno",
+            "Unidade",
+            "Secretaria",
+            "Município",
+            "Ativo",
+        ]
+
         rows_export = []
         for t in turmas_export:
-            rows_export.append([
-                getattr(t, "nome", "") or "—",
-                str(getattr(t, "ano_letivo", "") or "—"),
-                t.get_turno_display() if hasattr(t, "get_turno_display") else (getattr(t, "turno", "") or "—"),
-                getattr(getattr(t, "unidade", None), "nome", "—"),
-                getattr(getattr(getattr(t, "unidade", None), "secretaria", None), "nome", "—"),
-                getattr(getattr(getattr(getattr(t, "unidade", None), "secretaria", None), "municipio", None), "nome", "—"),
-                "Sim" if getattr(t, "ativo", False) else "Não",
-            ])
+            rows_export.append(
+                [
+                    t.nome or "—",
+                    str(t.ano_letivo or "—"),
+                    t.get_turno_display() if hasattr(t, "get_turno_display") else (getattr(t, "turno", "") or "—"),
+                    getattr(getattr(t, "unidade", None), "nome", "—"),
+                    getattr(getattr(getattr(t, "unidade", None), "secretaria", None), "nome", "—"),
+                    getattr(getattr(getattr(getattr(t, "unidade", None), "secretaria", None), "municipio", None), "nome", "—"),
+                    "Sim" if getattr(t, "ativo", False) else "Não",
+                ]
+            )
 
         if export == "csv":
             return export_csv("turmas.csv", headers_export, rows_export)
@@ -116,7 +159,6 @@ def turma_list(request):
 
     can_edu_manage = can(request.user, "educacao.manage")
 
-    # Actions do header
     # mantém filtros atuais na query (q + ano)
     qs_query = []
     if q:
@@ -152,7 +194,7 @@ def turma_list(request):
             }
         )
 
-        headers = [
+    headers = [
         {"label": "Turma"},
         {"label": "Ano", "width": "110px"},
         {"label": "Turno", "width": "140px"},
@@ -162,24 +204,25 @@ def turma_list(request):
 
     rows = []
     for t in page_obj:
-        rows.append({
-            "cells": [
-                {"text": t.nome, "url": reverse("educacao:turma_detail", args=[t.pk])},
-                {"text": str(t.ano_letivo or "—")},
-                {"text": t.get_turno_display() if hasattr(t, "get_turno_display") else "—"},
-                {"text": getattr(getattr(t, "unidade", None), "nome", "—")},
-                {"text": getattr(getattr(getattr(t, "unidade", None), "secretaria", None), "nome", "—")},
-            ],
-            "can_edit": bool(can_edu_manage and t.pk),
-            "edit_url": reverse("educacao:turma_update", args=[t.pk]) if t.pk else "",
-        })
+        rows.append(
+            {
+                "cells": [
+                    {"text": t.nome, "url": reverse("educacao:turma_detail", args=[t.pk])},
+                    {"text": str(t.ano_letivo or "—")},
+                    {"text": t.get_turno_display() if hasattr(t, "get_turno_display") else "—"},
+                    {"text": getattr(getattr(t, "unidade", None), "nome", "—")},
+                    {"text": getattr(getattr(getattr(t, "unidade", None), "secretaria", None), "nome", "—")},
+                ],
+                "can_edit": bool(can_edu_manage and t.pk),
+                "edit_url": reverse("educacao:turma_update", args=[t.pk]) if t.pk else "",
+            }
+        )
 
-
-    # Filtros extras (campo Ano) — HTML pronto e seguro
+    # Filtros extras — HTML seguro (escapa input)
     extra_filters = f"""
-      <div class="filter-bar__field" style="min-width:160px; flex:0 0 180px;">
+      <div class="filter-bar__field">
         <label class="small">Ano letivo</label>
-        <input name="ano" value="{ano}" placeholder="Ex.: 2026" />
+        <input name="ano" value="{escape(ano)}" placeholder="Ex.: 2026" />
       </div>
     """
 
@@ -199,131 +242,12 @@ def turma_list(request):
             "extra_filters": extra_filters,
             "autocomplete_url": reverse("educacao:api_turmas_suggest"),
             "autocomplete_href": reverse("educacao:turma_list") + "?q={q}",
-
         },
     )
+
+
 @login_required
 @require_perm("educacao.view")
-def matricula_create(request):
-    if not can(request.user, "educacao.manage"):
-        messages.error(request, "Você não tem permissão para realizar matrículas.")
-        return redirect("educacao:index")
-
-    q = (request.GET.get("q") or "").strip()
-    aluno_id = (request.GET.get("aluno") or "").strip()
-    unidade_id = (request.GET.get("unidade") or "").strip()
-
-    alunos_qs = scope_filter_alunos(request.user, Aluno.objects.all())
-    turmas_base_qs = scope_filter_turmas(
-        request.user,
-        Turma.objects.select_related("unidade", "unidade__secretaria", "unidade__secretaria__municipio")
-    )
-
-    # ---- busca de aluno (somente para selecionar) ----
-    alunos_result = alunos_qs
-    if q:
-        alunos_result = alunos_result.filter(
-            Q(nome__icontains=q) | Q(cpf__icontains=q) | Q(nis__icontains=q) | Q(nome_mae__icontains=q)
-        )
-    alunos_result = alunos_result.order_by("nome")[:25]
-
-    # ---- initial do form ----
-    initial = {}
-    if aluno_id.isdigit():
-        initial["aluno"] = int(aluno_id)
-    if unidade_id.isdigit():
-        initial["unidade"] = int(unidade_id)
-
-    form = MatriculaForm(request.POST or None, initial=initial)
-
-    # limitar aluno ao escopo
-    if "aluno" in form.fields:
-        form.fields["aluno"].queryset = alunos_qs.order_by("nome")
-
-    # ✅ Unidade (escola): filtra turmas
-    # Se seu MatriculaForm NÃO tem o campo "unidade", você precisa adicionar no form (eu te passo já já).
-    if "unidade" in form.fields:
-        # opcional: restringir unidades via turmas_base_qs (somente unidades que aparecem no escopo)
-        unidades_ids = turmas_base_qs.values_list("unidade_id", flat=True).distinct()
-        form.fields["unidade"].queryset = form.fields["unidade"].queryset.filter(id__in=unidades_ids)
-
-    turmas_qs = turmas_base_qs
-    unidade_selecionada = None
-
-    # pega unidade do POST primeiro (quando o usuário escolhe no form)
-    unidade_sel = (request.POST.get("unidade") or unidade_id or "").strip()
-    if unidade_sel.isdigit():
-        unidade_selecionada = int(unidade_sel)
-        turmas_qs = turmas_qs.filter(unidade_id=unidade_selecionada)
-
-    if "turma" in form.fields:
-        form.fields["turma"].queryset = turmas_qs.order_by("-ano_letivo", "nome")
-
-    # ---- salvar ----
-    if request.method == "POST":
-        if form.is_valid():
-            m = form.save(commit=False)
-
-            if not alunos_qs.filter(pk=m.aluno_id).exists():
-                messages.error(request, "Aluno fora do seu escopo.")
-                return redirect("educacao:matricula_create")
-
-            # proteção turma escopo (já filtrada, mas garante)
-            if not turmas_base_qs.filter(pk=m.turma_id).exists():
-                messages.error(request, "Turma fora do seu escopo.")
-                return redirect("educacao:matricula_create")
-
-            if Matricula.objects.filter(aluno=m.aluno, turma=m.turma).exists():
-                messages.warning(request, "Esse aluno já possui matrícula nessa turma.")
-            else:
-                m.save()
-                messages.success(request, "Matrícula realizada com sucesso.")
-                return redirect(reverse("educacao:matricula_create") + f"?aluno={m.aluno_id}")
-
-    # ---- lista de alunos (para selecionar) ----
-    headers = [
-        {"label": "Aluno"},
-        {"label": "CPF", "width": "160px"},
-        {"label": "NIS", "width": "160px"},
-    ]
-
-    rows = []
-    for a in alunos_result:
-        url = reverse("educacao:matricula_create") + f"?q={q}&aluno={a.pk}"
-        if unidade_id:
-            url += f"&unidade={unidade_id}"
-        rows.append({
-            "cells": [
-                {"text": a.nome, "url": reverse("educacao:aluno_detail", args=[a.pk])},
-                {"text": a.cpf or "—", "url": ""},
-                {"text": a.nis or "—", "url": ""},
-            ],
-            "can_edit": True,
-            "edit_url": url,
-        })
-
-    actions = []
-
-    return render(request, "educacao/matricula_create.html", {
-        "q": q,
-        "unidade": unidade_id,
-        "alunos_result": alunos_result,
-        "page_obj": None,
-        "headers": headers,
-        "rows": rows,
-        "actions": actions,
-        "action_url": reverse("educacao:matricula_create"),
-        "clear_url": reverse("educacao:matricula_create"),
-        "has_filters": bool(q),
-        "form": form,
-        "actions_partial": "educacao/partials/matricula_pick_action.html",
-    })
-
-    
-    
-    
-@require_perm("educacao.view")
-@login_required
 def turma_detail(request, pk):
     turma_qs = scope_filter_turmas(
         request.user,
@@ -331,7 +255,7 @@ def turma_detail(request, pk):
             "unidade",
             "unidade__secretaria",
             "unidade__secretaria__municipio",
-        )
+        ),
     )
     turma = get_object_or_404(turma_qs, pk=pk)
 
@@ -366,11 +290,15 @@ def turma_detail(request, pk):
 
     alunos_ativos = (
         Matricula.objects.filter(turma_id=turma.id, aluno__ativo=True)
-        .values("aluno_id").distinct().count()
+        .values("aluno_id")
+        .distinct()
+        .count()
     )
     alunos_inativos = (
         Matricula.objects.filter(turma_id=turma.id, aluno__ativo=False)
-        .values("aluno_id").distinct().count()
+        .values("aluno_id")
+        .distinct()
+        .count()
     )
 
     professores = []
@@ -407,7 +335,6 @@ def turma_detail(request, pk):
     evol_labels = [str(r["ano_letivo"]) for r in evol_rows]
     evol_values = [r["total"] for r in evol_rows]
 
-    # ---------- TableShell: Alunos ----------
     headers_alunos = [
         {"label": "Nome"},
         {"label": "CPF", "width": "180px"},
@@ -415,49 +342,49 @@ def turma_detail(request, pk):
     ]
     rows_alunos = []
     for a in alunos:
-        rows_alunos.append({
-            "cells": [
-                {"text": a.nome, "url": reverse("educacao:aluno_detail", args=[a.pk])},
-                {"text": getattr(a, "cpf", None) or "—", "url": ""},
-                {"text": "Sim" if getattr(a, "ativo", False) else "Não", "url": ""},
-            ],
-            "can_edit": False,
-            "edit_url": "",
-        })
+        rows_alunos.append(
+            {
+                "cells": [
+                    {"text": a.nome, "url": reverse("educacao:aluno_detail", args=[a.pk])},
+                    {"text": getattr(a, "cpf", None) or "—", "url": ""},
+                    {"text": "Sim" if getattr(a, "ativo", False) else "Não", "url": ""},
+                ],
+                "can_edit": False,
+                "edit_url": "",
+            }
+        )
 
-    # ---------- TableShell: Professores ----------
     headers_professores = [
         {"label": "Usuário"},
         {"label": "Perfil"},
     ]
     rows_professores = []
     for p in professores:
-        rows_professores.append({
-            "cells": [
-                {"text": getattr(getattr(p, "user", None), "username", "—") or "—", "url": ""},
-                {"text": getattr(p, "role", "") or "—", "url": ""},
-            ],
-            "can_edit": False,
-            "edit_url": "",
-        })
+        rows_professores.append(
+            {
+                "cells": [
+                    {"text": getattr(getattr(p, "user", None), "username", "—") or "—", "url": ""},
+                    {"text": getattr(p, "role", "") or "—", "url": ""},
+                ],
+                "can_edit": False,
+                "edit_url": "",
+            }
+        )
 
     ctx = {
         "turma": turma,
         "can_edu_manage": can_edu_manage,
         "actions": actions,
-
         "alunos_total": alunos_total,
         "professores_total": professores_total,
         "alunos_ativos": alunos_ativos,
         "alunos_inativos": alunos_inativos,
-
         "nee_labels": nee_labels,
         "nee_values": nee_values,
         "status_labels": ["Ativos", "Inativos"],
         "status_values": [alunos_ativos, alunos_inativos],
         "evol_labels": evol_labels,
         "evol_values": evol_values,
-
         "headers_alunos": headers_alunos,
         "rows_alunos": rows_alunos,
         "headers_professores": headers_professores,
@@ -467,10 +394,11 @@ def turma_detail(request, pk):
     return render(request, "educacao/turma_detail.html", ctx)
 
 
-
 @login_required
 @require_perm("educacao.manage")
 def turma_create(request):
+    cancel_url = reverse("educacao:turma_list")
+
     if request.method == "POST":
         form = TurmaForm(request.POST, user=request.user)
         if form.is_valid():
@@ -481,7 +409,13 @@ def turma_create(request):
     else:
         form = TurmaForm(user=request.user)
 
-    return render(request, "educacao/turma_form.html", {"form": form, "mode": "create"})
+    return render(
+        request,
+        "educacao/turma_form.html",
+        {"form": form, "mode": "create", "cancel_url": cancel_url},
+    )
+
+
 
 
 @login_required
@@ -495,6 +429,8 @@ def turma_update(request, pk: int):
     qs = scope_filter_turmas(request.user, qs)
     turma = get_object_or_404(qs, pk=pk)
 
+    cancel_url = reverse("educacao:turma_detail", args=[turma.pk])
+
     if request.method == "POST":
         form = TurmaForm(request.POST, instance=turma, user=request.user)
         if form.is_valid():
@@ -505,7 +441,126 @@ def turma_update(request, pk: int):
     else:
         form = TurmaForm(instance=turma, user=request.user)
 
-    return render(request, "educacao/turma_form.html", {"form": form, "mode": "update", "turma": turma})
+    return render(
+        request,
+        "educacao/turma_form.html",
+        {"form": form, "mode": "update", "turma": turma, "cancel_url": cancel_url},
+    )
+
+# -----------------------------
+# MATRÍCULAS
+# -----------------------------
+
+@login_required
+@require_perm("educacao.view")
+def matricula_create(request):
+    if not can(request.user, "educacao.manage"):
+        messages.error(request, "Você não tem permissão para realizar matrículas.")
+        return redirect("educacao:index")
+
+    q = (request.GET.get("q") or "").strip()
+    aluno_id = (request.GET.get("aluno") or "").strip()
+    unidade_id = (request.GET.get("unidade") or "").strip()
+
+    alunos_qs = scope_filter_alunos(
+        request.user,
+        Aluno.objects.only("id", "nome", "cpf", "nis", "nome_mae", "ativo"),
+    )
+    turmas_base_qs = scope_filter_turmas(
+        request.user,
+        Turma.objects.select_related("unidade", "unidade__secretaria", "unidade__secretaria__municipio"),
+    )
+
+    alunos_result = alunos_qs
+    if q:
+        alunos_result = alunos_result.filter(
+            Q(nome__icontains=q) | Q(cpf__icontains=q) | Q(nis__icontains=q) | Q(nome_mae__icontains=q)
+        )
+    alunos_result = alunos_result.order_by("nome")[:25]
+
+    initial = {}
+    if aluno_id.isdigit():
+        initial["aluno"] = int(aluno_id)
+    if unidade_id.isdigit():
+        initial["unidade"] = int(unidade_id)
+
+    form = MatriculaForm(request.POST or None, initial=initial)
+
+    if "aluno" in form.fields:
+        form.fields["aluno"].queryset = alunos_qs.order_by("nome")
+
+    if "unidade" in form.fields:
+        unidades_ids = turmas_base_qs.values_list("unidade_id", flat=True).distinct()
+        form.fields["unidade"].queryset = form.fields["unidade"].queryset.filter(id__in=unidades_ids)
+
+    turmas_qs = turmas_base_qs
+    unidade_sel = (request.POST.get("unidade") or unidade_id or "").strip()
+    if unidade_sel.isdigit():
+        turmas_qs = turmas_qs.filter(unidade_id=int(unidade_sel))
+
+    if "turma" in form.fields:
+        form.fields["turma"].queryset = turmas_qs.order_by("-ano_letivo", "nome")
+
+    if request.method == "POST":
+        if form.is_valid():
+            m = form.save(commit=False)
+
+            if not alunos_qs.filter(pk=m.aluno_id).exists():
+                messages.error(request, "Aluno fora do seu escopo.")
+                return redirect("educacao:matricula_create")
+
+            if not turmas_base_qs.filter(pk=m.turma_id).exists():
+                messages.error(request, "Turma fora do seu escopo.")
+                return redirect("educacao:matricula_create")
+
+            if Matricula.objects.filter(aluno=m.aluno, turma=m.turma).exists():
+                messages.warning(request, "Esse aluno já possui matrícula nessa turma.")
+            else:
+                m.save()
+                messages.success(request, "Matrícula realizada com sucesso.")
+                return redirect(reverse("educacao:matricula_create") + f"?aluno={m.aluno_id}")
+
+    headers = [
+        {"label": "Aluno"},
+        {"label": "CPF", "width": "160px"},
+        {"label": "NIS", "width": "160px"},
+    ]
+
+    rows = []
+    for a in alunos_result:
+        url = reverse("educacao:matricula_create") + f"?q={escape(q)}&aluno={a.pk}"
+        if unidade_id:
+            url += f"&unidade={escape(unidade_id)}"
+        rows.append(
+            {
+                "cells": [
+                    {"text": a.nome, "url": reverse("educacao:aluno_detail", args=[a.pk])},
+                    {"text": a.cpf or "—", "url": ""},
+                    {"text": a.nis or "—", "url": ""},
+                ],
+                "can_edit": True,
+                "edit_url": url,
+            }
+        )
+
+    return render(
+        request,
+        "educacao/matricula_create.html",
+        {
+            "q": q,
+            "unidade": unidade_id,
+            "alunos_result": alunos_result,
+            "page_obj": None,
+            "headers": headers,
+            "rows": rows,
+            "actions": [],
+            "action_url": reverse("educacao:matricula_create"),
+            "clear_url": reverse("educacao:matricula_create"),
+            "has_filters": bool(q),
+            "form": form,
+            "actions_partial": "educacao/partials/matricula_pick_action.html",
+        },
+    )
 
 
 # -----------------------------
@@ -517,7 +572,7 @@ def turma_update(request, pk: int):
 def aluno_list(request):
     q = (request.GET.get("q") or "").strip()
 
-    qs = Aluno.objects.all()
+    qs = Aluno.objects.only("id", "nome", "cpf", "nis", "nome_mae", "ativo")
 
     if q:
         qs = qs.filter(
@@ -529,7 +584,6 @@ def aluno_list(request):
 
     qs = scope_filter_alunos(request.user, qs)
 
-    # Export mantém igual (já está ótimo)
     from apps.core.exports import export_csv, export_pdf_table
     export = (request.GET.get("export") or "").strip().lower()
 
@@ -557,11 +611,9 @@ def aluno_list(request):
     paginator = Paginator(qs, 10)
     page_obj = paginator.get_page(request.GET.get("page"))
 
-    # flags pro template (antes você usava can_edu_manage no template, mas não passava aqui)
     can_edu_manage = can(request.user, "educacao.manage")
 
-    # actions do PageHead
-    base_q = f"q={q}" if q else ""
+    base_q = f"q={escape(q)}" if q else ""
     actions = [
         {
             "label": "Exportar CSV",
@@ -595,18 +647,18 @@ def aluno_list(request):
 
     rows = []
     for a in page_obj:
-        rows.append({
-            "cells": [
-                {"text": a.nome, "url": reverse("educacao:aluno_detail", args=[a.pk])},
-                {"text": a.cpf or "—"},
-                {"text": a.nis or "—"},
-                {"text": "Sim" if a.ativo else "Não"},
-            ],
-            "can_edit": bool(can_edu_manage and a.pk),
-            "edit_url": reverse("educacao:aluno_update", args=[a.pk]) if a.pk else "",
-        })
-
-
+        rows.append(
+            {
+                "cells": [
+                    {"text": a.nome, "url": reverse("educacao:aluno_detail", args=[a.pk])},
+                    {"text": a.cpf or "—"},
+                    {"text": a.nis or "—"},
+                    {"text": "Sim" if a.ativo else "Não"},
+                ],
+                "can_edit": bool(can_edu_manage and a.pk),
+                "edit_url": reverse("educacao:aluno_update", args=[a.pk]) if a.pk else "",
+            }
+        )
 
     return render(
         request,
@@ -621,7 +673,6 @@ def aluno_list(request):
             "clear_url": reverse("educacao:aluno_list"),
             "autocomplete_url": reverse("educacao:api_alunos_suggest"),
             "autocomplete_href": reverse("educacao:aluno_list") + "?q={q}",
-
         },
     )
 
@@ -656,7 +707,6 @@ def aluno_detail(request, pk: int):
         .filter(aluno=aluno)
         .order_by("-id")
     )
-
     matriculas_qs = scope_filter_matriculas(request.user, matriculas_qs)
     matriculas = matriculas_qs
 
@@ -683,10 +733,6 @@ def aluno_detail(request, pk: int):
     ).values_list("id", flat=True)
 
     apoios = apoios_qs.filter(matricula_id__in=allowed_matriculas)
-
-    # =========================
-    # POST
-    # =========================
 
     if request.method == "POST":
         action = (request.POST.get("_action") or "").strip()
@@ -744,7 +790,6 @@ def aluno_detail(request, pk: int):
                     request.user,
                     Matricula.objects.filter(pk=apoio.matricula_id, aluno=aluno),
                 ).exists()
-
                 if not matricula_ok:
                     return HttpResponseForbidden("403 — Matrícula fora do seu escopo.")
 
@@ -758,10 +803,6 @@ def aluno_detail(request, pk: int):
         form_matricula = MatriculaForm(user=request.user)
         form_nee = AlunoNecessidadeForm(aluno=aluno)
         form_apoio = ApoioMatriculaForm(aluno=aluno)
-
-    # =========================
-    # DETAIL SUMMARY
-    # =========================
 
     fields = [
         {"label": "CPF", "value": aluno.cpf or "—"},
@@ -791,22 +832,20 @@ def aluno_detail(request, pk: int):
     ]
 
     rows_matriculas = []
-
     for m in matriculas:
-        rows_matriculas.append({
-            "cells": [
-                {
-                    "text": m.turma.nome,
-                    "url": reverse("educacao:turma_detail", args=[m.turma.pk]),
-                },
-                {"text": m.turma.unidade.nome},
-                {"text": str(m.turma.ano_letivo)},
-                {"text": m.get_situacao_display()},
-                {"text": m.data_matricula.strftime("%d/%m/%Y") if m.data_matricula else "—"},
-            ],
-            "can_edit": False,
-            "edit_url": "",
-        })
+        rows_matriculas.append(
+            {
+                "cells": [
+                    {"text": m.turma.nome, "url": reverse("educacao:turma_detail", args=[m.turma.pk])},
+                    {"text": m.turma.unidade.nome},
+                    {"text": str(m.turma.ano_letivo)},
+                    {"text": m.get_situacao_display()},
+                    {"text": m.data_matricula.strftime("%d/%m/%Y") if m.data_matricula else "—"},
+                ],
+                "can_edit": False,
+                "edit_url": "",
+            }
+        )
 
     return render(
         request,
@@ -831,7 +870,6 @@ def aluno_detail(request, pk: int):
     )
 
 
-
 @login_required
 @require_perm("educacao.manage")
 def aluno_create(request):
@@ -841,17 +879,14 @@ def aluno_create(request):
             with transaction.atomic():
                 turma = form.cleaned_data["turma"]
                 aluno = form.save()
-
                 Matricula.objects.create(
                     aluno=aluno,
                     turma=turma,
                     data_matricula=timezone.localdate(),
                     situacao=Matricula.Situacao.ATIVA,
                 )
-
             messages.success(request, "Aluno criado e matriculado com sucesso.")
             return redirect("educacao:aluno_detail", pk=aluno.pk)
-
         messages.error(request, "Corrija os erros do formulário.")
     else:
         form = AlunoCreateComTurmaForm(user=request.user)
@@ -875,12 +910,12 @@ def aluno_update(request, pk: int):
     else:
         form = AlunoForm(instance=aluno)
 
-    return render(
-        request,
-        "educacao/aluno_form.html",
-        {"form": form, "mode": "update", "aluno": aluno},
-    )
+    return render(request, "educacao/aluno_form.html", {"form": form, "mode": "update", "aluno": aluno})
 
+
+# -----------------------------
+# AUTOCOMPLETE (SUGGEST)
+# -----------------------------
 
 @login_required
 @require_perm("educacao.view")
@@ -892,7 +927,10 @@ def api_alunos_suggest(request):
     if len(q) < 2:
         return JsonResponse({"results": []})
 
-    alunos_qs = scope_filter_alunos(request.user, Aluno.objects.all())
+    alunos_qs = scope_filter_alunos(
+        request.user,
+        Aluno.objects.only("id", "nome", "cpf", "nis"),
+    )
 
     qs = alunos_qs.filter(
         Q(nome__icontains=q) | Q(cpf__icontains=q) | Q(nis__icontains=q)
@@ -900,14 +938,18 @@ def api_alunos_suggest(request):
 
     results = []
     for a in qs:
-        results.append({
-            "id": a.id,
-            "nome": a.nome,
-            "cpf": a.cpf or "",
-            "nis": a.nis or "",
-        })
+        results.append(
+            {
+                "id": a.id,
+                "nome": a.nome,
+                "cpf": a.cpf or "",
+                "nis": a.nis or "",
+            }
+        )
 
     return JsonResponse({"results": results})
+
+
 @login_required
 @require_perm("educacao.view")
 def api_turmas_suggest(request):
@@ -917,21 +959,28 @@ def api_turmas_suggest(request):
 
     qs = scope_filter_turmas(
         request.user,
-        Turma.objects.select_related("unidade")
+        Turma.objects.select_related("unidade").only("id", "nome", "ano_letivo", "unidade__nome"),
     )
 
-    qs = qs.filter(
-        Q(nome__icontains=q)
-        | Q(unidade__nome__icontains=q)
-        | Q(ano_letivo__icontains=q)
-    ).order_by("-ano_letivo", "nome")[:10]
+    if q.isdigit():
+        # Melhor que icontains em inteiro
+        qs = qs.filter(ano_letivo=int(q))
+    else:
+        qs = qs.filter(
+            Q(nome__icontains=q) | Q(unidade__nome__icontains=q)
+        )
+
+    qs = qs.order_by("-ano_letivo", "nome")[:10]
 
     results = []
     for t in qs:
-        results.append({
-            "id": t.id,
-            "text": f"{t.nome} ({t.ano_letivo})",
-            "meta": getattr(getattr(t, "unidade", None), "nome", "") or "",
-        })
+        results.append(
+            {
+                "id": t.id,
+                "text": f"{t.nome} ({t.ano_letivo})",
+                "meta": getattr(getattr(t, "unidade", None), "nome", "") or "",
+            }
+        )
 
     return JsonResponse({"results": results})
+

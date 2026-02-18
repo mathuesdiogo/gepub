@@ -1,6 +1,5 @@
-{% extends "core/base.html" %}
+{% extends "educacao/base_modulo.html" %}
 {% block title %}{{ turma.nome }} • Turmas • Educação • GEPUB{% endblock %}
-{% block header %}Educação{% endblock %}
 
 {% block breadcrumbs %}
   <div class="breadcrumbs">
@@ -14,161 +13,160 @@
   </div>
 {% endblock %}
 
-{% block content %}
+{% block module_content %}
 
-{{ nee_labels|json_script:"nee-labels" }}
-{{ nee_values|json_script:"nee-values" }}
-{{ status_labels|json_script:"st-labels" }}
-{{ status_values|json_script:"st-values" }}
-{{ evol_labels|json_script:"ev-labels" }}
-{{ evol_values|json_script:"ev-values" }}
+  {{ nee_labels|json_script:"nee-labels" }}
+  {{ nee_values|json_script:"nee-values" }}
+  {{ status_labels|json_script:"st-labels" }}
+  {{ status_values|json_script:"st-values" }}
+  {{ evol_labels|json_script:"ev-labels" }}
+  {{ evol_values|json_script:"ev-values" }}
 
-<div class="card">
-  <div class="card__body">
+  <div class="card">
+    <div class="card__body">
 
-{% include "core/partials/components/layout/page_head.html" with title=turma.nome subtitle="Turma • "|add:turma.ano_letivo|add:" • "|add:turma.turno actions=actions %}
+      {% include "core/partials/components/layout/page_head.html" with title=turma.nome subtitle="Turma • "|add:turma.ano_letivo|add:" • "|add:turma.turno actions=actions %}
 
-    <div class="dash-grid">
+      <div class="dash-grid">
 
-      <div class="card dash-col-6">
-        <div class="card__title">Informações da turma</div>
-        <div class="card__body">
-          <div class="detail-grid">
-            <div>
-              <div class="small">Ano letivo</div>
-              <div class="detail-value">{{ turma.ano_letivo }}</div>
-            </div>
-            <div>
-              <div class="small">Turno</div>
-              <div class="detail-value">{{ turma.turno }}</div>
-            </div>
-            <div class="detail-wide">
-              <div class="small">Unidade</div>
-              <div class="detail-value"><a class="link" href="{% url 'org:unidade_detail' turma.unidade_id %}">{{ turma.unidade.nome }}</a></div>
-            </div>
-            <div>
-              <div class="small">Secretaria</div>
-              <div class="detail-value">{{ turma.unidade.secretaria.nome }}</div>
-            </div>
-            <div>
-              <div class="small">Município</div>
-              <div class="detail-value">{{ turma.unidade.secretaria.municipio.nome }}</div>
+        <div class="card dash-col-6">
+          <div class="card__title">Informações da turma</div>
+          <div class="card__body">
+            <div class="detail-grid">
+              <div>
+                <div class="small">Ano letivo</div>
+                <div class="detail-value">{{ turma.ano_letivo }}</div>
+              </div>
+              <div>
+                <div class="small">Turno</div>
+                <div class="detail-value">{{ turma.turno }}</div>
+              </div>
+              <div class="detail-wide">
+                <div class="small">Unidade</div>
+                <div class="detail-value"><a class="link" href="{% url 'org:unidade_detail' turma.unidade_id %}">{{ turma.unidade.nome }}</a></div>
+              </div>
+              <div>
+                <div class="small">Secretaria</div>
+                <div class="detail-value">{{ turma.unidade.secretaria.nome }}</div>
+              </div>
+              <div>
+                <div class="small">Município</div>
+                <div class="detail-value">{{ turma.unidade.secretaria.municipio.nome }}</div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="card dash-col-6">
-        <div class="card__title">Resumo</div>
-        <div class="card__body">
-          <div class="pill-row">
-            <span class="pill">Alunos <strong>{{ alunos_total }}</strong></span>
-            <span class="pill">Professores <strong>{{ professores_total }}</strong></span>
-            <span class="pill">Ativos <strong>{{ alunos_ativos }}</strong></span>
-            <span class="pill">Inativos <strong>{{ alunos_inativos }}</strong></span>
+        <div class="card dash-col-6">
+          <div class="card__title">Resumo</div>
+          <div class="card__body">
+            <div class="pill-row">
+              <span class="pill">Alunos <strong>{{ alunos_total }}</strong></span>
+              <span class="pill">Professores <strong>{{ professores_total }}</strong></span>
+              <span class="pill">Ativos <strong>{{ alunos_ativos }}</strong></span>
+              <span class="pill">Inativos <strong>{{ alunos_inativos }}</strong></span>
+            </div>
+            <div class="small">Clique nos blocos abaixo para expandir listas.</div>
           </div>
-          <div class="small">Clique nos blocos abaixo para expandir listas.</div>
         </div>
-      </div>
 
-      <div class="card dash-col-6">
-        <div class="card__title">Necessidades (NEE) na turma</div>
-        <div class="card__body">
-          <canvas id="chartNee" height="140"></canvas>
-          <div class="small">Distribuição por tipo de necessidade.</div>
+        <div class="card dash-col-6">
+          <div class="card__title">Necessidades (NEE) na turma</div>
+          <div class="card__body">
+            <canvas id="chartNee" height="140"></canvas>
+            <div class="small">Distribuição por tipo de necessidade.</div>
+          </div>
         </div>
-      </div>
 
-      <div class="card dash-col-6">
-        <div class="card__title">Ativos vs Inativos</div>
-        <div class="card__body">
-          <canvas id="chartStatus" height="140"></canvas>
-          <div class="small">Situação dos alunos matriculados.</div>
+        <div class="card dash-col-6">
+          <div class="card__title">Ativos vs Inativos</div>
+          <div class="card__body">
+            <canvas id="chartStatus" height="140"></canvas>
+            <div class="small">Situação dos alunos matriculados.</div>
+          </div>
         </div>
-      </div>
 
-      <div class="card dash-col-12">
-        <div class="card__title">Evolução por ano letivo</div>
-        <div class="card__body">
-          <canvas id="chartEvol" height="110"></canvas>
-          <div class="small">Comparação por ano (mesmo nome de turma e mesma unidade).</div>
+        <div class="card dash-col-12">
+          <div class="card__title">Evolução por ano letivo</div>
+          <div class="card__body">
+            <canvas id="chartEvol" height="110"></canvas>
+            <div class="small">Comparação por ano (mesmo nome de turma e mesma unidade).</div>
+          </div>
         </div>
-      </div>
 
-      <div class="card dash-col-6">
-        <div class="card__title">Alunos</div>
-        <div class="card__body">
-          <details>
-            <summary class="link">Ver alunos da turma ({{ alunos_total }})</summary>
-{% include "core/partials/components/data/table_shell.html" with headers=headers_alunos rows=rows_alunos page_obj=None empty_title="Nenhum aluno" empty_text="Nenhum aluno matriculado nesta turma." %}
-          </details>
+        <div class="card dash-col-6">
+          <div class="card__title">Alunos</div>
+          <div class="card__body">
+            <details>
+              <summary class="link">Ver alunos da turma ({{ alunos_total }})</summary>
+              {% include "core/partials/components/data/table_shell.html" with headers=headers_alunos rows=rows_alunos page_obj=None empty_title="Nenhum aluno" empty_text="Nenhum aluno matriculado nesta turma." %}
+            </details>
+          </div>
         </div>
-      </div>
 
-      <div class="card dash-col-6">
-        <div class="card__title">Professores</div>
-        <div class="card__body">
-          <details>
-            <summary class="link">Ver professores ({{ professores_total }})</summary>
-{% include "core/partials/components/data/table_shell.html" with headers=headers_professores rows=rows_professores page_obj=None empty_title="Nenhum professor" empty_text="Nenhum professor encontrado (ou perfil não vincula unidade)." %}
-          </details>
+        <div class="card dash-col-6">
+          <div class="card__title">Professores</div>
+          <div class="card__body">
+            <details>
+              <summary class="link">Ver professores ({{ professores_total }})</summary>
+              {% include "core/partials/components/data/table_shell.html" with headers=headers_professores rows=rows_professores page_obj=None empty_title="Nenhum professor" empty_text="Nenhum professor encontrado (ou perfil não vincula unidade)." %}
+            </details>
+          </div>
         </div>
-      </div>
 
+      </div>
     </div>
-
   </div>
-</div>
 
-<script>
-(function () {
-  function ensureChartJs(cb) {
-    if (window.Chart) return cb();
-    const s = document.createElement("script");
-    s.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js";
-    s.onload = cb;
-    s.onerror = function(){ console.warn("Chart.js não carregou."); };
-    document.head.appendChild(s);
-  }
-
-  function renderCharts() {
-    const neeLabels = JSON.parse(document.getElementById("nee-labels").textContent || "[]");
-    const neeValues = JSON.parse(document.getElementById("nee-values").textContent || "[]");
-    const stLabels = JSON.parse(document.getElementById("st-labels").textContent || "[]");
-    const stValues = JSON.parse(document.getElementById("st-values").textContent || "[]");
-    const evLabels = JSON.parse(document.getElementById("ev-labels").textContent || "[]");
-    const evValues = JSON.parse(document.getElementById("ev-values").textContent || "[]");
-
-    const cNee = document.getElementById("chartNee");
-    const cSt  = document.getElementById("chartStatus");
-    const cEv  = document.getElementById("chartEvol");
-    if (!cNee || !cSt || !cEv || !window.Chart) return;
-
-    if (neeLabels.length && neeValues.length) {
-      new Chart(cNee.getContext("2d"), {
-        type: "bar",
-        data: { labels: neeLabels, datasets: [{ label: "Alunos", data: neeValues, borderWidth: 1 }] },
-        options: { responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
-      });
+  <script>
+  (function () {
+    function ensureChartJs(cb) {
+      if (window.Chart) return cb();
+      const s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js";
+      s.onload = cb;
+      s.onerror = function(){ console.warn("Chart.js não carregou."); };
+      document.head.appendChild(s);
     }
 
-    new Chart(cSt.getContext("2d"), {
-      type: "doughnut",
-      data: { labels: stLabels, datasets: [{ data: stValues, borderWidth: 0 }] },
-      options: { responsive:true, plugins:{ legend:{ position:"bottom" } } }
-    });
+    function renderCharts() {
+      const neeLabels = JSON.parse(document.getElementById("nee-labels").textContent || "[]");
+      const neeValues = JSON.parse(document.getElementById("nee-values").textContent || "[]");
+      const stLabels = JSON.parse(document.getElementById("st-labels").textContent || "[]");
+      const stValues = JSON.parse(document.getElementById("st-values").textContent || "[]");
+      const evLabels = JSON.parse(document.getElementById("ev-labels").textContent || "[]");
+      const evValues = JSON.parse(document.getElementById("ev-values").textContent || "[]");
 
-    if (evLabels.length && evValues.length) {
-      new Chart(cEv.getContext("2d"), {
-        type: "line",
-        data: { labels: evLabels, datasets: [{ label: "Alunos", data: evValues, borderWidth: 2, tension: .25 }] },
-        options: { responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
+      const cNee = document.getElementById("chartNee");
+      const cSt  = document.getElementById("chartStatus");
+      const cEv  = document.getElementById("chartEvol");
+      if (!cNee || !cSt || !cEv || !window.Chart) return;
+
+      if (neeLabels.length && neeValues.length) {
+        new Chart(cNee.getContext("2d"), {
+          type: "bar",
+          data: { labels: neeLabels, datasets: [{ label: "Alunos", data: neeValues, borderWidth: 1 }] },
+          options: { responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
+        });
+      }
+
+      new Chart(cSt.getContext("2d"), {
+        type: "doughnut",
+        data: { labels: stLabels, datasets: [{ data: stValues, borderWidth: 0 }] },
+        options: { responsive:true, plugins:{ legend:{ position:"bottom" } } }
       });
-    }
-  }
 
-  ensureChartJs(renderCharts);
-})();
-</script>
+      if (evLabels.length && evValues.length) {
+        new Chart(cEv.getContext("2d"), {
+          type: "line",
+          data: { labels: evLabels, datasets: [{ label: "Alunos", data: evValues, borderWidth: 2, tension: .25 }] },
+          options: { responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
+        });
+      }
+    }
+
+    ensureChartJs(renderCharts);
+  })();
+  </script>
 
 {% endblock %}
