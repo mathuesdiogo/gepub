@@ -61,6 +61,7 @@ ROLE_PERMS_FINE = {
         "accounts.manage_users",
         "system.admin_django",
         "saude.view",
+        "saude.manage",
     },
     "MUNICIPAL": {
         "org.view",
@@ -73,6 +74,7 @@ ROLE_PERMS_FINE = {
         "reports.view",
         "accounts.manage_users",
         "saude.view",
+        "saude.manage",
     },
     "SECRETARIA": {
         "org.view",

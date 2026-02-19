@@ -1,0 +1,8 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Avaliações • Educação • GEPUB{% endblock %}
+{% block module_content %}
+<div class="card"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Avaliações" subtitle=diario.turma.nome actions=actions %}
+{% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj empty_title="Nenhuma avaliação" empty_text="Crie uma avaliação para lançar notas." %}
+</div></div>
+{% endblock %}

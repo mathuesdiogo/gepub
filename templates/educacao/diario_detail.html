@@ -1,0 +1,9 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Diário • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Diário de Classe" subtitle=diario.turma.nome actions=actions %}
+{% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj empty_title="Nenhuma aula registrada" empty_text="Crie uma aula para lançar frequência." %}
+</div></div>
+{% endblock %}

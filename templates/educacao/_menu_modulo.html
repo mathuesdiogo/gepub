@@ -5,10 +5,25 @@
   </div>
 
   <ul class="module-menu__list">
+
     <li class="module-menu__item">
       <a class="module-menu__link" href="{% url 'educacao:index' %}">
         <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
         <span>Dashboard</span>
+      </a>
+    </li>
+
+    <li class="module-menu__item">
+      <a class="module-menu__link" href="{% url 'educacao:relatorio_mensal' %}">
+        <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
+        <span>Relatório Mensal</span>
+      </a>
+    </li>
+
+    <li class="module-menu__item">
+      <a class="module-menu__link" href="{% url 'educacao:meus_diarios' %}">
+        <i class="fa-solid fa-book" aria-hidden="true"></i>
+        <span>Diário de Classe</span>
       </a>
     </li>
 
@@ -34,12 +49,13 @@
     </li>
 
     {% if perms.nee.view %}
-      <li class="module-menu__item">
-        <a class="module-menu__link" href="{% url 'nee:relatorios_index' %}">
-          <i class="fa-solid fa-wheelchair" aria-hidden="true"></i>
-          <span>Relatórios NEE</span>
-        </a>
-      </li>
+    <li class="module-menu__item">
+      <a class="module-menu__link" href="{% url 'nee:relatorios_index' %}">
+        <i class="fa-solid fa-wheelchair" aria-hidden="true"></i>
+        <span>Relatórios NEE</span>
+      </a>
+    </li>
     {% endif %}
+
   </ul>
 </nav>

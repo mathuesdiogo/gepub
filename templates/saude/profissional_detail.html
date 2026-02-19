@@ -1,0 +1,12 @@
+{% extends "saude/base_modulo.html" %}
+{% block title %}{{ obj.nome }} • Profissional • Saúde • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+
+  {% include "core/partials/components/layout/page_head.html" with title=obj.nome subtitle="Detalhes do profissional" actions=actions %}
+
+  {% include "core/partials/components/layout/detail_summary.html" with fields=fields pills=pills %}
+
+</div></div>
+{% endblock %}

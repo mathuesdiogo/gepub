@@ -1,0 +1,27 @@
+{# core/partials/components/layout/detail_summary.html #}
+
+{% if pills %}
+  <div class="chips" style="margin-bottom: 10px;">
+    {% for p in pills %}
+      <span class="pill{% if p.variant %} pill--{{ p.variant }}{% endif %}">
+        {% if p.label %}<strong>{{ p.label }}:</strong>{% endif %}
+        {{ p.value }}
+      </span>
+    {% endfor %}
+  </div>
+{% endif %}
+
+{% if fields %}
+  <div class="detail-summary">
+    <div class="detail-summary__grid">
+      {% for f in fields %}
+        <div class="detail-summary__item">
+          <div class="detail-summary__label">{{ f.label }}</div>
+          <div class="detail-summary__value">
+            {{ f.value|default:"—" }}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}

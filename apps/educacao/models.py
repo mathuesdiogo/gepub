@@ -147,3 +147,6 @@ class Matricula(models.Model):
 
     def __str__(self) -> str:
         return f"{self.aluno} → {self.turma} ({self.situacao})"
+    
+from .models_horarios import *
+from .models_diario import * 

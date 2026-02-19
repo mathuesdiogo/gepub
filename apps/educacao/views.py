@@ -262,12 +262,19 @@ def turma_detail(request, pk):
     can_edu_manage = can(request.user, "educacao.manage")
 
     actions = [
-        {
-            "label": "Voltar",
-            "url": reverse("educacao:turma_list"),
-            "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
-        }
+    {
+        "label": "Voltar",
+        "url": reverse("educacao:turma_list"),
+        "icon": "fa-solid fa-arrow-left",
+        "variant": "btn--ghost",
+    },
+    {
+        "label": "Horário",
+        "url": reverse("educacao:horario_turma", args=[turma.pk]),
+        "icon": "fa-solid fa-calendar-days",
+        "variant": "btn--ghost",
+    },
+
     ]
     if can_edu_manage:
         actions.append(
