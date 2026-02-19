@@ -1,0 +1,47 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Boletim por Período • Educação • GEPUB{% endblock %}
+{% block module_content %}
+<div class="card"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Boletim por Período" subtitle=turma.nome actions=actions %}
+
+<form method="get" class="filter-bar" action="">
+  <div class="filter-bar__field">
+    <label class="small">Período</label>
+    <select name="periodo">
+      {% for p in periodos %}
+      <option value="{{ p.pk }}" {% if periodo and p.pk == periodo.pk %}selected{% endif %}>{{ p }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="filter-bar__actions">
+    <button class="btn btn--ghost" type="submit"><i class="fa-solid fa-filter" aria-hidden="true"></i><span>Aplicar</span></button>
+  </div>
+</form>
+
+<div class="small" style="margin-top:10px;">
+  Total de aulas no período: <strong>{{ total_aulas }}</strong>
+</div>
+
+<table class="table" style="margin-top:12px;">
+  <thead>
+    <tr>
+      <th>Aluno</th>
+      <th style="width:140px;">Média</th>
+      <th style="width:160px;">Frequência (%)</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in rows_data %}
+    <tr>
+      <td>{{ r.aluno.nome }}</td>
+      <td>{{ r.media|default:"—" }}</td>
+      <td>{{ r.freq|default:"—" }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="3">Sem dados.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+</div></div>
+{% endblock %}

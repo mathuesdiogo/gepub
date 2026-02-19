@@ -274,6 +274,19 @@ def turma_detail(request, pk):
         "icon": "fa-solid fa-calendar-days",
         "variant": "btn--ghost",
     },
+    {
+        "label": "Boletim",
+        "url": reverse("educacao:boletim_turma", args=[turma.pk]),
+        "icon": "fa-solid fa-clipboard-list",
+        "variant": "btn--ghost",
+    },
+    {
+        "label": "Relatório",
+        "url": reverse("educacao:relatorio_geral_turma", args=[turma.pk]),
+        "icon": "fa-solid fa-file-lines",
+        "variant": "btn--ghost",
+    },
+
 
     ]
     if can_edu_manage:

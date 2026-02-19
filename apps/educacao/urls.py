@@ -2,8 +2,19 @@ from django.urls import path
 from . import views
 from . import views_relatorios
 from . import views_diario
+from . import views_horarios
+
 from . import views_notas
 from apps.educacao.views_horarios import horario_turma, horario_aula_create, horario_aula_update
+from apps.educacao.views_boletim import boletim_turma, boletim_aluno
+from apps.educacao.views_relatorios_turma import relatorio_geral_turma
+from apps.educacao.views_boletim_periodo import boletim_turma_periodo
+from apps.educacao.views_periodos import periodo_list, periodo_create, periodo_update
+from apps.educacao.views_periodos import periodo_list, periodo_create, periodo_update, periodo_gerar_bimestres
+
+from apps.educacao.views_horarios_index import horarios_index
+from apps.educacao.views_horarios import horario_turma, horario_aula_create, horario_aula_update
+from .views_horarios import horario_gerar_padrao, horario_duplicar
 
 app_name = "educacao"
 
@@ -40,6 +51,24 @@ urlpatterns = [
     path("turmas/<int:pk>/horario/aulas/nova/", horario_aula_create, name="horario_aula_create"),
     path("turmas/<int:pk>/horario/aulas/<int:aula_id>/editar/", horario_aula_update, name="horario_aula_update"),
 
+    path("turmas/<int:pk>/boletim/", boletim_turma, name="boletim_turma"),
+    path("turmas/<int:pk>/boletim/aluno/<int:aluno_id>/", boletim_aluno, name="boletim_aluno"),
+    path("turmas/<int:pk>/relatorio/geral/", relatorio_geral_turma, name="relatorio_geral_turma"),
+    path("turmas/<int:pk>/boletim/periodo/", boletim_turma_periodo, name="boletim_turma_periodo"),
 
+    path("periodos/", periodo_list, name="periodo_list"),
+    path("periodos/novo/", periodo_create, name="periodo_create"),
+    path("periodos/<int:pk>/editar/", periodo_update, name="periodo_update"),
+    path("periodos/gerar-bimestres/", periodo_gerar_bimestres, name="periodo_gerar_bimestres"),
+    
+    
+    path("turmas/<int:pk>/horario/", horario_turma, name="horario_turma"),
+    path("turmas/<int:turma_pk>/horario/aulas/nova/", horario_aula_create, name="horario_aula_create"),
+    path("turmas/<int:turma_pk>/horario/aulas/<int:pk>/editar/", horario_aula_update, name="horario_aula_update"),
+    path("horarios/", horarios_index, name="horarios_index"),
+    path("turmas/<int:pk>/horario/gerar-padrao/", views_horarios.horario_gerar_padrao, name="horario_gerar_padrao"),
+    path("turmas/<int:pk>/horario/duplicar/", views_horarios.horario_duplicar, name="horario_duplicar"),
+    path("turmas/<int:pk>/horario/duplicar/selecionar/", views_horarios.horario_duplicar_select, name="horario_duplicar_select"),
+    path("turmas/<int:pk>/horario/limpar/", views_horarios.horario_limpar, name="horario_limpar"),
 
 ]

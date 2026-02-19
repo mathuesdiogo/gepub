@@ -149,4 +149,7 @@ class Matricula(models.Model):
         return f"{self.aluno} → {self.turma} ({self.situacao})"
     
 from .models_horarios import *
-from .models_diario import * 
+from .models_diario import *
+from .models_periodos import *
+from .models_horarios import *
+
