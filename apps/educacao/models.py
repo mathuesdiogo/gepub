@@ -148,8 +148,9 @@ class Matricula(models.Model):
     def __str__(self) -> str:
         return f"{self.aluno} → {self.turma} ({self.situacao})"
     
-from .models_horarios import *
-from .models_diario import *
-from .models_periodos import *
-from .models_horarios import *
 
+# Importa submódulos de models (sem wildcard) para registrar os models do app
+from . import models_diario  # noqa: F401
+from . import models_horarios  # noqa: F401
+from . import models_periodos  # noqa: F401
+from . import models_notas  # noqa: F401

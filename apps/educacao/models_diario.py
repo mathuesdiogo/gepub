@@ -9,15 +9,12 @@ class DiarioTurma(models.Model):
         on_delete=models.CASCADE,
         related_name="diarios",
     )
-
     professor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="diarios",
     )
-
     ano_letivo = models.PositiveIntegerField(default=timezone.now().year)
-
     criado_em = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -34,11 +31,9 @@ class Aula(models.Model):
         on_delete=models.CASCADE,
         related_name="aulas",
     )
-
     data = models.DateField(default=timezone.localdate)
     conteudo = models.TextField(blank=True)
     observacoes = models.TextField(blank=True)
-
     criado_em = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -59,13 +54,11 @@ class Frequencia(models.Model):
         on_delete=models.CASCADE,
         related_name="frequencias",
     )
-
     aluno = models.ForeignKey(
         "educacao.Aluno",
         on_delete=models.CASCADE,
         related_name="frequencias",
     )
-
     status = models.CharField(max_length=1, choices=Status.choices, default=Status.PRESENTE)
 
     class Meta:
@@ -76,39 +69,57 @@ class Frequencia(models.Model):
 
 
 class Avaliacao(models.Model):
+    """
+    ✅ MODELO ÚNICO DE AVALIAÇÃO DO APP 'educacao'
+    (evita conflito com models_notas.py)
+    """
     diario = models.ForeignKey(
         DiarioTurma,
         on_delete=models.CASCADE,
         related_name="avaliacoes",
     )
 
+    # ✅ opcional: vincular em um período (bimestre/trimestre/semestre)
+    periodo = models.ForeignKey(
+        "educacao.PeriodoLetivo",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="avaliacoes",
+    )
+
     titulo = models.CharField(max_length=160)
     peso = models.DecimalField(max_digits=5, decimal_places=2, default=1)
+    nota_maxima = models.DecimalField(max_digits=5, decimal_places=2, default=10)
     data = models.DateField(default=timezone.localdate)
 
+    ativo = models.BooleanField(default=True)
     criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-data", "-id"]
+        indexes = [
+            models.Index(fields=["data"]),
+            models.Index(fields=["ativo"]),
+        ]
 
     def __str__(self):
         return self.titulo
 
-
 class Nota(models.Model):
-    avaliacao = models.ForeignKey(
-        Avaliacao,
-        on_delete=models.CASCADE,
-        related_name="notas",
-    )
+    """Nota lançada em uma Avaliação (Diário de Classe).
 
-    aluno = models.ForeignKey(
-        "educacao.Aluno",
-        on_delete=models.CASCADE,
-        related_name="notas",
-    )
-
-    valor = models.DecimalField(max_digits=5, decimal_places=2)
+    Mantida exatamente no padrão da migration 0007 (tabela educacao_nota),
+    para evitar conflitos com notas curriculares.
+    """
+    avaliacao = models.ForeignKey("educacao.Avaliacao", on_delete=models.CASCADE, related_name="notas")
+    aluno = models.ForeignKey("educacao.Aluno", on_delete=models.CASCADE, related_name="notas")
+    valor = models.DecimalField(max_digits=5, decimal_places=2, default=0)
 
     class Meta:
-        unique_together = ("avaliacao", "aluno")
+        unique_together = [("avaliacao", "aluno")]
+        ordering = ["aluno_id"]
 
-    def __str__(self):
-        return f"{self.aluno} — {self.valor}"
+    def __str__(self) -> str:
+        return f"{self.aluno_id} • {self.avaliacao_id} • {self.valor}"
+

@@ -1,36 +1,50 @@
 {% extends "educacao/base_modulo.html" %}
-{% block title %}Notas • Educação • GEPUB{% endblock %}
+{% block title %}Lançar Notas • Educação • GEPUB{% endblock %}
 {% block module_content %}
 <div class="card"><div class="card__body">
-{% include "core/partials/components/layout/page_head.html" with title="Lançamento de Notas" subtitle=avaliacao.titulo actions=actions %}
-{% include "core/partials/components/layout/filter_bar.html" with q=q placeholder="Buscar aluno por nome..." action_url=action_url clear_url=clear_url has_filters=has_filters autocomplete_url=autocomplete_url autocomplete_href=autocomplete_href %}
 
-<form id="notas-form" method="post">
+{% include "core/partials/components/layout/page_head.html" with title="Lançamento de Notas" subtitle=avaliacao.titulo actions=actions %}
+
+<div class="detail-summary">
+  <div><strong>Turma:</strong> {{ turma.nome }} • {{ turma.ano_letivo }}</div>
+  <div><strong>Período:</strong> {{ avaliacao.periodo }}</div>
+  <div><strong>Componente:</strong> {{ avaliacao.componente }}</div>
+  <div><strong>Máx:</strong> {{ avaliacao.valor_maximo }} • <strong>Peso:</strong> {{ avaliacao.peso }}</div>
+</div>
+
+<form method="post" id="notas-form">
   {% csrf_token %}
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Aluno</th>
-        <th style="width:240px;">Nota</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in alunos_render %}
-      <tr>
-        <td>{{ row.nome }}</td>
-        <td>
-          <input name="aluno_{{ row.id }}" value="{{ row.nota }}" placeholder="Ex.: 8,5" {% if not can_edit %}disabled{% endif %}/>
-        </td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="2">Nenhum aluno encontrado.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+
+  <div class="table">
+    <table>
+      <thead>
+        <tr>
+          <th>Aluno</th>
+          <th style="width:160px;">Nota</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in alunos_render %}
+        <tr>
+          <td>{{ a.aluno_nome }}</td>
+          <td>
+            {% if can_edit %}
+              <input name="mat_{{ a.matricula_id }}" value="{{ a.valor }}" placeholder="0 a {{ avaliacao.valor_maximo }}" />
+            {% else %}
+              {{ a.valor|default:"—" }}
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="2">Nenhum aluno matriculado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
   {% if can_edit %}
-  <div class="actions">
-    <button class="btn btn-primary" type="submit"><i class="fa-solid fa-check" aria-hidden="true"></i><span>Salvar Notas</span></button>
+  <div class="form__actions">
+    <button class="btn btn-primary" type="submit">Salvar Notas</button>
   </div>
   {% endif %}
 </form>
