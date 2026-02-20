@@ -11,6 +11,7 @@
 @import url("./core/layout.css");
 @import url("./core/utilities.css");
 
+
 /* -----------------------
    Components (UI)
    ----------------------- */
@@ -18,6 +19,8 @@
 @import url("./components/topbar.css");
 @import url("./components/breadcrumbs.css");
 @import url("./components/navigation.css");
+@import url("./components/tabs.css");
+@import url("./components/accordion.css");
 
 @import url("./components/buttons.css");
 @import url("./components/dropdown.css");
