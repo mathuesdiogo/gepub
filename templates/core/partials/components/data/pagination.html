@@ -1,1 +1,19 @@
-{% include "core/partials/pagination.html" %}
+{# templates/core/partials/pagination.html #}
+
+{% if page_obj %}
+  <div class="pagination">
+    <div class="pagination__meta">
+      Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+    </div>
+
+    <div class="pagination__actions">
+      {% if page_obj.has_previous %}
+        <a class="btn btn-ghost" href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if ano %}&ano={{ ano }}{% endif %}">Anterior</a>
+      {% endif %}
+
+      {% if page_obj.has_next %}
+        <a class="btn btn-ghost" href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if ano %}&ano={{ ano }}{% endif %}">Próxima</a>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}

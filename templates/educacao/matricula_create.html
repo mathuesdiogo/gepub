@@ -26,7 +26,7 @@
         {% url "educacao:api_alunos_suggest" as ac_url %}
         {% url "educacao:matricula_create" as ac_href %}
 
-        {% include "core/partials/components/layout/filter_bar.html" with q=q placeholder="Digite nome, CPF ou NIS..." action_url=action_url clear_url=clear_url has_filters=has_filters input_attrs='data-autocomplete="1" data-autocomplete-url="'|add:ac_url|add:'" data-autocomplete-href="'|add:ac_href|add:'?q={q}"'%}
+        {% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Digite nome, CPF ou NIS..." action_url=action_url clear_url=clear_url has_filters=has_filters input_attrs='data-autocomplete="1" data-autocomplete-url="'|add:ac_url|add:'" data-autocomplete-href="'|add:ac_href|add:'?q={q}"'%}
 
         {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Nenhum aluno encontrado" empty_text="Tente ajustar sua busca."%}
 

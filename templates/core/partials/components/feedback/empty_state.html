@@ -1,6 +1,7 @@
+{# templates/core/partials/empty_state.html #}
+
 <div class="empty-state">
-  <h3 class="empty-state__title">{{ empty_title|default:"Nenhum registro encontrado" }}</h3>
-  {% if empty_text %}
-    <p class="empty-state__text">{{ empty_text }}</p>
-  {% endif %}
+  {% if empty_title %}<h4 class="empty-state__title">{{ empty_title }}</h4>{% endif %}
+  {% if empty_text %}<p class="empty-state__text">{{ empty_text }}</p>{% endif %}
 </div>
+

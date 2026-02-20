@@ -4,7 +4,7 @@
 {% block module_content %}
 <div class="card"><div class="card__body">
 {% include "core/partials/components/layout/page_head.html" with title="Frequência" subtitle=diario.turma.nome actions=actions %}
-{% include "core/partials/components/layout/filter_bar.html" with q=q placeholder="Buscar aluno por nome, CPF ou NIS..." action_url=action_url clear_url=clear_url has_filters=has_filters autocomplete_url=autocomplete_url autocomplete_href=autocomplete_href %}
+{% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Buscar aluno por nome, CPF ou NIS..." action_url=action_url clear_url=clear_url has_filters=has_filters autocomplete_url=autocomplete_url autocomplete_href=autocomplete_href %}
 
 <form id="freq-form" method="post">
   {% csrf_token %}
