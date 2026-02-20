@@ -42,13 +42,12 @@
         {% empty %}
           <tr>
             <td colspan="{{ headers|length|add:1 }}">
-              {% include "core/partials/empty_state.html" with empty_title=empty_title empty_text=empty_text %}
-            </td>
+{% include "core/partials/components/feedback/empty_state.html" with empty_title=empty_title empty_text=empty_text %}            </td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 
-  {% include "core/partials/pagination.html" with page_obj=page_obj q=q %}
+  {% include "core/partials/components/data/pagination.html" with page_obj=page_obj q=q ano=ano %}
 </div>
