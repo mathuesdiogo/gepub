@@ -1,30 +1,8 @@
-{% extends "core/base.html" %}
-{% block title %}{% if mode == "create" %}Novo Tipo{% else %}Editar Tipo{% endif %} • NEE • GEPUB{% endblock %}
-{% block header %}NEE{% endblock %}
-
-{% block breadcrumbs %}
-<div class="breadcrumbs">
-  <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
-  <span class="breadcrumbs__sep">/</span>
-  <a class="breadcrumbs__link" href="{% url 'nee:index' %}">NEE</a>
-  <span class="breadcrumbs__sep">/</span>
-  <a class="breadcrumbs__link" href="{% url 'nee:tipo_list' %}">Tipos</a>
-  <span class="breadcrumbs__sep">/</span>
-  <span class="breadcrumbs__current">{% if mode == "create" %}Novo{% else %}Editar{% endif %}</span>
-</div>
-{% endblock %}
-
-{% block content %}
-<div class="card">
-  <div class="card__body">
-
-{% if mode == "create" %}{% include "core/partials/components/layout/page_head.html" with title="Novo Tipo de Necessidade" subtitle="Cadastre um novo tipo (TEA, TDAH, etc.)" actions=actions %}{% else %}{% include "core/partials/components/layout/page_head.html" with title="Editar Tipo de Necessidade" subtitle="Atualize as informações do tipo" actions=actions %}{% endif %}
-
-<form method="post">
-  {% csrf_token %}
-  {% include "core/partials/components/forms/form_shell.html" with form=form %}
-</form>
-
-  </div>
-</div>
+{% extends "nee/base_modulo.html" %}
+{% block module_title %}{% if mode == 'update' %}Editar Tipo{% else %}Novo Tipo{% endif %} • NEE{% endblock %}
+{% block module_content %}
+<div class="card"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Tipo de Necessidade" subtitle="Preencha os dados do tipo" actions=actions %}
+{% include "core/partials/components/forms/form_shell.html" with form=form submit_label="Salvar" cancel_url=actions.0.url %}
+</div></div>
 {% endblock %}

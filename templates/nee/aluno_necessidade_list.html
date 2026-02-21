@@ -1,14 +1,14 @@
 {% extends "nee/base_modulo.html" %}
-{% block module_title %}Tipos de Necessidade • NEE{% endblock %}
+{% block module_title %}NEE • {{ aluno.nome }}{% endblock %}
 {% block module_content %}
 <div class="card"><div class="card__body">
-{% include "core/partials/components/layout/page_head.html" with title="Tipos de Necessidade" subtitle="Cadastro de tipos (TEA, TDAH, etc.)" actions=actions %}
+{% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
 {% include "core/partials/components/data/filter_bar.html" with action_url=action_url clear_url=clear_url has_filters=has_filters q=q extra_filters=extra_filters %}
 {% if page_obj and page_obj.object_list %}
   {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows %}
   {% include "core/partials/components/data/pagination.html" with page_obj=page_obj %}
 {% else %}
-  {% include "core/partials/components/feedback/empty_state.html" with title="Nenhum tipo encontrado" text="Crie um novo tipo de necessidade para começar." %}
+  {% include "core/partials/components/feedback/empty_state.html" with title="Nenhuma necessidade cadastrada" text="Adicione uma necessidade para este aluno." %}
 {% endif %}
 </div></div>
 {% endblock %}

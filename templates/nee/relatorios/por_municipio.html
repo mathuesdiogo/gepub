@@ -1,22 +1,20 @@
-{% extends "core/base.html" %}
-{% block title %}Relatório • Por município • NEE • GEPUB{% endblock %}
-{% block header %}NEE{% endblock %}
-
-{% block breadcrumbs %}
-<div class="breadcrumbs">
-  <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
-  <span class="breadcrumbs__sep">/</span>
-  <a class="breadcrumbs__link" href="{% url 'nee:index' %}">NEE</a>
-  <span class="breadcrumbs__sep">/</span>
-  <a class="breadcrumbs__link" href="{% url 'nee:relatorios_index' %}">Relatórios</a>
-  <span class="breadcrumbs__sep">/</span>
-  <span class="breadcrumbs__current">Por município</span>
-</div>
-{% endblock %}
-
-{% block content %}
+{% extends "nee/base_modulo.html" %}
+{% block module_title %}Relatório por Município • NEE{% endblock %}
+{% block module_content %}
 <div class="card"><div class="card__body">
-{% include "core/partials/components/layout/page_head.html" with title="Relatório NEE — Por município" subtitle="Somente administradores" actions=actions %}
-{% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q empty_title="Sem dados" empty_text="Nenhum município encontrado." %}
+{% include "core/partials/components/layout/page_head.html" with title="Relatório por Município" subtitle="Totalizações por município" actions=actions %}
+<div class="actions-bar">
+  <a class="btn btn--ghost" href="?export=csv"><i class="fa-solid fa-file-csv"></i> Exportar CSV</a>
+</div>
+<table class="table-shell">
+  <thead><tr><th>Município</th><th style="width:140px;">Total</th></tr></thead>
+  <tbody>
+  {% for d in data %}
+    <tr><td>{{ d.aluno__matriculas__turma__unidade__secretaria__municipio__nome }}</td><td>{{ d.total }}</td></tr>
+  {% empty %}
+    <tr><td colspan="2">Sem dados.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
 </div></div>
 {% endblock %}

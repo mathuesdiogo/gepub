@@ -1,24 +1,21 @@
-{% extends "core/base.html" %}
-{% block title %}Relatórios • NEE • GEPUB{% endblock %}
-{% block header %}NEE{% endblock %}
-
-{% block breadcrumbs %}
-<div class="breadcrumbs">
-  <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
-  <span class="breadcrumbs__sep">/</span>
-  <a class="breadcrumbs__link" href="{% url 'nee:index' %}">NEE</a>
-  <span class="breadcrumbs__sep">/</span>
-  <span class="breadcrumbs__current">Relatórios</span>
-</div>
-{% endblock %}
-
-{% block content %}
+{% extends "nee/base_modulo.html" %}
+{% block module_title %}Relatórios • NEE{% endblock %}
+{% block module_content %}
 <div class="card"><div class="card__body">
-{% include "core/partials/components/layout/page_head.html" with title="Relatórios NEE" subtitle="Indicadores e exportações (CSV/PDF)" actions=actions %}
-<div class="link-list">
-  <a class="link-card" href="{% url 'nee:relatorio_por_tipo' %}"><div><div class="link-card__title">Por tipo</div><div class="link-card__meta">Total de alunos com NEE agrupado por tipo</div></div><span class="pill">Abrir</span></a>
-  <a class="link-card" href="{% url 'nee:relatorio_por_unidade' %}"><div><div class="link-card__title">Por unidade</div><div class="link-card__meta">Total de alunos com NEE por município/secretaria/unidade</div></div><span class="pill">Abrir</span></a>
-  <a class="link-card" href="{% url 'nee:relatorio_por_municipio' %}"><div><div class="link-card__title">Por município</div><div class="link-card__meta">Visão geral por município (admin)</div></div><span class="pill">Abrir</span></a>
+{% include "core/partials/components/layout/page_head.html" with title="Relatórios NEE" subtitle="Visões agregadas por tipo, município e unidade" actions=actions %}
+<div class="section-grid cols-3">
+  <a class="link-card" href="{% url 'nee:relatorio_por_tipo' %}">
+    <div class="link-card__icon"><i class="fa-solid fa-tags"></i></div>
+    <div class="link-card__content"><div class="link-card__title">Por tipo</div><div class="link-card__text">Totalizações por tipo de necessidade.</div></div>
+  </a>
+  <a class="link-card" href="{% url 'nee:relatorio_por_municipio' %}">
+    <div class="link-card__icon"><i class="fa-solid fa-city"></i></div>
+    <div class="link-card__content"><div class="link-card__title">Por município</div><div class="link-card__text">Totalizações por município.</div></div>
+  </a>
+  <a class="link-card" href="{% url 'nee:relatorio_por_unidade' %}">
+    <div class="link-card__icon"><i class="fa-solid fa-school"></i></div>
+    <div class="link-card__content"><div class="link-card__title">Por unidade</div><div class="link-card__text">Totalizações por unidade.</div></div>
+  </a>
 </div>
 </div></div>
 {% endblock %}
