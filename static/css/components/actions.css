@@ -13,7 +13,7 @@
   border:1px solid var(--color-border-light);
   background:#fff;
   cursor:pointer;
-  transition: all .15s ease;
+  transition: background .15s ease, border-color .15s ease, transform .15s ease;
 }
 
 .action-icon i{

@@ -1,0 +1,8 @@
+{% extends "saude/base_modulo.html" %}
+{% block title %}{% if mode == "update" %}Editar Unidade • Saúde • GEPUB{% else %}Nova Unidade • Saúde • GEPUB{% endif %}{% endblock %}
+{% block module_content %}
+<div class="card"><div class="card__body">
+  {% if mode == "update" %}{% include "core/partials/components/layout/page_head.html" with title="Editar unidade" subtitle="Atualize os dados da unidade de saúde" actions=None %}{% else %}{% include "core/partials/components/layout/page_head.html" with title="Nova unidade" subtitle="Cadastre uma unidade de saúde" actions=None %}{% endif %}
+  {% include "core/partials/components/forms/form_shell.html" with form=form cancel_url=cancel_url submit_label="Salvar" %}
+</div></div>
+{% endblock %}

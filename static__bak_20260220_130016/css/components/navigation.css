@@ -1,0 +1,375 @@
+/* ==========================================================================
+   Navigation (SUAP-inspired) — Tabs / Âncoras / Pills
+   ========================================================================== */
+
+/* Suaviza navegação por âncora */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ------------------------------
+   Tabs (Abas)
+   HTML esperado:
+   <ul class="nav nav-tabs">
+     <li class="active"><a href="#">Janeiro <span>4</span></a></li>
+   </ul>
+--------------------------------- */
+
+.nav.nav-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nav.nav-tabs > li {
+  margin: 0;
+  padding: 0;
+}
+
+.nav.nav-tabs > li > a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 10px 14px;
+  border-radius: 10px;
+
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e6e9ef);
+
+  color: var(--text, #0f172a);
+  text-decoration: none;
+  font-weight: 600;
+  line-height: 1;
+
+  transition: background .15s ease, border-color .15s ease, transform .12s ease;
+}
+
+.nav.nav-tabs > li > a:hover {
+  background: var(--surface-2, #f7f8fb);
+  border-color: var(--border-strong, #d7dce6);
+  transform: translateY(-1px);
+}
+
+/* Aba ativa (SUAP-like: destaque + "sub-linha") */
+.nav.nav-tabs > li.active > a,
+.nav.nav-tabs > li > a[aria-current="page"],
+.nav.nav-tabs > li > a.is-active {
+  background: color-mix(in srgb, var(--primary, #2563eb) 10%, #fff);
+  border-color: color-mix(in srgb, var(--primary, #2563eb) 30%, var(--border, #e6e9ef));
+  color: var(--primary-700, var(--primary, #2563eb));
+}
+
+.nav.nav-tabs > li.active > a::after,
+.nav.nav-tabs > li > a[aria-current="page"]::after,
+.nav.nav-tabs > li > a.is-active::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: -6px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--primary, #2563eb);
+  opacity: .95;
+}
+
+/* contador na aba: <span>99</span> */
+.nav.nav-tabs > li > a > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 22px;
+  height: 18px;
+  padding: 0 7px;
+
+  border-radius: 999px;
+  background: var(--muted, #eef2ff);
+  border: 1px solid var(--border, #e6e9ef);
+
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted, #475569);
+}
+
+/* estado "desabilitar tudo, exceto a active" (igual tabela referência) */
+.nav.nav-tabs.disabled > li > a {
+  opacity: .55;
+  pointer-events: none;
+  filter: grayscale(.15);
+}
+.nav.nav-tabs.disabled > li.active > a {
+  opacity: 1;
+  pointer-events: auto;
+  filter: none;
+}
+
+/* Conteúdo de aba (quando usado) */
+.tab-pane {
+  margin-top: 14px;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid var(--border, #e6e9ef);
+  background: var(--surface, #fff);
+}
+
+/* ------------------------------
+   Âncoras
+   HTML esperado (igual referência):
+   <ul class="ancoras">
+     <li><a href="#id_1">Caixa</a>
+       <ul>
+         <li><a href="#id_2">Aguardando</a></li>
+       </ul>
+     </li>
+   </ul>
+
+   variação:
+   <ul class="ancoras three-digits"> ... </ul>
+--------------------------------- */
+
+.ancoras {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  counter-reset: anc;
+  display: grid;
+  gap: 10px;
+}
+
+/* item de 1º nível */
+.ancoras > li {
+  counter-increment: anc;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border, #e6e9ef);
+  background: var(--surface, #fff);
+}
+
+/* link do item */
+.ancoras a {
+  text-decoration: none;
+  color: var(--text, #0f172a);
+  font-weight: 600;
+}
+
+/* prefixo numerado SUAP-like */
+.ancoras > li > a::before {
+  content: counter(anc) " ";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 26px;
+  height: 26px;
+  margin-right: 10px;
+
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary, #2563eb) 12%, #fff);
+  border: 1px solid color-mix(in srgb, var(--primary, #2563eb) 28%, var(--border, #e6e9ef));
+
+  color: var(--primary-700, var(--primary, #2563eb));
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.ancoras.three-digits > li > a::before {
+  /* 001, 002... */
+  content: counter(anc, decimal-leading-zero) " ";
+  width: 32px;
+}
+
+/* subníveis */
+.ancoras ul {
+  list-style: none;
+  margin: 10px 0 0 38px;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.ancoras ul li a {
+  font-weight: 500;
+  color: var(--text-muted, #334155);
+}
+
+.ancoras ul li a:hover {
+  color: var(--primary, #2563eb);
+  text-decoration: underline;
+}
+
+/* ------------------------------
+   Pills (chips)
+   HTML esperado:
+   <ul class="pills">
+     <li class="active"><a href="#">Janeiro</a></li>
+   </ul>
+--------------------------------- */
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.pills > li {
+  margin: 0;
+  padding: 0;
+}
+
+.pills > li > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 7px 12px;
+  border-radius: 999px;
+
+  background: color-mix(in srgb, var(--primary, #2563eb) 8%, #fff);
+  border: 1px solid color-mix(in srgb, var(--primary, #2563eb) 18%, var(--border, #e6e9ef));
+
+  color: var(--text, #0f172a);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+
+  transition: background .15s ease, border-color .15s ease, transform .12s ease;
+}
+
+.pills > li > a:hover {
+  background: color-mix(in srgb, var(--primary, #2563eb) 12%, #fff);
+  border-color: color-mix(in srgb, var(--primary, #2563eb) 28%, var(--border, #e6e9ef));
+  transform: translateY(-1px);
+}
+
+/* pill ativa */
+.pills > li.active > a,
+.pills > li > a[aria-current="page"],
+.pills > li > a.is-active {
+  background: var(--primary, #2563eb);
+  border-color: var(--primary, #2563eb);
+  color: #fff;
+}
+
+/* pill desabilitada */
+.pills > li.disabled > a {
+  opacity: .55;
+  pointer-events: none;
+}
+
+.module-shell {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.module-shell__aside {
+  position: sticky;
+  top: 16px;
+}
+
+.module-shell__main {
+  min-width: 0;
+}
+
+.module-menu {
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, rgba(0,0,0,.08));
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.module-menu__title {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-weight: 700;
+  padding: 8px 10px;
+  border-radius: 10px;
+}
+
+.module-menu__list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.module-menu__link {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 10px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.module-menu__link:hover {
+  background: rgba(0,0,0,.04);
+}
+.module-shell{
+  display:grid;
+  grid-template-columns:280px 1fr;
+  gap:16px;
+  align-items:start;
+}
+
+.module-shell__aside{
+  position:sticky;
+  top:16px;
+}
+
+.module-shell__main{
+  min-width:0;
+}
+
+.module-menu{
+  background:var(--surface,#fff);
+  border:1px solid var(--border, rgba(0,0,0,.08));
+  border-radius:14px;
+  padding:14px;
+}
+
+.module-menu__title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight:700;
+  padding:8px 10px;
+  border-radius:10px;
+}
+
+.module-menu__list{
+  list-style:none;
+  margin:10px 0 0;
+  padding:0;
+  display:grid;
+  gap:6px;
+}
+
+.module-menu__link{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 10px;
+  border-radius:10px;
+  text-decoration:none;
+  color:inherit;
+}
+
+.module-menu__link:hover{
+  background:rgba(0,0,0,.04);
+}

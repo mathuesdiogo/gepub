@@ -1,0 +1,39 @@
+/* ==========================================================
+   TABLES — Auxiliares (NÃO estiliza <table> global)
+   Motivo: o padrão oficial de tabela está em table-shell.css
+   ========================================================== */
+
+/* wrapper opcional quando quiser “card” em volta de uma tabela */
+.table-wrapper{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* status badge simples (compatível com listagens antigas) */
+.table-status{
+  display:inline-flex;
+  align-items:center;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: var(--font-weight-bold);
+  border-radius: 999px;
+  line-height: 1;
+}
+
+.table-status.success{
+  background: color-mix(in srgb, var(--success) 16%, transparent);
+  color: var(--success);
+}
+
+.table-status.warning{
+  background: color-mix(in srgb, var(--warning) 16%, transparent);
+  color: var(--warning);
+}
+
+.table-status.danger{
+  background: color-mix(in srgb, var(--danger) 16%, transparent);
+  color: var(--danger);
+}

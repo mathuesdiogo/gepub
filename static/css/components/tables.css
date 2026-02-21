@@ -1,103 +1,37 @@
 /* ==========================================================
-   TABLES — Institucional Clean (Google Admin Style)
+   TABLES — Auxiliares (NÃO estiliza <table> global)
+   Motivo: o padrão oficial de tabela/lista está em table-shell.css
    ========================================================== */
 
-.table-wrapper {
+.table-wrapper{
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
 }
 
-/* Base */
-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  font-size: 14px;
-  color: var(--text);
-}
-
-/* Head */
-thead {
-  background: var(--surface-2);
-}
-
-thead th {
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: .02em;
-  color: var(--muted);
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--border);
-}
-
-/* Body */
-tbody td {
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-  transition: background .12s ease;
-}
-
-/* Zebra */
-tbody tr:nth-child(even) td {
-  background: var(--surface-2);
-}
-
-/* Hover */
-tbody tr:hover td {
-  background: var(--primary-100);
-}
-
-/* Última linha */
-tbody tr:last-child td {
-  border-bottom: none;
-}
-
-/* Links dentro da tabela */
-table a {
-  color: var(--primary-700);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-table a:hover {
-  text-decoration: underline;
-}
-
-/* Status badges dentro da tabela */
-.table-status {
-  display: inline-block;
+.table-status{
+  display:inline-flex;
+  align-items:center;
   padding: 4px 10px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   border-radius: 999px;
+  line-height: 1;
 }
 
-.table-status.success {
-  background: rgba(22,163,74,.15);
+.table-status.success{
+  background: color-mix(in srgb, var(--success) 16%, transparent);
   color: var(--success);
 }
 
-.table-status.warning {
-  background: rgba(245,158,11,.15);
+.table-status.warning{
+  background: color-mix(in srgb, var(--warning) 16%, transparent);
   color: var(--warning);
 }
 
-.table-status.danger {
-  background: rgba(239,68,68,.15);
+.table-status.danger{
+  background: color-mix(in srgb, var(--danger) 16%, transparent);
   color: var(--danger);
-}
-
-/* Responsividade */
-@media (max-width: 900px) {
-  table {
-    font-size: 13px;
-  }
-
-  th, td {
-    padding: 10px 12px;
-  }
 }

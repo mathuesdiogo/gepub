@@ -1,0 +1,297 @@
+{% load static %}
+
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}GEPUB{% endblock %}</title>
+
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+
+  <!-- Font Awesome (CDN) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  {% block extra_css %}{% endblock %}
+</head>
+
+<body class="theme-institucional">
+
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" aria-label="Menu lateral">
+      <div class="sidebar__header">
+        <div class="brand">
+          <div class="brand__logo" aria-hidden="true">
+            <i class="fa-solid fa-cube"></i>
+          </div>
+          <div class="brand__text">
+            <div class="brand__name">GEPUB</div>
+            <div class="brand__sub">Gestão Estratégica Pública</div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="sidebar__toggle"
+          id="sidebarToggle"
+          aria-label="Recolher menu"
+          aria-pressed="false"
+          title="Recolher menu"
+        >
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+
+      <nav class="menu">
+
+        <a
+          class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'core' %}is-active{% endif %}"
+          href="{% url 'core:dashboard' %}"
+          title="Dashboard"
+        >
+          <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-house"></i></span>
+          <span class="menu__label">Dashboard</span>
+        </a>
+
+        <div class="menu__section">Módulos</div>
+
+        {% if can_org %}
+          <a
+            class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'org' %}is-active{% endif %}"
+            href="{% url 'org:index' %}"
+            title="Organização"
+          >
+            <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-sitemap"></i></span>
+            <span class="menu__label">Organização</span>
+          </a>
+        {% endif %}
+
+       {% if can_edu %}
+  <a
+    class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'educacao' and request.resolver_match.url_name == 'index' %}is-active{% endif %}"
+    href="{% url 'educacao:index' %}"
+    title="Educação"
+  >
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-book-open"></i></span>
+    <span class="menu__label">Educação</span>
+  </a>
+
+  <a
+    class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'educacao' and request.resolver_match.url_name == 'matricula_create' %}is-active{% endif %}"
+    href="{% url 'educacao:matricula_create' %}"
+    title="Matrículas"
+  >
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-id-card-clip"></i></span>
+    <span class="menu__label">Matrículas</span>
+  </a>
+{% endif %}
+
+
+        {% if can_nee %}
+          <a
+            class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'nee' %}is-active{% endif %}"
+            href="{% url 'nee:index' %}"
+            title="NEE"
+          >
+            <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-universal-access"></i></span>
+            <span class="menu__label">NEE</span>
+          </a>
+        {% endif %}
+
+        <div class="menu__section">Conta</div>
+
+        <a
+          class="menu__item {% if request.resolver_match and request.resolver_match.url_name == 'meu_perfil' %}is-active{% endif %}"
+          href="{% url 'accounts:meu_perfil' %}"
+          title="Meu perfil"
+        >
+          <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-user"></i></span>
+          <span class="menu__label">Meu perfil</span>
+        </a>
+
+        <a
+          class="menu__item {% if request.resolver_match and request.resolver_match.url_name == 'alterar_senha' %}is-active{% endif %}"
+          href="{% url 'accounts:alterar_senha' %}"
+          title="Alterar senha"
+        >
+          <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-key"></i></span>
+          <span class="menu__label">Alterar senha</span>
+        </a>
+
+        {% if can_users %}
+          <a
+            class="menu__item {% if request.resolver_match and request.resolver_match.url_name == 'usuarios_list' %}is-active{% endif %}"
+            href="{% url 'accounts:usuarios_list' %}"
+            title="Usuários"
+          >
+            <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-users"></i></span>
+            <span class="menu__label">Usuários</span>
+          </a>
+        {% endif %}
+            <div class="menu__section">Ajuda</div>
+
+<a
+  class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'core' and request.resolver_match.url_name == 'guia_telas' %}is-active{% endif %}"
+  href="{% url 'core:guia_telas' %}"
+  title="Guia de Telas"
+>
+  <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-hashtag"></i></span>
+  <span class="menu__label">Guia de Telas</span>
+</a>
+
+        {% if request.user.is_staff or request.user.is_superuser %}
+          <div class="menu__section">Sistema</div>
+          <a class="menu__item" href="/admin/" title="Admin Django">
+            <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-gear"></i></span>
+            <span class="menu__label">Admin Django</span>
+          </a>
+        {% endif %}
+
+        <a class="menu__item" href="{% url 'accounts:logout' %}" title="Sair">
+          <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-power-off"></i></span>
+          <span class="menu__label">Sair</span>
+        </a>
+
+      </nav>
+
+      <div class="sidebar__footer">
+        <div class="sidebar__avatar" aria-hidden="true"></div>
+
+        <div class="sidebar__user-info">
+          <div class="sidebar__user-name">
+            {% if request.user.is_authenticated %}
+              {{ request.user.get_full_name|default:request.user.username }}
+            {% else %}
+              Visitante
+            {% endif %}
+          </div>
+
+          <div class="sidebar__user-role">
+            {% if request.user.is_authenticated %}
+              {{ request.user.groups.first.name|default:"Usuário" }}
+            {% else %}
+              —
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main" id="conteudo">
+
+      <header class="topbar">
+        <div class="topbar__left">
+          <div class="topbar__title">{% block header %}Dashboard{% endblock %}</div>
+
+            {% block breadcrumbs %}{% if breadcrumbs %}{% include "core/partials/components/layout/breadcrumbs.html" with items=breadcrumbs %}{% endif %}{% endblock %}
+        </div>
+
+        <div class="topbar__right">
+  <form class="topbar-go" method="get" action="{% url 'core:go_code' %}">
+    <i class="fa-solid fa-magnifying-glass topbar-go__icon" aria-hidden="true"></i>
+    <input class="topbar-go__input" type="text" name="c" inputmode="numeric" autocomplete="off" placeholder="Ir para código… (ex: 201)" />
+    <button class="btn btn--ghost topbar-go__btn" type="submit">Ir</button>
+  </form>
+
+  <span class="pill">GEPUB</span>
+</div>
+
+      </header>
+
+      <!-- ✅ Conteúdo rolável (conforme layout.css) -->
+      <section class="content">
+
+        {% if messages %}
+          <div class="alert-stack">
+            {% for message in messages %}
+              <div class="alert alert--{{ message.tags }}">
+                {{ message }}
+                <button type="button" class="alert__close" aria-label="Fechar">&times;</button>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+
+      </section>
+    </main>
+
+  </div>
+
+  <!-- ✅ scripts globais realmente necessários -->
+  <script src="{% static 'js/autocomplete.js' %}"></script>
+
+  <script>
+    (function () {
+      // Sidebar collapse (global)
+      const key = "gepub.sidebar.collapsed";
+      const btn = document.getElementById("sidebarToggle");
+
+      function apply(state) {
+        document.body.classList.toggle("sidebar-collapsed", state);
+        if (btn) {
+          btn.setAttribute("aria-pressed", state ? "true" : "false");
+          btn.setAttribute("aria-label", state ? "Expandir menu" : "Recolher menu");
+          btn.title = state ? "Expandir menu" : "Recolher menu";
+        }
+      }
+
+      const saved = localStorage.getItem(key);
+      apply(saved === "1");
+
+      if (btn) {
+        btn.addEventListener("click", function () {
+          const next = !document.body.classList.contains("sidebar-collapsed");
+          localStorage.setItem(key, next ? "1" : "0");
+          apply(next);
+        });
+      }
+
+      // Alerts (global)
+      document.addEventListener("click", function (e) {
+        const close = e.target.closest(".alert__close");
+        if (!close) return;
+
+        const alert = close.closest(".alert");
+        if (!alert) return;
+
+        alert.classList.add("alert--closing");
+        setTimeout(() => alert.remove(), 250);
+      });
+
+      document.querySelectorAll(".alert").forEach(alert => {
+        setTimeout(() => {
+          if (!alert.parentNode) return;
+          alert.classList.add("alert--closing");
+          setTimeout(() => alert.remove(), 250);
+        }, 4000);
+      });
+
+      // Action menu (dropdown actions)
+      document.addEventListener("click", function () {
+        document.querySelectorAll(".action-menu").forEach(m => m.classList.remove("action-menu--open"));
+      });
+
+      document.addEventListener("click", function (e) {
+        const btn = e.target.closest(".action-menu__button");
+        if (!btn) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const menu = btn.closest(".action-menu");
+        if (!menu) return;
+
+        menu.classList.toggle("action-menu--open");
+      });
+    })();
+  </script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

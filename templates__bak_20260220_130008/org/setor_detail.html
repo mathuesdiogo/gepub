@@ -1,0 +1,26 @@
+{% extends "core/base.html" %}
+{% block title %}{{ page_title }} • Setores • Organização • GEPUB{% endblock %}
+{% block header %}Organização{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'org:index' %}">Organização</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'org:setor_list' %}">Setores</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">{{ page_title }}</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card__body">
+
+{% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+{% include "core/partials/components/layout/detail_summary.html" with fields=fields pills=pills %}
+
+  </div>
+</div>
+{% endblock %}

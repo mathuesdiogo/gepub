@@ -1,0 +1,97 @@
+<div class="dash-grid">
+  <div class="dash-col-4">
+    <div class="metric-card">
+      <div class="metric-label">Turmas</div>
+      <div class="metric-value">{{ turmas_total|default:0 }}</div>
+      <div class="metric-meta">Ativas e históricas</div>
+    </div>
+  </div>
+
+  <div class="dash-col-4">
+    <div class="metric-card">
+      <div class="metric-label">Alunos</div>
+      <div class="metric-value">{{ alunos_total|default:0 }}</div>
+      <div class="metric-meta">Vínculos na unidade</div>
+    </div>
+  </div>
+
+  <div class="dash-col-4">
+    <div class="metric-card">
+      <div class="metric-label">Matrículas</div>
+      <div class="metric-value">{{ matriculas_total|default:0 }}</div>
+      <div class="metric-meta">Registros no escopo</div>
+    </div>
+  </div>
+
+  <div class="dash-col-6">
+    <div class="card">
+      <div class="card__title">Matrículas por turma (Top 10)</div>
+      <div class="card__body">
+        {% if graf_matriculas_por_turma %}
+          <div class="dash-chart">
+            <canvas id="chartMatriculasTurma" height="160"></canvas>
+          </div>
+        {% else %}
+          {% include "core/partials/components/feedback/empty_state.html" with title="Sem dados" text="Ainda não há matrículas suficientes para gerar o gráfico." %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-col-6">
+    <div class="card">
+      <div class="card__title">Turmas</div>
+      <div class="card__body">
+        {% if turmas %}
+          <div class="dash-table">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Turma</th>
+                  <th>Ano letivo</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for t in turmas %}
+                  <tr>
+                    <td>{{ t.nome }}</td>
+                    <td>{{ t.ano_letivo|default:"—" }}</td>
+                    <td><a class="btn btn--ghost" href="{% url 'educacao:turma_detail' t.pk %}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir</a></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          {% include "core/partials/components/feedback/empty_state.html" with title="Sem turmas" text="Nenhuma turma encontrada para esta unidade." %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if graf_matriculas_por_turma %}
+<script>
+(function () {
+  function loadChart(cb){
+    if (window.Chart) return cb();
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js";
+    s.onload = cb;
+    document.head.appendChild(s);
+  }
+
+  loadChart(function(){
+    const labels = [{% for r in graf_matriculas_por_turma %}"{{ r.turma__nome|default:'—'|escapejs }}"{% if not forloop.last %},{% endif %}{% endfor %}];
+    const values = [{% for r in graf_matriculas_por_turma %}{{ r.total|default:0 }}{% if not forloop.last %},{% endif %}{% endfor %}];
+
+    new Chart(document.getElementById('chartMatriculasTurma'), {
+      type: 'bar',
+      data: { labels: labels, datasets: [{ data: values }] },
+      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+  });
+})();
+</script>
+{% endif %}

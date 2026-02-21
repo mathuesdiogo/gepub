@@ -1,0 +1,28 @@
+{% load static %}
+
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}GEPUB{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body class="public-body">
+
+  {% if messages %}
+    <div class="public-flash">
+      <div class="flash-stack">
+        {% for message in messages %}
+          <div class="flash flash--{{ message.tags }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+
+</body>
+</html>

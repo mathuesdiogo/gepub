@@ -1,0 +1,155 @@
+/* =========================================================
+   GEPUB — BADGES / STATUS (SUAP-inspired)
+   - "Situações" no estilo pill pastel
+   - Suporta: .status status-CLASS  (como na referência)
+   - Também aceita: .status.CLASS / .status--CLASS / .status-CLASS
+   ========================================================= */
+
+.badge{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 6px 10px;
+  border-radius: 999px;
+
+  border: 1px solid rgba(17, 24, 39, 0.12);
+  background: rgba(243, 244, 246, 0.90);
+
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  color: rgba(17, 24, 39, 0.85);
+}
+
+/* ===== Situações (pílulas) ===== */
+.status{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 6px 12px;
+  border-radius: 999px;
+
+  border: 1px solid rgba(17, 24, 39, 0.12);
+  background: rgba(243, 244, 246, 0.90);
+
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  color: rgba(17, 24, 39, 0.80);
+
+  white-space: nowrap;
+}
+
+/* Base SUAP-ish: cores pastel + borda suave */
+.status.info,
+.status--info,
+.status-info{
+  background: rgba(210, 236, 255, 0.75);
+  border-color: rgba(59, 130, 246, 0.28);
+  color: rgba(29, 78, 216, 0.95);
+}
+
+.status.alert,
+.status--alert,
+.status-warning,
+.status.warning,
+.status--warning{
+  background: rgba(255, 247, 204, 0.78);
+  border-color: rgba(245, 158, 11, 0.30);
+  color: rgba(146, 64, 14, 0.95);
+}
+
+.status.success,
+.status--success,
+.status-success,
+.status.concluido,
+.status--concluido,
+.status.finalizado,
+.status--finalizado{
+  background: rgba(220, 248, 223, 0.72);
+  border-color: rgba(34, 197, 94, 0.30);
+  color: rgba(21, 128, 61, 0.95);
+}
+
+.status.error,
+.status--error,
+.status-danger,
+.status.danger,
+.status--danger,
+.status.cancelado,
+.status--cancelado{
+  background: rgba(255, 220, 220, 0.72);
+  border-color: rgba(239, 68, 68, 0.30);
+  color: rgba(153, 27, 27, 0.95);
+}
+
+.status.default,
+.status--default{
+  background: rgba(229, 231, 235, 0.85);
+  border-color: rgba(107, 114, 128, 0.22);
+  color: rgba(55, 65, 81, 0.92);
+}
+
+.status.final,
+.status--final{
+  background: rgba(31, 41, 55, 0.10);
+  border-color: rgba(31, 41, 55, 0.22);
+  color: rgba(17, 24, 39, 0.90);
+}
+
+/* Extras (mantém o "ar" do SUAP: cores suaves diferentes) */
+.status.extra,
+.status--extra{
+  background: rgba(253, 230, 198, 0.70);
+  border-color: rgba(251, 146, 60, 0.28);
+  color: rgba(154, 52, 18, 0.95);
+}
+.status.extra2,
+.status--extra2{
+  background: rgba(233, 213, 255, 0.65);
+  border-color: rgba(168, 85, 247, 0.28);
+  color: rgba(107, 33, 168, 0.95);
+}
+.status.extra3,
+.status--extra3{
+  background: rgba(236, 253, 245, 0.70);
+  border-color: rgba(16, 185, 129, 0.28);
+  color: rgba(6, 95, 70, 0.95);
+}
+.status.extra4,
+.status--extra4{
+  background: rgba(251, 207, 232, 0.60);
+  border-color: rgba(236, 72, 153, 0.28);
+  color: rgba(131, 24, 67, 0.95);
+}
+.status.extra5,
+.status--extra5{
+  background: rgba(207, 250, 254, 0.65);
+  border-color: rgba(6, 182, 212, 0.28);
+  color: rgba(14, 116, 144, 0.95);
+}
+.status.extra6,
+.status--extra6{
+  background: rgba(245, 245, 220, 0.72);
+  border-color: rgba(120, 113, 108, 0.22);
+  color: rgba(68, 64, 60, 0.95);
+}
+.status.extra7,
+.status--extra7{
+  background: rgba(226, 232, 240, 0.78);
+  border-color: rgba(100, 116, 139, 0.22);
+  color: rgba(51, 65, 85, 0.95);
+}
+
+/* Disabled */
+.status.disabled,
+.status--disabled,
+.status-disabled{
+  background: rgba(229, 231, 235, 0.75);
+  border-color: rgba(156, 163, 175, 0.30);
+  color: rgba(107, 114, 128, 0.95);
+  opacity: 0.85;
+  filter: grayscale(0.2);
+}

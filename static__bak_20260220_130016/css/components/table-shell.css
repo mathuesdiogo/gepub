@@ -1,0 +1,52 @@
+/* =========================================================
+   TABLE SHELL — FINAL SAFE
+   ========================================================= */
+
+.table-responsive{
+  width:100%;
+  overflow-x:auto;
+  border-radius:var(--radius-lg);
+  border:1px solid var(--border);
+  background:var(--surface);
+}
+
+.table-shell table,
+.table-responsive table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  color:var(--text);
+}
+
+.table-shell thead th{
+  position:sticky;
+  top:0;
+  z-index:1;
+  text-align:left;
+  font-size:.86rem;
+  font-weight:var(--font-weight-semibold);
+  background:color-mix(in srgb,var(--surface) 85%,var(--surface-2));
+  border-bottom:1px solid var(--border);
+  padding:12px 14px;
+}
+
+.table-shell tbody td{
+  padding:12px 14px;
+  border-bottom:1px solid color-mix(in srgb,var(--border) 70%,transparent);
+}
+
+.table-shell tbody tr:hover td{
+  background:color-mix(in srgb,var(--primary) 6%,transparent);
+}
+
+/* helpers */
+
+.text-center{text-align:center;}
+.text-right{text-align:right;}
+
+.table-shell{margin-top:20px;}
+
+.table-shell .btn-sm{
+  padding:6px 8px;
+  font-size:13px;
+}

@@ -11,7 +11,8 @@ from django.utils import timezone
 from django.utils.html import escape
 from apps.org.models import Unidade
 from .models import Turma, Aluno, Matricula
-
+from .views_alunos_detail import AlunoDetailView
+from .views_turmas_detail import TurmaDetailView
 from apps.core.decorators import require_perm
 from apps.core.rbac import (
     can,
@@ -417,8 +418,6 @@ def turma_detail(request, pk):
 @login_required
 @require_perm("educacao.manage")
 def turma_create(request):
-    cancel_url = reverse("educacao:turma_list")
-
     if request.method == "POST":
         form = TurmaForm(request.POST, user=request.user)
         if form.is_valid():
@@ -432,9 +431,21 @@ def turma_create(request):
     return render(
         request,
         "educacao/turma_form.html",
-        {"form": form, "mode": "create", "cancel_url": cancel_url},
+        {
+            "form": form,
+            "mode": "create",
+            "cancel_url": reverse("educacao:turma_list"),
+            "submit_label": "Salvar",
+            "actions": [
+                {
+                    "label": "Voltar",
+                    "url": reverse("educacao:turma_list"),
+                    "icon": "fa-solid fa-arrow-left",
+                    "variant": "btn--ghost",
+                },
+            ],
+        },
     )
-
 
 
 
@@ -449,8 +460,6 @@ def turma_update(request, pk: int):
     qs = scope_filter_turmas(request.user, qs)
     turma = get_object_or_404(qs, pk=pk)
 
-    cancel_url = reverse("educacao:turma_detail", args=[turma.pk])
-
     if request.method == "POST":
         form = TurmaForm(request.POST, instance=turma, user=request.user)
         if form.is_valid():
@@ -464,123 +473,23 @@ def turma_update(request, pk: int):
     return render(
         request,
         "educacao/turma_form.html",
-        {"form": form, "mode": "update", "turma": turma, "cancel_url": cancel_url},
-    )
-
-# -----------------------------
-# MATRÍCULAS
-# -----------------------------
-
-@login_required
-@require_perm("educacao.view")
-def matricula_create(request):
-    if not can(request.user, "educacao.manage"):
-        messages.error(request, "Você não tem permissão para realizar matrículas.")
-        return redirect("educacao:index")
-
-    q = (request.GET.get("q") or "").strip()
-    aluno_id = (request.GET.get("aluno") or "").strip()
-    unidade_id = (request.GET.get("unidade") or "").strip()
-
-    alunos_qs = scope_filter_alunos(
-        request.user,
-        Aluno.objects.only("id", "nome", "cpf", "nis", "nome_mae", "ativo"),
-    )
-    turmas_base_qs = scope_filter_turmas(
-        request.user,
-        Turma.objects.select_related("unidade", "unidade__secretaria", "unidade__secretaria__municipio"),
-    )
-
-    alunos_result = alunos_qs
-    if q:
-        alunos_result = alunos_result.filter(
-            Q(nome__icontains=q) | Q(cpf__icontains=q) | Q(nis__icontains=q) | Q(nome_mae__icontains=q)
-        )
-    alunos_result = alunos_result.order_by("nome")[:25]
-
-    initial = {}
-    if aluno_id.isdigit():
-        initial["aluno"] = int(aluno_id)
-    if unidade_id.isdigit():
-        initial["unidade"] = int(unidade_id)
-
-    form = MatriculaForm(request.POST or None, initial=initial)
-
-    if "aluno" in form.fields:
-        form.fields["aluno"].queryset = alunos_qs.order_by("nome")
-
-    if "unidade" in form.fields:
-        unidades_ids = turmas_base_qs.values_list("unidade_id", flat=True).distinct()
-        form.fields["unidade"].queryset = form.fields["unidade"].queryset.filter(id__in=unidades_ids)
-
-    turmas_qs = turmas_base_qs
-    unidade_sel = (request.POST.get("unidade") or unidade_id or "").strip()
-    if unidade_sel.isdigit():
-        turmas_qs = turmas_qs.filter(unidade_id=int(unidade_sel))
-
-    if "turma" in form.fields:
-        form.fields["turma"].queryset = turmas_qs.order_by("-ano_letivo", "nome")
-
-    if request.method == "POST":
-        if form.is_valid():
-            m = form.save(commit=False)
-
-            if not alunos_qs.filter(pk=m.aluno_id).exists():
-                messages.error(request, "Aluno fora do seu escopo.")
-                return redirect("educacao:matricula_create")
-
-            if not turmas_base_qs.filter(pk=m.turma_id).exists():
-                messages.error(request, "Turma fora do seu escopo.")
-                return redirect("educacao:matricula_create")
-
-            if Matricula.objects.filter(aluno=m.aluno, turma=m.turma).exists():
-                messages.warning(request, "Esse aluno já possui matrícula nessa turma.")
-            else:
-                m.save()
-                messages.success(request, "Matrícula realizada com sucesso.")
-                return redirect(reverse("educacao:matricula_create") + f"?aluno={m.aluno_id}")
-
-    headers = [
-        {"label": "Aluno"},
-        {"label": "CPF", "width": "160px"},
-        {"label": "NIS", "width": "160px"},
-    ]
-
-    rows = []
-    for a in alunos_result:
-        url = reverse("educacao:matricula_create") + f"?q={escape(q)}&aluno={a.pk}"
-        if unidade_id:
-            url += f"&unidade={escape(unidade_id)}"
-        rows.append(
-            {
-                "cells": [
-                    {"text": a.nome, "url": reverse("educacao:aluno_detail", args=[a.pk])},
-                    {"text": a.cpf or "—", "url": ""},
-                    {"text": a.nis or "—", "url": ""},
-                ],
-                "can_edit": True,
-                "edit_url": url,
-            }
-        )
-
-    return render(
-        request,
-        "educacao/matricula_create.html",
         {
-            "q": q,
-            "unidade": unidade_id,
-            "alunos_result": alunos_result,
-            "page_obj": None,
-            "headers": headers,
-            "rows": rows,
-            "actions": [],
-            "action_url": reverse("educacao:matricula_create"),
-            "clear_url": reverse("educacao:matricula_create"),
-            "has_filters": bool(q),
             "form": form,
-            "actions_partial": "educacao/partials/matricula_pick_action.html",
+            "mode": "update",
+            "turma": turma,
+            "cancel_url": reverse("educacao:turma_list"),
+            "submit_label": "Atualizar",
+            "actions": [
+                {
+                    "label": "Voltar",
+                    "url": reverse("educacao:turma_list"),
+                    "icon": "fa-solid fa-arrow-left",
+                    "variant": "btn--ghost",
+                },
+            ],
         },
     )
+
 
 
 # -----------------------------
@@ -911,7 +820,25 @@ def aluno_create(request):
     else:
         form = AlunoCreateComTurmaForm(user=request.user)
 
-    return render(request, "educacao/aluno_form.html", {"form": form, "mode": "create"})
+    return render(
+        request,
+        "educacao/aluno_form.html",
+        {
+            "form": form,
+            "mode": "create",
+            "cancel_url": reverse("educacao:aluno_list"),
+            "submit_label": "Salvar",
+            "actions": [
+                {
+                    "label": "Voltar",
+                    "url": reverse("educacao:aluno_list"),
+                    "icon": "fa-solid fa-arrow-left",
+                    "variant": "btn--ghost",
+                },
+            ],
+        },
+    )
+
 
 
 @login_required
@@ -930,7 +857,25 @@ def aluno_update(request, pk: int):
     else:
         form = AlunoForm(instance=aluno)
 
-    return render(request, "educacao/aluno_form.html", {"form": form, "mode": "update", "aluno": aluno})
+    return render(
+        request,
+        "educacao/aluno_form.html",
+        {
+            "form": form,
+            "mode": "update",
+            "cancel_url": reverse("educacao:aluno_list"),
+            "submit_label": "Atualizar",
+            "actions": [
+                {
+                    "label": "Voltar",
+                    "url": reverse("educacao:aluno_list"),
+                    "icon": "fa-solid fa-arrow-left",
+                    "variant": "btn--ghost",
+                },
+            ],
+        },
+    )
+
 
 
 # -----------------------------

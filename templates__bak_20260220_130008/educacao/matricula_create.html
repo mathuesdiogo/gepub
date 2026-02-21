@@ -1,0 +1,50 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Nova Matrícula • Educação • GEPUB{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'educacao:index' %}">Educação</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">Nova Matrícula</span>
+  </div>
+{% endblock %}
+
+{% block module_content %}
+  <div class="card">
+    <div class="card__body">
+
+      {% include "core/partials/components/layout/page_head.html" with title="Nova matrícula" subtitle="Busque o aluno e confirme os dados" actions=actions%}
+
+      <div class="section">
+        <div class="section__header">
+          <div class="section__title">Buscar aluno</div>
+          <div class="section__meta">Digite ao menos 2 caracteres</div>
+        </div>
+
+        {% url "educacao:api_alunos_suggest" as ac_url %}
+        {% url "educacao:matricula_create" as ac_href %}
+
+        {% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Digite nome, CPF ou NIS..." action_url=action_url clear_url=clear_url has_filters=has_filters input_attrs='data-autocomplete="1" data-autocomplete-url="'|add:ac_url|add:'" data-autocomplete-href="'|add:ac_href|add:'?q={q}"'%}
+
+        {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Nenhum aluno encontrado" empty_text="Tente ajustar sua busca."%}
+
+        <div class="small">
+          Clique em “Selecionar” para preencher o aluno no formulário.
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="section">
+        <div class="section__header">
+          <div class="section__title">Dados da matrícula</div>
+        </div>
+
+        {% include "core/partials/components/forms/form_shell.html" with form=form cancel_url=clear_url submit_label="Confirmar matrícula"%}
+      </div>
+
+    </div>
+  </div>
+{% endblock %}

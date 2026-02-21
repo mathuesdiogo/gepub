@@ -1,0 +1,32 @@
+{# Accordion SUAP-like
+  items: [
+    { "title": "...", "meta": "Atualizado em ...", "open": True, "body_html": "...(safe)" }
+  ]
+#}
+{% if items %}
+  <div class="accordion">
+    {% for it in items %}
+      <details class="accordion__item" {% if it.open %}open{% endif %}>
+        <summary class="accordion__summary">
+          <div class="accordion__head">
+            <div class="accordion__title">{{ it.title }}</div>
+            {% if it.meta %}
+              <div class="accordion__meta">{{ it.meta }}</div>
+            {% endif %}
+          </div>
+          <span class="accordion__chev" aria-hidden="true">
+            <i class="fa-solid fa-chevron-down"></i>
+          </span>
+        </summary>
+
+        <div class="accordion__body">
+          {% if it.body_html %}
+            {{ it.body_html|safe }}
+          {% elif it.body_template %}
+            {% include it.body_template with item=it %}
+          {% endif %}
+        </div>
+      </details>
+    {% endfor %}
+  </div>
+{% endif %}

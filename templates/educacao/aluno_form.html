@@ -8,32 +8,18 @@
   {% endif %}
 {% endblock %}
 
-{% block breadcrumbs %}
-  <div class="breadcrumbs">
-    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
-    <span class="breadcrumbs__sep">/</span>
-    <a class="breadcrumbs__link" href="{% url 'educacao:index' %}">Educação</a>
-    <span class="breadcrumbs__sep">/</span>
-    <a class="breadcrumbs__link" href="{% url 'educacao:aluno_list' %}">Alunos</a>
-    <span class="breadcrumbs__sep">/</span>
-    <span class="breadcrumbs__current">
-      {% if mode == "create" %}Novo{% else %}Editar{% endif %}
-    </span>
-  </div>
-{% endblock %}
-
 {% block module_content %}
-  <div class="card">
-    <div class="card__body">
+<div class="card">
+  <div class="card__body">
 
-      {% if mode == "create" %}
-        {% include "core/partials/components/layout/page_head.html" with title="Novo Aluno" subtitle="Preencha as informações do aluno" actions=None%}
-      {% else %}
-        {% include "core/partials/components/layout/page_head.html" with title="Editar Aluno" subtitle="Atualize as informações do aluno" actions=None%}
-      {% endif %}
+    {% if mode == "create" %}
+      {% include "core/partials/components/layout/page_head.html" with title="Novo Aluno" subtitle="Preencha as informações do aluno" actions=actions %}
+    {% else %}
+      {% include "core/partials/components/layout/page_head.html" with title="Editar Aluno" subtitle="Atualize as informações do aluno" actions=actions %}
+    {% endif %}
 
-      {% include "core/partials/components/forms/form_shell.html" with form=form cancel_url=aluno.get_absolute_url|default:None submit_label="Salvar"%}
+    {% include "core/partials/components/forms/form_shell.html" with form=form cancel_url=cancel_url submit_label=submit_label|default:"Salvar" %}
 
-    </div>
   </div>
+</div>
 {% endblock %}

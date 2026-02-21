@@ -1,0 +1,9 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Duplicar Horário • Educação • GEPUB{% endblock %}
+{% block module_content %}
+<div class="card"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Duplicar Horário" subtitle=turma_destino.nome actions=actions %}
+{% include "core/partials/components/data/filter_bar.html" with q=q action_url=action_url clear_url=clear_url has_filters=has_filters extra_filters=extra_filters autocomplete_url=autocomplete_url %}
+{% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj empty_title="Nenhuma turma encontrada" empty_text="Mostramos apenas turmas que já possuem horário cadastrado." %}
+</div></div>
+{% endblock %}

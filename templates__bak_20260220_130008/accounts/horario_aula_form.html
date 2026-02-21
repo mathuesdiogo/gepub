@@ -1,0 +1,46 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}{% if mode == "update" %}Editar Aula{% else %}Nova Aula{% endif %} • Educação • GEPUB{% endblock %}
+{% block module_content %}
+<div class="card"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Aula do Horário" subtitle=turma.nome actions=None %}
+
+<form method="post" class="form">
+  {% csrf_token %}
+
+  <div class="form__row">
+    <label>Dia</label>
+    <select name="dia" required>
+      {% for v,l in dias %}
+      <option value="{{ v }}" {% if aula and aula.dia == v %}selected{% endif %}>{{ l }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="form__row">
+    <label>Início</label>
+    <input type="time" name="inicio" value="{% if aula %}{{ aula.inicio|time:'H:i' }}{% endif %}" required />
+  </div>
+
+  <div class="form__row">
+    <label>Fim</label>
+    <input type="time" name="fim" value="{% if aula %}{{ aula.fim|time:'H:i' }}{% endif %}" required />
+  </div>
+
+  <div class="form__row">
+    <label>Disciplina</label>
+    <input name="disciplina" value="{% if aula %}{{ aula.disciplina }}{% endif %}" required />
+  </div>
+
+  <div class="form__row">
+    <label>Sala</label>
+    <input name="sala" value="{% if aula %}{{ aula.sala }}{% endif %}" />
+  </div>
+
+  <div class="actions">
+    <a class="btn btn--ghost" href="{{ cancel_url }}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i><span>Cancelar</span></a>
+    <button class="btn btn-primary" type="submit"><i class="fa-solid fa-check" aria-hidden="true"></i><span>{{ submit_label }}</span></button>
+  </div>
+</form>
+
+</div></div>
+{% endblock %}

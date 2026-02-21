@@ -1,73 +1,12 @@
 {% extends "core/base.html" %}
-{% block title %}Organização • GEPUB{% endblock %}
-{% block header %}Organização{% endblock %}
-
-{% block breadcrumbs %}
-  <div class="breadcrumbs">
-    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
-    <span class="breadcrumbs__sep">/</span>
-    <span class="breadcrumbs__current">Organização</span>
-  </div>
-{% endblock %}
-
 {% block content %}
-
-  <div class="card">
-    <br><br>
-<br>
-  <div class="card" style="max-width: 900px;">
-  <div class="card__title">Organização</div>
-  
-
-  <div class="card__body">
-    <div class="link-list">
-      {% if request.user.profile.role == "ADMIN" %}
-      <a class="link-card" href="{% url 'org:municipio_list' %}">
-        <div>
-          <div style="font-weight:800;">Municípios</div>
-          <div class="link-card__meta">Cadastro do município + dados da Prefeitura</div>
-        </div>
-        <span class="pill">Abrir</span>
-      </a>
-      {% endif %}
-
-      <a class="link-card" href="{% url 'org:secretaria_list' %}">
-  <div>
-    <div style="font-weight:800;">Secretarias</div>
-    <div class="link-card__meta">
-      Secretarias vinculadas ao Município
-    </div>
-  </div>
-  <span class="pill">Abrir</span>
-</a>
-
-<a class="link-card" href="{% url 'org:unidade_list' %}">
-  <div>
-    <div style="font-weight:800;">Unidades</div>
-    <div class="link-card__meta">
-      Escolas, creches e unidades vinculadas à secretaria
-    </div>
-  </div>
-  <span class="pill">Abrir</span>
-</a>
-<a class="link-card" href="{% url 'org:setor_list' %}">
-  <div>
-    <div style="font-weight:800;">Setores</div>
-    <div class="link-card__meta">Departamentos internos das unidades</div>
-  </div>
-  <span class="pill">Abrir</span>
-</a>
-
-
-    </div>
-  </div>
-</div>
-
-
-
-    <div class="card__title">Módulo Organização</div>
-    <div class="card__body">
-      Próximo passo:  Vínculos.
-    </div>
-  </div>
+<div class="card"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Organização" subtitle="Cadastros institucionais (Municípios, Secretarias, Unidades e Setores)" actions=actions %}
+<ul class="action-list">
+  <li><div><div class="item-title">Municípios</div><div class="item-subtitle">Gerencie municípios/prefeituras</div></div><a class="btn btn--ghost" href="{% url 'org:municipio_list' %}"><i class="fa-solid fa-arrow-right"></i></a></li>
+  <li><div><div class="item-title">Secretarias</div><div class="item-subtitle">Secretarias por município</div></div><a class="btn btn--ghost" href="{% url 'org:secretaria_list' %}"><i class="fa-solid fa-arrow-right"></i></a></li>
+  <li><div><div class="item-title">Unidades</div><div class="item-subtitle">Unidades por secretaria</div></div><a class="btn btn--ghost" href="{% url 'org:unidade_list' %}"><i class="fa-solid fa-arrow-right"></i></a></li>
+  <li><div><div class="item-title">Setores</div><div class="item-subtitle">Setores por unidade</div></div><a class="btn btn--ghost" href="{% url 'org:setor_list' %}"><i class="fa-solid fa-arrow-right"></i></a></li>
+</ul>
+</div></div>
 {% endblock %}

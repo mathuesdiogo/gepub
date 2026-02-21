@@ -1,0 +1,87 @@
+{% extends "core/base_public.html" %}
+{% load static %}
+
+{% block title %}Entrar • GEPUB{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/login_gepub.css' %}">
+
+<div class="login">
+
+  <!-- LADO ESQUERDO (INSTITUCIONAL) -->
+  <div class="login__left">
+    <div class="login__left-inner">
+
+      <div class="login__brand">
+        <div class="login__logo">
+          GEPUB
+        </div>
+        <div class="login__brand-sub">
+          Gestão Estratégica Pública
+        </div>
+      </div>
+
+      <div class="login__headline">
+        Um sistema público desenvolvido para
+        <strong>organizar, integrar e validar</strong>
+        informações da gestão municipal.
+      </div>
+
+      <div class="login__features">
+        <div>✔ Organização Estrutural</div>
+        <div>✔ Gestão Educacional</div>
+        <div>✔ NEE e Relatórios com Validação</div>
+        <div>✔ Controle por Perfil (RBAC)</div>
+      </div>
+
+      <div class="login__footer-left">
+        Transparência • Auditoria • Segurança
+      </div>
+
+    </div>
+  </div>
+
+  <!-- LADO DIREITO (FORMULÁRIO) -->
+  <div class="login__right">
+    <div class="login__card">
+
+      <h1 class="login__title">Login</h1>
+      <p class="login__subtitle">
+        Acesse o GEPUB com seu código institucional.
+      </p>
+
+      {% if error %}
+      <div class="login__error">
+        {{ error }}
+      </div>
+      {% endif %}
+
+      <form method="post" class="login__form">
+        {% csrf_token %}
+
+        <div class="login__field">
+          <label>Código de acesso</label>
+          <input type="text" name="codigo_acesso" required>
+        </div>
+
+        <div class="login__field">
+          <label>Senha</label>
+          <input type="password" name="password" required>
+        </div>
+
+        <button type="submit" class="login__button">
+          Acessar Sistema
+        </button>
+
+        <div class="login__help">
+          Primeira senha padrão: <strong>CPF</strong><br>
+          Em caso de dúvidas, procure o administrador.
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

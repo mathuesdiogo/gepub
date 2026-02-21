@@ -1,0 +1,22 @@
+{% extends "core/base.html" %}
+
+{% block title %}Usuários • GEPUB{% endblock %}
+{% block header %}Usuários{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">Usuários</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Usuários" subtitle="Gerencie contas, perfis e acessos" actions=actions %}
+{% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Buscar por nome, e-mail, código..." action_url=action_url clear_url=clear_url extra_filters=extra_filters has_filters=has_filters input_attrs=input_attrs %}
+{% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q actions_partial=actions_partial empty_title="Nenhum usuário encontrado" empty_text="Tente ajustar sua busca." %}
+  </div>
+</div>
+{% endblock %}

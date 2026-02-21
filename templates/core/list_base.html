@@ -1,0 +1,8 @@
+{% extends "core/base.html" %}
+{% block content %}
+<div class="card"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+{% include "core/partials/components/layout/filter_bar.html" with q=q placeholder=placeholder action_url=action_url clear_url=clear_url extra_filters=extra_filters has_filters=has_filters input_attrs=input_attrs %}
+{% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q ano=ano empty_title=empty_title empty_text=empty_text %}
+</div></div>
+{% endblock %}

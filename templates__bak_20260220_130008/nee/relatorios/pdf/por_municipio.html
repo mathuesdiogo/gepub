@@ -1,0 +1,30 @@
+{% extends "nee/relatorios/pdf/base_pdf.html" %}
+
+{% block body %}
+
+  <div class="kpi">
+    <strong>Total de municípios listados:</strong> {{ rows|length }}
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Município</th>
+        <th class="right">Total de alunos com NEE</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+        <tr>
+          <td>{{ r.municipio }}</td>
+          <td class="right">{{ r.total }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="2">Sem dados.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+{% endblock %}

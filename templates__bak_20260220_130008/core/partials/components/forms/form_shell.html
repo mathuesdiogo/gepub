@@ -1,0 +1,24 @@
+<form method="{{ method|default:'post' }}" action="{{ action_url|default:'' }}" {% if enctype %}enctype="{{ enctype }}"{% endif %} class="form-shell">
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+    <div class="flash flash--error">{{ form.non_field_errors }}</div>
+  {% endif %}
+
+  {% if top_extra %}
+    {{ top_extra|safe }}
+  {% endif %}
+
+  <div class="form-shell__fields">
+    {{ form.as_p }}
+  </div>
+
+  {% if bottom_extra %}
+    {{ bottom_extra|safe }}
+  {% endif %}
+
+  <div class="form-shell__actions">
+    <button type="submit" class="btn btn-primary">{{ submit_label|default:"Salvar" }}</button>
+    <a class="link" href="{{ cancel_url|default:'/' }}">Cancelar</a>
+  </div>
+</form>

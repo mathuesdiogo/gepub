@@ -1,0 +1,59 @@
+<a class="menu__item" href="{% url 'core:dashboard' %}">
+  <i class="fa-solid fa-house"></i><span>Início</span>
+</a>
+
+<div class="menu__section">
+  <div class="menu__title">Organização</div>
+
+  <a class="menu__item" href="{% url 'org:municipio_list' %}">
+    <i class="fa-solid fa-map-location-dot"></i><span>Municípios</span>
+  </a>
+  <a class="menu__item" href="{% url 'org:secretaria_list' %}">
+    <i class="fa-solid fa-building-columns"></i><span>Secretarias</span>
+  </a>
+  <a class="menu__item" href="{% url 'org:unidade_list' %}">
+    <i class="fa-solid fa-school"></i><span>Unidades</span>
+  </a>
+  <a class="menu__item" href="{% url 'org:setor_list' %}">
+    <i class="fa-solid fa-sitemap"></i><span>Setores</span>
+  </a>
+</div>
+
+<div class="menu__section">
+  <div class="menu__title">Educação</div>
+
+  <a class="menu__item" href="{% url 'educacao:aluno_list' %}">
+    <i class="fa-solid fa-user-graduate"></i><span>Alunos</span>
+  </a>
+  <a class="menu__item" href="{% url 'educacao:turma_list' %}">
+    <i class="fa-solid fa-users"></i><span>Turmas</span>
+  </a>
+
+  <a class="menu__item" href="{% url 'educacao:matricula_create' %}">
+    <i class="fa-solid fa-id-card-clip"></i><span>Matrículas</span>
+  </a>
+</div>
+
+<div class="menu__section">
+  <div class="menu__title">NEE</div>
+
+  <a class="menu__item" href="{% url 'nee:index' %}">
+    <i class="fa-solid fa-universal-access"></i><span>NEE</span>
+  </a>
+</div>
+
+<div class="menu__section">
+  <div class="menu__title">Acesso</div>
+
+  <a class="menu__item" href="{% url 'accounts:usuarios_list' %}">
+    <i class="fa-solid fa-user-shield"></i><span>Usuários</span>
+  </a>
+</div>
+
+<div class="menu__section">
+  <div class="menu__title">Ajuda</div>
+
+  <a class="menu__item" href="{% url 'core:guia_telas' %}">
+    <i class="fa-solid fa-hashtag"></i><span>Guia de Telas</span>
+  </a>
+</div>

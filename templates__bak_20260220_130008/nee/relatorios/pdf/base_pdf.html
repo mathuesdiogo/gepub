@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <title>{{ title }}</title>
+
+  <style>
+    @page {
+      size: A4;
+      margin: 18mm 14mm 26mm 14mm; /* ⬅️ espaço pro rodapé fixo */
+      @bottom-right {
+        content: "Página " counter(page) " de " counter(pages);
+        font-size: 9.5px;
+        color: #6b7280;
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 12px;
+      color: #1f2937;
+    }
+
+    /* ===============================
+       CABEÇALHO
+       =============================== */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid #1e3a8a;
+      padding-bottom: 10px;
+      margin-bottom: 16px;
+    }
+
+    .header-left { display: flex; flex-direction: column; gap: 4px; }
+
+    .title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1e3a8a;
+    }
+
+    .meta { font-size: 11px; color: #6b7280; }
+
+    .logo { height: 46px; object-fit: contain; }
+
+    /* ===============================
+       BLOCO KPI / FILTROS
+       =============================== */
+    .kpi {
+      border: 1px solid #e5e7eb;
+      border-left: 4px solid #1e3a8a;
+      padding: 8px 10px;
+      margin-bottom: 14px;
+      font-size: 11.5px;
+      background: #f9fafb;
+    }
+
+    /* ===============================
+       TABELA
+       =============================== */
+    table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+
+    th {
+      background: #eef2ff;
+      color: #1e3a8a;
+      font-weight: 700;
+      font-size: 11.5px;
+      padding: 8px;
+      border: 1px solid #e5e7eb;
+      text-align: left;
+    }
+
+    td { padding: 8px; border: 1px solid #e5e7eb; font-size: 11px; }
+    td.right, th.right { text-align: right; }
+    tr:nth-child(even) td { background: #fafafa; }
+
+    /* ===============================
+       RODAPÉ FIXO (todas as páginas)
+       =============================== */
+    .pdf-footer {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: -14mm; /* empurra pra região do rodapé reservada no @page */
+      padding-top: 8px;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 12px;
+      font-size: 10px;
+      color: #6b7280;
+    }
+
+    .pdf-footer .left { display: flex; flex-direction: column; gap: 3px; }
+    .pdf-footer .right { text-align: right; display: flex; flex-direction: column; gap: 6px; }
+
+    .val-link {
+      color: #1e3a8a;
+      text-decoration: underline;
+      font-weight: 700;
+    }
+
+    .qr {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 4px;
+      background: #fff;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="title">{{ title }}</div>
+
+      {% if municipio_nome %}
+        <div class="meta">Município: {{ municipio_nome }}{% if municipio_uf %}/{{ municipio_uf }}{% endif %}</div>
+      {% endif %}
+
+      {% if secretaria_nome %}
+        <div class="meta">Secretaria: {{ secretaria_nome }}</div>
+      {% endif %}
+
+      {% if filtros %}
+        <div class="meta">Filtros: {{ filtros }}</div>
+      {% endif %}
+    </div>
+
+    {% if logo_url %}
+      <img src="{{ logo_url }}" class="logo" alt="Logo">
+    {% endif %}
+  </div>
+
+  <!-- CONTEÚDO -->
+  {% block body %}{% endblock %}
+
+  <!-- RODAPÉ FIXO -->
+  <div class="pdf-footer">
+    <div class="left">
+      <div><strong>Usuário:</strong> {{ printed_by|default:"—" }}</div>
+      <div><strong>Relatório:</strong> {{ report_code|default:"RELATORIO" }}</div>
+      <div><strong>Gerado em:</strong> {{ generated_at|default:"—" }}</div>
+      <div><strong>Código:</strong> {{ validation_code }}</div>
+      <div>
+        <strong>Valide em:</strong>
+        <a class="val-link" href="{{ validation_url }}">GEPUB / Validar</a>
+      </div>
+    </div>
+
+    <div class="right">
+      {% if qr_data_uri %}
+        <img class="qr" src="{{ qr_data_uri }}" alt="QR Code">
+      {% endif %}
+      <div>GEPUB • Gestão Estratégica Pública</div>
+    </div>
+  </div>
+
+</body>
+</html>

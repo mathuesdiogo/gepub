@@ -1,0 +1,8 @@
+<a class="link" href="{% url 'accounts:usuario_update' row.obj.id %}">Editar</a>
+<span style="opacity:.4;"> | </span>
+<form method="post" action="{% url 'accounts:usuario_reset_senha' row.obj.id %}" style="display:inline;">
+  {% csrf_token %}
+  <button class="link" type="submit" style="border:0; background:transparent; padding:0; cursor:pointer;">
+    Redefinir senha
+  </button>
+</form>

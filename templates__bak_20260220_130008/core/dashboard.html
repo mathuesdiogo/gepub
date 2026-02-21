@@ -1,0 +1,18 @@
+{% extends "core/base.html" %}
+{% block title %}Dashboard • GEPUB{% endblock %}
+{% block header %}Dashboard{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">Dashboard</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+{% include dash_template %}
+</div></div>
+{% endblock %}

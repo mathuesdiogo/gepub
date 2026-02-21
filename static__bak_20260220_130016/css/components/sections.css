@@ -1,0 +1,55 @@
+/* =========================================================
+   GEPUB SECTIONS — FINAL SUAP STYLE
+   ========================================================= */
+
+.section{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:18px;
+  margin-bottom:18px;
+}
+
+.section-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:14px;
+}
+
+.section-title{
+  font-size:1.05rem;
+  font-weight:var(--font-weight-semibold);
+  color:var(--text);
+}
+
+/* CARD */
+
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:16px;
+}
+
+/* GRID */
+
+.section-grid{
+  display:grid;
+  gap:16px;
+}
+
+.section-grid.cols-2{
+  grid-template-columns:repeat(2,1fr);
+}
+
+.section-grid.cols-3{
+  grid-template-columns:repeat(3,1fr);
+}
+
+@media(max-width:900px){
+  .section-grid.cols-2,
+  .section-grid.cols-3{
+    grid-template-columns:1fr;
+  }
+}

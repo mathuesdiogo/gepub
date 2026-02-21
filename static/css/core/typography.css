@@ -1,6 +1,5 @@
-/* Tipografia e elementos semânticos (apoio a páginas de documentação e conteúdo) */
+/* Tipografia complementar (conteúdo técnico) */
 
-p { margin: 0 0 var(--space-3, .75rem); }
 small, .text-small { font-size: .875em; color: var(--color-muted, #6b7280); }
 
 code, kbd {
@@ -21,7 +20,7 @@ pre {
   padding: 1rem;
   border-radius: var(--radius-md, .5rem);
   overflow: auto;
-  margin: 0 0 var(--space-4, 1rem);
+  margin-bottom: var(--space-4, 1rem);
 }
 
 pre code { background: transparent; border: 0; padding: 0; }
@@ -45,6 +44,6 @@ abbr[title] {
   cursor: help;
 }
 
-dl { margin: 0 0 var(--space-4, 1rem); }
+dl { margin-bottom: var(--space-4, 1rem); }
 dt { font-weight: 600; }
-dd { margin: 0 0 var(--space-2, .5rem); color: var(--color-muted, #6b7280); }
+dd { margin-bottom: var(--space-2, .5rem); color: var(--color-muted, #6b7280); }

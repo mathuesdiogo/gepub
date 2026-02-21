@@ -2,12 +2,13 @@
   <div class="filter-bar__field">
     <label class="small">Buscar</label>
     <input
-      name="q"
-      value="{{ q|default:'' }}"
-      placeholder="Digite para buscar..."
-      {% if autocomplete_url %}data-autocomplete-url="{{ autocomplete_url }}"{% endif %}
-      autocomplete="off"
-    />
+    name="q"
+    value="{{ q|default:'' }}"
+    placeholder="{{ placeholder|default:'Digite para buscar...' }}"
+    autocomplete="off"
+    {% if input_attrs %}{{ input_attrs|safe }}{% endif %}
+    {% if autocomplete_url %}data-autocomplete-url="{{ autocomplete_url }}"{% endif %}
+  />
     <div class="filter-bar__autocomplete" data-autocomplete-list hidden></div>
   </div>
 

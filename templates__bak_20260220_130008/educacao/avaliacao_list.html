@@ -1,0 +1,9 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Avaliações • Educação • GEPUB{% endblock %}
+{% block module_content %}
+<div class="card"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Avaliações" subtitle="Crie e lance notas por período" actions=actions %}
+{% include "core/partials/components/data/filter_bar.html" with q=q action_url=action_url clear_url=clear_url has_filters=has_filters %}
+{% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj empty_title="Sem avaliações" empty_text="Crie uma avaliação para começar." %}
+</div></div>
+{% endblock %}

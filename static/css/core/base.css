@@ -1,13 +1,7 @@
 /* =========================================================
-   GEPUB DESIGN SYSTEM — BASE
+   GEPUB DESIGN SYSTEM — BASE (FINAL CLEAN)
    Reset leve + tipografia global + acessibilidade
-   NÃO altera estrutura de layout
    ========================================================= */
-
-
-/* ======================================================
-   RESET GLOBAL
-   ====================================================== */
 
 *,
 *::before,
@@ -32,146 +26,99 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* headings */
 
-/* ======================================================
-   HEADINGS (Escala Tipográfica Oficial)
-   ====================================================== */
-
-h1, h2, h3, h4, h5, h6 {
-  margin-top: 0;
-  margin-bottom: var(--space-4);
-  font-weight: var(--font-weight-medium);
-  line-height: 1.25;
-  color: var(--color-text-primary);
+h1,h2,h3,h4,h5,h6{
+  margin:0 0 var(--space-4);
+  font-weight:var(--font-weight-medium);
+  line-height:1.25;
+  color:var(--color-text-primary);
 }
 
-h1 { font-size: var(--font-size-3xl); }
-h2 { font-size: var(--font-size-2xl); }
-h3 { font-size: var(--font-size-xl); }
-h4 { font-size: var(--font-size-lg); }
-h5 { font-size: var(--font-size-md); }
-h6 { font-size: var(--font-size-sm); }
+h1{font-size:var(--font-size-3xl);}
+h2{font-size:var(--font-size-2xl);}
+h3{font-size:var(--font-size-xl);}
+h4{font-size:var(--font-size-lg);}
+h5{font-size:var(--font-size-md);}
+h6{font-size:var(--font-size-sm);}
 
+/* text */
 
-/* ======================================================
-   PARAGRAPHS & TEXT
-   ====================================================== */
+p{margin:0 0 var(--space-4);color:var(--color-text-secondary);}
+small{font-size:var(--font-size-xs);color:var(--color-text-muted);}
 
-p {
-  margin-top: 0;
-  margin-bottom: var(--space-4);
-  color: var(--color-text-secondary);
+/* links */
+
+a{
+  color:var(--color-primary-600);
+  text-decoration:none;
+  transition:.2s;
 }
 
-small {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
+a:hover{color:var(--color-primary-700);}
+
+a:focus-visible{
+  outline:none;
+  box-shadow:var(--focus-ring);
+  border-radius:var(--radius-sm);
 }
 
+/* lists */
 
-/* ======================================================
-   LINKS
-   ====================================================== */
-
-a {
-  color: var(--color-primary-600);
-  text-decoration: none;
-  transition: color 0.2s ease;
+ul,ol{
+  margin:0 0 var(--space-4);
+  padding-left:var(--space-6);
 }
 
-a:hover {
-  color: var(--color-primary-700);
+/* images */
+
+img{
+  max-width:100%;
+  display:block;
 }
 
-a:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
-  border-radius: var(--radius-sm);
+/* TABLE NORMALIZE (SEM ESTILO VISUAL) */
+
+table{
+  width:100%;
+  border-collapse:collapse;
 }
 
-
-/* ======================================================
-   LISTS
-   ====================================================== */
-
-ul, ol {
-  margin-top: 0;
-  margin-bottom: var(--space-4);
-  padding-left: var(--space-6);
+th,td{
+  text-align:left;
+  vertical-align:middle;
 }
 
+/* form normalize */
 
-/* ======================================================
-   IMAGES
-   ====================================================== */
-
-img {
-  max-width: 100%;
-  display: block;
+button,input,select,textarea{
+  font-family:inherit;
+  font-size:inherit;
 }
 
-
-/* ======================================================
-   TABLE BASE NORMALIZATION
-   (não estiliza ainda, só normaliza)
-   ====================================================== */
-
-table {
-  border-collapse: collapse;
-  width: 100%;
-}
-
-th,
-td {
-  text-align: left;
-  vertical-align: middle;
-}
-
-
-/* ======================================================
-   FORM ELEMENT BASE NORMALIZATION
-   (sem interferir nos componentes ainda)
-   ====================================================== */
-
-button,
-input,
-select,
-textarea {
-  font-family: inherit;
-  font-size: inherit;
-}
-
-button {
-  cursor: pointer;
-  background: none;
-  border: none;
+button{
+  cursor:pointer;
+  background:none;
+  border:none;
 }
 
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
-textarea:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
+textarea:focus-visible{
+  outline:none;
+  box-shadow:var(--focus-ring);
 }
 
+/* misc */
 
-/* ======================================================
-   HR
-   ====================================================== */
-
-hr {
-  border: none;
-  border-top: 1px solid var(--color-border-light);
-  margin: var(--space-6) 0;
+hr{
+  border:none;
+  border-top:1px solid var(--color-border-light);
+  margin:var(--space-6) 0;
 }
 
-
-/* ======================================================
-   SELECTION
-   ====================================================== */
-
-::selection {
-  background-color: var(--color-primary-200);
-  color: var(--color-neutral-900);
+::selection{
+  background:var(--color-primary-200);
+  color:var(--color-neutral-900);
 }

@@ -1,0 +1,49 @@
+<div class="dash-grid">
+  <div class="dash-col-6">
+    <div class="metric-card">
+      <div class="metric-label">Minhas turmas</div>
+      <div class="metric-value">{{ turmas_total|default:0 }}</div>
+      <div class="metric-meta">Ano {{ ano_atual }}</div>
+    </div>
+  </div>
+
+  <div class="dash-col-6">
+    <div class="metric-card">
+      <div class="metric-label">Meus alunos</div>
+      <div class="metric-value">{{ alunos_total|default:0 }}</div>
+      <div class="metric-meta">Vínculos nas minhas turmas</div>
+    </div>
+  </div>
+
+  <div class="dash-col-12">
+    <div class="card">
+      <div class="card__title">Turmas do ano ({{ ano_atual }})</div>
+      <div class="card__body">
+        {% if turmas %}
+          <div class="dash-table">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Turma</th>
+                  <th>Unidade</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for t in turmas %}
+                  <tr>
+                    <td>{{ t.nome }}</td>
+                    <td>{{ t.unidade.nome }}</td>
+                    <td><a class="btn btn--ghost" href="{% url 'educacao:turma_detail' t.pk %}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir</a></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          {% include "core/partials/components/feedback/empty_state.html" with title="Sem turmas" text="Nenhuma turma encontrada para este ano." %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>

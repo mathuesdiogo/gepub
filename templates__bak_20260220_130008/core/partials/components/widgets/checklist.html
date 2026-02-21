@@ -1,0 +1,35 @@
+{# 
+  Component: Checklist
+  Uso:
+  {% include "core/partials/components/widgets/checklist.html" 
+     with items=checklist_items 
+  %}
+#}
+
+{% if items %}
+<ul class="checklist">
+  {% for item in items %}
+    <li class="checklist-item {% if item.status %}is-{{ item.status }}{% endif %}">
+      
+      <span class="checklist-icon">
+        {% if item.status == "success" %}
+          <i class="fa-solid fa-check"></i>
+        {% elif item.status == "error" %}
+          <i class="fa-solid fa-xmark"></i>
+        {% else %}
+          <i class="fa-solid fa-circle"></i>
+        {% endif %}
+      </span>
+
+      <span class="checklist-text">
+        {{ item.label }}
+      </span>
+
+    </li>
+  {% endfor %}
+</ul>
+{% else %}
+  {% include "core/partials/components/feedback/empty_state.html"
+     with empty_title="Sem itens"
+          empty_text="Nenhum item disponível." %}
+{% endif %}

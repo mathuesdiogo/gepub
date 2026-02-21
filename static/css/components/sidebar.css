@@ -6,7 +6,7 @@
    ========================================================= */
 
 .sidebar{
-  background: #2D6FD3; /* azul da imagem (sólido) */
+  background: var(--primary); /* azul da imagem (sólido) */
   color: rgba(255,255,255,.92);
   padding: 18px;
   border-right: 0;

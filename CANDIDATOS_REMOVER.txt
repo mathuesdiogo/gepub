@@ -1,0 +1,6 @@
+static/css/components/actions.css
+static/css/components/forms.css
+static/css/components/modal.css
+static/css/components/loaders.css
+static/css/pages/detail.css
+static/css/pages/login.css

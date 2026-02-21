@@ -1,14 +1,15 @@
 .accordion{
   display:flex;
   flex-direction:column;
-  gap:12px;
+  gap:var(--space-3);
 }
 
 .accordion__item{
-  border:1px solid var(--brand);
-  border-radius:14px;
-  background: var(--surface);
+  border:1px solid var(--primary);
+  border-radius:var(--radius-lg);
+  background:var(--surface);
   overflow:hidden;
+  box-shadow:var(--shadow-card);
 }
 
 .accordion__summary{
@@ -17,27 +18,22 @@
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:12px;
-  padding:14px 16px;
+  gap:var(--space-3);
+  padding:var(--space-4);
 }
 
 .accordion__summary::-webkit-details-marker{
   display:none;
 }
 
-.accordion__head{
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-}
-
 .accordion__title{
-  font-weight:700;
+  font-weight:var(--font-weight-bold);
+  color:var(--text);
 }
 
 .accordion__meta{
-  font-size:12px;
-  opacity:.75;
+  font-size:var(--font-size-sm);
+  color:var(--muted);
 }
 
 .accordion__chev{
@@ -46,20 +42,20 @@
   justify-content:center;
   width:34px;
   height:34px;
-  border-radius:10px;
+  border-radius:var(--radius-md);
   border:1px solid var(--border);
-  background: var(--surface);
-}
-
-.accordion__item[open] .accordion__chev i{
-  transform: rotate(180deg);
+  background:var(--surface);
 }
 
 .accordion__chev i{
   transition: transform .18s ease;
 }
 
+.accordion__item[open] .accordion__chev i{
+  transform: rotate(180deg);
+}
+
 .accordion__body{
-  padding:14px 16px 16px 16px;
+  padding:var(--space-4);
   border-top:1px solid var(--border);
 }

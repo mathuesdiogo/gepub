@@ -1,0 +1,124 @@
+/* =========================================================
+   GEPUB DESIGN SYSTEM — BASE (FINAL CLEAN)
+   Reset leve + tipografia global + acessibilidade
+   ========================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-md);
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* headings */
+
+h1,h2,h3,h4,h5,h6{
+  margin:0 0 var(--space-4);
+  font-weight:var(--font-weight-medium);
+  line-height:1.25;
+  color:var(--color-text-primary);
+}
+
+h1{font-size:var(--font-size-3xl);}
+h2{font-size:var(--font-size-2xl);}
+h3{font-size:var(--font-size-xl);}
+h4{font-size:var(--font-size-lg);}
+h5{font-size:var(--font-size-md);}
+h6{font-size:var(--font-size-sm);}
+
+/* text */
+
+p{margin:0 0 var(--space-4);color:var(--color-text-secondary);}
+small{font-size:var(--font-size-xs);color:var(--color-text-muted);}
+
+/* links */
+
+a{
+  color:var(--color-primary-600);
+  text-decoration:none;
+  transition:.2s;
+}
+
+a:hover{color:var(--color-primary-700);}
+
+a:focus-visible{
+  outline:none;
+  box-shadow:var(--focus-ring);
+  border-radius:var(--radius-sm);
+}
+
+/* lists */
+
+ul,ol{
+  margin:0 0 var(--space-4);
+  padding-left:var(--space-6);
+}
+
+/* images */
+
+img{
+  max-width:100%;
+  display:block;
+}
+
+/* TABLE NORMALIZE (SEM ESTILO VISUAL) */
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,td{
+  text-align:left;
+  vertical-align:middle;
+}
+
+/* form normalize */
+
+button,input,select,textarea{
+  font-family:inherit;
+  font-size:inherit;
+}
+
+button{
+  cursor:pointer;
+  background:none;
+  border:none;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible{
+  outline:none;
+  box-shadow:var(--focus-ring);
+}
+
+/* misc */
+
+hr{
+  border:none;
+  border-top:1px solid var(--color-border-light);
+  margin:var(--space-6) 0;
+}
+
+::selection{
+  background:var(--color-primary-200);
+  color:var(--color-neutral-900);
+}

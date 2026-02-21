@@ -329,6 +329,49 @@ def aula_create(request, pk: int):
         "submit_label": "Salvar",
         "action_url": reverse("educacao:aula_create", args=[diario.pk]),
     })
+
+
+@login_required
+@require_perm("educacao.view")
+def aula_update(request, pk: int, aula_id: int):
+    """
+    Editar uma aula dentro de um diário.
+    Mantém assinatura usada no urls.py:
+      pk = DiarioTurma.id
+      aula_id = Aula.id
+    """
+
+    diario = get_object_or_404(
+        DiarioTurma.objects.select_related("turma", "professor"),
+        pk=pk,
+    )
+
+    # Mesma regra do create: só o professor responsável edita
+    if not _can_edit_diario(request.user, diario):
+        return HttpResponseForbidden("403 — Somente o professor responsável pode editar esta aula.")
+
+    aula = get_object_or_404(Aula, pk=aula_id, diario=diario)
+
+    if request.method == "POST":
+        form = AulaForm(request.POST, instance=aula)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Aula atualizada com sucesso.")
+            return redirect("educacao:diario_detail", pk=diario.pk)
+        messages.error(request, "Corrija os erros do formulário.")
+    else:
+        form = AulaForm(instance=aula)
+
+    return render(request, "educacao/aula_form.html", {
+        "form": form,
+        "diario": diario,
+        "aula": aula,
+        "mode": "update",
+        "cancel_url": reverse("educacao:diario_detail", args=[diario.pk]),
+        "submit_label": "Atualizar",
+        "action_url": reverse("educacao:aula_update", args=[diario.pk, aula.pk]),
+    })
+    
     
 @login_required
 @require_perm("educacao.view")

@@ -1,34 +1,33 @@
 .tabs{
   display:flex;
   flex-wrap:wrap;
-  gap:10px;
-  padding:10px;
-  border-radius:12px;
-  background: var(--surface-2);
+  gap:var(--space-2);
+  padding:var(--space-2);
+  border-radius:var(--radius-lg);
+  background:var(--surface-2);
   border:1px solid var(--border);
-  margin-bottom:14px;
+  margin-bottom:var(--space-4);
 }
 
 .tabs__item{
   display:inline-flex;
   align-items:center;
-  gap:8px;
-  padding:8px 12px;
-  border-radius:999px;
+  gap:6px;
+  padding:6px 12px;
+  border-radius:var(--radius-pill);
   text-decoration:none;
   border:1px solid transparent;
+  color:var(--text);
 }
 
 .tabs__item:hover{
-  border-color: var(--border);
+  border-color:var(--border);
+  background:var(--surface);
 }
 
 .tabs__item.is-active{
-  border-color: var(--brand);
-  background: var(--surface);
-}
-
-.tabs__label{
+  border-color:var(--primary);
+  background:var(--surface);
   font-weight:600;
 }
 
@@ -39,9 +38,9 @@
   min-width:22px;
   height:22px;
   padding:0 8px;
-  border-radius:999px;
+  border-radius:var(--radius-pill);
   border:1px solid var(--border);
-  background: var(--surface);
+  background:var(--surface);
   font-size:12px;
   font-weight:600;
 }
