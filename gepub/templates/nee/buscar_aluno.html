@@ -1,0 +1,19 @@
+{% extends "nee/base_modulo.html" %}
+{% block title %}Buscar aluno • NEE • GEPUB{% endblock %}
+{% block module_content %}
+  <div class="card">
+    <div class="card__body">
+      {% include "core/partials/components/layout/page_head.html" with title="Buscar aluno" subtitle="Selecione um aluno para acessar necessidades, laudos, recursos e timeline." actions=actions %}
+      <div class="empty-state">
+        <p>Esta tela é o ponto de entrada do NEE. Por enquanto, use a listagem de alunos do módulo Educação para localizar o aluno.</p>
+        <div class="actions">
+          {% for a in actions %}
+            <a class="btn btn--primary" href="{{ a.url }}">
+              <i class="{{ a.icon }}"></i> {{ a.label }}
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

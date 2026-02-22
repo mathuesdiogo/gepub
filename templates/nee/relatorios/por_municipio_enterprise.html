@@ -1,0 +1,30 @@
+{% extends "nee/base_modulo.html" %}
+{% block module_title %}NEE • Por município{% endblock %}
+{% block module_content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title="Relatório — Por município" subtitle="Clique em um município para ver alunos (drilldown)." actions=actions %}
+
+  {% if rows %}
+    <div class="table-shell">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Município</th>
+            <th style="width:160px;">Alunos</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+            <tr>
+              <td><a href="{{ r.url }}">{{ r.municipio }}</a></td>
+              <td>{{ r.qtd }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    {% include "core/partials/components/feedback/empty_state.html" with title="Sem dados" text="Nenhuma matrícula com necessidade NEE encontrada." %}
+  {% endif %}
+</div></div>
+{% endblock %}

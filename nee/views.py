@@ -24,8 +24,8 @@ from apps.core.rbac import get_profile, is_admin
 from apps.educacao.models import Aluno, Matricula
 from apps.org.models import Municipio, Unidade
 
-from .forms import AlunoNecessidadeForm, ApoioMatriculaForm, TipoNecessidadeForm
-from .models import AlunoNecessidade, ApoioMatricula, TipoNecessidade
+from .forms import (AlunoNecessidadeForm, ApoioMatriculaForm, TipoNecessidadeForm, LaudoNEEForm, AcompanhamentoNEEForm, RecursoNEEForm)
+from .models import (AlunoNecessidade, ApoioMatricula, TipoNecessidade, LaudoNEE, AcompanhamentoNEE, RecursoNEE)
 
 
 # =========================================================
@@ -742,3 +742,405 @@ def relatorio_por_unidade(request: HttpRequest) -> HttpResponse:
         "data": data,
         "extra_filters": extra_filters,
     })
+
+# =========================================================
+# FASE 2 — Laudos / Recursos / Acompanhamentos (por aluno)
+# =========================================================
+
+class LaudoListView(BaseListView):
+    model = LaudoNEE
+    template_name = "nee/laudo_list.html"
+    paginate_by = 10
+    search_param = "q"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.aluno = get_object_or_404(Aluno, pk=kwargs["aluno_id"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        qs = super().get_queryset().select_related("aluno", "tipo").filter(aluno=self.aluno)
+        q = self.request.GET.get(self.search_param, "").strip()
+        if q:
+            qs = qs.filter(Q(emissor__icontains=q) | Q(numero__icontains=q) | Q(tipo__nome__icontains=q))
+        return qs
+
+    def get_actions(self):
+        return [
+            {"label": "Voltar", "url": reverse("nee:index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+            {"label": "Novo laudo", "url": reverse("nee:laudo_create", args=[self.aluno.pk]), "icon": "fa-solid fa-plus", "variant": "btn-primary"},
+        ]
+
+    def get_table_context(self):
+        headers = [
+            {"label": "Tipo"},
+            {"label": "Emissor"},
+            {"label": "Emissão", "width": "140px"},
+            {"label": "Ativo", "width": "110px"},
+        ]
+        rows = []
+        for o in self.object_list:
+            rows.append({
+                "cells": [
+                    {"text": o.tipo.nome if o.tipo_id else "—", "url": reverse("nee:laudo_detail", args=[self.aluno.pk, o.pk])},
+                    {"text": o.emissor or "—", "url": ""},
+                    {"text": o.data_emissao.strftime("%d/%m/%Y") if o.data_emissao else "—", "url": ""},
+                    {"text": "Sim" if o.ativo else "Não", "url": ""},
+                ],
+            })
+        return {"headers": headers, "rows": rows}
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["aluno"] = self.aluno
+        return ctx
+
+
+class LaudoCreateView(BaseCreateView):
+    model = LaudoNEE
+    form_class = LaudoNEEForm
+    template_name = "nee/laudo_form.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.aluno = get_object_or_404(Aluno, pk=kwargs["aluno_id"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw["aluno"] = self.aluno
+        return kw
+
+    def get_success_url(self):
+        return reverse("nee:laudo_list", args=[self.aluno.pk])
+
+    def get_actions(self):
+        return [
+            {"label": "Voltar", "url": reverse("nee:laudo_list", args=[self.aluno.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+        ]
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["aluno"] = self.aluno
+        ctx["title"] = "Novo laudo"
+        return ctx
+
+
+class LaudoDetailView(BaseDetailView):
+    model = LaudoNEE
+    template_name = "nee/laudo_detail.html"
+    context_object_name = "laudo"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.aluno = get_object_or_404(Aluno, pk=kwargs["aluno_id"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("aluno", "tipo").filter(aluno=self.aluno)
+
+    def get_actions(self):
+        laudo = self.get_object()
+        return [
+            {"label": "Voltar", "url": reverse("nee:laudo_list", args=[self.aluno.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+            {"label": "Editar", "url": reverse("nee:laudo_update", args=[self.aluno.pk, laudo.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"},
+        ]
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["aluno"] = self.aluno
+        return ctx
+
+
+class LaudoUpdateView(BaseUpdateView):
+    model = LaudoNEE
+    form_class = LaudoNEEForm
+    template_name = "nee/laudo_form.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.aluno = get_object_or_404(Aluno, pk=kwargs["aluno_id"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return super().get_queryset().filter(aluno=self.aluno)
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw["aluno"] = self.aluno
+        return kw
+
+    def get_success_url(self):
+        return reverse("nee:laudo_detail", args=[self.aluno.pk, self.object.pk])
+
+    def get_actions(self):
+        return [
+            {"label": "Voltar", "url": reverse("nee:laudo_detail", args=[self.aluno.pk, self.object.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+        ]
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["aluno"] = self.aluno
+        ctx["title"] = "Editar laudo"
+        return ctx
+
+
+class RecursoListView(BaseListView):
+    model = RecursoNEE
+    template_name = "nee/recurso_list.html"
+    paginate_by = 10
+    search_param = "q"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.aluno = get_object_or_404(Aluno, pk=kwargs["aluno_id"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        qs = super().get_queryset().filter(aluno=self.aluno)
+        q = self.request.GET.get(self.search_param, "").strip()
+        if q:
+            qs = qs.filter(Q(nome__icontains=q) | Q(categoria__icontains=q))
+        return qs
+
+    def get_actions(self):
+        return [
+            {"label": "Voltar", "url": reverse("nee:index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+            {"label": "Novo recurso", "url": reverse("nee:recurso_create", args=[self.aluno.pk]), "icon": "fa-solid fa-plus", "variant": "btn-primary"},
+        ]
+
+    def get_table_context(self):
+        headers = [{"label": "Nome"}, {"label": "Categoria"}, {"label": "Ativo", "width": "110px"}]
+        rows = []
+        for o in self.object_list:
+            rows.append({
+                "cells": [
+                    {"text": o.nome, "url": reverse("nee:recurso_detail", args=[self.aluno.pk, o.pk])},
+                    {"text": o.categoria or "—", "url": ""},
+                    {"text": "Sim" if o.ativo else "Não", "url": ""},
+                ],
+            })
+        return {"headers": headers, "rows": rows}
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["aluno"] = self.aluno
+        return ctx
+
+
+class RecursoCreateView(BaseCreateView):
+    model = RecursoNEE
+    form_class = RecursoNEEForm
+    template_name = "nee/recurso_form.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.aluno = get_object_or_404(Aluno, pk=kwargs["aluno_id"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw["aluno"] = self.aluno
+        return kw
+
+    def get_success_url(self):
+        return reverse("nee:recurso_list", args=[self.aluno.pk])
+
+    def get_actions(self):
+        return [{"label": "Voltar", "url": reverse("nee:recurso_list", args=[self.aluno.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["aluno"] = self.aluno
+        ctx["title"] = "Novo recurso"
+        return ctx
+
+
+class RecursoDetailView(BaseDetailView):
+    model = RecursoNEE
+    template_name = "nee/recurso_detail.html"
+    context_object_name = "recurso"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.aluno = get_object_or_404(Aluno, pk=kwargs["aluno_id"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return super().get_queryset().filter(aluno=self.aluno)
+
+    def get_actions(self):
+        o = self.get_object()
+        return [
+            {"label": "Voltar", "url": reverse("nee:recurso_list", args=[self.aluno.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+            {"label": "Editar", "url": reverse("nee:recurso_update", args=[self.aluno.pk, o.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"},
+        ]
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["aluno"] = self.aluno
+        return ctx
+
+
+class RecursoUpdateView(BaseUpdateView):
+    model = RecursoNEE
+    form_class = RecursoNEEForm
+    template_name = "nee/recurso_form.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.aluno = get_object_or_404(Aluno, pk=kwargs["aluno_id"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return super().get_queryset().filter(aluno=self.aluno)
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw["aluno"] = self.aluno
+        return kw
+
+    def get_success_url(self):
+        return reverse("nee:recurso_detail", args=[self.aluno.pk, self.object.pk])
+
+    def get_actions(self):
+        return [{"label": "Voltar", "url": reverse("nee:recurso_detail", args=[self.aluno.pk, self.object.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["aluno"] = self.aluno
+        ctx["title"] = "Editar recurso"
+        return ctx
+
+
+class AcompanhamentoListView(BaseListView):
+    model = AcompanhamentoNEE
+    template_name = "nee/acompanhamento_list.html"
+    paginate_by = 10
+    search_param = "q"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.aluno = get_object_or_404(Aluno, pk=kwargs["aluno_id"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        qs = super().get_queryset().select_related("profissional", "necessidade", "necessidade__tipo").filter(aluno=self.aluno)
+        q = self.request.GET.get(self.search_param, "").strip()
+        if q:
+            qs = qs.filter(Q(titulo__icontains=q) | Q(descricao__icontains=q))
+        return qs
+
+    def get_actions(self):
+        return [
+            {"label": "Voltar", "url": reverse("nee:index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+            {"label": "Novo acompanhamento", "url": reverse("nee:acompanhamento_create", args=[self.aluno.pk]), "icon": "fa-solid fa-plus", "variant": "btn-primary"},
+        ]
+
+    def get_table_context(self):
+        headers = [
+            {"label": "Data", "width": "140px"},
+            {"label": "Título"},
+            {"label": "Status", "width": "150px"},
+        ]
+        rows = []
+        for o in self.object_list:
+            rows.append({
+                "cells": [
+                    {"text": o.data.strftime("%d/%m/%Y") if o.data else "—", "url": reverse("nee:acompanhamento_detail", args=[self.aluno.pk, o.pk])},
+                    {"text": o.titulo, "url": ""},
+                    {"text": o.get_status_display(), "url": ""},
+                ],
+            })
+        return {"headers": headers, "rows": rows}
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["aluno"] = self.aluno
+        return ctx
+
+
+class AcompanhamentoCreateView(BaseCreateView):
+    model = AcompanhamentoNEE
+    form_class = AcompanhamentoNEEForm
+    template_name = "nee/acompanhamento_form.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.aluno = get_object_or_404(Aluno, pk=kwargs["aluno_id"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw["aluno"] = self.aluno
+        return kw
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        if not obj.profissional_id and self.request.user.is_authenticated:
+            obj.profissional = self.request.user
+        obj.save()
+        form.save_m2m()
+        messages.success(self.request, "Acompanhamento registrado.")
+        return redirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse("nee:acompanhamento_list", args=[self.aluno.pk])
+
+    def get_actions(self):
+        return [{"label": "Voltar", "url": reverse("nee:acompanhamento_list", args=[self.aluno.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["aluno"] = self.aluno
+        ctx["title"] = "Novo acompanhamento"
+        return ctx
+
+
+class AcompanhamentoDetailView(BaseDetailView):
+    model = AcompanhamentoNEE
+    template_name = "nee/acompanhamento_detail.html"
+    context_object_name = "acompanhamento"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.aluno = get_object_or_404(Aluno, pk=kwargs["aluno_id"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("profissional", "necessidade", "necessidade__tipo").filter(aluno=self.aluno)
+
+    def get_actions(self):
+        o = self.get_object()
+        return [
+            {"label": "Voltar", "url": reverse("nee:acompanhamento_list", args=[self.aluno.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+            {"label": "Editar", "url": reverse("nee:acompanhamento_update", args=[self.aluno.pk, o.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"},
+        ]
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["aluno"] = self.aluno
+        return ctx
+
+
+class AcompanhamentoUpdateView(BaseUpdateView):
+    model = AcompanhamentoNEE
+    form_class = AcompanhamentoNEEForm
+    template_name = "nee/acompanhamento_form.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.aluno = get_object_or_404(Aluno, pk=kwargs["aluno_id"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return super().get_queryset().filter(aluno=self.aluno)
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw["aluno"] = self.aluno
+        return kw
+
+    def get_success_url(self):
+        return reverse("nee:acompanhamento_detail", args=[self.aluno.pk, self.object.pk])
+
+    def get_actions(self):
+        return [{"label": "Voltar", "url": reverse("nee:acompanhamento_detail", args=[self.aluno.pk, self.object.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["aluno"] = self.aluno
+        ctx["title"] = "Editar acompanhamento"
+        return ctx
+
+
+
+

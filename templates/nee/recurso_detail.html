@@ -1,0 +1,13 @@
+{% extends "nee/base_modulo.html" %}
+{% block module_title %}Recurso • NEE{% endblock %}
+{% block module_content %}
+<div class="card"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Recurso/Adaptação" subtitle=aluno.nome actions=actions %}
+<div class="detail-summary">
+  <div><strong>Nome:</strong> {{ recurso.nome }}</div>
+  <div><strong>Categoria:</strong> {{ recurso.categoria|default:"—" }}</div>
+  <div><strong>Ativo:</strong> {{ recurso.ativo|yesno:"Sim,Não" }}</div>
+</div>
+{% if recurso.descricao %}<p><strong>Descrição:</strong><br>{{ recurso.descricao|linebreaksbr }}</p>{% endif %}
+</div></div>
+{% endblock %}

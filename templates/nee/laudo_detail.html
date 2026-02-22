@@ -1,0 +1,20 @@
+{% extends "nee/base_modulo.html" %}
+{% block module_title %}Laudo • NEE{% endblock %}
+{% block module_content %}
+<div class="card"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Laudo" subtitle=aluno.nome actions=actions %}
+
+<div class="detail-summary">
+  <div><strong>Tipo:</strong> {{ laudo.tipo.nome|default:"—" }}</div>
+  <div><strong>Emissor:</strong> {{ laudo.emissor|default:"—" }}</div>
+  <div><strong>Emissão:</strong> {{ laudo.data_emissao|date:"d/m/Y"|default:"—" }}</div>
+  <div><strong>Validade:</strong> {{ laudo.validade|date:"d/m/Y"|default:"—" }}</div>
+  <div><strong>Ativo:</strong> {{ laudo.ativo|yesno:"Sim,Não" }}</div>
+</div>
+
+{% if laudo.numero %}<p><strong>Número:</strong> {{ laudo.numero }}</p>{% endif %}
+{% if laudo.observacao %}<p><strong>Observação:</strong><br>{{ laudo.observacao|linebreaksbr }}</p>{% endif %}
+{% if laudo.arquivo %}<p><strong>Arquivo:</strong> <a href="{{ laudo.arquivo.url }}" target="_blank" rel="noopener">Abrir</a></p>{% endif %}
+
+</div></div>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "core/base.html" %}
+{% block title %}{% block module_title %}NEE • GEPUB{% endblock %}{% endblock %}
+{% block content %}
+<div class="module-shell module-shell--single">
+  <div class="module-content">
+    {% block module_content %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

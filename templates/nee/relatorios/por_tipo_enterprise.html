@@ -1,0 +1,30 @@
+{% extends "nee/base_modulo.html" %}
+{% block module_title %}NEE • Por tipo{% endblock %}
+{% block module_content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title="Relatório — Por tipo" subtitle="Clique em um tipo para ver alunos (drilldown)." actions=actions %}
+
+  {% if rows %}
+    <div class="table-shell">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th style="width:160px;">Alunos</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+            <tr>
+              <td><a href="{{ r.url }}">{{ r.tipo }}</a></td>
+              <td>{{ r.qtd }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    {% include "core/partials/components/feedback/empty_state.html" with title="Sem dados" text="Cadastre necessidades em alunos para alimentar este relatório." %}
+  {% endif %}
+</div></div>
+{% endblock %}

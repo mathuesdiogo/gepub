@@ -143,3 +143,14 @@ canvas {
   .topbar-go__input{ min-width: 160px; }
   .topbar-go__btn{ display:none; }
 }
+
+/* ==========================================================
+   Wide content mode (listas / módulos administrativos)
+   ========================================================== */
+.content--wide{
+  max-width:none;
+}
+
+.module-shell.module-shell--single {
+  grid-template-columns: 1fr !important;
+}

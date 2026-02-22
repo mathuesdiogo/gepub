@@ -1,0 +1,19 @@
+{% extends "nee/base_modulo.html" %}
+{% block module_title %}NEE • Alertas{% endblock %}
+{% block module_content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title="Alertas NEE" subtitle="Painel de gestão (drilldown + export institucional)" actions=actions %}
+
+  <div class="section-grid cols-3">
+    {% for c in cards %}
+      <a class="link-card" href="{{ c.url }}">
+        <div class="link-card__icon"><i class="{{ c.icon }}"></i></div>
+        <div class="link-card__content">
+          <div class="link-card__title">{{ c.title }}</div>
+          <div class="link-card__desc">{{ c.desc }} <strong>({{ c.kpi }})</strong></div>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+</div></div>
+{% endblock %}

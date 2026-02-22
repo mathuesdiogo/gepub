@@ -1,0 +1,19 @@
+{% extends "nee/base_modulo.html" %}
+{% block module_title %}Acompanhamento • NEE{% endblock %}
+{% block module_content %}
+<div class="card"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Acompanhamento" subtitle=aluno.nome actions=actions %}
+
+<div class="detail-summary">
+  <div><strong>Data:</strong> {{ acompanhamento.data|date:"d/m/Y" }}</div>
+  <div><strong>Status:</strong> {{ acompanhamento.get_status_display }}</div>
+  <div><strong>Necessidade:</strong> {% if acompanhamento.necessidade %}{{ acompanhamento.necessidade.tipo.nome }}{% else %}—{% endif %}</div>
+  <div><strong>Profissional:</strong> {% if acompanhamento.profissional %}{{ acompanhamento.profissional }}{% else %}—{% endif %}</div>
+  <div><strong>Ativo:</strong> {{ acompanhamento.ativo|yesno:"Sim,Não" }}</div>
+</div>
+
+<p><strong>Título:</strong> {{ acompanhamento.titulo }}</p>
+{% if acompanhamento.descricao %}<p><strong>Registro:</strong><br>{{ acompanhamento.descricao|linebreaksbr }}</p>{% endif %}
+
+</div></div>
+{% endblock %}

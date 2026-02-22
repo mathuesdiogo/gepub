@@ -1,0 +1,12 @@
+{% extends "nee/base_modulo.html" %}
+{% block title %}Alertas • NEE • GEPUB{% endblock %}
+{% block module_content %}
+  <div class="card">
+    <div class="card__body">
+      {% include "core/partials/components/layout/page_head.html" with title="Alertas" subtitle="Pendências e acompanhamentos para ação rápida." actions=actions %}
+      <div class="empty-state">
+        <p>Em construção. Aqui vamos concentrar pendências por aluno/unidade (drilldown) e alertas de acompanhamento.</p>
+      </div>
+    </div>
+  </div>
+{% endblock %}

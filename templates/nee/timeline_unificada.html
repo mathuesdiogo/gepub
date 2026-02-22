@@ -1,0 +1,28 @@
+{% extends "nee/base_modulo.html" %}
+{% block module_title %}NEE • Timeline{% endblock %}
+{% block module_content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title="Timeline unificada" subtitle=aluno.nome actions=actions %}
+
+  {% if eventos %}
+    <div class="timeline">
+      {% for e in eventos %}
+        <div class="timeline__item">
+          <div class="timeline__dot"></div>
+          <div class="timeline__content">
+            <div class="timeline__meta">
+              <span class="badge">{{ e.tipo }}</span>
+              {% if e.data %}<span class="muted">{{ e.data }}</span>{% endif %}
+            </div>
+            <div class="timeline__title">{{ e.titulo }}</div>
+            <div class="timeline__text">{{ e.descricao }}</div>
+            {% if e.url %}<div class="timeline__actions"><a class="btn btn--ghost btn--sm" href="{{ e.url }}">Abrir</a></div>{% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    {% include "core/partials/components/feedback/empty_state.html" with title="Sem eventos" text="Nenhum evento encontrado para este aluno." %}
+  {% endif %}
+</div></div>
+{% endblock %}

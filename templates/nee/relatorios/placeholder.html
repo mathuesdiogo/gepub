@@ -1,0 +1,12 @@
+{% extends "nee/base_modulo.html" %}
+{% block module_title %}NEE • Relatório{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  {% include "core/partials/components/feedback/empty_state.html" with title="Em breve" text="Este relatório será habilitado assim que o vínculo de dados estiver consolidado." %}
+
+</div></div>
+{% endblock %}
