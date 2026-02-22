@@ -1,56 +1,40 @@
-"""Compat layer (Enterprise)
+"""Compat layer (NORMALIZADO)
 
 Este módulo existe para manter estabilidade de imports: urls.py e templates
-podem referenciar `apps.nee.views.*` mesmo quando o código estiver dividido
-em subarquivos (views_dashboard.py, views_tipos.py, views_relatorios.py, ...).
+podem referenciar `apps.nee.views.*` mesmo quando o código estiver dividido em
+múltiplos arquivos (views_dashboard.py, views_tipos.py, views_relatorios.py, ...).
+
+Regras desta versão:
+- Sem try/except engolindo erro (falha rápida é melhor do que rota “fantasma”)
+- Aliases mantidos (singular/plural) para não quebrar templates antigos
 """
 from __future__ import annotations
 
 # Dashboard
-try:
-    from .views_dashboard import index  # type: ignore
-except Exception:  # pragma: no cover
-    index = None  # type: ignore
-
-# Alguns patches antigos importam index_simple
-index_simple = index  # type: ignore
+from .views_dashboard import index
+index_simple = index  # compat
 
 # Tipos (CBVs)
+from .views_tipos import TipoListView, TipoCreateView, TipoUpdateView
 try:
-    from .views_tipos import TipoListView, TipoCreateView, TipoUpdateView  # type: ignore
-    # Detail pode não existir; se não existir, usamos Update como detail
-    try:
-        from .views_tipos import TipoDetailView  # type: ignore
-    except Exception:  # pragma: no cover
-        TipoDetailView = TipoUpdateView  # type: ignore
+    from .views_tipos import TipoDetailView
 except Exception:  # pragma: no cover
-    TipoListView = TipoCreateView = TipoUpdateView = TipoDetailView = None  # type: ignore
+    TipoDetailView = TipoUpdateView  # fallback compat
 
 # Relatórios (FBVs)
-try:
-    from .views_relatorios import (
-        relatorios_index,
-        relatorio_por_tipo,
-        relatorio_por_municipio,
-        relatorio_por_unidade,
-    )  # type: ignore
-except Exception:  # pragma: no cover
-    relatorios_index = relatorio_por_tipo = relatorio_por_municipio = relatorio_por_unidade = None  # type: ignore
+from .views_relatorios import (
+    relatorios_index,
+    relatorios_por_tipo,
+    relatorios_por_municipio,
+    relatorios_por_unidade,
+    relatorios_alunos,
+)
 
-# Aliases (plural) para compat com urls/templates antigos
-relatorios_por_tipo = relatorio_por_tipo  # type: ignore
-relatorios_por_municipio = relatorio_por_municipio  # type: ignore
-relatorios_por_unidade = relatorio_por_unidade  # type: ignore
-
+# Aliases (singular) para compat com código antigo
+relatorio_por_tipo = relatorios_por_tipo
+relatorio_por_municipio = relatorios_por_municipio
+relatorio_por_unidade = relatorios_por_unidade
 
 # Busca / Alertas
-try:
-    from .views_busca import buscar_aluno  # type: ignore
-except Exception:  # pragma: no cover
-    buscar_aluno = None  # type: ignore
-
-try:
-    from .views_alertas import alertas_index  # type: ignore
-except Exception:  # pragma: no cover
-    alertas_index = None  # type: ignore
-
+from .views_busca import buscar_aluno
+from .views_alertas import alertas_index

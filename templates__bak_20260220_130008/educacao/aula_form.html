@@ -1,9 +1,0 @@
-{% extends "educacao/base_modulo.html" %}
-{% block title %}Nova Aula • Educação • GEPUB{% endblock %}
-
-{% block module_content %}
-<div class="card"><div class="card__body">
-{% include "core/partials/components/layout/page_head.html" with title="Nova Aula" subtitle=diario.turma.nome actions=None %}
-{% include "core/partials/components/forms/form_shell.html" with form=form cancel_url=cancel_url submit_label=submit_label action_url=action_url %}
-</div></div>
-{% endblock %}

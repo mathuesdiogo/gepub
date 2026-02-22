@@ -1,8 +1,0 @@
-{% extends "educacao/base_modulo.html" %}
-{% block title %}Diários da Turma • Educação • GEPUB{% endblock %}
-{% block module_content %}
-<div class="card"><div class="card__body">
-{% include "core/partials/components/layout/page_head.html" with title="Diários da Turma" subtitle=turma.nome actions=actions %}
-{% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj empty_title="Nenhum diário criado" empty_text="Ainda não existe diário para esta turma." %}
-</div></div>
-{% endblock %}

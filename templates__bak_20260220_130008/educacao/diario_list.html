@@ -1,9 +1,0 @@
-{% extends "educacao/base_modulo.html" %}
-{% block title %}Diários • Educação • GEPUB{% endblock %}
-
-{% block module_content %}
-<div class="card"><div class="card__body">
-{% include "core/partials/components/layout/page_head.html" with title="Diários de Classe" subtitle="Acesso aos diários por turma" actions=actions %}
-{% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj empty_title="Nenhum diário encontrado" empty_text="Nenhum diário disponível no seu escopo." %}
-</div></div>
-{% endblock %}

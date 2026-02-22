@@ -1,0 +1,7 @@
+# --- GEPUB normalização (auto) ---
+apps__bak_*/
+templates__bak_*/
+static__bak_*/
+gepub/apps/nee/
+gepub/templates/nee/
+nee/

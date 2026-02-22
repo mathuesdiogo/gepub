@@ -1,8 +1,0 @@
-{% extends "saude/base_modulo.html" %}
-{% block title %}{{ obj.paciente_nome }} • Atendimento • Saúde • GEPUB{% endblock %}
-{% block module_content %}
-<div class="card"><div class="card__body">
-  {% include "core/partials/components/layout/page_head.html" with title=obj.paciente_nome subtitle="Detalhes do atendimento" actions=actions %}
-  {% include "core/partials/components/layout/detail_summary.html" with fields=fields pills=pills %}
-</div></div>
-{% endblock %}
