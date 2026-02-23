@@ -35,6 +35,21 @@ class ProfissionalSaude(models.Model):
             models.Index(fields=["ativo"]),
         ]
 
+
+    def save(self, *args, **kwargs):
+        # Mantém compatibilidade com telas antigas: preenche paciente_* a partir do aluno quando existir.
+        if self.aluno_id:
+            try:
+                nome = getattr(self.aluno, "nome", "") or ""
+                cpf = getattr(self.aluno, "cpf", "") or ""
+                if nome and not (self.paciente_nome or "").strip():
+                    self.paciente_nome = nome
+                if cpf and not (self.paciente_cpf or "").strip():
+                    self.paciente_cpf = cpf
+            except Exception:
+                pass
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.nome
 
@@ -60,12 +75,21 @@ class AtendimentoSaude(models.Model):
         related_name="atendimentos",
     )
 
+    aluno = models.ForeignKey(
+        "educacao.Aluno",
+        on_delete=models.PROTECT,
+        related_name="atendimentos_saude",
+        null=True,
+        blank=True,
+    )
+
     data = models.DateField(default=timezone.localdate)
     tipo = models.CharField(max_length=20, choices=Tipo.choices, default=Tipo.CONSULTA)
 
     paciente_nome = models.CharField(max_length=180)
     paciente_cpf = models.CharField(max_length=14, blank=True, default="")
     observacoes = models.TextField(blank=True, default="")
+    cid = models.CharField("CID (opcional)", max_length=20, blank=True, default="")
 
     class Meta:
         verbose_name = "Atendimento"
@@ -76,6 +100,21 @@ class AtendimentoSaude(models.Model):
             models.Index(fields=["tipo"]),
             models.Index(fields=["paciente_nome"]),
         ]
+
+
+    def save(self, *args, **kwargs):
+        # Mantém compatibilidade com telas antigas: preenche paciente_* a partir do aluno quando existir.
+        if self.aluno_id:
+            try:
+                nome = getattr(self.aluno, "nome", "") or ""
+                cpf = getattr(self.aluno, "cpf", "") or ""
+                if nome and not (self.paciente_nome or "").strip():
+                    self.paciente_nome = nome
+                if cpf and not (self.paciente_cpf or "").strip():
+                    self.paciente_cpf = cpf
+            except Exception:
+                pass
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.paciente_nome} — {self.get_tipo_display()} ({self.data})"

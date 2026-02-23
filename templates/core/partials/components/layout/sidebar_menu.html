@@ -43,6 +43,25 @@
 </div>
 
 <div class="menu__section">
+  <div class="menu__title">Saúde</div>
+
+  <a class="menu__item" href="{% url 'saude:index' %}">
+    <i class="fa-solid fa-notes-medical"></i><span>Painel</span>
+  </a>
+  <a class="menu__item" href="{% url 'saude:atendimento_list' %}">
+    <i class="fa-solid fa-stethoscope"></i><span>Atendimentos</span>
+  </a>
+  <a class="menu__item" href="{% url 'saude:profissional_list' %}">
+    <i class="fa-solid fa-user-doctor"></i><span>Profissionais</span>
+  </a>
+  <a class="menu__item" href="{% url 'saude:relatorio_mensal' %}">
+    <i class="fa-solid fa-chart-column"></i><span>Relatório Mensal</span>
+  </a>
+</div>
+
+</div>
+
+<div class="menu__section">
   <div class="menu__title">Acesso</div>
 
   <a class="menu__item" href="{% url 'accounts:usuarios_list' %}">

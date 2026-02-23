@@ -145,6 +145,7 @@ class LaudoNEEForm(forms.ModelForm):
             "data_emissao",
             "validade",
             "profissional",
+            "profissional_saude",
             "documento",
             "texto",
         ])
@@ -216,6 +217,7 @@ class PlanoClinicoNEEForm(forms.ModelForm):
             "data_inicio",
             "data_revisao",
             "responsavel",
+            "profissional_saude",
             "objetivo_geral",
             "observacao",
         ])

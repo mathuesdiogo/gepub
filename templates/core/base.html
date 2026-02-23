@@ -99,7 +99,14 @@
             <span class="menu__label">NEE</span>
           </a>
         {% endif %}
-
+        <a
+          class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'saude' %}is-active{% endif %}"
+          href="{% url 'saude:index' %}"
+          title="Saúde"
+        >
+          <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-notes-medical"></i></span>
+          <span class="menu__label">Saúde</span>
+        </a>
         <div class="menu__section">Conta</div>
 
         <a

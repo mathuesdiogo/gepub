@@ -7,6 +7,11 @@ from django.shortcuts import render
 from apps.core.rbac import can
 from apps.educacao.models import Matricula
 
+try:
+    from apps.saude.models import AtendimentoSaude
+except Exception:  # pragma: no cover
+    AtendimentoSaude = None  # type: ignore
+
 from .models import AcompanhamentoNEE, AlunoNecessidade, ApoioMatricula, LaudoNEE, RecursoNEE
 from .utils import get_scoped_aluno
 
@@ -36,6 +41,18 @@ def timeline_unificada(request, aluno_id: int):
             "descricao": (l.profissional or "").strip() or (l.texto[:160] if l.texto else ""),
             "url": reverse("nee:laudo_detail", args=[l.pk]),
         })
+
+
+    # Saúde (Atendimentos) — somente se o módulo existir e o usuário tiver permissão
+    if AtendimentoSaude is not None and can(request.user, "saude.view"):
+        for at in AtendimentoSaude.objects.select_related("unidade", "profissional").filter(aluno=aluno).order_by("-data", "-id")[:50]:
+            eventos.append({
+                "tipo": "Saúde",
+                "data": at.data.strftime("%d/%m/%Y") if getattr(at, "data", None) else "",
+                "titulo": f"{at.get_tipo_display()} — {at.unidade.nome}",
+                "descricao": (at.observacoes or "").strip()[:160] or (f"CID: {at.cid}" if getattr(at, "cid", "") else ""),
+                "url": reverse("saude:atendimento_detail", args=[at.pk]),
+            })
 
     # Recursos
     for r in RecursoNEE.objects.filter(aluno=aluno).order_by("-id")[:50]:

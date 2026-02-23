@@ -73,6 +73,32 @@
 
 <hr class="divider">
 
+<!-- ========================= SAÚDE (RESUMO) ========================= -->
+
+<div class="section">
+  <div class="section__title">Saúde • Resumo</div>
+
+  {% if can_saude_view and saude_resumo %}
+    <div class="detail-summary">
+      <div><strong>Total de atendimentos:</strong> {{ saude_resumo.total }}</div>
+      {% if saude_resumo.ultimo %}
+        <div><strong>Último:</strong> {{ saude_resumo.ultimo.data|date:"d/m/Y" }} • {{ saude_resumo.ultimo.get_tipo_display }} • {{ saude_resumo.ultimo.unidade.nome }}</div>
+        <div><strong>Profissional:</strong> {{ saude_resumo.ultimo.profissional.nome }}</div>
+      {% endif %}
+    </div>
+
+    <div class="actions">
+      <a class="btn btn-secondary" href="{% url 'saude:atendimento_list' %}?aluno={{ aluno.id }}">
+        Ver atendimentos
+      </a>
+    </div>
+  {% else %}
+    <span class="small">Sem acesso ao módulo Saúde ou nenhum atendimento registrado.</span>
+  {% endif %}
+</div>
+
+<hr class="divider">
+
 <!-- ========================= APOIOS ========================= -->
 
 <div class="section">

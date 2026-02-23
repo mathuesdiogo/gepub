@@ -14,6 +14,11 @@ from .models import Aluno, Matricula, Turma
 
 from apps.nee.models import AlunoNecessidade, TipoNecessidade, ApoioMatricula
 
+try:
+    from apps.saude.models import AtendimentoSaude
+except Exception:  # pragma: no cover
+    AtendimentoSaude = None  # type: ignore
+
 
 def _matricula_form_fields():
     names = {f.name for f in Matricula._meta.fields}

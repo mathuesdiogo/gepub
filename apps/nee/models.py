@@ -79,6 +79,13 @@ class LaudoNEE(models.Model):
     data_emissao = models.DateField(default=timezone.localdate)
     validade = models.DateField(null=True, blank=True)
     profissional = models.CharField(max_length=180, blank=True, default="")
+    profissional_saude = models.ForeignKey(
+        "saude.ProfissionalSaude",
+        on_delete=models.PROTECT,
+        related_name="laudos_nee",
+        null=True,
+        blank=True,
+    )
     documento = models.FileField(upload_to="nee/laudos/", blank=True, null=True)
     texto = models.TextField(blank=True, default="")
     criado_em = models.DateTimeField(auto_now_add=True)
@@ -152,6 +159,13 @@ class PlanoClinicoNEE(models.Model):
     data_inicio = models.DateField(default=timezone.localdate)
     data_revisao = models.DateField(null=True, blank=True)
     responsavel = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="planos_clinicos_nee")
+    profissional_saude = models.ForeignKey(
+        "saude.ProfissionalSaude",
+        on_delete=models.PROTECT,
+        related_name="planos_clinicos_nee",
+        null=True,
+        blank=True,
+    )
     objetivo_geral = models.TextField(blank=True, default="")
     observacao = models.TextField(blank=True, default="")
     criado_em = models.DateTimeField(auto_now_add=True)
