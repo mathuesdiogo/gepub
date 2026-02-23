@@ -1,9 +1,5 @@
 from __future__ import annotations
 
-
-from apps.core.exports import export_csv, export_pdf_table
-from django.http import HttpResponse
-
 from django.db.models import Q
 from django.urls import reverse
 from django.utils.html import escape
@@ -16,17 +12,19 @@ from apps.core.views_gepub import (
     BaseListViewGepub,
     BaseUpdateViewGepub,
 )
+from apps.core.exports import export_csv, export_pdf_table
 from apps.educacao.models import Aluno
 
 from .forms import AlunoNecessidadeForm
 from .models import AlunoNecessidade
+
 
 # ================================
 # LIST
 # ================================
 
 class AlunoNecessidadeListView(BaseListViewGepub):
-    template_name = "nee/aluno_necessidade_list.html"
+    template_name = "nee/aluno_necessidades.html"
     paginate_by = 20
     manage_perm = "nee.manage"
 
@@ -53,62 +51,10 @@ class AlunoNecessidadeListView(BaseListViewGepub):
             )
         return qs
 
-
-    def get(self, request, *args, **kwargs):
-        """Suporta exportação CSV/PDF sem travar o navegador.
-
-        Usa `?export=csv` ou `?export=pdf` e respeita o filtro de busca `q`.
-        """
-        export = request.GET.get("export")
-        if export in {"csv", "pdf"}:
-            aluno_id = int(self.kwargs["aluno_id"])
-            aluno = getattr(self, "_aluno", None)
-            if not aluno:
-                # garante aluno para nomear arquivo e validar escopo
-                qs_aluno = scope_filter_alunos(request.user, Aluno.objects.filter(id=aluno_id))
-                aluno = qs_aluno.first()
-                if not aluno:
-                    return HttpResponse("Aluno não encontrado.", status=404)
-
-            q = (request.GET.get("q") or "").strip()
-            qs = self.get_base_queryset()
-            qs = self.apply_search(qs, q)
-
-            # monta linhas (sem paginação)
-            rows = []
-            for n in qs:
-                rows.append([
-                    n.tipo.nome if n.tipo_id else "",
-                    n.cid or "",
-                    "Sim" if n.ativo else "Não",
-                    n.criado_em.strftime("%d/%m/%Y %H:%M") if n.criado_em else "",
-                    (n.observacao or "").replace("\n", " ").strip(),
-                ])
-
-            headers = ["Tipo", "CID", "Ativo", "Criado em", "Observação"]
-            safe_name = f"necessidades_aluno_{aluno_id}"
-
-            if export == "csv":
-                # ✅ PADRÃO GEPUB: export_csv(filename, headers, rows)
-                return export_csv(f"{safe_name}.csv", headers, rows)
-
-            # export == "pdf"
-            return export_pdf_table(
-                request,
-                filename=f"{safe_name}.pdf",
-                title=f"NEE — Necessidades ({aluno.nome})",
-                headers=headers,
-                rows=rows,
-                subtitle="Necessidades do aluno",
-                filtros=(f"Busca: {q}" if q else ""),
-            )
-
-        return super().get(request, *args, **kwargs)
-
     def get_actions(self, q: str = "", **kwargs):
         aluno = getattr(self, "_aluno", None)
         actions = [
-            {"label": "Voltar", "url": reverse("nee:aluno_hub", args=[aluno.pk]) if aluno else reverse("nee:buscar_aluno"),
+            {"label": "Voltar", "url": reverse("nee:buscar_aluno"),
              "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
         ]
 
@@ -158,7 +104,7 @@ class AlunoNecessidadeListView(BaseListViewGepub):
             rows.append({
                 "cells": [
                     {"text": n.tipo.nome,
-                     "url": reverse("nee:necessidade_detail", args=[n.pk])},
+                     "url": reverse("nee:aluno_necessidade_detail", args=[n.pk])},
                     {"text": n.cid or "—"},
                     {"text": "Sim" if n.ativo else "Não"},
                     {"text": n.criado_em.strftime("%d/%m/%Y") if n.criado_em else "—"},
@@ -181,23 +127,10 @@ class AlunoNecessidadeCreateView(BaseCreateViewGepub):
     manage_perm = "nee.manage"
 
     # 👇 CORRETO PARA BaseCreateViewGepub
-    def form_valid(self, *args, **kwargs):
-        """Compat com BaseViewGepub.
-
-        O core pode chamar form_valid(form) (padrão Django) ou form_valid(request, form).
-        Aqui detectamos a assinatura em tempo de execução e garantimos que 'form' é o objeto correto.
-        """
-        # Detecta se veio (request, form)
-        if len(args) >= 2 and hasattr(args[0], "method") and hasattr(args[1], "save"):
-            request, form = args[0], args[1]
-            call_args = (request, form)
-        else:
-            form = args[0] if args else kwargs.get("form")
-            call_args = (form,)
-
+    def form_valid(self, form):
         aluno_id = self.kwargs.get("aluno_id")
         form.instance.aluno = get_object_or_404(Aluno, pk=aluno_id)
-        return super().form_valid(*call_args, **kwargs)
+        return super().form_valid(form)
 
     def get_actions(self, q: str = "", **kwargs):
         aluno_id = int(self.kwargs["aluno_id"])
@@ -227,7 +160,7 @@ class AlunoNecessidadeUpdateView(BaseUpdateViewGepub):
     def get_actions(self, q: str = "", obj=None, **kwargs):
         return [{
             "label": "Voltar",
-            "url": reverse("nee:necessidade_detail", args=[obj.pk]),
+            "url": reverse("nee:aluno_necessidade_detail", args=[obj.pk]),
             "icon": "fa-solid fa-arrow-left",
             "variant": "btn--ghost",
         }]
@@ -272,10 +205,11 @@ class AlunoNecessidadeDetailView(BaseDetailViewGepub):
 
     def get_fields(self, request, obj):
         return [
-            {"label": "Aluno", "value": str(obj.aluno)},
-            {"label": "Tipo", "value": str(obj.tipo)},
-            {"label": "CID", "value": obj.cid or "—"},
-            {"label": "Observação", "value": obj.observacao or "—"},
-            {"label": "Ativo", "value": "Sim" if obj.ativo else "Não"},
-            {"label": "Criado em", "value": obj.criado_em.strftime("%d/%m/%Y %H:%M")},
+            ("Aluno", str(obj.aluno)),
+            ("Tipo", obj.tipo.nome),
+            ("CID", obj.cid or "—"),
+            ("Ativo", "Sim" if obj.ativo else "Não"),
+            ("Criado em",
+             obj.criado_em.strftime("%d/%m/%Y %H:%M") if obj.criado_em else "—"),
+            ("Observação", obj.observacao or "—"),
         ]

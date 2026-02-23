@@ -89,8 +89,15 @@ class AlunoNecessidadeListView(BaseListViewGepub):
             safe_name = f"necessidades_aluno_{aluno_id}"
 
             if export == "csv":
-                # ✅ PADRÃO GEPUB: export_csv(filename, headers, rows)
-                return export_csv(f"{safe_name}.csv", headers, rows)
+                return export_csv(
+                    request,
+                    filename=f"{safe_name}.csv",
+                    title=f"NEE — Necessidades ({aluno.nome})",
+                    headers=headers,
+                    rows=rows,
+                    subtitle="Necessidades do aluno",
+                    filtros=(f"Busca: {q}" if q else ""),
+                )
 
             # export == "pdf"
             return export_pdf_table(
@@ -272,10 +279,11 @@ class AlunoNecessidadeDetailView(BaseDetailViewGepub):
 
     def get_fields(self, request, obj):
         return [
-            {"label": "Aluno", "value": str(obj.aluno)},
-            {"label": "Tipo", "value": str(obj.tipo)},
-            {"label": "CID", "value": obj.cid or "—"},
-            {"label": "Observação", "value": obj.observacao or "—"},
-            {"label": "Ativo", "value": "Sim" if obj.ativo else "Não"},
-            {"label": "Criado em", "value": obj.criado_em.strftime("%d/%m/%Y %H:%M")},
+            ("Aluno", str(obj.aluno)),
+            ("Tipo", obj.tipo.nome),
+            ("CID", obj.cid or "—"),
+            ("Ativo", "Sim" if obj.ativo else "Não"),
+            ("Criado em",
+             obj.criado_em.strftime("%d/%m/%Y %H:%M") if obj.criado_em else "—"),
+            ("Observação", obj.observacao or "—"),
         ]

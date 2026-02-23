@@ -5,7 +5,6 @@
 {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
 {% if page_obj and page_obj.object_list %}
   {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows %}
-  {% include "core/partials/components/data/pagination.html" with page_obj=page_obj %}
 {% else %}
   {% include "core/partials/components/feedback/empty_state.html" with title="Nenhum apoio cadastrado" text="Crie um apoio vinculado a uma matrícula do aluno." %}
 {% endif %}

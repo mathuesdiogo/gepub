@@ -1,12 +1,8 @@
 from __future__ import annotations
 
-from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
-from django.utils.html import escape
 from django.contrib.auth.mixins import LoginRequiredMixin
-
-from apps.core.exports import export_csv, export_pdf_table
 
 from apps.core.views_gepub import (
     BaseListViewGepub,
@@ -30,15 +26,6 @@ class LaudoListView(LoginRequiredMixin, BaseListViewGepub):
         aluno_id = int(self.kwargs["aluno_id"])
         self._aluno = get_object_or_404(Aluno, pk=aluno_id)
         return LaudoNEE.objects.filter(aluno_id=aluno_id).order_by("-data_emissao", "-id")
-
-    def apply_search(self, qs, q: str, **kwargs):
-        if q:
-            qs = qs.filter(
-                Q(numero__icontains=q)
-                | Q(profissional__icontains=q)
-                | Q(texto__icontains=q)
-            )
-        return qs
 
     def get_actions(self, q: str = "", **kwargs):
         aluno_id = int(self.kwargs["aluno_id"])
@@ -68,18 +55,6 @@ class LaudoListView(LoginRequiredMixin, BaseListViewGepub):
                 "variant": "btn-primary",
             }
         )
-        actions.append({
-            "label": "Exportar CSV",
-            "url": f"{self.request.path}?q={escape(q)}&export=csv",
-            "icon": "fa-solid fa-file-csv",
-            "variant": "btn--ghost",
-        })
-        actions.append({
-            "label": "Exportar PDF",
-            "url": f"{self.request.path}?q={escape(q)}&export=pdf",
-            "icon": "fa-solid fa-file-pdf",
-            "variant": "btn--ghost",
-        })
         return actions
 
     def get_headers(self, *args, **kwargs):
@@ -106,44 +81,6 @@ class LaudoListView(LoginRequiredMixin, BaseListViewGepub):
                 }
             )
         return rows
-    def get(self, request, *args, **kwargs):
-        # export hook antes do render
-        export = request.GET.get("export")
-        q = (request.GET.get(self.search_param) or "").strip() if hasattr(self, "search_param") else (request.GET.get("q") or "").strip()
-        if export in ("csv", "pdf"):
-            qs = self.get_queryset(request)
-            qs = self.apply_search(qs, q)
-
-            headers = ["Número", "Emissão", "Validade", "Profissional"]
-            rows = []
-            for l in qs:
-                rows.append([
-                    l.numero or "",
-                    l.data_emissao.strftime("%d/%m/%Y") if getattr(l, "data_emissao", None) else "",
-                    l.validade.strftime("%d/%m/%Y") if getattr(l, "validade", None) else "",
-                    l.profissional or "",
-                ])
-
-            aluno = getattr(self, "_aluno", None)
-            aluno_id = int(self.kwargs["aluno_id"])
-            safe_name = f"nee_laudos_aluno_{aluno_id}"
-
-            if export == "csv":
-                return export_csv(f"{safe_name}.csv", headers, rows)
-
-            return export_pdf_table(
-                request,
-                filename=f"{safe_name}.pdf",
-                title=f"NEE — Laudos ({aluno.nome if aluno else aluno_id})",
-                headers=headers,
-                rows=rows,
-                subtitle="Laudos do aluno",
-                filtros=(f"Busca: {q}" if q else ""),
-            )
-
-        return super().get(request, *args, **kwargs)
-
-
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)

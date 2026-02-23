@@ -1,6 +1,4 @@
 from __future__ import annotations
-from django.shortcuts import get_object_or_404
-from apps.educacao.models import Aluno
 
 from django.db.models import Q
 from django.urls import reverse
@@ -99,13 +97,9 @@ class AcompanhamentoCreateView(BaseCreateViewGepub):
         }]
 
     def form_valid(self, request, form):
-        aluno_id = int(self.kwargs["aluno_id"])
-        form.instance.aluno = get_object_or_404(Aluno, pk=aluno_id)
-
-        # seta autor automaticamente
-        if hasattr(form.instance, "autor_id") and not form.instance.autor_id:
-            form.instance.autor = request.user
-
+        aluno = get_scoped_aluno(request.user, int(self.kwargs["aluno_id"]))
+        form.instance.aluno = aluno
+        form.instance.autor = request.user
         return super().form_valid(request, form)
 
     def get_success_url(self, request, obj=None):

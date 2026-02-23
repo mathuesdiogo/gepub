@@ -33,7 +33,7 @@ class ApoioListView(BaseListViewGepub):
 
     def get_actions(self, q: str = "", **kwargs):
         aluno = getattr(self, "_aluno", None)
-        actions = [{"label": "Voltar", "url": reverse("nee:aluno_hub", args=[aluno.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+        actions = [{"label": "Voltar", "url": reverse("educacao:aluno_detail", args=[aluno.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
         if can(self.request.user, "nee.manage"):
             actions.append({"label": "Novo apoio", "url": reverse("nee:apoio_create", args=[aluno.pk]), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
         actions.append({"label": "Exportar CSV", "url": f"{self.request.path}?q={escape(q)}&export=csv", "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"})
