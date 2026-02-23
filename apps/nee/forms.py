@@ -24,6 +24,14 @@ try:
 except Exception:  # pragma: no cover
     AcompanhamentoNEE = None  # type: ignore
 
+# Models Plano Clínico (Enterprise)
+try:
+    from .models import PlanoClinicoNEE, ObjetivoPlanoNEE, EvolucaoPlanoNEE
+except Exception:  # pragma: no cover
+    PlanoClinicoNEE = None  # type: ignore
+    ObjetivoPlanoNEE = None  # type: ignore
+    EvolucaoPlanoNEE = None  # type: ignore
+
 
 def _model_has_field(model, field_name: str) -> bool:
     if model is None:
@@ -190,3 +198,72 @@ class AcompanhamentoNEEForm(forms.ModelForm):
 
         if "descricao" in self.fields:
             self.fields["descricao"].widget = forms.Textarea(attrs={"rows": 4, "placeholder": "Descreva o evento..."})
+# ============================================================
+# Plano Clínico NEE (Enterprise)
+# ============================================================
+
+class PlanoClinicoNEEForm(forms.ModelForm):
+    class Meta:
+        model = PlanoClinicoNEE  # type: ignore[assignment]
+        fields: list[str] = []
+
+    def __init__(self, *args, **kwargs):
+        if PlanoClinicoNEE is None:
+            raise RuntimeError("Model PlanoClinicoNEE não existe no app NEE.")
+        super().__init__(*args, **kwargs)
+
+        _set_fields(self, PlanoClinicoNEE, [
+            "data_inicio",
+            "data_revisao",
+            "responsavel",
+            "objetivo_geral",
+            "observacao",
+        ])
+
+        if "objetivo_geral" in self.fields:
+            self.fields["objetivo_geral"].widget = forms.Textarea(attrs={"rows": 3})
+        if "observacao" in self.fields:
+            self.fields["observacao"].widget = forms.Textarea(attrs={"rows": 3})
+
+
+class ObjetivoPlanoNEEForm(forms.ModelForm):
+    class Meta:
+        model = ObjetivoPlanoNEE  # type: ignore[assignment]
+        fields: list[str] = []
+
+    def __init__(self, *args, **kwargs):
+        if ObjetivoPlanoNEE is None:
+            raise RuntimeError("Model ObjetivoPlanoNEE não existe no app NEE.")
+        super().__init__(*args, **kwargs)
+
+        _set_fields(self, ObjetivoPlanoNEE, [
+            "area",
+            "descricao",
+            "meta",
+            "prazo",
+            "status",
+        ])
+
+        if "descricao" in self.fields:
+            self.fields["descricao"].widget = forms.Textarea(attrs={"rows": 3})
+
+
+class EvolucaoPlanoNEEForm(forms.ModelForm):
+    class Meta:
+        model = EvolucaoPlanoNEE  # type: ignore[assignment]
+        fields: list[str] = []
+
+    def __init__(self, *args, **kwargs):
+        if EvolucaoPlanoNEE is None:
+            raise RuntimeError("Model EvolucaoPlanoNEE não existe no app NEE.")
+        super().__init__(*args, **kwargs)
+
+        _set_fields(self, EvolucaoPlanoNEE, [
+            "data",
+            "descricao",
+            "avaliacao",
+            "profissional",
+        ])
+
+        if "descricao" in self.fields:
+            self.fields["descricao"].widget = forms.Textarea(attrs={"rows": 3})

@@ -1,0 +1,8 @@
+{% extends "nee/base_modulo.html" %}
+{% block module_title %}Objetivos • NEE{% endblock %}
+{% block module_content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+  {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q empty_label="Nenhum objetivo cadastrado." %}
+</div></div>
+{% endblock %}

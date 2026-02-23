@@ -141,7 +141,7 @@ class AcompanhamentoDetailView(BaseDetailViewGepub):
     def get_actions(self, q: str = "", obj=None, **kwargs):
         actions = [
             {"label": "Voltar", "url": reverse("nee:aluno_acompanhamentos", args=[obj.aluno_id]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-            {"label": "Abrir aluno", "url": reverse("educacao:aluno_detail", args=[obj.aluno_id]), "icon": "fa-solid fa-user", "variant": "btn--ghost"},
+            {"label": "Abrir aluno", "url": reverse("nee:aluno_hub", args=[obj.aluno_id]), "icon": "fa-solid fa-user", "variant": "btn--ghost"},
         ]
         if can(self.request.user, "nee.manage"):
             actions.append({"label": "Editar", "url": reverse("nee:acompanhamento_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})

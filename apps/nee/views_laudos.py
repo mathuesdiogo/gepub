@@ -159,19 +159,11 @@ class LaudoCreateView(LoginRequiredMixin, BaseCreateViewGepub):
     subtitle = "Cadastrar laudo para o aluno"
     manage_perm = "nee.manage"
 
-    def form_valid(self, *args, **kwargs):
-        # Compat: BaseCreateViewGepub pode chamar form_valid(request, form)
-        # ou o padrão Django form_valid(form).
-        if len(args) >= 2 and hasattr(args[0], "method") and hasattr(args[1], "is_valid"):
-            request, form = args[0], args[1]
-        else:
-            form = args[0]
-
+    def form_valid(self, request, form):
         aluno_id = int(self.kwargs["aluno_id"])
         form.instance.aluno = get_object_or_404(Aluno, pk=aluno_id)
+        return super().form_valid(request, form)
 
-        # chama o BaseCreateViewGepub com a assinatura que ele espera
-        return super().form_valid(request, form) if "request" in locals() else super().form_valid(request, form)
 
     def get_actions(self, q: str = "", **kwargs):
         aluno_id = int(self.kwargs["aluno_id"])

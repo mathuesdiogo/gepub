@@ -1,38 +1,74 @@
 {% extends "nee/base_modulo.html" %}
-{% block module_title %}Aluno NEE{% endblock %}
+{% block module_title %}Hub Clínico • NEE{% endblock %}
 
 {% block module_content %}
 <div class="card"><div class="card__body">
 
-{% include "core/partials/components/layout/page_head.html" with title=aluno.nome subtitle="Painel clínico do aluno NEE" actions=actions %}
+{% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=aluno.nome actions=actions %}
 
+{% if alerts %}
+  <div class="detail-summary">
+    {% for a in alerts %}
+      <span class="badge {{ a.variant }}">{{ a.label }}: {{ a.value }}</span>
+    {% endfor %}
+  </div>
+{% endif %}
 
-<div class="grid-cards">
+<div class="section">
+  <div class="section-header"><div class="section-title">Fluxo Clínico</div></div>
 
-<a class="link-card" href="{% url 'nee:aluno_necessidades' aluno.pk %}">
-<div class="link-card__title">Necessidades</div>
-</a>
+  <div class="grid-cards">
+    <a class="link-card" href="{{ links.necessidades }}">
+      <div class="link-card__title"><i class="fa-solid fa-tag"></i> Necessidades</div>
+      <div class="small">{{ counts.necessidades }} registradas</div>
+    </a>
 
-<a class="link-card" href="{% url 'nee:aluno_laudos' aluno.pk %}">
-<div class="link-card__title">Laudos</div>
-</a>
+    <a class="link-card" href="{{ links.laudos }}">
+      <div class="link-card__title"><i class="fa-solid fa-file-lines"></i> Laudos</div>
+      <div class="small">{{ counts.laudos }} laudos</div>
+    </a>
 
-<a class="link-card" href="{% url 'nee:aluno_recursos' aluno.pk %}">
-<div class="link-card__title">Recursos</div>
-</a>
+    <a class="link-card" href="{{ links.recursos }}">
+      <div class="link-card__title"><i class="fa-solid fa-puzzle-piece"></i> Recursos</div>
+      <div class="small">{{ counts.recursos }} recursos</div>
+    </a>
 
-<a class="link-card" href="{% url 'nee:aluno_apoios' aluno.pk %}">
-<div class="link-card__title">Apoios</div>
-</a>
+    <a class="link-card" href="{{ links.apoios }}">
+      <div class="link-card__title"><i class="fa-solid fa-user-doctor"></i> Apoios</div>
+      <div class="small">{{ counts.apoios }} apoios</div>
+    </a>
 
-<a class="link-card" href="{% url 'nee:aluno_acompanhamentos' aluno.pk %}">
-<div class="link-card__title">Acompanhamentos</div>
-</a>
+    <a class="link-card" href="{{ links.acompanhamentos }}">
+      <div class="link-card__title"><i class="fa-solid fa-calendar-check"></i> Acompanhamentos</div>
+      <div class="small">{{ counts.acompanhamentos }} registros</div>
+    </a>
 
-<a class="link-card" href="{% url 'nee:aluno_timeline' aluno.pk %}">
-<div class="link-card__title">Timeline completa</div>
-</a>
+    <a class="link-card" href="{{ links.timeline }}">
+      <div class="link-card__title"><i class="fa-solid fa-clock-rotate-left"></i> Timeline</div>
+      <div class="small">Histórico unificado</div>
+    </a>
+  </div>
+</div>
 
+<div class="section">
+  <div class="section-header"><div class="section-title">Plano Clínico (PEI)</div></div>
+
+  <div class="grid-cards">
+    <a class="link-card" href="{{ links.plano }}">
+      <div class="link-card__title"><i class="fa-solid fa-book-medical"></i> Plano clínico</div>
+      <div class="small">Editar objetivo geral e revisão</div>
+    </a>
+
+    <a class="link-card" href="{{ links.objetivos }}">
+      <div class="link-card__title"><i class="fa-solid fa-bullseye"></i> Objetivos</div>
+      <div class="small">{{ counts.objetivos }} objetivos</div>
+    </a>
+  </div>
+
+  <div class="detail-summary">
+    <span class="badge badge--info">Início: {{ plano.data_inicio|date:"d/m/Y" }}</span>
+    {% if plano.data_revisao %}<span class="badge badge--warning">Revisão: {{ plano.data_revisao|date:"d/m/Y" }}</span>{% endif %}
+  </div>
 </div>
 
 </div></div>

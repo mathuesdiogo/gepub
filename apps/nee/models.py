@@ -143,3 +143,93 @@ class AcompanhamentoNEE(models.Model):
 
     def __str__(self) -> str:
         return f"{self.get_tipo_evento_display()} — {self.aluno}"
+# ============================================================
+# Plano Clínico NEE (Enterprise)
+# ============================================================
+
+class PlanoClinicoNEE(models.Model):
+    aluno = models.OneToOneField("educacao.Aluno", on_delete=models.PROTECT, related_name="plano_clinico_nee")
+    data_inicio = models.DateField(default=timezone.localdate)
+    data_revisao = models.DateField(null=True, blank=True)
+    responsavel = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="planos_clinicos_nee")
+    objetivo_geral = models.TextField(blank=True, default="")
+    observacao = models.TextField(blank=True, default="")
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Plano Clínico NEE"
+        verbose_name_plural = "Planos Clínicos NEE"
+        ordering = ["-data_inicio", "-id"]
+        indexes = [
+            models.Index(fields=["aluno"]),
+            models.Index(fields=["data_inicio"]),
+            models.Index(fields=["data_revisao"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"Plano Clínico — {self.aluno}"
+
+
+class ObjetivoPlanoNEE(models.Model):
+    class Area(models.TextChoices):
+        COGNITIVO = "COGNITIVO", "Cognitivo"
+        SOCIAL = "SOCIAL", "Social"
+        MOTOR = "MOTOR", "Motor"
+        COMUNICACAO = "COMUNICACAO", "Comunicação"
+        SENSORIAL = "SENSORIAL", "Sensorial"
+        OUTRO = "OUTRO", "Outro"
+
+    class Status(models.TextChoices):
+        ATIVO = "ATIVO", "Ativo"
+        EM_ANDAMENTO = "EM_ANDAMENTO", "Em andamento"
+        CONCLUIDO = "CONCLUIDO", "Concluído"
+        SUSPENSO = "SUSPENSO", "Suspenso"
+
+    plano = models.ForeignKey(PlanoClinicoNEE, on_delete=models.CASCADE, related_name="objetivos")
+    area = models.CharField(max_length=20, choices=Area.choices, default=Area.OUTRO)
+    descricao = models.TextField()
+    meta = models.CharField(max_length=180, blank=True, default="")
+    prazo = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.ATIVO)
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Objetivo do Plano NEE"
+        verbose_name_plural = "Objetivos do Plano NEE"
+        ordering = ["-criado_em", "-id"]
+        indexes = [
+            models.Index(fields=["plano"]),
+            models.Index(fields=["area"]),
+            models.Index(fields=["status"]),
+            models.Index(fields=["prazo"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.get_area_display()} — {self.plano.aluno}"
+
+
+class EvolucaoPlanoNEE(models.Model):
+    objetivo = models.ForeignKey(ObjetivoPlanoNEE, on_delete=models.CASCADE, related_name="evolucoes")
+    data = models.DateField(default=timezone.localdate)
+    descricao = models.TextField()
+    avaliacao = models.CharField(max_length=180, blank=True, default="")
+    profissional = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="evolucoes_plano_nee",
+        null=True,
+        blank=True,
+    )
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Evolução do Plano NEE"
+        verbose_name_plural = "Evoluções do Plano NEE"
+        ordering = ["-data", "-id"]
+        indexes = [
+            models.Index(fields=["objetivo"]),
+            models.Index(fields=["data"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"Evolução — {self.objetivo.plano.aluno} ({self.data})"

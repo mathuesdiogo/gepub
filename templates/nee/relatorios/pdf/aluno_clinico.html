@@ -1,0 +1,97 @@
+{% extends "nee/relatorios/pdf/base_pdf.html" %}
+
+{% block body %}
+  <div class="kpi">
+    <strong>Aluno:</strong> {{ aluno.nome }} • <strong>ID:</strong> {{ aluno.id }}
+    {% if aluno.unidade %} • <strong>Unidade:</strong> {{ aluno.unidade }}{% endif %}
+    {% if aluno.turma %} • <strong>Turma:</strong> {{ aluno.turma }}{% endif %}
+  </div>
+
+  <h3>Plano Clínico (PEI)</h3>
+  <p><strong>Início:</strong> {{ plano.data_inicio|date:"d/m/Y" }}{% if plano.data_revisao %} • <strong>Revisão:</strong> {{ plano.data_revisao|date:"d/m/Y" }}{% endif %}</p>
+  {% if plano.objetivo_geral %}<p><strong>Objetivo geral:</strong> {{ plano.objetivo_geral|linebreaksbr }}</p>{% endif %}
+  {% if plano.observacao %}<p><strong>Observações:</strong> {{ plano.observacao|linebreaksbr }}</p>{% endif %}
+
+  <h3>Necessidades</h3>
+  <table>
+    <thead><tr><th>Tipo</th><th>CID</th><th class="right">Ativo</th><th>Observação</th></tr></thead>
+    <tbody>
+      {% for n in necessidades %}
+        <tr>
+          <td>{{ n.tipo.nome }}</td>
+          <td>{{ n.cid|default:"" }}</td>
+          <td class="right">{% if n.ativo %}Sim{% else %}Não{% endif %}</td>
+          <td>{{ n.observacao|default:"—" }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4">Sem necessidades cadastradas.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h3>Laudos</h3>
+  <table>
+    <thead><tr><th>Número</th><th>Profissional</th><th>Emissão</th><th>Validade</th></tr></thead>
+    <tbody>
+      {% for l in laudos %}
+        <tr>
+          <td>{{ l.numero|default:"—" }}</td>
+          <td>{{ l.profissional|default:"—" }}</td>
+          <td>{{ l.data_emissao|date:"d/m/Y"|default:"—" }}</td>
+          <td>{{ l.validade|date:"d/m/Y"|default:"—" }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4">Sem laudos cadastrados.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h3>Recursos</h3>
+  <table>
+    <thead><tr><th>Nome</th><th>Status</th><th>Observação</th></tr></thead>
+    <tbody>
+      {% for r in recursos %}
+        <tr>
+          <td>{{ r.nome }}</td>
+          <td>{{ r.get_status_display }}</td>
+          <td>{{ r.observacao|default:"—" }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="3">Sem recursos cadastrados.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h3>Apoios</h3>
+  <table>
+    <thead><tr><th>Profissional</th><th>Área</th><th>Frequência</th><th>Observação</th></tr></thead>
+    <tbody>
+      {% for a in apoios %}
+        <tr>
+          <td>{{ a.profissional }}</td>
+          <td>{{ a.area|default:"—" }}</td>
+          <td>{{ a.frequencia|default:"—" }}</td>
+          <td>{{ a.observacao|default:"—" }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4">Sem apoios cadastrados.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h3>Timeline resumida (últimos 25)</h3>
+  <table>
+    <thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th></tr></thead>
+    <tbody>
+      {% for e in acompanhamentos %}
+        <tr>
+          <td>{{ e.data|date:"d/m/Y" }}</td>
+          <td>{{ e.get_tipo_evento_display }}</td>
+          <td>{{ e.descricao|truncatechars:140 }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="3">Sem acompanhamentos.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

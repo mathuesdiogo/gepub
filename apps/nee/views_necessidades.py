@@ -180,24 +180,10 @@ class AlunoNecessidadeCreateView(BaseCreateViewGepub):
     subtitle = "Vincular tipo ao aluno"
     manage_perm = "nee.manage"
 
-    # 👇 CORRETO PARA BaseCreateViewGepub
-    def form_valid(self, *args, **kwargs):
-        """Compat com BaseViewGepub.
-
-        O core pode chamar form_valid(form) (padrão Django) ou form_valid(request, form).
-        Aqui detectamos a assinatura em tempo de execução e garantimos que 'form' é o objeto correto.
-        """
-        # Detecta se veio (request, form)
-        if len(args) >= 2 and hasattr(args[0], "method") and hasattr(args[1], "save"):
-            request, form = args[0], args[1]
-            call_args = (request, form)
-        else:
-            form = args[0] if args else kwargs.get("form")
-            call_args = (form,)
-
-        aluno_id = self.kwargs.get("aluno_id")
+    def form_valid(self, request, form):
+        aluno_id = int(self.kwargs["aluno_id"])
         form.instance.aluno = get_object_or_404(Aluno, pk=aluno_id)
-        return super().form_valid(*call_args, **kwargs)
+        return super().form_valid(request, form)
 
     def get_actions(self, q: str = "", **kwargs):
         aluno_id = int(self.kwargs["aluno_id"])

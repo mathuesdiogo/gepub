@@ -152,10 +152,10 @@ class RecursoCreateView(BaseCreateViewGepub):
     manage_perm = "nee.manage"
 
     # 👇 ESSA É A FORMA CORRETA
-    def form_valid(self, form):
-        aluno_id = self.kwargs.get("aluno_id")
+    def form_valid(self, request, form):
+        aluno_id = int(self.kwargs["aluno_id"])
         form.instance.aluno = get_object_or_404(Aluno, pk=aluno_id)
-        return super().form_valid(form)
+        return super().form_valid(request, form)
 
     def get_actions(self, q: str = "", **kwargs):
         aluno_id = int(self.kwargs["aluno_id"])

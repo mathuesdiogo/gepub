@@ -67,8 +67,12 @@ class BaseAlunoMixin:
                 return reverse(name, kwargs={self.aluno_kwarg: aluno_id})
             except NoReverseMatch:
                 pass
-        # 3) sem args
-        return reverse(name)
+        # 3) sem args (não deve acontecer, mas evita quebrar)
+        try:
+            return reverse(name)
+        except NoReverseMatch:
+            # fallback seguro
+            return reverse("nee:buscar_aluno")
 
 
     # ---- Context (assinatura compatível com o core)

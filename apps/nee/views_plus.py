@@ -1,114 +1,124 @@
+from __future__ import annotations
 
 # =========================================================
-# NEE • PLUS (fixed imports)
+# NEE • HUB CLÍNICO (Aluno)
 # =========================================================
-from django.shortcuts import render, get_object_or_404
-from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
+from django.shortcuts import render
+from django.urls import reverse
 from django.utils.timezone import localdate
 
-from apps.educacao.models import Matricula, Aluno
-from .models import AlunoNecessidade, LaudoNEE, RecursoNEE, AcompanhamentoNEE
+from apps.educacao.models import Aluno, Matricula
+
+from .models import (
+    AlunoNecessidade,
+    LaudoNEE,
+    RecursoNEE,
+    ApoioMatricula,
+    AcompanhamentoNEE,
+)
+from .utils import get_scoped_aluno
 
 
-@login_required
-def aluno_timeline(request, aluno_id: int):
-    aluno = get_object_or_404(Aluno, pk=aluno_id)
+def _calc_idade(aluno: Aluno) -> str:
+    dn = getattr(aluno, "data_nascimento", None)
+    if not dn:
+        return "—"
+    try:
+        today = localdate()
+        years = today.year - dn.year - ((today.month, today.day) < (dn.month, dn.day))
+        return f"{years} anos"
+    except Exception:
+        return "—"
 
-    eventos = []
-
-    for ev in AcompanhamentoNEE.objects.select_related("autor").filter(aluno=aluno).order_by("-data", "-id")[:200]:
-        eventos.append({
-            "data": ev.data,
-            "tipo": f"NEE • {ev.get_tipo_evento_display()}",
-            "titulo": (ev.descricao[:80] + "…") if len(ev.descricao) > 80 else ev.descricao,
-            "descricao": ev.descricao,
-            "autor": getattr(ev.autor, "get_full_name", lambda: str(ev.autor))() if ev.autor else "—",
-            "url": reverse("nee:acompanhamento_detail", args=[aluno.pk, ev.pk]),
-            "icon": "fa-solid fa-timeline",
-        })
-
-    for l in LaudoNEE.objects.filter(aluno=aluno).order_by("-data_emissao", "-id")[:100]:
-        eventos.append({
-            "data": l.data_emissao,
-            "tipo": "NEE • Laudo",
-            "titulo": (l.numero or "Laudo"),
-            "descricao": l.texto or "—",
-            "autor": l.profissional or "—",
-            "url": reverse("nee:laudo_detail", args=[aluno.pk, l.pk]),
-            "icon": "fa-solid fa-file-medical",
-        })
-
-    for r in RecursoNEE.objects.filter(aluno=aluno).order_by("nome")[:200]:
-        eventos.append({
-            "data": localdate(),
-            "tipo": "NEE • Recurso",
-            "titulo": r.nome,
-            "descricao": r.observacao or "—",
-            "autor": "—",
-            "url": reverse("nee:recurso_detail", args=[aluno.pk, r.pk]),
-            "icon": "fa-solid fa-screwdriver-wrench",
-        })
-
-    for n in AlunoNecessidade.objects.select_related("tipo").filter(aluno=aluno).order_by("-criado_em")[:200]:
-        eventos.append({
-            "data": n.criado_em.date() if getattr(n, "criado_em", None) else localdate(),
-            "tipo": "NEE • Necessidade",
-            "titulo": n.tipo.nome,
-            "descricao": n.observacao or "—",
-            "autor": "—",
-            "url": reverse("nee:aluno_necessidade_detail", args=[aluno.pk, n.pk]),
-            "icon": "fa-solid fa-tags",
-        })
-
-    eventos.sort(key=lambda x: (x["data"], x.get("tipo","")), reverse=True)
-
-    actions = [
-        {"label": "Voltar", "url": reverse("nee:aluno_search"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-    ]
-    return render(request, "nee/timeline_unificada.html", {"aluno": aluno, "actions": actions, "eventos": eventos})
-
-
-@login_required
-def relatorio_por_municipio(request):
-    qs = (
-        Matricula.objects
-        .select_related("turma__unidade__secretaria__municipio")
-        .filter(aluno__necessidades_nee__isnull=False)
-        .values("turma__unidade__secretaria__municipio__nome")
-        .annotate(qtd=Count("aluno", distinct=True))
-        .order_by("-qtd", "turma__unidade__secretaria__municipio__nome")
-    )
-    rows = [{"nome": x["turma__unidade__secretaria__municipio__nome"] or "—", "qtd": x["qtd"]} for x in qs]
-    actions = [{"label": "Relatórios", "url": reverse("nee:relatorios_index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
-    return render(request, "nee/relatorios/por_municipio.html", {"actions": actions, "rows": rows})
-
-
-@login_required
-def relatorio_por_unidade(request):
-    qs = (
-        Matricula.objects
-        .select_related("turma__unidade__secretaria__municipio")
-        .filter(aluno__necessidades_nee__isnull=False)
-        .values("turma__unidade__secretaria__municipio__nome", "turma__unidade__nome")
-        .annotate(qtd=Count("aluno", distinct=True))
-        .order_by("-qtd", "turma__unidade__secretaria__municipio__nome", "turma__unidade__nome")
-    )
-    rows = [{
-        "municipio": x["turma__unidade__secretaria__municipio__nome"] or "—",
-        "unidade": x["turma__unidade__nome"] or "—",
-        "qtd": x["qtd"],
-    } for x in qs]
-    actions = [{"label": "Relatórios", "url": reverse("nee:relatorios_index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
-    return render(request, "nee/relatorios/por_unidade.html", {"actions": actions, "rows": rows})
 
 @login_required
 def aluno_hub(request, aluno_id: int):
-    aluno = get_object_or_404(Aluno, pk=aluno_id)
+    """HUB CLÍNICO NEE do aluno.
+
+    - resumo (identificação + KPIs)
+    - acesso rápido aos submódulos
+    """
+    aluno = get_scoped_aluno(request.user, int(aluno_id))
+
+    # Matrícula "principal" (última) para exibir Turma/Unidade quando existir
+    matricula = (
+        Matricula.objects.filter(aluno=aluno)
+        .select_related("turma", "turma__unidade")
+        .order_by("-id")
+        .first()
+    )
+    turma = getattr(matricula, "turma", None) if matricula else None
+    unidade = getattr(turma, "unidade", None) if turma else None
+
+    hoje = localdate()
+
+    # KPIs / contagens
+    necessidades_qs = AlunoNecessidade.objects.filter(aluno=aluno)
+    necessidades_total = necessidades_qs.count()
+    try:
+        necessidades_ativas = necessidades_qs.filter(ativo=True).count()
+    except Exception:
+        necessidades_ativas = necessidades_total
+
+    laudos_qs = LaudoNEE.objects.filter(aluno=aluno)
+    laudos_total = laudos_qs.count()
+    laudos_vigentes = laudos_qs.filter(validade__isnull=True).count() + laudos_qs.filter(validade__gte=hoje).count()
+
+    recursos_qs = RecursoNEE.objects.filter(aluno=aluno)
+    recursos_total = recursos_qs.count()
+    recursos_ativos = recursos_qs.exclude(status="INATIVO").count()
+
+    matriculas_ids = list(Matricula.objects.filter(aluno=aluno).values_list("id", flat=True))
+    apoios_qs = ApoioMatricula.objects.filter(matricula_id__in=matriculas_ids) if matriculas_ids else ApoioMatricula.objects.none()
+    apoios_total = apoios_qs.count()
+
+    acompanhamentos_qs = AcompanhamentoNEE.objects.filter(aluno=aluno)
+    acompanhamentos_total = acompanhamentos_qs.count()
+
+    ultimo_laudo = laudos_qs.order_by("-data_emissao", "-id").first()
+    ultimo_acomp = acompanhamentos_qs.order_by("-data", "-id").first()
 
     actions = [
-        {"label": "Voltar para lista", "url": reverse("nee:buscar_aluno"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+        {
+            "label": "Voltar",
+            "url": reverse("nee:buscar_aluno"),
+            "icon": "fa-solid fa-arrow-left",
+            "variant": "btn--ghost",
+        },
+        {
+            "label": "Abrir aluno",
+            "url": reverse("educacao:aluno_detail", args=[aluno.pk]),
+            "icon": "fa-solid fa-user",
+            "variant": "btn--ghost",
+        },
     ]
 
-    return render(request, "nee/aluno_hub.html", {"aluno": aluno, "actions": actions})
+    ctx = {
+        "aluno": aluno,
+        "matricula": matricula,
+        "turma": turma,
+        "unidade": unidade,
+        "idade": _calc_idade(aluno),
+        "actions": actions,
+        "page_title": "Hub Clínico",
+        "page_subtitle": "Resumo clínico-pedagógico NEE",
+        "kpis": [
+            {"label": "Necessidades", "value": f"{necessidades_ativas}/{necessidades_total}", "variant": "badge--info"},
+            {"label": "Laudos vigentes", "value": f"{laudos_vigentes}/{laudos_total}", "variant": "badge--success"},
+            {"label": "Recursos", "value": f"{recursos_ativos}/{recursos_total}", "variant": "badge--info"},
+            {"label": "Apoios", "value": str(apoios_total), "variant": "badge--info"},
+            {"label": "Acompanhamentos", "value": str(acompanhamentos_total), "variant": "badge--info"},
+        ],
+        "ultimo_laudo": ultimo_laudo,
+        "ultimo_acomp": ultimo_acomp,
+        "links": [
+            {"title": "Necessidades", "desc": "Tipos, CID e observações do aluno.", "url": reverse("nee:aluno_necessidades", args=[aluno.pk]), "icon": "fa-solid fa-notes-medical"},
+            {"title": "Laudos", "desc": "Documentos clínicos e anexos.", "url": reverse("nee:aluno_laudos", args=[aluno.pk]), "icon": "fa-solid fa-file-medical"},
+            {"title": "Recursos", "desc": "Recursos/adaptações ofertados pela escola.", "url": reverse("nee:aluno_recursos", args=[aluno.pk]), "icon": "fa-solid fa-wheelchair"},
+            {"title": "Apoios", "desc": "Apoios por matrícula (AEE, cuidador etc.).", "url": reverse("nee:aluno_apoios", args=[aluno.pk]), "icon": "fa-solid fa-hands-helping"},
+            {"title": "Acompanhamentos", "desc": "Registros clínico-pedagógicos.", "url": reverse("nee:aluno_acompanhamentos", args=[aluno.pk]), "icon": "fa-solid fa-clipboard-list"},
+            {"title": "Timeline", "desc": "Histórico unificado do aluno.", "url": reverse("nee:aluno_timeline", args=[aluno.pk]), "icon": "fa-solid fa-clock-rotate-left"},
+        ],
+    }
+    return render(request, "nee/aluno_hub.html", ctx)

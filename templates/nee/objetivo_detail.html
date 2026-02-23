@@ -1,0 +1,38 @@
+{% extends "nee/base_modulo.html" %}
+{% block module_title %}Objetivo • NEE{% endblock %}
+{% block module_content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+  <div class="section">
+    <div class="section-header"><div class="section-title">Informações</div></div>
+    <dl class="detail-grid">
+      {% for f in fields %}
+        <dt>{{ f.label }}</dt><dd>{{ f.value }}</dd>
+      {% endfor %}
+    </dl>
+  </div>
+
+  {% if object.evolucoes.all %}
+  <div class="section">
+    <div class="section-header"><div class="section-title">Evoluções</div></div>
+    <div class="table">
+      <table>
+        <thead><tr><th>Data</th><th>Descrição</th><th>Avaliação</th><th>Profissional</th></tr></thead>
+        <tbody>
+          {% for e in object.evolucoes.all %}
+            <tr>
+              <td>{{ e.data|date:"d/m/Y" }}</td>
+              <td>{{ e.descricao|linebreaksbr }}</td>
+              <td>{{ e.avaliacao|default:"—" }}</td>
+              <td>{{ e.profissional|default:"—" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4">Nenhuma evolução registrada.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+</div></div>
+{% endblock %}
