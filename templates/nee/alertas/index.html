@@ -1,12 +1,24 @@
 {% extends "nee/base_modulo.html" %}
-{% block title %}Alertas • NEE • GEPUB{% endblock %}
+{% block module_title %}NEE • Alertas{% endblock %}
+
 {% block module_content %}
-  <div class="card">
-    <div class="card__body">
-      {% include "core/partials/components/layout/page_head.html" with title="Alertas" subtitle="Pendências e acompanhamentos para ação rápida." actions=actions %}
-      <div class="empty-state">
-        <p>Em construção. Aqui vamos concentrar pendências por aluno/unidade (drilldown) e alertas de acompanhamento.</p>
-      </div>
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title="Alertas NEE" subtitle="Pendências e acompanhamentos para ação rápida." actions=actions %}
+
+  {% if cards %}
+    <div class="grid-cards">
+      {% for c in cards %}
+        <a class="link-card" href="{{ c.url }}">
+          <div class="link-card__title">
+            <i class="{{ c.icon }}"></i> {{ c.title }}
+          </div>
+          <div class="link-card__meta">{{ c.subtitle }}</div>
+          <div class="link-card__meta"><strong>{{ c.total }}</strong> aluno(s)</div>
+        </a>
+      {% endfor %}
     </div>
-  </div>
+  {% else %}
+    {% include "core/partials/components/feedback/empty_state.html" with title="Sem alertas" text="Não há alertas configurados." %}
+  {% endif %}
+</div></div>
 {% endblock %}

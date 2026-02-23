@@ -89,23 +89,25 @@ class AcompanhamentoCreateView(BaseCreateViewGepub):
 
     def get_actions(self, q: str = "", **kwargs):
         aluno_id = int(self.kwargs["aluno_id"])
-        return [{"label": "Voltar", "url": reverse("nee:acompanhamento_list", args=[aluno_id]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
-
-    def get_form(self, request, *args, **kwargs):
-        aluno_id = int(self.kwargs["aluno_id"])
-        form = super().get_form(request, *args, **kwargs)
-        form.fields["aluno"].initial = aluno_id
-        form.fields["aluno"].widget = form.fields["aluno"].hidden_widget()
-        return form
+        return [{
+            "label": "Voltar",
+            "url": reverse("nee:aluno_acompanhamentos", args=[aluno_id]),
+            "icon": "fa-solid fa-arrow-left",
+            "variant": "btn--ghost",
+        }]
 
     def form_valid(self, request, form):
-        obj = form.save(commit=False)
-        obj.autor = request.user
-        obj.save()
-        return super().form_valid(request, form, obj=obj)
+        aluno_id = int(self.kwargs["aluno_id"])
+        form.instance.aluno = get_object_or_404(Aluno, pk=aluno_id)
 
-    def get_success_url(self, request, obj=None) -> str:
-        return reverse("nee:acompanhamento_list", args=[obj.aluno_id])
+        # seta autor automaticamente
+        if hasattr(form.instance, "autor_id") and not form.instance.autor_id:
+            form.instance.autor = request.user
+
+        return super().form_valid(request, form)
+
+    def get_success_url(self, request, obj=None):
+        return reverse("nee:aluno_acompanhamentos", args=[obj.aluno_id])
 
 
 class AcompanhamentoUpdateView(BaseUpdateViewGepub):
@@ -124,7 +126,7 @@ class AcompanhamentoUpdateView(BaseUpdateViewGepub):
         return super().post(request, pk, *args, **kwargs)
 
     def get_success_url(self, request, obj=None) -> str:
-        return reverse("nee:acompanhamento_list", args=[obj.aluno_id])
+        return reverse("nee:aluno_acompanhamentos", args=[obj.aluno_id])
 
 
 class AcompanhamentoDetailView(BaseDetailViewGepub):
@@ -136,7 +138,7 @@ class AcompanhamentoDetailView(BaseDetailViewGepub):
 
     def get_actions(self, q: str = "", obj=None, **kwargs):
         actions = [
-            {"label": "Voltar", "url": reverse("nee:acompanhamento_list", args=[obj.aluno_id]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+            {"label": "Voltar", "url": reverse("nee:aluno_acompanhamentos", args=[obj.aluno_id]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
             {"label": "Abrir aluno", "url": reverse("educacao:aluno_detail", args=[obj.aluno_id]), "icon": "fa-solid fa-user", "variant": "btn--ghost"},
         ]
         if can(self.request.user, "nee.manage"):

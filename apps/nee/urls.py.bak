@@ -103,6 +103,7 @@ urlpatterns = [
     path("necessidade/novo/<int:aluno_id>/", AlunoNecessidadeCreateView.as_view(), name="necessidade_create"),
     path("necessidade/<int:pk>/", AlunoNecessidadeDetailView.as_view(), name="necessidade_detail"),
     path("necessidade/<int:pk>/editar/", AlunoNecessidadeUpdateView.as_view(), name="necessidade_update"),
+    path("necessidade/<int:pk>/", AlunoNecessidadeDetailView.as_view(), name="aluno_necessidade_detail"),
     # ============================================================
     # CRUD LAUDOS
     # ============================================================

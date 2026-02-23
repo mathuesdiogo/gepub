@@ -1,32 +1,37 @@
 {% extends "nee/base_modulo.html" %}
 {% block module_title %}NEE • Por unidade{% endblock %}
+
 {% block module_content %}
 <div class="card"><div class="card__body">
   {% include "core/partials/components/layout/page_head.html" with title="Relatório — Por unidade" subtitle="Clique em uma unidade para ver alunos (drilldown)." actions=actions %}
 
-  {% if rows %}
+  {% if items %}
     <div class="table-shell">
       <table class="table">
         <thead>
           <tr>
             <th>Município</th>
             <th>Unidade</th>
-            <th style="width:160px;">Alunos</th>
+            <th>Alunos</th>
+            <th>Turmas</th>
+            <th>Necessidades (ativas)</th>
           </tr>
         </thead>
         <tbody>
-          {% for r in rows %}
+          {% for i in items %}
             <tr>
-              <td>{{ r.municipio }}</td>
-              <td><a href="{{ r.url }}">{{ r.unidade }}</a></td>
-              <td>{{ r.qtd }}</td>
+              <td>{{ i.municipio }}</td>
+              <td><a href="{{ i.url }}">{{ i.unidade }}</a></td>
+              <td>{{ i.total_alunos }}</td>
+              <td>{{ i.total_turmas }}</td>
+              <td>{{ i.total_nec }}</td>
             </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
   {% else %}
-    {% include "core/partials/components/feedback/empty_state.html" with title="Sem dados" text="Nenhuma matrícula com necessidade NEE encontrada." %}
+    {% include "core/partials/components/feedback/empty_state.html" with title="Sem dados" text="Nenhuma matrícula com necessidade NEE ativa encontrada." %}
   {% endif %}
 </div></div>
 {% endblock %}

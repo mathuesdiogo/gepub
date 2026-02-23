@@ -1,23 +1,30 @@
 {% extends "nee/base_modulo.html" %}
 {% block module_title %}NEE • Por tipo{% endblock %}
+
 {% block module_content %}
 <div class="card"><div class="card__body">
   {% include "core/partials/components/layout/page_head.html" with title="Relatório — Por tipo" subtitle="Clique em um tipo para ver alunos (drilldown)." actions=actions %}
 
-  {% if rows %}
+  {% if items %}
     <div class="table-shell">
       <table class="table">
         <thead>
           <tr>
             <th>Tipo</th>
-            <th style="width:160px;">Alunos</th>
+            <th>Alunos</th>
+            <th>Necessidades (ativas)</th>
+            <th>Unidades</th>
+            <th>Municípios</th>
           </tr>
         </thead>
         <tbody>
-          {% for r in rows %}
+          {% for i in items %}
             <tr>
-              <td><a href="{{ r.url }}">{{ r.tipo }}</a></td>
-              <td>{{ r.qtd }}</td>
+              <td><a href="{{ i.url }}">{{ i.label }}</a></td>
+              <td>{{ i.total_alunos }}</td>
+              <td>{{ i.total_nec }}</td>
+              <td>{{ i.total_unidades }}</td>
+              <td>{{ i.total_municipios }}</td>
             </tr>
           {% endfor %}
         </tbody>

@@ -1,0 +1,9 @@
+PATCH: Laudos sem dropdown gigante de aluno
+
+O que muda:
+- apps/nee/forms.py: LaudoNEEForm NÃO inclui o campo 'aluno' (aluno é definido pela URL aluno_id na view)
+- apps/nee/views_laudos.py: LaudoCreateView.form_valid compatível com BaseCreateViewGepub (request, form) e injeta ctx['aluno'] para template.
+  LaudoUpdateView também injeta ctx['aluno'] para subtitle do template.
+
+Resultado:
+- /nee/laudo/novo/<aluno_id>/ não carrega lista de 100k alunos.

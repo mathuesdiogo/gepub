@@ -24,7 +24,7 @@ def timeline_unificada(request, aluno_id: int):
             "data": n.criado_em.strftime("%d/%m/%Y") if getattr(n, "criado_em", None) else "",
             "titulo": n.tipo.nome,
             "descricao": (n.observacao or "").strip() or (f"CID: {n.cid}" if n.cid else ""),
-            "url": reverse("nee:aluno_necessidade_detail", args=[n.pk]),
+            "url": reverse("nee:necessidade_detail", args=[n.pk]),
         })
 
     # Laudos

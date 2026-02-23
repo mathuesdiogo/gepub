@@ -93,10 +93,15 @@ class ApoioCreateView(BaseCreateViewGepub):
     title = "Novo apoio"
     subtitle = "Registrar apoio / acompanhamento"
     manage_perm = "nee.manage"
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["aluno"] = self.kwargs.get("aluno_id")
+        return kwargs
 
     def get_actions(self, q: str = "", **kwargs):
         aluno_id = int(self.kwargs["aluno_id"])
-        return [{"label": "Voltar", "url": reverse("nee:apoio_list", args=[aluno_id]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+        return [{"label": "Voltar", "url": reverse("nee:aluno_apoios", args=[aluno_id]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
 
     def get_form(self, request, *args, **kwargs):
         aluno = get_scoped_aluno(request.user, int(self.kwargs["aluno_id"]))
@@ -107,7 +112,7 @@ class ApoioCreateView(BaseCreateViewGepub):
 
     def get_success_url(self, request, obj=None) -> str:
         aluno_id = obj.matricula.aluno_id if obj and obj.matricula_id else int(self.kwargs["aluno_id"])
-        return reverse("nee:apoio_list", args=[aluno_id])
+        return reverse("nee:aluno_apoios", args=[aluno_id])
 
 
 class ApoioUpdateView(BaseUpdateViewGepub):
@@ -129,7 +134,7 @@ class ApoioUpdateView(BaseUpdateViewGepub):
         return form
 
     def get_success_url(self, request, obj=None) -> str:
-        return reverse("nee:apoio_list", args=[obj.matricula.aluno_id])
+        return reverse("nee:aluno_apoios", args=[obj.matricula.aluno_id])
 
 
 class ApoioDetailView(BaseDetailViewGepub):
@@ -142,7 +147,7 @@ class ApoioDetailView(BaseDetailViewGepub):
     def get_actions(self, q: str = "", obj=None, **kwargs):
         aluno_id = obj.matricula.aluno_id
         actions = [
-            {"label": "Voltar", "url": reverse("nee:apoio_list", args=[aluno_id]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+            {"label": "Voltar", "url": reverse("nee:aluno_apoios", args=[aluno_id]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
             {"label": "Abrir aluno", "url": reverse("educacao:aluno_detail", args=[aluno_id]), "icon": "fa-solid fa-user", "variant": "btn--ghost"},
         ]
         if can(self.request.user, "nee.manage"):

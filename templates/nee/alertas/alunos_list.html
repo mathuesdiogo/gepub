@@ -1,8 +1,42 @@
 {% extends "nee/base_modulo.html" %}
 {% block module_title %}NEE • Alertas{% endblock %}
+
 {% block module_content %}
 <div class="card"><div class="card__body">
-  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
-  {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None q="" empty_title=empty_title empty_text=empty_text %}
+
+{% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+{% if rows %}
+  <div class="table-shell">
+    <table class="table">
+      <thead>
+        <tr>
+          {% for h in headers %}
+            <th>{{ h.label }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+          <tr>
+            {% for c in r.cells %}
+              <td>
+                {% if c.url %}
+                  <a href="{{ c.url }}">{{ c.text }}</a>
+                {% else %}
+                  {{ c.text }}
+                {% endif %}
+              </td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+{% else %}
+  <p>Nenhum aluno encontrado.</p>
+{% endif %}
+
 </div></div>
 {% endblock %}

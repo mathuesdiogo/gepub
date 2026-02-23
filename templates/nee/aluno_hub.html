@@ -1,0 +1,39 @@
+{% extends "nee/base_modulo.html" %}
+{% block module_title %}Aluno NEE{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+
+{% include "core/partials/components/layout/page_head.html" with title=aluno.nome subtitle="Painel clínico do aluno NEE" actions=actions %}
+
+
+<div class="grid-cards">
+
+<a class="link-card" href="{% url 'nee:aluno_necessidades' aluno.pk %}">
+<div class="link-card__title">Necessidades</div>
+</a>
+
+<a class="link-card" href="{% url 'nee:aluno_laudos' aluno.pk %}">
+<div class="link-card__title">Laudos</div>
+</a>
+
+<a class="link-card" href="{% url 'nee:aluno_recursos' aluno.pk %}">
+<div class="link-card__title">Recursos</div>
+</a>
+
+<a class="link-card" href="{% url 'nee:aluno_apoios' aluno.pk %}">
+<div class="link-card__title">Apoios</div>
+</a>
+
+<a class="link-card" href="{% url 'nee:aluno_acompanhamentos' aluno.pk %}">
+<div class="link-card__title">Acompanhamentos</div>
+</a>
+
+<a class="link-card" href="{% url 'nee:aluno_timeline' aluno.pk %}">
+<div class="link-card__title">Timeline completa</div>
+</a>
+
+</div>
+
+</div></div>
+{% endblock %}

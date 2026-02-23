@@ -102,3 +102,13 @@ def relatorio_por_unidade(request):
     } for x in qs]
     actions = [{"label": "Relatórios", "url": reverse("nee:relatorios_index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
     return render(request, "nee/relatorios/por_unidade.html", {"actions": actions, "rows": rows})
+
+@login_required
+def aluno_hub(request, aluno_id: int):
+    aluno = get_object_or_404(Aluno, pk=aluno_id)
+
+    actions = [
+        {"label": "Voltar para lista", "url": reverse("nee:buscar_aluno"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+    ]
+
+    return render(request, "nee/aluno_hub.html", {"aluno": aluno, "actions": actions})

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from django import forms
+from django.forms.models import fields_for_model
 
 from .models import (
     TipoNecessidade,
@@ -24,9 +25,23 @@ def _model_has_field(model, field_name: str) -> bool:
 
 
 def _set_fields(form: forms.ModelForm, model, field_names: list[str]) -> None:
+    """Define os campos do ModelForm de forma *real*.
+
+    Importante: alterar apenas `form._meta.fields` depois do `super().__init__()`
+    NÃO recria `form.fields`. Por isso, além de setar `_meta.fields`, nós também
+    reconstruímos os campos via `fields_for_model`.
+    """
     # Só mantém campos que existem no model (evita FieldError)
     valid = [n for n in field_names if _model_has_field(model, n)]
     form._meta.fields = valid  # type: ignore[attr-defined]
+
+    # Reconstrói os campos do formulário (senão `form.fields` fica vazio)
+    generated = fields_for_model(model, fields=valid)
+
+    # Preserva campos já existentes (caso algum seja declarado manualmente)
+    for name, field in generated.items():
+        if name not in form.fields:
+            form.fields[name] = field
 
 
 # ============================================================
@@ -45,22 +60,11 @@ class TipoNecessidadeForm(forms.ModelForm):
 class AlunoNecessidadeForm(forms.ModelForm):
     class Meta:
         model = AlunoNecessidade
-        fields: list[str] = []
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        _set_fields(self, AlunoNecessidade, [
-            "tipo",
-            "cid",
-            "observacao",
-            "ativo",
-        ])
-
-        if "cid" in self.fields:
-            self.fields["cid"].widget = forms.TextInput(attrs={"placeholder": "Ex.: F84.0 (opcional)"})
-        if "observacao" in self.fields:
-            self.fields["observacao"].widget = forms.Textarea(attrs={"rows": 3, "placeholder": "Observações (opcional)"})
+        fields = ["tipo", "cid", "observacao", "ativo"]
+        widgets = {
+            "cid": forms.TextInput(attrs={"placeholder": "Ex.: F84.0 (opcional)"}),
+            "observacao": forms.Textarea(attrs={"rows": 3, "placeholder": "Observações (opcional)"}),
+        }
 
 
 class ApoioMatriculaForm(forms.ModelForm):
@@ -96,26 +100,19 @@ class ApoioMatriculaForm(forms.ModelForm):
 class LaudoNEEForm(forms.ModelForm):
     class Meta:
         model = LaudoNEE  # type: ignore[assignment]
-        fields: list[str] = []
-
-    def __init__(self, *args, **kwargs):
-        if LaudoNEE is None:
-            raise RuntimeError("Model LaudoNEE não existe no app NEE.")
-        super().__init__(*args, **kwargs)
-
-        _set_fields(self, LaudoNEE, [
-            "aluno",
+        fields = [
             "numero",
             "data_emissao",
             "validade",
             "profissional",
             "documento",
             "texto",
-            "ativo",
-        ])
-
-        if "texto" in self.fields:
-            self.fields["texto"].widget = forms.Textarea(attrs={"rows": 4})
+        ]
+        widgets = {
+            "numero": forms.TextInput(attrs={"placeholder": "Número do laudo (opcional)"}),
+            "profissional": forms.TextInput(attrs={"placeholder": "Profissional responsável (opcional)"}),
+            "texto": forms.Textarea(attrs={"rows": 4, "placeholder": "Descrição / parecer (opcional)"}),
+        }
 
 
 class RecursoNEEForm(forms.ModelForm):
@@ -129,13 +126,13 @@ class RecursoNEEForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         _set_fields(self, RecursoNEE, [
-            "aluno",
             "nome",
             "status",
             "observacao",
-            "ativo",
         ])
 
+        if "nome" in self.fields:
+            self.fields["nome"].widget = forms.TextInput(attrs={"placeholder": "Ex.: Sala de recursos, Material adaptado..."})
         if "observacao" in self.fields:
             self.fields["observacao"].widget = forms.Textarea(attrs={"rows": 3})
 
@@ -143,20 +140,12 @@ class RecursoNEEForm(forms.ModelForm):
 class AcompanhamentoNEEForm(forms.ModelForm):
     class Meta:
         model = AcompanhamentoNEE  # type: ignore[assignment]
-        fields: list[str] = []
+        fields = ["data", "tipo_evento", "descricao", "visibilidade"]
 
     def __init__(self, *args, **kwargs):
         if AcompanhamentoNEE is None:
             raise RuntimeError("Model AcompanhamentoNEE não existe no app NEE.")
         super().__init__(*args, **kwargs)
-
-        _set_fields(self, AcompanhamentoNEE, [
-            "aluno",
-            "data",
-            "tipo_evento",
-            "descricao",
-            "visibilidade",
-        ])
 
         if "descricao" in self.fields:
             self.fields["descricao"].widget = forms.Textarea(attrs={"rows": 4})

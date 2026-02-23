@@ -1,19 +1,123 @@
 {% extends "nee/base_modulo.html" %}
-{% block title %}Buscar aluno • NEE • GEPUB{% endblock %}
+{% block module_title %}Buscar aluno • NEE{% endblock %}
+
 {% block module_content %}
-  <div class="card">
-    <div class="card__body">
-      {% include "core/partials/components/layout/page_head.html" with title="Buscar aluno" subtitle="Selecione um aluno para acessar necessidades, laudos, recursos e timeline." actions=actions %}
-      <div class="empty-state">
-        <p>Esta tela é o ponto de entrada do NEE. Por enquanto, use a listagem de alunos do módulo Educação para localizar o aluno.</p>
-        <div class="actions">
-          {% for a in actions %}
-            <a class="btn btn--primary" href="{{ a.url }}">
-              <i class="{{ a.icon }}"></i> {{ a.label }}
-            </a>
-          {% endfor %}
-        </div>
-      </div>
-    </div>
+<div class="card"><div class="card__body">
+
+{% include "core/partials/components/layout/page_head.html" with title="Buscar aluno (NEE)" subtitle="Aparecem apenas alunos com necessidade ativa. Use o autocomplete ou pesquise pelo nome." actions=actions %}
+
+<form method="get" class="form" style="position:relative;">
+  <div class="form-row">
+    <input id="nee-search" type="text" name="q" value="{{ q }}" placeholder="Digite o nome do aluno (min 2 letras)..." class="input" autocomplete="off">
+    <button type="submit" class="btn">Buscar</button>
   </div>
+
+  <div id="nee-autocomplete" class="dropdown" style="display:none; position:absolute; z-index:20; top:48px; left:0; right:0;">
+    <div class="card"><div class="card__body" style="padding:8px;">
+      <div id="nee-autocomplete-items"></div>
+    </div></div>
+  </div>
+</form>
+
+{% if rows %}
+  <div class="table-shell" style="margin-top:12px;">
+    <table class="table">
+      <thead>
+        <tr>
+          {% for h in headers %}
+            <th{% if h.width %} style="width:{{ h.width }};"{% endif %}>{{ h.label }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+          <tr>
+            {% for c in r.cells %}
+              <td>
+                {% if c.url %}
+                  <a href="{{ c.url }}">{{ c.text }}</a>
+                {% else %}
+                  {{ c.text }}
+                {% endif %}
+              </td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page_obj %}
+    <div class="pagination" style="display:flex; gap:10px; align-items:center; margin-top:12px;">
+      {% if page_obj.has_previous %}
+        <a class="btn btn--ghost" href="?q={{ q|urlencode }}&page={{ page_obj.previous_page_number }}">← Anterior</a>
+      {% else %}
+        <span class="btn btn--ghost" style="opacity:.5; pointer-events:none;">← Anterior</span>
+      {% endif %}
+
+      <span style="opacity:.8;">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+      {% if page_obj.has_next %}
+        <a class="btn btn--ghost" href="?q={{ q|urlencode }}&page={{ page_obj.next_page_number }}">Próxima →</a>
+      {% else %}
+        <span class="btn btn--ghost" style="opacity:.5; pointer-events:none;">Próxima →</span>
+      {% endif %}
+    </div>
+  {% endif %}
+
+{% else %}
+  {% include "core/partials/components/feedback/empty_state.html" with title="Sem resultados" text="Digite um nome para buscar alunos NEE (necessidade ativa)." %}
+{% endif %}
+
+</div></div>
+
+<script>
+(function(){
+  const input = document.getElementById("nee-search");
+  const box = document.getElementById("nee-autocomplete");
+  const items = document.getElementById("nee-autocomplete-items");
+  let lastQ = "";
+  let t = null;
+
+  function hide(){ box.style.display = "none"; items.innerHTML = ""; }
+  function show(){ box.style.display = "block"; }
+
+  function render(results){
+    if (!results || results.length === 0) { hide(); return; }
+    items.innerHTML = results.map(r => (
+      `<a href="${r.url}" style="display:block; padding:10px; border-radius:8px; text-decoration:none;">
+         ${r.label}
+       </a>`
+    )).join("");
+    show();
+  }
+
+  async function fetchAuto(q){
+    const url = "{% url 'nee:buscar_aluno_autocomplete' %}?q=" + encodeURIComponent(q);
+    const resp = await fetch(url, {headers: {"X-Requested-With":"XMLHttpRequest"}});
+    if (!resp.ok) { hide(); return; }
+    const data = await resp.json();
+    render(data.results);
+  }
+
+  input.addEventListener("input", function(){
+    const q = (input.value || "").trim();
+    if (q.length < 2) { hide(); return; }
+    if (q === lastQ) return;
+    lastQ = q;
+    clearTimeout(t);
+    t = setTimeout(() => fetchAuto(q), 180);
+  });
+
+  document.addEventListener("click", function(e){
+    if (!box.contains(e.target) && e.target !== input) hide();
+  });
+
+  input.addEventListener("focus", function(){
+    const q = (input.value || "").trim();
+    if (q.length >= 2) fetchAuto(q);
+  });
+
+})();
+</script>
 {% endblock %}

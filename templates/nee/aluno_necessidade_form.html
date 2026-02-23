@@ -3,6 +3,11 @@
 {% block module_content %}
 <div class="card"><div class="card__body">
 {% include "core/partials/components/layout/page_head.html" with title="Necessidade do Aluno" subtitle=aluno.nome actions=actions %}
-{% include "core/partials/components/forms/form_shell.html" with form=form submit_label="Salvar" cancel_url=actions.0.url %}
+{% url 'nee:aluno_necessidades' aluno.pk as back_url %}
+{% if actions and actions.0.url %}
+  {% include "core/partials/components/forms/form_shell.html" with form=form submit_label="Salvar" cancel_url=actions.0.url %}
+{% else %}
+  {% include "core/partials/components/forms/form_shell.html" with form=form submit_label="Salvar" cancel_url=back_url %}
+{% endif %}
 </div></div>
 {% endblock %}
