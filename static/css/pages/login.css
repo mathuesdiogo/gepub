@@ -1,172 +1,330 @@
-/* ==========================================================
-   LOGIN — Layout igual referência (form esquerda + promo direita)
-   ========================================================== */
-.login-page{
+body.public-body {
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  background: linear-gradient(180deg, #3f7fba 0%, #2f6ea9 100%);
+}
+
+.suap-login {
+  --bg-900: #0d4678;
+  --bg-850: #175687;
+  --bg-800: #226495;
+  --panel-900: #0e3f68;
+  --panel-850: #14507d;
+  --mint-400: #d8efff;
+  --mint-300: #f0f9ff;
+  --text-100: #f6fbff;
+  --text-200: #d4e8f8;
+  --text-300: #bdd8ec;
+  --danger-bg: #fff1f1;
+  --danger-border: #f3c5c5;
+  --danger-text: #8d2b2b;
+
   min-height: 100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding: clamp(18px, 3vw, 52px);
-  background:
-    radial-gradient(1000px 700px at 20% 10%, rgba(61, 124, 255, .35), transparent 60%),
-    radial-gradient(900px 700px at 80% 70%, rgba(0, 160, 255, .22), transparent 55%),
-    linear-gradient(180deg, #00040c 0%, #020a1d 45%, #010511 100%);
+  background: linear-gradient(180deg, #3f7fba 0%, #2f6ea9 100%);
+  padding: clamp(14px, 2vw, 26px);
+  color: var(--text-100);
 }
 
-.login-frame{
-  width: min(1220px, 96vw);
-  min-height: min(720px, 86vh);
+.suap-login__hero,
+.suap-services {
+  width: min(1280px, 100%);
+  margin: 0 auto;
+}
+
+.suap-login__hero {
   border-radius: 28px;
+  background: linear-gradient(135deg, var(--bg-800) 0%, var(--bg-900) 72%);
+  border: 1px solid rgba(76, 131, 179, 0.34);
   overflow: hidden;
-  display:grid;
-  grid-template-columns: 1fr 1.1fr;
-  background: rgba(39, 4, 4, 0.92);
-  border: 1px solid rgba(255,255,255,.55);
-  box-shadow: 0 34px 90px rgba(0,0,0,.25);
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  min-height: 620px;
 }
 
-/* esquerda */
-.login-left{
-  background: linear-gradient(180deg, rgba(189, 216, 233, 1), rgba(248,250,255,.96));
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding: clamp(18px, 2.8vw, 44px);
+.suap-login__left {
+  padding: clamp(30px, 4.2vw, 56px);
+  position: relative;
 }
 
-.login-left__inner{
-  width: 100%;
-  max-width: 420px;
+.suap-brand {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
 }
 
-.login-brand{
-  display:flex;
-  align-items:center;
-  gap: 12px;
-  margin-bottom: 18px;
+.suap-brand__line {
+  width: 4px;
+  min-height: 188px;
+  border-radius: 4px;
+  background: rgba(207, 233, 255, 0.95);
+  margin-top: 8px;
 }
 
-.login-brand__logo{
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  background: rgba(252, 251, 250, 0.1);
-  border: 1px solid rgba(30,84,214,.18);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-}
-
-.login-brand__logo img{
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-}
-
-.login-brand__name{
-  font-weight: 1000;
-  color: #0f172a;
-  letter-spacing: .2px;
-}
-
-.login-brand__sub{
-  font-size: 12px;
-  color: #64748b;
-  margin-top: 2px;
-}
-
-.login-title{
+.suap-brand__title {
   margin: 0;
-  font-size: 35px;
-  letter-spacing: -.3px;
-  color: #001D39;
-  font-weight: 1000;
+  font-size: clamp(3.4rem, 9vw, 8.5rem);
+  line-height: 0.95;
+  letter-spacing: -2px;
+  color: #e3f4ff;
+  font-weight: 700;
 }
 
-.login-subtitle{
-  margin: 8px 0 0 0;
-  color: #64748b;
-  font-size: 20px;
-  line-height: 1.35;
+.suap-brand__subtitle {
+  margin: 6px 0 0;
+  font-size: clamp(1rem, 2vw, 1.38rem);
+  color: var(--text-200);
 }
 
-.login-alert{
-  margin: 12px 0 12px 0;
+.suap-brand__lead {
+  margin: clamp(30px, 4vw, 42px) 0 0;
+  max-width: 560px;
+  font-size: clamp(1.28rem, 2.1vw, 2rem);
+  line-height: 1.34;
+  color: #edf7ff;
+}
+
+.suap-brand__highlights {
+  margin: 26px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  max-width: 560px;
+}
+
+.suap-brand__highlights li {
+  padding-left: 22px;
+  position: relative;
+  color: var(--text-200);
+  line-height: 1.5;
+}
+
+.suap-brand__highlights li::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #d5ecff;
+  position: absolute;
+  left: 0;
+  top: 0.57em;
+}
+
+.suap-login__right {
+  background: linear-gradient(180deg, rgba(10, 63, 103, 0.62) 0%, rgba(9, 54, 88, 0.86) 100%);
+  padding: clamp(24px, 4vw, 46px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.suap-auth-card {
+  width: min(470px, 100%);
+  border-radius: 22px;
+  background: linear-gradient(180deg, var(--panel-850) 0%, var(--panel-900) 100%);
+  border: 1px solid rgba(158, 201, 237, 0.22);
+  padding: clamp(22px, 4vw, 34px);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+}
+
+.suap-auth-card__title {
+  margin: 0;
+  font-size: clamp(2.2rem, 4vw, 3.2rem);
+  color: var(--text-100);
+  line-height: 1;
+  text-align: center;
+}
+
+.suap-auth-card__subtitle {
+  margin: 8px 0 0;
+  text-align: center;
+  color: var(--text-200);
+  font-size: 1.1rem;
+}
+
+.suap-auth-card__alert {
+  margin-top: 16px;
+  border: 1px solid var(--danger-border);
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  border-radius: 10px;
   padding: 10px 12px;
-  border-radius: 14px;
-  background: rgba(229,72,77,.10);
-  border: 1px solid rgba(229,72,77,.22);
-  color: #7f1d1d;
-  font-size: 13px;
+  font-size: 0.9rem;
 }
 
-.login-form{
-  margin-top: 14px;
-  display:flex;
-  flex-direction:column;
-  gap: 12px;
+.suap-auth-card__form {
+  margin-top: 18px;
+  display: grid;
+  gap: 8px;
 }
 
-.login-field{
-  display:flex;
-  flex-direction:column;
-  gap: 6px;
+.suap-auth-card__form label {
+  color: var(--text-200);
+  font-size: 0.95rem;
 }
 
-.login-field label{
-  font-size: 15px;
-  font-weight: 800;
-  color: #334155;
-}
-
-
-.login-btn{
-  margin-top: 6px;
+.suap-auth-card__form input {
   width: 100%;
-  padding: 12px 14px;
-  border-radius: 14px;
-  border: 0;
-  cursor: pointer;
-  font-weight: 1000;
-  color: #fff;
-  background: linear-gradient(135deg, #112b68 0%, #1e54d6 100%);
-  box-shadow: 0 14px 32px rgba(30,84,214,.22);
-  transition: .18s ease;
+  min-height: 48px;
+  border: 1px solid rgba(147, 189, 223, 0.75);
+  border-radius: 8px;
+  background: #f7fbff;
+  color: #0d3351;
+  font-size: 1rem;
+  padding: 0 12px;
+  outline: none;
 }
 
-.login-btn:hover{
-  filter: brightness(1.03);
+.suap-auth-card__form input:focus {
+  border-color: #7ea9ce;
+  box-shadow: 0 0 0 3px rgba(125, 171, 211, 0.24);
+}
+
+.suap-auth-card__form button {
+  margin-top: 14px;
+  min-height: 48px;
+  border: 0;
+  border-radius: 999px;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: #ffffff;
+  background: linear-gradient(180deg, #3f7fba 0%, #2f6ea9 100%);
+  cursor: pointer;
+  transition: transform 0.16s ease, filter 0.16s ease;
+}
+
+.suap-auth-card__form button:hover {
+  filter: brightness(1.04);
   transform: translateY(-1px);
 }
 
-.login-help{
-  margin-top: 12px;
-  font-size: 15px;
-  color: #334155;
-}
-.login-help__small{
-  margin-top: 6px;
-  color: #64748b;
+.suap-auth-card__help {
+  margin: 14px 0 0;
+  color: var(--text-300);
+  font-size: 0.86rem;
+  line-height: 1.45;
+  text-align: center;
 }
 
-/* direita */
-.login-right{
-  background: linear-gradient(135deg, #0A4174 0%, #0A4174 55%, #49769F 100%);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding: clamp(18px, 2.8vw, 44px);
+.suap-auth-card__divider {
+  margin: 14px 0 14px;
+  height: 1px;
+  background: rgba(180, 214, 240, 0.24);
 }
 
-.login-right__inner{
-  width: 100%;
-  max-width: 540px;
-  color: #fff;
+.suap-auth-card__gov {
+  display: block;
+  width: fit-content;
+  margin: 0 auto;
+  padding: 10px 22px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 700;
+  color: #1657b6;
+  background: #ffffff;
 }
 
-.login-right__cards{
-  display:flex;
-  flex-direction:column;
-  gap: 14px;
+.suap-services {
+  margin-top: 14px;
+}
+
+.suap-services__panel {
+  border-radius: 22px;
+  border: 1px solid rgba(76, 131, 179, 0.28);
+  background: linear-gradient(180deg, #0f4778 0%, #0b3f6d 100%);
+  overflow: hidden;
+}
+
+.suap-services__panel > summary {
+  list-style: none;
+  cursor: pointer;
+  text-align: center;
+  font-size: clamp(1.3rem, 2.8vw, 2rem);
+  color: #e1f3ff;
+  padding: 18px 16px;
+  font-weight: 700;
+  border-bottom: 1px solid rgba(154, 198, 233, 0.24);
+}
+
+.suap-services__panel > summary::-webkit-details-marker {
+  display: none;
+}
+
+.suap-services__grid {
+  padding: clamp(20px, 3.2vw, 34px);
+  display: grid;
+  grid-template-columns: 1.05fr 1fr 1fr 1fr;
+  gap: 20px;
+}
+
+.suap-services__about {
+  border-radius: 14px;
+  border: 1px solid rgba(145, 191, 229, 0.25);
+  background: rgba(13, 71, 118, 0.54);
+  padding: 18px;
+}
+
+.suap-services__about h3 {
+  margin: 0;
+  color: var(--text-100);
+  font-size: 1.35rem;
+}
+
+.suap-services__about p {
+  margin: 12px 0 0;
+  color: var(--text-200);
+  line-height: 1.5;
+}
+
+.suap-services__col h4 {
+  margin: 0 0 12px;
+  color: var(--text-300);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.suap-services__col {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.suap-services__col a {
+  color: #f2fffd;
+  text-decoration: none;
+  font-size: 1.32rem;
+  line-height: 1.25;
+}
+
+.suap-services__col a:hover {
+  color: #cde9ff;
+}
+
+@media (max-width: 1180px) {
+  .suap-login__hero {
+    grid-template-columns: 1fr;
+  }
+
+  .suap-services__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 740px) {
+  .suap-brand__line {
+    min-height: 110px;
+  }
+
+  .suap-auth-card__form button {
+    font-size: 1.32rem;
+  }
+
+  .suap-services__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .suap-services__col a {
+    font-size: 1.08rem;
+  }
 }

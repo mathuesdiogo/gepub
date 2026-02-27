@@ -1,0 +1,42 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+    {% if municipios and municipios|length %}
+      <select name="municipio" class="input" style="max-width:260px;">
+        {% for m in municipios %}
+          <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+    <input name="q" value="{{ q }}" class="input" placeholder="Buscar banco/agência/conta" style="max-width:260px;">
+    <button class="btn btn--sm" type="submit">Filtrar</button>
+  </form>
+
+  <div class="table-shell"><div class="table-shell__body">
+    <table class="table">
+      <thead>
+        <tr><th>UG</th><th>Banco</th><th>Agência</th><th>Conta</th><th>Tipo</th><th>Saldo</th><th>Ativo</th></tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td>{{ item.unidade_gestora.codigo }}</td>
+            <td>{{ item.banco_nome }}</td>
+            <td>{{ item.agencia }}</td>
+            <td>{{ item.conta }}</td>
+            <td>{{ item.get_tipo_conta_display }}</td>
+            <td>R$ {{ item.saldo_atual }}</td>
+            <td>{{ item.ativo|yesno:"Sim,Não" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7">Nenhuma conta bancária encontrada.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <title>{{ title }}</title>
+  <style>
+    @page {
+      size: A4 landscape;
+      margin: 10mm;
+      @bottom-left { content: "GEPUB — Gestão Estratégica Pública"; font-size: 9px; color: #475569; }
+      @bottom-right { content: "Página " counter(page) " de " counter(pages); font-size: 9px; color: #475569; }
+    }
+    html, body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; color: #0f172a; font-size: 11px; }
+    .header { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; background: linear-gradient(135deg, #1f4e79, #173b5a); color: #fff; }
+    .logo { width: 44px; height: 44px; object-fit: contain; background: rgba(255,255,255,.1); border-radius: 8px; padding: 5px; }
+    .header-main { flex: 1; text-align: center; }
+    .title { margin: 0; font-size: 16px; font-weight: 800; }
+    .subtitle { margin: 3px 0 0 0; font-size: 12px; opacity: .95; }
+    .meta { margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+    .chip { border: 1px solid #dbe3ee; background: #f8fafc; border-radius: 8px; padding: 6px 8px; font-size: 10px; }
+    .layout { margin-top: 8px; display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
+    .card { border: 1px solid #dbe3ee; border-radius: 10px; background: #fff; overflow: hidden; }
+    .card-title { margin: 0; padding: 8px 10px; font-size: 12px; font-weight: 800; background: #eff6ff; border-bottom: 1px solid #dbe3ee; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    th { background: #0b5c98; color: #fff; border: 1px solid #084a7c; padding: 5px; font-size: 10px; }
+    th.wk { background: #9b1c1c; border-color: #7f1d1d; }
+    td { border: 1px solid #dbe3ee; height: 78px; vertical-align: top; padding: 4px; font-size: 9px; background: #fff; }
+    td.empty { background: #f8fafc; }
+    td.weekend { background: #fee2e2; }
+    td.holiday { background: #fecaca; }
+    .day-number { font-size: 10px; font-weight: 800; margin-bottom: 2px; color: #0f172a; }
+    td.weekend .day-number, td.holiday .day-number { color: #991b1b; }
+    .ev { display: block; margin-top: 2px; padding: 1px 4px; border-radius: 6px; border: 1px solid #dbe3ee; background: #f8fafc; line-height: 1.2; }
+    .legend { padding: 8px; display: grid; gap: 6px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 10px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 999px; border: 1px solid rgba(15, 23, 42, 0.15); }
+    .annotations { margin-top: 8px; display: grid; gap: 6px; max-height: 460px; }
+    .ann { border: 1px solid #dbe3ee; border-left-width: 6px; border-radius: 8px; padding: 6px 8px; background: #fff; }
+    .ann-title { font-size: 11px; font-weight: 800; color: #0f172a; }
+    .ann-meta { margin-top: 2px; font-size: 9px; color: #475569; }
+    .ann-desc { margin-top: 4px; font-size: 9px; color: #334155; }
+    .type-letivo { border-left-color: #2563eb; }
+    .type-facultativo { border-left-color: #d97706; }
+    .type-feriado { border-left-color: #dc2626; }
+    .type-comemorativa { border-left-color: #9333ea; }
+    .type-bimestre_inicio { border-left-color: #16a34a; }
+    .type-bimestre_fim { border-left-color: #ea580c; }
+    .type-planejamento { border-left-color: #4f46e5; }
+    .type-recesso { border-left-color: #0f766e; }
+    .type-pedagogico { border-left-color: #4f46e5; }
+    .type-outro { border-left-color: #475569; }
+    .footer-extra { margin-top: 8px; display: flex; justify-content: space-between; align-items: center; gap: 10px; border: 1px solid #dbe3ee; border-radius: 10px; padding: 8px; background: #fff; }
+    .hash { font-size: 9px; color: #334155; }
+    .hash code { border: 1px solid #dbe3ee; border-radius: 6px; padding: 1px 5px; background: #f8fafc; }
+    .qr { display: flex; align-items: center; gap: 8px; font-size: 9px; color: #334155; }
+    .qr img { width: 48px; height: 48px; border: 1px solid #dbe3ee; border-radius: 6px; padding: 4px; background: #fff; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img class="logo" src="{{ logo_url }}" alt="Logo" />
+    <div class="header-main">
+      <p class="title">{{ title }}</p>
+      {% if subtitle %}<p class="subtitle">{{ subtitle }}</p>{% endif %}
+    </div>
+  </div>
+
+  <div class="meta">
+    <div class="chip"><b>Ano:</b> {{ ano }}</div>
+    <div class="chip"><b>Mês:</b> {{ mes_nome }}</div>
+    <div class="chip"><b>Dias letivos no mês:</b> {{ dias_letivos_mes }}</div>
+    <div class="chip"><b>Total de eventos:</b> {{ total_eventos_mes }}</div>
+    <div class="chip"><b>Impresso por:</b> {{ printed_by }}</div>
+    <div class="chip"><b>Data/hora:</b> {{ printed_at }}</div>
+    <div class="chip" style="grid-column: span 2;"><b>Filtros:</b> {{ filtros }}</div>
+  </div>
+
+  <div class="layout">
+    <div class="card">
+      <p class="card-title">Grade do Mês</p>
+      <table>
+        <thead>
+          <tr>
+            {% for d in dias_semana %}
+              <th class="{% if d == 'Dom' or d == 'Sáb' %}wk{% endif %}">{{ d }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for semana in semanas %}
+            <tr>
+              {% for c in semana %}
+                <td class="{% if not c.day %}empty{% endif %} {% if c.is_weekend %}weekend{% endif %} {% if c.has_holiday %}holiday{% endif %}">
+                  {% if c.day %}
+                    <div class="day-number">{{ c.day }}</div>
+                    {% for ev in c.events|slice:":3" %}
+                      <span class="ev">{{ ev.titulo }}</span>
+                    {% endfor %}
+                  {% endif %}
+                </td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <div class="card">
+        <p class="card-title">Legenda por Cor</p>
+        <div class="legend">
+          {% for l in legendas %}
+            <div class="legend-item">
+              <span class="legend-dot" style="background: {{ l.cor }};"></span>
+              <span>{{ l.label }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="card" style="margin-top: 8px;">
+        <p class="card-title">Bloco de Anotações</p>
+        <div class="legend">
+          <div class="annotations">
+            {% for a in anotacoes %}
+              <div class="ann type-{{ a.tipo_css }}">
+                <div class="ann-title">{{ a.titulo }}</div>
+                <div class="ann-meta">{{ a.tipo }} • {{ a.periodo }} • {{ a.escopo }}{% if a.dia_letivo %} • Dia letivo{% endif %}</div>
+                {% if a.descricao %}<div class="ann-desc">{{ a.descricao }}</div>{% endif %}
+              </div>
+            {% empty %}
+              <div class="ann type-outro">
+                <div class="ann-title">Sem eventos no período selecionado.</div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-extra">
+    <div class="hash">
+      <b>ID do relatório:</b> <code>{{ report_hash }}</code>
+    </div>
+    <div class="qr">
+      {% if qr_data_uri %}
+        <img src="{{ qr_data_uri }}" alt="QR Code" />
+        <span>QR de validação do relatório</span>
+      {% else %}
+        <span>QR indisponível</span>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>

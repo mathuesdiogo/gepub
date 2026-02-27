@@ -1,0 +1,101 @@
+{% extends "educacao/base_modulo.html" %}
+
+{% block title %}
+  {% if mode == "create" %}
+    Novo Curso • Educação • GEPUB
+  {% else %}
+    Editar Curso • Educação • GEPUB
+  {% endif %}
+{% endblock %}
+
+{% block module_content %}
+  <div class="card">
+    <div class="card__body">
+      {% if mode == "create" %}
+        {% include "core/partials/components/layout/page_head.html" with title="Novo Curso" subtitle="Cadastro acadêmico para ensino regular, EJA e cursos técnicos" actions=actions %}
+      {% else %}
+        {% include "core/partials/components/layout/page_head.html" with title="Editar Curso" subtitle=curso.nome actions=actions %}
+      {% endif %}
+
+      <form method="post" class="form-shell">
+        {% csrf_token %}
+        <input type="hidden" name="_action" value="save_curso">
+
+        {% if form.non_field_errors %}
+          <div class="flash flash--error">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="form-shell__fields">
+          {{ form.as_p }}
+        </div>
+
+        {% if mode == "create" and grade_form %}
+          <hr class="divider">
+          <div class="section__title">Grade Curricular Inicial (Opcional)</div>
+          <div class="small">Você pode adicionar a primeira disciplina agora. Depois poderá complementar a grade no curso.</div>
+          <div class="u-mt-10">
+            {{ grade_form.as_p }}
+          </div>
+        {% endif %}
+
+        <div class="form-shell__actions">
+          <button type="submit" class="btn btn-primary">{{ submit_label|default:"Salvar" }}</button>
+          <a class="link" href="{{ cancel_url|default:'/' }}">Cancelar</a>
+        </div>
+      </form>
+
+      {% if mode == "update" %}
+        <hr class="divider">
+        <div class="section">
+          <div class="section__title">Grade Curricular do Curso</div>
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th class="u-w-80">Ordem</th>
+                <th>Disciplina</th>
+                <th class="u-w-180">Tipo de aula</th>
+                <th class="u-w-120">Carga Horária</th>
+                <th class="u-w-120">Obrigatória</th>
+                <th class="u-w-120">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for d in disciplinas %}
+                <tr>
+                  <td>{{ d.ordem }}</td>
+                  <td>{{ d.nome }}</td>
+                  <td>{{ d.get_tipo_aula_display }}</td>
+                  <td>{{ d.carga_horaria }}h</td>
+                  <td>{% if d.obrigatoria %}Sim{% else %}Não{% endif %}</td>
+                  <td>
+                    <form method="post">
+                      {% csrf_token %}
+                      <input type="hidden" name="_action" value="remove_disciplina">
+                      <input type="hidden" name="disciplina_id" value="{{ d.pk }}">
+                      <button type="submit" class="btn btn--ghost">Remover</button>
+                    </form>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="6">Nenhuma disciplina cadastrada nesta grade.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          <div class="form-section u-mt-12">
+            <div class="form-section__title">Adicionar disciplina</div>
+            <form method="post">
+              {% csrf_token %}
+              <input type="hidden" name="_action" value="add_disciplina">
+              {{ grade_form.as_p }}
+              <button type="submit" class="btn btn-primary">Adicionar na grade</button>
+            </form>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

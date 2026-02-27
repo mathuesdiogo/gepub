@@ -1,0 +1,162 @@
+{% extends "saude/base_modulo.html" %}
+{% block title %}Prontuário • {{ atendimento.paciente_nome }} • Saúde • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+
+  {% include "core/partials/components/layout/page_head.html" with title="Prontuário Clínico" subtitle=atendimento.paciente_nome actions=actions %}
+  {% if is_outside_edit_window %}
+    <div class="alert alert-warning">Janela de edição clínica encerrada ({{ edit_window_hours }}h). Apenas novos registros são permitidos.</div>
+  {% endif %}
+
+  <div class="section">
+    <div class="section__title">Triagem</div>
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="_action" value="save_triagem">
+      {{ triagem_form.as_p }}
+      <p><label for="id_justificativa_triagem">Justificativa (ao editar):</label><textarea id="id_justificativa_triagem" name="justificativa_alteracao" rows="2"></textarea></p>
+      <button type="submit" class="btn btn-primary">Salvar triagem</button>
+    </form>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section">
+    <div class="section__title">Evoluções Clínicas</div>
+    {% for e in evolucoes %}
+      <div class="mini">
+        <strong>{{ e.get_tipo_display }} • {{ e.criado_em|date:"d/m/Y H:i" }}</strong>
+        <div class="small">{{ e.autor.username }}</div>
+        <div>{{ e.texto }}</div>
+      </div>
+    {% empty %}
+      <span class="small">Nenhuma evolução registrada.</span>
+    {% endfor %}
+    <form method="post" class="mt-2">
+      {% csrf_token %}
+      <input type="hidden" name="_action" value="add_evolucao">
+      {{ evolucao_form.as_p }}
+      <button type="submit" class="btn btn-primary">Adicionar evolução</button>
+    </form>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section">
+    <div class="section__title">Problemas Ativos (Aluno)</div>
+    {% for p in problemas %}
+      <div class="mini"><strong>{{ p.descricao }}</strong> <span class="small">({{ p.status }})</span> <div class="small">CID: {{ p.cid|default:"—" }}</div></div>
+    {% empty %}
+      <span class="small">Nenhum problema ativo.</span>
+    {% endfor %}
+    {% if atendimento.aluno_id %}
+    <form method="post" class="mt-2">
+      {% csrf_token %}
+      <input type="hidden" name="_action" value="add_problema">
+      {{ problema_form.as_p }}
+      <button type="submit" class="btn btn-primary">Adicionar problema</button>
+    </form>
+    {% endif %}
+  </div>
+
+  <hr class="divider">
+
+  <div class="section">
+    <div class="section__title">Alergias (Aluno)</div>
+    {% for a in alergias %}
+      <div class="mini"><strong>{{ a.agente }}</strong> <span class="small">({{ a.get_gravidade_display }})</span><div class="small">{{ a.reacao|default:"—" }}</div></div>
+    {% empty %}
+      <span class="small">Nenhuma alergia registrada.</span>
+    {% endfor %}
+    {% if atendimento.aluno_id %}
+    <form method="post" class="mt-2">
+      {% csrf_token %}
+      <input type="hidden" name="_action" value="add_alergia">
+      {{ alergia_form.as_p }}
+      <button type="submit" class="btn btn-primary">Adicionar alergia</button>
+    </form>
+    {% endif %}
+  </div>
+
+  <hr class="divider">
+
+  <div class="section">
+    <div class="section__title">Anexos</div>
+    {% for an in anexos %}
+      <div class="mini">
+        <strong>{{ an.titulo }}</strong>
+        <div class="small">{{ an.criado_em|date:"d/m/Y H:i" }} • {{ an.criado_por.username }}</div>
+        <a class="btn btn--ghost" href="{{ an.arquivo.url }}" target="_blank">Abrir arquivo</a>
+      </div>
+    {% empty %}
+      <span class="small">Nenhum anexo.</span>
+    {% endfor %}
+    <form method="post" enctype="multipart/form-data" class="mt-2">
+      {% csrf_token %}
+      <input type="hidden" name="_action" value="add_anexo">
+      {{ anexo_form.as_p }}
+      <button type="submit" class="btn btn-primary">Adicionar anexo</button>
+    </form>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section">
+    <div class="section__title">Prescrições</div>
+    {% for p in prescricoes %}
+      <div class="mini">
+        <strong>Versão {{ p.versao }} • {{ p.get_status_display }}</strong>
+        <div class="small">{{ p.criado_em|date:"d/m/Y H:i" }} • {{ p.criado_por.username }}</div>
+        {% for i in p.itens.all %}
+          <div>{{ i.medicamento }} — {{ i.dose }} — {{ i.frequencia }} — {{ i.duracao }}</div>
+        {% endfor %}
+      </div>
+    {% empty %}
+      <span class="small">Nenhuma prescrição registrada.</span>
+    {% endfor %}
+
+    <form method="post" class="mt-2">
+      {% csrf_token %}
+      <input type="hidden" name="_action" value="add_prescricao">
+      {{ prescricao_form.as_p }}
+      {{ prescricao_item_form.as_p }}
+      <button type="submit" class="btn btn-primary">Adicionar prescrição</button>
+    </form>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section">
+    <div class="section__title">Exames</div>
+    {% for bloco in exame_blocos %}
+      {% with ex=bloco.pedido %}
+      <div class="mini">
+        <strong>{{ ex.nome_exame }} • {{ ex.get_status_display }}</strong>
+        <div class="small">{{ ex.get_prioridade_display }} • {{ ex.criado_em|date:"d/m/Y H:i" }}</div>
+        <div class="small">Hipótese: {{ ex.hipotese_diagnostica|default:"—" }}</div>
+
+        <form method="post" enctype="multipart/form-data" class="mt-1">
+          {% csrf_token %}
+          <input type="hidden" name="_action" value="save_resultado">
+          <input type="hidden" name="pedido_id" value="{{ ex.id }}">
+          {{ bloco.form_resultado.as_p }}
+          <p><label for="id_justificativa_resultado_{{ ex.id }}">Justificativa (ao editar):</label><textarea id="id_justificativa_resultado_{{ ex.id }}" name="justificativa_alteracao" rows="2"></textarea></p>
+          <button type="submit" class="btn btn--ghost">Salvar resultado</button>
+        </form>
+      </div>
+      {% endwith %}
+    {% empty %}
+      <span class="small">Nenhum exame solicitado.</span>
+    {% endfor %}
+
+    <form method="post" class="mt-2">
+      {% csrf_token %}
+      <input type="hidden" name="_action" value="add_exame">
+      {{ exame_form.as_p }}
+      <button type="submit" class="btn btn-primary">Solicitar exame</button>
+    </form>
+  </div>
+
+</div></div>
+{% endblock %}

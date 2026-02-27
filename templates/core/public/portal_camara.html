@@ -1,0 +1,76 @@
+{% extends "core/public/base_portal_tenant.html" %}
+
+{% block hero_text %}
+<p>Publicações da Câmara Municipal: matérias legislativas e sessões oficiais.</p>
+{% endblock %}
+
+{% block page_content %}
+<section class="pp-card">
+  <form method="get" class="pp-form-inline pp-form-inline--3">
+    <div>
+      <label for="id_tipo">Tipo de matéria</label>
+      <select id="id_tipo" class="pp-select" name="tipo">
+        <option value="">Todos</option>
+        {% for value, label in tipos %}
+          <option value="{{ value }}" {% if tipo == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="id_status">Status</label>
+      <select id="id_status" class="pp-select" name="status">
+        <option value="">Todos</option>
+        {% for value, label in status_choices %}
+          <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>&nbsp;</label>
+      <div class="pp-actions">
+        <button class="pp-btn pp-btn--primary" type="submit">Filtrar</button>
+        <a class="pp-btn pp-btn--soft" href="{% url 'core:portal_camara_public' %}">Limpar</a>
+      </div>
+    </div>
+  </form>
+</section>
+
+<section class="pp-grid pp-grid--2" style="margin-top:10px;">
+  <article class="pp-card">
+    <h2>Matérias</h2>
+    <ul class="pp-list" style="margin-top:8px;">
+      {% for item in materias %}
+        <li class="pp-list__item">
+          <p class="pp-meta">{{ item.get_tipo_display }} • {{ item.numero }}/{{ item.ano }} • {{ item.get_status_display }}</p>
+          <h3>{{ item.ementa }}</h3>
+          {% if item.descricao %}<p>{{ item.descricao }}</p>{% endif %}
+          <div class="pp-actions">
+            {% if item.arquivo %}<a class="pp-btn pp-btn--soft" href="{{ item.arquivo.url }}" target="_blank" rel="noopener">Documento</a>{% endif %}
+          </div>
+        </li>
+      {% empty %}
+        <li class="pp-list__item"><p>Nenhuma matéria publicada.</p></li>
+      {% endfor %}
+    </ul>
+  </article>
+
+  <article class="pp-card">
+    <h2>Sessões</h2>
+    <ul class="pp-list" style="margin-top:8px;">
+      {% for sessao in sessoes %}
+        <li class="pp-list__item">
+          <p class="pp-meta">{{ sessao.data_sessao|date:"d/m/Y" }}</p>
+          <h3>{{ sessao.titulo }}</h3>
+          {% if sessao.pauta %}<p>{{ sessao.pauta }}</p>{% endif %}
+          <div class="pp-actions">
+            {% if sessao.ata_arquivo %}<a class="pp-btn pp-btn--soft" href="{{ sessao.ata_arquivo.url }}" target="_blank" rel="noopener">Ata</a>{% endif %}
+            {% if sessao.video_url %}<a class="pp-btn pp-btn--soft" href="{{ sessao.video_url }}" target="_blank" rel="noopener">Vídeo</a>{% endif %}
+          </div>
+        </li>
+      {% empty %}
+        <li class="pp-list__item"><p>Nenhuma sessão publicada.</p></li>
+      {% endfor %}
+    </ul>
+  </article>
+</section>
+{% endblock %}

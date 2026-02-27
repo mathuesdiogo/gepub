@@ -1,0 +1,19 @@
+{% if links %}
+<section class="org-board">
+  <div class="org-board__head">
+    <h3 class="org-board__title">{{ title|default:"Acessos rápidos" }}</h3>
+    {% if subtitle %}<p class="org-board__sub">{{ subtitle }}</p>{% endif %}
+  </div>
+  <div class="org-quick-grid">
+    {% for it in links %}
+      <a class="org-quick-card" href="{{ it.url }}">
+        <span class="org-quick-card__icon">
+          <i class="{% if it.icon %}{{ it.icon }}{% else %}fa-solid fa-arrow-up-right-from-square{% endif %}"></i>
+        </span>
+        <span class="org-quick-card__title">{{ it.label }}</span>
+        {% if it.meta %}<span class="org-quick-card__meta">{{ it.meta }}</span>{% endif %}
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}

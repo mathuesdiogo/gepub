@@ -1,0 +1,247 @@
+{% extends "core/base_public.html" %}
+{% load static %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/pages/documentacao.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="doc2-page" id="topo">
+  <header class="doc2-header">
+    <a class="doc2-brand" href="{{ cta_home }}">
+      <span class="doc2-brand__badge">
+        {% if marca_logo_url %}
+          <img src="{{ marca_logo_url }}" alt="{{ marca_nome }}">
+        {% else %}
+          <i class="fa-solid fa-city"></i>
+        {% endif %}
+      </span>
+      <span>{{ marca_nome }}</span>
+    </a>
+
+    <nav class="doc2-nav">
+      <a href="#modulos">Apps</a>
+      <a href="#funcionalidades">Funcionalidades</a>
+      <a href="#integracoes">Integrações</a>
+      <a href="#planos">Planos</a>
+      <a href="#fluxo">Fluxo</a>
+      <a href="{{ cta_transparencia }}">Transparência</a>
+    </nav>
+
+    <div class="doc2-actions">
+      <a class="btn-doc2 btn-doc2--ghost" href="{{ cta_home }}">Home</a>
+      <a class="btn-doc2 btn-doc2--primary" href="{{ cta_login }}">Entrar</a>
+    </div>
+  </header>
+
+  <main class="doc2-main">
+    <section class="doc2-hero">
+      <article class="doc2-hero__content">
+        <p class="doc2-kicker">PLATAFORMA MUNICIPAL INTEGRADA</p>
+        <h1>{{ titulo }}</h1>
+        <p>{{ subtitulo }}</p>
+
+        <div class="doc2-hero__actions">
+          <a class="btn-doc2 btn-doc2--primary" href="{{ cta_simulador }}">Simular plano</a>
+          <a class="btn-doc2 btn-doc2--ghost" href="#modulos">Ver documentação</a>
+        </div>
+
+        <div class="doc2-stats">
+          {% for kpi in kpis %}
+            <div>
+              <strong>{{ kpi.value }}</strong>
+              <span>{{ kpi.label }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      </article>
+
+      <aside class="doc2-hero__panel">
+        <h3>Resumo executivo</h3>
+        <ul>
+          {% for pilar in pilares %}
+            <li>{{ pilar }}</li>
+          {% endfor %}
+        </ul>
+      </aside>
+    </section>
+
+    <section class="doc2-section" id="modulos">
+      <div class="doc2-section__head">
+        <p class="doc2-kicker">APPS GEPUB</p>
+        <h2>Menos telas soltas, mais plataforma unificada por município</h2>
+      </div>
+
+      <div class="doc2-accordion">
+        {% for modulo in modulos %}
+          <details class="doc2-item" {% if forloop.first %}open{% endif %}>
+            <summary>
+              <span class="doc2-item__left">
+                <i class="{{ modulo.icone }}"></i>
+                <span>
+                  <strong>{{ modulo.nome }}</strong>
+                  <small>{{ modulo.descricao }}</small>
+                </span>
+              </span>
+              <span class="doc2-item__hint">Expandir</span>
+            </summary>
+            <div class="doc2-item__body">
+              <ul>
+                {% for item in modulo.features %}
+                  <li>{{ item }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </details>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="doc2-section" id="funcionalidades">
+      <div class="doc2-section__head">
+        <p class="doc2-kicker">FUNCIONALIDADES TRANSVERSAIS</p>
+        <h2>Capacidades estratégicas para implantação, operação e crescimento</h2>
+      </div>
+
+      <div class="doc2-accordion doc2-accordion--soft">
+        {% for item in funcionalidades %}
+          <details class="doc2-item" {% if forloop.first %}open{% endif %}>
+            <summary>
+              <span class="doc2-item__left">
+                <i class="fa-solid fa-circle-check"></i>
+                <span>
+                  <strong>{{ item.grupo }}</strong>
+                </span>
+              </span>
+              <span class="doc2-item__hint">Detalhes</span>
+            </summary>
+            <div class="doc2-item__body">
+              <ul>
+                {% for valor in item.itens %}
+                  <li>{{ valor }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </details>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="doc2-section" id="integracoes">
+      <div class="doc2-section__head">
+        <p class="doc2-kicker">INTEGRAÇÕES E OPERAÇÃO</p>
+        <h2>Conectividade com legado e fluxo padronizado para prefeitura</h2>
+      </div>
+
+      <div class="doc2-columns">
+        <article class="doc2-panel">
+          <h3>Integrações</h3>
+          <div class="doc2-accordion doc2-accordion--soft">
+            {% for integracao in integracoes %}
+              <details class="doc2-item" {% if forloop.first %}open{% endif %}>
+                <summary>
+                  <span class="doc2-item__left">
+                    <i class="fa-solid fa-plug-circle-check"></i>
+                    <span>
+                      <strong>{{ integracao.titulo }}</strong>
+                    </span>
+                  </span>
+                  <span class="doc2-badge {% if integracao.status == 'Disponível' %}is-on{% else %}is-soon{% endif %}">{{ integracao.status }}</span>
+                </summary>
+                <div class="doc2-item__body">
+                  <p>{{ integracao.texto }}</p>
+                </div>
+              </details>
+            {% endfor %}
+          </div>
+        </article>
+
+        <article class="doc2-panel" id="fluxo">
+          <h3>Fluxo operacional</h3>
+          <ol class="doc2-flow">
+            {% for passo in fluxos %}
+              <li>{{ passo }}</li>
+            {% endfor %}
+          </ol>
+
+          <h4>Arquitetura e governança</h4>
+          <ul class="doc2-list">
+            {% for item in arquitetura %}
+              <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="doc2-section" id="planos">
+      <div class="doc2-section__head">
+        <p class="doc2-kicker">PLANOS MUNICIPAIS</p>
+        <h2>Preço base + limites + adicionais, de forma transparente</h2>
+      </div>
+
+      <div class="doc2-accordion doc2-accordion--plans">
+        {% for plano in planos %}
+          <details class="doc2-item" {% if plano.destaque == 'Recomendado' %}open{% endif %}>
+            <summary>
+              <span class="doc2-item__left">
+                <i class="fa-solid fa-layer-group"></i>
+                <span>
+                  <strong>{{ plano.nome }}</strong>
+                  <small>{{ plano.descricao }}</small>
+                </span>
+              </span>
+              <span class="doc2-price">{{ plano.preco }}{% if plano.preco != 'Sob proposta' %}<small>/mês</small>{% endif %}</span>
+            </summary>
+            <div class="doc2-item__body">
+              <div class="doc2-plan-columns">
+                <div>
+                  <h4>Limites</h4>
+                  <ul>
+                    {% for limite in plano.limits %}
+                      <li>{{ limite }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+
+                <div>
+                  <h4>Recursos</h4>
+                  <ul>
+                    {% for feature in plano.features %}
+                      <li>{{ feature }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+
+                <div>
+                  <h4>Adicionais</h4>
+                  <ul>
+                    {% for over in plano.overages %}
+                      <li>{{ over }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </details>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="doc2-cta">
+      <h2>Leve esta estrutura para sua proposta municipal</h2>
+      <p>Use o simulador do GEPUB para gerar recomendação de plano e avançar com contrato SaaS previsível.</p>
+      <div class="doc2-cta__actions">
+        <a class="btn-doc2 btn-doc2--primary" href="{{ cta_simulador }}">Abrir simulador</a>
+        <a class="btn-doc2 btn-doc2--ghost" href="{{ cta_login }}">Acessar plataforma</a>
+      </div>
+    </section>
+  </main>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Fechamento de Período • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Fechamento do Período" subtitle=turma.nome actions=actions %}
+{% include "core/partials/components/data/filter_bar.html" with q="" action_url=action_url clear_url=clear_url has_filters=has_filters extra_filters=extra_filters %}
+
+<div class="grid grid--3">
+{% include "core/partials/components/data/kpi_card.html" with label="Total de Aulas" value=total_aulas %}
+{% include "core/partials/components/data/kpi_card.html" with label="Alunos Ativos" value=total_alunos %}
+{% include "core/partials/components/data/kpi_card.html" with label="Aprovados" value=aprovados %}
+</div>
+
+<div class="grid grid--2">
+{% include "core/partials/components/data/kpi_card.html" with label="Recuperação" value=recuperacao %}
+{% include "core/partials/components/data/kpi_card.html" with label="Reprovados" value=reprovados %}
+</div>
+
+<hr>
+
+{% include "core/partials/components/layout/page_head.html" with title="Parâmetros do Fechamento" subtitle="Defina critérios de média e frequência para o período selecionado" actions=None %}
+{% include "core/partials/components/forms/form_shell.html" with form=form cancel_url=clear_url submit_label="Salvar Fechamento" action_url=action_url top_extra=top_extra %}
+
+<hr>
+
+{% include "core/partials/components/layout/page_head.html" with title="Prévia por Aluno" subtitle="Resultado calculado antes da consolidação" actions=None %}
+{% include "core/partials/components/data/table_shell.html" with headers=headers_preview rows=rows_preview page_obj=None empty_title="Sem alunos" empty_text="Não há alunos ativos para fechamento nesta turma." %}
+
+</div></div>
+{% endblock %}

@@ -29,13 +29,19 @@ class TurmaListView(BaseListViewGepub):
                 "unidade",
                 "unidade__secretaria",
                 "unidade__secretaria__municipio",
+                "curso",
             )
             .only(
                 "id",
                 "nome",
                 "ano_letivo",
                 "turno",
+                "modalidade",
+                "etapa",
+                "forma_oferta",
                 "ativo",
+                "curso_id",
+                "curso__nome",
                 "unidade_id",
                 "unidade__nome",
                 "unidade__secretaria__nome",
@@ -50,35 +56,68 @@ class TurmaListView(BaseListViewGepub):
         return qs
 
     def apply_search(self, qs, q: str, **kwargs):
+        modalidade = (self.request.GET.get("modalidade") or "").strip()
+        etapa = (self.request.GET.get("etapa") or "").strip()
         if not q:
-            return qs
-        return qs.filter(
-            Q(nome__icontains=q)
-            | Q(unidade__nome__icontains=q)
-            | Q(unidade__secretaria__nome__icontains=q)
-            | Q(unidade__secretaria__municipio__nome__icontains=q)
-        )
+            filtered = qs
+        else:
+            filtered = qs.filter(
+                Q(nome__icontains=q)
+                | Q(unidade__nome__icontains=q)
+                | Q(unidade__secretaria__nome__icontains=q)
+                | Q(unidade__secretaria__municipio__nome__icontains=q)
+                | Q(curso__nome__icontains=q)
+                | Q(modalidade__icontains=q)
+                | Q(etapa__icontains=q)
+            )
+        if modalidade:
+            filtered = filtered.filter(modalidade=modalidade)
+        if etapa:
+            filtered = filtered.filter(etapa=etapa)
+        return filtered
 
     def get(self, request, *args, **kwargs):
         q = (request.GET.get("q") or "").strip()
         ano = (request.GET.get("ano") or "").strip()
+        modalidade = (request.GET.get("modalidade") or "").strip()
+        etapa = (request.GET.get("etapa") or "").strip()
         export = (request.GET.get("export") or "").strip().lower()
 
         qs = self.get_base_queryset()
         if ano.isdigit():
             qs = qs.filter(ano_letivo=int(ano))
+        if modalidade:
+            qs = qs.filter(modalidade=modalidade)
+        if etapa:
+            qs = qs.filter(etapa=etapa)
         qs = self.apply_search(qs, q)
 
         if export in ("csv", "pdf"):
             turmas_export = qs.order_by("-ano_letivo", "nome")
 
-            headers_export = ["Turma", "Ano", "Turno", "Unidade", "Secretaria", "Município", "Ativo"]
+            headers_export = [
+                "Turma",
+                "Ano",
+                "Turno",
+                "Modalidade",
+                "Etapa",
+                "Curso",
+                "Oferta",
+                "Unidade",
+                "Secretaria",
+                "Município",
+                "Ativo",
+            ]
             rows_export = []
             for t in turmas_export:
                 rows_export.append([
                     t.nome or "—",
                     str(t.ano_letivo or "—"),
                     t.get_turno_display() if hasattr(t, "get_turno_display") else (getattr(t, "turno", "") or "—"),
+                    t.get_modalidade_display() if hasattr(t, "get_modalidade_display") else (getattr(t, "modalidade", "") or "—"),
+                    t.get_etapa_display() if hasattr(t, "get_etapa_display") else (getattr(t, "etapa", "") or "—"),
+                    getattr(getattr(t, "curso", None), "nome", "—"),
+                    t.get_forma_oferta_display() if hasattr(t, "get_forma_oferta_display") else (getattr(t, "forma_oferta", "") or "—"),
                     getattr(getattr(t, "unidade", None), "nome", "—"),
                     getattr(getattr(getattr(t, "unidade", None), "secretaria", None), "nome", "—"),
                     getattr(getattr(getattr(getattr(t, "unidade", None), "secretaria", None), "municipio", None), "nome", "—"),
@@ -88,7 +127,7 @@ class TurmaListView(BaseListViewGepub):
             if export == "csv":
                 return export_csv("turmas.csv", headers_export, rows_export)
 
-            filtros = f"Ano={ano or '-'} | Busca={q or '-'}"
+            filtros = f"Ano={ano or '-'} | Modalidade={modalidade or '-'} | Etapa={etapa or '-'} | Busca={q or '-'}"
             return export_pdf_table(
                 request,
                 filename="turmas.pdf",
@@ -106,6 +145,12 @@ class TurmaListView(BaseListViewGepub):
             base_params.append(f"q={escape(q)}")
         if ano:
             base_params.append(f"ano={ano}")
+        modalidade = (self.request.GET.get("modalidade") or "").strip()
+        etapa = (self.request.GET.get("etapa") or "").strip()
+        if modalidade:
+            base_params.append(f"modalidade={modalidade}")
+        if etapa:
+            base_params.append(f"etapa={etapa}")
         base_qs = "&".join(base_params)
 
         actions = [
@@ -137,6 +182,9 @@ class TurmaListView(BaseListViewGepub):
             {"label": "Turma"},
             {"label": "Ano", "width": "110px"},
             {"label": "Turno", "width": "140px"},
+            {"label": "Modalidade"},
+            {"label": "Etapa"},
+            {"label": "Curso"},
             {"label": "Unidade"},
             {"label": "Secretaria"},
             {"label": "Município"},
@@ -159,6 +207,9 @@ class TurmaListView(BaseListViewGepub):
                     {"text": t.nome, "url": reverse("educacao:turma_detail", args=[t.pk])},
                     {"text": str(getattr(t, "ano_letivo", "—"))},
                     {"text": t.get_turno_display() if hasattr(t, "get_turno_display") else (getattr(t, "turno", "") or "—")},
+                    {"text": t.get_modalidade_display() if hasattr(t, "get_modalidade_display") else (getattr(t, "modalidade", "") or "—")},
+                    {"text": t.get_etapa_display() if hasattr(t, "get_etapa_display") else (getattr(t, "etapa", "") or "—")},
+                    {"text": getattr(getattr(t, "curso", None), "nome", "—")},
                     {"text": getattr(unidade, "nome", "—")},
                     {"text": getattr(secretaria, "nome", "—")},
                     {"text": getattr(municipio, "nome", "—")},
@@ -173,8 +224,34 @@ class TurmaListView(BaseListViewGepub):
         # anos disponíveis (limitado) dentro do escopo
         qs = self.get_base_queryset()
         anos = list(qs.order_by("-ano_letivo").values_list("ano_letivo", flat=True).distinct())[:12]
+        modalidade = (self.request.GET.get("modalidade") or "").strip()
+        etapa = (self.request.GET.get("etapa") or "").strip()
+
+        modalidades_opts = ['<option value="" {}>Todas modalidades</option>'.format("selected" if not modalidade else "")]
+        for value, label in Turma.Modalidade.choices:
+            selected = "selected" if modalidade == value else ""
+            modalidades_opts.append(f'<option value="{value}" {selected}>{label}</option>')
+
+        etapas_opts = ['<option value="" {}>Todas etapas</option>'.format("selected" if not etapa else "")]
+        for value, label in Turma.Etapa.choices:
+            selected = "selected" if etapa == value else ""
+            etapas_opts.append(f'<option value="{value}" {selected}>{label}</option>')
+
         if not anos:
-            return ""
+            return f'''
+<div class="filter-bar__field">
+  <label class="small">Modalidade</label>
+  <select name="modalidade">
+    {''.join(modalidades_opts)}
+  </select>
+</div>
+<div class="filter-bar__field">
+  <label class="small">Etapa</label>
+  <select name="etapa">
+    {''.join(etapas_opts)}
+  </select>
+</div>
+'''.strip()
         opts = []
         sel = "selected" if not ano else ""
         opts.append(f'<option value="" {sel}>Todos os anos</option>')
@@ -186,6 +263,18 @@ class TurmaListView(BaseListViewGepub):
   <label class="small">Ano letivo</label>
   <select name="ano">
     {''.join(opts)}
+  </select>
+</div>
+<div class="filter-bar__field">
+  <label class="small">Modalidade</label>
+  <select name="modalidade">
+    {''.join(modalidades_opts)}
+  </select>
+</div>
+<div class="filter-bar__field">
+  <label class="small">Etapa</label>
+  <select name="etapa">
+    {''.join(etapas_opts)}
   </select>
 </div>
 '''.strip()

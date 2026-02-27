@@ -31,13 +31,37 @@ class Aula(models.Model):
         on_delete=models.CASCADE,
         related_name="aulas",
     )
+    periodo = models.ForeignKey(
+        "educacao.PeriodoLetivo",
+        on_delete=models.PROTECT,
+        related_name="aulas_diario",
+        null=True,
+        blank=True,
+    )
+    componente = models.ForeignKey(
+        "educacao.ComponenteCurricular",
+        on_delete=models.SET_NULL,
+        related_name="aulas_diario",
+        null=True,
+        blank=True,
+    )
     data = models.DateField(default=timezone.localdate)
+    bncc_codigos = models.ManyToManyField(
+        "educacao.BNCCCodigo",
+        blank=True,
+        related_name="aulas",
+    )
     conteudo = models.TextField(blank=True)
     observacoes = models.TextField(blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["-data"]
+        indexes = [
+            models.Index(fields=["data"]),
+            models.Index(fields=["periodo"]),
+            models.Index(fields=["componente"]),
+        ]
 
     def __str__(self):
         return f"{self.diario} — {self.data}"
@@ -122,4 +146,3 @@ class Nota(models.Model):
 
     def __str__(self) -> str:
         return f"{self.aluno_id} • {self.avaliacao_id} • {self.valor}"
-

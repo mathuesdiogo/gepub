@@ -1,0 +1,70 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+    {% if municipios and municipios|length %}
+      <select name="municipio" class="input" style="max-width:240px;" onchange="this.form.submit()">
+        {% for m in municipios %}
+          <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+  </form>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:12px 0 18px;">
+    {% for card in cards %}
+      {% include "core/partials/components/data/kpi_card.html" with label=card.label value=card.value %}
+    {% endfor %}
+  </div>
+
+  <div class="table-shell"><div class="table-shell__body">
+    <table class="table">
+      <thead><tr><th>Data</th><th>Bem</th><th>Tipo</th><th>Destino</th><th>Valor</th></tr></thead>
+      <tbody>
+        {% for item in latest_movs %}
+          <tr>
+            <td>{{ item.data_movimento|date:"d/m/Y" }}</td>
+            <td>{{ item.bem.nome }}</td>
+            <td>{{ item.get_tipo_display }}</td>
+            <td>{{ item.unidade_destino|default:"-" }}</td>
+            <td>R$ {{ item.valor_movimento }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Sem movimentações registradas.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+
+  <div class="table-shell" style="margin-top:12px;"><div class="table-shell__body">
+    <table class="table">
+      <thead><tr><th>Código</th><th>Referência</th><th>Status</th><th>Total bens</th><th>Ação</th></tr></thead>
+      <tbody>
+        {% for item in latest_invs %}
+          <tr>
+            <td>{{ item.codigo }}</td>
+            <td>{{ item.referencia|default:"-" }}</td>
+            <td>{{ item.get_status_display }}</td>
+            <td>{{ item.total_bens }}</td>
+            <td>
+              {% if item.status == "ABERTO" %}
+                <form method="post" action="{% url 'patrimonio:inventario_concluir' item.pk %}?municipio={{ municipio.pk }}" style="display:inline;">
+                  {% csrf_token %}
+                  <button class="btn btn--sm btn-primary" type="submit">Concluir</button>
+                </form>
+              {% else %}
+                -
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Nenhum inventário criado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

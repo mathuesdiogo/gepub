@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <title>{{ title }}</title>
+  <style>
+    @page { size: A4 landscape; margin: 14mm; }
+    body { font-family: DejaVu Sans, sans-serif; color: #1d2733; font-size: 11px; }
+    h1 { margin: 0; font-size: 18px; }
+    h2 { margin: 14px 0 6px; font-size: 13px; }
+    .muted { color: #5f6f81; }
+    .kpis { display: table; width: 100%; margin-top: 8px; border-collapse: collapse; }
+    .kpis td { border: 1px solid #d9e2ec; padding: 8px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    th, td { border: 1px solid #dde5ed; padding: 5px; text-align: left; }
+    th { background: #f5f8fc; }
+  </style>
+</head>
+<body>
+  <h1>{{ title }}</h1>
+  <p class="muted">{{ subtitle }}{% if filtros %} • {{ filtros }}{% endif %}</p>
+
+  <table class="kpis">
+    <tr>
+      <td><strong>Linhas filtradas</strong><br>{{ kpis.linhas_filtradas }}</td>
+      <td><strong>Linhas totais</strong><br>{{ kpis.linhas_total }}</td>
+      <td><strong>Colunas</strong><br>{{ kpis.colunas }}</td>
+      <td><strong>Soma principal</strong><br>{{ kpis.soma_principal }}</td>
+    </tr>
+  </table>
+
+  <h2>Amostra de dados (até 100 linhas)</h2>
+  <table>
+    <thead>
+      <tr>
+        {% for h in headers %}
+          <th>{{ h }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+        <tr>
+          {% for value in row %}
+            <td>{{ value }}</td>
+          {% endfor %}
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="{{ headers|length }}">Sem dados para os filtros aplicados.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

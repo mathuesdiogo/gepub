@@ -1,31 +1,57 @@
+import os
 from datetime import timedelta
 from django.core.cache import cache
 from django.utils import timezone
 
-MAX_ATTEMPTS = 5
-LOCK_MINUTES = 10
+
+def _env_int(name: str, default: int) -> int:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    try:
+        value = int(raw.strip())
+        return value if value > 0 else default
+    except Exception:
+        return default
 
 
-def _key(ip: str, codigo: str) -> str:
+MAX_ATTEMPTS_PER_CODE = _env_int("DJANGO_LOGIN_MAX_ATTEMPTS_PER_CODE", 5)
+MAX_ATTEMPTS_PER_IP = _env_int("DJANGO_LOGIN_MAX_ATTEMPTS_PER_IP", 25)
+LOCK_MINUTES = _env_int("DJANGO_LOGIN_LOCK_MINUTES", 10)
+
+
+def _code_key(ip: str, codigo: str) -> str:
     return f"loginlock:{ip}:{(codigo or '').lower()}"
 
 
-def is_locked(ip: str, codigo: str) -> bool:
-    data = cache.get(_key(ip, codigo))
+def _ip_key(ip: str) -> str:
+    return f"loginlock:ip:{ip}"
+
+
+def _is_locked_payload(data: dict | None) -> bool:
     if not data:
         return False
     locked_until = data.get("locked_until")
     return bool(locked_until and locked_until > timezone.now())
 
 
-def register_failure(ip: str, codigo: str):
-    k = _key(ip, codigo)
-    data = cache.get(k) or {"count": 0, "locked_until": None}
+def _register_on_key(key: str, max_attempts: int):
+    data = cache.get(key) or {"count": 0, "locked_until": None}
     data["count"] += 1
-    if data["count"] >= MAX_ATTEMPTS:
+    if data["count"] >= max_attempts:
         data["locked_until"] = timezone.now() + timedelta(minutes=LOCK_MINUTES)
-    cache.set(k, data, timeout=LOCK_MINUTES * 60)
+    cache.set(key, data, timeout=LOCK_MINUTES * 60)
+
+
+def is_locked(ip: str, codigo: str) -> bool:
+    return _is_locked_payload(cache.get(_code_key(ip, codigo))) or _is_locked_payload(cache.get(_ip_key(ip)))
+
+
+def register_failure(ip: str, codigo: str):
+    _register_on_key(_code_key(ip, codigo), MAX_ATTEMPTS_PER_CODE)
+    _register_on_key(_ip_key(ip), MAX_ATTEMPTS_PER_IP)
 
 
 def reset(ip: str, codigo: str):
-    cache.delete(_key(ip, codigo))
+    cache.delete(_code_key(ip, codigo))
+    cache.delete(_ip_key(ip))

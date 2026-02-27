@@ -1,0 +1,9 @@
+{% extends "saude/base_modulo.html" %}
+{% block title %}{% if mode == "update" %}Editar Procedimento{% else %}Novo Procedimento{% endif %} • Saúde • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+  {% if mode == "update" %}{% include "core/partials/components/layout/page_head.html" with title="Editar Procedimento" subtitle="Atualize o registro clínico do procedimento" actions=None %}{% else %}{% include "core/partials/components/layout/page_head.html" with title="Novo Procedimento" subtitle="Registre procedimento ambulatorial" actions=None %}{% endif %}
+  {% include "core/partials/components/forms/form_shell.html" with form=form cancel_url=cancel_url submit_label=submit_label action_url=action_url %}
+</div></div>
+{% endblock %}

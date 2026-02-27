@@ -104,6 +104,7 @@
     }
 
     .meta b { color: #2a3340; }
+    .muted { color: #677386; }
 
     .filters {
       margin-top: 10px;
@@ -260,7 +261,7 @@
   <div class="footer-extra">
     <div class="hash">
       <b>ID do relatório:</b> <code>{{ report_hash }}</code><br/>
-      <span style="color:#677386;">Use este ID para auditoria/validação do documento.</span>
+      <span class="muted">Use este ID para auditoria/validação do documento.</span>
     </div>
 
     <div class="qr">
@@ -268,12 +269,12 @@
         <img src="{{ qr_data_uri }}" alt="QR Code" />
         <div>
           <b>QR de validação</b><br/>
-          <span style="color:#677386;">Escaneie para identificar este relatório.</span>
+          <span class="muted">Escaneie para identificar este relatório.</span>
         </div>
       {% else %}
         <div>
           <b>Validação</b><br/>
-          <span style="color:#677386;">QR indisponível (instale <code>qrcode</code>).</span>
+          <span class="muted">QR indisponível (instale <code>qrcode</code>).</span>
         </div>
       {% endif %}
     </div>

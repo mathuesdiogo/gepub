@@ -6,7 +6,7 @@
 
     {% include "core/partials/components/layout/page_head.html" with title="Relatórios NEE" subtitle="Por tipo, município e unidade." actions=actions %}
 
-    <div class="grid grid-3" style="margin-top:16px;">
+    <div class="grid grid-3 u-mt-16">
       {% for c in cards %}
         <a class="link-card" href="{{ c.url }}">
           <div class="link-card__icon"><i class="{{ c.icon }}"></i></div>

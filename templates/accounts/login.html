@@ -1,87 +1,119 @@
 {% extends "core/base_public.html" %}
 {% load static %}
 
-{% block title %}Entrar • GEPUB{% endblock %}
+{% block title %}Acesso • GEPUB{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/pages/login.css' %}">
 
-<div class="login-page">
-  <div class="login-frame">
-
-    <!-- ESQUERDA (FORM) -->
-    <section class="login-left">
-      <div class="login-left__inner">
-
-        <div class="login-brand">
-          <div class="login-brand__logo">
-            {# Se você tiver logo, use aqui #}
-            {# <img src="{% static 'img/brand/gepub-mark.svg' %}" alt="GEPUB"> #}
-            <span class="login-brand__name">GEPUB</span>
-          </div>
-          <div>
-            <div class="login-brand__name">GEPUB</div>
-            <div class="login-brand__sub">Gestão Estratégica Pública</div>
-          </div>
+<div class="suap-login">
+  <section class="suap-login__hero">
+    <div class="suap-login__left">
+      <div class="suap-brand">
+        <div class="suap-brand__line"></div>
+        <div>
+          <h1 class="suap-brand__title">GEPUB</h1>
+          <p class="suap-brand__subtitle">Gestão Estratégica Pública</p>
         </div>
+      </div>
 
-        <h1 class="login-title">Login</h1>
-        <p class="login-subtitle">Acesse o GEPUB com seu código institucional.</p>
+      <p class="suap-brand__lead">
+        Um software desenvolvido para instituições públicas e prefeituras, com gestão integrada e rastreabilidade total.
+      </p>
+
+      <ul class="suap-brand__highlights">
+        <li>Onboarding por secretarias com ativação guiada</li>
+        <li>Educação, Saúde, Financeiro, Compras e Contratos</li>
+        <li>Permissões por escopo e trilhas de auditoria</li>
+      </ul>
+    </div>
+
+    <div class="suap-login__right">
+      <div class="suap-auth-card">
+        <h2 class="suap-auth-card__title">Login</h2>
+        <p class="suap-auth-card__subtitle">Acesse o GEPUB</p>
 
         {% if error %}
-          <div class="login-alert">{{ error }}</div>
+          <div class="suap-auth-card__alert">{{ error }}</div>
         {% endif %}
 
-        <form method="post" class="login-form">
+        <form method="post" class="suap-auth-card__form">
           {% csrf_token %}
 
-          <div class="login-field">
-            <label for="id_codigo_acesso">Código de acesso</label>
-            <input id="id_codigo_acesso" type="text" name="codigo_acesso" required autocomplete="username">
-          </div>
+          <label for="id_codigo_acesso">Código de acesso</label>
+          <input
+            id="id_codigo_acesso"
+            type="text"
+            name="codigo_acesso"
+            value="{{ form.codigo_acesso.value|default:'' }}"
+            required
+            autocomplete="username"
+            placeholder="Digite seu código"
+          >
 
-          <div class="login-field">
-            <label for="id_password">Senha</label>
-            <input id="id_password" type="password" name="password" required autocomplete="current-password">
-          </div>
+          <label for="id_password">Senha</label>
+          <input
+            id="id_password"
+            type="password"
+            name="password"
+            required
+            autocomplete="current-password"
+            placeholder="Digite sua senha"
+          >
 
-          <button type="submit" class="login-btn">Acessar Sistema</button>
-
-          <div class="login-help">
-            Primeira senha padrão: <strong>CPF</strong>
-            <div class="login-help__small">Em caso de dúvidas, procure o administrador.</div>
-          </div>
+          <button type="submit">Acessar</button>
         </form>
 
+        <p class="suap-auth-card__help">
+          Primeira senha padrão: CPF. Após o primeiro acesso, a troca de senha é obrigatória.
+        </p>
+
+        <div class="suap-auth-card__divider"></div>
+
+        <a class="suap-auth-card__gov" href="{% url 'core:institucional_public' %}">
+          Entrar com gov.br (implantação)
+        </a>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- DIREITA (INSTITUCIONAL) -->
-    <aside class="login-right">
-      <div class="login-right__inner">
+  <section class="suap-services">
+    <details class="suap-services__panel" open>
+      <summary>Serviços de Acesso Público</summary>
 
-        <div class="login-right__cards">
-          <div>
-            <div style="font-weight:1000;font-size:24px;line-height:1.15;">
-              Um sistema público desenvolvido para <span style="text-decoration:underline;">organizar</span>, <span style="text-decoration:underline;">integrar</span> e <span style="text-decoration:underline;">validar</span> informações da gestão municipal.
-            </div>
-          </div>
+      <div class="suap-services__grid">
+        <article class="suap-services__about">
+          <h3>O que é esta seção?</h3>
+          <p>
+            Esta área reúne links públicos sobre o GEPUB, funcionalidades, documentação,
+            transparência e canais institucionais para acesso rápido.
+          </p>
+        </article>
 
-          <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px;font-size:16px;opacity:.95;">
-            <div>✔ Organização Estrutural</div>
-            <div>✔ Gestão Educacional</div>
-            <div>✔ NEE e Relatórios com Validação</div>
-            <div>✔ Controle por Perfil (RBAC)</div>
-          </div>
-
-          <div style="margin-top:18px;font-size:14px;opacity:.9;">
-            Transparência • Auditoria • Segurança
-          </div>
+        <div class="suap-services__col">
+          <h4>Consultas</h4>
+          <a href="{% url 'core:institucional_public' %}">Página institucional</a>
+          <a href="{% url 'core:documentacao_public' %}">Documentação da plataforma</a>
+          <a href="{% url 'core:transparencia_public' %}">Transparência pública</a>
+          <a href="{% url 'core:funcionalidades_public' %}">Funcionalidades</a>
         </div>
 
-      </div>
-    </aside>
+        <div class="suap-services__col">
+          <h4>Gestão</h4>
+          <a href="{% url 'core:sobre_public' %}">Sobre a GEPUB</a>
+          <a href="{% url 'core:por_que_usar_public' %}">Por que usar</a>
+          <a href="{% url 'core:institucional_public' %}#simulador">Simulador de aderência</a>
+          <a href="{% url 'accounts:login' %}">Acesso institucional</a>
+        </div>
 
-  </div>
+        <div class="suap-services__col">
+          <h4>Suporte</h4>
+          <a href="{% url 'core:documentacao_public' %}">Guia inicial</a>
+          <a href="{% url 'core:institucional_public' %}#contato">Falar com o time</a>
+          <a href="{% url 'core:transparencia_public' %}">Base pública de eventos</a>
+        </div>
+      </div>
+    </details>
+  </section>
 </div>
 {% endblock %}

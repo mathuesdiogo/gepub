@@ -1,0 +1,59 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+    {% if municipios and municipios|length %}
+      <select name="municipio" class="input" style="max-width:240px;">
+        {% for m in municipios %}
+          <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+
+    <input name="q" value="{{ q }}" class="input" placeholder="Conector, dominio, referencia" style="max-width:320px;">
+    <button class="btn btn--sm" type="submit">Filtrar</button>
+  </form>
+
+  <div class="table-shell" style="margin-bottom:12px;"><div class="table-shell__head"><h3 style="margin:0;">Conectores</h3></div><div class="table-shell__body">
+    <table class="table">
+      <thead><tr><th>Nome</th><th>Dominio</th><th>Tipo</th><th>Endpoint</th><th>Ativo</th></tr></thead>
+      <tbody>
+        {% for item in conectores %}
+          <tr>
+            <td>{{ item.nome }}</td>
+            <td>{{ item.get_dominio_display }}</td>
+            <td>{{ item.get_tipo_display }}</td>
+            <td>{{ item.endpoint|default:"-" }}</td>
+            <td>{% if item.ativo %}Sim{% else %}Nao{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Nenhum conector cadastrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+
+  <div class="table-shell"><div class="table-shell__head"><h3 style="margin:0;">Ultimas execucoes</h3></div><div class="table-shell__body">
+    <table class="table">
+      <thead><tr><th>Data/Hora</th><th>Conector</th><th>Direcao</th><th>Status</th><th>Registros</th><th>Referencia</th></tr></thead>
+      <tbody>
+        {% for item in execucoes %}
+          <tr>
+            <td>{{ item.executado_em|date:"d/m/Y H:i" }}</td>
+            <td>{{ item.conector.nome }}</td>
+            <td>{{ item.get_direcao_display }}</td>
+            <td>{{ item.get_status_display }}</td>
+            <td>{{ item.quantidade_registros }}</td>
+            <td>{{ item.referencia|default:"-" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6">Nenhuma execucao registrada.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "core/detail_base.html" %}
+
+{% block detail_sections %}
+<div class="card" style="margin-top:12px;"><div class="card__body">
+  <h3 style="margin-top:0;">Aditivos</h3>
+  <div class="table-shell"><div class="table-shell__body">
+    <table class="table">
+      <thead><tr><th>Numero</th><th>Tipo</th><th>Data</th><th>Valor</th><th>Nova vigencia</th></tr></thead>
+      <tbody>
+        {% for item in aditivos %}
+          <tr>
+            <td>{{ item.numero }}</td>
+            <td>{{ item.get_tipo_display }}</td>
+            <td>{{ item.data_ato|date:"d/m/Y" }}</td>
+            <td>R$ {{ item.valor_aditivo }}</td>
+            <td>{{ item.nova_vigencia_fim|date:"d/m/Y"|default:"-" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Nenhum aditivo cadastrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+
+<div class="card" style="margin-top:12px;"><div class="card__body">
+  <h3 style="margin-top:0;">Medicoes</h3>
+  <div class="table-shell"><div class="table-shell__body">
+    <table class="table">
+      <thead><tr><th>Numero</th><th>Competencia</th><th>Data</th><th>Valor</th><th>Status</th><th>Liquidacao</th><th></th></tr></thead>
+      <tbody>
+        {% for item in medicoes %}
+          <tr>
+            <td>{{ item.numero }}</td>
+            <td>{{ item.competencia }}</td>
+            <td>{{ item.data_medicao|date:"d/m/Y" }}</td>
+            <td>R$ {{ item.valor_medido }}</td>
+            <td>{{ item.get_status_display }}</td>
+            <td>{{ item.liquidacao|default:"-" }}</td>
+            <td>
+              {% if item.status == 'PENDENTE' %}
+                <a class="link" href="{% url 'contratos:medicao_atestar' item.id %}?municipio={{ municipio.id }}">atestar</a>
+              {% elif item.status == 'ATESTADA' %}
+                <a class="link" href="{% url 'contratos:medicao_liquidar' item.id %}?municipio={{ municipio.id }}">liquidar</a>
+              {% else %}
+                -
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7">Nenhuma medicao cadastrada.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

@@ -13,6 +13,19 @@
 <div class="grid grid--3">
 {% include "core/partials/components/data/kpi_card.html" with label="Total de Atendimentos" value=total_atendimentos %}
 {% include "core/partials/components/data/kpi_card.html" with label="Unidades no Período" value=total_unidades %}
+{% include "core/partials/components/data/kpi_card.html" with label="Agendamentos" value=total_agendamentos %}
+{% include "core/partials/components/data/kpi_card.html" with label="Faltas" value=total_faltas %}
+{% include "core/partials/components/data/kpi_card.html" with label="Absenteísmo (%)" value=taxa_absenteismo %}
+{% include "core/partials/components/data/kpi_card.html" with label="Fila Aguardando" value=total_fila_aguardando %}
+{% include "core/partials/components/data/kpi_card.html" with label="Fila Convertida" value=total_fila_convertido %}
+{% include "core/partials/components/data/kpi_card.html" with label="Tempo Médio Fila (min)" value=tempo_medio_espera_min %}
+{% include "core/partials/components/data/kpi_card.html" with label="Exames Solicitados" value=total_exames %}
+{% include "core/partials/components/data/kpi_card.html" with label="Exames com Resultado" value=total_exames_com_resultado %}
+{% include "core/partials/components/data/kpi_card.html" with label="Encaixes" value=total_encaixes %}
+{% include "core/partials/components/data/kpi_card.html" with label="Taxa de Encaixe (%)" value=taxa_encaixe %}
+{% include "core/partials/components/data/kpi_card.html" with label="Documentos Clínicos" value=total_documentos %}
+{% include "core/partials/components/data/kpi_card.html" with label="Documentos Validáveis" value=total_documentos_validaveis %}
+{% include "core/partials/components/data/kpi_card.html" with label="Acessos Prontuário" value=total_acessos_prontuario %}
 </div>
 
 <hr>
@@ -33,6 +46,102 @@
     {% empty %}
     <tr>
       <td colspan="2">Nenhum dado encontrado.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<hr>
+
+<h3>Produção por profissional (top 10)</h3>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Profissional</th>
+      <th>Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in producao_profissionais %}
+    <tr>
+      <td>{{ item.profissional__nome|default:"—" }}</td>
+      <td>{{ item.total }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="2">Sem dados no período.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<hr>
+
+<h3>Produção por especialidade (top 10)</h3>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Especialidade</th>
+      <th>Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in producao_especialidades %}
+    <tr>
+      <td>{{ item.profissional__especialidade__nome|default:"Não informada" }}</td>
+      <td>{{ item.total }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="2">Sem dados no período.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<hr>
+
+<h3>CIDs mais frequentes</h3>
+<table class="table">
+  <thead>
+    <tr>
+      <th>CID</th>
+      <th>Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for cid in top_cids %}
+    <tr>
+      <td>{{ cid.cid }}</td>
+      <td>{{ cid.total }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="2">Sem CIDs registrados no período.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<hr>
+
+<h3>Ações de auditoria do prontuário (top 10)</h3>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Ação</th>
+      <th>Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in top_acoes_auditoria %}
+    <tr>
+      <td>{{ item.acao }}</td>
+      <td>{{ item.total }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="2">Sem acessos de prontuário no período.</td>
     </tr>
     {% endfor %}
   </tbody>

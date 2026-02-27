@@ -1,0 +1,63 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+    {% if municipios and municipios|length %}
+      <select name="municipio" class="input" style="max-width:240px;">
+        {% for m in municipios %}
+          <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+
+    <select name="exercicio" class="input" style="max-width:220px;">
+      <option value="">Todos os exercícios</option>
+      {% for ex in exercicios %}
+        <option value="{{ ex.id }}" {% if exercicio and ex.id == exercicio.id %}selected{% endif %}>{{ ex.ano }}</option>
+      {% endfor %}
+    </select>
+
+    <input name="q" value="{{ q }}" class="input" placeholder="Arquivo, banco ou conta" style="max-width:260px;">
+    <button class="btn btn--sm" type="submit">Filtrar</button>
+  </form>
+
+  <div class="table-shell"><div class="table-shell__body">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Importado em</th><th>Conta</th><th>Formato</th><th>Período</th><th>Itens</th><th>Conciliados</th><th>Créditos</th><th>Débitos</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td>{{ item.criado_em|date:"d/m/Y H:i" }}</td>
+            <td>
+              {{ item.conta_bancaria.banco_nome }} {{ item.conta_bancaria.agencia }}/{{ item.conta_bancaria.conta }}
+              <small style="display:block;color:#6b7f95;">{{ item.arquivo_nome }}</small>
+            </td>
+            <td>{{ item.formato }}</td>
+            <td>
+              {% if item.periodo_inicio and item.periodo_fim %}
+                {{ item.periodo_inicio|date:"d/m/Y" }} a {{ item.periodo_fim|date:"d/m/Y" }}
+              {% else %}
+                —
+              {% endif %}
+            </td>
+            <td>{{ item.total_itens }}</td>
+            <td>{{ item.total_conciliados }}</td>
+            <td>R$ {{ item.total_creditos }}</td>
+            <td>R$ {{ item.total_debitos }}</td>
+            <td><a class="link" href="{% url 'financeiro:extrato_detail' item.id %}?municipio={{ municipio.id }}">ver</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="9">Nenhuma importação de extrato encontrada.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

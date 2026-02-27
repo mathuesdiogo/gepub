@@ -194,6 +194,28 @@ class SetorDetailView(BaseDetailViewGepub):
             "obj": setor,
             "fields": fields,
             "pills": [],
+            "links": [
+                {
+                    "label": "Ver unidade",
+                    "url": reverse("org:unidade_detail", args=[setor.unidade_id]),
+                    "meta": setor.unidade.nome if setor.unidade else "—",
+                    "icon": "fa-solid fa-school",
+                },
+                {
+                    "label": "Ver secretaria",
+                    "url": (
+                        reverse("org:secretaria_detail", args=[setor.unidade.secretaria_id])
+                        if setor.unidade and setor.unidade.secretaria_id
+                        else reverse("org:secretaria_list")
+                    ),
+                    "meta": (
+                        setor.unidade.secretaria.nome
+                        if setor.unidade and setor.unidade.secretaria
+                        else "Sem secretaria vinculada"
+                    ),
+                    "icon": "fa-solid fa-building-columns",
+                },
+            ],
         })
 
 

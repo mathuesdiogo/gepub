@@ -46,4 +46,49 @@
       </div>
     </div>
   </div>
+
+  <div class="dash-col-12">
+    <div class="card">
+      <div class="card__title">Calendário educacional</div>
+      <div class="card__body">
+        {% if eventos_calendario %}
+          <div class="dash-table">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Evento</th>
+                  <th>Tipo</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for ev in eventos_calendario %}
+                  <tr>
+                    <td>
+                      {{ ev.data_inicio|date:"d/m/Y" }}
+                      {% if ev.data_fim and ev.data_fim != ev.data_inicio %}
+                        até {{ ev.data_fim|date:"d/m/Y" }}
+                      {% endif %}
+                    </td>
+                    <td>{{ ev.titulo }}</td>
+                    <td>{{ ev.get_tipo_display }}</td>
+                    <td>
+                      {% if perms.educacao.view %}
+                        <a class="btn btn--ghost" href="{% url 'educacao:calendario_index' %}"><i class="fa-solid fa-calendar-week"></i> Ver calendário</a>
+                      {% else %}
+                        —
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          {% include "core/partials/components/feedback/empty_state.html" with title="Sem eventos" text="Não há eventos de calendário visíveis para você." %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
 </div>

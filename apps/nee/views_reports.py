@@ -48,7 +48,7 @@ def relatorio_por_tipo(request):
         "tipo_id": x["tipo_id"],
         "tipo": x["tipo__nome"],
         "qtd": x["qtd"],
-        "url": reverse("nee:relatorio_tipo_alunos", args=[x["tipo_id"]]),
+        "url": reverse("nee:relatorios_alunos") + f"?tipo={x['tipo_id']}",
     } for x in qs]
 
     # Export padrão GEPUB (CSV/PDF)
@@ -112,7 +112,7 @@ def relatorio_tipo_alunos(request, tipo_id: int):
     ]
     ctx = {
         "actions": [
-            {"label": "Voltar", "url": reverse("nee:relatorio_por_tipo"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+            {"label": "Voltar", "url": reverse("nee:relatorios_por_tipo"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
             {"label": "Exportar CSV", "url": "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
             {"label": "Exportar PDF", "url": "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
         ],
@@ -142,7 +142,7 @@ def relatorio_por_municipio(request):
         "municipio_id": x["turma__unidade__secretaria__municipio__id"],
         "municipio": x["turma__unidade__secretaria__municipio__nome"] or "—",
         "qtd": x["qtd"],
-        "url": reverse("nee:relatorio_municipio_alunos", args=[x["turma__unidade__secretaria__municipio__id"]]),
+        "url": reverse("nee:relatorios_alunos") + f"?municipio={x['turma__unidade__secretaria__municipio__nome']}",
     } for x in qs]
 
     if request.GET.get("export") == "csv":
@@ -199,7 +199,7 @@ def relatorio_municipio_alunos(request, municipio_id: int):
     ]
     ctx = {
         "actions": [
-            {"label": "Voltar", "url": reverse("nee:relatorio_por_municipio"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+            {"label": "Voltar", "url": reverse("nee:relatorios_por_municipio"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
             {"label": "Exportar CSV", "url": "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
             {"label": "Exportar PDF", "url": "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
         ],
@@ -230,7 +230,7 @@ def relatorio_por_unidade(request):
         "municipio": x["turma__unidade__secretaria__municipio__nome"] or "—",
         "unidade": x["turma__unidade__nome"] or "—",
         "qtd": x["qtd"],
-        "url": reverse("nee:relatorio_unidade_alunos", args=[x["turma__unidade__id"]]),
+        "url": reverse("nee:relatorios_alunos") + f"?unidade={x['turma__unidade__id']}",
     } for x in qs]
 
     if request.GET.get("export") == "csv":
@@ -287,7 +287,7 @@ def relatorio_unidade_alunos(request, unidade_id: int):
     ]
     ctx = {
         "actions": [
-            {"label": "Voltar", "url": reverse("nee:relatorio_por_unidade"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+            {"label": "Voltar", "url": reverse("nee:relatorios_por_unidade"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
             {"label": "Exportar CSV", "url": "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
             {"label": "Exportar PDF", "url": "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
         ],

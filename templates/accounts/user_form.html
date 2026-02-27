@@ -1,9 +1,6 @@
 {% extends "core/base.html" %}
 
-{% block title %}
-  {% if mode == "create" %}Novo usuário{% else %}Editar usuário{% endif %} • GEPUB
-{% endblock %}
-
+{% block title %}{% if mode == "create" %}Novo usuário{% else %}Editar usuário{% endif %} • GEPUB{% endblock %}
 {% block header %}Usuários{% endblock %}
 
 {% block breadcrumbs %}
@@ -17,146 +14,111 @@
 {% endblock %}
 
 {% block content %}
-<div class="card" style="max-width:860px;">
-  <form method="post" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-    {% csrf_token %}
+<div class="card">
+  <div class="card__body">
+    {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-    <div>
-      <label class="small">{{ form.first_name.label }}</label><br>
-      {{ form.first_name }}
-      {% if form.first_name.errors %}<div class="small" style="color:#ffb4b4;">{{ form.first_name.errors|striptags }}</div>{% endif %}
-    </div>
+    <form method="post" class="form-shell">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="alert alert--danger">{{ form.non_field_errors }}</div>{% endif %}
+      <div class="form-shell__fields users-form-grid">
+        <p>
+          {{ form.first_name.label_tag }}
+          {{ form.first_name }}
+          {% if form.first_name.errors %}<span class="small u-text-danger">{{ form.first_name.errors|striptags }}</span>{% endif %}
+        </p>
+        <p>
+          {{ form.last_name.label_tag }}
+          {{ form.last_name }}
+          {% if form.last_name.errors %}<span class="small u-text-danger">{{ form.last_name.errors|striptags }}</span>{% endif %}
+        </p>
+        <p class="users-form-grid__full">
+          {{ form.email.label_tag }}
+          {{ form.email }}
+          {% if form.email.errors %}<span class="small u-text-danger">{{ form.email.errors|striptags }}</span>{% endif %}
+        </p>
 
-    <div>
-      <label class="small">{{ form.last_name.label }}</label><br>
-      {{ form.last_name }}
-      {% if form.last_name.errors %}<div class="small" style="color:#ffb4b4;">{{ form.last_name.errors|striptags }}</div>{% endif %}
-    </div>
+        <p>
+          {{ form.cpf.label_tag }}
+          {{ form.cpf }}
+          {% if form.cpf.errors %}<span class="small u-text-danger">{{ form.cpf.errors|striptags }}</span>{% endif %}
+          {% if mode == "create" %}<span class="small">Senha inicial = CPF (apenas números).</span>{% endif %}
+        </p>
+        <p>
+          {{ form.role.label_tag }}
+          {{ form.role }}
+          {% if form.role.errors %}<span class="small u-text-danger">{{ form.role.errors|striptags }}</span>{% endif %}
+        </p>
 
-    <div style="grid-column:1 / -1;">
-      <label class="small">{{ form.email.label }}</label><br>
-      {{ form.email }}
-      {% if form.email.errors %}<div class="small" style="color:#ffb4b4;">{{ form.email.errors|striptags }}</div>{% endif %}
-    </div>
+        <p>
+          {{ form.municipio.label_tag }}
+          {{ form.municipio }}
+          {% if form.municipio.errors %}<span class="small u-text-danger">{{ form.municipio.errors|striptags }}</span>{% endif %}
+        </p>
+        <p>
+          {{ form.secretaria.label_tag }}
+          {{ form.secretaria }}
+          {% if form.secretaria.errors %}<span class="small u-text-danger">{{ form.secretaria.errors|striptags }}</span>{% endif %}
+        </p>
+        <p>
+          {{ form.unidade.label_tag }}
+          {{ form.unidade }}
+          {% if form.unidade.errors %}<span class="small u-text-danger">{{ form.unidade.errors|striptags }}</span>{% endif %}
+        </p>
+        <p>
+          {{ form.setor.label_tag }}
+          {{ form.setor }}
+          {% if form.setor.errors %}<span class="small u-text-danger">{{ form.setor.errors|striptags }}</span>{% endif %}
+        </p>
 
-    <div>
-      <label class="small">{{ form.cpf.label }}</label><br>
-      {{ form.cpf }}
-      {% if form.cpf.errors %}<div class="small" style="color:#ffb4b4;">{{ form.cpf.errors|striptags }}</div>{% endif %}
-      {% if mode == "create" %}
-        <div class="small" style="opacity:.8; margin-top:4px;">Senha inicial = CPF (apenas números).</div>
-      {% endif %}
-    </div>
+        <p id="turmas-wrap" class="users-form-grid__full users-form__turmas">
+          {{ form.turmas.label_tag }}
+          {{ form.turmas }}
+          {% if form.turmas.errors %}<span class="small u-text-danger">{{ form.turmas.errors|striptags }}</span>{% endif %}
+          <span class="users-form__note">Selecione uma ou mais turmas para usuário professor.</span>
+        </p>
 
-    <div>
-      <label class="small">{{ form.role.label }}</label><br>
-      {{ form.role }}
-      {% if form.role.errors %}<div class="small" style="color:#ffb4b4;">{{ form.role.errors|striptags }}</div>{% endif %}
-    </div>
-
-    <div>
-      <label class="small">{{ form.municipio.label }}</label><br>
-      {{ form.municipio }}
-      {% if form.municipio.errors %}<div class="small" style="color:#ffb4b4;">{{ form.municipio.errors|striptags }}</div>{% endif %}
-    </div>
-
-    <div>
-      <label class="small">{{ form.unidade.label }}</label><br>
-      {{ form.unidade }}
-      {% if form.unidade.errors %}<div class="small" style="color:#ffb4b4;">{{ form.unidade.errors|striptags }}</div>{% endif %}
-    </div>
-
-    {# ✅ NOVO: Turmas (para professor) #}
-    <div style="grid-column:1 / -1;">
-      <label class="small">{{ form.turmas.label }}</label><br>
-      {{ form.turmas }}
-      {% if form.turmas.errors %}<div class="small" style="color:#ffb4b4;">{{ form.turmas.errors|striptags }}</div>{% endif %}
-      <div class="small" style="opacity:.8; margin-top:4px;">
-        Selecione as turmas para vincular (apenas para usuários com função <strong>Professor</strong>).
+        <p class="users-form-grid__full users-form-grid__check">
+          {{ form.ativo }} <span>{{ form.ativo.label }}</span>
+        </p>
       </div>
-    </div>
 
-    <div style="grid-column:1 / -1; display:flex; align-items:center; gap:10px;">
-      {{ form.ativo }} <span class="small">{{ form.ativo.label }}</span>
-    </div>
+      <div class="form-shell__actions">
+        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Salvar</button>
+        {% if mode == "update" and u %}
+          <a class="btn btn--ghost" href="{% url 'accounts:usuario_detail' u.id %}">Detalhes</a>
+        {% endif %}
+        <a class="btn btn--ghost" href="{% url 'accounts:usuarios_list' %}">Cancelar</a>
+      </div>
+    </form>
 
-    <div style="grid-column:1 / -1; display:flex; gap:10px; margin-top:8px;">
-      <button class="btn" type="submit">Salvar</button>
-      <a class="link" href="{% url 'accounts:usuarios_list' %}">Cancelar</a>
-    </div>
-  </form>
-
-  {% if mode == "update" and u %}
-    <div class="small" style="opacity:.85; margin-top:12px;">
-      <strong>Código de acesso:</strong> {{ u.profile.codigo_acesso }}
-      {% if u.profile.must_change_password %}
-        <span class="pill">Troca de senha pendente</span>
-      {% endif %}
-    </div>
-  {% endif %}
+    {% if mode == "update" and u %}
+      <p class="small u-mt-12">
+        <strong>Código de acesso:</strong> {{ u.profile.codigo_acesso }}
+        {% if u.profile.must_change_password %}<span class="status warning">Troca de senha pendente</span>{% endif %}
+      </p>
+    {% endif %}
+  </div>
 </div>
-<style>
-  /* Box bonito para multi-select */
-  .turmas-box {
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(255,255,255,.03);
-    border-radius: 14px;
-    padding: 10px 12px;
-  }
-  .turmas-box select {
-    width: 100%;
-    min-height: 160px;         /* altura “bonita” */
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(0,0,0,.15);
-    color: inherit;
-    padding: 10px;
-    outline: none;
-  }
-  .turmas-help {
-    margin-top: 6px;
-    opacity: .8;
-    font-size: 12px;
-  }
-</style>
 
 <script>
-  (function () {
-    function byName(name) {
-      return document.querySelector(`[name="${name}"]`);
-    }
+(function () {
+  const roleSelect = document.querySelector('[name="role"]');
+  const turmasWrap = document.getElementById('turmas-wrap');
+  if (!roleSelect || !turmasWrap) return;
 
-    const roleSelect = byName("role");
-    const turmasSelect = byName("turmas");
-
-    if (!roleSelect || !turmasSelect) return;
-
-    // wrapper (a div pai do campo turmas)
-    // pega o container mais próximo (o seu template usa <div style="grid-column:1 / -1;">)
-    const turmasWrap = turmasSelect.closest("div");
-
-    // aplica classe de estilo no wrapper
-    if (turmasWrap) turmasWrap.classList.add("turmas-box");
-
-    // dica de seleção múltipla
-    const help = document.createElement("div");
-    help.className = "turmas-help";
-    help.innerHTML = "Selecione uma ou mais turmas (PC: Ctrl/⌘ + clique).";
-    if (turmasWrap) turmasWrap.appendChild(help);
-
-    function syncVisibility() {
-      const isProfessor = roleSelect.value === "PROFESSOR";
-      if (turmasWrap) turmasWrap.style.display = isProfessor ? "" : "none";
-
-      // se não for professor, limpa seleção para não “vazar” vínculo indevido
-      if (!isProfessor) {
-        for (const opt of turmasSelect.options) opt.selected = false;
+  function syncVisibility() {
+    const isProfessor = roleSelect.value === 'PROFESSOR';
+    turmasWrap.style.display = isProfessor ? '' : 'none';
+    if (!isProfessor) {
+      const select = turmasWrap.querySelector('select');
+      if (select) {
+        for (const opt of select.options) opt.selected = false;
       }
     }
-
-    roleSelect.addEventListener("change", syncVisibility);
-    syncVisibility(); // roda ao carregar
-  })();
+  }
+  roleSelect.addEventListener('change', syncVisibility);
+  syncVisibility();
+})();
 </script>
-
 {% endblock %}

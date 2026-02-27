@@ -94,3 +94,61 @@ textarea{
   min-height:90px;
   resize:vertical;
 }
+
+/* Shell padrão usado nos formulários bios */
+.form-shell{
+  display:grid;
+  gap:16px;
+}
+
+.form-shell__fields{
+  display:grid;
+  gap:12px;
+}
+
+.form-shell__fields > p{
+  margin:0;
+  display:grid;
+  gap:6px;
+}
+
+.form-shell__fields label{
+  font-size:.83rem;
+  font-weight:var(--font-weight-bold);
+  color:var(--muted);
+}
+
+.form-shell__fields .helptext{
+  font-size:.78rem;
+  color:var(--muted);
+}
+
+.form-shell__fields .errorlist{
+  margin:0;
+  padding:0;
+  list-style:none;
+  font-size:.78rem;
+  color:var(--danger);
+}
+
+.form-shell__actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.flash{
+  border:1px solid var(--border);
+  border-radius:var(--radius-md);
+  padding:10px 12px;
+  font-size:.88rem;
+  background:var(--surface-2);
+  color:var(--text);
+}
+
+.flash--error{
+  border-color:color-mix(in srgb,var(--danger) 35%,var(--border));
+  background:color-mix(in srgb,var(--danger) 8%,#fff);
+  color:color-mix(in srgb,var(--danger) 80%,#111);
+}

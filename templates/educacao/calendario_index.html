@@ -1,0 +1,130 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Calendário Educacional • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Calendário Educacional" subtitle="Dias letivos, feriados, datas comemorativas e marcos de bimestre" actions=actions %}
+
+<div class="cal-nav">
+  <a class="btn btn--ghost" href="{% url 'educacao:calendario_index' %}?ano={{ ano_prev }}&mes={{ mes_prev }}"><i class="fa-solid fa-chevron-left"></i> Mês anterior</a>
+  <form method="get" class="cal-nav__form">
+    <label class="small">Ano</label>
+    <select name="ano">
+      {% for a in anos_opcoes %}
+        <option value="{{ a }}" {% if a == ano %}selected{% endif %}>{{ a }}</option>
+      {% endfor %}
+    </select>
+    <label class="small">Mês</label>
+    <select name="mes">
+      {% for m_num, m_nome in meses_opcoes %}
+        <option value="{{ m_num }}" {% if m_num == mes %}selected{% endif %}>{{ m_nome }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary">Aplicar</button>
+  </form>
+  <a class="btn btn--ghost" href="{% url 'educacao:calendario_index' %}?ano={{ ano_next }}&mes={{ mes_next }}">Próximo mês <i class="fa-solid fa-chevron-right"></i></a>
+</div>
+
+<div class="cal-header">
+  <div class="cal-title">{{ mes_nome }} de {{ ano }}</div>
+  <div class="cal-legend">
+    {% for l in legendas %}
+      <span class="cal-legend__item">
+        <span class="cal-dot cal-dot--{{ l.tipo|lower }}"></span>
+        {{ l.label }}
+      </span>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="cal-grid">
+  <div class="cal-grid__week cal-grid__week--weekend">Dom</div>
+  <div class="cal-grid__week">Seg</div>
+  <div class="cal-grid__week">Ter</div>
+  <div class="cal-grid__week">Qua</div>
+  <div class="cal-grid__week">Qui</div>
+  <div class="cal-grid__week">Sex</div>
+  <div class="cal-grid__week cal-grid__week--weekend">Sáb</div>
+
+  {% for semana in semanas %}
+    {% for cell in semana %}
+      <div class="cal-day {% if not cell.day %}cal-day--empty{% endif %} {% if cell.is_weekend %}cal-day--weekend{% endif %} {% if cell.has_holiday %}cal-day--holiday{% endif %}">
+        {% if cell.day %}
+          <div class="cal-day__number {% if cell.is_weekend or cell.has_holiday %}cal-day__number--danger{% endif %}">{{ cell.day }}</div>
+          <div class="cal-day__events">
+            {% for ev in cell.events %}
+              <div class="cal-chip cal-chip--{{ ev.tipo|lower }}">
+                <span class="cal-chip__title">{{ ev.titulo }}</span>
+                {% if ev.dia_letivo %}<span class="cal-chip__badge">Letivo</span>{% endif %}
+              </div>
+            {% empty %}
+              <span class="cal-day__none">—</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+  {% endfor %}
+</div>
+
+<hr>
+
+{% include "core/partials/components/layout/page_head.html" with title="Avisos de próximos eventos do mês" subtitle="Alertas rápidos para planejamento escolar" actions=None %}
+<div class="cal-alerts">
+  {% for item in avisos_proximos_mes %}
+    <div class="cal-alert cal-alert--{{ item.evento.tipo|lower }}">
+      <div class="cal-alert__left">
+        <div class="cal-alert__title">{{ item.evento.titulo }}</div>
+        <div class="cal-alert__meta">{{ item.evento.get_tipo_display }} • {{ item.evento.data_inicio|date:"d/m/Y" }}</div>
+      </div>
+      <div class="cal-alert__right">{{ item.aviso }}</div>
+    </div>
+  {% empty %}
+    <div class="cal-alert cal-alert--empty">Sem eventos futuros neste mês.</div>
+  {% endfor %}
+</div>
+
+<hr>
+
+{% include "core/partials/components/layout/page_head.html" with title="Próximos eventos" subtitle="Agenda do calendário no escopo visível" actions=None %}
+<div class="dash-table">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Evento</th>
+        <th>Tipo</th>
+        <th>Escopo</th>
+        {% if can_manage_calendar %}<th>Ações</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for ev in eventos_proximos %}
+        <tr>
+          <td>
+            {{ ev.data_inicio|date:"d/m/Y" }}
+            {% if ev.data_fim and ev.data_fim != ev.data_inicio %}
+              até {{ ev.data_fim|date:"d/m/Y" }}
+            {% endif %}
+          </td>
+          <td>{{ ev.titulo }}</td>
+          <td>{{ ev.get_tipo_display }}</td>
+          <td>{% if ev.unidade %}{{ ev.unidade.nome }}{% else %}{{ ev.secretaria.nome }}{% endif %}</td>
+          {% if can_manage_calendar %}
+            <td>
+              <a class="btn btn--ghost" href="{% url 'educacao:calendario_evento_update' ev.pk %}"><i class="fa-solid fa-pen"></i> Editar</a>
+              <form method="post" action="{% url 'educacao:calendario_evento_delete' ev.pk %}" class="u-inline-block">
+                {% csrf_token %}
+                <button type="submit" class="btn btn--ghost"><i class="fa-solid fa-trash"></i> Excluir</button>
+              </form>
+            </td>
+          {% endif %}
+        </tr>
+      {% empty %}
+        <tr><td colspan="{% if can_manage_calendar %}5{% else %}4{% endif %}">Sem eventos cadastrados para este escopo.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+</div></div>
+{% endblock %}

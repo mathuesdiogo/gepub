@@ -1,0 +1,30 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Indicadores Gerenciais • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="card educacao-indicadores"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Indicadores Gerenciais" subtitle="Painel de produção e desempenho da rede de educação" actions=actions %}
+
+<div class="grid grid--3">
+{% include "core/partials/components/data/kpi_card.html" with label="Unidades" value=total_unidades helper="Total de escolas no escopo" %}
+{% include "core/partials/components/data/kpi_card.html" with label="Turmas" value=total_turmas helper="Turmas ativas por escopo" %}
+{% include "core/partials/components/data/kpi_card.html" with label="Matrículas" value=total_matriculas helper="Total de registros de matrícula" %}
+</div>
+
+<div class="grid grid--3">
+{% include "core/partials/components/data/kpi_card.html" with label="Alunos únicos" value=total_alunos_unicos helper="Sem duplicidade por matrícula" %}
+{% include "core/partials/components/data/kpi_card.html" with label="Frequência média (%)" value=frequencia_pct helper="Base em presenças lançadas" %}
+{% include "core/partials/components/data/kpi_card.html" with label="Nota média" value=nota_media helper="Média geral das notas lançadas" %}
+</div>
+
+<div class="grid grid--3">
+{% include "core/partials/components/data/kpi_card.html" with label="Evasão" value=evasao helper="Matrículas em situação evadido" %}
+{% include "core/partials/components/data/kpi_card.html" with label="Canceladas" value=canceladas helper="Matrículas canceladas" %}
+{% include "core/partials/components/data/kpi_card.html" with label="Transferidas" value=transferidas helper="Matrículas transferidas" %}
+</div>
+
+<hr>
+{% include "core/partials/components/layout/page_head.html" with title="Produção por Unidade" subtitle="Total de matrículas por unidade escolar" actions=None %}
+{% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Sem dados" empty_text="Não há dados para o escopo atual." %}
+</div></div>
+{% endblock %}

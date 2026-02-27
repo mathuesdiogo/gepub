@@ -1,0 +1,18 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Assistência Escolar • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Assistência Escolar" subtitle="Merenda e transporte escolar" actions=actions %}
+
+<div class="grid grid--2">
+{% include "core/partials/components/data/kpi_card.html" with label="Cardápios cadastrados" value=total_cardapios %}
+{% include "core/partials/components/data/kpi_card.html" with label="Refeições servidas" value=total_refeicoes %}
+</div>
+
+<div class="grid grid--2">
+{% include "core/partials/components/data/kpi_card.html" with label="Rotas de transporte" value=total_rotas %}
+{% include "core/partials/components/data/kpi_card.html" with label="Alunos transportados" value=total_transportados %}
+</div>
+</div></div>
+{% endblock %}

@@ -1,12 +1,50 @@
 from django.urls import path
 
 from . import views
-from . import views_municipios, views_secretarias, views_unidades, views_setores
+from . import views_municipios, views_secretarias, views_unidades, views_setores, views_onboarding, views_governanca
 
 app_name = "org"
 
 urlpatterns = [
     path("", views.index, name="index"),
+    path("onboarding/primeiro-acesso/", views_onboarding.onboarding_primeiro_acesso, name="onboarding_primeiro_acesso"),
+    path("onboarding/painel/", views_onboarding.onboarding_painel, name="onboarding_painel"),
+    path("secretarias/governanca/", views_governanca.secretaria_governanca_hub, name="secretaria_governanca_hub"),
+    path(
+        "secretarias/<int:secretaria_pk>/governanca/",
+        views_governanca.secretaria_governanca_detail,
+        name="secretaria_governanca_detail",
+    ),
+    path(
+        "secretarias/<int:secretaria_pk>/governanca/configuracoes/nova/",
+        views_governanca.secretaria_configuracao_create,
+        name="secretaria_configuracao_create",
+    ),
+    path(
+        "secretarias/governanca/configuracoes/<int:pk>/editar/",
+        views_governanca.secretaria_configuracao_update,
+        name="secretaria_configuracao_update",
+    ),
+    path(
+        "secretarias/governanca/configuracoes/<int:pk>/remover/",
+        views_governanca.secretaria_configuracao_delete,
+        name="secretaria_configuracao_delete",
+    ),
+    path(
+        "secretarias/<int:secretaria_pk>/governanca/cadastros-base/novo/",
+        views_governanca.secretaria_cadastro_base_create,
+        name="secretaria_cadastro_base_create",
+    ),
+    path(
+        "secretarias/governanca/cadastros-base/<int:pk>/editar/",
+        views_governanca.secretaria_cadastro_base_update,
+        name="secretaria_cadastro_base_update",
+    ),
+    path(
+        "secretarias/governanca/cadastros-base/<int:pk>/remover/",
+        views_governanca.secretaria_cadastro_base_delete,
+        name="secretaria_cadastro_base_delete",
+    ),
 
     # Municípios
     path("municipios/", views_municipios.MunicipioListView.as_view(), name="municipio_list"),

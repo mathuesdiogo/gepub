@@ -4,27 +4,24 @@ Esperado:
 - rows: lista de dicts com chaves: label, total
 {% endcomment %}
 
-<div class="form-section" style="margin-top:14px;">
+<div class="form-section u-mt-14">
   <div class="form-section__title">{{ title }}</div>
 
   {% if rows %}
     {% with max=rows.0.total %}
-      <div style="display:grid; gap:8px;">
+      <div class="u-grid-gap-8">
         {% for r in rows %}
-          <div style="display:grid; grid-template-columns: 220px 1fr 70px; gap:10px; align-items:center;">
-            <div class="small" style="opacity:.9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+          <div class="mini-bar-chart__row">
+            <div class="small u-opacity-90 u-nowrap-ellipsis">
               {{ r.label }}
             </div>
-            <div style="height:12px; border-radius:999px; background:rgba(255,255,255,.06); overflow:hidden;">
-              {% widthratio r.total max 100 as pct %}
-              <div style="height:12px; width:{{ pct }}%; background:rgba(90,166,255,.55);"></div>
-            </div>
-            <div class="small" style="text-align:right; opacity:.85;">{{ r.total }}</div>
+            <progress class="mini-bar-chart__progress" value="{{ r.total }}" max="{% if max %}{{ max }}{% else %}1{% endif %}"></progress>
+            <div class="small u-text-right u-opacity-85">{{ r.total }}</div>
           </div>
         {% endfor %}
       </div>
     {% endwith %}
   {% else %}
-    <div class="small" style="opacity:.8;">Sem dados ainda.</div>
+    <div class="small u-opacity-80">Sem dados ainda.</div>
   {% endif %}
 </div>

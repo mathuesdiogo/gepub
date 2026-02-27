@@ -1,0 +1,10 @@
+{% extends "saude/base_modulo.html" %}
+{% block title %}Procedimentos • Saúde • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title="Procedimentos" subtitle="Registros ambulatoriais e intercorrências" actions=actions %}
+  {% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Buscar por paciente, procedimento, unidade..." action_url=action_url clear_url=clear_url has_filters=has_filters %}
+  {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj empty_title="Nenhum procedimento encontrado" empty_text="Cadastre o primeiro procedimento." %}
+</div></div>
+{% endblock %}

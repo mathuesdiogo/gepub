@@ -1,0 +1,117 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/billing.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  {% if municipios %}
+    <form method="get" class="billing-filter-form">
+      <label class="small" for="id_municipio">Município</label>
+      <select id="id_municipio" name="municipio" onchange="this.form.submit()">
+        {% for m in municipios %}
+          <option value="{{ m.pk }}" {% if m.pk == municipio.pk %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+        {% endfor %}
+      </select>
+    </form>
+  {% endif %}
+
+  <div class="billing-summary-grid">
+    <div class="billing-box">
+      <div class="billing-box__label">Plano atual</div>
+      <div class="billing-box__value">{{ assinatura.plano.nome }}</div>
+      <div class="billing-box__meta">R$ {{ assinatura.valor_base_mensal }} / mês</div>
+    </div>
+    <div class="billing-box">
+      <div class="billing-box__label">Vigência</div>
+      <div class="billing-box__value">{{ assinatura.inicio_vigencia|date:"d/m/Y" }} {% if assinatura.fim_vigencia %}até {{ assinatura.fim_vigencia|date:"d/m/Y" }}{% else %}• sem data final{% endif %}</div>
+      <div class="billing-box__meta">Reajuste: {{ assinatura.indice_reajuste }}</div>
+    </div>
+    <div class="billing-box">
+      <div class="billing-box__label">Status</div>
+      <div class="billing-box__value">{{ assinatura.get_status_display }}</div>
+      <div class="billing-box__meta">Atualizado em {{ assinatura.atualizado_em|date:"d/m/Y H:i" }}</div>
+    </div>
+  </div>
+
+  <h3>Limites e consumo</h3>
+  <div class="billing-metrics-grid">
+    {% for item in metricas %}
+      <div class="billing-metric-card">
+        <div class="billing-metric-card__head">
+          <strong>{{ item.label }}</strong>
+          <span>{{ item.usado }}{% if item.limite is not None %} / {{ item.limite }}{% else %} / ilimitado{% endif %}</span>
+        </div>
+        {% if item.percentual is not None %}
+          <div class="billing-progress billing-progress--{{ item.classe }}">
+            <span style="width: {{ item.percentual }}%"></span>
+          </div>
+          <div class="small">{{ item.percentual }}% utilizado{% if item.disponivel is not None %} • disponível: {{ item.disponivel }}{% endif %}</div>
+        {% else %}
+          <div class="small">Uso monitorado sem teto contratual.</div>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <h3>Solicitações de upgrade</h3>
+  <div class="table-shell">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Tipo</th>
+          <th>Quantidade</th>
+          <th>Valor mensal</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in solicitacoes %}
+          <tr>
+            <td>{{ s.solicitado_em|date:"d/m/Y H:i" }}</td>
+            <td>{{ s.get_tipo_display }}</td>
+            <td>{{ s.quantidade }}</td>
+            <td>R$ {{ s.valor_mensal_calculado }}</td>
+            <td>{{ s.get_status_display }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Nenhuma solicitação registrada.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Faturas</h3>
+  <div class="table-shell">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Competência</th>
+          <th>Valor</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in faturas %}
+          <tr>
+            <td>{{ f.competencia|date:"m/Y" }}</td>
+            <td>R$ {{ f.valor_total }}</td>
+            <td>{{ f.get_status_display }}</td>
+            <td>
+              <a href="{% url 'billing:fatura_pdf' f.pk %}">PDF</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4">Nenhuma fatura gerada.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div></div>
+{% endblock %}

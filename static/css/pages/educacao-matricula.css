@@ -1,0 +1,127 @@
+.educacao-matricula-create .u-grid-2 {
+  align-items: start;
+  gap: 14px;
+}
+
+.matricula-search-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.matricula-search-form__field {
+  display: grid;
+  gap: 6px;
+}
+
+.matricula-search-form__field input[type="text"] {
+  width: 100%;
+}
+
+.matricula-search-form__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.matricula-search-hint {
+  margin-top: 8px;
+}
+
+.matricula-pick-list {
+  display: grid;
+  gap: 10px;
+}
+
+.matricula-pick-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-card);
+  padding: 10px 12px;
+}
+
+.matricula-pick-item__main {
+  min-width: 0;
+}
+
+.matricula-pick-item__name {
+  display: inline-block;
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+  color: var(--color-primary-700);
+}
+
+.matricula-pick-item__meta {
+  margin-top: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.matricula-pick-item__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.matricula-pick-empty {
+  border: 1px dashed var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.matricula-selected {
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  background: var(--color-neutral-50);
+  margin-bottom: 12px;
+}
+
+.matricula-selected--empty {
+  color: var(--color-text-secondary);
+}
+
+.matricula-selected__title {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.matricula-selected__name {
+  margin-top: 2px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.matricula-selected__meta {
+  margin-top: 4px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.matricula-selected-history {
+  margin-bottom: 12px;
+}
+
+.matricula-selected-history__title {
+  margin-bottom: 6px;
+}
+
+@media (max-width: 960px) {
+  .matricula-search-form {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+}

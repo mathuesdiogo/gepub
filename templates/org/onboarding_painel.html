@@ -1,0 +1,148 @@
+{% extends "core/base.html" %}
+
+{% block title %}Painel de Onboarding • ORG • GEPUB{% endblock %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+{% include "org/partials/nav_tabs.html" %}
+
+<section class="org-info-grid">
+  <article class="org-info-card">
+    <p class="org-info-card__label">Módulos ativos</p>
+    <p class="org-info-card__value">{{ summary.modulos_ativos }}</p>
+    <p class="org-info-card__meta">Módulos em operação no município</p>
+  </article>
+  <article class="org-info-card">
+    <p class="org-info-card__label">Secretarias em implantação</p>
+    <p class="org-info-card__value">{{ summary.secretarias_em_implantacao }}</p>
+    <p class="org-info-card__meta">Com passos de onboarding registrados</p>
+  </article>
+  <article class="org-info-card">
+    <p class="org-info-card__label">Etapas concluídas</p>
+    <p class="org-info-card__value">{{ summary.steps_concluidos }}</p>
+    <p class="org-info-card__meta">De {{ summary.steps_total }} etapas totais</p>
+  </article>
+  <article class="org-info-card">
+    <p class="org-info-card__label">Provisionamentos com erro</p>
+    <p class="org-info-card__value">{{ summary.provisionamentos_erro }}</p>
+    <p class="org-info-card__meta">Em {{ summary.provisionamentos_total }} registros recentes</p>
+  </article>
+</section>
+
+<section class="onboard-card">
+  <div class="onboard-card__head">
+    <h3 class="onboard-card__title">Módulos Ativos</h3>
+    <p class="onboard-card__sub">Módulos habilitados para {{ municipio.nome }}.</p>
+  </div>
+  <div class="onboard-card__body">
+    <div class="onboard-module-badges">
+      {% for m in modulos_ativos %}
+        <span class="onboard-badge"><i class="fa-solid fa-circle-check"></i> {{ m.modulo|upper }}</span>
+      {% empty %}
+        <span class="onboard-badge">Sem módulos ativos</span>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% if credentials %}
+<section class="onboard-card onboard-credentials">
+  <div class="onboard-card__head">
+    <h3 class="onboard-card__title">Credenciais Geradas no Último Provisionamento</h3>
+    <p class="onboard-card__sub">Anote e compartilhe com cada secretaria. O usuário será forçado a trocar senha no primeiro login.</p>
+  </div>
+  <div class="onboard-card__body">
+    <div class="dash-table">
+      <table class="table">
+        <thead><tr><th>Secretaria</th><th>Usuário</th><th>Senha temporária</th></tr></thead>
+        <tbody>
+          {% for c in credentials %}
+            <tr><td>{{ c.secretaria }}</td><td>{{ c.username }}</td><td>{{ c.password }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="onboard-card">
+  <div class="onboard-card__head">
+    <h3 class="onboard-card__title">Progresso por Secretaria/Módulo</h3>
+    <p class="onboard-card__sub">Checklist de implantação inicial com status automático.</p>
+  </div>
+  <div class="onboard-card__body">
+    <div class="onboard-progress-grid">
+      {% for card in modulo_cards %}
+        <article class="onboard-progress">
+          <div class="onboard-progress__head">
+            <p class="onboard-progress__title">{{ card.modulo|upper }} • {{ card.secretaria_nome }}</p>
+            <p class="onboard-progress__sub">{{ card.concluidos }}/{{ card.total }} concluídos</p>
+          </div>
+          <progress class="onboard-progress__bar" max="{{ card.total }}" value="{{ card.concluidos }}"></progress>
+          <div class="onboard-progress__meta">
+            <span>Em progresso: {{ card.em_progresso }}</span>
+            <span>Pendentes: {{ card.pendentes }}</span>
+            <span>Total: {{ card.total }}</span>
+          </div>
+          <div class="onboard-step-list">
+            {% for step_row in card.steps %}
+              <div class="onboard-step">
+                <div class="onboard-step__top">
+                  <span class="onboard-step__title">{{ step_row.obj.ordem }}. {{ step_row.obj.titulo }}</span>
+                  <span class="status {% if step_row.obj.status == 'CONCLUIDO' %}success{% elif step_row.obj.status == 'EM_PROGRESSO' %}warning{% else %}default{% endif %}">
+                    {{ step_row.obj.get_status_display }}
+                  </span>
+                </div>
+                {% if step_row.obj.descricao %}<div class="onboard-step__desc">{{ step_row.obj.descricao }}</div>{% endif %}
+                {% if step_row.url %}
+                  <div class="u-mt-4"><a class="btn btn--ghost" href="{{ step_row.url }}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir etapa</a></div>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        </article>
+      {% empty %}
+        <div class="empty-state"><p class="small">Sem passos de onboarding registrados.</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="onboard-card">
+  <div class="onboard-card__head">
+    <h3 class="onboard-card__title">Histórico de Provisionamento</h3>
+    <p class="onboard-card__sub">Auditoria dos provisionamentos executados.</p>
+  </div>
+  <div class="onboard-card__body">
+    <div class="dash-table">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Template</th>
+            <th>Secretaria</th>
+            <th>Status</th>
+            <th>Solicitado por</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in provisionamentos %}
+            <tr>
+              <td>{{ p.criado_em|date:"d/m/Y H:i" }}</td>
+              <td>{{ p.template.nome|default:"—" }}</td>
+              <td>{{ p.secretaria.nome|default:"—" }}</td>
+              <td>{{ p.get_status_display }}</td>
+              <td>{{ p.solicitado_por.username|default:"—" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5">Nenhum provisionamento registrado.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+</div></div>
+{% endblock %}

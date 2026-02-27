@@ -1,0 +1,64 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+    {% if municipios and municipios|length %}
+      <select name="municipio" class="input" style="max-width:240px;">
+        {% for m in municipios %}
+          <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+
+    <select name="status" class="input" style="max-width:180px;">
+      <option value="">Todos os status</option>
+      {% for key,label in status_choices %}
+        <option value="{{ key }}" {% if status == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <input name="categoria" value="{{ categoria }}" class="input" placeholder="Categoria" style="max-width:200px;">
+    <input name="q" value="{{ q }}" class="input" placeholder="Buscar dataset" style="max-width:280px;">
+    <button class="btn btn--sm" type="submit">Filtrar</button>
+  </form>
+
+  <div class="table-shell"><div class="table-shell__body">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Dataset</th>
+          <th>Categoria</th>
+          <th>Escopo</th>
+          <th>Status</th>
+          <th>Visibilidade</th>
+          <th>Atualizado</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td>
+              <div class="item-title">{{ item.nome }}</div>
+              <div class="item-subtitle">Fonte: {{ item.get_fonte_display }}</div>
+            </td>
+            <td>{{ item.categoria|default:"-" }}</td>
+            <td>{{ item.secretaria|default:item.unidade|default:item.municipio }}</td>
+            <td>{{ item.get_status_display }}</td>
+            <td>{{ item.get_visibilidade_display }}</td>
+            <td>{{ item.atualizado_em|date:"d/m/Y H:i" }}</td>
+            <td>
+              <a class="link" href="{% url 'paineis:dataset_detail' item.id %}?municipio={{ municipio.id }}">abrir</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7">Nenhum dataset encontrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

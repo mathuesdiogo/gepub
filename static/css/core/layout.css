@@ -129,7 +129,7 @@ canvas {
   padding:0 12px;
   border-radius:999px;
   border:1px solid var(--border);
-  background: var(--card);
+  background: var(--color-bg-card);
   color: var(--text);
   min-width: 220px;
   outline: none;

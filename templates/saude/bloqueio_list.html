@@ -1,0 +1,10 @@
+{% extends "saude/base_modulo.html" %}
+{% block title %}Bloqueios de Agenda • Saúde • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title="Bloqueios de Agenda" subtitle="Períodos indisponíveis por unidade/profissional/sala" actions=actions %}
+  {% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Buscar por motivo, unidade, profissional..." action_url=action_url clear_url=clear_url has_filters=has_filters %}
+  {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj empty_title="Nenhum bloqueio encontrado" empty_text="Cadastre o primeiro bloqueio." %}
+</div></div>
+{% endblock %}

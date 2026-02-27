@@ -2,6 +2,6 @@
 {% block content %}
 <div class="card"><div class="card__body">
 {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
-{% include "core/partials/components/forms/form_shell.html" with form=form cancel_url=cancel_url submit_label=submit_label %}
+{% include "core/partials/components/forms/form_shell.html" with form=form cancel_url=cancel_url submit_label=submit_label enctype=enctype action_url=action_url top_extra=top_extra bottom_extra=bottom_extra %}
 </div></div>
 {% endblock %}

@@ -6,20 +6,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}GEPUB{% endblock %}</title>
-
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
-
-  <!-- Font Awesome (CDN) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
   {% block extra_css %}{% endblock %}
 </head>
-
 <body class="theme-institucional">
-
   <div class="layout">
-
-    <!-- SIDEBAR -->
     <aside class="sidebar" aria-label="Menu lateral">
       <div class="sidebar__header">
         <div class="brand">
@@ -31,7 +23,6 @@
             <div class="brand__sub">Gestão Estratégica Pública</div>
           </div>
         </div>
-
         <button
           type="button"
           class="sidebar__toggle"
@@ -44,128 +35,10 @@
         </button>
       </div>
 
-      <nav class="menu">
-
-        <a
-          class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'core' %}is-active{% endif %}"
-          href="{% url 'core:dashboard' %}"
-          title="Dashboard"
-        >
-          <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-house"></i></span>
-          <span class="menu__label">Dashboard</span>
-        </a>
-
-        <div class="menu__section">Módulos</div>
-
-        {% if can_org %}
-          <a
-            class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'org' %}is-active{% endif %}"
-            href="{% url 'org:index' %}"
-            title="Organização"
-          >
-            <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-sitemap"></i></span>
-            <span class="menu__label">Organização</span>
-          </a>
-        {% endif %}
-
-       {% if can_edu %}
-  <a
-    class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'educacao' and request.resolver_match.url_name == 'index' %}is-active{% endif %}"
-    href="{% url 'educacao:index' %}"
-    title="Educação"
-  >
-    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-book-open"></i></span>
-    <span class="menu__label">Educação</span>
-  </a>
-
-  <a
-    class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'educacao' and request.resolver_match.url_name == 'matricula_create' %}is-active{% endif %}"
-    href="{% url 'educacao:matricula_create' %}"
-    title="Matrículas"
-  >
-    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-id-card-clip"></i></span>
-    <span class="menu__label">Matrículas</span>
-  </a>
-{% endif %}
-
-
-        {% if can_nee %}
-          <a
-            class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'nee' %}is-active{% endif %}"
-            href="{% url 'nee:index' %}"
-            title="NEE"
-          >
-            <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-universal-access"></i></span>
-            <span class="menu__label">NEE</span>
-          </a>
-        {% endif %}
-        <a
-          class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'saude' %}is-active{% endif %}"
-          href="{% url 'saude:index' %}"
-          title="Saúde"
-        >
-          <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-notes-medical"></i></span>
-          <span class="menu__label">Saúde</span>
-        </a>
-        <div class="menu__section">Conta</div>
-
-        <a
-          class="menu__item {% if request.resolver_match and request.resolver_match.url_name == 'meu_perfil' %}is-active{% endif %}"
-          href="{% url 'accounts:meu_perfil' %}"
-          title="Meu perfil"
-        >
-          <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-user"></i></span>
-          <span class="menu__label">Meu perfil</span>
-        </a>
-
-        <a
-          class="menu__item {% if request.resolver_match and request.resolver_match.url_name == 'alterar_senha' %}is-active{% endif %}"
-          href="{% url 'accounts:alterar_senha' %}"
-          title="Alterar senha"
-        >
-          <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-key"></i></span>
-          <span class="menu__label">Alterar senha</span>
-        </a>
-
-        {% if can_users %}
-          <a
-            class="menu__item {% if request.resolver_match and request.resolver_match.url_name == 'usuarios_list' %}is-active{% endif %}"
-            href="{% url 'accounts:usuarios_list' %}"
-            title="Usuários"
-          >
-            <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-users"></i></span>
-            <span class="menu__label">Usuários</span>
-          </a>
-        {% endif %}
-            <div class="menu__section">Ajuda</div>
-
-<a
-  class="menu__item {% if request.resolver_match and request.resolver_match.namespace == 'core' and request.resolver_match.url_name == 'guia_telas' %}is-active{% endif %}"
-  href="{% url 'core:guia_telas' %}"
-  title="Guia de Telas"
->
-  <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-hashtag"></i></span>
-  <span class="menu__label">Guia de Telas</span>
-</a>
-
-        {% if request.user.is_staff or request.user.is_superuser %}
-          <div class="menu__section">Sistema</div>
-          <a class="menu__item" href="/admin/" title="Admin Django">
-            <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-gear"></i></span>
-            <span class="menu__label">Admin Django</span>
-          </a>
-        {% endif %}
-
-        <a class="menu__item" href="{% url 'accounts:logout' %}" title="Sair">
-          <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-power-off"></i></span>
-          <span class="menu__label">Sair</span>
-        </a>
-
-      </nav>
+      {% with rm=request.resolver_match %}{% include "core/partials/components/layout/sidebar_navigation.html" %}{% endwith %}
 
       <div class="sidebar__footer">
         <div class="sidebar__avatar" aria-hidden="true"></div>
-
         <div class="sidebar__user-info">
           <div class="sidebar__user-name">
             {% if request.user.is_authenticated %}
@@ -174,7 +47,6 @@
               Visitante
             {% endif %}
           </div>
-
           <div class="sidebar__user-role">
             {% if request.user.is_authenticated %}
               {{ request.user.groups.first.name|default:"Usuário" }}
@@ -184,34 +56,26 @@
           </div>
         </div>
       </div>
-
     </aside>
 
-    <!-- MAIN -->
     <main class="main" id="conteudo">
-
       <header class="topbar">
         <div class="topbar__left">
           <div class="topbar__title">{% block header %}Dashboard{% endblock %}</div>
-
-            {% block breadcrumbs %}{% if breadcrumbs %}{% include "core/partials/components/layout/breadcrumbs.html" with items=breadcrumbs %}{% endif %}{% endblock %}
+          {% block breadcrumbs %}{% if breadcrumbs %}{% include "core/partials/components/layout/breadcrumbs.html" with items=breadcrumbs %}{% endif %}{% endblock %}
         </div>
 
         <div class="topbar__right">
-  <form class="topbar-go" method="get" action="{% url 'core:go_code' %}">
-    <i class="fa-solid fa-magnifying-glass topbar-go__icon" aria-hidden="true"></i>
-    <input class="topbar-go__input" type="text" name="c" inputmode="numeric" autocomplete="off" placeholder="Ir para código… (ex: 201)" />
-    <button class="btn btn--ghost topbar-go__btn" type="submit">Ir</button>
-  </form>
-
-  <span class="pill">GEPUB</span>
-</div>
-
+          <form class="topbar-go" method="get" action="{% url 'core:go_code' %}">
+            <i class="fa-solid fa-magnifying-glass topbar-go__icon" aria-hidden="true"></i>
+            <input class="topbar-go__input" type="text" name="c" inputmode="numeric" autocomplete="off" placeholder="Ir para código… (ex: 101)" />
+            <button class="btn btn--ghost topbar-go__btn" type="submit">Ir</button>
+          </form>
+          <span class="pill">GEPUB</span>
+        </div>
       </header>
 
-      <!-- ✅ Conteúdo rolável (conforme layout.css) -->
       <section class="content">
-
         {% if messages %}
           <div class="alert-stack">
             {% for message in messages %}
@@ -222,24 +86,18 @@
             {% endfor %}
           </div>
         {% endif %}
-
         {% block content %}{% endblock %}
-
       </section>
     </main>
-
   </div>
 
-  <!-- ✅ scripts globais realmente necessários -->
   <script src="{% static 'js/autocomplete.js' %}"></script>
-
   <script>
     (function () {
-      // Sidebar collapse (global)
       const key = "gepub.sidebar.collapsed";
       const btn = document.getElementById("sidebarToggle");
 
-      function apply(state) {
+      function applySidebarState(state) {
         document.body.classList.toggle("sidebar-collapsed", state);
         if (btn) {
           btn.setAttribute("aria-pressed", state ? "true" : "false");
@@ -248,57 +106,73 @@
         }
       }
 
-      const saved = localStorage.getItem(key);
-      apply(saved === "1");
-
-      if (btn) {
+      function setupSidebar() {
+        const saved = localStorage.getItem(key);
+        applySidebarState(saved === "1");
+        if (!btn) return;
         btn.addEventListener("click", function () {
           const next = !document.body.classList.contains("sidebar-collapsed");
           localStorage.setItem(key, next ? "1" : "0");
-          apply(next);
+          applySidebarState(next);
         });
       }
 
-      // Alerts (global)
-      document.addEventListener("click", function (e) {
-        const close = e.target.closest(".alert__close");
-        if (!close) return;
-
-        const alert = close.closest(".alert");
+      function closeAlert(alert) {
         if (!alert) return;
-
         alert.classList.add("alert--closing");
-        setTimeout(() => alert.remove(), 250);
-      });
+        setTimeout(function () {
+          if (alert.parentNode) {
+            alert.remove();
+          }
+        }, 250);
+      }
 
-      document.querySelectorAll(".alert").forEach(alert => {
-        setTimeout(() => {
-          if (!alert.parentNode) return;
-          alert.classList.add("alert--closing");
-          setTimeout(() => alert.remove(), 250);
-        }, 4000);
-      });
+      function setupAlerts() {
+        document.addEventListener("click", function (e) {
+          const close = e.target.closest(".alert__close");
+          if (!close) return;
+          closeAlert(close.closest(".alert"));
+        });
 
-      // Action menu (dropdown actions)
-      document.addEventListener("click", function () {
-        document.querySelectorAll(".action-menu").forEach(m => m.classList.remove("action-menu--open"));
-      });
+        document.querySelectorAll(".alert").forEach(function (alert) {
+          setTimeout(function () {
+            if (!alert.parentNode) return;
+            closeAlert(alert);
+          }, 4000);
+        });
+      }
 
-      document.addEventListener("click", function (e) {
-        const btn = e.target.closest(".action-menu__button");
-        if (!btn) return;
+      function setupActionMenus() {
+        document.addEventListener("click", function () {
+          document.querySelectorAll(".action-menu").forEach(function (menu) {
+            menu.classList.remove("action-menu--open");
+          });
+        });
 
-        e.preventDefault();
-        e.stopPropagation();
+        document.addEventListener("click", function (e) {
+          const menuButton = e.target.closest(".action-menu__button");
+          if (!menuButton) return;
+          e.preventDefault();
+          e.stopPropagation();
+          const menu = menuButton.closest(".action-menu");
+          if (!menu) return;
+          menu.classList.toggle("action-menu--open");
+        });
+      }
 
-        const menu = btn.closest(".action-menu");
-        if (!menu) return;
+      function boot() {
+        setupSidebar();
+        setupAlerts();
+        setupActionMenus();
+      }
 
-        menu.classList.toggle("action-menu--open");
-      });
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", boot);
+      } else {
+        boot();
+      }
     })();
   </script>
-
   {% block extra_js %}{% endblock %}
 </body>
 </html>

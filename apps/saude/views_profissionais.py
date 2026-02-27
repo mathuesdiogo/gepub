@@ -36,12 +36,13 @@ def profissional_list(request):
     # EXPORTAÇÃO (respeita filtros)
     # =========================
     if export in ("csv", "pdf"):
-        headers_export = ["Nome", "Unidade", "Cargo", "CPF", "Telefone", "E-mail", "Ativo"]
+        headers_export = ["Nome", "Unidade", "Especialidade", "Cargo", "CPF", "Telefone", "E-mail", "Ativo"]
         rows_export = []
         for p in qs:
             rows_export.append([
                 p.nome,
                 p.unidade.nome if p.unidade else "",
+                p.especialidade.nome if getattr(p, "especialidade", None) else "",
                 p.get_cargo_display(),
                 p.cpf or "",
                 p.telefone or "",
@@ -86,6 +87,7 @@ def profissional_list(request):
     headers = [
         {"label": "Nome"},
         {"label": "Unidade"},
+        {"label": "Especialidade"},
         {"label": "Cargo"},
         {"label": "Ativo", "width": "120px"},
     ]
@@ -96,6 +98,7 @@ def profissional_list(request):
             "cells": [
                 {"text": p.nome, "url": reverse("saude:profissional_detail", args=[p.pk])},
                 {"text": p.unidade.nome if p.unidade else "—"},
+                {"text": p.especialidade.nome if getattr(p, "especialidade", None) else "—"},
                 {"text": p.get_cargo_display()},
                 {"text": "Sim" if p.ativo else "Não"},
             ],
@@ -187,7 +190,11 @@ def profissional_detail(request, pk: int):
 
     fields = [
         {"label": "Unidade", "value": obj.unidade.nome if obj.unidade else "—"},
+        {"label": "Especialidade", "value": obj.especialidade.nome if getattr(obj, "especialidade", None) else "—"},
         {"label": "Cargo", "value": obj.get_cargo_display()},
+        {"label": "Conselho", "value": obj.conselho_numero or "—"},
+        {"label": "CBO", "value": obj.cbo or "—"},
+        {"label": "Carga horária semanal", "value": obj.carga_horaria_semanal},
         {"label": "CPF", "value": obj.cpf or "—"},
         {"label": "Telefone", "value": obj.telefone or "—"},
         {"label": "E-mail", "value": obj.email or "—"},

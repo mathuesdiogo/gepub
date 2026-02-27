@@ -1,0 +1,483 @@
+.aluno-flow-page {
+  position: relative;
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border));
+  border-radius: 24px;
+  padding: 22px;
+  background:
+    radial-gradient(circle at 8% 0%, color-mix(in srgb, var(--primary) 16%, white) 0%, transparent 34%),
+    radial-gradient(circle at 92% 10%, color-mix(in srgb, var(--success) 14%, white) 0%, transparent 36%),
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 72%, var(--surface-2)) 0%, var(--surface) 100%);
+  box-shadow: 0 12px 30px rgba(20, 48, 86, 0.08);
+}
+
+.aluno-flow-page__hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 0 16px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  color: color-mix(in srgb, var(--text) 86%, var(--muted));
+  background: color-mix(in srgb, var(--primary) 10%, white);
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--border));
+}
+
+.aluno-flow-page__hint i {
+  color: var(--primary);
+}
+
+.aluno-flow-layout {
+  display: grid;
+  grid-template-columns: 290px minmax(0, 1fr);
+  gap: 20px;
+}
+
+.aluno-flow-side {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.aluno-profile-card {
+  border: 1px solid color-mix(in srgb, var(--primary) 20%, var(--border));
+  border-radius: 20px;
+  padding: 16px;
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--primary) 8%, white) 0%, color-mix(in srgb, var(--surface) 86%, white) 100%);
+  box-shadow: 0 10px 20px rgba(18, 51, 90, 0.07);
+}
+
+.aluno-profile-card__avatar {
+  width: 124px;
+  height: 124px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  border: 4px solid color-mix(in srgb, var(--primary) 22%, white);
+  background: color-mix(in srgb, var(--primary) 10%, white);
+  overflow: hidden;
+}
+
+.aluno-profile-card__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.aluno-profile-card__avatar-fallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 42px;
+  color: color-mix(in srgb, var(--primary) 78%, #fff);
+}
+
+.aluno-profile-card h2 {
+  margin: 0;
+  text-align: center;
+  font-size: 1.2rem;
+  color: color-mix(in srgb, var(--text) 92%, #000);
+}
+
+.aluno-profile-card p {
+  margin: 6px 0 0;
+  text-align: center;
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+
+.aluno-profile-card__pills {
+  margin: 14px 0 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.aluno-pill {
+  flex: 1 1 46%;
+  min-width: 115px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--primary) 16%, var(--border));
+  background: color-mix(in srgb, var(--surface) 72%, var(--surface-2));
+  padding: 9px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.aluno-pill small {
+  font-size: 0.66rem;
+  color: color-mix(in srgb, var(--muted) 84%, #0e1f38);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.aluno-pill strong {
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--text) 92%, #000);
+}
+
+.aluno-pill--success {
+  border-color: color-mix(in srgb, var(--success) 28%, var(--border));
+  background: color-mix(in srgb, var(--success) 12%, white);
+}
+
+.aluno-pill--danger {
+  border-color: color-mix(in srgb, var(--danger) 24%, var(--border));
+  background: color-mix(in srgb, var(--danger) 10%, white);
+}
+
+.aluno-profile-card__meta {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  border-top: 1px dashed color-mix(in srgb, var(--primary) 20%, var(--border));
+}
+
+.aluno-profile-card__meta li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px dashed color-mix(in srgb, var(--primary) 12%, var(--border));
+}
+
+.aluno-profile-card__meta li span {
+  color: color-mix(in srgb, var(--muted) 88%, #0d2a4d);
+  font-size: 0.8rem;
+}
+
+.aluno-profile-card__meta li strong {
+  color: color-mix(in srgb, var(--text) 92%, #000);
+  font-size: 0.84rem;
+  text-align: right;
+}
+
+.aluno-steps-nav {
+  position: sticky;
+  top: 86px;
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border));
+  border-radius: 16px;
+  padding: 10px;
+  background: color-mix(in srgb, var(--surface) 84%, var(--surface-2));
+}
+
+.aluno-steps-nav a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: color-mix(in srgb, var(--text) 88%, #000);
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.aluno-steps-nav a:hover {
+  background: color-mix(in srgb, var(--primary) 11%, white);
+  transform: translateX(3px);
+}
+
+.aluno-steps-nav a span {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  font-size: 0.73rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 15%, white);
+}
+
+.aluno-flow-main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.aluno-flow-main::before {
+  content: "";
+  position: absolute;
+  left: 22px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 38%, var(--border)) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.aluno-stage {
+  position: relative;
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border));
+  border-radius: 18px;
+  padding: 16px 16px 16px 52px;
+  box-shadow: 0 8px 22px rgba(14, 38, 76, 0.07);
+  animation: alunoStageIn 0.46s ease both;
+}
+
+.aluno-stage:nth-of-type(2) { animation-delay: 0.04s; }
+.aluno-stage:nth-of-type(3) { animation-delay: 0.08s; }
+.aluno-stage:nth-of-type(4) { animation-delay: 0.12s; }
+.aluno-stage:nth-of-type(5) { animation-delay: 0.16s; }
+.aluno-stage:nth-of-type(6) { animation-delay: 0.2s; }
+
+.aluno-stage--a { background: color-mix(in srgb, var(--primary) 8%, white); }
+.aluno-stage--b { background: color-mix(in srgb, var(--color-info-500) 7%, white); }
+.aluno-stage--c { background: color-mix(in srgb, var(--success) 8%, white); }
+.aluno-stage--d { background: color-mix(in srgb, var(--warning) 9%, white); }
+.aluno-stage--e { background: color-mix(in srgb, #1f8fa6 9%, white); }
+.aluno-stage--f { background: color-mix(in srgb, #8a5ad2 8%, white); }
+
+.aluno-stage__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.aluno-stage__step {
+  position: absolute;
+  left: 9px;
+  top: 18px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 18%, white);
+  border: 1px solid color-mix(in srgb, var(--primary) 34%, var(--border));
+}
+
+.aluno-stage__header h3 {
+  margin: 0;
+  font-size: 1.06rem;
+  color: color-mix(in srgb, var(--text) 92%, #000);
+}
+
+.aluno-stage__header p {
+  margin: 3px 0 0;
+  color: color-mix(in srgb, var(--muted) 86%, #0f2b4f);
+  font-size: 0.86rem;
+}
+
+.aluno-kv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
+}
+
+.aluno-kv-card {
+  border: 1px solid color-mix(in srgb, var(--primary) 16%, var(--border));
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: color-mix(in srgb, white 78%, var(--surface-2));
+}
+
+.aluno-kv-card span {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--muted) 84%, #163861);
+  margin-bottom: 4px;
+}
+
+.aluno-kv-card strong {
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--text) 92%, #000);
+}
+
+.aluno-stage .table-shell {
+  margin-top: 0;
+  border: 1px solid color-mix(in srgb, var(--primary) 14%, var(--border));
+  border-radius: 14px;
+  overflow: auto;
+  background: color-mix(in srgb, white 88%, var(--surface-2));
+}
+
+.aluno-stage .table-shell thead th {
+  background: color-mix(in srgb, var(--primary) 12%, white);
+  color: color-mix(in srgb, var(--text) 90%, #000);
+}
+
+.aluno-stage .table-shell tbody td {
+  background: transparent;
+}
+
+.aluno-stage__forms {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.aluno-form-panel {
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border));
+  border-radius: 14px;
+  background: color-mix(in srgb, white 86%, var(--surface-2));
+}
+
+.aluno-form-panel summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 10px 12px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: color-mix(in srgb, var(--text) 90%, #000);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.aluno-form-panel summary::-webkit-details-marker {
+  display: none;
+}
+
+.aluno-form-panel form {
+  border-top: 1px solid color-mix(in srgb, var(--primary) 14%, var(--border));
+  padding: 10px 12px 12px;
+}
+
+.aluno-form-panel form p {
+  margin: 0 0 10px;
+}
+
+.aluno-form-panel form label {
+  display: block;
+  margin-bottom: 4px;
+  color: color-mix(in srgb, var(--muted) 88%, #102e52);
+  font-size: 0.78rem;
+}
+
+.aluno-form-panel form input,
+.aluno-form-panel form select,
+.aluno-form-panel form textarea {
+  width: 100%;
+}
+
+.aluno-stage__subblock {
+  margin-top: 14px;
+}
+
+.aluno-stage__cta {
+  margin-top: 8px;
+}
+
+.aluno-stage__subblock h4,
+.aluno-dual-list h4 {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--text) 88%, #000);
+}
+
+.aluno-listing {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.aluno-listing__item {
+  border: 1px solid color-mix(in srgb, var(--primary) 16%, var(--border));
+  background: color-mix(in srgb, white 90%, var(--surface-2));
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.aluno-listing__item h4 {
+  margin: 0;
+  font-size: 0.89rem;
+  color: color-mix(in srgb, var(--text) 90%, #000);
+}
+
+.aluno-listing__item p {
+  margin: 5px 0 0;
+  font-size: 0.83rem;
+  color: color-mix(in srgb, var(--muted) 86%, #19385f);
+}
+
+.aluno-listing__item a {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.aluno-chip-list {
+  margin: 0 0 10px;
+}
+
+.aluno-dual-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.aluno-empty-line {
+  display: block;
+  border: 1px dashed color-mix(in srgb, var(--primary) 22%, var(--border));
+  border-radius: 10px;
+  padding: 9px 12px;
+  background: color-mix(in srgb, white 90%, var(--surface-2));
+  font-size: 0.84rem;
+  color: color-mix(in srgb, var(--muted) 90%, #163861);
+}
+
+@keyframes alunoStageIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1120px) {
+  .aluno-flow-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .aluno-flow-main::before {
+    display: none;
+  }
+
+  .aluno-stage {
+    padding-left: 16px;
+  }
+
+  .aluno-stage__step {
+    position: static;
+    margin-right: 8px;
+  }
+
+  .aluno-stage__header {
+    align-items: center;
+  }
+
+  .aluno-steps-nav {
+    position: static;
+  }
+}
+
+@media (max-width: 780px) {
+  .aluno-flow-page {
+    padding: 14px;
+    border-radius: 18px;
+  }
+
+  .aluno-dual-list {
+    grid-template-columns: 1fr;
+  }
+
+  .aluno-pill {
+    min-width: 100%;
+  }
+}

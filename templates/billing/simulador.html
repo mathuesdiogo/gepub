@@ -1,0 +1,76 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/billing.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <form method="post" class="form-shell">
+    {% csrf_token %}
+    <div class="form-shell__fields">{{ form.as_p }}</div>
+    <div class="form-shell__actions">
+      <button type="submit" class="btn btn-primary">Simular</button>
+      <a class="link" href="{{ cancel_url }}">Cancelar</a>
+    </div>
+  </form>
+
+  {% if resultado %}
+    <div class="billing-summary-grid">
+      <div class="billing-box">
+        <div class="billing-box__label">Plano recomendado</div>
+        <div class="billing-box__value">{{ resultado.plano.nome }}</div>
+        <div class="billing-box__meta">{{ resultado.justificativa }}</div>
+      </div>
+      <div class="billing-box">
+        <div class="billing-box__label">Base mensal</div>
+        <div class="billing-box__value">R$ {{ resultado.preco_base }}</div>
+        <div class="billing-box__meta">Sem adicionais</div>
+      </div>
+      <div class="billing-box">
+        <div class="billing-box__label">Total mensal estimado</div>
+        <div class="billing-box__value">R$ {{ resultado.total_mensal }}</div>
+        <div class="billing-box__meta">Adicionais: R$ {{ resultado.total_adicionais }}</div>
+      </div>
+    </div>
+
+    <div class="table-shell">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Quantidade</th>
+            <th>Valor unitário</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in resultado.adicionais %}
+            <tr>
+              <td>{{ a.nome }}</td>
+              <td>{{ a.quantidade }}</td>
+              <td>R$ {{ a.valor_unitario }}</td>
+              <td>R$ {{ a.valor_total }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4">Sem adicionais para este cenário.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <form method="post" style="margin-top: 12px;">
+      {% csrf_token %}
+      {% for field in form %}
+        <input type="hidden" name="{{ field.name }}" value="{{ field.value|default_if_none:'' }}">
+      {% endfor %}
+      <button type="submit" name="export" value="pdf" class="btn btn--ghost">
+        <i class="fa-solid fa-file-pdf"></i> Exportar proposta em PDF
+      </button>
+    </form>
+  {% endif %}
+</div></div>
+{% endblock %}

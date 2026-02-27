@@ -8,7 +8,7 @@
   <a class="btn btn--ghost" href="?export=csv"><i class="fa-solid fa-file-csv"></i> Exportar CSV</a>
 </div>
 <table class="table-shell">
-  <thead><tr><th>Unidade</th><th style="width:140px;">Total</th></tr></thead>
+  <thead><tr><th>Unidade</th><th class="u-w-140">Total</th></tr></thead>
   <tbody>
   {% for d in data %}
     <tr><td>{{ d.aluno__matriculas__turma__unidade__nome }}</td><td>{{ d.total }}</td></tr>

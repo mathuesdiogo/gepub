@@ -1,0 +1,74 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+    {% if municipios and municipios|length %}
+      <select name="municipio" class="input" style="max-width:240px;" onchange="this.form.submit()">
+        {% for m in municipios %}
+          <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+  </form>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:12px 0 18px;">
+    {% for card in cards %}
+      {% include "core/partials/components/data/kpi_card.html" with label=card.label value=card.value %}
+    {% endfor %}
+  </div>
+
+  <div class="table-shell"><div class="table-shell__body">
+    <table class="table">
+      <thead><tr><th>Competência</th><th>Status</th><th>Colaboradores</th><th>Líquido</th><th></th></tr></thead>
+      <tbody>
+        {% for item in latest_competencias %}
+          <tr>
+            <td>{{ item.competencia }}</td>
+            <td>{{ item.get_status_display }}</td>
+            <td>{{ item.total_colaboradores }}</td>
+            <td>R$ {{ item.total_liquido }}</td>
+            <td>
+              {% if item.status != "FECHADA" %}
+                <form method="post" action="{% url 'folha:competencia_processar' item.pk %}?municipio={{ municipio.pk }}" style="display:inline;">
+                  {% csrf_token %}
+                  <button class="btn btn--sm btn--ghost" type="submit">Processar</button>
+                </form>
+                <form method="post" action="{% url 'folha:competencia_fechar' item.pk %}?municipio={{ municipio.pk }}" style="display:inline;">
+                  {% csrf_token %}
+                  <button class="btn btn--sm btn-primary" type="submit">Fechar</button>
+                </form>
+              {% else %}
+                -
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Nenhuma competência cadastrada.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+
+  <div class="table-shell" style="margin-top:12px;"><div class="table-shell__body">
+    <table class="table">
+      <thead><tr><th>Competência</th><th>Servidor</th><th>Rubrica</th><th>Status</th><th>Valor</th></tr></thead>
+      <tbody>
+        {% for item in latest_lancamentos %}
+          <tr>
+            <td>{{ item.competencia.competencia }}</td>
+            <td>{{ item.servidor.get_full_name|default:item.servidor.username }}</td>
+            <td>{{ item.evento.codigo }} - {{ item.evento.nome }}</td>
+            <td>{{ item.get_status_display }}</td>
+            <td>R$ {{ item.valor_calculado }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Nenhum lançamento recente.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

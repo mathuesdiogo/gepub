@@ -1,0 +1,89 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="card" style="margin-top:12px;"><div class="card__body">
+    <h3 style="margin-top:0;">Nova conversão</h3>
+    <form method="post" enctype="multipart/form-data" class="form-grid" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;">
+      {% csrf_token %}
+      {% for field in form %}
+        <div style="grid-column: span 1;">
+          <label class="small" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<small class="muted" style="display:block;">{{ field.help_text }}</small>{% endif %}
+          {% for err in field.errors %}<div class="small" style="color:#c0392b;">{{ err }}</div>{% endfor %}
+        </div>
+      {% endfor %}
+      <div style="grid-column:1 / -1;">
+        <button class="btn btn-primary" type="submit"><i class="fa-solid fa-gear"></i> Processar conversão</button>
+      </div>
+    </form>
+  </div></div>
+
+  <form method="get" class="filter-bar" style="margin:12px 0;">
+    {% if municipios and municipios|length %}
+      <select name="municipio" class="input" style="max-width:240px;">
+        {% for m in municipios %}
+          <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+
+    <select name="tipo" class="input" style="max-width:220px;">
+      <option value="">Todos os tipos</option>
+      {% for key,label in tipo_choices %}
+        <option value="{{ key }}" {% if tipo == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <select name="status" class="input" style="max-width:220px;">
+      <option value="">Todos os status</option>
+      {% for key,label in status_choices %}
+        <option value="{{ key }}" {% if status == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <input name="q" value="{{ q }}" class="input" placeholder="Buscar por log">
+    <button class="btn btn--sm" type="submit">Filtrar</button>
+  </form>
+
+  <div class="table-shell"><div class="table-shell__body">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Tipo</th>
+          <th>Status</th>
+          <th>Entrada</th>
+          <th>Duração</th>
+          <th>Criado em</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td>#{{ item.id }}</td>
+            <td>{{ item.get_tipo_display }}</td>
+            <td>{{ item.get_status_display }}</td>
+            <td>{{ item.tamanho_entrada }} bytes</td>
+            <td>{{ item.duracao_ms }} ms</td>
+            <td>{{ item.criado_em|date:"d/m/Y H:i" }}</td>
+            <td>
+              {% if item.output_file %}
+                <a class="link" href="{% url 'conversor:download' item.id %}">download</a>
+              {% else %}
+                -
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7">Nenhum job encontrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

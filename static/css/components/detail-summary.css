@@ -5,6 +5,7 @@
   margin: 8px 0 20px;
 }
 
+.detail-summary__grid,
 .detail-summary__fields{
   display:grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

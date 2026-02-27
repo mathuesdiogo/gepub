@@ -1,0 +1,72 @@
+{% extends "core/base_public.html" %}
+{% load static %}
+
+{% block title %}{{ title|default:titulo_portal }}{% endblock %}
+
+{% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/pages/portal-public-pages.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="pp-page" style="--portal-primary: {{ cor_primaria|default:'#0E4A7E' }}; --portal-secondary: {{ cor_secundaria|default:'#2F6EA9' }};">
+  <header class="pp-header">
+    <div class="pp-wrap pp-header__bar">
+      <a href="{% url 'core:institucional_public' %}" class="pp-brand">
+        {% if logo_url %}
+          <img src="{{ logo_url }}" alt="Logo {{ municipio.nome }}">
+        {% else %}
+          <span class="pp-brand__icon"><i class="fa-solid fa-building-columns"></i></span>
+        {% endif %}
+        <span>
+          <strong>{{ titulo_portal|default:municipio.nome }}</strong>
+          <small>{{ subtitulo_portal|default:"Portal Público Municipal" }}</small>
+        </span>
+      </a>
+      <nav class="pp-nav">
+        {% for item in menu_items_header %}
+          <a href="{{ item.url }}" {% if item.nova_aba %}target="_blank" rel="noopener"{% endif %}>{{ item.titulo }}</a>
+        {% endfor %}
+        <a href="{{ cta_login }}" class="pp-login">Acesso admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="pp-main">
+    <div class="pp-wrap">
+      <section class="pp-hero">
+        <p class="pp-kicker">{{ municipio.nome }}/{{ municipio.uf }}</p>
+        <h1>{{ title|default:titulo_portal }}</h1>
+        {% block hero_text %}
+          {% if mensagem_boas_vindas %}<p>{{ mensagem_boas_vindas }}</p>{% endif %}
+        {% endblock %}
+      </section>
+
+      {% block page_content %}{% endblock %}
+    </div>
+  </main>
+
+  <footer class="pp-footer">
+    <div class="pp-wrap">
+      <div>{{ titulo_portal|default:municipio.nome }} • {{ municipio.nome }}/{{ municipio.uf }}</div>
+      {% if endereco %}<div>{{ endereco }}</div>{% endif %}
+      <div>
+        {% if telefone %}Tel: {{ telefone }}{% endif %}
+        {% if telefone and email %} • {% endif %}
+        {% if email %}E-mail: {{ email }}{% endif %}
+      </div>
+      {% if horario_atendimento %}<div>Atendimento: {{ horario_atendimento }}</div>{% endif %}
+      {% if menu_items_footer %}
+        <div class="pp-inline-list" style="margin-top:8px;">
+          {% for item in menu_items_footer %}
+            <a href="{{ item.url }}" {% if item.nova_aba %}target="_blank" rel="noopener"{% endif %}>{{ item.titulo }}</a>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </footer>
+</div>
+{% endblock %}

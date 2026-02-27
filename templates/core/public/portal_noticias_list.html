@@ -1,0 +1,66 @@
+{% extends "core/public/base_portal_tenant.html" %}
+
+{% block hero_text %}
+<p>Notícias oficiais da prefeitura, comunicados das secretarias e atualizações institucionais.</p>
+{% endblock %}
+
+{% block page_content %}
+<section class="pp-card">
+  <form method="get" class="pp-form-inline pp-form-inline--3">
+    <div>
+      <label for="id_q">Busca</label>
+      <input id="id_q" class="pp-input" type="text" name="q" value="{{ q }}" placeholder="Título, resumo ou conteúdo">
+    </div>
+    <div>
+      <label for="id_categoria">Categoria</label>
+      <select id="id_categoria" class="pp-select" name="categoria">
+        <option value="">Todas</option>
+        {% for value, label in categorias %}
+          <option value="{{ value }}" {% if categoria == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>&nbsp;</label>
+      <div class="pp-actions">
+        <button class="pp-btn pp-btn--primary" type="submit">Filtrar</button>
+        <a class="pp-btn pp-btn--soft" href="{% url 'core:portal_noticias_public' %}">Limpar</a>
+      </div>
+    </div>
+  </form>
+</section>
+
+{% if banners %}
+<section class="pp-grid pp-grid--3" style="margin-top:10px;">
+  {% for banner in banners %}
+    <article class="pp-card">
+      <h3>{{ banner.titulo }}</h3>
+      {% if banner.subtitulo %}<p class="pp-meta">{{ banner.subtitulo }}</p>{% endif %}
+      {% if banner.imagem %}<img src="{{ banner.imagem.url }}" alt="{{ banner.titulo }}" style="width:100%;border-radius:10px;margin-top:8px;">{% endif %}
+      {% if banner.link %}<p><a class="pp-btn pp-btn--soft" href="{{ banner.link }}">Acessar</a></p>{% endif %}
+    </article>
+  {% endfor %}
+</section>
+{% endif %}
+
+<section style="margin-top:10px;">
+  <ul class="pp-list">
+    {% for item in items %}
+      <li class="pp-list__item">
+        <p class="pp-meta">{{ item.get_categoria_display }} • {{ item.publicado_em|date:"d/m/Y H:i" }}</p>
+        <h3><a href="{% url 'core:portal_noticia_detail_public' item.slug %}" style="text-decoration:none;color:inherit;">{{ item.titulo }}</a></h3>
+        {% if item.resumo %}<p>{{ item.resumo }}</p>{% endif %}
+        <div class="pp-actions">
+          <a class="pp-btn pp-btn--soft" href="{% url 'core:portal_noticia_detail_public' item.slug %}">Ler notícia</a>
+          {% if item.destaque %}<span class="pp-badge"><i class="fa-solid fa-star"></i>Destaque</span>{% endif %}
+        </div>
+      </li>
+    {% empty %}
+      <li class="pp-list__item">
+        <h3>Nenhuma notícia encontrada</h3>
+        <p>Não há publicações para os filtros informados.</p>
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

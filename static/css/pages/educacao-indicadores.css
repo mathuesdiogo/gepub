@@ -1,0 +1,49 @@
+/* Indicadores Educação (ajuste visual SUAP) */
+.educacao-indicadores .grid {
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.educacao-indicadores .sec-kpi {
+  min-height: 0;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-light);
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-xs);
+  display: block;
+}
+
+.educacao-indicadores .sec-kpi:hover {
+  transform: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.educacao-indicadores .sec-kpi__label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-bold);
+  opacity: 1;
+}
+
+.educacao-indicadores .sec-kpi__value {
+  margin-top: 4px;
+  font-size: var(--font-size-2xl);
+  line-height: 1.1;
+  color: var(--color-primary-700);
+  font-weight: var(--font-weight-bold);
+}
+
+.educacao-indicadores .sec-kpi__helper {
+  margin-top: 6px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* Neutraliza variantes coloridas só nesta página */
+.educacao-indicadores .kpi-blue,
+.educacao-indicadores .kpi-green,
+.educacao-indicadores .kpi-purple {
+  background: var(--color-bg-card);
+}

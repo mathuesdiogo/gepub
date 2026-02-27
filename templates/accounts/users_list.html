@@ -14,9 +14,35 @@
 {% block content %}
 <div class="card">
   <div class="card__body">
-{% include "core/partials/components/layout/page_head.html" with title="Usuários" subtitle="Gerencie contas, perfis e acessos" actions=actions %}
-{% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Buscar por nome, e-mail, código..." action_url=action_url clear_url=clear_url extra_filters=extra_filters has_filters=has_filters input_attrs=input_attrs %}
-{% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q actions_partial=actions_partial empty_title="Nenhum usuário encontrado" empty_text="Tente ajustar sua busca." %}
+{% include "core/partials/components/layout/page_head.html" with title="Usuários" subtitle="Gestão de contas, perfis, escopos e segurança" actions=actions %}
+{% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Buscar por nome, username, e-mail ou código..." action_url=action_url clear_url=clear_url extra_filters=extra_filters has_filters=has_filters input_attrs=input_attrs %}
+
+{% if grouped_cards %}
+  <section class="users-groups">
+    <div class="users-groups__grid">
+      {% for g in grouped_cards %}
+        <article class="users-group-card">
+          <header class="users-group-card__head">
+            <h3 class="users-group-card__title">{{ g.title }}</h3>
+            <span class="status info">{{ g.total }} usuários</span>
+          </header>
+          <div class="users-group-card__meta">
+            <span class="status success">Ativos: {{ g.ativos }}</span>
+            <span class="status default">Inativos: {{ g.inativos }}</span>
+            <span class="status danger">Bloqueados: {{ g.bloqueados }}</span>
+          </div>
+          <ul class="users-group-card__list">
+            {% for u in g.users %}
+              <li>{{ u.name }} <span class="small">({{ u.code }})</span></li>
+            {% endfor %}
+          </ul>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+
+{% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q actions_partial=actions_partial next_url=next_url empty_title="Nenhum usuário encontrado" empty_text="Tente ajustar sua busca/filtros." %}
   </div>
 </div>
 {% endblock %}

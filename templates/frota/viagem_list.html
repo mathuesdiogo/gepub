@@ -1,0 +1,51 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+    {% if municipios and municipios|length %}
+      <select name="municipio" class="input" style="max-width:240px;">
+        {% for m in municipios %}
+          <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+    <select name="status" class="input" style="max-width:220px;">
+      <option value="">Todos status</option>
+      {% for key,label in status_choices %}
+        <option value="{{ key }}" {% if status == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn--sm" type="submit">Filtrar</button>
+  </form>
+  <div class="table-shell"><div class="table-shell__body">
+    <table class="table">
+      <thead><tr><th>Saída</th><th>Veículo</th><th>Motorista</th><th>Destino</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td>{{ item.data_saida|date:"d/m/Y" }}</td>
+            <td>{{ item.veiculo.codigo }} / {{ item.veiculo.placa|default:"-" }}</td>
+            <td>{{ item.motorista.get_full_name|default:item.motorista.username }}</td>
+            <td>{{ item.destino }}</td>
+            <td>{{ item.get_status_display }}</td>
+            <td>
+              {% if item.status == "ABERTA" %}
+                <form method="post" action="{% url 'frota:viagem_concluir' item.pk %}?municipio={{ municipio.pk }}" style="display:inline;">
+                  {% csrf_token %}
+                  <button class="btn btn--sm btn-primary" type="submit">Concluir</button>
+                </form>
+              {% else %}
+                -
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6">Nenhuma viagem encontrada.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

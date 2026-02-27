@@ -27,20 +27,138 @@ def is_admin(user) -> bool:
 # =========================
 PERM_ORG = "org"
 PERM_EDU = "educacao"
+PERM_AVALIACOES = "avaliacoes"
 PERM_NEE = "nee"
 PERM_SAUDE = "saude"
+PERM_BILLING = "billing"
+PERM_FINANCEIRO = "financeiro"
 PERM_ACCOUNTS = "accounts"
 PERM_REPORTS = "reports"
+PERM_PROCESSOS = "processos"
+PERM_COMPRAS = "compras"
+PERM_CONTRATOS = "contratos"
+PERM_INTEGRACOES = "integracoes"
+PERM_PAINEIS = "paineis"
+PERM_CONVERSOR = "conversor"
+PERM_RH = "rh"
+PERM_PONTO = "ponto"
+PERM_FOLHA = "folha"
+PERM_PATRIMONIO = "patrimonio"
+PERM_ALMOXARIFADO = "almoxarifado"
+PERM_FROTA = "frota"
+PERM_OUVIDORIA = "ouvidoria"
+PERM_TRIBUTOS = "tributos"
 
-ALL_PERMS = {PERM_ORG, PERM_EDU, PERM_NEE, PERM_ACCOUNTS, PERM_REPORTS}
+ALL_PERMS = {
+    PERM_ORG,
+    PERM_EDU,
+    PERM_AVALIACOES,
+    PERM_NEE,
+    PERM_SAUDE,
+    PERM_BILLING,
+    PERM_FINANCEIRO,
+    PERM_ACCOUNTS,
+    PERM_REPORTS,
+    PERM_PROCESSOS,
+    PERM_COMPRAS,
+    PERM_CONTRATOS,
+    PERM_INTEGRACOES,
+    PERM_PAINEIS,
+    PERM_CONVERSOR,
+    PERM_RH,
+    PERM_PONTO,
+    PERM_FOLHA,
+    PERM_PATRIMONIO,
+    PERM_ALMOXARIFADO,
+    PERM_FROTA,
+    PERM_OUVIDORIA,
+    PERM_TRIBUTOS,
+}
 
 ROLE_PERMS = {
     "ADMIN": ALL_PERMS,
-    "MUNICIPAL": {PERM_ORG, PERM_EDU, PERM_NEE, PERM_SAUDE, PERM_REPORTS, PERM_ACCOUNTS},
-    "SECRETARIA": {PERM_EDU, PERM_NEE, PERM_SAUDE, PERM_REPORTS, PERM_ACCOUNTS},
-    "UNIDADE": {PERM_EDU, PERM_NEE, PERM_SAUDE, PERM_REPORTS, PERM_ACCOUNTS},
-    "NEE": {PERM_NEE, PERM_SAUDE, PERM_REPORTS, PERM_ACCOUNTS},
-    "LEITURA": {PERM_REPORTS, PERM_ACCOUNTS},
+    "MUNICIPAL": {
+        PERM_ORG,
+        PERM_EDU,
+        PERM_AVALIACOES,
+        PERM_NEE,
+        PERM_SAUDE,
+        PERM_BILLING,
+        PERM_FINANCEIRO,
+        PERM_REPORTS,
+        PERM_ACCOUNTS,
+        PERM_PROCESSOS,
+        PERM_COMPRAS,
+        PERM_CONTRATOS,
+        PERM_INTEGRACOES,
+        PERM_PAINEIS,
+        PERM_CONVERSOR,
+        PERM_RH,
+        PERM_PONTO,
+        PERM_FOLHA,
+        PERM_PATRIMONIO,
+        PERM_ALMOXARIFADO,
+        PERM_FROTA,
+        PERM_OUVIDORIA,
+        PERM_TRIBUTOS,
+    },
+    "SECRETARIA": {
+        PERM_EDU,
+        PERM_AVALIACOES,
+        PERM_NEE,
+        PERM_SAUDE,
+        PERM_FINANCEIRO,
+        PERM_REPORTS,
+        PERM_ACCOUNTS,
+        PERM_PROCESSOS,
+        PERM_COMPRAS,
+        PERM_CONTRATOS,
+        PERM_INTEGRACOES,
+        PERM_PAINEIS,
+        PERM_CONVERSOR,
+        PERM_RH,
+        PERM_PONTO,
+        PERM_FOLHA,
+        PERM_PATRIMONIO,
+        PERM_ALMOXARIFADO,
+        PERM_FROTA,
+        PERM_OUVIDORIA,
+        PERM_TRIBUTOS,
+    },
+    "UNIDADE": {
+        PERM_EDU,
+        PERM_AVALIACOES,
+        PERM_NEE,
+        PERM_SAUDE,
+        PERM_FINANCEIRO,
+        PERM_REPORTS,
+        PERM_ACCOUNTS,
+        PERM_PROCESSOS,
+        PERM_COMPRAS,
+        PERM_CONTRATOS,
+        PERM_INTEGRACOES,
+        PERM_PAINEIS,
+        PERM_CONVERSOR,
+        PERM_RH,
+        PERM_PONTO,
+        PERM_FOLHA,
+        PERM_PATRIMONIO,
+        PERM_ALMOXARIFADO,
+        PERM_FROTA,
+        PERM_OUVIDORIA,
+        PERM_TRIBUTOS,
+    },
+    "NEE": {PERM_NEE, PERM_SAUDE, PERM_FINANCEIRO, PERM_REPORTS, PERM_ACCOUNTS, PERM_PROCESSOS, PERM_PAINEIS},
+    "LEITURA": {
+        PERM_FINANCEIRO,
+        PERM_REPORTS,
+        PERM_ACCOUNTS,
+        PERM_PROCESSOS,
+        PERM_COMPRAS,
+        PERM_CONTRATOS,
+        PERM_PAINEIS,
+        PERM_CONVERSOR,
+    },
     "ALUNO": {PERM_ACCOUNTS},
 }
 
@@ -56,6 +174,8 @@ ROLE_PERMS_FINE = {
         "org.manage_unidade",
         "educacao.view",
         "educacao.manage",
+        "avaliacoes.view",
+        "avaliacoes.manage",
         "nee.view",
         "nee.manage",
         "reports.view",
@@ -63,6 +183,43 @@ ROLE_PERMS_FINE = {
         "system.admin_django",
         "saude.view",
         "saude.manage",
+        "billing.view",
+        "billing.manage",
+        "billing.admin",
+        "financeiro.view",
+        "financeiro.manage",
+        "financeiro.contabilidade",
+        "financeiro.tesouraria",
+        "processos.view",
+        "processos.manage",
+        "compras.view",
+        "compras.manage",
+        "contratos.view",
+        "contratos.manage",
+        "integracoes.view",
+        "integracoes.manage",
+        "integracoes.admin",
+        "paineis.view",
+        "paineis.manage",
+        "paineis.publish",
+        "conversor.view",
+        "conversor.manage",
+        "rh.view",
+        "rh.manage",
+        "ponto.view",
+        "ponto.manage",
+        "folha.view",
+        "folha.manage",
+        "patrimonio.view",
+        "patrimonio.manage",
+        "almoxarifado.view",
+        "almoxarifado.manage",
+        "frota.view",
+        "frota.manage",
+        "ouvidoria.view",
+        "ouvidoria.manage",
+        "tributos.view",
+        "tributos.manage",
     },
     "MUNICIPAL": {
         "org.view",
@@ -70,34 +227,122 @@ ROLE_PERMS_FINE = {
         "org.manage_unidade",
         "educacao.view",
         "educacao.manage",
+        "avaliacoes.view",
+        "avaliacoes.manage",
         "nee.view",
         "nee.manage",
         "reports.view",
         "accounts.manage_users",
         "saude.view",
         "saude.manage",
+        "billing.view",
+        "billing.manage",
+        "financeiro.view",
+        "financeiro.manage",
+        "financeiro.contabilidade",
+        "financeiro.tesouraria",
+        "processos.view",
+        "processos.manage",
+        "compras.view",
+        "compras.manage",
+        "contratos.view",
+        "contratos.manage",
+        "integracoes.view",
+        "integracoes.manage",
+        "integracoes.admin",
+        "paineis.view",
+        "paineis.manage",
+        "paineis.publish",
+        "conversor.view",
+        "conversor.manage",
+        "rh.view",
+        "rh.manage",
+        "ponto.view",
+        "ponto.manage",
+        "folha.view",
+        "folha.manage",
+        "patrimonio.view",
+        "patrimonio.manage",
+        "almoxarifado.view",
+        "almoxarifado.manage",
+        "frota.view",
+        "frota.manage",
+        "ouvidoria.view",
+        "ouvidoria.manage",
+        "tributos.view",
+        "tributos.manage",
     },
     "SECRETARIA": {
         "org.view",
         "org.manage_unidade",
         "educacao.view",
         "educacao.manage",
+        "avaliacoes.view",
+        "avaliacoes.manage",
         "nee.view",
         "nee.manage",
+        "saude.view",
+        "saude.manage",
         "reports.view",
         "accounts.manage_users",
+        "financeiro.view",
+        "processos.view",
+        "processos.manage",
+        "compras.view",
+        "compras.manage",
+        "contratos.view",
+        "contratos.manage",
+        "integracoes.view",
+        "integracoes.manage",
+        "paineis.view",
+        "paineis.manage",
+        "paineis.publish",
+        "conversor.view",
+        "conversor.manage",
+        "rh.view",
+        "rh.manage",
+        "ponto.view",
+        "ponto.manage",
+        "folha.view",
+        "folha.manage",
+        "patrimonio.view",
+        "almoxarifado.view",
+        "frota.view",
+        "ouvidoria.view",
+        "ouvidoria.manage",
+        "tributos.view",
     },
     "UNIDADE": {
         "org.view",
         "educacao.view",
         "educacao.manage",
+        "avaliacoes.view",
+        "avaliacoes.manage",
         "nee.view",
         "nee.manage",
+        "saude.view",
         "reports.view",
         "accounts.manage_users",
+        "financeiro.view",
+        "processos.view",
+        "compras.view",
+        "contratos.view",
+        "integracoes.view",
+        "paineis.view",
+        "conversor.view",
+        "rh.view",
+        "ponto.view",
+        "folha.view",
+        "patrimonio.view",
+        "almoxarifado.view",
+        "frota.view",
+        "ouvidoria.view",
+        "tributos.view",
     },
     "PROFESSOR": {
         "educacao.view",
+        "avaliacoes.view",
+        "avaliacoes.manage",
     },
     "ALUNO": {
         
@@ -106,11 +351,43 @@ ROLE_PERMS_FINE = {
     "VISUALIZACAO": {
         "org.view",
         "educacao.view",
+        "avaliacoes.view",
         "nee.view",
         "reports.view",
+        "financeiro.view",
+        "processos.view",
+        "compras.view",
+        "contratos.view",
+        "avaliacoes.view",
+        "paineis.view",
+        "conversor.view",
+        "rh.view",
+        "ponto.view",
+        "folha.view",
+        "patrimonio.view",
+        "almoxarifado.view",
+        "frota.view",
+        "ouvidoria.view",
+        "tributos.view",
     },
-    "NEE": {"nee.view", "nee.manage", "reports.view", "accounts.manage_users"},
-    "LEITURA": {"reports.view"},
+    "NEE": {
+        "nee.view",
+        "nee.manage",
+        "reports.view",
+        "accounts.manage_users",
+        "financeiro.view",
+        "processos.view",
+        "paineis.view",
+    },
+    "LEITURA": {
+        "reports.view",
+        "financeiro.view",
+        "processos.view",
+        "compras.view",
+        "contratos.view",
+        "paineis.view",
+        "conversor.view",
+    },
 }
 
 
@@ -204,8 +481,10 @@ def scope_filter_secretarias(user, qs):
 
     role = getattr(p, "role", None)
 
-    if role == "SECRETARIA" and getattr(p, "secretaria_id", None):
-        return qs.filter(id=p.secretaria_id)
+    if role == "SECRETARIA":
+        if getattr(p, "secretaria_id", None):
+            return qs.filter(id=p.secretaria_id)
+        return qs.none()
 
     if getattr(p, "municipio_id", None):
         return qs.filter(municipio_id=p.municipio_id)
@@ -228,8 +507,10 @@ def scope_filter_unidades(user, qs):
     if role == "UNIDADE" and getattr(p, "unidade_id", None):
         return qs.filter(id=p.unidade_id)
 
-    if role == "SECRETARIA" and getattr(p, "secretaria_id", None):
-        return qs.filter(secretaria_id=p.secretaria_id)
+    if role == "SECRETARIA":
+        if getattr(p, "secretaria_id", None):
+            return qs.filter(secretaria_id=p.secretaria_id)
+        return qs.none()
 
     if getattr(p, "municipio_id", None):
         return qs.filter(secretaria__municipio_id=p.municipio_id)
@@ -260,6 +541,11 @@ def scope_filter_turmas(user, qs):
     if role == "UNIDADE" and getattr(p, "unidade_id", None):
         return qs.filter(unidade_id=p.unidade_id)
 
+    if role == "SECRETARIA":
+        if getattr(p, "secretaria_id", None):
+            return qs.filter(unidade__secretaria_id=p.secretaria_id)
+        return qs.none()
+
     if getattr(p, "municipio_id", None):
         return qs.filter(unidade__secretaria__municipio_id=p.municipio_id)
 
@@ -285,6 +571,11 @@ def scope_filter_matriculas(user, qs):
 
     if role == "UNIDADE" and getattr(p, "unidade_id", None):
         return qs.filter(turma__unidade_id=p.unidade_id)
+
+    if role == "SECRETARIA":
+        if getattr(p, "secretaria_id", None):
+            return qs.filter(turma__unidade__secretaria_id=p.secretaria_id)
+        return qs.none()
 
     if getattr(p, "municipio_id", None):
         return qs.filter(turma__unidade__secretaria__municipio_id=p.municipio_id)
@@ -320,6 +611,11 @@ def scope_filter_alunos(user, qs):
     # regra antiga
     if role == "UNIDADE" and getattr(p, "unidade_id", None):
         matriculas = matriculas.filter(turma__unidade_id=p.unidade_id)
+    elif role == "SECRETARIA":
+        if getattr(p, "secretaria_id", None):
+            matriculas = matriculas.filter(turma__unidade__secretaria_id=p.secretaria_id)
+        else:
+            return qs.none()
     elif getattr(p, "municipio_id", None):
         matriculas = matriculas.filter(turma__unidade__secretaria__municipio_id=p.municipio_id)
     else:

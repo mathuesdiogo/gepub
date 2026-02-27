@@ -15,30 +15,11 @@
 {% endblock %}
 
 {% block content %}
-<div class="card" style="max-width:700px;">
-  <div class="card__title">
-    {% if mode == "create" %}Novo Setor{% else %}Editar Setor{% endif %}
-  </div>
+<div class="card">
   <div class="card__body">
-    <form method="post" style="display:grid; gap:14px;">
-      {% csrf_token %}
-      <div>
-        <label class="small">Unidade</label><br>
-        {{ form.unidade }}
-      </div>
-      <div>
-        <label class="small">Nome</label><br>
-        {{ form.nome }}
-      </div>
-      <label class="small" style="display:flex; gap:8px;">
-        {{ form.ativo }} Ativo
-      </label>
-
-      <div style="display:flex; gap:10px;">
-        <button type="submit">Salvar</button>
-        <a class="link" href="{% url 'org:setor_list' %}">Cancelar</a>
-      </div>
-    </form>
+    {% if mode == "create" %}{% include "core/partials/components/layout/page_head.html" with title="Novo Setor" subtitle="Cadastre um setor vinculado a uma unidade" actions=None %}{% else %}{% include "core/partials/components/layout/page_head.html" with title="Editar Setor" subtitle="Atualize os dados do setor" actions=None %}{% endif %}
+    {% include "org/partials/nav_tabs.html" %}
+    {% include "core/partials/components/forms/form_shell.html" with form=form cancel_url=cancel_url submit_label=submit_label %}
   </div>
 </div>
 {% endblock %}

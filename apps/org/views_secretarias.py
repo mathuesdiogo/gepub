@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from django.contrib import messages
 from django.db.models import Q
 from django.http import HttpRequest, JsonResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
-from apps.core.rbac import get_profile, is_admin
+from apps.billing.services import MetricaLimite, verificar_limite_municipio
+from apps.core.rbac import can, get_profile, is_admin
 from apps.org.forms import SecretariaForm
 from apps.org.models import Municipio, Secretaria, Unidade, Setor
 
@@ -104,6 +106,31 @@ class SecretariaCreateView(BaseCreateViewGepub):
             return HttpResponseForbidden("403 — Apenas administrador pode criar secretaria.")
         return super().dispatch(request, *args, **kwargs)
 
+    def get_form(self, request: HttpRequest, *args, **kwargs):
+        return self.form_class(*args, user=request.user, **kwargs)
+
+    def form_valid(self, request: HttpRequest, form):
+        municipio = form.cleaned_data.get("municipio")
+        if municipio:
+            limite = verificar_limite_municipio(
+                municipio,
+                MetricaLimite.SECRETARIAS,
+                incremento=1,
+            )
+            if not limite.permitido:
+                upgrade_url = reverse("billing:solicitar_upgrade")
+                upgrade_url += f"?municipio={municipio.pk}&tipo=SECRETARIAS&qtd={limite.excedente}"
+                messages.error(
+                    request,
+                    (
+                        f"Limite de secretarias excedido ({limite.atual}/{limite.limite}). "
+                        f"Solicite upgrade em: {upgrade_url}"
+                    ),
+                )
+                return self.form_invalid(request, form)
+
+        return super().form_valid(request, form)
+
     def get_success_url(self, request, obj=None) -> str:
         return reverse("org:secretaria_detail", args=[obj.pk])
 
@@ -157,6 +184,31 @@ class SecretariaDetailView(BaseDetailViewGepub):
             {"label": "Setores", "value": setores_qs.count()},
         ]
 
+        links = [
+            {
+                "label": "Ver unidades",
+                "url": reverse("org:unidade_list") + f"?municipio={secretaria.municipio_id}",
+                "meta": f"{unidades_qs.count()} registros",
+                "icon": "fa-solid fa-school",
+            },
+            {
+                "label": "Ver setores",
+                "url": reverse("org:setor_list"),
+                "meta": f"{setores_qs.count()} registros",
+                "icon": "fa-solid fa-sitemap",
+            },
+        ]
+        if can(request.user, "org.manage_secretaria"):
+            links.insert(
+                0,
+                {
+                    "label": "Governança da secretaria",
+                    "url": reverse("org:secretaria_governanca_detail", args=[secretaria.pk]),
+                    "meta": "Configurações e cadastros-base",
+                    "icon": "fa-solid fa-sliders",
+                },
+            )
+
         return render(request, self.template_name, {
             "title": secretaria.nome,
             "subtitle": "Detalhes e vínculos",
@@ -164,10 +216,7 @@ class SecretariaDetailView(BaseDetailViewGepub):
             "obj": secretaria,
             "fields": fields,
             "pills": pills,
-            "links": [
-                {"label": "Ver unidades", "url": reverse("org:unidade_list") + f"?municipio={secretaria.municipio_id}", "meta": f"{unidades_qs.count()}"},
-                {"label": "Ver setores", "url": reverse("org:setor_list"), "meta": f"{setores_qs.count()}"},
-            ]
+            "links": links,
         })
 
 

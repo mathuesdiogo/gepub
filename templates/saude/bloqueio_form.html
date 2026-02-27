@@ -1,0 +1,9 @@
+{% extends "saude/base_modulo.html" %}
+{% block title %}{% if mode == "update" %}Editar Bloqueio{% else %}Novo Bloqueio{% endif %} • Saúde • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+  {% if mode == "update" %}{% include "core/partials/components/layout/page_head.html" with title="Editar Bloqueio de Agenda" subtitle="Atualize o período indisponível" actions=None %}{% else %}{% include "core/partials/components/layout/page_head.html" with title="Novo Bloqueio de Agenda" subtitle="Cadastre indisponibilidade da agenda" actions=None %}{% endif %}
+  {% include "core/partials/components/forms/form_shell.html" with form=form cancel_url=cancel_url submit_label=submit_label action_url=action_url %}
+</div></div>
+{% endblock %}

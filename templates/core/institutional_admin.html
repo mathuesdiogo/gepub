@@ -1,0 +1,157 @@
+{% extends "core/base.html" %}
+
+{% block title %}Editor Institucional • GEPUB{% endblock %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="dash-actions" style="margin-bottom:12px;">
+    <a class="btn btn-primary" href="{% url 'core:institutional_slide_create' %}"><i class="fa-solid fa-images"></i> Novo slide</a>
+    <a class="btn btn-primary" href="{% url 'core:institutional_method_step_create' %}"><i class="fa-solid fa-list-check"></i> Novo passo</a>
+    <a class="btn btn-primary" href="{% url 'core:institutional_service_card_create' %}"><i class="fa-solid fa-table-cells-large"></i> Novo serviço</a>
+  </div>
+
+  <section class="dash-card" style="margin-bottom:14px;">
+    <div class="dash-card__head">
+      <div>
+        <div class="dash-card__title">Configuração Principal</div>
+        <div class="dash-card__sub">Logo, títulos, textos, CTAs e navegação da home pública</div>
+      </div>
+    </div>
+    <div class="dash-card__body">
+      {% include "core/partials/components/forms/form_shell.html" with form=form cancel_url=cancel_url submit_label=submit_label enctype=enctype %}
+    </div>
+  </section>
+
+  <section class="dash-card" style="margin-bottom:14px;">
+    <div class="dash-card__head">
+      <div>
+        <div class="dash-card__title">Slides (Hero)</div>
+        <div class="dash-card__sub">Adicione/edite os cards rotativos da parte direita do hero</div>
+      </div>
+    </div>
+    <div class="dash-card__body">
+      <div class="table-shell">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Ordem</th>
+              <th>Título</th>
+              <th>Subtítulo</th>
+              <th>Ativo</th>
+              <th width="220px">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in slides %}
+              <tr>
+                <td>{{ s.ordem }}</td>
+                <td>{{ s.titulo }}</td>
+                <td>{{ s.subtitulo|default:"—" }}</td>
+                <td>{{ s.ativo|yesno:"Sim,Não" }}</td>
+                <td>
+                  <a class="btn btn--ghost" href="{% url 'core:institutional_slide_update' s.pk %}"><i class="fa-solid fa-pen"></i> Editar</a>
+                  <form method="post" action="{% url 'core:institutional_slide_delete' s.pk %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn--ghost"><i class="fa-solid fa-trash"></i> Remover</button>
+                  </form>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="5">Nenhum slide cadastrado.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="dash-card" style="margin-bottom:14px;">
+    <div class="dash-card__head">
+      <div>
+        <div class="dash-card__title">Passos do Método</div>
+        <div class="dash-card__sub">Etapas exibidas na seção de método</div>
+      </div>
+    </div>
+    <div class="dash-card__body">
+      <div class="table-shell">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Ordem</th>
+              <th>Título</th>
+              <th>Ícone</th>
+              <th>Ativo</th>
+              <th width="220px">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for step in method_steps %}
+              <tr>
+                <td>{{ step.ordem }}</td>
+                <td>{{ step.titulo }}</td>
+                <td><code>{{ step.icone }}</code></td>
+                <td>{{ step.ativo|yesno:"Sim,Não" }}</td>
+                <td>
+                  <a class="btn btn--ghost" href="{% url 'core:institutional_method_step_update' step.pk %}"><i class="fa-solid fa-pen"></i> Editar</a>
+                  <form method="post" action="{% url 'core:institutional_method_step_delete' step.pk %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn--ghost"><i class="fa-solid fa-trash"></i> Remover</button>
+                  </form>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="5">Nenhum passo cadastrado.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="dash-card">
+    <div class="dash-card__head">
+      <div>
+        <div class="dash-card__title">Cards de Serviços</div>
+        <div class="dash-card__sub">Conteúdos da grade de serviços</div>
+      </div>
+    </div>
+    <div class="dash-card__body">
+      <div class="table-shell">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Ordem</th>
+              <th>Título</th>
+              <th>Ícone</th>
+              <th>Ativo</th>
+              <th width="220px">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for service in service_cards %}
+              <tr>
+                <td>{{ service.ordem }}</td>
+                <td>{{ service.titulo }}</td>
+                <td><code>{{ service.icone }}</code></td>
+                <td>{{ service.ativo|yesno:"Sim,Não" }}</td>
+                <td>
+                  <a class="btn btn--ghost" href="{% url 'core:institutional_service_card_update' service.pk %}"><i class="fa-solid fa-pen"></i> Editar</a>
+                  <form method="post" action="{% url 'core:institutional_service_card_delete' service.pk %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn--ghost"><i class="fa-solid fa-trash"></i> Remover</button>
+                  </form>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="5">Nenhum card cadastrado.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</div></div>
+{% endblock %}

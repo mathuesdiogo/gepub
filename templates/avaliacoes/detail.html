@@ -1,0 +1,118 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="detail-summary" style="margin-top:12px;">
+    <div><strong>Turma:</strong> {{ avaliacao.turma.nome }}</div>
+    <div><strong>Disciplina:</strong> {{ avaliacao.disciplina|default:"-" }}</div>
+    <div><strong>Data:</strong> {{ avaliacao.data_aplicacao|date:"d/m/Y" }}</div>
+    <div><strong>Tipo:</strong> {{ avaliacao.get_tipo_display }}</div>
+    <div><strong>Questões:</strong> {{ avaliacao.qtd_questoes }}</div>
+    <div><strong>Nota máxima:</strong> {{ avaliacao.nota_maxima }}</div>
+    <div><strong>Aplicações:</strong> {{ stats.total|default:0 }}</div>
+    <div><strong>Corrigidas:</strong> {{ stats.corrigidas|default:0 }}</div>
+    <div><strong>Média:</strong> {% if stats.media %}{{ stats.media|floatformat:2 }}{% else %}-{% endif %}</div>
+  </div>
+
+  <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+    <form method="post" action="{% url 'avaliacoes:avaliacao_sync' avaliacao.id %}">
+      {% csrf_token %}
+      <button class="btn btn--ghost" type="submit"><i class="fa-solid fa-rotate"></i> Sincronizar aplicações</button>
+    </form>
+
+    <form method="post" action="{% url 'avaliacoes:folha_lookup' %}" style="display:flex;gap:8px;align-items:center;">
+      {% csrf_token %}
+      {{ token_form.token }}
+      <button class="btn btn-primary" type="submit"><i class="fa-solid fa-qrcode"></i> Corrigir por token</button>
+    </form>
+  </div>
+
+  <div class="card" style="margin-top:12px;"><div class="card__body">
+    <h3 style="margin-top:0;">Gabaritos</h3>
+    <div class="table-shell"><div class="table-shell__body">
+      <table class="table">
+        <thead><tr><th>Versão</th><th>Respostas definidas</th><th>Integridade</th><th></th></tr></thead>
+        <tbody>
+          {% for versao,gabarito in gabaritos.items %}
+            <tr>
+              <td>{{ versao }}</td>
+              <td>{{ gabarito.respostas|length }}</td>
+              <td>{% if gabarito.integridade_ok %}OK{% else %}Inválida{% endif %}</td>
+              <td><a class="link" href="{% url 'avaliacoes:gabarito_update' avaliacao.id versao %}">editar</a></td>
+            </tr>
+          {% endfor %}
+          {% if not gabaritos %}
+            <tr><td colspan="4">Sem gabarito configurado.</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div></div>
+  </div></div>
+
+  <div class="card" style="margin-top:12px;"><div class="card__body">
+    <h3 style="margin-top:0;">Questões</h3>
+    <div class="table-shell"><div class="table-shell__body">
+      <table class="table">
+        <thead><tr><th>Nº</th><th>Tipo</th><th>Peso</th><th>Enunciado</th><th></th></tr></thead>
+        <tbody>
+          {% for q in questoes %}
+            <tr>
+              <td>{{ q.numero }}</td>
+              <td>{{ q.get_tipo_display }}</td>
+              <td>{{ q.peso }}</td>
+              <td>{{ q.enunciado|truncatechars:120 }}</td>
+              <td><a class="link" href="{% url 'avaliacoes:questao_update' avaliacao.id q.id %}">editar</a></td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5">Sem questões cadastradas (opcional para MVP).</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </div></div>
+
+  <div class="card" style="margin-top:12px;"><div class="card__body">
+    <h3 style="margin-top:0;">Aplicações por aluno</h3>
+    <div class="table-shell"><div class="table-shell__body">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Aluno</th>
+            <th>Versão</th>
+            <th>Status</th>
+            <th>Nota</th>
+            <th>Percentual</th>
+            <th>Token</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in aplicacoes %}
+            <tr>
+              <td>{{ item.aluno.nome }}</td>
+              <td>{{ item.versao }}</td>
+              <td>{{ item.get_status_display }}</td>
+              <td>{% if item.nota is not None %}{{ item.nota|floatformat:2 }}{% else %}-{% endif %}</td>
+              <td>{% if item.percentual is not None %}{{ item.percentual|floatformat:2 }}%{% else %}-{% endif %}</td>
+              <td>{% if item.folha %}<code>{{ item.folha.token }}</code>{% else %}-{% endif %}</td>
+              <td>
+                {% if item.folha %}
+                  <a class="link" href="{% url 'avaliacoes:folha_corrigir' item.folha.token %}">corrigir</a>
+                  •
+                  <a class="link" target="_blank" rel="noopener" href="{% url 'avaliacoes:folha_validar' item.folha.token %}">validar</a>
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="7">Sem aplicações geradas.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </div></div>
+</div></div>
+{% endblock %}

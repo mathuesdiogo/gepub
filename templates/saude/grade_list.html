@@ -1,0 +1,10 @@
+{% extends "saude/base_modulo.html" %}
+{% block title %}Grades de Agenda • Saúde • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title="Grades de Agenda" subtitle="Regras recorrentes por profissional e unidade" actions=actions %}
+  {% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Buscar por profissional, unidade, especialidade..." action_url=action_url clear_url=clear_url has_filters=has_filters %}
+  {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj empty_title="Nenhuma grade encontrada" empty_text="Cadastre a primeira grade de agenda." %}
+</div></div>
+{% endblock %}

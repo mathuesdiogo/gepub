@@ -1,13 +1,5 @@
 {% extends "core/detail_base.html" %}
 {% block detail_sections %}
-{% if links %}
-<div class="section">
-  <div class="section__head"><h3 class="section__title">Acessos rápidos</h3></div>
-  <ul class="action-list">
-    {% for it in links %}
-      <li><div><div class="item-title">{{ it.label }}</div><div class="item-subtitle">{{ it.meta }}</div></div><a class="btn btn--ghost" href="{{ it.url }}"><i class="fa-solid fa-arrow-right"></i></a></li>
-    {% endfor %}
-  </ul>
-</div>
-{% endif %}
+{% include "org/partials/nav_tabs.html" %}
+{% include "org/partials/quick_links_grid.html" with links=links title="Acessos rápidos" subtitle="Recursos vinculados a esta unidade" %}
 {% endblock %}

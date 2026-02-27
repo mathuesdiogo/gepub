@@ -1,0 +1,42 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+    {% if municipios and municipios|length %}
+      <select name="municipio" class="input" style="max-width:240px;" onchange="this.form.submit()">
+        {% for m in municipios %}
+          <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+  </form>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:12px 0 18px;">
+    {% for card in cards %}
+      {% include "core/partials/components/data/kpi_card.html" with label=card.label value=card.value %}
+    {% endfor %}
+  </div>
+
+  <div class="table-shell"><div class="table-shell__body">
+    <table class="table">
+      <thead><tr><th>Contribuinte</th><th>Tributo</th><th>Exercício</th><th>Total</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for item in latest_lanc %}
+          <tr>
+            <td>{{ item.contribuinte.nome }}</td>
+            <td>{{ item.get_tipo_tributo_display }}</td>
+            <td>{{ item.exercicio }}</td>
+            <td>R$ {{ item.valor_total }}</td>
+            <td>{{ item.get_status_display }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Sem lançamentos registrados.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

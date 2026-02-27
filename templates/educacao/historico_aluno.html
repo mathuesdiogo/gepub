@@ -1,0 +1,38 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Histórico Escolar • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Histórico Escolar" subtitle=aluno.nome actions=actions %}
+{% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Sem histórico" empty_text="Este aluno ainda não possui registros de histórico." %}
+
+<hr class="divider">
+<div class="section">
+  <div class="section__title">Certificados e Declarações</div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Tipo</th>
+        <th>Título</th>
+        <th class="u-w-160">Emissão</th>
+        <th class="u-w-200">Código</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for cert in certificados %}
+      <tr>
+        <td>{{ cert.get_tipo_display }}</td>
+        <td>{{ cert.titulo }}</td>
+        <td>{{ cert.data_emissao|date:"d/m/Y" }}</td>
+        <td>{{ cert.codigo_verificacao }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4">Nenhum certificado registrado.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+</div></div>
+{% endblock %}

@@ -1,8 +1,42 @@
-<a class="link" href="{% url 'accounts:usuario_update' row.obj.id %}">Editar</a>
-<span style="opacity:.4;"> | </span>
-<form method="post" action="{% url 'accounts:usuario_reset_senha' row.obj.id %}" style="display:inline;">
-  {% csrf_token %}
-  <button class="link" type="submit" style="border:0; background:transparent; padding:0; cursor:pointer;">
-    Redefinir senha
-  </button>
-</form>
+<div class="user-row-actions">
+  <a class="btn btn--ghost btn-sm" href="{% url 'accounts:usuario_detail' row.obj.id %}">
+    <i class="fa-solid fa-id-card"></i> Detalhes
+  </a>
+  <a class="btn btn--ghost btn-sm" href="{% url 'accounts:usuario_update' row.obj.id %}">
+    <i class="fa-solid fa-pen"></i> Editar
+  </a>
+
+  <form method="post" action="{% url 'accounts:usuario_toggle_ativo' row.obj.id %}" class="u-inline-form">
+    {% csrf_token %}
+    {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
+    <button class="btn btn--ghost btn-sm" type="submit">
+      <i class="fa-solid fa-power-off"></i>
+      {% if row.is_ativo %}Desativar{% else %}Ativar{% endif %}
+    </button>
+  </form>
+
+  <form method="post" action="{% url 'accounts:usuario_toggle_bloqueio' row.obj.id %}" class="u-inline-form">
+    {% csrf_token %}
+    {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
+    <button class="btn btn--ghost btn-sm" type="submit">
+      <i class="fa-solid fa-user-lock"></i>
+      {% if row.is_bloqueado %}Desbloquear{% else %}Bloquear{% endif %}
+    </button>
+  </form>
+
+  <form method="post" action="{% url 'accounts:usuario_reset_codigo' row.obj.id %}" class="u-inline-form">
+    {% csrf_token %}
+    {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
+    <button class="btn btn--ghost btn-sm" type="submit">
+      <i class="fa-solid fa-rotate"></i> Resetar código
+    </button>
+  </form>
+
+  <form method="post" action="{% url 'accounts:usuario_reset_senha' row.obj.id %}" class="u-inline-form">
+    {% csrf_token %}
+    {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
+    <button class="btn btn--ghost btn-sm" type="submit">
+      <i class="fa-solid fa-key"></i> Resetar senha
+    </button>
+  </form>
+</div>

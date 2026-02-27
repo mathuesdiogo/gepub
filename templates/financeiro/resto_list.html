@@ -1,0 +1,57 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+    {% if municipios and municipios|length %}
+      <select name="municipio" class="input" style="max-width:240px;">
+        {% for m in municipios %}
+          <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+
+    <select name="exercicio" class="input" style="max-width:220px;">
+      <option value="">Todos os exercícios</option>
+      {% for ex in exercicios %}
+        <option value="{{ ex.id }}" {% if exercicio and ex.id == exercicio.id %}selected{% endif %}>{{ ex.ano }}</option>
+      {% endfor %}
+    </select>
+
+    <input name="q" value="{{ q }}" class="input" placeholder="Nº inscrição, empenho, fornecedor" style="max-width:320px;">
+    <button class="btn btn--sm" type="submit">Filtrar</button>
+  </form>
+
+  <div class="table-shell"><div class="table-shell__body">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Nº inscrição</th><th>Data</th><th>Empenho</th><th>Tipo</th><th>Inscrito</th><th>Pago</th><th>Saldo</th><th>Status</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td>{{ item.numero_inscricao }}</td>
+            <td>{{ item.data_inscricao|date:"d/m/Y" }}</td>
+            <td>
+              {{ item.empenho.numero }}
+              <small style="display:block;color:#6b7f95;">{{ item.empenho.fornecedor_nome }}</small>
+            </td>
+            <td>{{ item.get_tipo_display }}</td>
+            <td>R$ {{ item.valor_inscrito }}</td>
+            <td>R$ {{ item.valor_pago }}</td>
+            <td>R$ {{ item.saldo_a_pagar }}</td>
+            <td>{{ item.get_status_display }}</td>
+            <td><a class="link" href="{% url 'financeiro:resto_detail' item.id %}?municipio={{ municipio.id }}">ver</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="9">Nenhum resto a pagar encontrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

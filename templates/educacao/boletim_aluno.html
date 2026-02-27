@@ -4,19 +4,28 @@
 <div class="card"><div class="card__body">
 {% include "core/partials/components/layout/page_head.html" with title="Boletim do Aluno" subtitle=aluno.nome actions=actions %}
 
+<div class="card u-mt-12">
+  <div class="card__body">
+    <div class="h6">Dados Acadêmicos</div>
+    <div class="small">Turma: {{ turma.nome }} • Ano: {{ turma.ano_letivo }} • Turno: {{ turma.get_turno_display }}</div>
+    <div class="small">Modalidade: {{ turma.get_modalidade_display }} • Etapa: {{ turma.get_etapa_display }}</div>
+    <div class="small">Curso: {% if turma.curso %}{{ turma.curso.nome }}{% else %}—{% endif %}</div>
+  </div>
+</div>
+
 {% for bloco in linhas %}
-  <div class="card" style="margin-top:12px;">
+  <div class="card u-mt-12">
     <div class="card__body">
       <div class="h6">Professor: {{ bloco.diario.professor.username }}</div>
       <div class="small">Média: {{ bloco.media|default:"—" }}</div>
 
-      <table class="table" style="margin-top:10px;">
+      <table class="table u-mt-10">
         <thead>
           <tr>
             <th>Avaliação</th>
-            <th style="width:120px;">Peso</th>
-            <th style="width:140px;">Data</th>
-            <th style="width:140px;">Nota</th>
+            <th class="u-w-120">Peso</th>
+            <th class="u-w-140">Data</th>
+            <th class="u-w-140">Nota</th>
           </tr>
         </thead>
         <tbody>
@@ -35,6 +44,34 @@
     </div>
   </div>
 {% endfor %}
+
+<div class="card u-mt-12">
+  <div class="card__body">
+    <div class="h6">Certificados / Declarações</div>
+    <table class="table u-mt-10">
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Título</th>
+          <th class="u-w-160">Emissão</th>
+          <th class="u-w-180">Código</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cert in certificados %}
+          <tr>
+            <td>{{ cert.get_tipo_display }}</td>
+            <td>{{ cert.titulo }}</td>
+            <td>{{ cert.data_emissao|date:"d/m/Y" }}</td>
+            <td>{{ cert.codigo_verificacao }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4">Nenhum certificado registrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 
 </div></div>
 {% endblock %}

@@ -6,6 +6,7 @@ from apps.core.rbac import scope_filter_unidades
 from apps.org.models import Unidade
 from .models import ProfissionalSaude
 from .models import AtendimentoSaude
+from .models import EspecialidadeSaude, AgendamentoSaude
 
 
 @login_required
@@ -42,6 +43,8 @@ def index(request):
     # ATENDIMENTOS (placeholder)
         # =========================
     atendimentos_total = AtendimentoSaude.objects.filter(unidade_id__in=unidades_qs.values_list("id", flat=True)).count()
+    agendamentos_total = AgendamentoSaude.objects.filter(unidade_id__in=unidades_qs.values_list("id", flat=True)).count()
+    especialidades_total = EspecialidadeSaude.objects.filter(ativo=True).count()
 
     context = {
         # Unidades
@@ -55,6 +58,8 @@ def index(request):
 
         # Atendimentos
         "atendimentos_total": atendimentos_total,
+        "agendamentos_total": agendamentos_total,
+        "especialidades_total": especialidades_total,
     }
 
     return render(request, "saude/index.html", context)

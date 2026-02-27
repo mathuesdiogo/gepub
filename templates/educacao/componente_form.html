@@ -1,0 +1,235 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}{% if mode == "update" %}Editar Componente{% else %}Novo Componente{% endif %} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Componente Curricular" subtitle="Cadastro de disciplinas e componentes" actions=None %}
+{% if bncc_total %}
+  <p class="small" style="margin:8px 0 12px;">
+    BNCC integrada: {{ bncc_total }} código(s) disponível(is) no filtro atual.
+  </p>
+{% endif %}
+{% include "core/partials/components/forms/form_shell.html" with form=form cancel_url=cancel_url submit_label=submit_label action_url=action_url %}
+</div></div>
+{% endblock %}
+
+{% block extra_css %}
+  {{ block.super }}
+  <style>
+    .bncc-autocomplete{
+      position: relative;
+      display:grid;
+      gap:8px;
+      margin-top:6px;
+    }
+    .bncc-autocomplete__hint{
+      font-size:.78rem;
+      color:var(--muted);
+    }
+    .bncc-autocomplete__select{
+      display:none;
+    }
+    .bncc-autocomplete__dropdown{
+      position:absolute;
+      left:0;
+      right:0;
+      top:calc(100% + 6px);
+      z-index:70;
+      display:none;
+    }
+    .bncc-autocomplete__dropdown .suggest__item{
+      width:100%;
+      text-align:left;
+      border:0;
+      background:transparent;
+      cursor:pointer;
+      font:inherit;
+    }
+    .bncc-autocomplete__dropdown .suggest__item.is-active{
+      background: var(--primary-50, rgba(37, 99, 235, .08));
+    }
+  </style>
+{% endblock %}
+
+{% block extra_js %}
+  {{ block.super }}
+  <script>
+    (function () {
+      function normalizeText(value) {
+        return (value || "")
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
+      }
+
+      function escapeHtml(value) {
+        return String(value || "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function enhanceSearchableSelect(selectId, placeholder) {
+        const select = document.getElementById(selectId);
+        if (!select || select.dataset.searchReady === "1") return;
+        select.dataset.searchReady = "1";
+
+        const wrap = document.createElement("div");
+        wrap.className = "bncc-autocomplete";
+
+        const search = document.createElement("input");
+        search.type = "search";
+        search.placeholder = placeholder;
+        search.autocomplete = "off";
+        search.spellcheck = false;
+
+        const hint = document.createElement("div");
+        hint.className = "bncc-autocomplete__hint";
+
+        const dropdown = document.createElement("div");
+        dropdown.className = "bncc-autocomplete__dropdown suggest";
+        dropdown.setAttribute("role", "listbox");
+
+        select.parentNode.insertBefore(wrap, select);
+        wrap.appendChild(search);
+        wrap.appendChild(dropdown);
+        wrap.appendChild(select);
+        wrap.appendChild(hint);
+        select.classList.add("bncc-autocomplete__select");
+
+        const options = Array.from(select.options).filter(function (option, index) {
+          return index > 0;
+        });
+        let activeIndex = -1;
+        let shown = [];
+
+        function hideDropdown() {
+          dropdown.style.display = "none";
+          dropdown.innerHTML = "";
+          activeIndex = -1;
+          shown = [];
+        }
+
+        function setSelection(value) {
+          const option = options.find(function (item) { return item.value === value; });
+          if (!option) return;
+          select.value = value;
+          search.value = option.textContent;
+          select.dispatchEvent(new Event("change", { bubbles: true }));
+          hint.textContent = "Selecionado: " + option.textContent;
+          hideDropdown();
+        }
+
+        function renderSuggestions(items) {
+          if (!items.length) {
+            dropdown.innerHTML = "";
+            dropdown.style.display = "none";
+            activeIndex = -1;
+            return;
+          }
+          dropdown.innerHTML = items.map(function (item, idx) {
+            const activeClass = idx === activeIndex ? " is-active" : "";
+            return (
+              '<button type="button" class="suggest__item' + activeClass + '" data-value="' + escapeHtml(item.value) + '" role="option">' +
+                '<div class="suggest__title">' + escapeHtml(item.text) + "</div>" +
+              "</button>"
+            );
+          }).join("");
+          dropdown.style.display = "block";
+        }
+
+        function updateFilter() {
+          const term = normalizeText(search.value.trim());
+          shown = options.filter(function (option) {
+            if (!term) return true;
+            const normalizedText = normalizeText(option.textContent);
+            const normalizedValue = normalizeText(option.value);
+            return normalizedText.includes(term) || normalizedValue.includes(term);
+          }).slice(0, 12);
+          activeIndex = shown.length ? 0 : -1;
+          renderSuggestions(shown.map(function (option) {
+            return { value: option.value, text: option.textContent };
+          }));
+          if (!shown.length) {
+            hint.textContent = term ? "Nenhum código encontrado." : "Digite para buscar um código BNCC.";
+            return;
+          }
+          hint.textContent = shown.length + " sugestão(ões).";
+        }
+
+        const selectedOption = options.find(function (option) {
+          return option.selected;
+        });
+        if (selectedOption) {
+          search.value = selectedOption.textContent;
+          hint.textContent = "Selecionado: " + selectedOption.textContent;
+        } else {
+          hint.textContent = "Digite para buscar um código BNCC.";
+        }
+
+        search.addEventListener("input", updateFilter);
+        search.addEventListener("focus", updateFilter);
+
+        search.addEventListener("keydown", function (event) {
+          if (!shown.length) return;
+          if (event.key === "ArrowDown") {
+            event.preventDefault();
+            activeIndex = (activeIndex + 1) % shown.length;
+            renderSuggestions(shown.map(function (option) {
+              return { value: option.value, text: option.textContent };
+            }));
+            return;
+          }
+          if (event.key === "ArrowUp") {
+            event.preventDefault();
+            activeIndex = (activeIndex - 1 + shown.length) % shown.length;
+            renderSuggestions(shown.map(function (option) {
+              return { value: option.value, text: option.textContent };
+            }));
+            return;
+          }
+          if (event.key === "Enter") {
+            event.preventDefault();
+            if (activeIndex >= 0 && shown[activeIndex]) {
+              setSelection(shown[activeIndex].value);
+            }
+            return;
+          }
+          if (event.key === "Escape") {
+            hideDropdown();
+            return;
+          }
+        });
+
+        dropdown.addEventListener("click", function (event) {
+          const button = event.target.closest(".suggest__item");
+          if (!button) return;
+          const value = button.getAttribute("data-value") || "";
+          if (!value) return;
+          setSelection(value);
+        });
+
+        document.addEventListener("click", function (event) {
+          if (!wrap.contains(event.target)) {
+            hideDropdown();
+          }
+        });
+      }
+
+      function boot() {
+        enhanceSearchableSelect(
+          "id_codigo_bncc_referencia",
+          "Digite o código ou a habilidade BNCC..."
+        );
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", boot);
+      } else {
+        boot();
+      }
+    })();
+  </script>
+{% endblock %}

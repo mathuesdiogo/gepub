@@ -1,6 +1,11 @@
 {% extends "core/base.html" %}
+{% load static %}
 {% block title %}{{ aluno.nome }} • Alunos • Educação • GEPUB{% endblock %}
 {% block header %}Educação{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/educacao-aluno-detail.css' %}">
+{% endblock %}
 
 {% block breadcrumbs %}
 <div class="breadcrumbs">
@@ -15,116 +20,354 @@
 {% endblock %}
 
 {% block content %}
-<div class="card">
-  <div class="card__body">
+<div class="aluno-flow-page">
+  {% include "core/partials/components/layout/page_head.html" with title=aluno.nome subtitle="Jornada do aluno por etapas (cadastro, matrícula, acompanhamento e documentação)" actions=actions %}
 
-{% include "core/partials/components/layout/page_head.html" with title=aluno.nome subtitle="Detalhes do aluno" actions=None %}
-
-{% include "core/partials/components/layout/detail_summary.html" with fields=fields pills=pills %}
-
-<hr class="divider">
-
-<!-- ========================= MATRÍCULAS ========================= -->
-
-<div class="section">
-  <div class="section__title">Matrículas</div>
-
-{% include "core/partials/components/data/table_shell.html" with headers=headers_matriculas rows=rows_matriculas page_obj=None empty_title="Nenhuma matrícula" empty_text="Este aluno ainda não possui matrícula." %}
-
-{% if can_edu_manage %}
-<div class="form-section">
-  <div class="form-section__title">Adicionar matrícula</div>
-  <form method="post">
-    {% csrf_token %}
-    <input type="hidden" name="_action" value="add_matricula">
-    {{ form_matricula.as_p }}
-    <button type="submit" class="btn btn-primary">Salvar matrícula</button>
-  </form>
-</div>
-{% endif %}
-</div>
-
-<hr class="divider">
-
-<!-- ========================= NEE ========================= -->
-
-<div class="section">
-  <div class="section__title">NEE • Necessidades</div>
-
-  <div class="chips">
-    {% for n in necessidades %}
-      <span class="pill">{{ n.tipo.nome }}</span>
-    {% empty %}
-      <span class="small">Nenhuma necessidade vinculada.</span>
-    {% endfor %}
+  <div class="aluno-flow-page__hint">
+    <i class="fa-solid fa-arrow-down-long" aria-hidden="true"></i>
+    <span>Desça a tela para acompanhar a trilha completa do aluno.</span>
   </div>
 
-{% if can_edu_manage %}
-<div class="form-section">
-  <form method="post">
-    {% csrf_token %}
-    <input type="hidden" name="_action" value="add_nee">
-    {{ form_nee.as_p }}
-    <button type="submit" class="btn btn-primary">Salvar necessidade</button>
-  </form>
-</div>
-{% endif %}
-</div>
+  <div class="aluno-flow-layout">
+    <aside class="aluno-flow-side">
+      <article class="aluno-profile-card">
+        <div class="aluno-profile-card__avatar">
+          {% if aluno.foto %}
+            <img src="{{ aluno.foto.url }}" alt="{{ aluno.nome }}">
+          {% else %}
+            <div class="aluno-profile-card__avatar-fallback">
+              <i class="fa-solid fa-user-graduate"></i>
+            </div>
+          {% endif %}
+        </div>
+        <h2>{{ aluno.nome }}</h2>
+        <p>Registro acadêmico ativo no GEPUB</p>
 
-<hr class="divider">
+        <div class="aluno-profile-card__pills">
+          {% for item in pills %}
+            <span class="aluno-pill aluno-pill--{{ item.variant|default:'default' }}">
+              <small>{{ item.label }}</small>
+              <strong>{{ item.value }}</strong>
+            </span>
+          {% endfor %}
+        </div>
 
-<!-- ========================= SAÚDE (RESUMO) ========================= -->
+        <ul class="aluno-profile-card__meta">
+          <li><span>CPF</span><strong>{{ aluno.cpf|default:"—" }}</strong></li>
+          <li><span>NIS</span><strong>{{ aluno.nis|default:"—" }}</strong></li>
+          <li><span>Nascimento</span><strong>{% if aluno.data_nascimento %}{{ aluno.data_nascimento|date:"d/m/Y" }}{% else %}—{% endif %}</strong></li>
+          <li><span>Telefone</span><strong>{{ aluno.telefone|default:"—" }}</strong></li>
+        </ul>
+      </article>
 
-<div class="section">
-  <div class="section__title">Saúde • Resumo</div>
+      <nav class="aluno-steps-nav" aria-label="Navegação por etapas">
+        <a href="#etapa-pessoal"><span>01</span>Dados Pessoais</a>
+        <a href="#etapa-matriculas"><span>02</span>Matrículas</a>
+        {% if not is_professor_role %}
+          <a href="#etapa-cursos"><span>03</span>Cursos</a>
+          <a href="#etapa-nee"><span>04</span>NEE</a>
+          <a href="#etapa-saude"><span>05</span>Saúde</a>
+          <a href="#etapa-documentos"><span>06</span>Documentos</a>
+        {% endif %}
+      </nav>
+    </aside>
 
-  {% if can_saude_view and saude_resumo %}
-    <div class="detail-summary">
-      <div><strong>Total de atendimentos:</strong> {{ saude_resumo.total }}</div>
-      {% if saude_resumo.ultimo %}
-        <div><strong>Último:</strong> {{ saude_resumo.ultimo.data|date:"d/m/Y" }} • {{ saude_resumo.ultimo.get_tipo_display }} • {{ saude_resumo.ultimo.unidade.nome }}</div>
-        <div><strong>Profissional:</strong> {{ saude_resumo.ultimo.profissional.nome }}</div>
+    <div class="aluno-flow-main">
+      <section id="etapa-pessoal" class="aluno-stage aluno-stage--a">
+        <header class="aluno-stage__header">
+          <div class="aluno-stage__step">01</div>
+          <div>
+            <h3>Informações Pessoais</h3>
+            <p>Base cadastral do aluno para secretaria, escola e equipe pedagógica.</p>
+          </div>
+        </header>
+        <div class="aluno-kv-grid">
+          {% for item in fields %}
+            <article class="aluno-kv-card">
+              <span>{{ item.label }}</span>
+              <strong>{{ item.value }}</strong>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section id="etapa-matriculas" class="aluno-stage aluno-stage--b">
+        <header class="aluno-stage__header">
+          <div class="aluno-stage__step">02</div>
+          <div>
+            <h3>Matrículas e Fluxo Escolar</h3>
+            <p>Histórico de vínculos com turmas, remanejamentos e movimentações acadêmicas.</p>
+          </div>
+        </header>
+
+        {% include "core/partials/components/data/table_shell.html" with headers=headers_matriculas rows=rows_matriculas page_obj=None empty_title="Nenhuma matrícula" empty_text="Este aluno ainda não possui matrícula." %}
+
+        {% if can_edu_manage %}
+          <div class="aluno-stage__forms">
+            <details class="aluno-form-panel">
+              <summary><i class="fa-solid fa-plus"></i>Adicionar matrícula</summary>
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="_action" value="add_matricula">
+                {{ form_matricula.as_p }}
+                <button type="submit" class="btn btn-primary">Salvar matrícula</button>
+              </form>
+            </details>
+            <details class="aluno-form-panel">
+              <summary><i class="fa-solid fa-shuffle"></i>Movimentar matrícula</summary>
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="_action" value="mov_matricula">
+                {{ form_movimentacao.as_p }}
+                <button type="submit" class="btn btn-primary">Executar movimentação</button>
+              </form>
+            </details>
+          </div>
+        {% endif %}
+
+        {% if not is_professor_role %}
+          <div class="aluno-stage__subblock">
+            <h4>Trilha de movimentações</h4>
+            {% include "core/partials/components/data/table_shell.html" with headers=headers_movimentacoes rows=rows_movimentacoes page_obj=None empty_title="Sem movimentações" empty_text="Nenhuma movimentação registrada para este aluno." %}
+          </div>
+        {% endif %}
+      </section>
+
+      {% if not is_professor_role %}
+        <section id="etapa-cursos" class="aluno-stage aluno-stage--c">
+          <header class="aluno-stage__header">
+            <div class="aluno-stage__step">03</div>
+            <div>
+              <h3>Cursos Complementares</h3>
+              <p>Matrículas em cursos extras com frequência, nota e situação final.</p>
+            </div>
+          </header>
+
+          <div class="aluno-listing">
+            {% for mc in matriculas_cursos %}
+              <article class="aluno-listing__item">
+                <h4>{{ mc.curso.nome }} • {{ mc.get_situacao_display }}</h4>
+                <p>
+                  Matrícula: {{ mc.data_matricula|date:"d/m/Y" }}
+                  {% if mc.turma %} • Turma: {{ mc.turma.nome }} ({{ mc.turma.unidade.nome }}){% endif %}
+                  {% if mc.nota_final is not None %} • Nota final: {{ mc.nota_final }}{% endif %}
+                  {% if mc.frequencia_percentual is not None %} • Frequência: {{ mc.frequencia_percentual }}%{% endif %}
+                </p>
+              </article>
+            {% empty %}
+              <div class="aluno-empty-line">Nenhum curso complementar registrado.</div>
+            {% endfor %}
+          </div>
+
+          {% if can_edu_manage %}
+            <details class="aluno-form-panel">
+              <summary><i class="fa-solid fa-book-open-reader"></i>Matricular em curso</summary>
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="_action" value="add_matricula_curso">
+                {{ form_matricula_curso.as_p }}
+                <button type="submit" class="btn btn-primary">Salvar matrícula em curso</button>
+              </form>
+            </details>
+          {% endif %}
+        </section>
+
+        <section id="etapa-nee" class="aluno-stage aluno-stage--d">
+          <header class="aluno-stage__header">
+            <div class="aluno-stage__step">04</div>
+            <div>
+              <h3>NEE e Apoios</h3>
+              <p>Necessidades educacionais e acompanhamentos associados à trajetória escolar.</p>
+            </div>
+          </header>
+
+          <div class="chips aluno-chip-list">
+            {% for n in necessidades %}
+              <span class="pill">{{ n.tipo.nome }}</span>
+            {% empty %}
+              <span class="aluno-empty-line">Nenhuma necessidade vinculada.</span>
+            {% endfor %}
+          </div>
+
+          <div class="aluno-listing">
+            {% for a in apoios %}
+              <article class="aluno-listing__item">
+                <h4>{{ a.matricula.turma.nome }} — {{ a.matricula.turma.unidade.nome }}</h4>
+                <p>{{ a.observacao|default:a.descricao|default:"Sem observação." }}</p>
+              </article>
+            {% empty %}
+              <div class="aluno-empty-line">Nenhum apoio registrado.</div>
+            {% endfor %}
+          </div>
+
+          {% if can_edu_manage %}
+            <div class="aluno-stage__forms">
+              <details class="aluno-form-panel">
+                <summary><i class="fa-solid fa-hand-holding-medical"></i>Adicionar necessidade NEE</summary>
+                <form method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="_action" value="add_nee">
+                  {{ form_nee.as_p }}
+                  <button type="submit" class="btn btn-primary">Salvar necessidade</button>
+                </form>
+              </details>
+              <details class="aluno-form-panel">
+                <summary><i class="fa-solid fa-people-arrows-left-right"></i>Registrar apoio</summary>
+                <form method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="_action" value="add_apoio">
+                  {{ form_apoio.as_p }}
+                  <button type="submit" class="btn btn-primary">Salvar apoio</button>
+                </form>
+              </details>
+            </div>
+          {% endif %}
+        </section>
+
+        <section id="etapa-saude" class="aluno-stage aluno-stage--e">
+          <header class="aluno-stage__header">
+            <div class="aluno-stage__step">05</div>
+            <div>
+              <h3>Saúde Integrada</h3>
+              <p>Resumo de atendimentos e agendamentos vinculados ao aluno.</p>
+            </div>
+          </header>
+
+          <div class="chips aluno-chip-list">
+            <span class="pill">Atendimentos: {{ atendimentos_saude|length }}</span>
+            <span class="pill">Agendamentos: {{ agendamentos_saude|length }}</span>
+          </div>
+
+          <div class="aluno-dual-list">
+            <div>
+              <h4>Últimos atendimentos</h4>
+              <div class="aluno-listing">
+                {% for a in atendimentos_saude %}
+                  <article class="aluno-listing__item">
+                    <h4>{{ a.data|date:"d/m/Y" }} • {{ a.get_tipo_display }}</h4>
+                    <p>{{ a.unidade.nome }} • {{ a.profissional.nome }}</p>
+                  </article>
+                {% empty %}
+                  <div class="aluno-empty-line">Nenhum atendimento de saúde vinculado.</div>
+                {% endfor %}
+              </div>
+            </div>
+            <div>
+              <h4>Próximos agendamentos</h4>
+              <div class="aluno-listing">
+                {% for ag in agendamentos_saude %}
+                  <article class="aluno-listing__item">
+                    <h4>{{ ag.inicio|date:"d/m/Y H:i" }} • {{ ag.get_status_display }}</h4>
+                    <p>{{ ag.unidade.nome }} • {{ ag.profissional.nome }}</p>
+                  </article>
+                {% empty %}
+                  <div class="aluno-empty-line">Nenhum agendamento de saúde vinculado.</div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="etapa-documentos" class="aluno-stage aluno-stage--f">
+          <header class="aluno-stage__header">
+            <div class="aluno-stage__step">06</div>
+            <div>
+              <h3>Documentos e Certificados</h3>
+              <p>Acervo digital para histórico escolar, declarações e certificados do aluno.</p>
+            </div>
+          </header>
+
+          <div class="aluno-stage__subblock">
+            <h4>Documentação do aluno</h4>
+            <div class="aluno-listing">
+              {% for doc in documentos %}
+                <article class="aluno-listing__item">
+                  <h4>{{ doc.get_tipo_display }} — {{ doc.titulo }}</h4>
+                  <p>
+                    Nº {{ doc.numero_documento|default:"—" }} • Emissão:
+                    {% if doc.data_emissao %}{{ doc.data_emissao|date:"d/m/Y" }}{% else %}—{% endif %}
+                    {% if doc.arquivo %}
+                      • <a href="{{ doc.arquivo.url }}" target="_blank" rel="noopener">Abrir arquivo</a>
+                    {% endif %}
+                  </p>
+                </article>
+              {% empty %}
+                <div class="aluno-empty-line">Nenhum documento cadastrado.</div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="aluno-stage__subblock">
+            <h4>Certificados e declarações</h4>
+            <div class="aluno-listing">
+              {% for cert in certificados %}
+                <article class="aluno-listing__item">
+                  <h4>{{ cert.titulo }} • {{ cert.get_tipo_display }}</h4>
+                  <p>
+                    Código: {{ cert.codigo_verificacao }} • Emissão: {{ cert.data_emissao|date:"d/m/Y" }}
+                    {% if cert.curso %} • Curso: {{ cert.curso.nome }}{% endif %}
+                    {% if cert.arquivo_pdf %}
+                      • <a href="{{ cert.arquivo_pdf.url }}" target="_blank" rel="noopener">Abrir PDF</a>
+                    {% endif %}
+                  </p>
+                </article>
+              {% empty %}
+                <div class="aluno-empty-line">Nenhum certificado emitido.</div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="aluno-stage__subblock">
+            <h4>Carteira estudantil digital</h4>
+            <div class="aluno-listing">
+              {% for card in carteiras_estudantis %}
+                <article class="aluno-listing__item">
+                  <h4>{{ card.codigo_estudante }} • Emissão {{ card.emitida_em|date:"d/m/Y H:i" }}</h4>
+                  <p>
+                    Validade:
+                    {% if card.validade %}{{ card.validade|date:"d/m/Y" }}{% else %}Indeterminada{% endif %}
+                    • Status: {% if card.ativa %}Ativa{% else %}Inativa{% endif %}
+                    • <a href="{% url 'educacao:carteira_verificar_public' card.codigo_verificacao %}" target="_blank" rel="noopener">Validar carteira</a>
+                  </p>
+                </article>
+              {% empty %}
+                <div class="aluno-empty-line">Nenhuma carteira emitida para este aluno.</div>
+              {% endfor %}
+            </div>
+            {% if can_edu_manage %}
+              <div class="aluno-stage__cta">
+                <a class="btn btn-primary" href="{% url 'educacao:carteira_emitir_pdf' aluno.pk %}">
+                  <i class="fa-solid fa-id-card"></i> Emitir carteira estudantil (PDF)
+                </a>
+              </div>
+            {% endif %}
+          </div>
+
+          {% if can_edu_manage %}
+            <div class="aluno-stage__forms">
+              <details class="aluno-form-panel">
+                <summary><i class="fa-solid fa-folder-plus"></i>Adicionar documento</summary>
+                <form method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  <input type="hidden" name="_action" value="add_documento">
+                  {{ form_documento.as_p }}
+                  <button type="submit" class="btn btn-primary">Salvar documento</button>
+                </form>
+              </details>
+              <details class="aluno-form-panel">
+                <summary><i class="fa-solid fa-certificate"></i>Emitir/registrar certificado</summary>
+                <form method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  <input type="hidden" name="_action" value="add_certificado">
+                  {{ form_certificado.as_p }}
+                  <button type="submit" class="btn btn-primary">Salvar certificado</button>
+                </form>
+              </details>
+            </div>
+          {% endif %}
+        </section>
       {% endif %}
     </div>
-
-    <div class="actions">
-      <a class="btn btn-secondary" href="{% url 'saude:atendimento_list' %}?aluno={{ aluno.id }}">
-        Ver atendimentos
-      </a>
-    </div>
-  {% else %}
-    <span class="small">Sem acesso ao módulo Saúde ou nenhum atendimento registrado.</span>
-  {% endif %}
-</div>
-
-<hr class="divider">
-
-<!-- ========================= APOIOS ========================= -->
-
-<div class="section">
-  <div class="section__title">Apoios / Acompanhamentos</div>
-
-  {% for a in apoios %}
-    <div class="mini">
-      <strong>{{ a.matricula.turma.nome }} — {{ a.matricula.turma.unidade.nome }}</strong>
-      <div class="small">{{ a.observacao|default:a.descricao|default:"" }}</div>
-    </div>
-  {% empty %}
-    <span class="small">Nenhum apoio registrado.</span>
-  {% endfor %}
-
-{% if can_edu_manage %}
-<div class="form-section">
-  <form method="post">
-    {% csrf_token %}
-    <input type="hidden" name="_action" value="add_apoio">
-    {{ form_apoio.as_p }}
-    <button type="submit" class="btn btn-primary">Salvar apoio</button>
-  </form>
-</div>
-{% endif %}
-</div>
-
   </div>
 </div>
 {% endblock %}

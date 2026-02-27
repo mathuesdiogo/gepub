@@ -48,6 +48,15 @@
         <div class="kpi-card__hint">Ver por turmas</div>
       </div>
     </a>
+
+    <a class="kpi-card kpi-card--teal" href="{{ onboarding_url }}">
+      <div class="kpi-card__icon"><i class="fa-solid fa-list-check"></i></div>
+      <div class="kpi-card__meta">
+        <div class="kpi-card__label">Onboarding</div>
+        <div class="kpi-card__value">{{ onboarding_done_steps|default:0 }}/{{ onboarding_total_steps|default:0 }}</div>
+        <div class="kpi-card__hint">{{ onboarding_modules_active|default:0 }} módulos ativos</div>
+      </div>
+    </a>
   </div>
 
   <!-- GRÁFICOS / INDICADORES (se existirem) -->
@@ -60,7 +69,11 @@
         </div>
       </div>
       <div class="dash-card__body">
-        <canvas id="chartUnidadesSecretaria" height="140"></canvas>
+        {% if chart1_labels %}
+          <canvas id="chartUnidadesSecretaria" height="140"></canvas>
+        {% else %}
+          {% include "core/partials/components/feedback/empty_state.html" with title="Sem dados" text="Ainda não há dados de unidades por secretaria." %}
+        {% endif %}
       </div>
     </div>
 
@@ -72,7 +85,11 @@
         </div>
       </div>
       <div class="dash-card__body">
-        <canvas id="chartAlunosSecretaria" height="140"></canvas>
+        {% if chart2_labels %}
+          <canvas id="chartAlunosSecretaria" height="140"></canvas>
+        {% else %}
+          {% include "core/partials/components/feedback/empty_state.html" with title="Sem dados" text="Ainda não há dados de alunos por secretaria." %}
+        {% endif %}
       </div>
     </div>
   </div>
@@ -156,3 +173,59 @@
     </div>
   </div>
 </div>
+
+{{ chart1_labels|json_script:"chart1-labels" }}
+{{ chart1_values|json_script:"chart1-values" }}
+{{ chart2_labels|json_script:"chart2-labels" }}
+{{ chart2_values|json_script:"chart2-values" }}
+
+<script>
+(function () {
+  function loadChart(cb) {
+    if (window.Chart) return cb();
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js";
+    script.onload = cb;
+    document.head.appendChild(script);
+  }
+
+  loadChart(function () {
+    const labels1 = JSON.parse(document.getElementById("chart1-labels").textContent || "[]");
+    const values1 = JSON.parse(document.getElementById("chart1-values").textContent || "[]");
+    const labels2 = JSON.parse(document.getElementById("chart2-labels").textContent || "[]");
+    const values2 = JSON.parse(document.getElementById("chart2-values").textContent || "[]");
+
+    const chart1 = document.getElementById("chartUnidadesSecretaria");
+    if (chart1 && labels1.length) {
+      new Chart(chart1, {
+        type: "bar",
+        data: {
+          labels: labels1,
+          datasets: [{ data: values1 }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    const chart2 = document.getElementById("chartAlunosSecretaria");
+    if (chart2 && labels2.length) {
+      new Chart(chart2, {
+        type: "bar",
+        data: {
+          labels: labels2,
+          datasets: [{ data: values2 }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+  });
+})();
+</script>

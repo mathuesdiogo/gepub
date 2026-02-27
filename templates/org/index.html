@@ -1,12 +1,114 @@
 {% extends "core/base.html" %}
+{% block title %}Organização • GEPUB{% endblock %}
+{% block header %}Organização{% endblock %}
 {% block content %}
-<div class="card"><div class="card__body">
-{% include "core/partials/components/layout/page_head.html" with title="Organização" subtitle="Cadastros institucionais (Municípios, Secretarias, Unidades e Setores)" actions=actions %}
-<ul class="action-list">
-  <li><div><div class="item-title">Municípios</div><div class="item-subtitle">Gerencie municípios/prefeituras</div></div><a class="btn btn--ghost" href="{% url 'org:municipio_list' %}"><i class="fa-solid fa-arrow-right"></i></a></li>
-  <li><div><div class="item-title">Secretarias</div><div class="item-subtitle">Secretarias por município</div></div><a class="btn btn--ghost" href="{% url 'org:secretaria_list' %}"><i class="fa-solid fa-arrow-right"></i></a></li>
-  <li><div><div class="item-title">Unidades</div><div class="item-subtitle">Unidades por secretaria</div></div><a class="btn btn--ghost" href="{% url 'org:unidade_list' %}"><i class="fa-solid fa-arrow-right"></i></a></li>
-  <li><div><div class="item-title">Setores</div><div class="item-subtitle">Setores por unidade</div></div><a class="btn btn--ghost" href="{% url 'org:setor_list' %}"><i class="fa-solid fa-arrow-right"></i></a></li>
-</ul>
+<div class="card org-shell"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title="Organização" subtitle="Gestão institucional de municípios, secretarias, unidades e setores" actions=actions %}
+  {% include "org/partials/nav_tabs.html" %}
+
+  <section class="org-info-grid">
+    <article class="org-info-card">
+      <p class="org-info-card__label">Municípios</p>
+      <p class="org-info-card__value">{{ stats.municipios }}</p>
+      <p class="org-info-card__meta">Prefeituras no escopo do usuário</p>
+    </article>
+    <article class="org-info-card">
+      <p class="org-info-card__label">Secretarias</p>
+      <p class="org-info-card__value">{{ stats.secretarias }}</p>
+      <p class="org-info-card__meta">Estruturas institucionais ativas</p>
+    </article>
+    <article class="org-info-card">
+      <p class="org-info-card__label">Unidades</p>
+      <p class="org-info-card__value">{{ stats.unidades }}</p>
+      <p class="org-info-card__meta">Escolas, UBS e unidades administrativas</p>
+    </article>
+    <article class="org-info-card">
+      <p class="org-info-card__label">Setores</p>
+      <p class="org-info-card__value">{{ stats.setores }}</p>
+      <p class="org-info-card__meta">Setores operacionais cadastrados</p>
+    </article>
+    <article class="org-info-card">
+      <p class="org-info-card__label">Módulos ativos</p>
+      <p class="org-info-card__value">{{ stats.modulos_ativos }}</p>
+      <p class="org-info-card__meta">Módulos habilitados por município</p>
+    </article>
+    <article class="org-info-card">
+      <p class="org-info-card__label">Onboarding</p>
+      <p class="org-info-card__value">{{ stats.onboarding_progress_pct }}%</p>
+      <p class="org-info-card__meta">{{ stats.onboarding_concluidos }}/{{ stats.onboarding_total }} etapas concluídas</p>
+    </article>
+  </section>
+
+  <section class="org-board">
+    <div class="org-board__head">
+      <h3 class="org-board__title">Acessos principais</h3>
+      <p class="org-board__sub">Fluxo recomendado para implantação institucional</p>
+    </div>
+    <div class="org-board__grid">
+      <a class="org-board-card" href="{% url 'org:onboarding_primeiro_acesso' %}">
+        <span class="org-board-card__icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+        <span class="org-board-card__title">Onboarding inicial</span>
+        <span class="org-board-card__meta">Configure município e ative templates</span>
+      </a>
+      <a class="org-board-card" href="{% url 'org:onboarding_painel' %}">
+        <span class="org-board-card__icon"><i class="fa-solid fa-list-check"></i></span>
+        <span class="org-board-card__title">Painel de onboarding</span>
+        <span class="org-board-card__meta">Acompanhe progresso por secretaria e módulo</span>
+      </a>
+      <a class="org-board-card" href="{% url 'org:municipio_list' %}">
+        <span class="org-board-card__icon"><i class="fa-solid fa-city"></i></span>
+        <span class="org-board-card__title">Municípios</span>
+        <span class="org-board-card__meta">Cadastro e manutenção das prefeituras</span>
+      </a>
+      <a class="org-board-card" href="{% url 'org:secretaria_list' %}">
+        <span class="org-board-card__icon"><i class="fa-solid fa-building-columns"></i></span>
+        <span class="org-board-card__title">Secretarias</span>
+        <span class="org-board-card__meta">Estrutura por município e gestão de siglas</span>
+      </a>
+      {% if can_manage_secretaria %}
+        <a class="org-board-card" href="{% url 'org:secretaria_governanca_hub' %}">
+          <span class="org-board-card__icon"><i class="fa-solid fa-sliders"></i></span>
+          <span class="org-board-card__title">Governança</span>
+          <span class="org-board-card__meta">Configurações e cadastros-base por secretaria</span>
+        </a>
+      {% endif %}
+      <a class="org-board-card" href="{% url 'org:unidade_list' %}">
+        <span class="org-board-card__icon"><i class="fa-solid fa-school"></i></span>
+        <span class="org-board-card__title">Unidades</span>
+        <span class="org-board-card__meta">Escolas, UBS e unidades administrativas</span>
+      </a>
+      <a class="org-board-card" href="{% url 'org:setor_list' %}">
+        <span class="org-board-card__icon"><i class="fa-solid fa-sitemap"></i></span>
+        <span class="org-board-card__title">Setores</span>
+        <span class="org-board-card__meta">Divisão setorial por unidade</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="org-board">
+    <div class="org-board__head">
+      <h3 class="org-board__title">Últimos provisionamentos</h3>
+      <p class="org-board__sub">Total executado: {{ stats.provisionamentos_total }}</p>
+    </div>
+    {% if recent_provisionamentos %}
+      <ul class="action-list">
+        {% for p in recent_provisionamentos %}
+          <li>
+            <div>
+              <div class="item-title">{{ p.secretaria.nome|default:"Secretaria não vinculada" }}</div>
+              <div class="item-subtitle">
+                {{ p.template.nome|default:"Template removido" }} • {{ p.criado_em|date:"d/m/Y H:i" }}
+              </div>
+            </div>
+            <span class="status {% if p.status == 'CONCLUIDO' %}success{% elif p.status == 'ERRO' %}danger{% elif p.status == 'EM_PROCESSAMENTO' %}warning{% else %}default{% endif %}">
+              {{ p.get_status_display }}
+            </span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      {% include "core/partials/components/feedback/empty_state.html" with title="Sem provisionamentos" text="Execute o onboarding inicial para criar secretarias automaticamente." %}
+    {% endif %}
+  </section>
 </div></div>
 {% endblock %}

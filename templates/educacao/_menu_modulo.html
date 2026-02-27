@@ -5,71 +5,158 @@
   </div>
 
   <ul class="module-menu__list">
+    {% if is_professor_role %}
+      <li class="module-menu__item">
+        <a class="module-menu__link" href="{% url 'educacao:index' %}">
+          <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+          <span>Painel Professor</span>
+        </a>
+      </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link" href="{% url 'educacao:turma_list' %}">
+          <i class="fa-solid fa-people-group" aria-hidden="true"></i>
+          <span>Minhas Turmas</span>
+        </a>
+      </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link" href="{% url 'educacao:aluno_list' %}">
+          <i class="fa-solid fa-user-graduate" aria-hidden="true"></i>
+          <span>Meus Alunos</span>
+        </a>
+      </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link" href="{% url 'educacao:meus_diarios' %}">
+          <i class="fa-solid fa-book" aria-hidden="true"></i>
+          <span>Diário de Classe</span>
+        </a>
+      </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link" href="{% url 'educacao:portal_professor' %}">
+          <i class="fa-solid fa-chalkboard-user" aria-hidden="true"></i>
+          <span>Portal Professor</span>
+        </a>
+      </li>
+    {% else %}
+      <li class="module-menu__item">
+        <a class="module-menu__link" href="{% url 'educacao:index' %}">
+          <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
 
-    <li class="module-menu__item">
-      <a class="module-menu__link" href="{% url 'educacao:index' %}">
-        <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
-        <span>Dashboard</span>
-      </a>
-    </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link" href="{% url 'educacao:relatorio_mensal' %}">
+          <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
+          <span>Relatório Mensal</span>
+        </a>
+      </li>
 
-    <li class="module-menu__item">
-      <a class="module-menu__link" href="{% url 'educacao:relatorio_mensal' %}">
-        <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
-        <span>Relatório Mensal</span>
-      </a>
-    </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link" href="{% url 'educacao:indicadores_gerenciais' %}">
+          <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+          <span>Indicadores</span>
+        </a>
+      </li>
 
-    <li class="module-menu__item">
-      <a class="module-menu__link" href="{% url 'educacao:periodo_list' %}">
-        <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
-        <span>Períodos Letivos</span>
-      </a>
-    </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link" href="{% url 'educacao:censo_escolar' %}">
+          <i class="fa-solid fa-database" aria-hidden="true"></i>
+          <span>Censo Escolar</span>
+        </a>
+      </li>
 
-    <!-- Diário controla Aulas, Frequência e Avaliações -->
-    <li class="module-menu__item">
-      <a class="module-menu__link" href="{% url 'educacao:meus_diarios' %}">
-        <i class="fa-solid fa-book" aria-hidden="true"></i>
-        <span>Diário de Classe</span>
-      </a>
-    </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link" href="{% url 'educacao:periodo_list' %}">
+          <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
+          <span>Períodos Letivos</span>
+        </a>
+      </li>
 
-    <li class="module-menu__item">
-      <a class="module-menu__link" href="{% url 'educacao:horarios_index' %}">
-        <i class="fa-solid fa-clock" aria-hidden="true"></i>
-        <span>Horários</span>
-      </a>
-    </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link" href="{% url 'educacao:calendario_index' %}">
+          <i class="fa-solid fa-calendar-week" aria-hidden="true"></i>
+          <span>Calendário Educacional</span>
+        </a>
+      </li>
 
-    <li class="module-menu__item">
-      <a class="module-menu__link" href="{% url 'educacao:aluno_list' %}">
-        <i class="fa-solid fa-user-graduate" aria-hidden="true"></i>
-        <span>Alunos</span>
-      </a>
-    </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link" href="{% url 'educacao:componente_list' %}">
+          <i class="fa-solid fa-book-open" aria-hidden="true"></i>
+          <span>Componentes</span>
+        </a>
+      </li>
 
-    <li class="module-menu__item">
-      <a class="module-menu__link" href="{% url 'educacao:turma_list' %}">
-        <i class="fa-solid fa-people-group" aria-hidden="true"></i>
-        <span>Turmas</span>
-      </a>
-    </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link" href="{% url 'educacao:meus_diarios' %}">
+          <i class="fa-solid fa-book" aria-hidden="true"></i>
+          <span>Diário de Classe</span>
+        </a>
+      </li>
 
-    <li class="module-menu__item">
-      <a class="module-menu__link" href="{% url 'educacao:matricula_create' %}">
-        <i class="fa-solid fa-id-card" aria-hidden="true"></i>
-        <span>Matrículas</span>
-      </a>
-    </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link" href="{% url 'educacao:portal_professor' %}">
+          <i class="fa-solid fa-chalkboard-user" aria-hidden="true"></i>
+          <span>Portal Professor</span>
+        </a>
+      </li>
 
-    {% if perms.nee.view %}
-    <li class="module-menu__item">
-      <a class="module-menu__link" href="{% url 'nee:relatorios_index' %}">
-        <i class="fa-solid fa-wheelchair" aria-hidden="true"></i>
-        <span>Relatórios NEE</span>
-      </a>
-    </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link" href="{% url 'educacao:horarios_index' %}">
+          <i class="fa-solid fa-clock" aria-hidden="true"></i>
+          <span>Horários</span>
+        </a>
+      </li>
+
+      <li class="module-menu__item">
+        <a class="module-menu__link" href="{% url 'educacao:aluno_list' %}">
+          <i class="fa-solid fa-user-graduate" aria-hidden="true"></i>
+          <span>Alunos</span>
+        </a>
+      </li>
+
+      <li class="module-menu__item">
+        <a class="module-menu__link" href="{% url 'educacao:turma_list' %}">
+          <i class="fa-solid fa-people-group" aria-hidden="true"></i>
+          <span>Turmas</span>
+        </a>
+      </li>
+
+      <li class="module-menu__item">
+        <a class="module-menu__link" href="{% url 'educacao:coordenacao_list' %}">
+          <i class="fa-solid fa-user-tie" aria-hidden="true"></i>
+          <span>Coordenação</span>
+        </a>
+      </li>
+
+      <li class="module-menu__item">
+        <a class="module-menu__link" href="{% url 'educacao:curso_list' %}">
+          <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
+          <span>Cursos</span>
+        </a>
+      </li>
+
+      <li class="module-menu__item">
+        <a class="module-menu__link" href="{% url 'educacao:matricula_create' %}">
+          <i class="fa-solid fa-id-card" aria-hidden="true"></i>
+          <span>Matrículas</span>
+        </a>
+      </li>
+
+      <li class="module-menu__item">
+        <a class="module-menu__link" href="{% url 'educacao:assistencia_index' %}">
+          <i class="fa-solid fa-utensils" aria-hidden="true"></i>
+          <span>Assistência Escolar</span>
+        </a>
+      </li>
+
+      {% if perms.nee.view %}
+      <li class="module-menu__item">
+        <a class="module-menu__link" href="{% url 'nee:relatorios_index' %}">
+          <i class="fa-solid fa-wheelchair" aria-hidden="true"></i>
+          <span>Relatórios NEE</span>
+        </a>
+      </li>
+      {% endif %}
     {% endif %}
 
   </ul>

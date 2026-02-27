@@ -1,0 +1,37 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Censo Escolar • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Censo Escolar (INEP)" subtitle="Base versionada para conferência e exportação" actions=actions %}
+{% include "core/partials/components/data/filter_bar.html" with q="" action_url=action_url clear_url=clear_url has_filters=has_filters extra_filters=extra_filters %}
+<p class="small">Layouts suportados: {{ layouts_suportados }}.</p>
+
+<div class="grid grid--3">
+{% include "core/partials/components/data/kpi_card.html" with label="Unidades" value=total_unidades helper="Escolas no escopo" %}
+{% include "core/partials/components/data/kpi_card.html" with label="Turmas" value=total_turmas helper="Ano letivo selecionado" %}
+{% include "core/partials/components/data/kpi_card.html" with label="Matrículas" value=total_matriculas helper="Registros do ano" %}
+</div>
+
+<div class="grid grid--2">
+{% include "core/partials/components/data/kpi_card.html" with label="Alunos Únicos" value=total_alunos helper="Com matrícula no ano" %}
+{% include "core/partials/components/data/kpi_card.html" with label="Docentes" value=total_docentes helper="Com turma vinculada" %}
+</div>
+
+<hr>
+
+{% include "core/partials/components/layout/page_head.html" with title="Consistência de Dados" subtitle="Pendências antes do envio ao Censo" actions=None %}
+{% include "core/partials/components/data/table_shell.html" with headers=headers_consistencia rows=rows_consistencia page_obj=None empty_title="Sem validações" empty_text="Nenhuma validação disponível." %}
+
+<hr>
+
+{% include "core/partials/components/layout/page_head.html" with title="Validação por Layout" subtitle="Regras aplicadas ao dataset e layout selecionados" actions=None %}
+{% include "core/partials/components/data/table_shell.html" with headers=headers_layout_validacao rows=rows_layout_validacao page_obj=None empty_title="Sem regras" empty_text="Não há regras configuradas para esse layout/dataset." %}
+
+<hr>
+
+{% include "core/partials/components/layout/page_head.html" with title="Prévia do Dataset" subtitle=preview_subtitle actions=None %}
+{% include "core/partials/components/data/table_shell.html" with headers=headers_preview rows=rows_preview page_obj=None empty_title="Sem dados" empty_text="Não há dados para o dataset e filtros selecionados." %}
+
+</div></div>
+{% endblock %}

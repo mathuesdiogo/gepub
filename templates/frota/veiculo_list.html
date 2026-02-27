@@ -1,0 +1,43 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+    {% if municipios and municipios|length %}
+      <select name="municipio" class="input" style="max-width:240px;">
+        {% for m in municipios %}
+          <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+    <select name="situacao" class="input" style="max-width:220px;">
+      <option value="">Todas situações</option>
+      {% for key,label in situacao_choices %}
+        <option value="{{ key }}" {% if situacao == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <input name="q" value="{{ q }}" class="input" placeholder="Código, placa ou modelo" style="max-width:280px;">
+    <button class="btn btn--sm" type="submit">Filtrar</button>
+  </form>
+  <div class="table-shell"><div class="table-shell__body">
+    <table class="table">
+      <thead><tr><th>Código</th><th>Placa</th><th>Veículo</th><th>Situação</th><th>KM</th><th></th></tr></thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td>{{ item.codigo }}</td>
+            <td>{{ item.placa|default:"-" }}</td>
+            <td>{{ item.nome }}{% if item.marca_modelo %} ({{ item.marca_modelo }}){% endif %}</td>
+            <td>{{ item.get_situacao_display }}</td>
+            <td>{{ item.quilometragem_atual }}</td>
+            <td><a class="btn btn--sm btn--ghost" href="{% url 'frota:veiculo_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6">Nenhum veículo encontrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

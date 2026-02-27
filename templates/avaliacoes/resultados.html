@@ -1,0 +1,77 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="card" style="margin-top:12px;"><div class="card__body">
+    <h3 style="margin-top:0;">Distribuição de notas</h3>
+    <div class="detail-summary">
+      {% for faixa in faixas_distribuicao %}
+        <div><strong>{{ faixa.label }}:</strong> {{ faixa.total }}</div>
+      {% endfor %}
+    </div>
+  </div></div>
+
+  <div class="card" style="margin-top:12px;"><div class="card__body">
+    <h3 style="margin-top:0;">Ranking</h3>
+    <div class="table-shell"><div class="table-shell__body">
+      <table class="table">
+        <thead><tr><th>#</th><th>Aluno</th><th>Nota</th><th>Percentual</th></tr></thead>
+        <tbody>
+          {% for app in ranking %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ app.aluno.nome }}</td>
+              <td>{{ app.nota|floatformat:2 }}</td>
+              <td>{{ app.percentual|floatformat:2 }}%</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4">Sem notas corrigidas.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </div></div>
+
+  <div class="card" style="margin-top:12px;"><div class="card__body">
+    <h3 style="margin-top:0;">Análise por questão</h3>
+    <div class="table-shell"><div class="table-shell__body">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Questão</th>
+            <th>Gabarito</th>
+            <th>Acertos</th>
+            <th>Erros</th>
+            <th>Taxa de acerto</th>
+            <th>Marcações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in questoes %}
+            <tr>
+              <td>{{ item.numero }}</td>
+              <td>{{ item.gabarito }}</td>
+              <td>{{ item.acertos }}</td>
+              <td>{{ item.erros }}</td>
+              <td>{{ item.taxa_acerto }}%</td>
+              <td>
+                {% if item.marcacoes %}
+                  {% for letra,total in item.marcacoes.items %}
+                    {{ letra }}={{ total }}{% if not forloop.last %} • {% endif %}
+                  {% endfor %}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6">Sem dados por questão.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </div></div>
+</div></div>
+{% endblock %}

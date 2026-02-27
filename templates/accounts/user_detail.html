@@ -1,0 +1,68 @@
+{% extends "core/detail_base.html" %}
+
+{% block title %}{{ title }} • Usuários • GEPUB{% endblock %}
+{% block header %}Usuários{% endblock %}
+
+{% block detail_sections %}
+<section class="org-board">
+  <div class="org-board__head">
+    <h3 class="org-board__title">Ações rápidas</h3>
+    <p class="org-board__sub">Administração e segurança de acesso</p>
+  </div>
+  <div class="users-detail-actions">
+    <form method="post" action="{% url 'accounts:usuario_toggle_ativo' u.id %}" class="u-inline-form">
+      {% csrf_token %}
+      <button class="btn btn--ghost" type="submit">
+        <i class="fa-solid fa-power-off"></i>
+        {% if profile_obj.ativo %}Desativar conta{% else %}Ativar conta{% endif %}
+      </button>
+    </form>
+    <form method="post" action="{% url 'accounts:usuario_toggle_bloqueio' u.id %}" class="u-inline-form">
+      {% csrf_token %}
+      <button class="btn btn--ghost" type="submit">
+        <i class="fa-solid fa-user-lock"></i>
+        {% if profile_obj.bloqueado %}Desbloquear{% else %}Bloquear{% endif %}
+      </button>
+    </form>
+    <form method="post" action="{% url 'accounts:usuario_reset_codigo' u.id %}" class="u-inline-form">
+      {% csrf_token %}
+      <button class="btn btn--ghost" type="submit"><i class="fa-solid fa-rotate"></i> Resetar código</button>
+    </form>
+    <form method="post" action="{% url 'accounts:usuario_reset_senha' u.id %}" class="u-inline-form">
+      {% csrf_token %}
+      <button class="btn btn--ghost" type="submit"><i class="fa-solid fa-key"></i> Resetar senha</button>
+    </form>
+  </div>
+</section>
+
+<section class="org-board">
+  <div class="org-board__head">
+    <h3 class="org-board__title">Auditoria</h3>
+    <p class="org-board__sub">Histórico de alterações críticas desta conta</p>
+  </div>
+  <div class="table-shell">
+    <table class="table">
+      <thead>
+        <tr>
+          <th width="180px">Data</th>
+          <th width="180px">Ação</th>
+          <th width="200px">Responsável</th>
+          <th>Detalhes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+          <tr>
+            <td>{{ log.created_at|date:"d/m/Y H:i" }}</td>
+            <td>{{ log.get_action_display }}</td>
+            <td>{{ log.actor.username|default:"—" }}</td>
+            <td>{{ log.details|default:"—" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4">Sem registros de auditoria para este usuário.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

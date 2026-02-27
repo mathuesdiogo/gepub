@@ -9,6 +9,7 @@
   <div class="card__body">
 
     {% include "core/partials/components/layout/page_head.html" with title="Municípios" subtitle="Cadastre e gerencie os municípios" actions=actions %}
+    {% include "org/partials/nav_tabs.html" %}
     {% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Buscar por município ou UF..." action_url=action_url clear_url=clear_url has_filters=has_filters input_attrs='data-autocomplete-url="'|add:autocomplete_url|add:'" data-autocomplete-href="'|add:autocomplete_href|add:'"' %}
 
     {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q empty_title="Nenhum município encontrado" empty_text="Tente ajustar sua busca." %}

@@ -1,0 +1,31 @@
+{% extends "core/detail_base.html" %}
+
+{% block detail_sections %}
+<div class="card" style="margin-top:12px;"><div class="card__body">
+  <h3 style="margin-top:0;">Descricao</h3>
+  <p style="margin:0;">{{ obj.descricao|default:"-" }}</p>
+</div></div>
+
+<div class="card" style="margin-top:12px;"><div class="card__body">
+  <h3 style="margin-top:0;">Andamentos</h3>
+  <div class="table-shell"><div class="table-shell__body">
+    <table class="table">
+      <thead><tr><th>Data</th><th>Tipo</th><th>Origem</th><th>Destino</th><th>Despacho</th><th>Usuario</th></tr></thead>
+      <tbody>
+        {% for item in andamentos %}
+          <tr>
+            <td>{{ item.data_evento|date:"d/m/Y" }}</td>
+            <td>{{ item.get_tipo_display }}</td>
+            <td>{{ item.setor_origem|default:"-" }}</td>
+            <td>{{ item.setor_destino|default:"-" }}</td>
+            <td>{{ item.despacho|default:"-" }}</td>
+            <td>{{ item.criado_por|default:"-" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6">Sem andamentos registrados.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

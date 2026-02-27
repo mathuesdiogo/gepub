@@ -1,0 +1,9 @@
+{% extends "saude/base_modulo.html" %}
+{% block title %}Documentos Clínicos • Saúde • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title="Documentos Clínicos" subtitle=atendimento.paciente_nome actions=actions %}
+  {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj empty_title="Nenhum documento emitido" empty_text="Emita o primeiro documento clínico deste atendimento." %}
+</div></div>
+{% endblock %}

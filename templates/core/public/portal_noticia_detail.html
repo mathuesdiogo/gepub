@@ -1,0 +1,36 @@
+{% extends "core/public/base_portal_tenant.html" %}
+
+{% block hero_text %}
+<p>{{ item.get_categoria_display }} • {{ item.publicado_em|date:"d/m/Y H:i" }}</p>
+{% endblock %}
+
+{% block page_content %}
+<section class="pp-card">
+  <h2>{{ item.titulo }}</h2>
+  {% if item.imagem %}
+    <img src="{{ item.imagem.url }}" alt="{{ item.titulo }}" style="width:100%;border-radius:12px;margin-top:10px;">
+  {% endif %}
+  {% if item.resumo %}
+    <p style="font-size:1rem;font-weight:600;color:#2b587f;">{{ item.resumo }}</p>
+  {% endif %}
+  <div style="margin-top:8px;color:#4a6d8d;line-height:1.6;white-space:pre-line;">{{ item.conteudo }}</div>
+  <div class="pp-actions" style="margin-top:12px;">
+    <a class="pp-btn pp-btn--soft" href="{% url 'core:portal_noticias_public' %}">Voltar para notícias</a>
+  </div>
+</section>
+
+{% if relacionados %}
+<section class="pp-card" style="margin-top:10px;">
+  <h3>Outras publicações</h3>
+  <ul class="pp-list" style="margin-top:10px;">
+    {% for rel in relacionados %}
+      <li class="pp-list__item">
+        <p class="pp-meta">{{ rel.get_categoria_display }} • {{ rel.publicado_em|date:"d/m/Y" }}</p>
+        <h3><a href="{% url 'core:portal_noticia_detail_public' rel.slug %}" style="text-decoration:none;color:inherit;">{{ rel.titulo }}</a></h3>
+        {% if rel.resumo %}<p>{{ rel.resumo }}</p>{% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends "core/public/base_portal_tenant.html" %}
+
+{% block hero_text %}
+<p>Publicações oficiais com foco em documentos, número da edição e data de publicação. Consulte a edição atual e o acervo histórico.</p>
+{% endblock %}
+
+{% block page_content %}
+<section class="pp-grid pp-grid--3">
+  <article class="pp-card">
+    <h3>Total de edições publicadas</h3>
+    <p class="pp-kpi-value">{{ total_edicoes }}</p>
+  </article>
+  <article class="pp-card">
+    <h3>Edições com PDF</h3>
+    <p class="pp-kpi-value">{{ total_com_pdf }}</p>
+  </article>
+  <article class="pp-card">
+    <h3>Última publicação</h3>
+    <p class="pp-kpi-value">{% if ultima_edicao %}{{ ultima_edicao.data_publicacao|date:"d/m/Y" }}{% else %}—{% endif %}</p>
+  </article>
+</section>
+
+<section class="pp-card">
+  <form method="get" class="pp-form-inline">
+    <div>
+      <label for="id_q">Busca</label>
+      <input id="id_q" class="pp-input" type="text" name="q" value="{{ q }}" placeholder="Número ou resumo">
+    </div>
+    <div>
+      <label for="id_ano">Ano</label>
+      <select id="id_ano" class="pp-select" name="ano">
+        <option value="">Todos</option>
+        {% for item in anos %}
+          {% with ano_item=item|date:'Y' %}
+            <option value="{{ ano_item }}" {% if ano == ano_item %}selected{% endif %}>{{ ano_item }}</option>
+          {% endwith %}
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="id_mes">Mês</label>
+      <select id="id_mes" class="pp-select" name="mes">
+        <option value="">Todos</option>
+        {% for codigo, label in meses %}
+          <option value="{{ codigo }}" {% if mes == codigo %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="id_inicio">Data inicial</label>
+      <input id="id_inicio" class="pp-input" type="date" name="inicio" value="{{ inicio }}">
+    </div>
+    <div>
+      <label for="id_fim">Data final</label>
+      <input id="id_fim" class="pp-input" type="date" name="fim" value="{{ fim }}">
+    </div>
+    <div>
+      <label>&nbsp;</label>
+      <div class="pp-actions">
+        <button class="pp-btn pp-btn--primary" type="submit">Filtrar</button>
+        <a class="pp-btn pp-btn--soft" href="{% url 'core:portal_diario_public' %}">Limpar</a>
+      </div>
+    </div>
+  </form>
+  {% if filtros_ativos %}
+    <p class="pp-meta pp-diario-meta-row">Exibindo {{ total_filtrado }} resultado(s) com filtros ativos.</p>
+  {% endif %}
+</section>
+
+{% if edicao_atual %}
+  <section class="pp-card pp-card--diario-atual">
+    <div class="pp-card__subhead">
+      <h2>Edição Atual</h2>
+      <span class="pp-badge">Edição {{ edicao_atual.numero }}</span>
+    </div>
+    <p class="pp-meta">Publicada em {{ edicao_atual.data_publicacao|date:"d/m/Y" }}{% if edicao_atual.criado_em %} • Cadastrada em {{ edicao_atual.criado_em|date:"d/m/Y H:i" }}{% endif %}</p>
+    <h3 class="pp-diario-title">Diário Oficial {{ edicao_atual.numero }}</h3>
+    {% if edicao_atual.resumo %}<p>{{ edicao_atual.resumo }}</p>{% endif %}
+    <div class="pp-actions">
+      {% if edicao_atual.arquivo_pdf %}
+        <a class="pp-btn pp-btn--primary" href="{{ edicao_atual.arquivo_pdf.url }}" target="_blank" rel="noopener">Abrir documento</a>
+        <a class="pp-btn pp-btn--soft" href="{{ edicao_atual.arquivo_pdf.url }}" download>Baixar PDF</a>
+      {% else %}
+        <span class="pp-badge">Sem PDF anexado</span>
+      {% endif %}
+    </div>
+  </section>
+{% endif %}
+
+<section class="pp-card">
+  <div class="pp-card__subhead">
+    <h2>Edições Anteriores</h2>
+    <span class="pp-badge">{{ total_filtrado }} edição(ões) no resultado</span>
+  </div>
+  <p class="pp-meta">
+    {% if primeira_edicao %}
+      Acervo disponível de {{ primeira_edicao.data_publicacao|date:"d/m/Y" }} até {% if ultima_edicao %}{{ ultima_edicao.data_publicacao|date:"d/m/Y" }}{% else %}—{% endif %}.
+    {% else %}
+      Nenhuma edição cadastrada no acervo.
+    {% endif %}
+  </p>
+  <ul class="pp-list pp-list--diario">
+    {% for item in edicoes_anteriores %}
+      <li class="pp-list__item">
+        <div class="pp-card__subhead">
+          <h3>Diário Oficial {{ item.numero }}</h3>
+          <span class="pp-badge">{{ item.data_publicacao|date:"d/m/Y" }}</span>
+        </div>
+        {% if item.resumo %}<p>{{ item.resumo }}</p>{% endif %}
+        <div class="pp-actions">
+          {% if item.arquivo_pdf %}
+            <a class="pp-btn pp-btn--soft" href="{{ item.arquivo_pdf.url }}" target="_blank" rel="noopener">Abrir PDF</a>
+            <a class="pp-btn pp-btn--soft" href="{{ item.arquivo_pdf.url }}" download>Baixar</a>
+          {% else %}
+            <span class="pp-badge">Sem PDF anexado</span>
+          {% endif %}
+        </div>
+      </li>
+    {% empty %}
+      <li class="pp-list__item">
+        <h3>Nenhuma edição publicada</h3>
+        <p>Não há diário oficial para o filtro informado.</p>
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

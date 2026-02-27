@@ -1,0 +1,118 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/billing.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <form method="post" class="inline-action-form" style="margin-bottom: 10px;">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="gerar_fatura">
+    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-file-invoice-dollar"></i> Gerar fatura mensal</button>
+  </form>
+
+  <h3>Consumo atual</h3>
+  <div class="billing-metrics-grid">
+    {% for item in metricas %}
+      <div class="billing-metric-card">
+        <div class="billing-metric-card__head">
+          <strong>{{ item.label }}</strong>
+          <span>{{ item.usado }}{% if item.limite is not None %} / {{ item.limite }}{% else %} / ilimitado{% endif %}</span>
+        </div>
+        {% if item.percentual is not None %}
+          <div class="billing-progress billing-progress--{{ item.classe }}"><span style="width: {{ item.percentual }}%"></span></div>
+        {% else %}
+          <div class="small">Sem limite contratual.</div>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <h3>Assinatura</h3>
+  <form method="post" class="form-shell">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="save_assinatura">
+    <div class="form-shell__fields">{{ assinatura_form.as_p }}</div>
+    <div class="form-shell__actions"><button type="submit" class="btn btn-primary">Salvar assinatura</button></div>
+  </form>
+
+  <h3>Conceder bônus</h3>
+  <form method="post" class="form-shell">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="bonus_quota">
+    <div class="form-shell__fields">{{ bonus_form.as_p }}</div>
+    <div class="form-shell__actions"><button type="submit" class="btn btn--ghost">Conceder bônus</button></div>
+  </form>
+
+  <h3>Solicitações</h3>
+  <div class="table-shell">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Tipo</th>
+          <th>Quantidade</th>
+          <th>Valor</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in solicitacoes %}
+          <tr>
+            <td>{{ s.solicitado_em|date:"d/m/Y H:i" }}</td>
+            <td>{{ s.get_tipo_display }}</td>
+            <td>{{ s.quantidade }}</td>
+            <td>R$ {{ s.valor_mensal_calculado }}</td>
+            <td>{{ s.get_status_display }}</td>
+            <td>
+              {% if s.status == "SOLICITADO" or s.status == "RASCUNHO" %}
+                <form method="post" class="inline-action-form">
+                  {% csrf_token %}
+                  <input type="hidden" name="solicitacao_id" value="{{ s.pk }}">
+                  <button type="submit" name="action" value="approve_upgrade" class="btn btn--ghost">Aprovar</button>
+                  <button type="submit" name="action" value="reject_upgrade" class="btn btn--ghost">Recusar</button>
+                </form>
+              {% else %}
+                -
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6">Sem solicitações.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Faturas</h3>
+  <div class="table-shell">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Competência</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in faturas %}
+          <tr>
+            <td>{{ f.competencia|date:"m/Y" }}</td>
+            <td>R$ {{ f.valor_total }}</td>
+            <td>{{ f.get_status_display }}</td>
+            <td><a href="{% url 'billing:fatura_pdf' f.pk %}">PDF</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4">Sem faturas.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div></div>
+{% endblock %}

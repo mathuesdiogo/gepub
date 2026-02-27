@@ -1,0 +1,155 @@
+{% extends "core/base.html" %}
+
+{% block extra_css %}
+<style>
+  .bi-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 12px; }
+  .bi-card { grid-column: span 3; padding: 14px; border: 1px solid #e6edf5; border-radius: 12px; background: #fff; }
+  .bi-card__label { font-size: 12px; color: #4a5a6a; }
+  .bi-card__value { font-size: 24px; font-weight: 700; margin-top: 6px; }
+  .bi-chart { background: #fff; border: 1px solid #e6edf5; border-radius: 12px; padding: 12px; }
+  .bi-chart--line { grid-column: span 8; }
+  .bi-chart--rank { grid-column: span 4; }
+  .bi-table { grid-column: span 12; }
+  .chart-canvas { height: 320px; }
+  @media (max-width: 980px) {
+    .bi-card { grid-column: span 6; }
+    .bi-chart--line, .bi-chart--rank { grid-column: span 12; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <form method="get" class="filter-bar" style="margin: 12px 0;">
+    <input type="date" name="date_start" value="{{ filters.date_start }}" class="input" style="max-width:180px;">
+    <input type="date" name="date_end" value="{{ filters.date_end }}" class="input" style="max-width:180px;">
+
+    <select name="secretaria" class="input" style="max-width:220px;">
+      <option value="">Secretaria</option>
+      {% for value in payload.filter_options.secretaria %}
+        <option value="{{ value }}" {% if filters.secretaria == value %}selected{% endif %}>{{ value }}</option>
+      {% endfor %}
+    </select>
+
+    <select name="unidade" class="input" style="max-width:220px;">
+      <option value="">Unidade</option>
+      {% for value in payload.filter_options.unidade %}
+        <option value="{{ value }}" {% if filters.unidade == value %}selected{% endif %}>{{ value }}</option>
+      {% endfor %}
+    </select>
+
+    <select name="categoria" class="input" style="max-width:220px;">
+      <option value="">Categoria</option>
+      {% for value in payload.filter_options.categoria %}
+        <option value="{{ value }}" {% if filters.categoria == value %}selected{% endif %}>{{ value }}</option>
+      {% endfor %}
+    </select>
+
+    <button class="btn btn--sm" type="submit">Aplicar filtros</button>
+  </form>
+
+  <div class="bi-grid">
+    <div class="bi-card">
+      <div class="bi-card__label">Linhas filtradas</div>
+      <div class="bi-card__value">{{ payload.kpis.linhas_filtradas }}</div>
+    </div>
+    <div class="bi-card">
+      <div class="bi-card__label">Linhas totais</div>
+      <div class="bi-card__value">{{ payload.kpis.linhas_total }}</div>
+    </div>
+    <div class="bi-card">
+      <div class="bi-card__label">Colunas</div>
+      <div class="bi-card__value">{{ payload.kpis.colunas }}</div>
+    </div>
+    <div class="bi-card">
+      <div class="bi-card__label">Soma principal ({{ payload.kpis.coluna_valor }})</div>
+      <div class="bi-card__value">{{ payload.kpis.soma_principal }}</div>
+    </div>
+
+    <div class="bi-chart bi-chart--line">
+      <h3 style="margin-top:0;">Série temporal</h3>
+      <div id="lineChart" class="chart-canvas"></div>
+    </div>
+
+    <div class="bi-chart bi-chart--rank">
+      <h3 style="margin-top:0;">Ranking</h3>
+      <div id="rankChart" class="chart-canvas"></div>
+    </div>
+
+    <div class="bi-chart bi-table">
+      <h3 style="margin-top:0;">Tabela filtrada</h3>
+      <div class="table-shell"><div class="table-shell__body">
+        <table class="table">
+          <thead>
+            <tr>
+              {% for h in payload.headers %}
+                <th>{{ h }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in table_rows %}
+              <tr>
+                {% for value in row %}
+                  <td>{{ value|default:"-" }}</td>
+                {% endfor %}
+              </tr>
+            {% empty %}
+              <tr><td colspan="{{ payload.headers|length }}">Sem dados para os filtros informados.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div></div>
+    </div>
+  </div>
+
+  {{ payload.line|json_script:"linePayload" }}
+  {{ payload.ranking|json_script:"rankingPayload" }}
+</div></div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script>
+(function () {
+  var linePayload = JSON.parse(document.getElementById("linePayload").textContent || "{}");
+  var rankPayload = JSON.parse(document.getElementById("rankingPayload").textContent || "{}");
+
+  var lineEl = document.getElementById("lineChart");
+  if (lineEl && window.echarts) {
+    var lineChart = echarts.init(lineEl);
+    lineChart.setOption({
+      tooltip: { trigger: "axis" },
+      toolbox: { feature: { saveAsImage: {} } },
+      xAxis: { type: "category", data: linePayload.labels || [] },
+      yAxis: { type: "value" },
+      series: [{
+        type: "line",
+        smooth: true,
+        areaStyle: {},
+        data: linePayload.values || []
+      }]
+    });
+    window.addEventListener("resize", function () { lineChart.resize(); });
+  }
+
+  var rankEl = document.getElementById("rankChart");
+  if (rankEl && window.echarts) {
+    var rankChart = echarts.init(rankEl);
+    rankChart.setOption({
+      tooltip: { trigger: "axis" },
+      toolbox: { feature: { saveAsImage: {} } },
+      xAxis: { type: "value" },
+      yAxis: { type: "category", data: rankPayload.labels || [] },
+      series: [{
+        type: "bar",
+        data: rankPayload.values || []
+      }]
+    });
+    window.addEventListener("resize", function () { rankChart.resize(); });
+  }
+})();
+</script>
+{% endblock %}

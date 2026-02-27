@@ -1,0 +1,10 @@
+{% extends "saude/base_modulo.html" %}
+{% block title %}Auditoria de Prontuário • Saúde • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title="Auditoria de Prontuário" subtitle="Rastreabilidade de acessos clínicos por usuário e paciente" actions=actions %}
+  {% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Buscar por usuário, ação, paciente..." action_url=action_url clear_url=clear_url has_filters=has_filters extra_filters=extra_filters %}
+  {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj empty_title="Nenhum registro encontrado" empty_text="A auditoria aparecerá conforme os acessos forem realizados." %}
+</div></div>
+{% endblock %}

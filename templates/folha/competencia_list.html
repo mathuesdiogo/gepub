@@ -1,0 +1,63 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+    {% if municipios and municipios|length %}
+      <select name="municipio" class="input" style="max-width:240px;">
+        {% for m in municipios %}
+          <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+    <select name="status" class="input" style="max-width:200px;">
+      <option value="">Todos os status</option>
+      {% for key,label in status_choices %}
+        <option value="{{ key }}" {% if status == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn--sm" type="submit">Filtrar</button>
+  </form>
+
+  <div class="table-shell"><div class="table-shell__body">
+    <table class="table">
+      <thead><tr><th>Competência</th><th>Status</th><th>Colaboradores</th><th>Líquido</th><th></th></tr></thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td>{{ item.competencia }}</td>
+            <td>{{ item.get_status_display }}</td>
+            <td>{{ item.total_colaboradores }}</td>
+            <td>R$ {{ item.total_liquido }}</td>
+            <td>
+              {% if item.status != "FECHADA" %}
+                <form method="post" action="{% url 'folha:competencia_processar' item.pk %}?municipio={{ municipio.pk }}" style="display:inline;">
+                  {% csrf_token %}
+                  <button class="btn btn--sm btn--ghost" type="submit">Processar</button>
+                </form>
+                <form method="post" action="{% url 'folha:competencia_fechar' item.pk %}?municipio={{ municipio.pk }}" style="display:inline;">
+                  {% csrf_token %}
+                  <button class="btn btn--sm btn-primary" type="submit">Fechar</button>
+                </form>
+                <form method="post" action="{% url 'folha:enviar_financeiro' item.pk %}?municipio={{ municipio.pk }}" style="display:inline;">
+                  {% csrf_token %}
+                  <button class="btn btn--sm btn--ghost" type="submit">Enviar financeiro</button>
+                </form>
+              {% else %}
+                <form method="post" action="{% url 'folha:competencia_reabrir' item.pk %}?municipio={{ municipio.pk }}" style="display:inline;">
+                  {% csrf_token %}
+                  <button class="btn btn--sm btn--ghost" type="submit">Reabrir</button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Nenhuma competência encontrada.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

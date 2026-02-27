@@ -1,0 +1,12 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Coordenação de Ensino • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+  <div class="card">
+    <div class="card__body">
+      {% include "core/partials/components/layout/page_head.html" with title="Coordenação de Ensino" subtitle="Gestão de coordenadores por unidade e modalidade" actions=actions %}
+      {% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Coordenador ou unidade..." action_url=action_url clear_url=clear_url extra_filters=extra_filters has_filters=has_filters %}
+      {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q empty_title="Nenhuma coordenação encontrada" empty_text="Cadastre coordenações para organizar regular, infantil, EJA e modalidades específicas." %}
+    </div>
+  </div>
+{% endblock %}

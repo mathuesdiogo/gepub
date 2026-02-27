@@ -100,3 +100,51 @@ def export_pdf_table(
     resp["Content-Disposition"] = f'attachment; filename="{filename}"'
     resp["X-Content-Type-Options"] = "nosniff"
     return resp
+
+
+def export_pdf_template(
+    request,
+    *,
+    filename: str,
+    title: str,
+    template_name: str,
+    context: dict | None = None,
+    subtitle: str = "",
+    filtros: str = "",
+    hash_payload: str = "",
+):
+    """
+    Exporta PDF renderizando um template arbitrário (WeasyPrint),
+    preservando metadados institucionais (impresso por/data, hash e QR).
+    """
+    from django.templatetags.static import static
+
+    printed_at = timezone.localtime()
+    printed_at_str = printed_at.strftime("%d/%m/%Y %H:%M")
+    printed_by = getattr(request.user, "username", "—")
+
+    hash_rows = [[hash_payload or template_name]]
+    report_hash = _make_report_hash(title, ["payload"], hash_rows, printed_by, printed_at_str)
+    qr_text = f"GEPUB|{title}|{printed_at_str}|{printed_by}|{report_hash}"
+    qr_data_uri = _try_make_qr_data_uri(qr_text)
+
+    base_context = {
+        "title": title,
+        "subtitle": subtitle,
+        "filtros": filtros,
+        "printed_at": printed_at_str,
+        "printed_by": printed_by,
+        "report_hash": report_hash,
+        "qr_data_uri": qr_data_uri,
+        "logo_url": request.build_absolute_uri(static("img/logo_prefeitura.png")),
+    }
+    if context:
+        base_context.update(context)
+
+    html = render_to_string(template_name, base_context, request=request)
+    pdf_bytes = HTML(string=html, base_url=request.build_absolute_uri("/")).write_pdf()
+
+    resp = HttpResponse(pdf_bytes, content_type="application/pdf")
+    resp["Content-Disposition"] = f'attachment; filename="{filename}"'
+    resp["X-Content-Type-Options"] = "nosniff"
+    return resp

@@ -4,15 +4,15 @@
 <div class="card"><div class="card__body">
 {% include "core/partials/components/layout/page_head.html" with title="Relatórios NEE" subtitle="Visões agregadas por tipo, município e unidade" actions=actions %}
 <div class="section-grid cols-3">
-  <a class="link-card" href="{% url 'nee:relatorio_por_tipo' %}">
+  <a class="link-card" href="{% url 'nee:relatorios_por_tipo' %}">
     <div class="link-card__icon"><i class="fa-solid fa-tags"></i></div>
     <div class="link-card__content"><div class="link-card__title">Por tipo</div><div class="link-card__text">Totalizações por tipo de necessidade.</div></div>
   </a>
-  <a class="link-card" href="{% url 'nee:relatorio_por_municipio' %}">
+  <a class="link-card" href="{% url 'nee:relatorios_por_municipio' %}">
     <div class="link-card__icon"><i class="fa-solid fa-city"></i></div>
     <div class="link-card__content"><div class="link-card__title">Por município</div><div class="link-card__text">Totalizações por município.</div></div>
   </a>
-  <a class="link-card" href="{% url 'nee:relatorio_por_unidade' %}">
+  <a class="link-card" href="{% url 'nee:relatorios_por_unidade' %}">
     <div class="link-card__icon"><i class="fa-solid fa-school"></i></div>
     <div class="link-card__content"><div class="link-card__title">Por unidade</div><div class="link-card__text">Totalizações por unidade.</div></div>
   </a>

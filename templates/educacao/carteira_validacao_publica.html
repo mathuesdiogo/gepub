@@ -1,0 +1,84 @@
+{% extends "core/base_public.html" %}
+{% load static %}
+
+{% block title %}Validação de Carteira Estudantil • GEPUB{% endblock %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'css/pages/educacao-carteira-public.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="carteira-public">
+  <div class="carteira-public__wrap">
+    <section class="carteira-public__hero">
+      <h1>Validação Pública de Carteira Estudantil</h1>
+      <p>Informe o código da carteira (QR/UUID ou código do estudante) para verificar autenticidade e situação.</p>
+    </section>
+
+    <section class="carteira-public__search">
+      <form method="get" action="{% url 'educacao:carteira_verificar_lookup' %}">
+        <input
+          class="input"
+          type="text"
+          name="codigo"
+          value="{{ busca }}"
+          placeholder="Ex.: MAT-000123 ou 5f53d76f-2dd6-46a1-bd75-70b1c3f6a2db"
+          autocomplete="off"
+        >
+        <button class="btn btn-primary" type="submit">Validar</button>
+        <a class="btn btn--ghost" href="{% url 'educacao:carteira_verificar_lookup' %}">Limpar</a>
+      </form>
+    </section>
+
+    {% if carteira %}
+      <section class="carteira-public__result">
+        {% if status == "valida" %}
+          <div class="carteira-status carteira-status--ok">Carteira válida</div>
+        {% elif status == "expirada" %}
+          <div class="carteira-status carteira-status--warn">Carteira expirada</div>
+        {% else %}
+          <div class="carteira-status carteira-status--bad">Carteira inativa</div>
+        {% endif %}
+
+        <div class="carteira-grid">
+          <div class="carteira-photo">
+            {% if carteira.aluno.foto %}
+              <img src="{{ carteira.aluno.foto.url }}" alt="{{ carteira.aluno.nome }}">
+            {% else %}
+              Sem foto
+            {% endif %}
+          </div>
+          <div>
+            <h2 style="margin:0 0 10px;">{{ carteira.aluno.nome }}</h2>
+            <div class="carteira-kv">
+              <article><span>Código do Estudante</span><strong>{{ carteira.codigo_estudante }}</strong></article>
+              <article><span>Código de Verificação</span><strong>{{ carteira.codigo_verificacao }}</strong></article>
+              <article><span>Emissão</span><strong>{{ carteira.emitida_em|date:"d/m/Y H:i" }}</strong></article>
+              <article><span>Validade</span><strong>{{ carteira.validade|date:"d/m/Y"|default:"Indeterminada" }}</strong></article>
+              <article><span>Escola</span><strong>{{ carteira.dados_snapshot.escola|default:"Não informada" }}</strong></article>
+              <article><span>Turma</span><strong>{{ carteira.dados_snapshot.turma|default:"Não informada" }}</strong></article>
+              <article><span>Mãe</span><strong>{{ carteira.dados_snapshot.nome_mae|default:"Não informada" }}</strong></article>
+              <article><span>Pai</span><strong>{{ carteira.dados_snapshot.nome_pai|default:"Não informado" }}</strong></article>
+              <article><span>Necessidades Especiais</span><strong>{% if carteira.dados_snapshot.possui_nee %}Sim{% else %}Não{% endif %}</strong></article>
+            </div>
+
+            <p class="carteira-list">
+              <strong>Cursos complementares:</strong>
+              {% if carteira.dados_snapshot.cursos_complementares %}
+                {{ carteira.dados_snapshot.cursos_complementares|join:", " }}
+              {% else %}
+                Nenhum curso complementar registrado.
+              {% endif %}
+            </p>
+          </div>
+        </div>
+      </section>
+    {% elif busca %}
+      <section class="carteira-public__result">
+        <div class="carteira-status carteira-status--bad">Carteira não localizada</div>
+        <p>Não encontramos carteira com o código informado.</p>
+      </section>
+    {% endif %}
+  </div>
+</main>
+{% endblock %}

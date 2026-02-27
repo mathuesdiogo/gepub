@@ -5,7 +5,7 @@ from datetime import datetime
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
-from django.urls import reverse
+from django.urls import NoReverseMatch, reverse
 
 from weasyprint import HTML
 
@@ -24,6 +24,11 @@ def aluno_relatorio_clinico_pdf(request: HttpRequest, aluno_id: int) -> HttpResp
     apoios = ApoioMatricula.objects.select_related("matricula", "matricula__turma", "matricula__turma__unidade").filter(matricula__aluno=aluno).order_by("-criado_em", "-id")
     acompanhamentos = AcompanhamentoNEE.objects.filter(aluno=aluno).order_by("-data", "-id")[:25]
 
+    try:
+        validation_url = request.build_absolute_uri(reverse("core:validar_documento"))
+    except NoReverseMatch:
+        validation_url = request.build_absolute_uri("/")
+
     ctx = {
         "title": f"NEE — Relatório Clínico ({aluno.nome})",
         "subtitle": "Plano clínico-pedagógico",
@@ -37,7 +42,7 @@ def aluno_relatorio_clinico_pdf(request: HttpRequest, aluno_id: int) -> HttpResp
         "generated_at": datetime.now().strftime("%d/%m/%Y %H:%M"),
         "printed_by": getattr(request.user, "get_full_name", lambda: str(request.user))() or str(request.user),
         "validation_code": f"ALUNO-{aluno.pk}",
-        "validation_url": request.build_absolute_uri(reverse("core:validar_documento")) if "core:validar_documento" else request.build_absolute_uri("/"),
+        "validation_url": validation_url,
         "report_code": "NEE-ALUNO",
         "municipio_nome": getattr(getattr(getattr(request.user, "profile", None), "municipio", None), "nome", None),
         "municipio_uf": getattr(getattr(getattr(request.user, "profile", None), "municipio", None), "uf", None),

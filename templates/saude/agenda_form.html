@@ -1,0 +1,9 @@
+{% extends "saude/base_modulo.html" %}
+{% block title %}{% if mode == "update" %}Editar Agendamento{% else %}Novo Agendamento{% endif %} • Saúde • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+  {% if mode == "update" %}{% include "core/partials/components/layout/page_head.html" with title="Editar Agendamento" subtitle="Atualize o agendamento" actions=None %}{% else %}{% include "core/partials/components/layout/page_head.html" with title="Novo Agendamento" subtitle="Agenda clínica por profissional e unidade" actions=None %}{% endif %}
+  {% include "core/partials/components/forms/form_shell.html" with form=form cancel_url=cancel_url submit_label=submit_label action_url=action_url %}
+</div></div>
+{% endblock %}

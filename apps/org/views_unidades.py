@@ -171,7 +171,12 @@ class UnidadeDetailView(BaseDetailViewGepub):
             "fields": fields,
             "pills": pills,
             "links": [
-                {"label": "Ver setores", "url": reverse("org:setor_list") + f"?unidade={unidade.id}", "meta": f"{setores_qs.count()}"},
+                {
+                    "label": "Ver setores",
+                    "url": reverse("org:setor_list") + f"?unidade={unidade.id}",
+                    "meta": f"{setores_qs.count()} registros",
+                    "icon": "fa-solid fa-sitemap",
+                },
             ]
         })
 

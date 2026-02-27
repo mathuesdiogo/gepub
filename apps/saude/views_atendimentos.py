@@ -10,7 +10,11 @@ from apps.core.rbac import can, scope_filter_unidades
 from apps.core.exports import export_csv, export_pdf_table
 
 from apps.org.models import Unidade
-from .models import ProfissionalSaude, AtendimentoSaude
+from .models import (
+    ProfissionalSaude,
+    AtendimentoSaude,
+    AuditoriaAcessoProntuarioSaude,
+)
 from .forms import AtendimentoSaudeForm
 
 
@@ -131,12 +135,21 @@ def atendimento_detail(request, pk: int):
     )
 
     obj = get_object_or_404(qs, pk=pk)
+    AuditoriaAcessoProntuarioSaude.objects.create(
+        usuario=request.user,
+        atendimento=obj,
+        aluno=obj.aluno if obj.aluno_id else None,
+        acao="VISUALIZACAO_ATENDIMENTO",
+        ip=request.META.get("REMOTE_ADDR", ""),
+    )
 
     can_manage = can(request.user, "saude.manage")
 
     actions = [{"label": "Voltar", "url": reverse("saude:atendimento_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
     if can_manage:
         actions.append({"label": "Editar", "url": reverse("saude:atendimento_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+        actions.append({"label": "Documentos", "url": reverse("saude:documento_list", args=[obj.pk]), "icon": "fa-solid fa-file-medical", "variant": "btn--ghost"})
+        actions.append({"label": "Prontuário", "url": reverse("saude:prontuario_hub", args=[obj.pk]), "icon": "fa-solid fa-notes-medical", "variant": "btn--ghost"})
 
     fields = [
         {"label": "Data", "value": obj.data.strftime("%d/%m/%Y") if obj.data else "—"},
@@ -145,6 +158,7 @@ def atendimento_detail(request, pk: int):
         {"label": "Unidade", "value": getattr(obj.unidade, "nome", "—")},
         {"label": "CPF do paciente", "value": obj.paciente_cpf or "—"},
         {"label": "Observações", "value": obj.observacoes or "—"},
+        {"label": "Documentos clínicos", "value": str(obj.documentos_clinicos.count())},
     ]
     pills = [{"label": "Paciente", "value": obj.paciente_nome, "variant": "info"}]
 

@@ -1,0 +1,49 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/billing.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <form method="get" class="billing-filter-form">
+    {{ filtro.q.label_tag }} {{ filtro.q }}
+    {{ filtro.status.label_tag }} {{ filtro.status }}
+    <button type="submit" class="btn btn--ghost">Filtrar</button>
+  </form>
+
+  <div class="table-shell">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Município</th>
+          <th>Plano</th>
+          <th>Status</th>
+          <th>Base mensal</th>
+          <th>Vigência</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in page_obj.object_list %}
+          <tr>
+            <td>{{ a.municipio.nome }}/{{ a.municipio.uf }}</td>
+            <td>{{ a.plano.nome }}</td>
+            <td>{{ a.get_status_display }}</td>
+            <td>R$ {{ a.valor_base_mensal }}</td>
+            <td>{{ a.inicio_vigencia|date:"d/m/Y" }}{% if a.fim_vigencia %} - {{ a.fim_vigencia|date:"d/m/Y" }}{% endif %}</td>
+            <td><a href="{% url 'billing:assinatura_admin_detail' a.pk %}">Gerir</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6">Nenhuma assinatura encontrada.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% include "core/partials/components/data/pagination.html" with page_obj=page_obj q=q %}
+</div></div>
+{% endblock %}

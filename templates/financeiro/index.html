@@ -1,0 +1,79 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+    {% if municipios and municipios|length %}
+      <select name="municipio" class="input" style="max-width:260px;">
+        {% for m in municipios %}
+          <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+
+    <select name="exercicio" class="input" style="max-width:220px;">
+      <option value="">Todos os exercícios</option>
+      {% for ex in exercicios %}
+        <option value="{{ ex.id }}" {% if exercicio and ex.id == exercicio.id %}selected{% endif %}>{{ ex.ano }} • {{ ex.get_status_display }}</option>
+      {% endfor %}
+    </select>
+
+    <button class="btn btn--sm" type="submit">Aplicar</button>
+  </form>
+
+  <div class="kpi-grid" style="margin-bottom:16px;">
+    {% for kpi in kpis %}
+      <article class="kpi-card">
+        <div class="kpi-card__label">{{ kpi.label }}</div>
+        <div class="kpi-card__value">R$ {{ kpi.value }}</div>
+      </article>
+    {% endfor %}
+  </div>
+
+  <div class="table-shell" style="margin-bottom:14px;">
+    <div class="table-shell__head"><h3 style="margin:0;">Empenhos recentes</h3></div>
+    <div class="table-shell__body">
+      <table class="table">
+        <thead><tr><th>Número</th><th>Fornecedor</th><th>UG</th><th>Valor</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          {% for item in empenhos_recentes %}
+            <tr>
+              <td>{{ item.numero }}</td>
+              <td>{{ item.fornecedor_nome }}</td>
+              <td>{{ item.unidade_gestora.codigo }}</td>
+              <td>R$ {{ item.valor_empenhado }}</td>
+              <td>{{ item.get_status_display }}</td>
+              <td><a class="link" href="{% url 'financeiro:empenho_detail' item.id %}?municipio={{ municipio.id }}">ver</a></td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6">Nenhum empenho no filtro atual.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-shell">
+    <div class="table-shell__head"><h3 style="margin:0;">Receitas recentes</h3></div>
+    <div class="table-shell__body">
+      <table class="table">
+        <thead><tr><th>Data</th><th>Rubrica</th><th>Descrição</th><th>Valor</th></tr></thead>
+        <tbody>
+          {% for item in receitas_recentes %}
+            <tr>
+              <td>{{ item.data_arrecadacao|date:"d/m/Y" }}</td>
+              <td>{{ item.rubrica_codigo }}</td>
+              <td>{{ item.rubrica_nome }}</td>
+              <td>R$ {{ item.valor }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4">Nenhuma receita no filtro atual.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div></div>
+{% endblock %}

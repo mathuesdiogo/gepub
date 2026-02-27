@@ -1,0 +1,27 @@
+{% with url_name=request.resolver_match.url_name|default:'' %}
+<nav class="tabs org-tabs" aria-label="Navegação do módulo organização">
+  <a class="tabs__item {% if url_name == 'index' %}is-active{% endif %}" href="{% url 'org:index' %}" {% if url_name == 'index' %}aria-current="page"{% endif %}>
+    <span class="tabs__label">Visão Geral</span>
+  </a>
+  <a class="tabs__item {% if 'onboarding_' in url_name %}is-active{% endif %}" href="{% url 'org:onboarding_painel' %}" {% if 'onboarding_' in url_name %}aria-current="page"{% endif %}>
+    <span class="tabs__label">Onboarding</span>
+  </a>
+  <a class="tabs__item {% if 'municipio_' in url_name %}is-active{% endif %}" href="{% url 'org:municipio_list' %}" {% if 'municipio_' in url_name %}aria-current="page"{% endif %}>
+    <span class="tabs__label">Municípios</span>
+  </a>
+  <a class="tabs__item {% if 'secretaria_' in url_name %}is-active{% endif %}" href="{% url 'org:secretaria_list' %}" {% if 'secretaria_' in url_name %}aria-current="page"{% endif %}>
+    <span class="tabs__label">Secretarias</span>
+  </a>
+  {% if can_org_manage_secretaria %}
+    <a class="tabs__item {% if 'governanca' in url_name %}is-active{% endif %}" href="{% url 'org:secretaria_governanca_hub' %}" {% if 'governanca' in url_name %}aria-current="page"{% endif %}>
+      <span class="tabs__label">Governança</span>
+    </a>
+  {% endif %}
+  <a class="tabs__item {% if 'unidade_' in url_name %}is-active{% endif %}" href="{% url 'org:unidade_list' %}" {% if 'unidade_' in url_name %}aria-current="page"{% endif %}>
+    <span class="tabs__label">Unidades</span>
+  </a>
+  <a class="tabs__item {% if 'setor_' in url_name %}is-active{% endif %}" href="{% url 'org:setor_list' %}" {% if 'setor_' in url_name %}aria-current="page"{% endif %}>
+    <span class="tabs__label">Setores</span>
+  </a>
+</nav>
+{% endwith %}

@@ -2,7 +2,7 @@
 {% block title %}Dashboard • Saúde • GEPUB{% endblock %}
 
 {% block module_content %}
-<div class="card">
+<div class="card dashboard-shell">
   <div class="card__body">
 
     {% include "core/partials/components/layout/page_head.html" with title="Saúde" subtitle="Painel do módulo de Saúde" actions=None %}
@@ -34,6 +34,24 @@
         </div>
         <div class="sec-kpi__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7 4.3 4.3l6.3 6.3 6.3-6.3Z"/></svg></div>
       </div>
+
+      <div class="sec-kpi kpi-blue">
+        <div>
+          <div class="sec-kpi__label">Agendamentos</div>
+          <div class="sec-kpi__value">{{ agendamentos_total }}</div>
+          <div class="sec-kpi__meta">Agenda clínica no escopo</div>
+        </div>
+        <div class="sec-kpi__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2Zm12 8H5v10h14V10Z"/></svg></div>
+      </div>
+
+      <div class="sec-kpi kpi-green">
+        <div>
+          <div class="sec-kpi__label">Especialidades</div>
+          <div class="sec-kpi__value">{{ especialidades_total }}</div>
+          <div class="sec-kpi__meta">Cadastro clínico ativo</div>
+        </div>
+        <div class="sec-kpi__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm1 5v4h4v2h-4v4h-2v-4H7v-2h4V7Z"/></svg></div>
+      </div>
     </div>
 
     <div class="section">
@@ -44,6 +62,7 @@
 
       <div class="actions-row">
         <a class="btn btn-primary" href="{% url 'saude:unidade_list' %}"><i class="fa-solid fa-hospital"></i><span>Ver Unidades</span></a>
+        <a class="btn btn--ghost" href="{% url 'saude:agenda_list' %}"><i class="fa-solid fa-calendar-days"></i><span>Ver Agenda</span></a>
         {% if perms.saude.manage %}
           <a class="btn btn--ghost" href="{% url 'saude:unidade_create' %}"><i class="fa-solid fa-plus"></i><span>Nova Unidade</span></a>
         {% endif %}

@@ -3,8 +3,11 @@
     <thead>
       <tr>
         {% for h in headers %}
-          <th{% if h.width %} style="width:{{ h.width }};"{% endif %}>{{ h.label }}</th>
+          <th{% if h.width %} width="{{ h.width }}"{% endif %}>{{ h.label }}</th>
         {% endfor %}
+        {% if actions_partial %}
+          <th width="280px">Ações</th>
+        {% endif %}
       </tr>
     </thead>
 
@@ -12,7 +15,7 @@
       {% for r in rows %}
         <tr>
           {% for c in r.cells %}
-            <td{% if c.width %} style="width:{{ c.width }};"{% endif %}>
+            <td{% if c.width %} width="{{ c.width }}"{% endif %}>
               {% if c.html %}
                 {{ c.html|safe }}
               {% elif c.url %}
@@ -22,10 +25,15 @@
               {% endif %}
             </td>
           {% endfor %}
+          {% if actions_partial %}
+            <td>
+              {% include actions_partial with row=r %}
+            </td>
+          {% endif %}
         </tr>
       {% empty %}
         <tr>
-          <td colspan="{{ headers|length }}">
+          <td colspan="{% if actions_partial %}{{ headers|length|add:1 }}{% else %}{{ headers|length }}{% endif %}">
             {% include "core/partials/components/feedback/empty_state.html" with title=empty_title text=empty_text %}
           </td>
         </tr>

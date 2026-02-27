@@ -1,0 +1,82 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="detail-summary" style="margin-top:12px;">
+    <div><strong>Status:</strong> {{ dataset.get_status_display }}</div>
+    <div><strong>Categoria:</strong> {{ dataset.categoria|default:"-" }}</div>
+    <div><strong>Fonte:</strong> {{ dataset.get_fonte_display }}</div>
+    <div><strong>Visibilidade:</strong> {{ dataset.get_visibilidade_display }}</div>
+    {% if version %}
+      <div><strong>Versão atual:</strong> v{{ version.numero }} ({{ version.get_status_display }})</div>
+      <div><strong>Linhas:</strong> {{ profile.row_count|default:0 }}</div>
+      <div><strong>Colunas:</strong> {{ profile.column_count|default:0 }}</div>
+    {% endif %}
+  </div>
+
+  {% if version and version.logs %}
+    <div class="alert alert--warning" style="margin-top:12px;">
+      {{ version.logs|linebreaksbr }}
+    </div>
+  {% endif %}
+
+  {% if version %}
+    <div class="card" style="margin-top:12px;"><div class="card__body">
+      <h3 style="margin-top:0;">Dicionário de dados</h3>
+      <div class="table-shell"><div class="table-shell__body">
+        <table class="table">
+          <thead><tr><th>Coluna</th><th>Tipo</th><th>Papel</th><th>Sensível</th><th>Amostra</th></tr></thead>
+          <tbody>
+            {% for col in columns %}
+              <tr>
+                <td>{{ col.nome }}</td>
+                <td>{{ col.get_tipo_display }}</td>
+                <td>{{ col.get_papel_display }}</td>
+                <td>{% if col.sensivel %}Sim{% else %}Não{% endif %}</td>
+                <td>{{ col.amostra|default:"-" }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="5">Sem colunas mapeadas.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div></div>
+
+      {% if dataset.status != 'PUBLICADO' %}
+        <form method="post" action="{% url 'paineis:dataset_publish' dataset.id %}" style="margin-top:12px;">
+          {% csrf_token %}
+          <button class="btn btn-primary" type="submit"><i class="fa-solid fa-globe"></i> Publicar dataset</button>
+        </form>
+      {% endif %}
+    </div></div>
+
+    <div class="card" style="margin-top:12px;"><div class="card__body">
+      <h3 style="margin-top:0;">Pré-visualização</h3>
+      <div class="table-shell"><div class="table-shell__body">
+        <table class="table">
+          <thead>
+            <tr>
+              {% for header in preview_headers %}
+                <th>{{ header }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in preview_rows %}
+              <tr>
+                {% for value in row %}
+                  <td>{{ value|default:"-" }}</td>
+                {% endfor %}
+              </tr>
+            {% empty %}
+              <tr><td colspan="{{ preview_headers|length|default:1 }}">Sem dados de preview.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div></div>
+    </div></div>
+  {% endif %}
+</div></div>
+{% endblock %}

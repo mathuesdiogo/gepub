@@ -7,6 +7,7 @@
   <div class="card__body">
 
     {% include "core/partials/components/layout/page_head.html" with title="Unidades" subtitle="Gerencie as unidades por município e secretaria" actions=actions %}
+    {% include "org/partials/nav_tabs.html" %}
 
     {% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Nome da unidade, secretaria ou município..." action_url=action_url clear_url=clear_url has_filters=has_filters input_attrs='data-autocomplete-url="'|add:autocomplete_url|add:'" data-autocomplete-href="'|add:autocomplete_href|add:'"' %}
 

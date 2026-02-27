@@ -8,6 +8,7 @@ from django.core.files.base import ContentFile
 from django.db import models
 from django.utils import timezone
 from PIL import Image
+from apps.core.security import derive_cpf_security_fields, mask_cpf, resolve_cpf_digits
 
 
 def _only_digits(s: str) -> str:
@@ -67,6 +68,13 @@ class Profile(models.Model):
         blank=True,
         related_name="profiles",
     )
+    secretaria = models.ForeignKey(
+        "org.Secretaria",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="profiles",
+    )
     unidade = models.ForeignKey(
         "org.Unidade",
         on_delete=models.PROTECT,
@@ -74,13 +82,24 @@ class Profile(models.Model):
         blank=True,
         related_name="profiles",
     )
+    setor = models.ForeignKey(
+        "org.Setor",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="profiles",
+    )
 
     ativo = models.BooleanField(default=True)
+    bloqueado = models.BooleanField(default=False)
 
     # =========================
     # Acesso (GEPUB)
     # =========================
     cpf = models.CharField(max_length=14, blank=True, default="")
+    cpf_enc = models.TextField(blank=True, default="")
+    cpf_hash = models.CharField(max_length=64, blank=True, default="", db_index=True)
+    cpf_last4 = models.CharField(max_length=4, blank=True, default="")
     codigo_acesso = models.CharField(max_length=60, unique=True, blank=True, default="")
     must_change_password = models.BooleanField(default=True)
 
@@ -113,6 +132,19 @@ class Profile(models.Model):
                 i += 1
 
             self.codigo_acesso = codigo
+
+        cpf_digits = resolve_cpf_digits(self.cpf, self.cpf_enc)
+        cpf_enc, cpf_hash, cpf_last4 = derive_cpf_security_fields(cpf_digits)
+        if cpf_digits:
+            if cpf_enc:
+                self.cpf_enc = cpf_enc
+            if cpf_hash:
+                self.cpf_hash = cpf_hash
+        else:
+            self.cpf_enc = ""
+            self.cpf_hash = ""
+        self.cpf_last4 = cpf_last4
+        self.cpf = mask_cpf(cpf_digits)
 
         # Salva primeiro (garante que foto exista no storage)
         super().save(*args, **kwargs)
@@ -154,4 +186,44 @@ class Profile(models.Model):
 
     @property
     def cpf_digits(self) -> str:
-        return _only_digits(self.cpf)
+        return resolve_cpf_digits(self.cpf, self.cpf_enc)
+
+
+class UserManagementAudit(models.Model):
+    class Action(models.TextChoices):
+        CREATE = "CREATE", "Criação"
+        UPDATE = "UPDATE", "Atualização"
+        ACTIVATE = "ACTIVATE", "Ativação"
+        DEACTIVATE = "DEACTIVATE", "Desativação"
+        BLOCK = "BLOCK", "Bloqueio"
+        UNBLOCK = "UNBLOCK", "Desbloqueio"
+        RESET_PASSWORD = "RESET_PASSWORD", "Reset de senha"
+        RESET_CODE = "RESET_CODE", "Reset de código de acesso"
+
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="accounts_audit_actions",
+    )
+    target = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="accounts_audit_targets",
+    )
+    action = models.CharField(max_length=30, choices=Action.choices)
+    details = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Auditoria de usuário"
+        verbose_name_plural = "Auditoria de usuários"
+        ordering = ["-created_at", "-id"]
+        indexes = [
+            models.Index(fields=["target", "created_at"]),
+            models.Index(fields=["action", "created_at"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.get_action_display()} • {self.target} • {self.created_at:%d/%m/%Y %H:%M}"

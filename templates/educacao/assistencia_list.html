@@ -1,0 +1,10 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}{{ title }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+{% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Buscar..." action_url=action_url clear_url=clear_url %}
+{% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q empty_title="Sem registros" empty_text="Nenhum registro encontrado para os filtros atuais." %}
+</div></div>
+{% endblock %}

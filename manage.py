@@ -2,9 +2,12 @@ import os
 import sys
 from pathlib import Path
 
+from config.env import load_dotenv_if_exists
+
 BASE_DIR = Path(__file__).resolve().parent
 
 def main():
+    load_dotenv_if_exists(BASE_DIR)
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
     from django.core.management import execute_from_command_line
     execute_from_command_line(sys.argv)

@@ -1,0 +1,111 @@
+{% extends "core/public/base_portal_tenant.html" %}
+
+{% block hero_text %}
+<p>Subportal da Saúde com unidades públicas, dados de atendimento e notícias da secretaria.</p>
+{% endblock %}
+
+{% block page_content %}
+<section class="pp-grid pp-grid--3">
+  <article class="pp-card">
+    <h3>Unidades</h3>
+    <p class="pp-kpi-value">{{ indicadores.unidades }}</p>
+  </article>
+  <article class="pp-card">
+    <h3>Profissionais ativos</h3>
+    <p class="pp-kpi-value">{{ indicadores.profissionais }}</p>
+  </article>
+  <article class="pp-card">
+    <h3>Especialidades</h3>
+    <p class="pp-kpi-value">{{ indicadores.especialidades }}</p>
+  </article>
+  <article class="pp-card">
+    <h3>Dispensações</h3>
+    <p class="pp-kpi-value">{{ indicadores.dispensacoes }}</p>
+  </article>
+</section>
+
+<section class="pp-grid pp-grid--2" style="margin-top:10px;">
+  <article class="pp-card">
+    <h2>Unidades de saúde</h2>
+    <div class="pp-table-wrap" style="margin-top:8px;">
+      <table class="pp-table" style="min-width:520px;">
+        <thead>
+          <tr>
+            <th>Unidade</th>
+            <th>Contato</th>
+            <th>Endereço</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in unidades %}
+            <tr>
+              <td>{{ item.nome }}</td>
+              <td>{{ item.telefone|default:"—" }}</td>
+              <td>{{ item.endereco|default:"—" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="3">Nenhuma unidade de saúde cadastrada.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <article class="pp-card">
+    <h2>Notícias da saúde</h2>
+    <ul class="pp-list" style="margin-top:8px;">
+      {% for item in noticias %}
+        <li class="pp-list__item">
+          <p class="pp-meta">{{ item.publicado_em|date:"d/m/Y" }}</p>
+          <h3><a href="{% url 'core:portal_noticia_detail_public' item.slug %}" style="text-decoration:none;color:inherit;">{{ item.titulo }}</a></h3>
+          {% if item.resumo %}<p>{{ item.resumo }}</p>{% endif %}
+        </li>
+      {% empty %}
+        <li class="pp-list__item"><p>Nenhuma notícia da saúde publicada.</p></li>
+      {% endfor %}
+    </ul>
+  </article>
+</section>
+
+<section class="pp-card" style="margin-top:10px;">
+  <h2>Medicamentos e insumos publicados</h2>
+  <p class="pp-meta" style="margin-top:6px;">Publicações manuais para transparência ativa de medicamentos.</p>
+  <div class="pp-table-wrap" style="margin-top:10px;">
+    <table class="pp-table" style="min-width:620px;">
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Competência</th>
+          <th>Formato</th>
+          <th>Publicação</th>
+          <th>Arquivo</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in arquivos_medicamentos %}
+          <tr>
+            <td>
+              <strong>{{ item.titulo }}</strong>
+              {% if item.descricao %}<p>{{ item.descricao }}</p>{% endif %}
+            </td>
+            <td>{{ item.competencia|default:"—" }}</td>
+            <td>{{ item.get_formato_display }}</td>
+            <td>{{ item.publicado_em|date:"d/m/Y H:i" }}</td>
+            <td>
+              {% if item.arquivo %}
+                <a class="pp-btn pp-btn--soft" href="{{ item.arquivo.url }}" target="_blank" rel="noopener">Abrir</a>
+              {% elif item.link_externo %}
+                <a class="pp-btn pp-btn--soft" href="{{ item.link_externo }}" target="_blank" rel="noopener">Abrir link</a>
+              {% else %}
+                —
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Nenhuma publicação de medicamentos disponível.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

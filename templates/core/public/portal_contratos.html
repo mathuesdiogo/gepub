@@ -1,0 +1,78 @@
+{% extends "core/public/base_portal_tenant.html" %}
+
+{% block hero_text %}
+<p>Contratos administrativos, aditivos e medições, com atualização integrada ao módulo de contratos.</p>
+{% endblock %}
+
+{% block page_content %}
+<section class="pp-grid pp-grid--3">
+  <article class="pp-card">
+    <h3>Total de contratos</h3>
+    <p class="pp-kpi-value">{{ indicadores.total }}</p>
+  </article>
+  <article class="pp-card">
+    <h3>Contratos ativos</h3>
+    <p class="pp-kpi-value">{{ indicadores.ativos }}</p>
+  </article>
+  <article class="pp-card">
+    <h3>Valor total</h3>
+    <p class="pp-kpi-value">R$ {{ indicadores.valor_total|default:0|floatformat:2 }}</p>
+  </article>
+</section>
+
+<section class="pp-card">
+  <form method="get" class="pp-form-inline pp-form-inline--3">
+    <div>
+      <label for="id_q">Busca</label>
+      <input id="id_q" class="pp-input" type="text" name="q" value="{{ q }}" placeholder="Número, objeto ou fornecedor">
+    </div>
+    <div>
+      <label for="id_status">Status</label>
+      <select id="id_status" class="pp-select" name="status">
+        <option value="">Todos</option>
+        {% for value, label in status_choices %}
+          <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>&nbsp;</label>
+      <div class="pp-actions">
+        <button class="pp-btn pp-btn--primary" type="submit">Filtrar</button>
+        <a class="pp-btn pp-btn--soft" href="{% url 'core:portal_contratos_public' %}">Limpar</a>
+      </div>
+    </div>
+  </form>
+
+  <div class="pp-table-wrap" style="margin-top:10px;">
+    <table class="pp-table">
+      <thead>
+        <tr>
+          <th>Contrato</th>
+          <th>Objeto</th>
+          <th>Fornecedor</th>
+          <th>Status</th>
+          <th>Vigência</th>
+          <th>Aditivos</th>
+          <th>Medições</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td>{{ item.numero }}</td>
+            <td>{{ item.objeto }}</td>
+            <td>{{ item.fornecedor_nome }}</td>
+            <td>{{ item.get_status_display }}</td>
+            <td>{{ item.vigencia_inicio|date:"d/m/Y" }} até {{ item.vigencia_fim|date:"d/m/Y" }}</td>
+            <td>{{ item.aditivos.count }}</td>
+            <td>{{ item.medicoes.count }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7">Nenhum contrato publicado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

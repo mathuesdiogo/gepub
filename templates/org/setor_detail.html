@@ -1,1 +1,5 @@
 {% extends "core/detail_base.html" %}
+{% block detail_sections %}
+{% include "org/partials/nav_tabs.html" %}
+{% include "org/partials/quick_links_grid.html" with links=links title="Acessos rápidos" subtitle="Navegação contextual do setor" %}
+{% endblock %}

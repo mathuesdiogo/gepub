@@ -6,26 +6,26 @@
 
 {% include "core/partials/components/layout/page_head.html" with title="Buscar aluno (NEE)" subtitle="Aparecem apenas alunos com necessidade ativa. Use o autocomplete ou pesquise pelo nome." actions=actions %}
 
-<form method="get" class="form" style="position:relative;">
+<form method="get" class="form u-relative">
   <div class="form-row">
     <input id="nee-search" type="text" name="q" value="{{ q }}" placeholder="Digite o nome do aluno (min 2 letras)..." class="input" autocomplete="off">
     <button type="submit" class="btn">Buscar</button>
   </div>
 
-  <div id="nee-autocomplete" class="dropdown" style="display:none; position:absolute; z-index:20; top:48px; left:0; right:0;">
-    <div class="card"><div class="card__body" style="padding:8px;">
+  <div id="nee-autocomplete" class="dropdown autocomplete-panel">
+    <div class="card"><div class="card__body autocomplete-panel__body">
       <div id="nee-autocomplete-items"></div>
     </div></div>
   </div>
 </form>
 
 {% if rows %}
-  <div class="table-shell" style="margin-top:12px;">
+  <div class="table-shell u-mt-12">
     <table class="table">
       <thead>
         <tr>
           {% for h in headers %}
-            <th{% if h.width %} style="width:{{ h.width }};"{% endif %}>{{ h.label }}</th>
+            <th{% if h.width %} width="{{ h.width }}"{% endif %}>{{ h.label }}</th>
           {% endfor %}
         </tr>
       </thead>
@@ -48,19 +48,19 @@
   </div>
 
   {% if page_obj %}
-    <div class="pagination" style="display:flex; gap:10px; align-items:center; margin-top:12px;">
+    <div class="pagination pagination-inline">
       {% if page_obj.has_previous %}
         <a class="btn btn--ghost" href="?q={{ q|urlencode }}&page={{ page_obj.previous_page_number }}">← Anterior</a>
       {% else %}
-        <span class="btn btn--ghost" style="opacity:.5; pointer-events:none;">← Anterior</span>
+        <span class="btn btn--ghost pagination-inline__disabled">← Anterior</span>
       {% endif %}
 
-      <span style="opacity:.8;">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+      <span class="u-opacity-80">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
 
       {% if page_obj.has_next %}
         <a class="btn btn--ghost" href="?q={{ q|urlencode }}&page={{ page_obj.next_page_number }}">Próxima →</a>
       {% else %}
-        <span class="btn btn--ghost" style="opacity:.5; pointer-events:none;">Próxima →</span>
+        <span class="btn btn--ghost pagination-inline__disabled">Próxima →</span>
       {% endif %}
     </div>
   {% endif %}
@@ -79,13 +79,13 @@
   let lastQ = "";
   let t = null;
 
-  function hide(){ box.style.display = "none"; items.innerHTML = ""; }
-  function show(){ box.style.display = "block"; }
+  function hide(){ box.classList.remove("is-open"); items.innerHTML = ""; }
+  function show(){ box.classList.add("is-open"); }
 
   function render(results){
     if (!results || results.length === 0) { hide(); return; }
     items.innerHTML = results.map(r => (
-      `<a href="${r.url}" style="display:block; padding:10px; border-radius:8px; text-decoration:none;">
+      `<a href="${r.url}" class="autocomplete-panel__item">
          ${r.label}
        </a>`
     )).join("");

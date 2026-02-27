@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <style>
+    @page { size: A4 portrait; margin: 10mm; }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "DejaVu Sans", Arial, sans-serif;
+      background: #fff;
+      color: #06223c;
+    }
+
+    .sheet {
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3.5mm;
+    }
+
+    .wallet {
+      position: relative;
+      width: 171.2mm;
+      height: 54mm;
+      border-radius: 4.2mm;
+      overflow: hidden;
+      box-shadow: 0 1.2mm 3.2mm rgba(8, 35, 72, 0.16);
+    }
+
+    .wallet::before {
+      content: "";
+      position: absolute;
+      left: 85.6mm;
+      top: 0;
+      bottom: 0;
+      border-left: 0.28mm dashed rgba(8, 50, 86, 0.6);
+      z-index: 10;
+    }
+
+    .faces {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: 85.6mm 85.6mm;
+    }
+
+    .face {
+      position: relative;
+      border: 0.32mm solid #0f4a82;
+      padding: 1.9mm;
+      overflow: hidden;
+    }
+
+    .face-back {
+      border-right: none;
+      background: linear-gradient(100deg, #7ed6dd 0%, #42a6d7 60%, #1d72c4 100%);
+    }
+
+    .face-front {
+      border-left: none;
+      background: linear-gradient(100deg, #64cad8 0%, #2f93d0 58%, #1b62be 100%);
+    }
+
+    .face-tag {
+      position: absolute;
+      top: 0.7mm;
+      left: 2.1mm;
+      font-size: 5.2pt;
+      line-height: 1;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-weight: 900;
+      color: rgba(7, 47, 82, 0.7);
+      z-index: 2;
+    }
+
+    .front-body,
+    .back-body {
+      margin-top: 1.9mm;
+      height: calc(100% - 1.9mm);
+      position: relative;
+      z-index: 2;
+    }
+
+    .front-body {
+      display: grid;
+      grid-template-columns: 58mm 22mm;
+      gap: 1.2mm;
+    }
+
+    .front-main {
+      display: grid;
+      grid-template-rows: 10.5mm 7.2mm 7.2mm 7.2mm 7.2mm 6.3mm;
+      gap: 0.65mm;
+      min-width: 0;
+    }
+
+    .front-header {
+      display: grid;
+      grid-template-columns: 19.6mm 1fr;
+      gap: 1.1mm;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .logo-box {
+      height: 10.5mm;
+      border: 0.24mm solid rgba(9, 58, 102, 0.5);
+      border-radius: 2mm;
+      background: rgba(124, 196, 233, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      color: #0b355a;
+      font-size: 4.9pt;
+      font-weight: 900;
+      text-align: center;
+      padding: 0.5mm;
+    }
+
+    .logo-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 7.9pt;
+      line-height: 1.08;
+      font-weight: 900;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #001426;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .photo-wrap {
+      width: 22mm;
+      height: 31mm;
+      border-radius: 4.8mm;
+      overflow: hidden;
+      align-self: start;
+      justify-self: end;
+    }
+
+    .photo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border: 0.7mm solid #0f4cb2;
+      border-radius: 4.8mm;
+      background: transparent;
+    }
+
+    .photo-fallback {
+      width: 100%;
+      height: 100%;
+      border: 0.7mm solid #0f4cb2;
+      border-radius: 4.8mm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 5.2pt;
+      font-weight: 800;
+      color: #234d70;
+      background: rgba(223, 242, 251, 0.95);
+      padding: 0.6mm;
+    }
+
+    .row2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.65mm;
+      min-width: 0;
+    }
+
+    .field {
+      border: 0.24mm solid rgba(8, 60, 106, 0.5);
+      border-radius: 1.9mm;
+      background: rgba(211, 237, 249, 0.37);
+      padding: 0.56mm 0.95mm;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .field .k {
+      margin: 0 0 0.24mm;
+      font-size: 4.95pt;
+      line-height: 1.05;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #0a3a62;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .field .v {
+      margin: 0;
+      font-size: 6.2pt;
+      line-height: 1.12;
+      font-weight: 700;
+      color: #03192d;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .verify-box {
+      border: 0.24mm solid rgba(8, 60, 106, 0.5);
+      border-radius: 1.9mm;
+      background: rgba(224, 242, 251, 0.43);
+      padding: 0.55mm 0.95mm;
+      overflow: hidden;
+    }
+
+    .verify-box p {
+      margin: 0;
+      font-size: 4.7pt;
+      line-height: 1.14;
+      font-weight: 700;
+      color: #09365d;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .back-body {
+      display: grid;
+      grid-template-columns: 58mm 21.8mm;
+      gap: 1.2mm;
+    }
+
+    .back-main {
+      display: grid;
+      grid-template-rows: 6.4mm 6.4mm 6.4mm 6.4mm 6.4mm 8.6mm 8.6mm;
+      gap: 0.62mm;
+      min-width: 0;
+    }
+
+    .back-side {
+      display: grid;
+      grid-template-rows: 11mm 13.2mm 11mm;
+      gap: 0.62mm;
+      min-width: 0;
+    }
+
+    .module {
+      border: 0.24mm solid rgba(8, 60, 106, 0.52);
+      border-radius: 2.1mm;
+      background: rgba(176, 224, 245, 0.95);
+      padding: 0.55mm;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+      color: #07365e;
+      font-size: 5pt;
+      line-height: 1.08;
+      font-weight: 800;
+    }
+
+    .module .symbol {
+      font-size: 10.3pt;
+      line-height: 1;
+      margin-bottom: 0.15mm;
+      color: #0f4e84;
+      font-weight: 900;
+    }
+
+    .module img {
+      width: 100%;
+      height: 6.8mm;
+      object-fit: contain;
+      display: block;
+      background: rgba(255, 255, 255, 0.76);
+      border-radius: 1mm;
+      padding: 0.36mm;
+      margin-bottom: 0.25mm;
+    }
+
+    .module.qr img {
+      height: 9.2mm;
+      background: #ffffff;
+    }
+
+    .long .v {
+      white-space: normal;
+      line-height: 1.08;
+      max-height: 6.8mm;
+      overflow: hidden;
+    }
+
+    .guide {
+      margin: 0;
+      font-size: 6.9pt;
+      color: #315674;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <main class="sheet">
+    <section class="wallet">
+      <div class="faces">
+        <article class="face face-back">
+          <span class="face-tag">Verso</span>
+          <div class="back-body">
+            <div class="back-main">
+              <div class="row2">
+                <div class="field">
+                  <p class="k">Codigo estudante</p>
+                  <p class="v">{{ carteira.codigo_estudante }}</p>
+                </div>
+                <div class="field">
+                  <p class="k">Municipio</p>
+                  <p class="v">{{ snapshot.municipio|default:"Nao informado"|truncatechars:24 }}</p>
+                </div>
+              </div>
+
+              <div class="field">
+                <p class="k">Escola</p>
+                <p class="v">{{ snapshot.escola|default:"Nao informada"|truncatechars:50 }}</p>
+              </div>
+
+              <div class="row2">
+                <div class="field">
+                  <p class="k">Turma</p>
+                  <p class="v">{{ snapshot.turma|default:"Nao informada"|truncatechars:21 }}</p>
+                </div>
+                <div class="field">
+                  <p class="k">Ano letivo</p>
+                  <p class="v">{{ snapshot.ano_letivo|default:"-" }}</p>
+                </div>
+              </div>
+
+              <div class="row2">
+                <div class="field">
+                  <p class="k">Nome da mae</p>
+                  <p class="v">{{ snapshot.nome_mae|default:"-"|truncatechars:22 }}</p>
+                </div>
+                <div class="field">
+                  <p class="k">Nome do pai</p>
+                  <p class="v">{{ snapshot.nome_pai|default:"-"|truncatechars:22 }}</p>
+                </div>
+              </div>
+
+              <div class="row2">
+                <div class="field">
+                  <p class="k">Validade</p>
+                  <p class="v">{% if carteira.validade %}{{ carteira.validade|date:"d/m/Y" }}{% else %}Indeterminada{% endif %}</p>
+                </div>
+                <div class="field">
+                  <p class="k">Inclusao</p>
+                  <p class="v">{% if possui_nee %}Ativa{% else %}Nao{% endif %}</p>
+                </div>
+              </div>
+
+              <div class="field long">
+                <p class="k">Necessidades especiais</p>
+                <p class="v">
+                  {% if possui_nee %}
+                    {{ nee_labels|join:", "|truncatechars:90 }}
+                  {% else %}
+                    Nao
+                  {% endif %}
+                </p>
+              </div>
+
+              <div class="field long">
+                <p class="k">Cursos complementares</p>
+                <p class="v">
+                  {% if cursos %}
+                    {{ cursos|join:", "|truncatechars:96 }}
+                  {% else %}
+                    Nenhum curso complementar registrado
+                  {% endif %}
+                </p>
+              </div>
+            </div>
+
+            <aside class="back-side">
+              <div class="module">
+                <span class="symbol">∞</span>
+                {% if possui_nee %}INCLUSAO ATIVA{% else %}INCLUSAO{% endif %}
+              </div>
+              <div class="module qr">
+                {% if qr_validacao %}
+                  <img src="{{ qr_validacao }}" alt="QR Code">
+                  QR CODE
+                {% else %}
+                  QR INDISPONIVEL
+                {% endif %}
+              </div>
+              <div class="module">
+                {% if brasao_url %}
+                  <img src="{{ brasao_url }}" alt="Brasao prefeitura">
+                  PREFEITURA
+                {% else %}
+                  BRASAO PREFEITURA
+                {% endif %}
+              </div>
+            </aside>
+          </div>
+        </article>
+
+        <article class="face face-front">
+          <span class="face-tag">Frente</span>
+          <div class="front-body">
+            <div class="front-main">
+              <div class="front-header">
+                <div class="logo-box">
+                  {% if logo_url %}
+                    <img src="{{ logo_url }}" alt="Logo GEPUB">
+                  {% else %}
+                    GEPUB
+                  {% endif %}
+                </div>
+                <h1 class="title">Carteira Estudantil</h1>
+              </div>
+
+              <div class="field">
+                <p class="k">Nome do aluno</p>
+                <p class="v">{{ aluno.nome|truncatechars:50 }}</p>
+              </div>
+
+              <div class="field">
+                <p class="k">Escola</p>
+                <p class="v">{{ snapshot.escola|default:"Nao informada"|truncatechars:54 }}</p>
+              </div>
+
+              <div class="row2">
+                <div class="field">
+                  <p class="k">Codigo</p>
+                  <p class="v">{{ carteira.codigo_estudante }}</p>
+                </div>
+                <div class="field">
+                  <p class="k">Validade</p>
+                  <p class="v">{% if carteira.validade %}{{ carteira.validade|date:"d/m/Y" }}{% else %}Indeterminada{% endif %}</p>
+                </div>
+              </div>
+
+              <div class="row2">
+                <div class="field">
+                  <p class="k">Municipio</p>
+                  <p class="v">{{ snapshot.municipio|default:"Nao informado"|truncatechars:20 }}</p>
+                </div>
+                <div class="field">
+                  <p class="k">Turma</p>
+                  <p class="v">{{ snapshot.turma|default:"Nao informada"|truncatechars:20 }}</p>
+                </div>
+              </div>
+
+              <div class="verify-box">
+                <p>Validacao publica: use o QR no verso</p>
+                <p>Codigo: {{ carteira.codigo_verificacao }}</p>
+              </div>
+            </div>
+
+            <div class="photo-wrap">
+              {% if foto_url %}
+                <img src="{{ foto_url }}" alt="Foto aluno">
+              {% else %}
+                <div class="photo-fallback">SEM FOTO</div>
+              {% endif %}
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+    <p class="guide">Dobre na linha pontilhada central para montar frente e verso.</p>
+  </main>
+</body>
+</html>

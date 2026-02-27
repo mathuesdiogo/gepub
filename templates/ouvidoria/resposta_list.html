@@ -1,0 +1,35 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+    {% if municipios and municipios|length %}
+      <select name="municipio" class="input" style="max-width:240px;">
+        {% for m in municipios %}
+          <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+    <button class="btn btn--sm" type="submit">Atualizar</button>
+  </form>
+  <div class="table-shell"><div class="table-shell__body">
+    <table class="table">
+      <thead><tr><th>Data</th><th>Protocolo</th><th>Responsável</th><th>Pública</th><th>Resumo</th></tr></thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td>{{ item.criado_em|date:"d/m/Y H:i" }}</td>
+            <td>{{ item.chamado.protocolo }}</td>
+            <td>{{ item.criado_por.get_full_name|default:item.criado_por.username|default:"-" }}</td>
+            <td>{% if item.publico %}Sim{% else %}Não{% endif %}</td>
+            <td>{{ item.resposta|truncatechars:90 }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Nenhuma resposta registrada.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

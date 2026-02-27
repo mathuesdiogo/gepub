@@ -1,0 +1,74 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+    {% if municipios and municipios|length %}
+      <select name="municipio" class="input" style="max-width:240px;" onchange="this.form.submit()">
+        {% for m in municipios %}
+          <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+  </form>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:12px 0 18px;">
+    {% for card in cards %}
+      {% include "core/partials/components/data/kpi_card.html" with label=card.label value=card.value %}
+    {% endfor %}
+  </div>
+
+  <div class="table-shell"><div class="table-shell__body">
+    <table class="table">
+      <thead><tr><th>Data</th><th>Servidor</th><th>Tipo</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for item in latest_movimentacoes %}
+          <tr>
+            <td>{{ item.data_inicio|date:"d/m/Y" }}</td>
+            <td>{{ item.servidor.nome }}</td>
+            <td>{{ item.get_tipo_display }}</td>
+            <td>{{ item.get_status_display }}</td>
+            <td>
+              {% if item.status == "PENDENTE" %}
+                <form method="post" action="{% url 'rh:movimentacao_aprovar' item.pk %}?municipio={{ municipio.pk }}" style="display:inline;">
+                  {% csrf_token %}
+                  <button class="btn btn--sm btn-primary" type="submit">Aprovar</button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Nenhuma movimentação encontrada.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+
+  <div class="table-shell" style="margin-top:12px;"><div class="table-shell__body">
+    <table class="table">
+      <thead><tr><th>Documento</th><th>Tipo</th><th>Servidor</th><th>Data</th><th>Arquivo</th></tr></thead>
+      <tbody>
+        {% for item in latest_documentos %}
+          <tr>
+            <td>{{ item.numero }}</td>
+            <td>{{ item.get_tipo_display }}</td>
+            <td>{{ item.servidor.nome }}</td>
+            <td>{{ item.data_documento|date:"d/m/Y" }}</td>
+            <td>
+              {% if item.arquivo %}
+                <a class="btn btn--sm btn--ghost" href="{{ item.arquivo.url }}" target="_blank" rel="noopener">Abrir</a>
+              {% else %}
+                -
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Nenhum documento funcional cadastrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

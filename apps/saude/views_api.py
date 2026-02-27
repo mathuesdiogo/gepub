@@ -32,3 +32,23 @@ def api_profissionais_por_unidade(request):
 
     results = [{"id": p.id, "text": p.nome} for p in qs]
     return JsonResponse({"results": results})
+
+@login_required
+@require_perm("saude.view")
+def api_alunos_suggest(request):
+    q = (request.GET.get("q") or "").strip()
+
+    alunos = (
+        Aluno.objects
+        .filter(Q(nome__icontains=q) | Q(cpf__icontains=q))
+        .order_by("nome")[:5]
+    )
+
+    return JsonResponse([
+        {
+            "id": a.id,
+            "label": a.nome,
+            "href": f"/educacao/alunos/{a.id}/"
+        }
+        for a in alunos
+    ], safe=False)

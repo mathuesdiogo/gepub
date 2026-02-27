@@ -9,7 +9,7 @@ from apps.core.decorators import require_perm
 from apps.core.exports import export_pdf_table
 from apps.core.rbac import can, scope_filter_turmas, scope_filter_alunos
 
-from .models import Turma, Matricula, Aluno
+from .models import Aluno, AlunoCertificado, Matricula, Turma
 from .models_diario import DiarioTurma, Avaliacao, Nota
 
 
@@ -141,6 +141,8 @@ def boletim_aluno(request, pk: int, aluno_id: int):
     # garante que o aluno pertence à turma (escopo + integridade)
     if not Matricula.objects.filter(turma=turma, aluno=aluno).exists():
         return HttpResponseForbidden("403 — Aluno não pertence a esta turma.")
+    matricula_aluno = Matricula.objects.select_related("turma", "turma__curso").filter(turma=turma, aluno=aluno).first()
+    certificados = AlunoCertificado.objects.filter(aluno=aluno, ativo=True).order_by("-data_emissao", "-id")[:8]
 
     diarios = DiarioTurma.objects.select_related("professor").filter(turma=turma).order_by("professor__username")
     diarios_list = list(diarios)
@@ -217,6 +219,8 @@ def boletim_aluno(request, pk: int, aluno_id: int):
     return render(request, "educacao/boletim_aluno.html", {
         "turma": turma,
         "aluno": aluno,
+        "matricula_aluno": matricula_aluno,
+        "certificados": certificados,
         "linhas": linhas,
         "actions": actions,
     })

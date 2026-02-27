@@ -1,0 +1,198 @@
+{% extends "core/base_public.html" %}
+{% load static %}
+
+{% block title %}{{ municipio.nome }} • Portal Público GEPUB{% endblock %}
+
+{% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/pages/portal-publico-municipio.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="mp-page" style="--portal-primary: {{ cor_primaria|default:'#0E4A7E' }}; --portal-secondary: {{ cor_secundaria|default:'#2F6EA9' }};">
+  <div class="mp-shell">
+    <header class="mp-topbar">
+      <a href="/" class="mp-brand">
+        {% if portal_cfg.logo %}
+          <img src="{{ portal_cfg.logo.url }}" alt="{{ municipio.nome }}">
+        {% else %}
+          <span class="mp-brand__icon"><i class="fa-solid fa-building-columns"></i></span>
+        {% endif %}
+        <span>
+          <strong>{{ portal_cfg.titulo_portal|default:municipio.nome }}</strong>
+          <small>{{ portal_cfg.subtitulo_portal|default:"Portal Público Municipal" }} • {{ municipio.uf }}</small>
+        </span>
+      </a>
+      <nav class="mp-nav">
+        {% for item in menu_items_header|slice:":6" %}
+          <a href="{{ item.url }}" {% if item.nova_aba %}target="_blank" rel="noopener"{% endif %}>{{ item.titulo }}</a>
+        {% endfor %}
+        <a class="mp-nav__admin" href="{{ cta_login }}">Acesso administrativo</a>
+      </nav>
+    </header>
+
+    <main class="mp-main">
+      <section class="mp-hero">
+        <p class="mp-kicker">PORTAL PÚBLICO MUNICIPAL</p>
+        <h1>Olá, {{ municipio.nome }}. Serviços digitais e transparência em um único ambiente.</h1>
+        <p>{{ portal_cfg.mensagem_boas_vindas|default:"Navegue por publicações oficiais, documentos e canais de atendimento com acesso rápido às áreas mais buscadas pela população." }}</p>
+        <div class="mp-search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input id="mp-service-search" type="text" placeholder="Buscar serviços, portais e funcionalidades...">
+        </div>
+      </section>
+
+      <section class="mp-services" id="mp-services-grid">
+        {% for item in servicos_cards %}
+          <article class="mp-service-card" data-search="{{ item.titulo }} {{ item.descricao }}">
+            <span class="mp-service-card__icon"><i class="{{ item.icon }}"></i></span>
+            <h2>{{ item.titulo }}</h2>
+            <p>{{ item.descricao }}</p>
+            <a href="{{ item.url|default:'#' }}">Acessar</a>
+          </article>
+        {% endfor %}
+      </section>
+
+      <section class="mp-panels">
+        <article class="mp-panel">
+          <div class="mp-panel__head">
+            <h3>Painel de Indicadores</h3>
+            <a href="{% url 'core:transparencia_public' %}">Ver transparência</a>
+          </div>
+          <ul class="mp-panel__kpis">
+            <li><strong>{{ summary.secretarias }}</strong><span>Secretarias ativas</span></li>
+            <li><strong>{{ summary.unidades }}</strong><span>Unidades cadastradas</span></li>
+            <li><strong>{{ summary.eventos_publicos }}</strong><span>Eventos públicos</span></li>
+          </ul>
+          {% if servicos_secundarios %}
+            <div class="mp-panel__tags">
+              {% for item in servicos_secundarios %}
+                <a href="{{ item.url|default:'#' }}">{{ item.titulo }}</a>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </article>
+
+        <article class="mp-panel">
+          <div class="mp-panel__head">
+            <h3>Publicações Recentes</h3>
+            <a href="{% url 'core:portal_diario_public' %}">Ver acervo</a>
+          </div>
+          <div class="mp-listing">
+            {% for item in diarios_recentes %}
+              <a class="mp-listing__item" href="{% url 'core:portal_diario_public' %}?q={{ item.numero }}">
+                <span class="mp-listing__meta">Diário Oficial • {{ item.data_publicacao|date:"d/m/Y" }}</span>
+                <strong>Edição {{ item.numero }}</strong>
+                <small>{{ item.resumo|default:"Publicação oficial disponível para consulta." }}</small>
+              </a>
+            {% empty %}
+              <p class="mp-listing__empty">Nenhuma edição de diário oficial publicada.</p>
+            {% endfor %}
+          </div>
+        </article>
+
+        <article class="mp-panel">
+          <div class="mp-panel__head">
+            <h3>Contato e Atendimento</h3>
+            <a href="{% url 'core:portal_ouvidoria_public' %}">Abrir chamado</a>
+          </div>
+          <div class="mp-contact">
+            <p>Para solicitações formais, utilize o canal e-SIC/Ouvidoria com protocolo público.</p>
+            {% if portal_cfg.telefone %}<p><i class="fa-solid fa-phone"></i> {{ portal_cfg.telefone }}</p>{% endif %}
+            {% if portal_cfg.email %}<p><i class="fa-solid fa-envelope"></i> {{ portal_cfg.email }}</p>{% endif %}
+            {% if portal_cfg.endereco %}<p><i class="fa-solid fa-location-dot"></i> {{ portal_cfg.endereco }}</p>{% endif %}
+            <div class="mp-contact__actions">
+              <a class="mp-btn mp-btn--primary" href="{% url 'core:portal_ouvidoria_public' %}">e-SIC / Ouvidoria</a>
+              <a class="mp-btn mp-btn--soft" href="{% url 'core:portal_noticias_public' %}">Notícias oficiais</a>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="mp-section" id="secretarias">
+        <div class="mp-section__head">
+          <p class="mp-kicker">ESTRUTURA ADMINISTRATIVA</p>
+          <h2>Secretarias Publicadas</h2>
+        </div>
+        <div class="mp-secretarias">
+          {% for secretaria in secretarias %}
+            <article>
+              <h3>{{ secretaria.nome }}</h3>
+              <p>Sigla: {{ secretaria.sigla|default:"—" }}</p>
+            </article>
+          {% empty %}
+            <article>
+              <h3>Nenhuma secretaria publicada</h3>
+              <p>A prefeitura ainda está concluindo o onboarding inicial.</p>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+
+      {% if noticias_recentes %}
+        <section class="mp-section">
+          <div class="mp-section__head">
+            <p class="mp-kicker">NOTÍCIAS</p>
+            <h2>Últimas atualizações da prefeitura</h2>
+          </div>
+          <div class="mp-news">
+            {% for item in noticias_recentes %}
+              <a class="mp-news__item" href="{% url 'core:portal_noticia_detail_public' item.slug %}">
+                <span>{{ item.publicado_em|date:"d/m/Y" }}</span>
+                <strong>{{ item.titulo }}</strong>
+                <p>{{ item.resumo|default:"Comunicado oficial publicado no portal da prefeitura." }}</p>
+              </a>
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+
+      {% if paginas_publicas %}
+        <section class="mp-section" id="paginas">
+          <div class="mp-section__head">
+            <p class="mp-kicker">PÁGINAS PÚBLICAS</p>
+            <h2>Conteúdos institucionais</h2>
+          </div>
+          <div class="mp-news">
+            {% for pagina in paginas_publicas %}
+              <a class="mp-news__item" href="{% url 'core:portal_pagina_public' pagina.slug %}">
+                <span>Página institucional</span>
+                <strong>{{ pagina.titulo }}</strong>
+                <p>{{ pagina.resumo|default:"Página institucional publicada." }}</p>
+              </a>
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+    </main>
+
+    <footer class="mp-footer">
+      <div class="mp-footer__copy">© {% now "Y" %} {{ municipio.nome }} • Portal Municipal GEPUB</div>
+      {% if menu_items_footer %}
+        <div class="mp-footer__links">
+          {% for item in menu_items_footer %}
+            <a href="{{ item.url }}" {% if item.nova_aba %}target="_blank" rel="noopener"{% endif %}>{{ item.titulo }}</a>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </footer>
+  </div>
+</div>
+<script>
+  (function () {
+    var input = document.getElementById("mp-service-search");
+    if (!input) return;
+    var cards = Array.prototype.slice.call(document.querySelectorAll("#mp-services-grid [data-search]"));
+    input.addEventListener("input", function () {
+      var q = (input.value || "").toLowerCase().trim();
+      cards.forEach(function (card) {
+        var text = (card.getAttribute("data-search") || "").toLowerCase();
+        card.style.display = !q || text.indexOf(q) !== -1 ? "" : "none";
+      });
+    });
+  })();
+</script>
+{% endblock %}

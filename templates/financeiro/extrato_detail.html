@@ -1,0 +1,93 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="kpi-grid" style="margin-bottom:14px;">
+    <article class="kpi-card">
+      <div class="kpi-card__label">Itens importados</div>
+      <div class="kpi-card__value">{{ importacao.total_itens }}</div>
+    </article>
+    <article class="kpi-card">
+      <div class="kpi-card__label">Conciliados</div>
+      <div class="kpi-card__value">{{ total_conciliados }}</div>
+    </article>
+    <article class="kpi-card">
+      <div class="kpi-card__label">Pendentes</div>
+      <div class="kpi-card__value">{{ total_pendentes }}</div>
+    </article>
+    <article class="kpi-card">
+      <div class="kpi-card__label">Saldo do período</div>
+      <div class="kpi-card__value">R$ {{ importacao.total_creditos }} - R$ {{ importacao.total_debitos }}</div>
+    </article>
+  </div>
+
+  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+    <input type="hidden" name="municipio" value="{{ municipio.id }}">
+    <input name="q" value="{{ q }}" class="input" placeholder="Documento, histórico, valor exato" style="max-width:320px;">
+    <button class="btn btn--sm" type="submit">Filtrar</button>
+  </form>
+
+  <div class="table-shell"><div class="table-shell__body">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Data</th><th>Documento</th><th>Histórico</th><th>Valor</th><th>Status</th><th>Referência</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td>{{ item.data_movimento|date:"d/m/Y" }}</td>
+            <td>{{ item.documento|default:"—" }}</td>
+            <td>
+              {{ item.historico|default:"—" }}
+              {% if item.identificador_externo %}
+                <small style="display:block;color:#6b7f95;">ID: {{ item.identificador_externo }}</small>
+              {% endif %}
+            </td>
+            <td>
+              {% if item.valor < 0 %}
+                <span style="color:#a33434;">R$ {{ item.valor }}</span>
+              {% else %}
+                <span style="color:#1f7a3f;">R$ {{ item.valor }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if item.conciliacao %}
+                <span class="badge badge--ok">Conciliado</span>
+              {% else %}
+                <span class="badge badge--warning">Pendente</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if item.conciliacao %}
+                {{ item.conciliacao.get_referencia_tipo_display }}
+                {% if item.conciliacao.receita %}
+                  <small style="display:block;color:#6b7f95;">Receita #{{ item.conciliacao.receita.id }}</small>
+                {% elif item.conciliacao.desp_pagamento %}
+                  <small style="display:block;color:#6b7f95;">Pagamento #{{ item.conciliacao.desp_pagamento.id }}</small>
+                {% elif item.conciliacao.desp_pagamento_resto %}
+                  <small style="display:block;color:#6b7f95;">Pagamento RP #{{ item.conciliacao.desp_pagamento_resto.id }}</small>
+                {% endif %}
+              {% else %}
+                —
+              {% endif %}
+            </td>
+            <td>
+              {% if item.conciliacao %}
+                <a class="link" href="{% url 'financeiro:extrato_desfazer' item.id %}?municipio={{ municipio.id }}">desfazer</a>
+              {% else %}
+                <a class="link" href="{% url 'financeiro:extrato_ajuste' item.id %}?municipio={{ municipio.id }}&next={{ request.get_full_path|urlencode }}">ajuste</a>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7">Nenhum item encontrado para o filtro.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

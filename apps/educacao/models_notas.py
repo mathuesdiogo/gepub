@@ -6,9 +6,91 @@ from django.core.validators import MinValueValidator
 from django.db import models
 
 
+class BNCCCodigo(models.Model):
+    class Modalidade(models.TextChoices):
+        EDUCACAO_INFANTIL = "EDUCACAO_INFANTIL", "Educação Infantil"
+        ENSINO_FUNDAMENTAL = "ENSINO_FUNDAMENTAL", "Ensino Fundamental"
+        ENSINO_MEDIO = "ENSINO_MEDIO", "Ensino Médio"
+
+    class Etapa(models.TextChoices):
+        EDUCACAO_INFANTIL = "EDUCACAO_INFANTIL", "Educação Infantil"
+        FUNDAMENTAL_ANOS_INICIAIS = "FUNDAMENTAL_ANOS_INICIAIS", "Fundamental - Anos Iniciais"
+        FUNDAMENTAL_ANOS_FINAIS = "FUNDAMENTAL_ANOS_FINAIS", "Fundamental - Anos Finais"
+        ENSINO_MEDIO = "ENSINO_MEDIO", "Ensino Médio"
+
+    codigo = models.CharField(max_length=20, unique=True)
+    descricao = models.TextField(blank=True, default="")
+    modalidade = models.CharField(max_length=24, choices=Modalidade.choices, db_index=True)
+    etapa = models.CharField(max_length=36, choices=Etapa.choices, db_index=True)
+    grupo_codigo = models.CharField(
+        max_length=8,
+        blank=True,
+        default="",
+        help_text="Prefixo etário/faixa (ex.: EI01, EM13).",
+    )
+    area_codigo = models.CharField(
+        max_length=8,
+        blank=True,
+        default="",
+        db_index=True,
+        help_text="Código da área/componente no padrão BNCC (ex.: LP, MA, EO, LGG).",
+    )
+    ano_inicial = models.PositiveSmallIntegerField(null=True, blank=True)
+    ano_final = models.PositiveSmallIntegerField(null=True, blank=True)
+    fonte_url = models.URLField(
+        blank=True,
+        default="https://basenacionalcomum.mec.gov.br/images/BNCC_EI_EF_110518_versaofinal_site.pdf",
+    )
+    ativo = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["codigo"]
+        verbose_name = "Código BNCC"
+        verbose_name_plural = "Códigos BNCC"
+        indexes = [
+            models.Index(fields=["codigo"]),
+            models.Index(fields=["modalidade", "etapa"]),
+            models.Index(fields=["area_codigo"]),
+            models.Index(fields=["ativo"]),
+        ]
+
+    def __str__(self):
+        return self.codigo
+
+
 class ComponenteCurricular(models.Model):
     nome = models.CharField(max_length=120)
     sigla = models.CharField(max_length=20, blank=True, default="")
+    modalidade_bncc = models.CharField(
+        max_length=24,
+        choices=BNCCCodigo.Modalidade.choices,
+        blank=True,
+        default="",
+        db_index=True,
+    )
+    etapa_bncc = models.CharField(
+        max_length=36,
+        choices=BNCCCodigo.Etapa.choices,
+        blank=True,
+        default="",
+    )
+    area_codigo_bncc = models.CharField(
+        max_length=8,
+        blank=True,
+        default="",
+        help_text="Código da área/componente BNCC (ex.: LP, MA, CG, EO, LGG).",
+    )
+    codigo_bncc_referencia = models.CharField(
+        max_length=20,
+        blank=True,
+        default="",
+        help_text="Código BNCC principal de referência para o componente.",
+    )
+    bncc_codigos = models.ManyToManyField(
+        "educacao.BNCCCodigo",
+        blank=True,
+        related_name="componentes_curriculares",
+    )
     ativo = models.BooleanField(default=True)
 
     class Meta:
@@ -16,6 +98,10 @@ class ComponenteCurricular(models.Model):
         verbose_name = "Componente curricular"
         verbose_name_plural = "Componentes curriculares"
         unique_together = [("nome", "sigla")]
+        indexes = [
+            models.Index(fields=["modalidade_bncc", "etapa_bncc"]),
+            models.Index(fields=["area_codigo_bncc"]),
+        ]
 
     def __str__(self):
         return self.sigla or self.nome

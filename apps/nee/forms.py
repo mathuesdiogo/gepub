@@ -2,6 +2,10 @@ from __future__ import annotations
 
 from django import forms
 from django.forms.models import fields_for_model
+from django.urls import reverse
+
+from apps.educacao.models import Matricula
+from apps.saude.models import ProfissionalSaude
 
 from .models import TipoNecessidade, AlunoNecessidade, ApoioMatricula
 
@@ -63,6 +67,14 @@ def _rebuild_fields(form: forms.ModelForm, model, field_names: list[str]) -> Non
     form.fields.update(manual)
 
 
+def _set_fields(form: forms.ModelForm, model, field_names: list[str]) -> None:
+    """
+    Alias enterprise (compatível com patches antigos).
+    Alguns trechos do NEE chamam `_set_fields`, mas a implementação real é `_rebuild_fields`.
+    """
+    _rebuild_fields(form, model, field_names)
+
+
 # ============================================================
 # BÁSICOS
 # ============================================================
@@ -82,6 +94,7 @@ class AlunoNecessidadeForm(forms.ModelForm):
         fields: list[str] = []
 
     def __init__(self, *args, **kwargs):
+        self.aluno = kwargs.pop("aluno", None)
         super().__init__(*args, **kwargs)
 
         _rebuild_fields(self, AlunoNecessidade, [
@@ -103,6 +116,7 @@ class ApoioMatriculaForm(forms.ModelForm):
         fields: list[str] = []
 
     def __init__(self, *args, **kwargs):
+        self.aluno = kwargs.pop("aluno", None)
         super().__init__(*args, **kwargs)
 
         _rebuild_fields(self, ApoioMatricula, [
@@ -124,31 +138,73 @@ class ApoioMatriculaForm(forms.ModelForm):
         if "carga_horaria_semanal" in self.fields:
             self.fields["carga_horaria_semanal"].widget = forms.NumberInput(attrs={"min": 1, "placeholder": "Horas/semana"})
 
+        if "matricula" in self.fields:
+            if self.aluno is not None:
+                self.fields["matricula"].queryset = (
+                    Matricula.objects
+                    .select_related("aluno", "turma")
+                    .filter(aluno=self.aluno)
+                    .order_by("-id")
+                )
+            else:
+                self.fields["matricula"].queryset = Matricula.objects.none()
+
 
 # ============================================================
 # ENTERPRISE
 # ============================================================
 
 class LaudoNEEForm(forms.ModelForm):
+    # Autocomplete institucional (Saúde)
+    profissional_saude_id = forms.IntegerField(required=False, widget=forms.HiddenInput())
+    profissional_saude_busca = forms.CharField(
+        required=False,
+        label="Profissional (Saúde)",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Digite o nome do profissional…",
+                "autocomplete": "off",
+            }
+        ),
+    )
+
     class Meta:
         model = LaudoNEE  # type: ignore[assignment]
         fields: list[str] = []
 
     def __init__(self, *args, **kwargs):
+        self.aluno = kwargs.pop("aluno", None)
         if LaudoNEE is None:
             raise RuntimeError("Model LaudoNEE não existe no app NEE.")
         super().__init__(*args, **kwargs)
 
-        # aluno é setado pela view (aluno_id na URL) — NÃO renderizar select gigante
+        # ⚠️ NÃO inclui profissional_saude (evita <select> gigante)
         _rebuild_fields(self, LaudoNEE, [
             "numero",
             "data_emissao",
             "validade",
             "profissional",
-            "profissional_saude",
             "documento",
             "texto",
         ])
+
+        # Liga autocomplete (modo fill do seu autocomplete.js)
+        self.fields["profissional_saude_busca"].widget.attrs.update({
+            "data-autocomplete-url": reverse("saude:api_profissionais_suggest"),
+            "data-autocomplete-mode": "fill",
+            "data-autocomplete-fill-target": "#id_profissional_saude_id",
+            "data-autocomplete-min": "2",
+            "data-autocomplete-max": "5",
+            "autocomplete": "off",
+        })
+
+        # Edição: pré-popula
+        if getattr(self.instance, "profissional_saude_id", None):
+            self.initial["profissional_saude_id"] = self.instance.profissional_saude_id
+            try:
+                self.initial["profissional_saude_busca"] = self.instance.profissional_saude.nome
+            except Exception:
+                pass
 
         if "numero" in self.fields:
             self.fields["numero"].widget = forms.TextInput(attrs={"placeholder": "Número do laudo (opcional)"})
@@ -157,6 +213,26 @@ class LaudoNEEForm(forms.ModelForm):
         if "texto" in self.fields:
             self.fields["texto"].widget = forms.Textarea(attrs={"rows": 4, "placeholder": "Descrição / parecer (opcional)"})
 
+    def clean(self):
+        cleaned = super().clean()
+
+        prof_id = cleaned.get("profissional_saude_id")
+        prof_obj = None
+        if prof_id:
+            prof_obj = ProfissionalSaude.objects.filter(id=prof_id).first()
+            if not prof_obj:
+                self.add_error("profissional_saude_busca", "Profissional inválido.")
+
+        cleaned["profissional_saude_obj"] = prof_obj
+        return cleaned
+
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+        obj.profissional_saude = self.cleaned_data.get("profissional_saude_obj")
+        if commit:
+            obj.save()
+        return obj
+
 
 class RecursoNEEForm(forms.ModelForm):
     class Meta:
@@ -164,11 +240,11 @@ class RecursoNEEForm(forms.ModelForm):
         fields: list[str] = []
 
     def __init__(self, *args, **kwargs):
+        self.aluno = kwargs.pop("aluno", None)
         if RecursoNEE is None:
             raise RuntimeError("Model RecursoNEE não existe no app NEE.")
         super().__init__(*args, **kwargs)
 
-        # aluno é setado pela view (aluno_id na URL) — NÃO renderizar select gigante
         _rebuild_fields(self, RecursoNEE, [
             "nome",
             "status",
@@ -185,11 +261,11 @@ class AcompanhamentoNEEForm(forms.ModelForm):
         fields: list[str] = []
 
     def __init__(self, *args, **kwargs):
+        self.aluno = kwargs.pop("aluno", None)
         if AcompanhamentoNEE is None:
             raise RuntimeError("Model AcompanhamentoNEE não existe no app NEE.")
         super().__init__(*args, **kwargs)
 
-        # aluno/autor são setados pela view (aluno_id na URL; autor=request.user)
         _rebuild_fields(self, AcompanhamentoNEE, [
             "data",
             "tipo_evento",
@@ -199,33 +275,84 @@ class AcompanhamentoNEEForm(forms.ModelForm):
 
         if "descricao" in self.fields:
             self.fields["descricao"].widget = forms.Textarea(attrs={"rows": 4, "placeholder": "Descreva o evento..."})
+
+
 # ============================================================
 # Plano Clínico NEE (Enterprise)
 # ============================================================
 
 class PlanoClinicoNEEForm(forms.ModelForm):
+    profissional_saude_id = forms.IntegerField(required=False, widget=forms.HiddenInput())
+    profissional_saude_busca = forms.CharField(
+        required=False,
+        label="Profissional (Saúde)",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Digite o nome do profissional…",
+                "autocomplete": "off",
+            }
+        ),
+    )
+
     class Meta:
         model = PlanoClinicoNEE  # type: ignore[assignment]
         fields: list[str] = []
 
     def __init__(self, *args, **kwargs):
+        self.aluno = kwargs.pop("aluno", None)
         if PlanoClinicoNEE is None:
             raise RuntimeError("Model PlanoClinicoNEE não existe no app NEE.")
         super().__init__(*args, **kwargs)
 
+        # ⚠️ NÃO inclui profissional_saude (evita <select> gigante)
         _set_fields(self, PlanoClinicoNEE, [
             "data_inicio",
             "data_revisao",
             "responsavel",
-            "profissional_saude",
             "objetivo_geral",
             "observacao",
         ])
+
+        self.fields["profissional_saude_busca"].widget.attrs.update({
+            "data-autocomplete-url": reverse("saude:api_profissionais_suggest"),
+            "data-autocomplete-mode": "fill",
+            "data-autocomplete-fill-target": "#id_profissional_saude_id",
+            "data-autocomplete-min": "2",
+            "data-autocomplete-max": "5",
+            "autocomplete": "off",
+        })
+
+        if getattr(self.instance, "profissional_saude_id", None):
+            self.initial["profissional_saude_id"] = self.instance.profissional_saude_id
+            try:
+                self.initial["profissional_saude_busca"] = self.instance.profissional_saude.nome
+            except Exception:
+                pass
 
         if "objetivo_geral" in self.fields:
             self.fields["objetivo_geral"].widget = forms.Textarea(attrs={"rows": 3})
         if "observacao" in self.fields:
             self.fields["observacao"].widget = forms.Textarea(attrs={"rows": 3})
+
+    def clean(self):
+        cleaned = super().clean()
+
+        prof_id = cleaned.get("profissional_saude_id")
+        prof_obj = None
+        if prof_id:
+            prof_obj = ProfissionalSaude.objects.filter(id=prof_id).first()
+            if not prof_obj:
+                self.add_error("profissional_saude_busca", "Profissional inválido.")
+
+        cleaned["profissional_saude_obj"] = prof_obj
+        return cleaned
+
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+        obj.profissional_saude = self.cleaned_data.get("profissional_saude_obj")
+        if commit:
+            obj.save()
+        return obj
 
 
 class ObjetivoPlanoNEEForm(forms.ModelForm):
@@ -234,6 +361,7 @@ class ObjetivoPlanoNEEForm(forms.ModelForm):
         fields: list[str] = []
 
     def __init__(self, *args, **kwargs):
+        self.aluno = kwargs.pop("aluno", None)
         if ObjetivoPlanoNEE is None:
             raise RuntimeError("Model ObjetivoPlanoNEE não existe no app NEE.")
         super().__init__(*args, **kwargs)
@@ -256,6 +384,7 @@ class EvolucaoPlanoNEEForm(forms.ModelForm):
         fields: list[str] = []
 
     def __init__(self, *args, **kwargs):
+        self.aluno = kwargs.pop("aluno", None)
         if EvolucaoPlanoNEE is None:
             raise RuntimeError("Model EvolucaoPlanoNEE não existe no app NEE.")
         super().__init__(*args, **kwargs)

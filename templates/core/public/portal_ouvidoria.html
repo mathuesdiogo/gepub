@@ -1,0 +1,95 @@
+{% extends "core/public/base_portal_tenant.html" %}
+
+{% block hero_text %}
+<p>Abra solicitações públicas (e-SIC, reclamação, denúncia, sugestão) e acompanhe pelo protocolo.</p>
+{% endblock %}
+
+{% block page_content %}
+<section class="pp-grid pp-grid--2">
+  <article class="pp-card">
+    <h2>Novo atendimento</h2>
+    <form method="post" style="display:grid;gap:8px;margin-top:10px;">
+      {% csrf_token %}
+      {% for field in form %}
+        <div>
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}<p class="pp-meta" style="color:#c03737;">{{ field.errors|striptags }}</p>{% endif %}
+        </div>
+      {% endfor %}
+      <button class="pp-btn pp-btn--primary" type="submit">Registrar solicitação</button>
+    </form>
+  </article>
+
+  <article class="pp-card">
+    <h2>Acompanhar protocolo</h2>
+    <form method="get" class="pp-form-inline pp-form-inline--3" style="margin-top:10px;">
+      <div>
+        <label for="id_protocolo">Protocolo</label>
+        <input id="id_protocolo" class="pp-input" type="text" name="protocolo" value="{{ protocolo_busca }}" placeholder="Ex.: OUV-10-20260226-0001">
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <div class="pp-actions">
+          <button class="pp-btn pp-btn--primary" type="submit">Consultar</button>
+          <a class="pp-btn pp-btn--soft" href="{% url 'core:portal_ouvidoria_public' %}">Limpar</a>
+        </div>
+      </div>
+    </form>
+
+    {% if acompanhamento %}
+      <div class="pp-list__item" style="margin-top:10px;">
+        <p class="pp-meta">{{ acompanhamento.protocolo }} • {{ acompanhamento.get_tipo_display }}</p>
+        <h3>{{ acompanhamento.assunto }}</h3>
+        <p>Status: <strong>{{ acompanhamento.get_status_display }}</strong></p>
+        <p>Prazo de resposta: {{ acompanhamento.prazo_resposta|date:"d/m/Y"|default:"—" }}</p>
+        {% if respostas_publicas %}
+          <h4 style="margin:10px 0 0;">Respostas</h4>
+          <ul class="pp-list" style="margin-top:8px;">
+            {% for resposta in respostas_publicas %}
+              <li class="pp-list__item">
+                <p class="pp-meta">{{ resposta.criado_em|date:"d/m/Y H:i" }}</p>
+                <p>{{ resposta.resposta }}</p>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="pp-meta">Ainda sem resposta pública.</p>
+        {% endif %}
+      </div>
+    {% elif protocolo_busca %}
+      <p class="pp-meta" style="margin-top:10px;">Protocolo não encontrado para este município.</p>
+    {% endif %}
+  </article>
+</section>
+
+<section class="pp-card" style="margin-top:10px;">
+  <h3>Solicitações recentes</h3>
+  <div class="pp-table-wrap" style="margin-top:8px;">
+    <table class="pp-table" style="min-width:560px;">
+      <thead>
+        <tr>
+          <th>Protocolo</th>
+          <th>Assunto</th>
+          <th>Tipo</th>
+          <th>Status</th>
+          <th>Abertura</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in recentes %}
+          <tr>
+            <td>{{ item.protocolo }}</td>
+            <td>{{ item.assunto }}</td>
+            <td>{{ item.get_tipo_display }}</td>
+            <td>{{ item.get_status_display }}</td>
+            <td>{{ item.criado_em|date:"d/m/Y H:i" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Nenhuma solicitação registrada.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

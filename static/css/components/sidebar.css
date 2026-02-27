@@ -254,6 +254,84 @@ body.sidebar-collapsed .sidebar__user-info{
   padding: 8px 10px 4px;
 }
 
+.menu__group {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.menu__group summary {
+  list-style: none;
+}
+
+.menu__group summary::-webkit-details-marker {
+  display: none;
+}
+
+.menu__group-summary {
+  cursor: pointer;
+}
+
+.menu__caret {
+  margin-left: auto;
+  color: rgba(255, 255, 255, .78);
+  font-size: 12px;
+  transition: transform .14s ease;
+}
+
+.menu__group[open] .menu__caret {
+  transform: rotate(180deg);
+}
+
+.menu__submenu {
+  display: grid;
+  gap: 6px;
+  padding: 4px 0 8px 42px;
+}
+
+.menu__subitem {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 7px 10px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: rgba(255, 255, 255, .88);
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.menu__subitem i {
+  width: 14px;
+  font-size: 12px;
+  text-align: center;
+}
+
+.menu__subitem:hover {
+  background: rgba(0, 0, 0, .12);
+  color: #fff;
+}
+
+.menu__subitem.is-active {
+  background: rgba(0, 0, 0, .2);
+  color: #fff;
+}
+
+body.sidebar-collapsed .menu__caret {
+  display: none;
+}
+
+body.sidebar-collapsed .menu__submenu {
+  display: none;
+}
+
+body.sidebar-collapsed .menu__group[open] {
+  background: rgba(0, 0, 0, .08);
+  border-radius: 14px;
+}
+
 /* Deixar “Sair” mais discreto (não competir com módulos) */
 .menu__item[href*="logout"]{
   margin-top: 6px;

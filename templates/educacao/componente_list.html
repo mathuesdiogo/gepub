@@ -1,0 +1,10 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Componentes Curriculares • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Componentes Curriculares" subtitle="Estrutura pedagógica por disciplina/componente" actions=actions %}
+{% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Nome ou sigla..." action_url=action_url clear_url=clear_url %}
+{% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q empty_title="Nenhum componente" empty_text="Cadastre componentes curriculares para usar nas avaliações." %}
+</div></div>
+{% endblock %}

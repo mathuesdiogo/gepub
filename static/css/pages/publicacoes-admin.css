@@ -1,0 +1,153 @@
+.publicacoes-filter {
+  margin: 0 0 14px;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.publicacoes-filter label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.78rem;
+  color: #5c748e;
+}
+
+.publicacoes-filter select {
+  min-width: 260px;
+  border: 1px solid #cedeed;
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
+.publicacoes-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.publicacoes-kpi {
+  border: 1px solid #d8e6f3;
+  background: #f9fcff;
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.publicacoes-kpi__value {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #18476d;
+  font-weight: 800;
+}
+
+.publicacoes-kpi__label {
+  margin: 4px 0 0;
+  color: #607f9a;
+  font-size: 0.82rem;
+}
+
+.publicacoes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.publicacoes-card {
+  border: 1px solid #d8e6f3;
+  border-radius: 14px;
+  background: #fff;
+  padding: 12px;
+}
+
+.publicacoes-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.publicacoes-card__head h3 {
+  margin: 0;
+  color: #173f62;
+}
+
+.publicacoes-card__actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.publicacoes-btn {
+  border: 1px solid #ccdfef;
+  background: #eef6fd;
+  color: #1b5488;
+  border-radius: 9px;
+  padding: 6px 9px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.publicacoes-btn--danger {
+  background: #fff3f3;
+  border-color: #f3c7c7;
+  color: #b53434;
+}
+
+.publicacoes-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.publicacoes-item {
+  border: 1px solid #e4edf6;
+  border-radius: 10px;
+  padding: 8px;
+  display: grid;
+  gap: 6px;
+}
+
+.publicacoes-item h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #19476f;
+}
+
+.publicacoes-item p {
+  margin: 0;
+  color: #617e97;
+  font-size: 0.82rem;
+}
+
+.publicacoes-item__actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.publicacoes-item__actions form {
+  margin: 0;
+}
+
+@media (max-width: 1200px) {
+  .publicacoes-kpis {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .publicacoes-grid,
+  .publicacoes-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .publicacoes-filter select {
+    min-width: 100%;
+  }
+}

@@ -23,6 +23,7 @@
   <div class="card__body">
 
 {% if mode == "update" %}{% include "core/partials/components/layout/page_head.html" with title="Editar Município" subtitle="Atualize as informações do município" actions=None %}{% else %}{% include "core/partials/components/layout/page_head.html" with title="Novo Município" subtitle="Preencha as informações do município" actions=None %}{% endif %}
+    {% include "org/partials/nav_tabs.html" %}
 
     <form method="post" class="form-grid">
       {% csrf_token %}

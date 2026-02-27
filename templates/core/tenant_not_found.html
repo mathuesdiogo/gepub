@@ -1,0 +1,18 @@
+{% extends "core/base_public.html" %}
+
+{% block title %}Município não encontrado • GEPUB{% endblock %}
+
+{% block content %}
+<section style="min-height:100vh;display:grid;place-items:center;background:#eef4fb;padding:24px;">
+  <article style="max-width:560px;width:100%;background:#fff;border:1px solid #d6e3f2;border-radius:14px;padding:22px;">
+    <h1 style="margin:0 0 8px;font-size:1.4rem;color:#123f63;">Município não encontrado</h1>
+    <p style="margin:0;color:#4f6a82;line-height:1.5;">
+      Não localizamos o subdomínio <strong>{{ slug }}</strong>. Verifique o endereço ou entre em contato com a equipe GEPUB.
+    </p>
+    <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+      <a href="{{ cta_home }}" style="padding:9px 13px;border-radius:10px;text-decoration:none;background:#2f6ea9;color:#fff;font-weight:700;">Ir para página inicial</a>
+      <a href="{{ cta_login }}" style="padding:9px 13px;border-radius:10px;text-decoration:none;border:1px solid #c4d9ed;color:#1f5d95;font-weight:700;">Acesso administrativo</a>
+    </div>
+  </article>
+</section>
+{% endblock %}

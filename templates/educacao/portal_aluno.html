@@ -1,0 +1,9 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Portal do Aluno • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Portal do Aluno" subtitle=aluno.nome actions=actions %}
+{% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Sem registros" empty_text="Não há matrículas no escopo para este aluno." %}
+</div></div>
+{% endblock %}

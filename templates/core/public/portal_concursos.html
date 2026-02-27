@@ -1,0 +1,72 @@
+{% extends "core/public/base_portal_tenant.html" %}
+
+{% block hero_text %}
+<p>Concursos e processos seletivos com etapas e documentos oficiais.</p>
+{% endblock %}
+
+{% block page_content %}
+<section class="pp-card">
+  <form method="get" class="pp-form-inline pp-form-inline--3">
+    <div>
+      <label for="id_q">Busca</label>
+      <input id="id_q" class="pp-input" type="text" name="q" value="{{ q }}" placeholder="Título ou descrição">
+    </div>
+    <div>
+      <label for="id_status">Status</label>
+      <select id="id_status" class="pp-select" name="status">
+        <option value="">Todos</option>
+        {% for value, label in status_choices %}
+          <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>&nbsp;</label>
+      <div class="pp-actions">
+        <button class="pp-btn pp-btn--primary" type="submit">Filtrar</button>
+        <a class="pp-btn pp-btn--soft" href="{% url 'core:portal_concursos_public' %}">Limpar</a>
+      </div>
+    </div>
+  </form>
+</section>
+
+<section class="pp-grid pp-grid--2" style="margin-top:10px;">
+  {% for item in items %}
+    <article class="pp-card">
+      <p class="pp-meta">{{ item.get_tipo_display }} • {{ item.get_status_display }}</p>
+      <h3>{{ item.titulo }}</h3>
+      {% if item.descricao %}<p>{{ item.descricao }}</p>{% endif %}
+      <p class="pp-meta">
+        Inscrições: {{ item.inicio_inscricao|date:"d/m/Y"|default:"—" }} até {{ item.fim_inscricao|date:"d/m/Y"|default:"—" }}
+      </p>
+      <div class="pp-actions" style="margin-top:8px;">
+        {% if item.edital_arquivo %}
+          <a class="pp-btn pp-btn--soft" href="{{ item.edital_arquivo.url }}" target="_blank" rel="noopener">Ver edital</a>
+        {% endif %}
+      </div>
+      {% if item.etapas.all %}
+        <h4 style="margin:10px 0 0;">Etapas</h4>
+        <ul class="pp-list" style="margin-top:8px;">
+          {% for etapa in item.etapas.all %}
+            {% if etapa.publicado %}
+              <li class="pp-list__item">
+                <p class="pp-meta">{{ etapa.data_inicio|date:"d/m/Y"|default:"—" }} até {{ etapa.data_fim|date:"d/m/Y"|default:"—" }}</p>
+                <h3>{{ etapa.titulo }}</h3>
+                {% if etapa.descricao %}<p>{{ etapa.descricao }}</p>{% endif %}
+                {% if etapa.arquivo %}
+                  <a class="pp-btn pp-btn--soft" href="{{ etapa.arquivo.url }}" target="_blank" rel="noopener">Documento da etapa</a>
+                {% endif %}
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </article>
+  {% empty %}
+    <article class="pp-card">
+      <h3>Nenhum concurso publicado</h3>
+      <p>No momento não há concursos/processos seletivos para os filtros informados.</p>
+    </article>
+  {% endfor %}
+</section>
+{% endblock %}

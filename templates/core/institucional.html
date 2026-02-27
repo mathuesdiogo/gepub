@@ -1,0 +1,286 @@
+{% extends "core/base_public.html" %}
+{% load static %}
+
+{% block title %}{{ content.marca_nome }} • Plataforma Municipal Integrada{% endblock %}
+
+{% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/pages/institucional.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="ins-page" id="topo">
+  {% if preview_mode %}
+    <div class="ins-preview-banner">
+      Visualização do editor institucional (modo preview).
+      <a href="{% url 'core:institutional_admin' %}">Voltar ao editor</a>
+    </div>
+  {% endif %}
+
+  <header class="ins-topbar">
+    <a class="ins-brand" href="#topo">
+      <span class="ins-brand__badge">
+        {% if content.marca_logo_url %}
+          <img src="{{ content.marca_logo_url }}" alt="{{ content.marca_nome }}" class="ins-brand__logo">
+        {% else %}
+          <i class="fa-solid fa-city"></i>
+        {% endif %}
+      </span>
+      <span class="ins-brand__text">{{ content.marca_nome }}</span>
+    </a>
+
+    <nav class="ins-nav">
+      <a href="#metodo">{{ content.nav_metodo_label }}</a>
+      <a href="#planos">{{ content.nav_planos_label }}</a>
+      <a href="#servicos">{{ content.nav_servicos_label }}</a>
+      <a href="#simulador">{{ content.nav_simulador_label }}</a>
+      <a href="{{ cta_docs }}">Documentação</a>
+      <a href="{{ cta_transparencia }}">Transparência</a>
+    </nav>
+
+    <div class="ins-topbar__actions">
+      <a class="btn-ins btn-ins--ghost" href="{{ cta_contato }}">Contato</a>
+      <a class="btn-ins btn-ins--primary" href="{{ cta_login }}">{{ content.botao_login_label }}</a>
+    </div>
+  </header>
+
+  <main class="ins-main">
+    <section class="ins-hero reveal-up" style="--d:.04s;">
+      <article class="ins-hero__content">
+        <p class="ins-kicker">{{ content.hero_kicker }}</p>
+        <h1>{{ content.hero_titulo }}</h1>
+        <p class="ins-lead">{{ content.hero_descricao }}</p>
+
+        <div class="ins-hero__actions">
+          <a class="btn-ins btn-ins--primary" href="{{ content.hero_cta_primario_link|default:'#contato' }}">{{ content.hero_cta_primario_label }}</a>
+          <a class="btn-ins btn-ins--ghost" href="{{ content.hero_cta_secundario_link|default:'#planos' }}">{{ content.hero_cta_secundario_label }}</a>
+        </div>
+      </article>
+
+      <aside class="ins-hero__media">
+        <div class="ins-shape ins-shape--a"></div>
+        <div class="ins-shape ins-shape--b"></div>
+
+        <div class="ins-slides" data-slide-count="{{ slides|length }}">
+          {% for slide in slides %}
+            <article class="ins-slide-card {% if forloop.first %}is-active{% endif %}" data-slide-index="{{ forloop.counter0 }}">
+              {% if slide.imagem_url %}
+                <img src="{{ slide.imagem_url }}" alt="{{ slide.titulo }}" class="ins-slide-card__image">
+              {% else %}
+                <div class="ins-slide-card__icon"><i class="{{ slide.icone|default:'fa-solid fa-user-tie' }}"></i></div>
+              {% endif %}
+              <div>
+                <strong>{{ slide.titulo }}</strong>
+                {% if slide.subtitulo %}<p>{{ slide.subtitulo }}</p>{% endif %}
+                {% if slide.descricao %}<p class="small">{{ slide.descricao }}</p>{% endif %}
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+
+        {% if slides|length > 1 %}
+          <div class="ins-slide-dots">
+            {% for slide in slides %}
+              <button type="button" class="ins-dot {% if forloop.first %}is-active{% endif %}" data-dot-index="{{ forloop.counter0 }}" aria-label="Slide {{ forloop.counter }}"></button>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </aside>
+    </section>
+
+    <section class="ins-section reveal-up" style="--d:.10s;" id="servicos">
+      <div class="ins-section__head">
+        <p class="ins-kicker">{{ content.servicos_kicker }}</p>
+        <h2>{{ content.servicos_titulo }}</h2>
+      </div>
+
+      <div class="ins-services-grid">
+        {% for service in service_cards %}
+          <article>
+            <i class="{{ service.icone|default:'fa-solid fa-square' }}"></i>
+            <h3>{{ service.titulo }}</h3>
+            <p>{{ service.descricao }}</p>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="ins-section reveal-up" style="--d:.16s;" id="metodo">
+      <div class="ins-about">
+        <article class="ins-about__main">
+          <p class="ins-kicker">{{ content.metodo_kicker }}</p>
+          <h2>{{ content.metodo_titulo }}</h2>
+          <p>{{ content.oferta_descricao }}</p>
+        </article>
+
+        <article class="ins-about__steps">
+          {% for step in method_steps %}
+            <div class="ins-step">
+              <i class="{{ step.icone|default:'fa-solid fa-circle-check' }}"></i>
+              <div>
+                <strong>{{ step.titulo }}</strong>
+                <p>{{ step.descricao }}</p>
+              </div>
+            </div>
+          {% endfor %}
+        </article>
+      </div>
+    </section>
+
+    <section class="ins-section reveal-up" style="--d:.22s;" id="planos">
+      <div class="ins-section__head">
+        <p class="ins-kicker">{{ content.planos_kicker }}</p>
+        <h2>{{ content.planos_titulo }}</h2>
+        <p>{{ content.planos_descricao }}</p>
+      </div>
+
+      <div class="ins-plan-accordion">
+        {% for plano in planos %}
+          <details class="ins-plan-item {% if plano.destaque == 'Recomendado' %}is-featured{% endif %}" {% if plano.destaque == 'Recomendado' %}open{% endif %}>
+            <summary>
+              <div>
+                {% if plano.destaque %}<span class="ins-plan-badge">{{ plano.destaque }}</span>{% endif %}
+                <strong>{{ plano.nome }}</strong>
+                <p>{{ plano.descricao }}</p>
+              </div>
+              <span class="ins-plan-summary-cta">Ver detalhes</span>
+            </summary>
+
+            <div class="ins-plan-item__body">
+              <div>
+                <h4>Capacidade</h4>
+                <ul>
+                  {% for item in plano.limits %}
+                    <li>{{ item }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+              <div>
+                <h4>Recursos</h4>
+                <ul>
+                  {% for item in plano.features %}
+                    <li>{{ item }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+              <div>
+                <h4>Condição comercial</h4>
+                <p>Valores e proposta comercial são informados apenas por contato com o time GEPUB.</p>
+                <a class="btn-ins btn-ins--ghost" href="#contato">Solicitar contato comercial</a>
+              </div>
+            </div>
+          </details>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="ins-section ins-sim-section reveal-up" style="--d:.28s;" id="simulador">
+      <article>
+        <p class="ins-kicker">{{ content.oferta_tag }}</p>
+        <h2>{{ content.oferta_titulo }}</h2>
+        <p>Faça uma simulação para descobrir o plano recomendado pelo porte do município. A proposta financeira é enviada pelo time comercial.</p>
+      </article>
+
+      <article class="ins-form-card">
+        <h3>Simulador municipal</h3>
+        <form method="post" class="ins-form">
+          {% csrf_token %}
+          <input type="number" name="populacao" min="0" placeholder="População (opcional)" value="{{ form.populacao.value|default_if_none:'' }}">
+          <input type="number" name="numero_secretarias" min="0" required placeholder="Secretarias desejadas" value="{{ form.numero_secretarias.value|default_if_none:'4' }}">
+          <input type="number" name="numero_usuarios" min="0" required placeholder="Usuários previstos" value="{{ form.numero_usuarios.value|default_if_none:'60' }}">
+          <input type="number" name="numero_alunos" min="0" required placeholder="Alunos previstos" value="{{ form.numero_alunos.value|default_if_none:'2000' }}">
+          <input type="number" name="atendimentos_estimados_ano" min="0" required placeholder="Atendimentos clínicos/ano" value="{{ form.atendimentos_estimados_ano.value|default_if_none:'10000' }}">
+          <button type="submit" class="btn-ins btn-ins--primary btn-ins--full">RECOMENDAR PLANO</button>
+        </form>
+
+        {% if simulacao %}
+          <div class="ins-sim-result">
+            <p><strong>Plano recomendado:</strong> {{ simulacao.plano.nome }}</p>
+            <p class="small">{{ simulacao.justificativa }}</p>
+            <p class="ins-sim-result__contact">Valores sob consulta comercial.</p>
+            <a class="btn-ins btn-ins--ghost" href="#contato">Quero proposta comercial</a>
+          </div>
+        {% endif %}
+      </article>
+    </section>
+
+    <section class="ins-section ins-faq reveal-up" style="--d:.34s;">
+      <div class="ins-section__head">
+        <p class="ins-kicker">DÚVIDAS FREQUENTES</p>
+        <h2>Perguntas comuns sobre contratação e operação do GEPUB</h2>
+      </div>
+
+      <div class="ins-faq-list">
+        {% for faq in faq_items %}
+          <details class="ins-faq-item" {% if forloop.first %}open{% endif %}>
+            <summary>{{ faq.pergunta }}</summary>
+            <p>{{ faq.resposta }}</p>
+          </details>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="ins-contact reveal-up" style="--d:.40s;" id="contato">
+      <p class="ins-kicker">CONTATO COMERCIAL</p>
+      <h2>Sem tabela pública de preços: proposta personalizada por município.</h2>
+      <p>Para receber valores, cronograma e escopo de implantação, fale com o time GEPUB.</p>
+      <div class="ins-contact__actions">
+        <a class="btn-ins btn-ins--primary" href="{{ cta_contato }}">Solicitar contato</a>
+        <a class="btn-ins btn-ins--ghost" href="{{ cta_login }}">Entrar na plataforma</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="ins-footer">{{ content.rodape_texto }}</footer>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const slidesWrap = document.querySelector('.ins-slides');
+  if (!slidesWrap) return;
+
+  const slides = Array.from(slidesWrap.querySelectorAll('.ins-slide-card'));
+  const dots = Array.from(document.querySelectorAll('.ins-dot'));
+  if (slides.length <= 1) return;
+
+  let idx = 0;
+  let timer = null;
+
+  function activate(next) {
+    idx = (next + slides.length) % slides.length;
+    slides.forEach((s, i) => s.classList.toggle('is-active', i === idx));
+    dots.forEach((d, i) => d.classList.toggle('is-active', i === idx));
+  }
+
+  function start() {
+    stop();
+    timer = window.setInterval(() => activate(idx + 1), 4800);
+  }
+
+  function stop() {
+    if (timer) {
+      window.clearInterval(timer);
+      timer = null;
+    }
+  }
+
+  dots.forEach((dot, i) => {
+    dot.addEventListener('click', () => {
+      activate(i);
+      start();
+    });
+  });
+
+  slidesWrap.addEventListener('mouseenter', stop);
+  slidesWrap.addEventListener('mouseleave', start);
+
+  activate(0);
+  start();
+})();
+</script>
+{% endblock %}

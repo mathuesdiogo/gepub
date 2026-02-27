@@ -1,9 +1,103 @@
 {% extends "educacao/base_modulo.html" %}
-{% block title %}Nova Aula • Educação • GEPUB{% endblock %}
+{% block title %}{% if mode == "update" %}Editar Aula{% else %}Nova Aula{% endif %} • Educação • GEPUB{% endblock %}
 
 {% block module_content %}
 <div class="card"><div class="card__body">
+{% if mode == "update" %}
+{% include "core/partials/components/layout/page_head.html" with title="Editar Aula" subtitle=diario.turma.nome actions=None %}
+{% else %}
 {% include "core/partials/components/layout/page_head.html" with title="Nova Aula" subtitle=diario.turma.nome actions=None %}
+{% endif %}
+{% if bncc_hint %}
+  <p class="small" style="margin:8px 0 12px;">BNCC: {{ bncc_hint }}</p>
+{% endif %}
 {% include "core/partials/components/forms/form_shell.html" with form=form cancel_url=cancel_url submit_label=submit_label action_url=action_url %}
 </div></div>
+{% endblock %}
+
+{% block extra_css %}
+  {{ block.super }}
+  <style>
+    .bncc-select-search{
+      display:grid;
+      gap:8px;
+      margin-top:6px;
+    }
+    .bncc-select-search__hint{
+      font-size:.78rem;
+      color:var(--muted);
+    }
+  </style>
+{% endblock %}
+
+{% block extra_js %}
+  {{ block.super }}
+  <script>
+    (function () {
+      function normalizeText(value) {
+        return (value || "")
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
+      }
+
+      function enhanceSearchableSelect(selectId, placeholder) {
+        const select = document.getElementById(selectId);
+        if (!select || select.dataset.searchReady === "1") return;
+        select.dataset.searchReady = "1";
+
+        const wrap = document.createElement("div");
+        wrap.className = "bncc-select-search";
+
+        const search = document.createElement("input");
+        search.type = "search";
+        search.placeholder = placeholder;
+        search.autocomplete = "off";
+
+        const hint = document.createElement("div");
+        hint.className = "bncc-select-search__hint";
+
+        select.parentNode.insertBefore(wrap, select);
+        wrap.appendChild(search);
+        wrap.appendChild(select);
+        wrap.appendChild(hint);
+
+        const options = Array.from(select.options);
+
+        function updateFilter() {
+          const term = normalizeText(search.value.trim());
+          let visible = 0;
+          options.forEach(function (option) {
+            const match = option.selected || !term || normalizeText(option.textContent).includes(term);
+            option.hidden = !match;
+            if (match) visible += 1;
+          });
+          hint.textContent = term ? (visible + " opção(ões) encontrada(s).") : "";
+        }
+
+        search.addEventListener("input", updateFilter);
+        search.addEventListener("keydown", function (event) {
+          if (event.key === "ArrowDown") {
+            event.preventDefault();
+            select.focus();
+          }
+        });
+
+        updateFilter();
+      }
+
+      function boot() {
+        enhanceSearchableSelect(
+          "id_bncc_codigos",
+          "Pesquisar e selecionar códigos BNCC da aula..."
+        );
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", boot);
+      } else {
+        boot();
+      }
+    })();
+  </script>
 {% endblock %}

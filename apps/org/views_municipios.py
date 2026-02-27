@@ -124,6 +124,9 @@ class MunicipioDetailView(BaseDetailViewGepub):
             ("Município", municipio.nome),
             ("UF", municipio.uf),
             ("Ativo", "Sim" if municipio.ativo else "Não"),
+            ("Slug público", municipio.slug_site or "—"),
+            ("Domínio público", municipio.dominio_publico or "—"),
+            ("Domínio personalizado", municipio.dominio_personalizado or "—"),
             ("Prefeito(a)", municipio.nome_prefeito or "—"),
             ("Telefone", municipio.telefone_prefeitura or "—"),
             ("E-mail", municipio.email_prefeitura or "—"),
@@ -148,9 +151,24 @@ class MunicipioDetailView(BaseDetailViewGepub):
             "fields": [{"label": k, "value": v} for k, v in fields],
             "pills": [{"label": k, "value": v} for k, v in pills],
             "links": [
-                {"label": "Ver secretarias", "url": reverse("org:secretaria_list") + f"?municipio={municipio.id}", "meta": f"{secretarias_qs.count()}"},
-                {"label": "Ver unidades", "url": reverse("org:unidade_list") + f"?municipio={municipio.id}", "meta": f"{unidades_qs.count()}"},
-                {"label": "Ver setores", "url": reverse("org:setor_list") + f"?municipio={municipio.id}", "meta": f"{setores_qs.count()}"},
+                {
+                    "label": "Ver secretarias",
+                    "url": reverse("org:secretaria_list") + f"?municipio={municipio.id}",
+                    "meta": f"{secretarias_qs.count()} registros",
+                    "icon": "fa-solid fa-building-columns",
+                },
+                {
+                    "label": "Ver unidades",
+                    "url": reverse("org:unidade_list") + f"?municipio={municipio.id}",
+                    "meta": f"{unidades_qs.count()} registros",
+                    "icon": "fa-solid fa-school",
+                },
+                {
+                    "label": "Ver setores",
+                    "url": reverse("org:setor_list") + f"?municipio={municipio.id}",
+                    "meta": f"{setores_qs.count()} registros",
+                    "icon": "fa-solid fa-sitemap",
+                },
             ]
         })
 

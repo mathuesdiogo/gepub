@@ -1,0 +1,132 @@
+{% extends "core/public/base_portal_tenant.html" %}
+
+{% block hero_text %}
+<p>Subportal da Educação com unidades escolares, cursos, calendário e notícias educacionais.</p>
+{% endblock %}
+
+{% block page_content %}
+<section class="pp-grid pp-grid--3">
+  <article class="pp-card">
+    <h3>Unidades escolares</h3>
+    <p class="pp-kpi-value">{{ indicadores.unidades }}</p>
+  </article>
+  <article class="pp-card">
+    <h3>Turmas ativas</h3>
+    <p class="pp-kpi-value">{{ indicadores.turmas }}</p>
+  </article>
+  <article class="pp-card">
+    <h3>Cursos cadastrados</h3>
+    <p class="pp-kpi-value">{{ indicadores.cursos }}</p>
+  </article>
+  <article class="pp-card">
+    <h3>Matrículas</h3>
+    <p class="pp-kpi-value">{{ indicadores.matriculas }}</p>
+  </article>
+</section>
+
+<section class="pp-grid pp-grid--2" style="margin-top:10px;">
+  <article class="pp-card">
+    <h2>Unidades</h2>
+    <ul class="pp-list" style="margin-top:8px;">
+      {% for item in unidades %}
+        <li class="pp-list__item">
+          <h3>{{ item.nome }}</h3>
+          <p class="pp-meta">Contato: {{ item.telefone|default:"—" }} • {{ item.email|default:"—" }}</p>
+          {% if item.endereco %}<p>{{ item.endereco }}</p>{% endif %}
+        </li>
+      {% empty %}
+        <li class="pp-list__item"><p>Nenhuma unidade educacional cadastrada.</p></li>
+      {% endfor %}
+    </ul>
+  </article>
+
+  <article class="pp-card">
+    <h2>Próximos eventos do calendário</h2>
+    <ul class="pp-list" style="margin-top:8px;">
+      {% for evento in eventos %}
+        <li class="pp-list__item">
+          <p class="pp-meta">{{ evento.data_inicio|date:"d/m/Y" }}{% if evento.data_fim %} até {{ evento.data_fim|date:"d/m/Y" }}{% endif %}</p>
+          <h3>{{ evento.titulo }}</h3>
+          <p>{{ evento.get_tipo_display }}{% if evento.unidade %} • {{ evento.unidade.nome }}{% endif %}</p>
+        </li>
+      {% empty %}
+        <li class="pp-list__item"><p>Sem eventos futuros cadastrados.</p></li>
+      {% endfor %}
+    </ul>
+  </article>
+</section>
+
+<section class="pp-grid pp-grid--2" style="margin-top:10px;">
+  <article class="pp-card">
+    <h2>Cursos ofertados</h2>
+    <ul class="pp-list" style="margin-top:8px;">
+      {% for curso in cursos %}
+        <li class="pp-list__item">
+          <h3>{{ curso.nome }}</h3>
+          {% if curso.descricao %}<p>{{ curso.descricao }}</p>{% endif %}
+          <p class="pp-meta">Carga horária: {{ curso.carga_horaria_total|default:"—" }}</p>
+        </li>
+      {% empty %}
+        <li class="pp-list__item"><p>Nenhum curso cadastrado.</p></li>
+      {% endfor %}
+    </ul>
+  </article>
+
+  <article class="pp-card">
+    <h2>Notícias da educação</h2>
+    <ul class="pp-list" style="margin-top:8px;">
+      {% for item in noticias %}
+        <li class="pp-list__item">
+          <p class="pp-meta">{{ item.publicado_em|date:"d/m/Y" }}</p>
+          <h3><a href="{% url 'core:portal_noticia_detail_public' item.slug %}" style="text-decoration:none;color:inherit;">{{ item.titulo }}</a></h3>
+          {% if item.resumo %}<p>{{ item.resumo }}</p>{% endif %}
+        </li>
+      {% empty %}
+        <li class="pp-list__item"><p>Nenhuma notícia da educação publicada.</p></li>
+      {% endfor %}
+    </ul>
+  </article>
+</section>
+
+<section class="pp-card" style="margin-top:10px;">
+  <h2>Listagens públicas da educação</h2>
+  <p class="pp-meta" style="margin-top:6px;">Solicitações de matrícula, lista de espera de creche e lista de alunos.</p>
+  <div class="pp-table-wrap" style="margin-top:10px;">
+    <table class="pp-table" style="min-width:640px;">
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Categoria</th>
+          <th>Competência</th>
+          <th>Publicação</th>
+          <th>Arquivo</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in arquivos_educacao %}
+          <tr>
+            <td>
+              <strong>{{ item.titulo }}</strong>
+              {% if item.descricao %}<p>{{ item.descricao }}</p>{% endif %}
+            </td>
+            <td>{{ item.get_categoria_display }}</td>
+            <td>{{ item.competencia|default:"—" }}</td>
+            <td>{{ item.publicado_em|date:"d/m/Y H:i" }}</td>
+            <td>
+              {% if item.arquivo %}
+                <a class="pp-btn pp-btn--soft" href="{{ item.arquivo.url }}" target="_blank" rel="noopener">Abrir</a>
+              {% elif item.link_externo %}
+                <a class="pp-btn pp-btn--soft" href="{{ item.link_externo }}" target="_blank" rel="noopener">Abrir link</a>
+              {% else %}
+                —
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Nenhuma listagem pública de educação publicada.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

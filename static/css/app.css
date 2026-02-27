@@ -43,6 +43,8 @@
 @import url("./components/suggest.css");
 @import url("./components/modal.css");
 @import url("./components/link-card.css");
+@import url("./components/suap-alignment.css");
+@import url("./components/detail-summary.css");
 
 /* Widgets (depois) */
 @import url("./components/dashboard-blocks.css");
@@ -52,6 +54,12 @@
    ----------------------- */
 @import url("./pages/dashboard.css");
 @import url("./pages/detail.css");
+@import url("./pages/educacao-indicadores.css");
+@import url("./pages/educacao-matricula.css");
+@import url("./pages/educacao-calendario.css");
+@import url("./pages/org-ui.css");
+@import url("./pages/org-onboarding.css");
+@import url("./pages/accounts-users.css");
 
 /* Autenticação:
    - Se você já tem pages/auth.css, mantenha.

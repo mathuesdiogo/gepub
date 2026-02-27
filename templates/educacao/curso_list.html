@@ -1,0 +1,12 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Cursos • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+  <div class="card">
+    <div class="card__body">
+      {% include "core/partials/components/layout/page_head.html" with title="Cursos" subtitle="Catálogo de cursos e trilhas formativas" actions=actions %}
+      {% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Nome, código ou eixo..." action_url=action_url clear_url=clear_url has_filters=has_filters %}
+      {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q empty_title="Nenhum curso encontrado" empty_text="Cadastre cursos para habilitar ofertas técnicas, EJA e cursos livres." %}
+    </div>
+  </div>
+{% endblock %}

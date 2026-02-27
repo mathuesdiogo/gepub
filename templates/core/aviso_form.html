@@ -3,13 +3,13 @@
 {% block header %}Novo aviso{% endblock %}
 
 {% block content %}
-<div class="card" style="max-width:900px;">
+<div class="card u-max-900">
   <div class="card__title">Publicar aviso</div>
   <div class="card__body">
-    <form method="post" style="display:grid; gap:12px;">
+    <form method="post" class="u-grid-gap-12">
       {% csrf_token %}
       {{ form.as_p }}
-      <div style="display:flex; gap:10px;">
+      <div class="u-flex u-gap-10">
         <button type="submit">Publicar</button>
         <a class="link" href="{% url 'core:dashboard' %}">Cancelar</a>
       </div>

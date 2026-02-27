@@ -1,0 +1,71 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+    {% if municipios and municipios|length %}
+      <select name="municipio" class="input" style="max-width:240px;">
+        {% for m in municipios %}
+          <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+    <select name="status" class="input" style="max-width:220px;">
+      <option value="">Todos status</option>
+      {% for key,label in status_choices %}
+        <option value="{{ key }}" {% if status == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <select name="tipo" class="input" style="max-width:220px;">
+      <option value="">Todos tipos</option>
+      {% for key,label in tipo_choices %}
+        <option value="{{ key }}" {% if tipo == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <select name="competencia" class="input" style="max-width:170px;">
+      <option value="">Competência</option>
+      {% for comp in competencias %}
+        <option value="{{ comp }}" {% if competencia == comp %}selected{% endif %}>{{ comp }}</option>
+      {% endfor %}
+    </select>
+    <input name="q" value="{{ q }}" class="input" placeholder="Servidor ou descrição" style="max-width:280px;">
+    <button class="btn btn--sm" type="submit">Filtrar</button>
+  </form>
+
+  <div class="table-shell"><div class="table-shell__body">
+    <table class="table">
+      <thead><tr><th>Data</th><th>Servidor</th><th>Tipo</th><th>Minutos</th><th>Competência</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td>{{ item.data_ocorrencia|date:"d/m/Y" }}</td>
+            <td>{{ item.servidor.get_full_name|default:item.servidor.username }}</td>
+            <td>{{ item.get_tipo_display }}</td>
+            <td>{{ item.minutos }}</td>
+            <td>{{ item.competencia }}</td>
+            <td>{{ item.get_status_display }}</td>
+            <td>
+              {% if item.status == "PENDENTE" %}
+                <form method="post" action="{% url 'ponto:ocorrencia_aprovar' item.pk %}?municipio={{ municipio.pk }}" style="display:inline;">
+                  {% csrf_token %}
+                  <button class="btn btn--sm btn-primary" type="submit">Aprovar</button>
+                </form>
+                <form method="post" action="{% url 'ponto:ocorrencia_recusar' item.pk %}?municipio={{ municipio.pk }}" style="display:inline;">
+                  {% csrf_token %}
+                  <button class="btn btn--sm btn--ghost" type="submit">Recusar</button>
+                </form>
+              {% else %}
+                -
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7">Nenhuma ocorrência encontrada.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

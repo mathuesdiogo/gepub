@@ -1,0 +1,35 @@
+{% extends "saude/base_modulo.html" %}
+{% block title %}{{ title }} • Internação • Saúde • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+  {% include "core/partials/components/layout/detail_summary.html" with fields=fields pills=pills %}
+
+  <hr class="divider">
+  <div class="section">
+    <div class="section__title">Registros de Internação</div>
+    {% for r in registros %}
+      <div class="mini">
+        <strong>{{ r.tipo }} • {{ r.quando }}</strong>
+        <div class="small">{{ r.autor }}</div>
+        <div>{{ r.texto }}</div>
+      </div>
+    {% empty %}
+      <span class="small">Nenhum registro.</span>
+    {% endfor %}
+  </div>
+
+  {% if can_manage %}
+  <hr class="divider">
+  <div class="section">
+    <div class="section__title">Novo Registro</div>
+    <form method="post">
+      {% csrf_token %}
+      {{ reg_form.as_p }}
+      <button type="submit" class="btn btn-primary">Adicionar registro</button>
+    </form>
+  </div>
+  {% endif %}
+</div></div>
+{% endblock %}

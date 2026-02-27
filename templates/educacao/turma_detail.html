@@ -5,7 +5,7 @@
 <div class="card">
 <div class="card__body">
 
-{% include "core/partials/components/layout/page_head.html" with title=turma.nome subtitle="Ano "|add:turma.ano_letivo|add:" • "|add:turma.turno actions=actions %}
+{% include "core/partials/components/layout/page_head.html" with title=turma.nome subtitle=turma.get_modalidade_display actions=actions %}
 
 
 {# ===== SUMMARY PADRÃO CORE ===== #}

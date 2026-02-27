@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <style>
+    @page { size: A4 portrait; margin: 11mm; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "DejaVu Sans", Arial, sans-serif; color: #10293f; font-size: 11px; }
+    .page { page-break-after: always; }
+    .page:last-child { page-break-after: auto; }
+    .header { display: flex; justify-content: space-between; align-items: center; gap: 12px; border-bottom: 1px solid #d7e2ec; padding-bottom: 8px; margin-bottom: 10px; }
+    .head-text h1 { margin: 0; font-size: 16px; }
+    .head-text p { margin: 2px 0; color: #486279; font-size: 10px; }
+    .qr { width: 88px; text-align: center; font-size: 8px; color: #5e7488; }
+    .qr img { width: 72px; height: 72px; border: 1px solid #cedae5; padding: 4px; background: #fff; }
+    .meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 8px 0 12px; }
+    .meta .box { border: 1px solid #d5e0ea; border-radius: 6px; padding: 6px 8px; }
+    .meta .k { font-size: 8px; text-transform: uppercase; color: #6a8094; margin-bottom: 2px; }
+    .meta .v { font-size: 11px; font-weight: 700; }
+    .question { margin: 10px 0; padding-bottom: 8px; border-bottom: 1px dashed #dce5ed; }
+    .question h3 { margin: 0 0 5px; font-size: 12px; }
+    .alternatives { display: flex; flex-wrap: wrap; gap: 8px 12px; }
+    .alt { border: 1px solid #d7e2ec; border-radius: 999px; padding: 2px 7px; font-size: 10px; }
+    .answer-title { margin: 0 0 8px; font-size: 12px; }
+    table.grid { width: 100%; border-collapse: collapse; }
+    .grid th, .grid td { border: 1px solid #d5e0ea; padding: 4px; text-align: center; font-size: 10px; }
+    .grid th { background: #f3f7fb; }
+    .bubble {
+      width: 12px;
+      height: 12px;
+      border: 1px solid #8aa0b3;
+      border-radius: 999px;
+      margin: 0 auto;
+      background: #fff;
+    }
+    .legend { margin-top: 8px; font-size: 9px; color: #5d7285; }
+  </style>
+</head>
+<body>
+  {% for item in itens %}
+    <section class="page">
+      <div class="header">
+        <div class="head-text">
+          <h1>{{ avaliacao.titulo }}</h1>
+          <p>{{ avaliacao.municipio.nome }} / {{ avaliacao.municipio.uf }}</p>
+          <p>Turma {{ avaliacao.turma.nome }} | Disciplina {{ avaliacao.disciplina|default:"-" }}</p>
+        </div>
+        <div class="qr">
+          {% if item.qr_data_uri %}
+            <img src="{{ item.qr_data_uri }}" alt="QR">
+          {% endif %}
+          <div>Token {{ item.folha.token }}</div>
+        </div>
+      </div>
+
+      <div class="meta">
+        <div class="box"><div class="k">Aluno</div><div class="v">{{ item.aluno.nome }}</div></div>
+        <div class="box"><div class="k">Matricula</div><div class="v">{{ item.aplicacao.matricula_id|default:"-" }}</div></div>
+        <div class="box"><div class="k">Data</div><div class="v">{{ avaliacao.data_aplicacao|date:"d/m/Y" }}</div></div>
+        <div class="box"><div class="k">Versao</div><div class="v">{{ item.aplicacao.versao }}</div></div>
+      </div>
+
+      {% for numero in questoes_range %}
+        <article class="question">
+          <h3>Questao {{ numero }}</h3>
+          {% if avaliacao.tipo == "DISCURSIVA" %}
+            <div style="height:38px;border:1px solid #d7e2ec;border-radius:6px;"></div>
+          {% else %}
+            <div class="alternatives">
+              {% for letra in letras %}
+                <span class="alt">({{ letra }})</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </article>
+      {% endfor %}
+    </section>
+
+    <section class="page">
+      <div class="header">
+        <div class="head-text">
+          <h1>Folha de Respostas</h1>
+          <p>{{ avaliacao.titulo }} | Turma {{ avaliacao.turma.nome }}</p>
+          <p>Aluno {{ item.aluno.nome }}</p>
+        </div>
+        <div class="qr">
+          {% if item.qr_data_uri %}
+            <img src="{{ item.qr_data_uri }}" alt="QR">
+          {% endif %}
+          <div>Validar / Corrigir</div>
+        </div>
+      </div>
+
+      <h2 class="answer-title">Marque uma alternativa por questao</h2>
+      <table class="grid">
+        <thead>
+          <tr>
+            <th>Q</th>
+            {% for letra in letras %}<th>{{ letra }}</th>{% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for numero in questoes_range %}
+            <tr>
+              <td>{{ numero }}</td>
+              {% for letra in letras %}
+                <td><div class="bubble"></div></td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p class="legend">URL de validacao: {{ item.validation_url }}</p>
+    </section>
+  {% endfor %}
+</body>
+</html>

@@ -1,0 +1,9 @@
+{% extends "saude/base_modulo.html" %}
+{% block title %}Novo Documento Clínico • Saúde • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title="Novo Documento Clínico" subtitle=atendimento.paciente_nome actions=None %}
+  {% include "core/partials/components/forms/form_shell.html" with form=form cancel_url=cancel_url submit_label=submit_label action_url=action_url %}
+</div></div>
+{% endblock %}

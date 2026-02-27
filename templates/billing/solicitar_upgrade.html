@@ -1,0 +1,33 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/billing.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="billing-summary-grid">
+    <div class="billing-box">
+      <div class="billing-box__label">Plano</div>
+      <div class="billing-box__value">{{ assinatura.plano.nome }}</div>
+      <div class="billing-box__meta">R$ {{ assinatura.valor_base_mensal }} / mês</div>
+    </div>
+    <div class="billing-box">
+      <div class="billing-box__label">Município</div>
+      <div class="billing-box__value">{{ municipio.nome }}/{{ municipio.uf }}</div>
+      <div class="billing-box__meta">Contrato ativo</div>
+    </div>
+  </div>
+
+  {% include "core/partials/components/forms/form_shell.html" with form=form cancel_url=cancel_url submit_label="Enviar solicitação" %}
+
+  {% if preview_valor is not None %}
+    <div class="billing-note">
+      Valor incremental estimado: <strong>R$ {{ preview_valor }} / mês</strong>
+    </div>
+  {% endif %}
+</div></div>
+{% endblock %}

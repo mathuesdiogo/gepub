@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from decimal import Decimal
 
 
 # ============================================================
@@ -90,3 +91,42 @@ class HorarioAula(models.Model):
 
     def __str__(self):
         return f"{self.turma} • {self.get_dia_semana_display()} • {self.ordem}ª aula"
+
+
+class FechamentoPeriodoTurma(models.Model):
+    turma = models.ForeignKey(
+        "educacao.Turma",
+        on_delete=models.CASCADE,
+        related_name="fechamentos_periodo",
+    )
+    periodo = models.ForeignKey(
+        "educacao.PeriodoLetivo",
+        on_delete=models.PROTECT,
+        related_name="fechamentos_turma",
+    )
+    media_corte = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal("6.00"))
+    frequencia_corte = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal("75.00"))
+
+    total_alunos = models.PositiveIntegerField(default=0)
+    aprovados = models.PositiveIntegerField(default=0)
+    recuperacao = models.PositiveIntegerField(default=0)
+    reprovados = models.PositiveIntegerField(default=0)
+
+    observacao = models.TextField(blank=True, default="")
+    fechado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="fechamentos_periodo_educacao",
+    )
+    fechado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-periodo__ano_letivo", "periodo__numero", "turma__nome"]
+        unique_together = [("turma", "periodo")]
+        verbose_name = "Fechamento do período (turma)"
+        verbose_name_plural = "Fechamentos do período (turma)"
+
+    def __str__(self):
+        return f"{self.turma} • {self.periodo}"

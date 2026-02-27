@@ -1,0 +1,22 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Portal do Professor • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Portal do Professor" subtitle="Acompanhamento de diários, aulas e pendências de lançamento" actions=actions %}
+
+<div class="grid grid--3">
+{% include "core/partials/components/data/kpi_card.html" with label="Diários" value=total_diarios %}
+{% include "core/partials/components/data/kpi_card.html" with label="Aulas lançadas" value=total_aulas %}
+{% include "core/partials/components/data/kpi_card.html" with label="Avaliações" value=total_avaliacoes %}
+</div>
+
+<div class="grid grid--1">
+{% include "core/partials/components/data/kpi_card.html" with label="Pendências de nota" value=total_pendencias %}
+</div>
+
+<hr>
+
+{% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Sem diários" empty_text="Não há diários disponíveis no seu escopo." %}
+</div></div>
+{% endblock %}

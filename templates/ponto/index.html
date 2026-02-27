@@ -1,0 +1,60 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+    {% if municipios and municipios|length %}
+      <select name="municipio" class="input" style="max-width:260px;" onchange="this.form.submit()">
+        {% for m in municipios %}
+          <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+  </form>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:12px 0 18px;">
+    {% for card in cards %}
+      {% include "core/partials/components/data/kpi_card.html" with label=card.label value=card.value %}
+    {% endfor %}
+  </div>
+
+  <div class="table-shell" style="margin-bottom:12px;"><div class="table-shell__body">
+    <table class="table">
+      <thead><tr><th>Competência</th><th>Status</th><th>Servidores</th><th>Ocorrências</th><th>Pendentes</th></tr></thead>
+      <tbody>
+        {% for item in latest_competencias %}
+          <tr>
+            <td>{{ item.competencia }}</td>
+            <td>{{ item.get_status_display }}</td>
+            <td>{{ item.total_servidores }}</td>
+            <td>{{ item.total_ocorrencias }}</td>
+            <td>{{ item.total_pendentes }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Nenhuma competência aberta ainda.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+
+  <div class="table-shell"><div class="table-shell__body">
+    <table class="table">
+      <thead><tr><th>Data</th><th>Servidor</th><th>Tipo</th><th>Competência</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for item in latest_ocorrencias %}
+          <tr>
+            <td>{{ item.data_ocorrencia|date:"d/m/Y" }}</td>
+            <td>{{ item.servidor.get_full_name|default:item.servidor.username }}</td>
+            <td>{{ item.get_tipo_display }}</td>
+            <td>{{ item.competencia }}</td>
+            <td>{{ item.get_status_display }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Nenhuma ocorrência registrada ainda.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}
