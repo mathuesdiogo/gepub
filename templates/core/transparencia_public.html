@@ -1,220 +1,214 @@
-{% extends "core/base_public.html" %}
+{% extends "core/public/base_portal_tenant.html" %}
 {% load static %}
 
 {% block title %}{{ title }}{% endblock %}
 
 {% block extra_head %}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Syne:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="{% static 'css/pages/transparencia.css' %}">
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/pages/transparencia.css' %}">
 {% endblock %}
 
-{% block content %}
-<div class="tp-page">
-  <header class="tp-topbar">
-    <a class="tp-brand" href="{{ cta_home }}">
-      <span class="tp-brand__badge">
-        {% if marca_logo_url %}
-          <img src="{{ marca_logo_url }}" alt="{{ marca_nome }}">
-        {% else %}
-          <i class="fa-solid fa-city"></i>
-        {% endif %}
-      </span>
-      <span>{{ marca_nome }}</span>
-    </a>
+{% block hero_text %}
+<p>Consulta consolidada de eventos e arquivos públicos com filtros por município, módulo, categoria e período.</p>
+{% endblock %}
 
-    <nav class="tp-nav">
-      <a href="{{ cta_home }}">Institucional</a>
-      <a href="{{ cta_docs }}">Documentação</a>
-      <a href="{{ cta_login }}">Entrar</a>
-    </nav>
-  </header>
+{% block page_content %}
+<section class="pp-grid pp-grid--3">
+  <article class="pp-card tp-kpi-card tp-kpi-card--blue">
+    <h3>Eventos listados</h3>
+    <p class="pp-kpi-value">{{ total_eventos }}</p>
+    <p class="pp-meta">Registros públicos no resultado atual</p>
+  </article>
+  <article class="pp-card tp-kpi-card tp-kpi-card--navy">
+    <h3>Valor financeiro somado</h3>
+    <p class="pp-kpi-value">R$ {{ total_valor|floatformat:2 }}</p>
+    <p class="pp-meta">Somatório de eventos com valor informado</p>
+  </article>
+  <article class="pp-card tp-kpi-card tp-kpi-card--green">
+    <h3>Arquivos publicados</h3>
+    <p class="pp-kpi-value">{{ total_arquivos_publicos }}</p>
+    <p class="pp-meta">Acervo público por categoria</p>
+  </article>
+</section>
 
-  <main class="tp-main">
-    <section class="tp-hero">
-      <p class="tp-kicker">PORTAL DE TRANSPARENCIA</p>
-      <h1>Eventos públicos de execução municipal</h1>
-      <p>Consulta consolidada de eventos publicados pelos módulos do GEPUB.</p>
-      <div class="tp-kpis">
-        <article>
-          <strong>{{ total_eventos }}</strong>
-          <span>Eventos listados</span>
-        </article>
-        <article>
-          <strong>R$ {{ total_valor|floatformat:2 }}</strong>
-          <span>Valor financeiro somado</span>
-        </article>
-        <article>
-          <strong>{{ total_arquivos_publicos }}</strong>
-          <span>Arquivos públicos publicados</span>
-        </article>
+<section class="pp-card" style="margin-top:12px;">
+  <form method="get" class="tp-filter-form">
+    <input class="pp-input" type="text" name="q" value="{{ filtro_q }}" placeholder="Buscar por título, referência ou município">
+
+    <select class="pp-select" name="municipio" {% if lock_municipio %}disabled{% endif %}>
+      <option value="">Todos os municípios</option>
+      {% for municipio in municipios %}
+        <option value="{{ municipio.pk }}" {% if filtro_municipio == municipio.pk %}selected{% endif %}>
+          {{ municipio.nome }}{% if municipio.uf %}/{{ municipio.uf }}{% endif %}
+        </option>
+      {% endfor %}
+    </select>
+    {% if lock_municipio %}
+      <input type="hidden" name="municipio" value="{{ filtro_municipio }}">
+    {% endif %}
+
+    <select class="pp-select" name="modulo">
+      <option value="">Todos os módulos</option>
+      {% for codigo, label in modulos %}
+        <option value="{{ codigo }}" {% if filtro_modulo == codigo %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <select class="pp-select" name="categoria">
+      <option value="">Todas as categorias de arquivo</option>
+      {% for codigo, label in categorias_arquivo %}
+        <option value="{{ codigo }}" {% if filtro_categoria == codigo %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <input class="pp-input" type="date" name="inicio" value="{{ filtro_inicio }}">
+    <input class="pp-input" type="date" name="fim" value="{{ filtro_fim }}">
+
+    <button class="pp-btn pp-btn--primary" type="submit">Filtrar</button>
+  </form>
+</section>
+
+{% if secoes_transparencia %}
+<section class="tp-sections" style="margin-top:12px;">
+  {% for secao in secoes_transparencia %}
+    <article class="pp-card tp-section">
+      <header class="tp-section__header">
+        <div>
+          <p class="tp-section__kicker">Módulo</p>
+          <h2>{{ secao.titulo }}</h2>
+          <p class="pp-meta">{{ secao.descricao }}</p>
+        </div>
+        <div class="tp-section__meta">
+          <strong>{{ secao.itens_com_dados }}/{{ secao.total_itens }}</strong>
+          <span>itens com movimentação</span>
+          <em>{{ secao.total_registros }} registro(s)</em>
+        </div>
+      </header>
+
+      <div class="tp-item-grid">
+        {% for item in secao.itens %}
+          <article class="tp-item tp-item--{{ item.status }}">
+            <div class="tp-item__top">
+              <h3>{{ item.titulo }}</h3>
+              <strong>{{ item.total }}</strong>
+            </div>
+            <p class="tp-item__desc">{{ item.descricao }}</p>
+            <p class="tp-item__meta"><span>Origem:</span> {{ item.origem }}</p>
+            <p class="tp-item__meta"><span>Movimentação:</span>
+              {% if item.ultima_movimentacao %}
+                {{ item.ultima_movimentacao|date:"d/m/Y" }}
+              {% else %}
+                sem registros
+              {% endif %}
+            </p>
+            <p class="tp-item__meta"><span>Cobertura:</span> {{ item.detalhe }}</p>
+            <div class="tp-item__actions">
+              {% if item.url_publica %}
+                <a class="pp-btn pp-btn--soft" href="{{ item.url_publica }}">Abrir módulo público</a>
+              {% endif %}
+              {% if item.categoria_filtro %}
+                <a class="pp-btn pp-btn--soft" href="?categoria={{ item.categoria_filtro }}{% if filtro_municipio %}&municipio={{ filtro_municipio }}{% endif %}">Ver publicações</a>
+              {% endif %}
+            </div>
+          </article>
+        {% endfor %}
       </div>
-    </section>
+    </article>
+  {% endfor %}
+</section>
+{% endif %}
 
-    <section class="tp-filters">
-      <form method="get" class="tp-filter-form">
-        <input type="text" name="q" value="{{ filtro_q }}" placeholder="Buscar por título, referência ou município">
-        <select name="municipio" {% if lock_municipio %}disabled{% endif %}>
-          <option value="">Todos os municípios</option>
-          {% for municipio in municipios %}
-            <option value="{{ municipio.pk }}" {% if filtro_municipio == municipio.pk %}selected{% endif %}>
-              {{ municipio.nome }}{% if municipio.uf %}/{{ municipio.uf }}{% endif %}
-            </option>
-          {% endfor %}
-        </select>
-        {% if lock_municipio %}
-          <input type="hidden" name="municipio" value="{{ filtro_municipio }}">
-        {% endif %}
-        <select name="modulo">
-          <option value="">Todos os módulos</option>
-          {% for codigo, label in modulos %}
-            <option value="{{ codigo }}" {% if filtro_modulo == codigo %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
-        <select name="categoria">
-          <option value="">Todas as categorias de arquivo</option>
-          {% for codigo, label in categorias_arquivo %}
-            <option value="{{ codigo }}" {% if filtro_categoria == codigo %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
-        <input type="date" name="inicio" value="{{ filtro_inicio }}">
-        <input type="date" name="fim" value="{{ filtro_fim }}">
-        <button type="submit">Filtrar</button>
-      </form>
-    </section>
+{% if arquivos_publicos %}
+<section class="pp-card" style="margin-top:12px;">
+  <div class="pp-card__subhead">
+    <h2>Arquivos públicos</h2>
+    <span class="pp-badge">{{ total_arquivos_publicos }} arquivo(s)</span>
+  </div>
 
-    <section class="tp-list">
-      {% if secoes_transparencia %}
-        <div class="tp-sections">
-          {% for secao in secoes_transparencia %}
-            <article class="tp-section">
-              <header class="tp-section__header">
-                <div>
-                  <p class="tp-section__kicker">Módulo</p>
-                  <h2>{{ secao.titulo }}</h2>
-                  <p class="tp-section__desc">{{ secao.descricao }}</p>
-                </div>
-                <div class="tp-section__meta">
-                  <strong>{{ secao.itens_com_dados }}/{{ secao.total_itens }}</strong>
-                  <span>itens com movimentação</span>
-                  <em>{{ secao.total_registros }} registro(s)</em>
-                </div>
-              </header>
-              <div class="tp-section__grid">
-                {% for item in secao.itens %}
-                  <article class="tp-item tp-item--{{ item.status }}">
-                    <div class="tp-item__top">
-                      <h3>{{ item.titulo }}</h3>
-                      <strong>{{ item.total }}</strong>
-                    </div>
-                    <p class="tp-item__desc">{{ item.descricao }}</p>
-                    <p class="tp-item__meta"><span>Origem:</span> {{ item.origem }}</p>
-                    <p class="tp-item__meta"><span>Movimentação:</span>
-                      {% if item.ultima_movimentacao %}
-                        {{ item.ultima_movimentacao|date:"d/m/Y" }}
-                      {% else %}
-                        sem registros
-                      {% endif %}
-                    </p>
-                    <p class="tp-item__meta"><span>Cobertura:</span> {{ item.detalhe }}</p>
-                    <div class="tp-item__actions">
-                      {% if item.url_publica %}
-                        <a href="{{ item.url_publica }}">Abrir módulo público</a>
-                      {% endif %}
-                      {% if item.categoria_filtro %}
-                        <a href="?categoria={{ item.categoria_filtro }}{% if filtro_municipio %}&municipio={{ filtro_municipio }}{% endif %}">Ver publicações</a>
-                      {% endif %}
-                    </div>
-                  </article>
-                {% endfor %}
-              </div>
-            </article>
-          {% endfor %}
-        </div>
-      {% endif %}
+  <div class="pp-table-wrap" style="margin-top:10px;">
+    <table class="pp-table">
+      <thead>
+        <tr>
+          <th>Categoria</th>
+          <th>Título</th>
+          <th>Município</th>
+          <th>Formato</th>
+          <th>Competência</th>
+          <th>Arquivo</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in arquivos_publicos %}
+          <tr>
+            <td>{{ item.get_categoria_display }}</td>
+            <td>
+              <strong>{{ item.titulo }}</strong>
+              {% if item.descricao %}<p>{{ item.descricao }}</p>{% endif %}
+            </td>
+            <td>{{ item.municipio.nome }}</td>
+            <td>{{ item.get_formato_display }}</td>
+            <td>{{ item.competencia|default:"—" }}</td>
+            <td>
+              {% if item.arquivo %}
+                <a class="pp-btn pp-btn--soft" href="{{ item.arquivo.url }}" target="_blank" rel="noopener">Abrir arquivo</a>
+              {% elif item.link_externo %}
+                <a class="pp-btn pp-btn--soft" href="{{ item.link_externo }}" target="_blank" rel="noopener">Abrir link</a>
+              {% else %}
+                -
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
 
-      {% if arquivos_publicos %}
-        <div class="tp-table-wrap tp-table-wrap--spaced">
-          <table class="tp-table">
-            <thead>
-              <tr>
-                <th>Categoria</th>
-                <th>Título</th>
-                <th>Município</th>
-                <th>Formato</th>
-                <th>Competência</th>
-                <th>Arquivo</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for item in arquivos_publicos %}
-                <tr>
-                  <td>{{ item.get_categoria_display }}</td>
-                  <td>
-                    <strong>{{ item.titulo }}</strong>
-                    {% if item.descricao %}<p>{{ item.descricao }}</p>{% endif %}
-                  </td>
-                  <td>{{ item.municipio.nome }}</td>
-                  <td>{{ item.get_formato_display }}</td>
-                  <td>{{ item.competencia|default:"—" }}</td>
-                  <td>
-                    {% if item.arquivo %}
-                      <a href="{{ item.arquivo.url }}" target="_blank" rel="noopener">Abrir arquivo</a>
-                    {% elif item.link_externo %}
-                      <a href="{{ item.link_externo }}" target="_blank" rel="noopener">Abrir link</a>
-                    {% else %}
-                      -
-                    {% endif %}
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% endif %}
+{% if eventos %}
+<section class="pp-card" style="margin-top:12px;">
+  <div class="pp-card__subhead">
+    <h2>Eventos públicos</h2>
+    <span class="pp-badge">{{ total_eventos }} evento(s)</span>
+  </div>
 
-      {% if eventos %}
-        <div class="tp-table-wrap">
-          <table class="tp-table">
-            <thead>
-              <tr>
-                <th>Data</th>
-                <th>Módulo</th>
-                <th>Tipo</th>
-                <th>Título</th>
-                <th>Município</th>
-                <th>Referência</th>
-                <th>Valor</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for item in eventos %}
-                <tr>
-                  <td>{{ item.data_evento|date:"d/m/Y H:i" }}</td>
-                  <td>{{ item.get_modulo_display }}</td>
-                  <td>{{ item.tipo_evento }}</td>
-                  <td>
-                    <strong>{{ item.titulo }}</strong>
-                    {% if item.descricao %}<p>{{ item.descricao }}</p>{% endif %}
-                  </td>
-                  <td>{{ item.municipio.nome }}</td>
-                  <td>{{ item.referencia|default:"-" }}</td>
-                  <td>{% if item.valor is not None %}R$ {{ item.valor|floatformat:2 }}{% else %}-{% endif %}</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% else %}
-        <article class="tp-empty">
-          <i class="fa-regular fa-folder-open"></i>
-          <h3>Nenhum evento público encontrado.</h3>
-          <p>Ajuste os filtros para ampliar a pesquisa.</p>
-        </article>
-      {% endif %}
-    </section>
-  </main>
-</div>
+  <div class="pp-table-wrap" style="margin-top:10px;">
+    <table class="pp-table">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Módulo</th>
+          <th>Tipo</th>
+          <th>Título</th>
+          <th>Município</th>
+          <th>Referência</th>
+          <th>Valor</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in eventos %}
+          <tr>
+            <td>{{ item.data_evento|date:"d/m/Y H:i" }}</td>
+            <td>{{ item.get_modulo_display }}</td>
+            <td>{{ item.tipo_evento }}</td>
+            <td>
+              <strong>{{ item.titulo }}</strong>
+              {% if item.descricao %}<p>{{ item.descricao }}</p>{% endif %}
+            </td>
+            <td>{{ item.municipio.nome }}</td>
+            <td>{{ item.referencia|default:"-" }}</td>
+            <td>{% if item.valor is not None %}R$ {{ item.valor|floatformat:2 }}{% else %}-{% endif %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% else %}
+<section class="pp-card" style="margin-top:12px; text-align:center;">
+  <i class="fa-regular fa-folder-open" style="color:#1f63c4;font-size:22px;"></i>
+  <h3 style="margin:10px 0 6px;">Nenhum evento público encontrado.</h3>
+  <p class="pp-meta">Ajuste os filtros para ampliar a pesquisa.</p>
+</section>
+{% endif %}
 {% endblock %}

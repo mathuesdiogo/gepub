@@ -6,7 +6,7 @@
 {% block extra_head %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="{% static 'css/pages/portal-public-pages.css' %}">
 {% endblock %}
@@ -14,31 +14,68 @@
 {% block content %}
 <div class="pp-page" style="--portal-primary: {{ cor_primaria|default:'#0E4A7E' }}; --portal-secondary: {{ cor_secundaria|default:'#2F6EA9' }};">
   <header class="pp-header">
-    <div class="pp-wrap pp-header__bar">
-      <a href="{% url 'core:institucional_public' %}" class="pp-brand">
-        {% if logo_url %}
-          <img src="{{ logo_url }}" alt="Logo {{ municipio.nome }}">
-        {% else %}
-          <span class="pp-brand__icon"><i class="fa-solid fa-building-columns"></i></span>
-        {% endif %}
-        <span>
-          <strong>{{ titulo_portal|default:municipio.nome }}</strong>
-          <small>{{ subtitulo_portal|default:"Portal Público Municipal" }}</small>
-        </span>
-      </a>
-      <nav class="pp-nav">
-        {% for item in menu_items_header %}
-          <a href="{{ item.url }}" {% if item.nova_aba %}target="_blank" rel="noopener"{% endif %}>{{ item.titulo }}</a>
-        {% endfor %}
-        <a href="{{ cta_login }}" class="pp-login">Acesso admin</a>
-      </nav>
+    <div class="pp-topbar">
+      <div class="pp-wrap pp-topbar__inner">
+        <a href="{% url 'core:home' %}" class="pp-brand">
+          {% if logo_url %}
+            <img src="{{ logo_url }}" alt="Logo {{ municipio.nome }}">
+          {% else %}
+            <span class="pp-brand__icon"><i class="fa-solid fa-building-columns"></i></span>
+          {% endif %}
+          <span>
+            <strong>{{ titulo_portal|default:municipio.nome|upper }}</strong>
+            <small>{{ subtitulo_portal|default:"PORTAL PÚBLICO MUNICIPAL" }}</small>
+          </span>
+        </a>
+
+        <nav class="pp-quick-links" aria-label="Links rápidos">
+          <a href="#conteudo-principal"><i class="fa-solid fa-universal-access"></i> Acessibilidade</a>
+          <a href="{% url 'core:portal_ouvidoria_public' %}"><i class="fa-regular fa-message"></i> Ouvidoria</a>
+          <a href="{% url 'core:transparencia_public' %}"><i class="fa-solid fa-chart-column"></i> Portal da Transparência</a>
+          <a href="{% url 'core:portal_diario_public' %}"><i class="fa-regular fa-file-lines"></i> Diário Oficial</a>
+          <a href="{{ cta_login }}" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-right-to-bracket"></i> Sistema Interno</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="pp-mainnav">
+      <div class="pp-wrap pp-mainnav__inner">
+        <nav class="pp-menu" aria-label="Navegação principal">
+          {% for item in menu_items_header|slice:":8" %}
+            {% with item_key=item.titulo|lower %}
+              <a href="{{ item.url }}" {% if item.nova_aba %}target="_blank" rel="noopener"{% endif %} class="pp-menu__item {% if request.path == item.url %}is-active{% endif %}">
+                {% if "início" in item_key or "inicio" in item_key %}
+                  <i class="fa-solid fa-house"></i>
+                {% elif "prefeitura" in item_key %}
+                  <i class="fa-solid fa-building"></i>
+                {% elif "transpar" in item_key %}
+                  <i class="fa-solid fa-chart-column"></i>
+                {% elif "servi" in item_key %}
+                  <i class="fa-solid fa-users"></i>
+                {% elif "not" in item_key %}
+                  <i class="fa-regular fa-newspaper"></i>
+                {% elif "diário" in item_key or "diario" in item_key %}
+                  <i class="fa-regular fa-file-lines"></i>
+                {% elif "ouv" in item_key %}
+                  <i class="fa-regular fa-message"></i>
+                {% elif "cont" in item_key %}
+                  <i class="fa-solid fa-phone"></i>
+                {% else %}
+                  <i class="fa-solid fa-circle-dot"></i>
+                {% endif %}
+                <span>{{ item.titulo }}</span>
+              </a>
+            {% endwith %}
+          {% endfor %}
+        </nav>
+      </div>
     </div>
   </header>
 
-  <main class="pp-main">
+  <main id="conteudo-principal" class="pp-main">
     <div class="pp-wrap">
       <section class="pp-hero">
-        <p class="pp-kicker">{{ municipio.nome }}/{{ municipio.uf }}</p>
+        <p class="pp-kicker">{{ municipio.nome }}{% if municipio.uf %}/{{ municipio.uf }}{% endif %}</p>
         <h1>{{ title|default:titulo_portal }}</h1>
         {% block hero_text %}
           {% if mensagem_boas_vindas %}<p>{{ mensagem_boas_vindas }}</p>{% endif %}
@@ -51,21 +88,33 @@
 
   <footer class="pp-footer">
     <div class="pp-wrap">
-      <div>{{ titulo_portal|default:municipio.nome }} • {{ municipio.nome }}/{{ municipio.uf }}</div>
-      {% if endereco %}<div>{{ endereco }}</div>{% endif %}
-      <div>
-        {% if telefone %}Tel: {{ telefone }}{% endif %}
-        {% if telefone and email %} • {% endif %}
-        {% if email %}E-mail: {{ email }}{% endif %}
+      <div class="pp-footer__grid">
+        <article>
+          <h3><i class="fa-solid fa-location-dot"></i> Endereço</h3>
+          <p>{{ endereco|default:"Endereço não informado." }}</p>
+        </article>
+        <article>
+          <h3><i class="fa-solid fa-phone"></i> Telefone</h3>
+          <p>{{ telefone|default:"Telefone não informado." }}</p>
+        </article>
+        <article>
+          <h3><i class="fa-solid fa-envelope"></i> E-mail</h3>
+          <p>{{ email|default:"E-mail não informado." }}</p>
+        </article>
+        <article>
+          <h3><i class="fa-regular fa-clock"></i> Atendimento</h3>
+          <p>{{ horario_atendimento|default:"Horário não informado." }}</p>
+        </article>
       </div>
-      {% if horario_atendimento %}<div>Atendimento: {{ horario_atendimento }}</div>{% endif %}
-      {% if menu_items_footer %}
-        <div class="pp-inline-list" style="margin-top:8px;">
-          {% for item in menu_items_footer %}
+
+      <div class="pp-footer__bottom">
+        <div class="pp-footer__links">
+          {% for item in menu_items_footer|slice:":8" %}
             <a href="{{ item.url }}" {% if item.nova_aba %}target="_blank" rel="noopener"{% endif %}>{{ item.titulo }}</a>
           {% endfor %}
         </div>
-      {% endif %}
+        <p>© {% now "Y" %} {{ titulo_portal|default:municipio.nome }} • {{ municipio.nome }}{% if municipio.uf %}/{{ municipio.uf }}{% endif %}</p>
+      </div>
     </div>
   </footer>
 </div>

@@ -1,0 +1,333 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/pages/publicacoes-theme-editor.css' %}">
+{% endblock %}
+
+{% block header %}Editor Visual do Tema{% endblock %}
+
+{% block content %}
+<div class="card theme-editor-card">
+  <div class="card__body theme-editor-card__body">
+    {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+    <section class="theme-editor-intro">
+      <article>
+        <p class="theme-editor-kicker">Editor em tempo real</p>
+        <h2>Personalize o portal público mantendo o padrão oficial do município</h2>
+        <p>
+          Edite textos, cores, banner, contatos e cards de serviço com autosave ativo.
+          O preview ao lado recebe as alterações na hora e permite clicar no conteúdo para editar.
+        </p>
+      </article>
+      <div class="theme-editor-intro__badges">
+        <span><i class="fa-solid fa-wand-magic-sparkles"></i> Edição visual</span>
+        <span><i class="fa-solid fa-bolt"></i> Autosave</span>
+        <span><i class="fa-solid fa-city"></i> Por município</span>
+      </div>
+    </section>
+
+    {% if municipios %}
+      <form method="get" class="theme-editor-filter" action="{% url 'core:publicacoes_theme_editor' %}">
+        <div>
+          <label for="id_municipio">Município em edição</label>
+          <select id="id_municipio" name="municipio" onchange="this.form.submit()">
+            {% for m in municipios %}
+              <option value="{{ m.pk }}" {% if m.pk == municipio.pk %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </form>
+    {% endif %}
+
+    <div class="theme-editor-shell">
+      <form id="themeEditorForm" class="theme-editor-panel" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="theme-editor-panel__head">
+          <h3><i class="fa-solid fa-pen-ruler"></i> Campos editáveis</h3>
+          <div class="theme-editor-status" id="themeEditorStatus">Pronto</div>
+        </div>
+
+        <section class="theme-editor-group">
+          <h4><i class="fa-solid fa-landmark"></i> Identidade do portal</h4>
+          <label>Título do portal</label>
+          <input class="input" type="text" name="titulo_portal" data-field="titulo_portal" value="{{ cfg.titulo_portal }}">
+
+          <label>Subtítulo</label>
+          <input class="input" type="text" name="subtitulo_portal" data-field="subtitulo_portal" value="{{ cfg.subtitulo_portal }}">
+
+          <label>Mensagem de boas-vindas</label>
+          <textarea class="textarea" name="mensagem_boas_vindas" data-field="mensagem_boas_vindas" rows="4">{{ cfg.mensagem_boas_vindas }}</textarea>
+
+          <div class="theme-editor-grid2">
+            <div>
+              <label>Cor primária</label>
+              <input class="input" type="color" name="cor_primaria" data-field="cor_primaria" value="{{ cfg.cor_primaria|default:'#0E4A7E' }}">
+            </div>
+            <div>
+              <label>Cor secundária</label>
+              <input class="input" type="color" name="cor_secundaria" data-field="cor_secundaria" value="{{ cfg.cor_secundaria|default:'#2F6EA9' }}">
+            </div>
+          </div>
+
+          <label>Logo (cabeçalho)</label>
+          <input class="input" type="file" name="logo" accept="image/*" data-field="logo" id="id_logo">
+
+          <label>Brasão</label>
+          <input class="input" type="file" name="brasao" accept="image/*" data-field="brasao">
+        </section>
+
+        <section class="theme-editor-group">
+          <h4><i class="fa-solid fa-image"></i> Banner principal</h4>
+          <input type="hidden" name="banner_id" value="{{ banner.id|default:'' }}" data-field="banner_id">
+
+          <label>Título do banner</label>
+          <input class="input" type="text" name="banner_titulo" data-field="banner_titulo" value="{{ banner.titulo|default:'' }}">
+
+          <label>Subtítulo do banner</label>
+          <input class="input" type="text" name="banner_subtitulo" data-field="banner_subtitulo" value="{{ banner.subtitulo|default:'' }}">
+
+          <label>Link do banner</label>
+          <input class="input" type="text" name="banner_link" data-field="banner_link" value="{{ banner.link|default:'' }}">
+
+          <div class="theme-editor-grid2">
+            <div>
+              <label>Ordem</label>
+              <input class="input" type="number" min="1" name="banner_ordem" data-field="banner_ordem" value="{{ banner.ordem|default:1 }}">
+            </div>
+            <div>
+              <label>Ativo</label>
+              <select class="input" name="banner_ativo" data-field="banner_ativo">
+                <option value="1" {% if banner.ativo or not banner %}selected{% endif %}>Sim</option>
+                <option value="0" {% if banner and not banner.ativo %}selected{% endif %}>Não</option>
+              </select>
+            </div>
+          </div>
+
+          <label>Imagem do banner</label>
+          <input class="input" type="file" name="banner_imagem" id="id_banner_imagem" accept="image/*" data-field="banner_imagem">
+          <p class="theme-editor-help">No preview, clique no banner para focar este campo.</p>
+        </section>
+
+        <section class="theme-editor-group">
+          <h4><i class="fa-solid fa-grip"></i> Cards de serviços (home)</h4>
+          {% for item in blocos_editor %}
+            <article class="theme-editor-block-row">
+              <h5>Card {{ forloop.counter }}</h5>
+              <input type="hidden" name="bloco_{{ item.idx }}_id" value="{{ item.id }}" data-field="bloco_{{ item.idx }}_id">
+
+              <label>Título</label>
+              <input class="input" type="text" name="bloco_{{ item.idx }}_titulo" data-field="bloco_{{ item.idx }}_titulo" value="{{ item.titulo }}">
+
+              <label>Descrição</label>
+              <textarea class="textarea" name="bloco_{{ item.idx }}_descricao" data-field="bloco_{{ item.idx }}_descricao" rows="2">{{ item.descricao }}</textarea>
+
+              <label>Ícone (FontAwesome)</label>
+              <input class="input" type="text" name="bloco_{{ item.idx }}_icone" data-field="bloco_{{ item.idx }}_icone" value="{{ item.icone }}">
+
+              <label>Link</label>
+              <input class="input" type="text" name="bloco_{{ item.idx }}_link" data-field="bloco_{{ item.idx }}_link" value="{{ item.link }}">
+
+              <label>Ativo</label>
+              <select class="input" name="bloco_{{ item.idx }}_ativo" data-field="bloco_{{ item.idx }}_ativo">
+                <option value="1" {% if item.ativo %}selected{% endif %}>Sim</option>
+                <option value="0" {% if not item.ativo %}selected{% endif %}>Não</option>
+              </select>
+            </article>
+          {% endfor %}
+        </section>
+
+        <section class="theme-editor-group">
+          <h4><i class="fa-solid fa-address-card"></i> Rodapé e contato</h4>
+          <label>Endereço</label>
+          <input class="input" type="text" name="endereco" data-field="endereco" value="{{ cfg.endereco }}">
+
+          <label>Telefone</label>
+          <input class="input" type="text" name="telefone" data-field="telefone" value="{{ cfg.telefone }}">
+
+          <label>E-mail</label>
+          <input class="input" type="email" name="email" data-field="email" value="{{ cfg.email }}">
+
+          <label>Horário de atendimento</label>
+          <input class="input" type="text" name="horario_atendimento" data-field="horario_atendimento" value="{{ cfg.horario_atendimento }}">
+        </section>
+
+        <section class="theme-editor-group">
+          <h4><i class="fa-solid fa-diagram-project"></i> Publicações por módulo</h4>
+          <div class="theme-editor-links">
+            {% for item in modulos_links %}
+              <a href="{{ item.url }}"><i class="fa-solid fa-arrow-up-right-from-square"></i> {{ item.label }}</a>
+            {% endfor %}
+          </div>
+        </section>
+
+        <div class="theme-editor-panel__footer">
+          <button class="btn btn--primary" type="submit">Salvar alterações</button>
+          <a class="btn btn--ghost" target="_blank" rel="noopener" href="{{ preview_url }}">Abrir preview em nova aba</a>
+        </div>
+      </form>
+
+      <section class="theme-editor-preview">
+        <div class="theme-editor-preview__head">
+          <div>
+            <h3><i class="fa-solid fa-display"></i> Preview em tempo real</h3>
+            <p>Clique em textos do portal para editar direto no formulário.</p>
+          </div>
+          <button type="button" class="btn btn--ghost" id="previewReloadBtn">Recarregar</button>
+        </div>
+
+        <div class="theme-editor-preview__tip">
+          <i class="fa-solid fa-hand-pointer"></i>
+          Alterações de texto e cores são aplicadas instantaneamente no preview.
+        </div>
+
+        <iframe id="themePreviewFrame" src="{{ preview_url }}" loading="lazy" title="Preview do portal"></iframe>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const form = document.getElementById("themeEditorForm");
+  const iframe = document.getElementById("themePreviewFrame");
+  const status = document.getElementById("themeEditorStatus");
+  const reloadBtn = document.getElementById("previewReloadBtn");
+  if (!form || !iframe) return;
+
+  const autosaveUrl = "{{ autosave_url }}";
+  let saveTimer = null;
+  let previewTimer = null;
+
+  function setStatus(text, cls) {
+    if (!status) return;
+    status.textContent = text;
+    status.className = "theme-editor-status" + (cls ? " " + cls : "");
+  }
+
+  function markField(input) {
+    if (!input) return;
+    input.classList.add("theme-editor-input-focus");
+    window.setTimeout(() => input.classList.remove("theme-editor-input-focus"), 1400);
+  }
+
+  function collectPreviewPayload() {
+    const payload = {
+      titulo_portal: form.querySelector("[name='titulo_portal']")?.value || "",
+      subtitulo_portal: form.querySelector("[name='subtitulo_portal']")?.value || "",
+      mensagem_boas_vindas: form.querySelector("[name='mensagem_boas_vindas']")?.value || "",
+      cor_primaria: form.querySelector("[name='cor_primaria']")?.value || "",
+      cor_secundaria: form.querySelector("[name='cor_secundaria']")?.value || "",
+      banner_titulo: form.querySelector("[name='banner_titulo']")?.value || "",
+      banner_subtitulo: form.querySelector("[name='banner_subtitulo']")?.value || "",
+      banner_link: form.querySelector("[name='banner_link']")?.value || "",
+      telefone: form.querySelector("[name='telefone']")?.value || "",
+      endereco: form.querySelector("[name='endereco']")?.value || "",
+      horario_atendimento: form.querySelector("[name='horario_atendimento']")?.value || "",
+    };
+    for (let i = 0; i < 6; i += 1) {
+      payload[`bloco_${i}_titulo`] = form.querySelector(`[name='bloco_${i}_titulo']`)?.value || "";
+      payload[`bloco_${i}_descricao`] = form.querySelector(`[name='bloco_${i}_descricao']`)?.value || "";
+    }
+    return payload;
+  }
+
+  function pushPreviewUpdate() {
+    if (!iframe.contentWindow) return;
+    iframe.contentWindow.postMessage({
+      type: "portal-theme:preview-update",
+      payload: collectPreviewPayload(),
+    }, "*");
+  }
+
+  function debouncedPreview() {
+    clearTimeout(previewTimer);
+    previewTimer = setTimeout(pushPreviewUpdate, 120);
+  }
+
+  async function autosave() {
+    const data = new FormData(form);
+    data.delete("logo");
+    data.delete("brasao");
+    data.delete("banner_imagem");
+    setStatus("Salvando...", "is-saving");
+    try {
+      const response = await fetch(autosaveUrl, {
+        method: "POST",
+        body: data,
+        headers: {"X-Requested-With": "XMLHttpRequest"},
+      });
+      const json = await response.json();
+      if (!response.ok || !json.ok) throw new Error("erro_ao_salvar");
+      setStatus("Salvo automaticamente", "is-ok");
+    } catch (err) {
+      setStatus("Falha no autosave", "is-error");
+    }
+  }
+
+  function debouncedAutosave() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(autosave, 700);
+  }
+
+  form.addEventListener("input", function (event) {
+    const target = event.target;
+    if (!target || !target.name) return;
+    setStatus("Alterações pendentes...", "is-saving");
+    debouncedPreview();
+    if (target.type === "file") return;
+    debouncedAutosave();
+  });
+
+  form.addEventListener("change", function (event) {
+    const target = event.target;
+    if (!target || !target.name) return;
+    debouncedPreview();
+    if (target.type === "file") return;
+    debouncedAutosave();
+  });
+
+  reloadBtn?.addEventListener("click", function () {
+    setStatus("Recarregando preview...", "is-saving");
+    iframe.src = iframe.src;
+  });
+
+  window.addEventListener("message", function (event) {
+    const data = event.data || {};
+    if (data.type === "portal-theme:field-edit") {
+      const field = String(data.field || "").trim();
+      const value = String(data.value || "");
+      if (!field) return;
+      const input = form.querySelector(`[name='${field}']`);
+      if (!input) return;
+      input.value = value;
+      markField(input);
+      debouncedPreview();
+      debouncedAutosave();
+      return;
+    }
+    if (data.type === "portal-theme:focus") {
+      const field = String(data.field || "").trim();
+      if (!field) return;
+      const input = form.querySelector(`[name='${field}']`);
+      if (!input) return;
+      input.focus();
+      markField(input);
+      input.scrollIntoView({behavior: "smooth", block: "center"});
+    }
+  });
+
+  iframe.addEventListener("load", function () {
+    setStatus("Preview sincronizado", "is-ok");
+    pushPreviewUpdate();
+  });
+})();
+</script>
+{% endblock %}

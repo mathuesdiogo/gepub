@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import re
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
@@ -101,6 +103,126 @@ def _portal_public_url(request, municipio: Municipio) -> str:
     return f"{scheme}://{domain}"
 
 
+def _normalize_hex(value: str, fallback: str) -> str:
+    raw = (value or "").strip()
+    if re.match(r"^#[0-9a-fA-F]{6}$", raw):
+        return raw.upper()
+    return fallback
+
+
+def _build_editor_blocos(municipio: Municipio, *, max_items: int = 6) -> list[dict]:
+    blocos = list(
+        PortalHomeBloco.objects.filter(municipio=municipio)
+        .order_by("ordem", "id")[:max_items]
+    )
+    items: list[dict] = []
+    for idx in range(max_items):
+        obj = blocos[idx] if idx < len(blocos) else None
+        items.append(
+            {
+                "idx": idx,
+                "obj": obj,
+                "id": obj.id if obj else "",
+                "titulo": obj.titulo if obj else "",
+                "descricao": obj.descricao if obj else "",
+                "link": obj.link if obj else "",
+                "icone": obj.icone if obj else "fa-solid fa-circle-info",
+                "ativo": obj.ativo if obj else True,
+            }
+        )
+    return items
+
+
+def _apply_theme_editor_changes(request, municipio: Municipio, *, allow_files: bool) -> None:
+    cfg, _ = PortalMunicipalConfig.objects.get_or_create(
+        municipio=municipio,
+        defaults={"titulo_portal": f"Portal de {municipio.nome}"},
+    )
+    cfg.titulo_portal = (request.POST.get("titulo_portal") or cfg.titulo_portal or "").strip() or f"Portal de {municipio.nome}"
+    cfg.subtitulo_portal = (request.POST.get("subtitulo_portal") or "").strip()
+    cfg.mensagem_boas_vindas = (request.POST.get("mensagem_boas_vindas") or "").strip()
+    cfg.endereco = (request.POST.get("endereco") or "").strip()
+    cfg.telefone = (request.POST.get("telefone") or "").strip()
+    cfg.email = (request.POST.get("email") or "").strip()
+    cfg.horario_atendimento = (request.POST.get("horario_atendimento") or "").strip()
+    cfg.cor_primaria = _normalize_hex(request.POST.get("cor_primaria") or "", cfg.cor_primaria or "#0E4A7E")
+    cfg.cor_secundaria = _normalize_hex(request.POST.get("cor_secundaria") or "", cfg.cor_secundaria or "#2F6EA9")
+    if allow_files and request.FILES.get("logo"):
+        cfg.logo = request.FILES["logo"]
+    if allow_files and request.FILES.get("brasao"):
+        cfg.brasao = request.FILES["brasao"]
+    cfg.save()
+
+    banner_id = (request.POST.get("banner_id") or "").strip()
+    banner = (
+        PortalBanner.objects.filter(pk=int(banner_id), municipio=municipio).first()
+        if banner_id.isdigit()
+        else PortalBanner.objects.filter(municipio=municipio).order_by("ordem", "id").first()
+    )
+    banner_titulo = (request.POST.get("banner_titulo") or "").strip()
+    banner_subtitulo = (request.POST.get("banner_subtitulo") or "").strip()
+    banner_link = (request.POST.get("banner_link") or "").strip()
+    banner_ordem_raw = (request.POST.get("banner_ordem") or "").strip()
+    banner_ativo = (request.POST.get("banner_ativo") or "1").strip() == "1"
+    banner_has_payload = bool(
+        banner_titulo
+        or banner_subtitulo
+        or banner_link
+        or (allow_files and request.FILES.get("banner_imagem"))
+    )
+    if banner or banner_has_payload:
+        if not banner:
+            banner = PortalBanner(municipio=municipio)
+        if banner_titulo:
+            banner.titulo = banner_titulo
+        elif not banner.titulo:
+            banner.titulo = f"Banner de {municipio.nome}"
+        banner.subtitulo = banner_subtitulo
+        banner.link = banner_link
+        banner.ativo = banner_ativo
+        banner.ordem = int(banner_ordem_raw) if banner_ordem_raw.isdigit() else (banner.ordem or 1)
+        if allow_files and request.FILES.get("banner_imagem"):
+            banner.imagem = request.FILES["banner_imagem"]
+        banner.save()
+
+    max_items = 6
+    for idx in range(max_items):
+        bloco_id_raw = (request.POST.get(f"bloco_{idx}_id") or "").strip()
+        bloco = (
+            PortalHomeBloco.objects.filter(pk=int(bloco_id_raw), municipio=municipio).first()
+            if bloco_id_raw.isdigit()
+            else None
+        )
+        titulo = (request.POST.get(f"bloco_{idx}_titulo") or "").strip()
+        descricao = (request.POST.get(f"bloco_{idx}_descricao") or "").strip()
+        link = (request.POST.get(f"bloco_{idx}_link") or "").strip()
+        icone = (request.POST.get(f"bloco_{idx}_icone") or "").strip() or "fa-solid fa-circle-info"
+        ativo = (request.POST.get(f"bloco_{idx}_ativo") or "1").strip() == "1"
+
+        if bloco:
+            if titulo:
+                bloco.titulo = titulo
+            bloco.descricao = descricao
+            bloco.link = link
+            bloco.icone = icone
+            bloco.ativo = ativo
+            bloco.ordem = idx + 1
+            bloco.save()
+            continue
+
+        if not titulo:
+            continue
+        PortalHomeBloco.objects.create(
+            municipio=municipio,
+            titulo=titulo,
+            descricao=descricao,
+            link=link,
+            icone=icone,
+            ordem=idx + 1,
+            ativo=ativo,
+        )
+
+
 def _ensure_access(request):
     if not _can_manage_publicacoes(request.user):
         return HttpResponseForbidden("403 — Perfil sem acesso à central de publicações.")
@@ -146,10 +268,16 @@ def publicacoes_admin(request):
             "municipios": _municipios_admin(request),
             "actions": [
                 {
+                    "label": "Editor visual do tema",
+                    "url": reverse("core:publicacoes_theme_editor") + _q_municipio(municipio),
+                    "icon": "fa-solid fa-wand-magic-sparkles",
+                    "variant": "btn--primary",
+                },
+                {
                     "label": "Configuração do portal",
                     "url": reverse("core:publicacoes_config_edit") + _q_municipio(municipio),
                     "icon": "fa-solid fa-sliders",
-                    "variant": "btn-primary",
+                    "variant": "btn--ghost",
                 },
                 {
                     "label": "Ver portal público",
@@ -182,6 +310,95 @@ def publicacoes_admin(request):
             "sessoes": sessoes,
         },
     )
+
+
+@login_required
+@require_perm("org.view")
+@require_http_methods(["GET", "POST"])
+def publicacoes_theme_editor(request):
+    denied = _ensure_access(request)
+    if denied:
+        return denied
+    municipio = _resolve_municipio(request, require_selected=True)
+    if not municipio:
+        messages.error(request, "Selecione um município.")
+        return redirect("core:publicacoes_admin")
+
+    if request.method == "POST":
+        _apply_theme_editor_changes(request, municipio, allow_files=True)
+        messages.success(request, "Tema atualizado e preview recarregado.")
+        return redirect(reverse("core:publicacoes_theme_editor") + _q_municipio(municipio))
+
+    cfg, _ = PortalMunicipalConfig.objects.get_or_create(
+        municipio=municipio,
+        defaults={"titulo_portal": f"Portal de {municipio.nome}"},
+    )
+    banner = PortalBanner.objects.filter(municipio=municipio).order_by("ordem", "id").first()
+    blocos_editor = _build_editor_blocos(municipio)
+    preview_url = reverse("core:publicacoes_theme_preview") + f"?municipio={municipio.pk}&portal_editor=1"
+
+    return render(
+        request,
+        "core/publicacoes_theme_editor.html",
+        {
+            "title": "Editor Visual do Tema",
+            "subtitle": f"{municipio.nome}/{municipio.uf}",
+            "municipio": municipio,
+            "municipios": _municipios_admin(request),
+            "cfg": cfg,
+            "banner": banner,
+            "blocos_editor": blocos_editor,
+            "preview_url": preview_url,
+            "autosave_url": reverse("core:publicacoes_theme_autosave") + _q_municipio(municipio),
+            "actions": [
+                {
+                    "label": "Voltar para central",
+                    "url": reverse("core:publicacoes_admin") + _q_municipio(municipio),
+                    "icon": "fa-solid fa-arrow-left",
+                    "variant": "btn--ghost",
+                },
+            ],
+            "modulos_links": [
+                {"label": "Notícias", "url": reverse("core:noticia_create") + _q_municipio(municipio)},
+                {"label": "Diário Oficial", "url": reverse("core:diario_create") + _q_municipio(municipio)},
+                {"label": "Concursos", "url": reverse("core:concurso_create") + _q_municipio(municipio)},
+                {"label": "Transparência", "url": reverse("core:transparencia_arquivo_create") + _q_municipio(municipio)},
+                {"label": "Câmara", "url": reverse("core:camara_materia_create") + _q_municipio(municipio)},
+            ],
+        },
+    )
+
+
+@login_required
+@require_perm("org.view")
+@require_http_methods(["POST"])
+def publicacoes_theme_autosave(request):
+    denied = _ensure_access(request)
+    if denied:
+        return denied
+    municipio = _resolve_municipio(request, require_selected=True)
+    if not municipio:
+        return JsonResponse({"ok": False, "error": "municipio_nao_encontrado"}, status=400)
+
+    _apply_theme_editor_changes(request, municipio, allow_files=False)
+    return JsonResponse({"ok": True})
+
+
+@login_required
+@require_perm("org.view")
+@require_http_methods(["GET"])
+def publicacoes_theme_preview(request):
+    denied = _ensure_access(request)
+    if denied:
+        return denied
+    municipio = _resolve_municipio(request, require_selected=True)
+    if not municipio:
+        messages.error(request, "Selecione um município para visualizar o preview.")
+        return redirect("core:publicacoes_admin")
+
+    from apps.core.views_portal import _render_municipio_public_home
+
+    return _render_municipio_public_home(request, municipio)
 
 
 @login_required

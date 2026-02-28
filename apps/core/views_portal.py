@@ -20,6 +20,7 @@ from apps.core.models import (
     InstitutionalPageConfig,
     InstitutionalServiceCard,
     InstitutionalSlide,
+    PortalBanner,
     PortalTransparenciaArquivo,
     PortalHomeBloco,
     PortalMunicipalConfig,
@@ -224,6 +225,12 @@ def _format_money(value: Decimal | None) -> str:
     if val <= 0:
         return "Sob proposta"
     return f"R$ {val.quantize(Decimal('0.01'))}"
+
+
+def _format_currency_br(value: Decimal | None) -> str:
+    amount = Decimal(value or 0).quantize(Decimal("0.01"))
+    formatted = f"{amount:,.2f}"
+    return f"R$ {formatted.replace(',', '_').replace('.', ',').replace('_', '.')}"
 
 
 def _planos_para_site() -> list[dict]:
@@ -532,11 +539,15 @@ def _app_login_url(request) -> str:
 
 def _render_municipio_public_home(request, municipio: Municipio):
     portal_cfg = PortalMunicipalConfig.objects.filter(municipio=municipio).first()
+    menu_items_header = build_menu_items(municipio, posicao="HEADER")
+    menu_items_footer = build_menu_items(municipio, posicao="FOOTER")
+
     secretarias = (
         municipio.secretarias.filter(ativo=True)
         .only("id", "nome", "sigla")
         .order_by("nome")[:16]
     )
+
     summary = {
         "secretarias": municipio.secretarias.filter(ativo=True).count(),
         "unidades": Unidade.objects.filter(secretaria__municipio=municipio, ativo=True).count(),
@@ -545,12 +556,37 @@ def _render_municipio_public_home(request, municipio: Municipio):
             publico=True,
         ).count(),
     }
+
     links_rapidos_default = [
         {
             "titulo": "Portal da Transparência",
             "descricao": "Consulte receitas, despesas e eventos publicados.",
             "url": reverse("core:transparencia_public"),
-            "icon": "fa-solid fa-chart-column",
+            "icon": "fa-solid fa-scale-balanced",
+        },
+        {
+            "titulo": "Diário Oficial",
+            "descricao": "Edições e publicações oficiais do município.",
+            "url": reverse("core:portal_diario_public"),
+            "icon": "fa-regular fa-file-lines",
+        },
+        {
+            "titulo": "Educação",
+            "descricao": "Portal da educação com unidades, cursos e calendário.",
+            "url": reverse("core:portal_educacao_public"),
+            "icon": "fa-solid fa-graduation-cap",
+        },
+        {
+            "titulo": "Saúde",
+            "descricao": "Informações de unidades, notícias e serviços de saúde.",
+            "url": reverse("core:portal_saude_public"),
+            "icon": "fa-solid fa-heart-pulse",
+        },
+        {
+            "titulo": "Assistência Social",
+            "descricao": "Canais de atendimento e políticas públicas ao cidadão.",
+            "url": reverse("core:portal_ouvidoria_public"),
+            "icon": "fa-solid fa-hand-holding-heart",
         },
         {
             "titulo": "e-SIC / Ouvidoria",
@@ -564,13 +600,8 @@ def _render_municipio_public_home(request, municipio: Municipio):
             "url": reverse("core:portal_licitacoes_public"),
             "icon": "fa-solid fa-file-contract",
         },
-        {
-            "titulo": "Educação e Saúde",
-            "descricao": "Subportais e serviços por secretaria.",
-            "url": reverse("core:portal_educacao_public"),
-            "icon": "fa-solid fa-building-columns",
-        },
     ]
+
     blocks_qs = PortalHomeBloco.objects.filter(municipio=municipio, ativo=True).order_by("ordem", "id")
     links_rapidos = list(blocks_qs.values("titulo", "descricao", "link", "icone"))
     if links_rapidos:
@@ -584,7 +615,18 @@ def _render_municipio_public_home(request, municipio: Municipio):
             for item in links_rapidos
         ]
     else:
-        links_rapidos = links_rapidos_default
+        links_rapidos = list(links_rapidos_default)
+
+    if len(links_rapidos) < 6:
+        existentes = {(item.get("titulo") or "").strip().lower() for item in links_rapidos}
+        for fallback in links_rapidos_default:
+            chave = (fallback.get("titulo") or "").strip().lower()
+            if chave in existentes:
+                continue
+            links_rapidos.append(fallback)
+            existentes.add(chave)
+            if len(links_rapidos) >= 6:
+                break
 
     servicos_cards = links_rapidos[:6]
     servicos_secundarios = links_rapidos[6:]
@@ -594,10 +636,99 @@ def _render_municipio_public_home(request, municipio: Municipio):
         publicado=True,
     ).order_by("-data_publicacao", "-id")[:5]
 
-    noticias_recentes = PortalNoticia.objects.filter(
+    noticias_recentes = list(
+        PortalNoticia.objects.filter(
+            municipio=municipio,
+            publicado=True,
+        ).order_by("-publicado_em", "-id")[:6]
+    )
+
+    noticias_home = noticias_recentes[:3]
+    noticia_principal = noticias_home[0] if noticias_home else None
+
+    banners_home = list(
+        PortalBanner.objects.filter(
+            municipio=municipio,
+            ativo=True,
+        ).order_by("ordem", "-id")[:4]
+    )
+
+    hero_image_url = ""
+    for banner in banners_home:
+        if banner.imagem:
+            hero_image_url = banner.imagem.url
+            break
+    if not hero_image_url:
+        for noticia in noticias_home:
+            if noticia.imagem:
+                hero_image_url = noticia.imagem.url
+                break
+
+    receita_total = (
+        TributoLancamento.objects.filter(
+            municipio=municipio,
+            status=TributoLancamento.Status.PAGO,
+        ).aggregate(total=Sum("valor_total")).get("total")
+        or Decimal("0.00")
+    )
+    despesa_total = (
+        DespEmpenho.objects.filter(municipio=municipio).aggregate(total=Sum("valor_pago")).get("total")
+        or Decimal("0.00")
+    )
+    if despesa_total <= 0:
+        despesa_total = (
+            DespEmpenho.objects.filter(municipio=municipio).aggregate(total=Sum("valor_empenhado")).get("total")
+            or Decimal("0.00")
+        )
+
+    ultima_licitacao = (
+        ProcessoLicitatorio.objects.filter(municipio=municipio)
+        .order_by("-data_abertura", "-id")
+        .first()
+    )
+    servidores_municipais = RhCadastro.objects.filter(
         municipio=municipio,
-        publicado=True,
-    ).order_by("-publicado_em", "-id")[:5]
+        status=RhCadastro.Status.ATIVO,
+    ).count()
+
+    transparencia_cards = [
+        {
+            "icone": "fa-solid fa-arrow-trend-up",
+            "titulo": "Receita acumulada",
+            "valor": _format_currency_br(receita_total),
+            "subtitulo": "Arrecadação tributária paga",
+            "cor": "sky",
+        },
+        {
+            "icone": "fa-solid fa-arrow-trend-down",
+            "titulo": "Despesa atual",
+            "valor": _format_currency_br(despesa_total),
+            "subtitulo": "Empenhos e pagamentos",
+            "cor": "navy",
+        },
+        {
+            "icone": "fa-solid fa-gavel",
+            "titulo": "Última licitação",
+            "valor": (
+                f"{ultima_licitacao.get_modalidade_display()} {ultima_licitacao.numero_processo}"
+                if ultima_licitacao
+                else "Sem licitação publicada"
+            ),
+            "subtitulo": (
+                ultima_licitacao.data_abertura.strftime("%d/%m/%Y")
+                if ultima_licitacao and ultima_licitacao.data_abertura
+                else "Atualize o módulo de compras"
+            ),
+            "cor": "green",
+        },
+        {
+            "icone": "fa-solid fa-users",
+            "titulo": "Servidores municipais",
+            "valor": f"{servidores_municipais:,}".replace(",", "."),
+            "subtitulo": "Cadastro funcional ativo",
+            "cor": "deep",
+        },
+    ]
 
     paginas_publicas = PortalPaginaPublica.objects.filter(
         municipio=municipio,
@@ -613,10 +744,25 @@ def _render_municipio_public_home(request, municipio: Municipio):
         "servicos_secundarios": servicos_secundarios,
         "diarios_recentes": diarios_recentes,
         "noticias_recentes": noticias_recentes,
+        "noticias_home": noticias_home,
+        "noticia_principal": noticia_principal,
+        "hero_image_url": hero_image_url,
+        "banners_home": banners_home,
+        "transparencia_cards": transparencia_cards,
+        "servicos_destaque": servicos_cards[:5],
         "cta_login": _app_login_url(request),
+        "cta_transparencia": reverse("core:transparencia_public"),
+        "cta_servicos_online": reverse("core:portal_ouvidoria_public"),
+        "top_links": [
+            {"titulo": "Acessibilidade", "url": "#conteudo-principal", "icon": "fa-solid fa-universal-access"},
+            {"titulo": "Ouvidoria", "url": reverse("core:portal_ouvidoria_public"), "icon": "fa-regular fa-message"},
+            {"titulo": "Portal da Transparência", "url": reverse("core:transparencia_public"), "icon": "fa-solid fa-chart-column"},
+            {"titulo": "Diário Oficial", "url": reverse("core:portal_diario_public"), "icon": "fa-regular fa-file-lines"},
+            {"titulo": "Sistema Interno", "url": _app_login_url(request), "icon": "fa-solid fa-arrow-right-to-bracket"},
+        ],
         "portal_cfg": portal_cfg,
-        "menu_items_header": build_menu_items(municipio, posicao="HEADER"),
-        "menu_items_footer": build_menu_items(municipio, posicao="FOOTER"),
+        "menu_items_header": menu_items_header,
+        "menu_items_footer": menu_items_footer,
         "paginas_publicas": paginas_publicas,
         "cor_primaria": portal_cfg.cor_primaria if portal_cfg else "#0E4A7E",
         "cor_secundaria": portal_cfg.cor_secundaria if portal_cfg else "#2F6EA9",
@@ -1299,6 +1445,21 @@ def transparencia_public(request):
         )
     arquivos_publicos = arquivos_publicos.select_related("municipio").order_by("categoria", "ordem", "-publicado_em", "-id")
     secoes_transparencia = _build_transparencia_secoes(municipio_contexto)
+    portal_cfg = PortalMunicipalConfig.objects.filter(municipio=municipio_contexto).first() if municipio_contexto else None
+    menu_items_header = (
+        build_menu_items(municipio_contexto, posicao="HEADER")
+        if municipio_contexto
+        else [
+            {"titulo": "Início", "url": reverse("core:institucional_public"), "nova_aba": False},
+            {"titulo": "Transparência", "url": reverse("core:transparencia_public"), "nova_aba": False},
+            {"titulo": "Documentação", "url": reverse("core:documentacao_public"), "nova_aba": False},
+        ]
+    )
+    menu_items_footer = (
+        build_menu_items(municipio_contexto, posicao="FOOTER")
+        if municipio_contexto
+        else []
+    )
 
     context = {
         "title": (
@@ -1331,6 +1492,35 @@ def transparencia_public(request):
         "cta_home": reverse("core:institucional_public"),
         "cta_docs": reverse("core:documentacao_public"),
         "cta_login": _app_login_url(request),
+        "municipio": municipio_contexto,
+        "titulo_portal": (
+            portal_cfg.titulo_portal
+            if portal_cfg and portal_cfg.titulo_portal
+            else (municipio_contexto.nome if municipio_contexto else (content.get("marca_nome") or "GEPUB"))
+        ),
+        "subtitulo_portal": (
+            portal_cfg.subtitulo_portal
+            if portal_cfg and portal_cfg.subtitulo_portal
+            else "Portal Público Municipal"
+        ),
+        "mensagem_boas_vindas": (
+            portal_cfg.mensagem_boas_vindas
+            if portal_cfg and portal_cfg.mensagem_boas_vindas
+            else "Consulta consolidada de eventos e arquivos públicos do município."
+        ),
+        "cor_primaria": portal_cfg.cor_primaria if portal_cfg else "#0E4A7E",
+        "cor_secundaria": portal_cfg.cor_secundaria if portal_cfg else "#2F6EA9",
+        "logo_url": (
+            portal_cfg.logo.url
+            if portal_cfg and portal_cfg.logo
+            else content.get("marca_logo_url", "")
+        ),
+        "endereco": portal_cfg.endereco if portal_cfg else "",
+        "telefone": portal_cfg.telefone if portal_cfg else "",
+        "email": portal_cfg.email if portal_cfg else "",
+        "horario_atendimento": portal_cfg.horario_atendimento if portal_cfg else "",
+        "menu_items_header": menu_items_header,
+        "menu_items_footer": menu_items_footer,
     }
     return render(request, "core/transparencia_public.html", context)
 
