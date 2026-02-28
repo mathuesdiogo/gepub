@@ -1,0 +1,506 @@
+/* =========================================================
+   GEPUB EDUCACAO - VISUAL SYSTEM
+   Inspirado em dashboard escolar moderno, mantendo identidade GEPUB
+   ========================================================= */
+
+.educacao-module {
+  --edu-primary: #152a75;
+  --edu-primary-2: #1e3a8a;
+  --edu-accent: #3b82f6;
+  --edu-border: #dbe6f4;
+  --edu-surface: #f4f7fb;
+  --edu-ink: #1f3347;
+  --edu-ink-soft: #61778d;
+}
+
+.educacao-module.module-shell {
+  grid-template-columns: minmax(255px, 290px) 1fr;
+  gap: 16px;
+}
+
+.educacao-module .module-shell__aside {
+  top: 12px;
+}
+
+.educacao-module .module-menu {
+  border: 1px solid #21378e;
+  border-radius: 20px;
+  padding: 14px;
+  background:
+    radial-gradient(circle at 12% 2%, rgba(64, 157, 255, 0.4), transparent 34%),
+    linear-gradient(180deg, #172f83 0%, #122667 100%);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.25);
+  color: #e9f0ff;
+}
+
+.educacao-module .module-menu__title {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-height: 46px;
+  padding: 10px 11px;
+  border: 1px solid rgba(220, 232, 255, 0.25);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.educacao-module .module-menu__title i {
+  width: 28px;
+  height: 28px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #f8fbff;
+}
+
+.educacao-module .module-menu__subtitle {
+  margin: 9px 2px 12px;
+  color: rgba(229, 239, 255, 0.82);
+  font-size: 12px;
+}
+
+.educacao-module .module-menu__group {
+  margin-top: 12px;
+}
+
+.educacao-module .module-menu__group-title {
+  margin: 0 8px 7px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: rgba(213, 228, 255, 0.78);
+}
+
+.educacao-module .module-menu__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.educacao-module .module-menu__link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 39px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  color: #e8f1ff;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background .14s ease, border-color .14s ease, transform .12s ease;
+}
+
+.educacao-module .module-menu__link i {
+  width: 22px;
+  text-align: center;
+  color: rgba(228, 239, 255, 0.94);
+}
+
+.educacao-module .module-menu__link:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(220, 233, 255, 0.22);
+  transform: translateX(1px);
+}
+
+.educacao-module .module-menu__link.is-active {
+  border-color: rgba(150, 203, 255, 0.66);
+  background: linear-gradient(180deg, rgba(60, 149, 255, 0.48) 0%, rgba(44, 119, 217, 0.4) 100%);
+  color: #ffffff;
+}
+
+.educacao-module .module-menu__link.is-active i {
+  color: #ffffff;
+}
+
+.educacao-module .card {
+  border: 1px solid var(--edu-border);
+  border-radius: 20px;
+  background: linear-gradient(180deg, #ffffff 0%, #fafdff 100%);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.07);
+}
+
+.educacao-module .card > .card__body {
+  padding: 22px;
+}
+
+.educacao-module .page-head {
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #deebf5;
+}
+
+.educacao-module .page-head__title {
+  color: #18384f;
+  font-size: 1.65rem;
+}
+
+.educacao-module .page-head__subtitle {
+  color: var(--edu-ink-soft);
+}
+
+.educacao-module .btn-primary {
+  background: linear-gradient(180deg, #3c93ff 0%, #2e75d8 100%);
+}
+
+.educacao-module .btn-primary:hover {
+  background: linear-gradient(180deg, #3587ea 0%, #2869c2 100%);
+}
+
+.educacao-module .btn--ghost {
+  border-color: #bcd5ec;
+  color: #1a4f79;
+  background: rgba(59, 130, 246, 0.07);
+}
+
+.educacao-module .btn--ghost:hover {
+  background: rgba(59, 130, 246, 0.14);
+}
+
+.educacao-module .edu-dashboard .card__body {
+  display: grid;
+  gap: 14px;
+}
+
+.educacao-module .edu-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 16px;
+  border: 1px solid #c9dff4;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 88% 8%, rgba(88, 196, 255, 0.26), transparent 38%),
+    linear-gradient(140deg, #152a75 0%, #1a347f 56%, #2459ad 100%);
+  color: #e9f2ff;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+}
+
+.educacao-module .edu-hero::after {
+  content: "";
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  right: -90px;
+  bottom: -150px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 68%);
+}
+
+.educacao-module .edu-hero__eyebrow {
+  margin: 0 0 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(230, 241, 255, 0.9);
+}
+
+.educacao-module .edu-hero__title {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #ffffff;
+}
+
+.educacao-module .edu-hero__text {
+  margin: 8px 0 0;
+  max-width: 800px;
+  font-size: 13px;
+  color: rgba(234, 244, 255, 0.92);
+}
+
+.educacao-module .edu-hero__chips {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.educacao-module .edu-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(228, 241, 255, 0.43);
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.educacao-module .edu-hero__actions {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.educacao-module .edu-hero__actions .btn--ghost {
+  border-color: rgba(232, 242, 255, 0.55);
+  background: rgba(255, 255, 255, 0.12);
+  color: #f2f8ff;
+}
+
+.educacao-module .edu-hero__actions .btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.educacao-module .edu-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.educacao-module .edu-kpi {
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid #d4e4f2;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #f5faff 100%);
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  transition: border-color .14s ease, box-shadow .14s ease, transform .14s ease;
+}
+
+.educacao-module .edu-kpi:hover {
+  border-color: #accde8;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+  transform: translateY(-2px);
+}
+
+.educacao-module .edu-kpi__label {
+  color: #5d7489;
+  font-size: 12px;
+}
+
+.educacao-module .edu-kpi__value {
+  margin-top: 4px;
+  color: #183750;
+  font-size: 1.55rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.educacao-module .edu-kpi__meta {
+  margin-top: 6px;
+  color: #74889a;
+  font-size: 12px;
+}
+
+.educacao-module .edu-kpi__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: inline-grid;
+  place-items: center;
+  color: #2f78dd;
+  background: rgba(59, 130, 246, 0.13);
+}
+
+.educacao-module .edu-quick .link-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.educacao-module .edu-link-card {
+  border: 1px solid #d4e4f2;
+  border-radius: 13px;
+  background: #ffffff;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.educacao-module .edu-link-card:hover {
+  border-color: #aecdE5;
+  background: #f5faff;
+}
+
+.educacao-module .edu-link-card .link-card__title {
+  color: #183750;
+}
+
+.educacao-module .edu-link-card .link-card__meta {
+  margin-top: 4px;
+  color: #637a8f;
+}
+
+.educacao-module .edu-link-card > i {
+  color: #2d6ec8;
+  font-size: 13px;
+}
+
+.educacao-module .section__header {
+  margin-bottom: 10px;
+}
+
+.educacao-module .section__title {
+  color: #1b3850;
+}
+
+.educacao-module .section__meta {
+  color: #678197;
+}
+
+.educacao-module .filter-bar {
+  margin-bottom: 8px;
+  padding: 12px;
+  border: 1px solid #d8e7f2;
+  border-radius: 13px;
+  background: #f7fbff;
+}
+
+.educacao-module .filter-bar input,
+.educacao-module .filter-bar select {
+  min-height: 40px;
+  border-radius: 10px;
+  border: 1px solid #c9dcec;
+  background: #ffffff;
+}
+
+.educacao-module .filter-bar input:focus,
+.educacao-module .filter-bar select:focus {
+  border-color: #86b8de;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+}
+
+.educacao-module .table-shell {
+  margin-top: 10px;
+  border: 1px solid #d8e7f2;
+  border-radius: 16px;
+  overflow: auto;
+  background: #ffffff;
+}
+
+.educacao-module .table-shell table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.educacao-module .table-shell thead th {
+  position: sticky;
+  top: 0;
+  background: #f3f9ff;
+  color: #587188;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 11px 12px;
+  border-bottom: 1px solid #dae8f2;
+}
+
+.educacao-module .table-shell tbody td {
+  padding: 11px 12px;
+  border-bottom: 1px solid #e5eff7;
+  color: #20364b;
+}
+
+.educacao-module .table-shell tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.educacao-module .table-shell tbody tr:hover td {
+  background: #f3f9ff;
+}
+
+.educacao-module .table-shell tbody td a {
+  color: #1f64ba;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.educacao-module .table-shell tbody td a:hover {
+  text-decoration: underline;
+}
+
+.educacao-module .detail-summary {
+  margin: 0 0 12px;
+  padding: 12px;
+  border: 1px solid #d9e7f2;
+  border-radius: 14px;
+  background: #f7fbff;
+}
+
+.educacao-module .form-shell__fields > p {
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #d6e6f2;
+  border-radius: 12px;
+  background: #fcfeff;
+}
+
+.educacao-module .form-shell__fields > p label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #5f778c;
+}
+
+.educacao-module .form-shell__fields > p input:not([type="checkbox"]):not([type="radio"]),
+.educacao-module .form-shell__fields > p select,
+.educacao-module .form-shell__fields > p textarea {
+  min-height: 40px;
+  border-radius: 10px;
+  border: 1px solid #c9dcec;
+}
+
+.educacao-module .form-shell__fields > p textarea {
+  min-height: 96px;
+}
+
+.educacao-module .form-shell__fields > p input:focus,
+.educacao-module .form-shell__fields > p select:focus,
+.educacao-module .form-shell__fields > p textarea:focus {
+  border-color: #82b5dc;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+}
+
+.educacao-module .form-shell__actions {
+  padding-top: 12px;
+  border-top: 1px solid #deebf5;
+}
+
+@media (max-width: 1220px) {
+  .educacao-module.module-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .educacao-module .module-shell__aside {
+    position: static;
+  }
+
+  .educacao-module .edu-kpis {
+    grid-template-columns: repeat(2, minmax(170px, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .educacao-module .card > .card__body {
+    padding: 16px;
+  }
+
+  .educacao-module .page-head__title {
+    font-size: 1.3rem;
+  }
+
+  .educacao-module .edu-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .educacao-module .edu-quick .link-list,
+  .educacao-module .edu-kpis {
+    grid-template-columns: 1fr;
+  }
+}

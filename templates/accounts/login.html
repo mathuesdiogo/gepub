@@ -3,117 +3,107 @@
 
 {% block title %}Acesso • GEPUB{% endblock %}
 
-{% block content %}
+{% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/pages/login.css' %}">
+{% endblock %}
 
-<div class="suap-login">
-  <section class="suap-login__hero">
-    <div class="suap-login__left">
-      <div class="suap-brand">
-        <div class="suap-brand__line"></div>
-        <div>
-          <h1 class="suap-brand__title">GEPUB</h1>
-          <p class="suap-brand__subtitle">Gestão Estratégica Pública</p>
-        </div>
+{% block content %}
+<div class="gepub-login-page">
+  <div class="gepub-login-page__accent" aria-hidden="true"></div>
+
+  <main class="gepub-login" aria-label="Acesso institucional GEPUB">
+    <aside class="gepub-login__intro">
+      <div class="gepub-mark">
+        <span class="gepub-mark__dot gepub-mark__dot--a"></span>
+        <span class="gepub-mark__dot gepub-mark__dot--b"></span>
+        <span class="gepub-mark__dot gepub-mark__dot--c"></span>
       </div>
 
-      <p class="suap-brand__lead">
-        Um software desenvolvido para instituições públicas e prefeituras, com gestão integrada e rastreabilidade total.
-      </p>
+      <p class="gepub-login__eyebrow">GEPUB</p>
+      <h1 class="gepub-login__title">Portal de Login</h1>
+      <p class="gepub-login__subtitle">Gestão Estratégica Pública com controle, transparência e operação integrada.</p>
 
-      <ul class="suap-brand__highlights">
-        <li>Onboarding por secretarias com ativação guiada</li>
-        <li>Educação, Saúde, Financeiro, Compras e Contratos</li>
-        <li>Permissões por escopo e trilhas de auditoria</li>
+      <ul class="gepub-login__bullets">
+        <li>Autenticação por código de acesso com rastreabilidade.</li>
+        <li>Permissões por escopo municipal, secretaria e unidade.</li>
+        <li>Módulos unificados para administração pública.</li>
       </ul>
-    </div>
 
-    <div class="suap-login__right">
-      <div class="suap-auth-card">
-        <h2 class="suap-auth-card__title">Login</h2>
-        <p class="suap-auth-card__subtitle">Acesse o GEPUB</p>
+      <nav class="gepub-login__links" aria-label="Acesso rápido público">
+        <a href="{% url 'core:institucional_public' %}">Institucional</a>
+        <a href="{% url 'core:documentacao_public' %}">Documentação</a>
+      </nav>
+    </aside>
+
+    <section class="gepub-login__frame">
+      <div class="gepub-login__form-panel">
+        <header class="gepub-auth__head">
+          <p class="gepub-auth__brand">GEPUB Network</p>
+          <h2 class="gepub-auth__title">Entrar na conta</h2>
+        </header>
 
         {% if error %}
-          <div class="suap-auth-card__alert">{{ error }}</div>
+          <div class="gepub-auth__alert" role="alert">{{ error }}</div>
         {% endif %}
 
-        <form method="post" class="suap-auth-card__form">
+        <form method="post" class="gepub-auth__form">
           {% csrf_token %}
 
           <label for="id_codigo_acesso">Código de acesso</label>
-          <input
-            id="id_codigo_acesso"
-            type="text"
-            name="codigo_acesso"
-            value="{{ form.codigo_acesso.value|default:'' }}"
-            required
-            autocomplete="username"
-            placeholder="Digite seu código"
-          >
+          <div class="gepub-auth__field">
+            <input
+              id="id_codigo_acesso"
+              type="text"
+              name="codigo_acesso"
+              value="{{ form.codigo_acesso.value|default:'' }}"
+              required
+              autocomplete="username"
+              placeholder="ex: joao.silva-2026"
+            >
+            <span class="gepub-auth__field-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5v-9Zm2.5-.5a.5.5 0 0 0-.5.5v.8l6 3.4 6-3.4v-.8a.5.5 0 0 0-.5-.5h-11Zm11.5 3.5-4.9 2.8a2 2 0 0 1-2 0L6 10.5v6a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5v-6Z"/></svg>
+            </span>
+          </div>
 
           <label for="id_password">Senha</label>
-          <input
-            id="id_password"
-            type="password"
-            name="password"
-            required
-            autocomplete="current-password"
-            placeholder="Digite sua senha"
-          >
+          <div class="gepub-auth__field">
+            <input
+              id="id_password"
+              type="password"
+              name="password"
+              required
+              autocomplete="current-password"
+              placeholder="Digite sua senha"
+            >
+            <span class="gepub-auth__field-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false"><path d="M7 10V8a5 5 0 1 1 10 0v2h.5A2.5 2.5 0 0 1 20 12.5v7a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 19.5v-7A2.5 2.5 0 0 1 6.5 10H7Zm2 0h6V8a3 3 0 1 0-6 0v2Zm3 4a1.5 1.5 0 0 0-.75 2.8V18a.75.75 0 0 0 1.5 0v-1.2A1.5 1.5 0 0 0 12 14Z"/></svg>
+            </span>
+          </div>
 
-          <button type="submit">Acessar</button>
+          <button type="submit" class="gepub-auth__submit">Acessar agora</button>
         </form>
 
-        <p class="suap-auth-card__help">
-          Primeira senha padrão: CPF. Após o primeiro acesso, a troca de senha é obrigatória.
-        </p>
+        <p class="gepub-auth__help">Primeira senha padrão: CPF. Após o primeiro acesso, a troca de senha é obrigatória.</p>
 
-        <div class="suap-auth-card__divider"></div>
+        <div class="gepub-auth__separator"><span>ou</span></div>
 
-        <a class="suap-auth-card__gov" href="{% url 'core:institucional_public' %}">
-          Entrar com gov.br (implantação)
-        </a>
+        <a class="gepub-auth__secondary" href="{% url 'core:institucional_public' %}">Conhecer o portal público</a>
       </div>
-    </div>
-  </section>
 
-  <section class="suap-services">
-    <details class="suap-services__panel" open>
-      <summary>Serviços de Acesso Público</summary>
-
-      <div class="suap-services__grid">
-        <article class="suap-services__about">
-          <h3>O que é esta seção?</h3>
-          <p>
-            Esta área reúne links públicos sobre o GEPUB, funcionalidades, documentação,
-            transparência e canais institucionais para acesso rápido.
-          </p>
-        </article>
-
-        <div class="suap-services__col">
-          <h4>Consultas</h4>
-          <a href="{% url 'core:institucional_public' %}">Página institucional</a>
-          <a href="{% url 'core:documentacao_public' %}">Documentação da plataforma</a>
-          <a href="{% url 'core:transparencia_public' %}">Transparência pública</a>
-          <a href="{% url 'core:funcionalidades_public' %}">Funcionalidades</a>
-        </div>
-
-        <div class="suap-services__col">
-          <h4>Gestão</h4>
-          <a href="{% url 'core:sobre_public' %}">Sobre a GEPUB</a>
-          <a href="{% url 'core:por_que_usar_public' %}">Por que usar</a>
-          <a href="{% url 'core:institucional_public' %}#simulador">Simulador de aderência</a>
-          <a href="{% url 'accounts:login' %}">Acesso institucional</a>
-        </div>
-
-        <div class="suap-services__col">
-          <h4>Suporte</h4>
-          <a href="{% url 'core:documentacao_public' %}">Guia inicial</a>
-          <a href="{% url 'core:institucional_public' %}#contato">Falar com o time</a>
-          <a href="{% url 'core:transparencia_public' %}">Base pública de eventos</a>
+      <div class="gepub-login__visual" aria-hidden="true">
+        <div class="gepub-visual-card">
+          <div class="gepub-visual-card__phone">
+            <div class="gepub-visual-card__notch"></div>
+            <div class="gepub-visual-card__line"></div>
+            <div class="gepub-visual-card__line gepub-visual-card__line--short"></div>
+            <div class="gepub-visual-card__line"></div>
+            <div class="gepub-visual-card__btn"></div>
+          </div>
+          <div class="gepub-visual-card__badge"></div>
+          <div class="gepub-visual-card__shape"></div>
         </div>
       </div>
-    </details>
-  </section>
+    </section>
+  </main>
 </div>
 {% endblock %}

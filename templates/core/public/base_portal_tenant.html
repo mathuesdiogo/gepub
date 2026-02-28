@@ -13,14 +13,29 @@
 
 {% block content %}
 <div class="pp-page" style="--portal-primary: {{ cor_primaria|default:'#0E4A7E' }}; --portal-secondary: {{ cor_secundaria|default:'#2F6EA9' }};">
-  <header class="pp-header">
-    <div class="pp-topbar">
-      <div class="pp-wrap pp-topbar__inner">
+  <header class="pp-header-shell">
+    <div class="pp-accessibility">
+      <div class="pp-wrap pp-accessibility__inner">
+        <div class="pp-accessibility__left">
+          <span><i class="fa-solid fa-universal-access"></i> Acessibilidade:</span>
+          <button type="button" data-font-size="down" aria-label="Diminuir fonte"><i class="fa-solid fa-minus"></i></button>
+          <button type="button" data-font-size="up" aria-label="Aumentar fonte"><i class="fa-solid fa-plus"></i></button>
+          <button type="button" data-font-size="reset" aria-label="Fonte padrão">A</button>
+          <button type="button" data-contrast-toggle aria-label="Alto contraste"><i class="fa-regular fa-eye"></i> Alto Contraste</button>
+        </div>
+        <a class="pp-login-btn" href="{{ cta_login }}" target="_blank" rel="noopener">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i> Login
+        </a>
+      </div>
+    </div>
+
+    <div class="pp-header-main">
+      <div class="pp-wrap pp-header-main__inner">
         <a href="{% url 'core:home' %}" class="pp-brand">
           {% if logo_url %}
-            <img src="{{ logo_url }}" alt="Logo {{ municipio.nome }}">
+            <img src="{{ logo_url }}" alt="Logo {{ municipio.nome|default:titulo_portal }}">
           {% else %}
-            <span class="pp-brand__icon"><i class="fa-solid fa-building-columns"></i></span>
+            <span class="pp-brand__icon"><i class="fa-solid fa-landmark"></i></span>
           {% endif %}
           <span>
             <strong>{{ titulo_portal|default:municipio.nome|upper }}</strong>
@@ -31,41 +46,19 @@
         <nav class="pp-quick-links" aria-label="Links rápidos">
           <a href="#conteudo-principal"><i class="fa-solid fa-universal-access"></i> Acessibilidade</a>
           <a href="{% url 'core:portal_ouvidoria_public' %}"><i class="fa-regular fa-message"></i> Ouvidoria</a>
-          <a href="{% url 'core:transparencia_public' %}"><i class="fa-solid fa-chart-column"></i> Portal da Transparência</a>
+          <a href="{% url 'core:transparencia_public' %}"><i class="fa-solid fa-chart-column"></i> Transparência</a>
           <a href="{% url 'core:portal_diario_public' %}"><i class="fa-regular fa-file-lines"></i> Diário Oficial</a>
-          <a href="{{ cta_login }}" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-right-to-bracket"></i> Sistema Interno</a>
         </nav>
       </div>
     </div>
 
     <div class="pp-mainnav">
-      <div class="pp-wrap pp-mainnav__inner">
+      <div class="pp-wrap">
         <nav class="pp-menu" aria-label="Navegação principal">
-          {% for item in menu_items_header|slice:":8" %}
-            {% with item_key=item.titulo|lower %}
-              <a href="{{ item.url }}" {% if item.nova_aba %}target="_blank" rel="noopener"{% endif %} class="pp-menu__item {% if request.path == item.url %}is-active{% endif %}">
-                {% if "início" in item_key or "inicio" in item_key %}
-                  <i class="fa-solid fa-house"></i>
-                {% elif "prefeitura" in item_key %}
-                  <i class="fa-solid fa-building"></i>
-                {% elif "transpar" in item_key %}
-                  <i class="fa-solid fa-chart-column"></i>
-                {% elif "servi" in item_key %}
-                  <i class="fa-solid fa-users"></i>
-                {% elif "not" in item_key %}
-                  <i class="fa-regular fa-newspaper"></i>
-                {% elif "diário" in item_key or "diario" in item_key %}
-                  <i class="fa-regular fa-file-lines"></i>
-                {% elif "ouv" in item_key %}
-                  <i class="fa-regular fa-message"></i>
-                {% elif "cont" in item_key %}
-                  <i class="fa-solid fa-phone"></i>
-                {% else %}
-                  <i class="fa-solid fa-circle-dot"></i>
-                {% endif %}
-                <span>{{ item.titulo }}</span>
-              </a>
-            {% endwith %}
+          {% for item in menu_items_header|slice:":9" %}
+            <a href="{{ item.url }}" {% if item.nova_aba %}target="_blank" rel="noopener"{% endif %} class="pp-menu__item {% if request.path == item.url %}is-active{% endif %}">
+              {{ item.titulo }}
+            </a>
           {% endfor %}
         </nav>
       </div>
@@ -75,7 +68,11 @@
   <main id="conteudo-principal" class="pp-main">
     <div class="pp-wrap">
       <section class="pp-hero">
-        <p class="pp-kicker">{{ municipio.nome }}{% if municipio.uf %}/{{ municipio.uf }}{% endif %}</p>
+        {% if municipio %}
+          <p class="pp-kicker">{{ municipio.nome }}{% if municipio.uf %}/{{ municipio.uf }}{% endif %}</p>
+        {% else %}
+          <p class="pp-kicker">Portal Público Municipal</p>
+        {% endif %}
         <h1>{{ title|default:titulo_portal }}</h1>
         {% block hero_text %}
           {% if mensagem_boas_vindas %}<p>{{ mensagem_boas_vindas }}</p>{% endif %}
@@ -107,15 +104,80 @@
         </article>
       </div>
 
-      <div class="pp-footer__bottom">
-        <div class="pp-footer__links">
-          {% for item in menu_items_footer|slice:":8" %}
-            <a href="{{ item.url }}" {% if item.nova_aba %}target="_blank" rel="noopener"{% endif %}>{{ item.titulo }}</a>
-          {% endfor %}
+      <div class="pp-footer__sitemap">
+        <div>
+          <h4>Portal</h4>
+          <ul>
+            {% for item in menu_items_header|slice:":6" %}
+              <li><a href="{{ item.url }}" {% if item.nova_aba %}target="_blank" rel="noopener"{% endif %}>{{ item.titulo }}</a></li>
+            {% empty %}
+              <li><a href="{% url 'core:institucional_public' %}">Início</a></li>
+              <li><a href="{% url 'core:transparencia_public' %}">Transparência</a></li>
+            {% endfor %}
+          </ul>
         </div>
-        <p>© {% now "Y" %} {{ titulo_portal|default:municipio.nome }} • {{ municipio.nome }}{% if municipio.uf %}/{{ municipio.uf }}{% endif %}</p>
+        <div>
+          <h4>Publicações</h4>
+          <ul>
+            <li><a href="{% url 'core:portal_noticias_public' %}">Notícias</a></li>
+            <li><a href="{% url 'core:portal_diario_public' %}">Diário Oficial</a></li>
+            <li><a href="{% url 'core:portal_licitacoes_public' %}">Licitações</a></li>
+            <li><a href="{% url 'core:portal_contratos_public' %}">Contratos</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Atendimento</h4>
+          <ul>
+            <li><a href="{% url 'core:portal_ouvidoria_public' %}">e-SIC / Ouvidoria</a></li>
+            <li><a href="{% url 'core:transparencia_public' %}">Portal da Transparência</a></li>
+            <li><a href="{{ cta_login }}" target="_blank" rel="noopener">Sistema Interno</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="pp-footer__bottom">
+        <p>© {% now "Y" %} {{ titulo_portal|default:municipio.nome|default:"Portal Público" }}</p>
+        <div>
+          <a href="#conteudo-principal">Acessibilidade</a>
+          <a href="{% url 'core:transparencia_public' %}">Transparência</a>
+          <a href="{% url 'core:portal_ouvidoria_public' %}">Ouvidoria</a>
+        </div>
       </div>
     </div>
   </footer>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    var page = document.querySelector(".pp-page");
+    if (!page) return;
+
+    var root = document.documentElement;
+    var fontSize = 16;
+    var minSize = 12;
+    var maxSize = 22;
+
+    function applyFontSize(next) {
+      fontSize = Math.max(minSize, Math.min(maxSize, next));
+      root.style.fontSize = fontSize + "px";
+    }
+
+    document.querySelectorAll("[data-font-size]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var action = btn.getAttribute("data-font-size");
+        if (action === "up") applyFontSize(fontSize + 2);
+        if (action === "down") applyFontSize(fontSize - 2);
+        if (action === "reset") applyFontSize(16);
+      });
+    });
+
+    var contrastBtn = document.querySelector("[data-contrast-toggle]");
+    contrastBtn && contrastBtn.addEventListener("click", function () {
+      page.classList.toggle("is-high-contrast");
+      contrastBtn.classList.toggle("is-active");
+    });
+  })();
+</script>
 {% endblock %}

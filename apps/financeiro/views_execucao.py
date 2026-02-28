@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from .views_common import *
-from .views_common import _municipios_admin, _resolve_municipio
+from .views_common import _municipios_admin, _resolve_municipio, _selected_exercicio
 
 @login_required
 @require_perm("financeiro.view")
@@ -514,7 +514,14 @@ def receita_create(request):
         {
             "title": "Nova arrecadação",
             "subtitle": f"{municipio.nome}/{municipio.uf}",
-            "actions": [],
+            "actions": [
+                {
+                    "label": "Voltar",
+                    "url": reverse("financeiro:receita_list") + f"?municipio={municipio.pk}",
+                    "icon": "fa-solid fa-arrow-left",
+                    "variant": "btn--ghost",
+                }
+            ],
             "form": form,
             "cancel_url": reverse("financeiro:receita_list") + f"?municipio={municipio.pk}",
             "submit_label": "Salvar arrecadação",

@@ -12,15 +12,30 @@
 {% endblock %}
 
 {% block content %}
-<div class="city-page {% if request.GET.portal_editor == '1' %}city-page--editor{% endif %}" style="--portal-primary: {{ cor_primaria|default:'#0E4A7E' }}; --portal-secondary: {{ cor_secundaria|default:'#2F6EA9' }};">
-  <header class="city-header">
-    <div class="city-topbar">
-      <div class="city-wrap city-topbar__inner">
-        <a href="{% url 'core:home' %}" class="city-brand">
+<div class="city-page portal-prefeitura {% if request.GET.portal_editor == '1' %}city-page--editor{% endif %}" style="--portal-primary: {{ cor_primaria|default:'#0E4A7E' }}; --portal-secondary: {{ cor_secundaria|default:'#2F6EA9' }};">
+  <header class="pm-header-shell">
+    <div class="pm-accessibility">
+      <div class="city-wrap pm-accessibility__inner">
+        <div class="pm-accessibility__left">
+          <span><i class="fa-solid fa-universal-access"></i> Acessibilidade:</span>
+          <button type="button" data-font-size="down" aria-label="Diminuir fonte"><i class="fa-solid fa-minus"></i></button>
+          <button type="button" data-font-size="up" aria-label="Aumentar fonte"><i class="fa-solid fa-plus"></i></button>
+          <button type="button" data-font-size="reset" aria-label="Fonte padrão">A</button>
+          <button type="button" data-contrast-toggle aria-label="Alto contraste"><i class="fa-regular fa-eye"></i> Alto Contraste</button>
+        </div>
+        <a class="pm-login-btn" href="{{ cta_login }}" target="_blank" rel="noopener">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i> Login
+        </a>
+      </div>
+    </div>
+
+    <div class="pm-header-main">
+      <div class="city-wrap pm-header-main__inner">
+        <a href="{% url 'core:home' %}" class="pm-brand">
           {% if portal_cfg.logo %}
             <img src="{{ portal_cfg.logo.url }}" alt="{{ municipio.nome }}">
           {% else %}
-            <span class="city-brand__icon"><i class="fa-solid fa-building-columns"></i></span>
+            <span class="pm-brand__icon"><i class="fa-solid fa-landmark"></i></span>
           {% endif %}
           <span>
             <strong
@@ -32,14 +47,14 @@
               data-theme-bind="subtitulo_portal"
               data-theme-editable="subtitulo_portal"
               {% if request.GET.portal_editor == "1" %}contenteditable="true"{% endif %}
-            >{{ portal_cfg.subtitulo_portal|default:"GOVERNO PARA O POVO" }}</small>
+            >{{ portal_cfg.subtitulo_portal|default:"PREFEITURA MUNICIPAL" }}</small>
           </span>
         </a>
 
-        <nav class="city-quick-links" aria-label="Links rápidos do portal">
-          {% for item in top_links %}
+        <nav class="pm-social-links" aria-label="Links rápidos e redes">
+          {% for item in top_links|slice:':4' %}
             <a href="{{ item.url }}" {% if "http" in item.url %}target="_blank" rel="noopener"{% endif %}>
-              <i class="{{ item.icon }}"></i>
+              <i class="{{ item.icon|default:'fa-solid fa-link' }}"></i>
               <span>{{ item.titulo }}</span>
             </a>
           {% endfor %}
@@ -47,149 +62,435 @@
       </div>
     </div>
 
-    <div class="city-mainnav">
-      <div class="city-wrap city-mainnav__inner">
-        <nav class="city-menu" aria-label="Navegação principal">
-          {% for item in menu_items_header|slice:":8" %}
-            {% with item_key=item.titulo|lower %}
-              <a href="{{ item.url }}" {% if item.nova_aba %}target="_blank" rel="noopener"{% endif %} class="city-menu__item {% if request.path == item.url %}is-active{% endif %}">
-                {% if "início" in item_key or "inicio" in item_key %}
-                  <i class="fa-solid fa-house"></i>
-                {% elif "prefeitura" in item_key %}
-                  <i class="fa-solid fa-building"></i>
-                {% elif "transpar" in item_key %}
-                  <i class="fa-solid fa-chart-column"></i>
-                {% elif "servi" in item_key %}
-                  <i class="fa-solid fa-users"></i>
-                {% elif "not" in item_key %}
-                  <i class="fa-regular fa-newspaper"></i>
-                {% elif "diário" in item_key or "diario" in item_key %}
-                  <i class="fa-regular fa-file-lines"></i>
-                {% elif "ouv" in item_key %}
-                  <i class="fa-regular fa-message"></i>
-                {% elif "cont" in item_key %}
-                  <i class="fa-solid fa-phone"></i>
-                {% else %}
-                  <i class="fa-solid fa-circle-dot"></i>
-                {% endif %}
-                <span>{{ item.titulo }}</span>
-              </a>
-            {% endwith %}
+    <div class="pm-mainnav">
+      <div class="city-wrap">
+        <nav class="pm-main-menu" aria-label="Menu principal do portal">
+          {% for item in menu_items_header|slice:":9" %}
+            <a href="{{ item.url }}" {% if item.nova_aba %}target="_blank" rel="noopener"{% endif %} class="pm-main-menu__item {% if request.path == item.url %}is-active{% endif %}">
+              {{ item.titulo }}
+            </a>
           {% endfor %}
         </nav>
       </div>
     </div>
   </header>
 
-  <main id="conteudo-principal" class="city-main">
-    <section class="city-hero {% if hero_image_url %}city-hero--image{% endif %}" data-theme-action="banner_imagem" {% if hero_image_url %}style="--hero-image:url('{{ hero_image_url }}');"{% endif %}>
-      <div class="city-wrap">
-        <div class="city-hero__content">
-          {% if banners_home|length %}
-            <p class="city-hero__banner-title" data-theme-bind="banner_titulo">{{ banners_home.0.titulo }}</p>
-            {% if banners_home.0.subtitulo %}
-              <p class="city-hero__banner-subtitle" data-theme-bind="banner_subtitulo">{{ banners_home.0.subtitulo }}</p>
-            {% endif %}
-          {% endif %}
-          <h1>Transparência e Compromisso com o Cidadão</h1>
-          <p
-            data-theme-bind="mensagem_boas_vindas"
-            data-theme-editable="mensagem_boas_vindas"
-            {% if request.GET.portal_editor == "1" %}contenteditable="true"{% endif %}
-          >{{ portal_cfg.mensagem_boas_vindas|default:"Acesse informações, serviços e acompanhe a gestão do seu município de forma simples e transparente." }}</p>
-          <div class="city-hero__actions">
-            <a class="city-btn city-btn--primary" href="{{ cta_transparencia }}">Acessar Transparência</a>
-            <a class="city-btn city-btn--success" href="{{ cta_servicos_online }}">Serviços Online</a>
-          </div>
-        </div>
+  <main id="conteudo-principal" class="pm-main">
+    <section class="pm-banner" data-theme-action="banner_imagem">
+      <div class="pm-banner__track">
+        {% if banners_home %}
+          {% for banner in banners_home|slice:":4" %}
+            <article class="pm-banner__slide {% if forloop.first %}is-active{% endif %}" data-banner-slide {% if banner.imagem %}style="--slide-image:url('{{ banner.imagem.url }}');"{% elif hero_image_url %}style="--slide-image:url('{{ hero_image_url }}');"{% endif %}>
+              <div class="city-wrap">
+                <div class="pm-banner__content">
+                  <p class="pm-banner__kicker">Portal da Prefeitura</p>
+                  <h1 data-theme-bind="banner_titulo">{{ banner.titulo|default:"Transparência e Serviços para o Cidadão" }}</h1>
+                  <p class="pm-banner__subtitle" data-theme-bind="banner_subtitulo">{{ banner.subtitulo|default:"Acompanhe notícias, serviços online e dados públicos do município." }}</p>
+                  <p
+                    data-theme-bind="mensagem_boas_vindas"
+                    data-theme-editable="mensagem_boas_vindas"
+                    {% if request.GET.portal_editor == "1" %}contenteditable="true"{% endif %}
+                  >{{ portal_cfg.mensagem_boas_vindas|default:"Bem-vindo ao portal oficial. Acesse serviços, acompanhe a gestão e consulte informações em tempo real." }}</p>
+                  <div class="pm-banner__actions">
+                    <a class="pm-btn pm-btn--primary" href="{{ cta_transparencia }}">Portal da Transparência</a>
+                    <a class="pm-btn pm-btn--green" href="{{ cta_servicos_online }}">Serviços Online</a>
+                  </div>
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+        {% else %}
+          <article class="pm-banner__slide is-active" data-banner-slide {% if hero_image_url %}style="--slide-image:url('{{ hero_image_url }}');"{% endif %}>
+            <div class="city-wrap">
+              <div class="pm-banner__content">
+                <p class="pm-banner__kicker">Portal da Prefeitura</p>
+                <h1 data-theme-bind="banner_titulo">Prefeitura {{ municipio.nome }}</h1>
+                <p class="pm-banner__subtitle" data-theme-bind="banner_subtitulo">Transparência e compromisso com a população</p>
+                <p
+                  data-theme-bind="mensagem_boas_vindas"
+                  data-theme-editable="mensagem_boas_vindas"
+                  {% if request.GET.portal_editor == "1" %}contenteditable="true"{% endif %}
+                >{{ portal_cfg.mensagem_boas_vindas|default:"Acesse informações públicas, serviços digitais e canais de atendimento oficial." }}</p>
+                <div class="pm-banner__actions">
+                  <a class="pm-btn pm-btn--primary" href="{{ cta_transparencia }}">Portal da Transparência</a>
+                  <a class="pm-btn pm-btn--green" href="{{ cta_servicos_online }}">Serviços Online</a>
+                </div>
+              </div>
+            </div>
+          </article>
+        {% endif %}
       </div>
-    </section>
 
-    <section class="city-shortcuts">
-      <div class="city-wrap">
-        <div class="city-shortcuts__grid">
-          {% for item in servicos_destaque %}
-            <a class="city-shortcut-card" href="{{ item.url|default:'#' }}">
-              <span class="city-shortcut-card__icon"><i class="{{ item.icon|default:'fa-solid fa-circle-info' }}"></i></span>
-              <strong>{{ item.titulo }}</strong>
-            </a>
+      {% if banners_home|length > 1 %}
+        <button class="pm-banner__control is-prev" type="button" data-banner-prev aria-label="Slide anterior"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="pm-banner__control is-next" type="button" data-banner-next aria-label="Próximo slide"><i class="fa-solid fa-chevron-right"></i></button>
+        <div class="pm-banner__dots">
+          {% for _item in banners_home|slice:":4" %}
+            <button type="button" data-banner-dot data-banner-index="{{ forloop.counter0 }}" class="{% if forloop.first %}is-active{% endif %}" aria-label="Ir para slide {{ forloop.counter }}"></button>
           {% endfor %}
         </div>
-      </div>
+      {% endif %}
     </section>
 
-    {% if noticias_home %}
-      <section class="city-section">
-        <div class="city-wrap">
-          <h2 class="city-section__title">Últimas Notícias</h2>
-          <div class="city-news-grid">
-            {% for item in noticias_home %}
-              <article class="city-news-card">
-                <a href="{% url 'core:portal_noticia_detail_public' item.slug %}">
-                  <div class="city-news-card__media">
-                    {% if item.imagem %}
-                      <img src="{{ item.imagem.url }}" alt="{{ item.titulo }}">
-                    {% else %}
-                      <span><i class="fa-regular fa-image"></i></span>
-                    {% endif %}
-                  </div>
-                  <div class="city-news-card__body">
-                    <h3>{{ item.titulo }}</h3>
-                    <div class="city-news-card__meta">
-                      <span>{{ item.publicado_em|date:"d/m/Y" }}</span>
-                      <span>Leia mais <i class="fa-solid fa-arrow-right"></i></span>
-                    </div>
-                  </div>
-                </a>
-              </article>
-            {% endfor %}
-          </div>
-        </div>
-      </section>
-    {% endif %}
-
-    <section class="city-section">
+    <section class="pm-section pm-section--main-services">
       <div class="city-wrap">
-        <h2 class="city-section__title">Painel de Transparência</h2>
-        <div class="city-kpi-grid">
-          {% for item in transparencia_cards %}
-            <article class="city-kpi-card city-kpi-card--{{ item.cor }}">
-              <p><i class="{{ item.icone }}"></i> {{ item.titulo }}</p>
-              <strong>{{ item.valor }}</strong>
-              <span>{{ item.subtitulo }}</span>
+        <div class="pm-main-services-grid">
+          {% for item in servicos_cards|slice:":4" %}
+            <a class="pm-main-service pm-main-service--{{ forloop.counter }}" href="{{ item.url|default:'#' }}">
+              <i class="{{ item.icon|default:'fa-solid fa-circle-info' }}"></i>
+              <h2
+                data-theme-bind="bloco_{{ forloop.counter0 }}_titulo"
+                data-theme-editable="bloco_{{ forloop.counter0 }}_titulo"
+                {% if request.GET.portal_editor == "1" %}contenteditable="true"{% endif %}
+              >{{ item.titulo }}</h2>
+              <p
+                data-theme-bind="bloco_{{ forloop.counter0 }}_descricao"
+                data-theme-editable="bloco_{{ forloop.counter0 }}_descricao"
+                {% if request.GET.portal_editor == "1" %}contenteditable="true"{% endif %}
+              >{{ item.descricao|default:"Acesse o serviço digital no portal municipal." }}</p>
+            </a>
+          {% empty %}
+            <article class="pm-main-service pm-main-service--1">
+              <i class="fa-solid fa-file-signature"></i>
+              <h2>Serviços Digitais</h2>
+              <p>Acesse solicitações e emissão de documentos.</p>
             </article>
           {% endfor %}
         </div>
       </div>
     </section>
 
-    <section class="city-section city-section--services">
+    <section class="pm-section pm-section--citizen">
       <div class="city-wrap">
-        <h2 class="city-section__title">Serviços Online</h2>
-        <div class="city-services-grid">
-          {% for item in servicos_cards %}
-            <a class="city-service-card" href="{{ item.url|default:'#' }}">
-              <span class="city-service-card__icon"><i class="{{ item.icon|default:'fa-solid fa-circle-info' }}"></i></span>
-              <h3
-                data-theme-bind="bloco_{{ forloop.counter0 }}_titulo"
-                data-theme-editable="bloco_{{ forloop.counter0 }}_titulo"
-                {% if request.GET.portal_editor == "1" %}contenteditable="true"{% endif %}
-              >{{ item.titulo }}</h3>
-              <p
-                data-theme-bind="bloco_{{ forloop.counter0 }}_descricao"
-                data-theme-editable="bloco_{{ forloop.counter0 }}_descricao"
-                {% if request.GET.portal_editor == "1" %}contenteditable="true"{% endif %}
-              >{{ item.descricao|default:"Serviço online disponível no portal público municipal." }}</p>
+        <div class="pm-section-head">
+          <h2>Serviços para o Cidadão</h2>
+        </div>
+        <div class="pm-citizen-grid">
+          {% for item in links_rapidos|slice:":8" %}
+            <a class="pm-citizen-card" href="{{ item.url|default:'#' }}">
+              <span><i class="{{ item.icon|default:'fa-solid fa-circle-check' }}"></i></span>
+              <strong>{{ item.titulo }}</strong>
+              <small>{{ item.descricao|default:"Canal de atendimento público municipal." }}</small>
             </a>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="pm-section pm-section--quick-access">
+      <div class="city-wrap">
+        <div class="pm-section-head">
+          <h2>Acesso Rápido</h2>
+        </div>
+        <div class="pm-quick-scroll">
+          {% for item in links_rapidos|slice:":12" %}
+            <a class="pm-quick-item" href="{{ item.url|default:'#' }}">
+              <i class="{{ item.icon|default:'fa-solid fa-link' }}"></i>
+              <span>{{ item.titulo }}</span>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="pm-section pm-section--news">
+      <div class="city-wrap">
+        <div class="pm-section-head">
+          <h2>Notícias</h2>
+          <a href="{% url 'core:portal_noticias_public' %}">Ver todas <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <div class="pm-news-grid">
+          <article class="pm-news-main">
+            {% if noticia_principal and noticia_principal.imagem %}
+              <img src="{{ noticia_principal.imagem.url }}" alt="{{ noticia_principal.titulo }}">
+            {% else %}
+              <div class="pm-news-placeholder"><i class="fa-regular fa-image"></i></div>
+            {% endif %}
+
+            <div class="pm-news-main__body">
+              <span class="pm-news-badge">Destaque</span>
+              {% if noticia_principal %}
+                <p><i class="fa-regular fa-calendar"></i> {{ noticia_principal.publicado_em|date:"d/m/Y" }}</p>
+                <h3>{{ noticia_principal.titulo }}</h3>
+                <p>{{ noticia_principal.resumo|default:noticia_principal.conteudo|striptags|truncatechars:180 }}</p>
+                <a href="{% url 'core:portal_noticia_detail_public' noticia_principal.slug %}">Ler notícia</a>
+              {% else %}
+                <p><i class="fa-regular fa-calendar"></i> Atualização contínua</p>
+                <h3>As principais notícias da gestão municipal em destaque</h3>
+                <p>Publique matérias no módulo de publicações para exibir notícias nesta área.</p>
+                <a href="{% url 'core:portal_noticias_public' %}">Ver notícias</a>
+              {% endif %}
+            </div>
+          </article>
+
+          <div class="pm-news-side">
+            {% for item in noticias_recentes|slice:"1:4" %}
+              <article class="pm-news-side__card">
+                {% if item.imagem %}
+                  <img src="{{ item.imagem.url }}" alt="{{ item.titulo }}">
+                {% else %}
+                  <div class="pm-news-placeholder"><i class="fa-regular fa-image"></i></div>
+                {% endif %}
+                <div>
+                  <p><i class="fa-regular fa-calendar"></i> {{ item.publicado_em|date:"d/m/Y" }}</p>
+                  <h4>{{ item.titulo|truncatechars:80 }}</h4>
+                  <a href="{% url 'core:portal_noticia_detail_public' item.slug %}">Ler mais</a>
+                </div>
+              </article>
+            {% empty %}
+              <article class="pm-news-side__card">
+                <div class="pm-news-placeholder"><i class="fa-regular fa-newspaper"></i></div>
+                <div>
+                  <p><i class="fa-regular fa-calendar"></i> Sem notícias publicadas</p>
+                  <h4>Publique conteúdos para preencher esta seção.</h4>
+                  <a href="{% url 'core:portal_noticias_public' %}">Acessar notícias</a>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pm-section pm-section--videos">
+      <div class="city-wrap">
+        <div class="pm-section-head">
+          <h2>Galeria de Vídeos</h2>
+          <a href="{{ cta_servicos_online }}">Ver todos <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <div class="pm-media-grid">
+          {% for item in banners_home|slice:":4" %}
+            <article class="pm-media-card">
+              <div class="pm-media-card__thumb" {% if item.imagem %}style="--card-image:url('{{ item.imagem.url }}');"{% elif hero_image_url %}style="--card-image:url('{{ hero_image_url }}');"{% endif %}>
+                <span class="pm-media-card__play"><i class="fa-solid fa-play"></i></span>
+              </div>
+              <div class="pm-media-card__body">
+                <h3>{{ item.titulo|default:"Vídeo institucional"|truncatechars:70 }}</h3>
+                <p>{{ item.subtitulo|default:"Conteúdo oficial da Prefeitura Municipal."|truncatechars:88 }}</p>
+              </div>
+            </article>
+          {% empty %}
+            {% for item in noticias_home|slice:":4" %}
+              <article class="pm-media-card">
+                <div class="pm-media-card__thumb" {% if item.imagem %}style="--card-image:url('{{ item.imagem.url }}');"{% endif %}>
+                  <span class="pm-media-card__play"><i class="fa-solid fa-play"></i></span>
+                </div>
+                <div class="pm-media-card__body">
+                  <h3>{{ item.titulo|truncatechars:70 }}</h3>
+                  <p>Vídeo da cobertura institucional do município.</p>
+                </div>
+              </article>
+            {% endfor %}
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="pm-section pm-section--photos">
+      <div class="city-wrap">
+        <div class="pm-section-head">
+          <h2>Galeria de Fotos</h2>
+          <a href="{% url 'core:portal_noticias_public' %}">Ver todas <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <div class="pm-photo-grid">
+          {% for item in noticias_recentes|slice:":6" %}
+            <article class="pm-photo-card">
+              {% if item.imagem %}
+                <img src="{{ item.imagem.url }}" alt="{{ item.titulo }}">
+              {% else %}
+                <div class="pm-news-placeholder"><i class="fa-regular fa-image"></i></div>
+              {% endif %}
+              <div class="pm-photo-card__overlay">
+                <p>{{ item.titulo|truncatechars:72 }}</p>
+              </div>
+            </article>
+          {% empty %}
+            <article class="pm-photo-card">
+              <div class="pm-news-placeholder"><i class="fa-regular fa-image"></i></div>
+              <div class="pm-photo-card__overlay">
+                <p>Publique notícias com imagem para montar a galeria.</p>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="pm-section pm-section--secretarias">
+      <div class="city-wrap">
+        <div class="pm-section-head">
+          <h2>Secretarias Municipais</h2>
+          <a href="{{ cta_servicos_online }}">Ver todas <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <div class="pm-secretarias-scroll">
+          {% for item in secretarias|slice:":10" %}
+            <article class="pm-secretaria-card">
+              <div class="pm-secretaria-card__top">
+                <i class="fa-solid fa-building-user"></i>
+              </div>
+              <div class="pm-secretaria-card__body">
+                <h3>{{ item.nome }}</h3>
+                <p>{% if item.sigla %}Sigla {{ item.sigla }}{% else %}Secretaria municipal ativa{% endif %}</p>
+                <a href="{{ cta_servicos_online }}">Acessar <i class="fa-solid fa-arrow-right"></i></a>
+              </div>
+            </article>
+          {% empty %}
+            <article class="pm-secretaria-card">
+              <div class="pm-secretaria-card__top"><i class="fa-solid fa-city"></i></div>
+              <div class="pm-secretaria-card__body">
+                <h3>Secretarias em atualização</h3>
+                <p>Cadastre secretarias para exibir esta seção.</p>
+                <a href="{{ cta_servicos_online }}">Acessar <i class="fa-solid fa-arrow-right"></i></a>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="pm-section pm-section--editais">
+      <div class="city-wrap">
+        <div class="pm-section-head">
+          <h2>Editais e Licitações</h2>
+          <a href="{% url 'core:portal_diario_public' %}">Ver todos <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <div class="pm-edital-grid">
+          {% for item in diarios_recentes|slice:":4" %}
+            <article class="pm-edital-card">
+              <div class="pm-edital-card__icon"><i class="fa-regular fa-file-lines"></i></div>
+              <div class="pm-edital-card__body">
+                <p class="pm-edital-card__meta">
+                  Edição {{ item.numero }}
+                  <span class="is-open">Publicado</span>
+                </p>
+                <h3>{{ item.resumo|default:"Diário Oficial do Município"|truncatechars:96 }}</h3>
+                <div class="pm-edital-card__footer">
+                  <span><i class="fa-regular fa-calendar"></i> {{ item.data_publicacao|date:"d/m/Y" }}</span>
+                  <a href="{% url 'core:portal_diario_public' %}"><i class="fa-solid fa-download"></i> Abrir</a>
+                </div>
+              </div>
+            </article>
+          {% empty %}
+            <article class="pm-edital-card">
+              <div class="pm-edital-card__icon"><i class="fa-regular fa-folder-open"></i></div>
+              <div class="pm-edital-card__body">
+                <p class="pm-edital-card__meta">Sem editais publicados <span class="is-closed">Atualizar</span></p>
+                <h3>Cadastre edições no Diário Oficial para exibir aqui.</h3>
+                <div class="pm-edital-card__footer">
+                  <span><i class="fa-regular fa-calendar"></i> Publicação contínua</span>
+                  <a href="{% url 'core:portal_diario_public' %}"><i class="fa-solid fa-arrow-right"></i> Acessar diário</a>
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="pm-section pm-section--arquivos">
+      <div class="city-wrap">
+        <div class="pm-section-head">
+          <h2>Arquivos e Documentos</h2>
+          <a href="{{ cta_transparencia }}">Ver todos <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <div class="pm-arquivos-grid">
+          <article class="pm-arquivo-col">
+            <h3><i class="fa-solid fa-folder-tree"></i> Páginas institucionais</h3>
+            <div class="pm-arquivo-list">
+              {% for item in paginas_publicas|slice:":3" %}
+                <a href="{% url 'core:portal_pagina_public' item.slug %}">
+                  <div>
+                    <p>{{ item.titulo }}</p>
+                    <small>Página pública • Conteúdo institucional</small>
+                  </div>
+                  <span><i class="fa-solid fa-arrow-down"></i></span>
+                </a>
+              {% empty %}
+                <a href="{{ cta_transparencia }}">
+                  <div>
+                    <p>Documentos institucionais</p>
+                    <small>Publique páginas para exibir nesta área</small>
+                  </div>
+                  <span><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+                </a>
+              {% endfor %}
+            </div>
+          </article>
+
+          <article class="pm-arquivo-col">
+            <h3><i class="fa-solid fa-folder-open"></i> Transparência e links úteis</h3>
+            <div class="pm-arquivo-list">
+              {% for item in menu_items_footer|slice:":3" %}
+                <a href="{{ item.url }}" {% if item.nova_aba %}target="_blank" rel="noopener"{% endif %}>
+                  <div>
+                    <p>{{ item.titulo }}</p>
+                    <small>Link público • Consulta oficial</small>
+                  </div>
+                  <span><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+                </a>
+              {% empty %}
+                {% for item in top_links|slice:":3" %}
+                  <a href="{{ item.url }}" {% if "http" in item.url %}target="_blank" rel="noopener"{% endif %}>
+                    <div>
+                      <p>{{ item.titulo }}</p>
+                      <small>Canal de acesso rápido</small>
+                    </div>
+                    <span><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+                  </a>
+                {% endfor %}
+              {% endfor %}
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="pm-section pm-section--turismo">
+      <div class="city-wrap">
+        <div class="pm-section-head">
+          <div>
+            <h2>Turismo</h2>
+            <p>Conheça os principais pontos e atrações de {{ municipio.nome }}</p>
+          </div>
+          <a href="{{ cta_servicos_online }}">Ver mais <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <div class="pm-turismo-grid">
+          {% for item in noticias_home|slice:":3" %}
+            <article class="pm-turismo-card">
+              <div class="pm-turismo-card__thumb" {% if item.imagem %}style="--turismo-image:url('{{ item.imagem.url }}');"{% elif hero_image_url %}style="--turismo-image:url('{{ hero_image_url }}');"{% endif %}></div>
+              <div class="pm-turismo-card__body">
+                <h3>{{ item.titulo|truncatechars:66 }}</h3>
+                <p>{{ item.resumo|default:"Atração turística com acesso público e informações oficiais."|truncatechars:92 }}</p>
+                <div>
+                  <span><i class="fa-solid fa-location-dot"></i> {{ municipio.nome }}</span>
+                  <span><i class="fa-regular fa-clock"></i> Consulte horários</span>
+                </div>
+              </div>
+            </article>
+          {% empty %}
+            <article class="pm-turismo-card">
+              <div class="pm-turismo-card__thumb" {% if hero_image_url %}style="--turismo-image:url('{{ hero_image_url }}');"{% endif %}></div>
+              <div class="pm-turismo-card__body">
+                <h3>Centro Administrativo Municipal</h3>
+                <p>Espaço público de referência para atendimento e serviços da prefeitura.</p>
+                <div>
+                  <span><i class="fa-solid fa-location-dot"></i> {{ municipio.nome }}</span>
+                  <span><i class="fa-regular fa-clock"></i> Segunda a sexta</span>
+                </div>
+              </div>
+            </article>
           {% endfor %}
         </div>
       </div>
     </section>
   </main>
 
-  <footer class="city-footer">
+  <footer class="pm-footer">
     <div class="city-wrap">
-      <div class="city-footer__grid">
+      <div class="pm-footer__grid">
         <article>
           <h3><i class="fa-solid fa-location-dot"></i> Endereço</h3>
           <p data-theme-bind="endereco">{{ portal_cfg.endereco|default:"Endereço não informado." }}</p>
@@ -199,8 +500,8 @@
           <p data-theme-bind="telefone">{{ portal_cfg.telefone|default:"Telefone não informado." }}</p>
         </article>
         <article>
-          <h3><i class="fa-solid fa-id-card"></i> Município</h3>
-          <p>{{ municipio.nome }}{% if municipio.uf %} - {{ municipio.uf }}{% endif %}</p>
+          <h3><i class="fa-solid fa-envelope"></i> E-mail</h3>
+          <p data-theme-bind="email">{{ portal_cfg.email|default:"E-mail não informado." }}</p>
         </article>
         <article>
           <h3><i class="fa-regular fa-clock"></i> Atendimento</h3>
@@ -208,17 +509,130 @@
         </article>
       </div>
 
-      <div class="city-footer__bottom">
-        <div class="city-footer__links">
-          {% for item in menu_items_footer|slice:":6" %}
-            <a href="{{ item.url }}" {% if item.nova_aba %}target="_blank" rel="noopener"{% endif %}>{{ item.titulo }}</a>
-          {% endfor %}
+      <div class="pm-footer__sitemap">
+        <div>
+          <h4>A Prefeitura</h4>
+          <ul>
+            {% for item in menu_items_header|slice:":6" %}
+              <li><a href="{{ item.url }}" {% if item.nova_aba %}target="_blank" rel="noopener"{% endif %}>{{ item.titulo }}</a></li>
+            {% endfor %}
+          </ul>
         </div>
+        <div>
+          <h4>Links úteis</h4>
+          <ul>
+            {% for item in top_links|slice:":5" %}
+              <li><a href="{{ item.url }}" {% if "http" in item.url %}target="_blank" rel="noopener"{% endif %}>{{ item.titulo }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div>
+          <h4>Publicações</h4>
+          <ul>
+            <li><a href="{{ cta_transparencia }}">Portal da Transparência</a></li>
+            <li><a href="{% url 'core:portal_diario_public' %}">Diário Oficial</a></li>
+            <li><a href="{% url 'core:portal_noticias_public' %}">Notícias</a></li>
+            <li><a href="{{ cta_servicos_online }}">Ouvidoria</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="pm-footer__bottom">
         <p>© {% now "Y" %} {{ municipio.nome }} • Portal Público Municipal</p>
+        <div>
+          <a href="#conteudo-principal">Acessibilidade</a>
+          <a href="{{ cta_transparencia }}">Transparência</a>
+          <a href="{{ cta_login }}" target="_blank" rel="noopener">Sistema Interno</a>
+        </div>
       </div>
     </div>
   </footer>
 </div>
+
+<script>
+  (function () {
+    var page = document.querySelector(".city-page");
+    if (!page) return;
+
+    var root = document.documentElement;
+    var fontSize = 16;
+    var minSize = 12;
+    var maxSize = 22;
+
+    function applyFontSize(next) {
+      fontSize = Math.max(minSize, Math.min(maxSize, next));
+      root.style.fontSize = fontSize + "px";
+    }
+
+    document.querySelectorAll("[data-font-size]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var action = btn.getAttribute("data-font-size");
+        if (action === "up") applyFontSize(fontSize + 2);
+        if (action === "down") applyFontSize(fontSize - 2);
+        if (action === "reset") applyFontSize(16);
+      });
+    });
+
+    var contrastBtn = document.querySelector("[data-contrast-toggle]");
+    contrastBtn && contrastBtn.addEventListener("click", function () {
+      page.classList.toggle("is-high-contrast");
+      contrastBtn.classList.toggle("is-active");
+    });
+
+    var slides = Array.prototype.slice.call(document.querySelectorAll("[data-banner-slide]"));
+    var dots = Array.prototype.slice.call(document.querySelectorAll("[data-banner-dot]"));
+    var prevBtn = document.querySelector("[data-banner-prev]");
+    var nextBtn = document.querySelector("[data-banner-next]");
+    var index = 0;
+    var timer = null;
+
+    function showSlide(nextIndex) {
+      if (!slides.length) return;
+      index = (nextIndex + slides.length) % slides.length;
+      slides.forEach(function (slide, i) {
+        slide.classList.toggle("is-active", i === index);
+      });
+      dots.forEach(function (dot, i) {
+        dot.classList.toggle("is-active", i === index);
+      });
+    }
+
+    function startAutoplay() {
+      if (slides.length < 2) return;
+      stopAutoplay();
+      timer = setInterval(function () {
+        showSlide(index + 1);
+      }, 5500);
+    }
+
+    function stopAutoplay() {
+      if (timer) clearInterval(timer);
+      timer = null;
+    }
+
+    prevBtn && prevBtn.addEventListener("click", function () {
+      showSlide(index - 1);
+      startAutoplay();
+    });
+
+    nextBtn && nextBtn.addEventListener("click", function () {
+      showSlide(index + 1);
+      startAutoplay();
+    });
+
+    dots.forEach(function (dot) {
+      dot.addEventListener("click", function () {
+        var target = Number(dot.getAttribute("data-banner-index") || 0);
+        showSlide(target);
+        startAutoplay();
+      });
+    });
+
+    showSlide(0);
+    startAutoplay();
+  })();
+</script>
+
 {% if request.GET.portal_editor == "1" %}
 <script>
   (function () {
@@ -226,7 +640,7 @@
     if (!page) return;
 
     function cleanText(value) {
-      return String(value || "").replace(/\\s+/g, " ").trim();
+      return String(value || "").replace(/\s+/g, " ").trim();
     }
 
     function bindSet(field, value) {

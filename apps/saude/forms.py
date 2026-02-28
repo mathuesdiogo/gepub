@@ -36,6 +36,19 @@ from .models import (
 )
 
 
+def _configure_autocomplete_field(field, *, url: str, fill_target: str, min_chars: int = 2, max_items: int = 10):
+    field.widget.attrs.update(
+        {
+            "autocomplete": "off",
+            "data-autocomplete-url": url,
+            "data-autocomplete-mode": "fill",
+            "data-autocomplete-fill-target": fill_target,
+            "data-autocomplete-min": str(min_chars),
+            "data-autocomplete-max": str(max_items),
+        }
+    )
+
+
 class UnidadeSaudeForm(forms.ModelForm):
     """
     Form de Unidade (org.Unidade) usado em views_unidades.py.
@@ -130,14 +143,12 @@ class AtendimentoSaudeForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         # Autocomplete institucional (seu autocomplete.js suporta MODE=fill)
-        self.fields["aluno_busca"].widget.attrs.update(
-            {
-                "data-autocomplete-url": reverse("educacao:api_alunos_suggest"),
-                "data-autocomplete-mode": "fill",
-                "data-autocomplete-fill-target": "#id_aluno_id",
-                "data-autocomplete-min": "2",
-                "data-autocomplete-max": "5",
-            }
+        _configure_autocomplete_field(
+            self.fields["aluno_busca"],
+            url=reverse("saude:api_alunos_suggest"),
+            fill_target="#id_aluno_id",
+            min_chars=2,
+            max_items=8,
         )
 
         if unidades_qs is not None and "unidade" in self.fields:
@@ -228,14 +239,12 @@ class AgendamentoSaudeForm(forms.ModelForm):
         profissionais_qs = kwargs.pop("profissionais_qs", None)
         super().__init__(*args, **kwargs)
 
-        self.fields["aluno_busca"].widget.attrs.update(
-            {
-                "data-autocomplete-url": reverse("educacao:api_alunos_suggest"),
-                "data-autocomplete-mode": "fill",
-                "data-autocomplete-fill-target": "#id_aluno_id",
-                "data-autocomplete-min": "2",
-                "data-autocomplete-max": "5",
-            }
+        _configure_autocomplete_field(
+            self.fields["aluno_busca"],
+            url=reverse("saude:api_alunos_suggest"),
+            fill_target="#id_aluno_id",
+            min_chars=2,
+            max_items=8,
         )
 
         if unidades_qs is not None and "unidade" in self.fields:
@@ -352,12 +361,25 @@ class BloqueioAgendaSaudeForm(forms.ModelForm):
 
 
 class FilaEsperaSaudeForm(forms.ModelForm):
+    aluno_id = forms.IntegerField(required=False, widget=forms.HiddenInput())
+    aluno_busca = forms.CharField(
+        required=False,
+        label="Aluno (Educação)",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Digite nome, CPF ou NIS do aluno…",
+                "autocomplete": "off",
+            }
+        ),
+    )
+
     class Meta:
         model = FilaEsperaSaude
         fields = [
             "unidade",
             "especialidade",
-            "aluno",
+            "aluno_id",
+            "aluno_busca",
             "paciente_nome",
             "paciente_contato",
             "prioridade",
@@ -371,12 +393,65 @@ class FilaEsperaSaudeForm(forms.ModelForm):
         if unidades_qs is not None:
             self.fields["unidade"].queryset = unidades_qs
 
+        _configure_autocomplete_field(
+            self.fields["aluno_busca"],
+            url=reverse("saude:api_alunos_suggest"),
+            fill_target="#id_aluno_id",
+            min_chars=2,
+            max_items=8,
+        )
+
+        if getattr(self.instance, "aluno_id", None):
+            self.initial["aluno_id"] = self.instance.aluno_id
+            self.initial["aluno_busca"] = getattr(self.instance.aluno, "nome", "")
+
+    def clean(self):
+        cleaned = super().clean()
+
+        aluno_id = cleaned.get("aluno_id")
+        aluno_busca = (cleaned.get("aluno_busca") or "").strip()
+
+        aluno = None
+        if aluno_id:
+            aluno = Aluno.objects.filter(pk=aluno_id).first()
+            if not aluno:
+                self.add_error("aluno_busca", "Aluno inválido.")
+        elif aluno_busca:
+            self.add_error("aluno_busca", "Selecione um aluno válido nas sugestões.")
+
+        cleaned["aluno_obj"] = aluno
+
+        if aluno and not cleaned.get("paciente_nome"):
+            cleaned["paciente_nome"] = aluno.nome
+
+        return cleaned
+
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+        obj.aluno = self.cleaned_data.get("aluno_obj")
+        if commit:
+            obj.save()
+        return obj
+
 
 class ProcedimentoSaudeForm(forms.ModelForm):
+    atendimento_id = forms.IntegerField(required=False, widget=forms.HiddenInput())
+    atendimento_busca = forms.CharField(
+        required=False,
+        label="Atendimento",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Buscar atendimento por paciente, CPF ou número…",
+                "autocomplete": "off",
+            }
+        ),
+    )
+
     class Meta:
         model = ProcedimentoSaude
         fields = [
-            "atendimento",
+            "atendimento_id",
+            "atendimento_busca",
             "tipo",
             "descricao",
             "materiais",
@@ -384,12 +459,73 @@ class ProcedimentoSaudeForm(forms.ModelForm):
             "realizado_em",
         ]
 
+    def __init__(self, *args, **kwargs):
+        unidades_qs = kwargs.pop("unidades_qs", None)
+        super().__init__(*args, **kwargs)
+
+        self._atendimentos_qs = AtendimentoSaude.objects.all()
+        if unidades_qs is not None:
+            self._atendimentos_qs = self._atendimentos_qs.filter(
+                unidade_id__in=unidades_qs.values_list("id", flat=True)
+            )
+
+        _configure_autocomplete_field(
+            self.fields["atendimento_busca"],
+            url=reverse("saude:api_atendimentos_suggest"),
+            fill_target="#id_atendimento_id",
+            min_chars=2,
+            max_items=10,
+        )
+
+        if getattr(self.instance, "atendimento_id", None):
+            self.initial["atendimento_id"] = self.instance.atendimento_id
+            self.initial["atendimento_busca"] = f"#{self.instance.atendimento_id} • {self.instance.atendimento.paciente_nome}"
+
+    def clean(self):
+        cleaned = super().clean()
+
+        atendimento_id = cleaned.get("atendimento_id")
+        atendimento_busca = (cleaned.get("atendimento_busca") or "").strip()
+
+        atendimento = None
+        if atendimento_id:
+            atendimento = self._atendimentos_qs.filter(pk=atendimento_id).first()
+            if not atendimento:
+                self.add_error("atendimento_busca", "Atendimento inválido.")
+        elif atendimento_busca:
+            self.add_error("atendimento_busca", "Selecione um atendimento válido nas sugestões.")
+        else:
+            self.add_error("atendimento_busca", "Selecione um atendimento para continuar.")
+
+        cleaned["atendimento_obj"] = atendimento
+        return cleaned
+
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+        obj.atendimento = self.cleaned_data.get("atendimento_obj")
+        if commit:
+            obj.save()
+        return obj
+
 
 class VacinacaoSaudeForm(forms.ModelForm):
+    atendimento_id = forms.IntegerField(required=False, widget=forms.HiddenInput())
+    atendimento_busca = forms.CharField(
+        required=False,
+        label="Atendimento",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Buscar atendimento por paciente, CPF ou número…",
+                "autocomplete": "off",
+            }
+        ),
+    )
+
     class Meta:
         model = VacinacaoSaude
         fields = [
-            "atendimento",
+            "atendimento_id",
+            "atendimento_busca",
             "vacina",
             "dose",
             "lote",
@@ -404,10 +540,53 @@ class VacinacaoSaudeForm(forms.ModelForm):
         unidades_qs = kwargs.pop("unidades_qs", None)
         profissionais_qs = kwargs.pop("profissionais_qs", None)
         super().__init__(*args, **kwargs)
+
+        self._atendimentos_qs = AtendimentoSaude.objects.all()
         if unidades_qs is not None:
             self.fields["unidade_aplicadora"].queryset = unidades_qs
+            self._atendimentos_qs = self._atendimentos_qs.filter(
+                unidade_id__in=unidades_qs.values_list("id", flat=True)
+            )
         if profissionais_qs is not None:
             self.fields["aplicador"].queryset = profissionais_qs
+
+        _configure_autocomplete_field(
+            self.fields["atendimento_busca"],
+            url=reverse("saude:api_atendimentos_suggest"),
+            fill_target="#id_atendimento_id",
+            min_chars=2,
+            max_items=10,
+        )
+
+        if getattr(self.instance, "atendimento_id", None):
+            self.initial["atendimento_id"] = self.instance.atendimento_id
+            self.initial["atendimento_busca"] = f"#{self.instance.atendimento_id} • {self.instance.atendimento.paciente_nome}"
+
+    def clean(self):
+        cleaned = super().clean()
+
+        atendimento_id = cleaned.get("atendimento_id")
+        atendimento_busca = (cleaned.get("atendimento_busca") or "").strip()
+
+        atendimento = None
+        if atendimento_id:
+            atendimento = self._atendimentos_qs.filter(pk=atendimento_id).first()
+            if not atendimento:
+                self.add_error("atendimento_busca", "Atendimento inválido.")
+        elif atendimento_busca:
+            self.add_error("atendimento_busca", "Selecione um atendimento válido nas sugestões.")
+        else:
+            self.add_error("atendimento_busca", "Selecione um atendimento para continuar.")
+
+        cleaned["atendimento_obj"] = atendimento
+        return cleaned
+
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+        obj.atendimento = self.cleaned_data.get("atendimento_obj")
+        if commit:
+            obj.save()
+        return obj
 
 
 class EncaminhamentoSaudeForm(forms.ModelForm):
@@ -445,11 +624,24 @@ class ProgramaSaudeForm(forms.ModelForm):
 
 
 class PacienteSaudeForm(forms.ModelForm):
+    aluno_id = forms.IntegerField(required=False, widget=forms.HiddenInput())
+    aluno_busca = forms.CharField(
+        required=False,
+        label="Aluno (Educação)",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Digite nome, CPF ou NIS do aluno…",
+                "autocomplete": "off",
+            }
+        ),
+    )
+
     class Meta:
         model = PacienteSaude
         fields = [
             "unidade_referencia",
-            "aluno",
+            "aluno_id",
+            "aluno_busca",
             "programa",
             "nome",
             "data_nascimento",
@@ -471,15 +663,92 @@ class PacienteSaudeForm(forms.ModelForm):
         if unidades_qs is not None:
             self.fields["unidade_referencia"].queryset = unidades_qs
 
+        _configure_autocomplete_field(
+            self.fields["aluno_busca"],
+            url=reverse("saude:api_alunos_suggest"),
+            fill_target="#id_aluno_id",
+            min_chars=2,
+            max_items=8,
+        )
+
+        if getattr(self.instance, "aluno_id", None):
+            self.initial["aluno_id"] = self.instance.aluno_id
+            self.initial["aluno_busca"] = getattr(self.instance.aluno, "nome", "")
+
+    def clean(self):
+        cleaned = super().clean()
+
+        aluno_id = cleaned.get("aluno_id")
+        aluno_busca = (cleaned.get("aluno_busca") or "").strip()
+
+        aluno = None
+        if aluno_id:
+            aluno = Aluno.objects.filter(pk=aluno_id).first()
+            if not aluno:
+                self.add_error("aluno_busca", "Aluno inválido.")
+        elif aluno_busca:
+            self.add_error("aluno_busca", "Selecione um aluno válido nas sugestões.")
+
+        cleaned["aluno_obj"] = aluno
+
+        if aluno and not cleaned.get("nome"):
+            cleaned["nome"] = aluno.nome
+
+        return cleaned
+
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+        obj.aluno = self.cleaned_data.get("aluno_obj")
+        if commit:
+            obj.save()
+        return obj
+
 
 class CheckInSaudeForm(forms.ModelForm):
+    agendamento_id = forms.IntegerField(required=False, widget=forms.HiddenInput())
+    agendamento_busca = forms.CharField(
+        required=False,
+        label="Agendamento",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Buscar agendamento por paciente, CPF ou número…",
+                "autocomplete": "off",
+            }
+        ),
+    )
+    atendimento_id = forms.IntegerField(required=False, widget=forms.HiddenInput())
+    atendimento_busca = forms.CharField(
+        required=False,
+        label="Atendimento",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Buscar atendimento por paciente, CPF ou número…",
+                "autocomplete": "off",
+            }
+        ),
+    )
+    paciente_id = forms.IntegerField(required=False, widget=forms.HiddenInput())
+    paciente_busca = forms.CharField(
+        required=False,
+        label="Paciente",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Buscar paciente por nome, CPF ou Cartão SUS…",
+                "autocomplete": "off",
+            }
+        ),
+    )
+
     class Meta:
         model = CheckInSaude
         fields = [
             "unidade",
-            "agendamento",
-            "atendimento",
-            "paciente",
+            "agendamento_id",
+            "agendamento_busca",
+            "atendimento_id",
+            "atendimento_busca",
+            "paciente_id",
+            "paciente_busca",
             "paciente_nome",
             "motivo_visita",
             "queixa_principal",
@@ -496,24 +765,131 @@ class CheckInSaudeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         unidades_qs = kwargs.pop("unidades_qs", None)
         super().__init__(*args, **kwargs)
+        self._pacientes_qs = PacienteSaude.objects.none()
+        self._atendimentos_qs = AtendimentoSaude.objects.none()
+        self._agendamentos_qs = AgendamentoSaude.objects.none()
+
         if unidades_qs is not None:
+            scoped_ids = unidades_qs.values_list("id", flat=True)
             self.fields["unidade"].queryset = unidades_qs
-            self.fields["paciente"].queryset = PacienteSaude.objects.filter(
-                unidade_referencia_id__in=unidades_qs.values_list("id", flat=True)
+            self._pacientes_qs = PacienteSaude.objects.filter(
+                unidade_referencia_id__in=scoped_ids
             ).order_by("nome")
-            self.fields["atendimento"].queryset = AtendimentoSaude.objects.filter(
-                unidade_id__in=unidades_qs.values_list("id", flat=True)
+            self._atendimentos_qs = AtendimentoSaude.objects.filter(
+                unidade_id__in=scoped_ids
             ).order_by("-data", "-id")
-            self.fields["agendamento"].queryset = AgendamentoSaude.objects.filter(
-                unidade_id__in=unidades_qs.values_list("id", flat=True)
+            self._agendamentos_qs = AgendamentoSaude.objects.filter(
+                unidade_id__in=scoped_ids
             ).order_by("-inicio", "-id")
+
+        _configure_autocomplete_field(
+            self.fields["paciente_busca"],
+            url=reverse("saude:api_pacientes_suggest"),
+            fill_target="#id_paciente_id",
+            min_chars=2,
+            max_items=10,
+        )
+        _configure_autocomplete_field(
+            self.fields["atendimento_busca"],
+            url=reverse("saude:api_atendimentos_suggest"),
+            fill_target="#id_atendimento_id",
+            min_chars=2,
+            max_items=10,
+        )
+        _configure_autocomplete_field(
+            self.fields["agendamento_busca"],
+            url=reverse("saude:api_agendamentos_suggest"),
+            fill_target="#id_agendamento_id",
+            min_chars=2,
+            max_items=10,
+        )
+
+        if getattr(self.instance, "paciente_id", None):
+            self.initial["paciente_id"] = self.instance.paciente_id
+            self.initial["paciente_busca"] = getattr(self.instance.paciente, "nome", "")
+        if getattr(self.instance, "atendimento_id", None):
+            self.initial["atendimento_id"] = self.instance.atendimento_id
+            self.initial["atendimento_busca"] = f"#{self.instance.atendimento_id} • {self.instance.atendimento.paciente_nome}"
+        if getattr(self.instance, "agendamento_id", None):
+            self.initial["agendamento_id"] = self.instance.agendamento_id
+            self.initial["agendamento_busca"] = f"#{self.instance.agendamento_id} • {self.instance.agendamento.paciente_nome}"
+
+    def clean(self):
+        cleaned = super().clean()
+
+        paciente_id = cleaned.get("paciente_id")
+        paciente_busca = (cleaned.get("paciente_busca") or "").strip()
+        atendimento_id = cleaned.get("atendimento_id")
+        atendimento_busca = (cleaned.get("atendimento_busca") or "").strip()
+        agendamento_id = cleaned.get("agendamento_id")
+        agendamento_busca = (cleaned.get("agendamento_busca") or "").strip()
+
+        paciente = None
+        atendimento = None
+        agendamento = None
+
+        if paciente_id:
+            paciente = self._pacientes_qs.filter(pk=paciente_id).first()
+            if not paciente:
+                self.add_error("paciente_busca", "Paciente inválido.")
+        elif paciente_busca:
+            self.add_error("paciente_busca", "Selecione um paciente válido nas sugestões.")
+
+        if atendimento_id:
+            atendimento = self._atendimentos_qs.filter(pk=atendimento_id).first()
+            if not atendimento:
+                self.add_error("atendimento_busca", "Atendimento inválido.")
+        elif atendimento_busca:
+            self.add_error("atendimento_busca", "Selecione um atendimento válido nas sugestões.")
+
+        if agendamento_id:
+            agendamento = self._agendamentos_qs.filter(pk=agendamento_id).first()
+            if not agendamento:
+                self.add_error("agendamento_busca", "Agendamento inválido.")
+        elif agendamento_busca:
+            self.add_error("agendamento_busca", "Selecione um agendamento válido nas sugestões.")
+
+        cleaned["paciente_obj"] = paciente
+        cleaned["atendimento_obj"] = atendimento
+        cleaned["agendamento_obj"] = agendamento
+
+        if paciente and not cleaned.get("paciente_nome"):
+            cleaned["paciente_nome"] = paciente.nome
+        elif atendimento and not cleaned.get("paciente_nome"):
+            cleaned["paciente_nome"] = atendimento.paciente_nome
+        elif agendamento and not cleaned.get("paciente_nome"):
+            cleaned["paciente_nome"] = agendamento.paciente_nome
+
+        return cleaned
+
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+        obj.paciente = self.cleaned_data.get("paciente_obj")
+        obj.atendimento = self.cleaned_data.get("atendimento_obj")
+        obj.agendamento = self.cleaned_data.get("agendamento_obj")
+        if commit:
+            obj.save()
+        return obj
 
 
 class MedicamentoUsoContinuoSaudeForm(forms.ModelForm):
+    paciente_id = forms.IntegerField(required=False, widget=forms.HiddenInput())
+    paciente_busca = forms.CharField(
+        required=False,
+        label="Paciente",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Buscar paciente por nome, CPF ou Cartão SUS…",
+                "autocomplete": "off",
+            }
+        ),
+    )
+
     class Meta:
         model = MedicamentoUsoContinuoSaude
         fields = [
-            "paciente",
+            "paciente_id",
+            "paciente_busca",
             "medicamento",
             "dose",
             "via",
@@ -527,19 +903,83 @@ class MedicamentoUsoContinuoSaudeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         unidades_qs = kwargs.pop("unidades_qs", None)
         super().__init__(*args, **kwargs)
+        self._pacientes_qs = PacienteSaude.objects.none()
         if unidades_qs is not None:
-            self.fields["paciente"].queryset = PacienteSaude.objects.filter(
+            self._pacientes_qs = PacienteSaude.objects.filter(
                 unidade_referencia_id__in=unidades_qs.values_list("id", flat=True)
             ).order_by("nome")
 
+        _configure_autocomplete_field(
+            self.fields["paciente_busca"],
+            url=reverse("saude:api_pacientes_suggest"),
+            fill_target="#id_paciente_id",
+            min_chars=2,
+            max_items=10,
+        )
+
+        if getattr(self.instance, "paciente_id", None):
+            self.initial["paciente_id"] = self.instance.paciente_id
+            self.initial["paciente_busca"] = getattr(self.instance.paciente, "nome", "")
+
+    def clean(self):
+        cleaned = super().clean()
+
+        paciente_id = cleaned.get("paciente_id")
+        paciente_busca = (cleaned.get("paciente_busca") or "").strip()
+
+        paciente = None
+        if paciente_id:
+            paciente = self._pacientes_qs.filter(pk=paciente_id).first()
+            if not paciente:
+                self.add_error("paciente_busca", "Paciente inválido.")
+        elif paciente_busca:
+            self.add_error("paciente_busca", "Selecione um paciente válido nas sugestões.")
+        else:
+            self.add_error("paciente_busca", "Selecione um paciente para continuar.")
+
+        cleaned["paciente_obj"] = paciente
+        return cleaned
+
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+        obj.paciente = self.cleaned_data.get("paciente_obj")
+        if commit:
+            obj.save()
+        return obj
+
 
 class DispensacaoSaudeForm(forms.ModelForm):
+    atendimento_id = forms.IntegerField(required=False, widget=forms.HiddenInput())
+    atendimento_busca = forms.CharField(
+        required=False,
+        label="Atendimento",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Buscar atendimento por paciente, CPF ou número…",
+                "autocomplete": "off",
+            }
+        ),
+    )
+    paciente_id = forms.IntegerField(required=False, widget=forms.HiddenInput())
+    paciente_busca = forms.CharField(
+        required=False,
+        label="Paciente",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Buscar paciente por nome, CPF ou Cartão SUS…",
+                "autocomplete": "off",
+            }
+        ),
+    )
+
     class Meta:
         model = DispensacaoSaude
         fields = [
             "unidade",
-            "atendimento",
-            "paciente",
+            "atendimento_id",
+            "atendimento_busca",
+            "paciente_id",
+            "paciente_busca",
             "medicamento",
             "quantidade",
             "unidade_medida",
@@ -552,11 +992,78 @@ class DispensacaoSaudeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         unidades_qs = kwargs.pop("unidades_qs", None)
         super().__init__(*args, **kwargs)
+        self._pacientes_qs = PacienteSaude.objects.none()
+        self._atendimentos_qs = AtendimentoSaude.objects.none()
         if unidades_qs is not None:
             scoped_ids = unidades_qs.values_list("id", flat=True)
             self.fields["unidade"].queryset = unidades_qs
-            self.fields["paciente"].queryset = PacienteSaude.objects.filter(unidade_referencia_id__in=scoped_ids).order_by("nome")
-            self.fields["atendimento"].queryset = AtendimentoSaude.objects.filter(unidade_id__in=scoped_ids).order_by("-data", "-id")
+            self._pacientes_qs = PacienteSaude.objects.filter(
+                unidade_referencia_id__in=scoped_ids
+            ).order_by("nome")
+            self._atendimentos_qs = AtendimentoSaude.objects.filter(
+                unidade_id__in=scoped_ids
+            ).order_by("-data", "-id")
+
+        _configure_autocomplete_field(
+            self.fields["paciente_busca"],
+            url=reverse("saude:api_pacientes_suggest"),
+            fill_target="#id_paciente_id",
+            min_chars=2,
+            max_items=10,
+        )
+        _configure_autocomplete_field(
+            self.fields["atendimento_busca"],
+            url=reverse("saude:api_atendimentos_suggest"),
+            fill_target="#id_atendimento_id",
+            min_chars=2,
+            max_items=10,
+        )
+
+        if getattr(self.instance, "paciente_id", None):
+            self.initial["paciente_id"] = self.instance.paciente_id
+            self.initial["paciente_busca"] = getattr(self.instance.paciente, "nome", "")
+        if getattr(self.instance, "atendimento_id", None):
+            self.initial["atendimento_id"] = self.instance.atendimento_id
+            self.initial["atendimento_busca"] = f"#{self.instance.atendimento_id} • {self.instance.atendimento.paciente_nome}"
+
+    def clean(self):
+        cleaned = super().clean()
+
+        paciente_id = cleaned.get("paciente_id")
+        paciente_busca = (cleaned.get("paciente_busca") or "").strip()
+        atendimento_id = cleaned.get("atendimento_id")
+        atendimento_busca = (cleaned.get("atendimento_busca") or "").strip()
+
+        paciente = None
+        atendimento = None
+
+        if paciente_id:
+            paciente = self._pacientes_qs.filter(pk=paciente_id).first()
+            if not paciente:
+                self.add_error("paciente_busca", "Paciente inválido.")
+        elif paciente_busca:
+            self.add_error("paciente_busca", "Selecione um paciente válido nas sugestões.")
+        else:
+            self.add_error("paciente_busca", "Selecione um paciente para continuar.")
+
+        if atendimento_id:
+            atendimento = self._atendimentos_qs.filter(pk=atendimento_id).first()
+            if not atendimento:
+                self.add_error("atendimento_busca", "Atendimento inválido.")
+        elif atendimento_busca:
+            self.add_error("atendimento_busca", "Selecione um atendimento válido nas sugestões.")
+
+        cleaned["paciente_obj"] = paciente
+        cleaned["atendimento_obj"] = atendimento
+        return cleaned
+
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+        obj.paciente = self.cleaned_data.get("paciente_obj")
+        obj.atendimento = self.cleaned_data.get("atendimento_obj")
+        if commit:
+            obj.save()
+        return obj
 
 
 class ExameColetaSaudeForm(forms.ModelForm):
@@ -581,11 +1088,24 @@ class ExameColetaSaudeForm(forms.ModelForm):
 
 
 class InternacaoSaudeForm(forms.ModelForm):
+    paciente_id = forms.IntegerField(required=False, widget=forms.HiddenInput())
+    paciente_busca = forms.CharField(
+        required=False,
+        label="Paciente",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Buscar paciente por nome, CPF ou Cartão SUS…",
+                "autocomplete": "off",
+            }
+        ),
+    )
+
     class Meta:
         model = InternacaoSaude
         fields = [
             "unidade",
-            "paciente",
+            "paciente_id",
+            "paciente_busca",
             "profissional_responsavel",
             "tipo",
             "status",
@@ -600,13 +1120,52 @@ class InternacaoSaudeForm(forms.ModelForm):
         unidades_qs = kwargs.pop("unidades_qs", None)
         profissionais_qs = kwargs.pop("profissionais_qs", None)
         super().__init__(*args, **kwargs)
+        self._pacientes_qs = PacienteSaude.objects.none()
         if unidades_qs is not None:
             self.fields["unidade"].queryset = unidades_qs
-            self.fields["paciente"].queryset = PacienteSaude.objects.filter(
+            self._pacientes_qs = PacienteSaude.objects.filter(
                 unidade_referencia_id__in=unidades_qs.values_list("id", flat=True)
             ).order_by("nome")
         if profissionais_qs is not None:
             self.fields["profissional_responsavel"].queryset = profissionais_qs
+
+        _configure_autocomplete_field(
+            self.fields["paciente_busca"],
+            url=reverse("saude:api_pacientes_suggest"),
+            fill_target="#id_paciente_id",
+            min_chars=2,
+            max_items=10,
+        )
+
+        if getattr(self.instance, "paciente_id", None):
+            self.initial["paciente_id"] = self.instance.paciente_id
+            self.initial["paciente_busca"] = getattr(self.instance.paciente, "nome", "")
+
+    def clean(self):
+        cleaned = super().clean()
+
+        paciente_id = cleaned.get("paciente_id")
+        paciente_busca = (cleaned.get("paciente_busca") or "").strip()
+
+        paciente = None
+        if paciente_id:
+            paciente = self._pacientes_qs.filter(pk=paciente_id).first()
+            if not paciente:
+                self.add_error("paciente_busca", "Paciente inválido.")
+        elif paciente_busca:
+            self.add_error("paciente_busca", "Selecione um paciente válido nas sugestões.")
+        else:
+            self.add_error("paciente_busca", "Selecione um paciente para continuar.")
+
+        cleaned["paciente_obj"] = paciente
+        return cleaned
+
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+        obj.paciente = self.cleaned_data.get("paciente_obj")
+        if commit:
+            obj.save()
+        return obj
 
 
 class InternacaoRegistroSaudeForm(forms.ModelForm):

@@ -21,45 +21,32 @@
   {% endif %}
 
   <header class="ins-header">
-    <div class="ins-headline">
-      <div class="ins-wrap ins-headline__inner">
-        <a class="ins-brand" href="#topo">
-          <span class="ins-brand__badge">
-            {% if content.marca_logo_url %}
-              <img src="{{ content.marca_logo_url }}" alt="{{ content.marca_nome|default:'GEPUB' }}" class="ins-brand__logo">
-            {% else %}
-              <i class="fa-solid fa-building-columns"></i>
-            {% endif %}
-          </span>
-          <span>
-            <strong>{{ content.marca_nome|default:'GEPUB' }}</strong>
-            <small>Gestão Estratégica Pública</small>
-          </span>
-        </a>
+    <div class="ins-wrap ins-header__inner">
+      <a class="ins-brand" href="#topo">
+        <span class="ins-brand__mark">
+          {% if content.marca_logo_url %}
+            <img src="{{ content.marca_logo_url }}" alt="{{ content.marca_nome|default:'GEPUB' }}" class="ins-brand__logo">
+          {% else %}
+            <i class="fa-solid fa-building-columns"></i>
+          {% endif %}
+        </span>
+        <span>
+          <strong>{{ content.marca_nome|default:'GEPUB' }}</strong>
+          <small>Gestão Estratégica Pública</small>
+        </span>
+      </a>
 
-        <nav class="ins-quick" aria-label="Links institucionais">
-          <a href="{{ cta_transparencia }}"><i class="fa-solid fa-chart-column"></i> Transparência</a>
-          <a href="{{ cta_docs }}"><i class="fa-regular fa-file-lines"></i> Documentação</a>
-          <a href="{{ cta_login }}"><i class="fa-solid fa-arrow-right-to-bracket"></i> Sistema Interno</a>
-        </nav>
-      </div>
-    </div>
+      <nav class="ins-nav" aria-label="Navegação institucional">
+        <a href="#ferramentas">{{ content.nav_servicos_label|default:'Serviços' }}</a>
+        <a href="#metodo">{{ content.nav_metodo_label|default:'Método' }}</a>
+        <a href="#modulos">Módulos</a>
+        <a href="#planos">{{ content.nav_planos_label|default:'Planos' }}</a>
+        <a href="#simulador">{{ content.nav_simulador_label|default:'Simulador' }}</a>
+      </nav>
 
-    <div class="ins-mainnav">
-      <div class="ins-wrap ins-mainnav__inner">
-        <nav class="ins-menu" aria-label="Seções da página institucional">
-          <a href="#topo" class="is-active"><i class="fa-solid fa-house"></i> Início</a>
-          <a href="#sobre"><i class="fa-solid fa-circle-info"></i> Sobre o GEPUB</a>
-          <a href="#modulos"><i class="fa-solid fa-puzzle-piece"></i> Módulos</a>
-          <a href="#diferenciais"><i class="fa-solid fa-shield-halved"></i> Diferenciais</a>
-          <a href="#planos"><i class="fa-solid fa-layer-group"></i> Planos</a>
-          <a href="#contato"><i class="fa-solid fa-phone"></i> Contato</a>
-        </nav>
-
-        <div class="ins-mainnav__actions">
-          <a class="btn-ins btn-ins--ghost" href="{{ cta_docs }}">Ver módulos</a>
-          <a class="btn-ins btn-ins--primary" href="{{ cta_contato }}">Solicitar apresentação</a>
-        </div>
+      <div class="ins-header__actions">
+        <a class="ins-btn ins-btn--ghost" href="{{ cta_login }}">{{ content.botao_login_label|default:'Entrar' }}</a>
+        <a class="ins-btn ins-btn--primary" href="{{ cta_contato }}">Agendar Demo</a>
       </div>
     </div>
   </header>
@@ -68,326 +55,347 @@
     <section class="ins-hero">
       <div class="ins-wrap ins-hero__inner">
         <article class="ins-hero__content reveal-up" style="--d:.02s;">
-          <p class="ins-kicker">GEPUB - Gestão Estratégica Pública</p>
-          <h1>Tecnologia inteligente para transformar a administração municipal.</h1>
-          <p>
-            O GEPUB é uma plataforma completa de gestão pública que integra secretarias, setores e unidades
-            em um único sistema organizado, moderno e seguro. Desenvolvido para prefeituras que desejam
-            eficiência, transparência e controle total das informações.
-          </p>
-
-          <ul class="ins-checklist">
-            <li><i class="fa-solid fa-check"></i> Integração entre secretarias</li>
-            <li><i class="fa-solid fa-check"></i> Organização centralizada</li>
-            <li><i class="fa-solid fa-check"></i> Dados em tempo real</li>
-            <li><i class="fa-solid fa-check"></i> Portal institucional próprio para cada município</li>
-            <li><i class="fa-solid fa-check"></i> Tecnologia moderna, segura e escalável</li>
-          </ul>
-
-          <p class="ins-hero__quote">
-            Uma nova forma de administrar com inteligência, controle e transparência.
-          </p>
+          <p class="ins-kicker">{{ content.hero_kicker|default:'GEPUB' }}</p>
+          <h1>{{ content.hero_titulo|default:'Tecnologia inteligente para gestão pública municipal' }}</h1>
+          <p>{{ content.hero_descricao|default:'Plataforma integrada para organizar secretarias, ampliar transparência e acelerar resultados da prefeitura.' }}</p>
 
           <div class="ins-hero__actions">
-            <a class="btn-ins btn-ins--primary" href="{{ cta_contato }}">Falar com especialista</a>
-            <a class="btn-ins btn-ins--ghost" href="#planos">Ver planos de implantação</a>
+            <a class="ins-btn ins-btn--primary" href="{{ content.hero_cta_primario_link|default:'#simulador' }}">{{ content.hero_cta_primario_label|default:'Simular plano' }}</a>
+            <a class="ins-btn ins-btn--soft" href="{{ content.hero_cta_secundario_link|default:'#planos' }}">{{ content.hero_cta_secundario_label|default:'Ver planos' }}</a>
+          </div>
+
+          <div class="ins-hero__trusted">
+            <span>Ecossistema integrado:</span>
+            <div class="ins-hero__icons">
+              {% for service in service_cards|slice:':7' %}
+                <i class="{{ service.icone|default:'fa-solid fa-cube' }}" title="{{ service.titulo }}"></i>
+              {% endfor %}
+            </div>
           </div>
         </article>
 
-        <aside class="ins-hero__aside reveal-up" style="--d:.10s;">
-          <div class="ins-metric-panel">
-            <h2>Plataforma estratégica para prefeituras</h2>
-            <p>Ecossistema integrado para organização estrutural, gestão operacional e transparência pública.</p>
+        <aside class="ins-hero__visual reveal-up" style="--d:.08s;">
+          {% with first=slides.0 second=slides.1 third=slides.2 %}
+            <article class="ins-bubble ins-bubble--main">
+              {% if first and first.imagem_url %}
+                <img src="{{ first.imagem_url }}" alt="{{ first.titulo }}">
+              {% else %}
+                <span><i class="fa-solid fa-user-tie"></i></span>
+              {% endif %}
+            </article>
 
-            <div class="ins-metric-grid">
-              <article>
-                <strong>{{ planos|length }}</strong>
-                <span>Modelos de implantação</span>
+            <article class="ins-bubble ins-bubble--secondary">
+              {% if second and second.imagem_url %}
+                <img src="{{ second.imagem_url }}" alt="{{ second.titulo }}">
+              {% else %}
+                <span><i class="fa-solid fa-users"></i></span>
+              {% endif %}
+            </article>
+
+            {% if first %}
+              <article class="ins-float-card is-top">
+                <strong>{{ first.titulo }}</strong>
+                {% if first.subtitulo %}<p>{{ first.subtitulo }}</p>{% endif %}
               </article>
-              <article>
+            {% endif %}
+
+            {% if second %}
+              <article class="ins-float-card is-mid">
+                <strong>{{ second.titulo }}</strong>
+                {% if second.subtitulo %}<p>{{ second.subtitulo }}</p>{% endif %}
+              </article>
+            {% endif %}
+
+            {% if third %}
+              <article class="ins-float-card is-bottom">
+                <strong>{{ third.titulo }}</strong>
+                {% if third.subtitulo %}<p>{{ third.subtitulo }}</p>{% endif %}
+              </article>
+            {% endif %}
+
+            <article class="ins-score-card">
+              <p>Operação única para o município</p>
+              <div>
                 <strong>{{ service_cards|length }}</strong>
-                <span>Módulos e recursos ativos</span>
-              </article>
-              <article>
-                <strong>{{ method_steps|length }}</strong>
-                <span>Etapas de governança</span>
-              </article>
-              <article>
-                <strong>100%</strong>
-                <span>Base integrada de dados</span>
-              </article>
-            </div>
-          </div>
-
-          <div class="ins-highlight-list">
-            {% for slide in slides|slice:":3" %}
-              <article class="ins-highlight-item">
-                <div class="ins-highlight-item__icon">
-                  <i class="{{ slide.icone|default:'fa-solid fa-circle-check' }}"></i>
-                </div>
-                <div>
-                  <strong>{{ slide.titulo }}</strong>
-                  {% if slide.subtitulo %}<p>{{ slide.subtitulo }}</p>{% elif slide.descricao %}<p>{{ slide.descricao }}</p>{% endif %}
-                </div>
-              </article>
-            {% endfor %}
-          </div>
+                <span>módulos conectados</span>
+              </div>
+            </article>
+          {% endwith %}
         </aside>
       </div>
     </section>
 
-    <section class="ins-section" id="sobre">
-      <div class="ins-wrap ins-about reveal-up" style="--d:.16s;">
-        <article>
-          <p class="ins-kicker">Sobre o GEPUB</p>
-          <h2>Estrutura padronizada, processos organizados e integração total de dados.</h2>
-          <p>
-            O GEPUB foi desenvolvido com foco em organização estrutural da prefeitura, padronização de processos
-            e integração de dados entre setores. A plataforma funciona como um ecossistema único, onde todos os
-            módulos compartilham a mesma base de dados, garantindo consistência e confiabilidade das informações.
-          </p>
+    <section class="ins-section" id="ferramentas">
+      <div class="ins-wrap reveal-up" style="--d:.12s;">
+        <div class="ins-section__head ins-section__head--center">
+          <p class="ins-kicker">{{ content.servicos_kicker|default:'Nossos serviços' }}</p>
+          <h2>Todas as ferramentas que sua gestão precisa</h2>
+          <p>{{ content.servicos_titulo|default:'Solução completa para operação pública integrada, com governança e transparência.' }}</p>
+        </div>
+
+        <article class="ins-platform-shot">
+          <img src="{% static 'img/design-admin-panel-ui-ux-for-web-app-saas-dashboard-software-in-figma-or-xd.webp' %}" alt="Painel administrativo GEPUB">
         </article>
 
-        <article class="ins-about__cards">
-          <div>
-            <h3>Estrutura administrativa sólida</h3>
-            <ul>
-              <li>Secretarias, Unidades e Setores organizados</li>
-              <li>Controle de usuários por perfil e função</li>
-              <li>Gestão centralizada com permissões inteligentes</li>
-            </ul>
+        <div class="ins-service-chips">
+          {% for service in service_cards %}
+            <article>
+              <i class="{{ service.icone|default:'fa-solid fa-cube' }}"></i>
+              <span>{{ service.titulo }}</span>
+            </article>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="ins-section ins-section--split" id="metodo">
+      <div class="ins-wrap ins-split reveal-up" style="--d:.16s;">
+        <article>
+          <p class="ins-kicker">{{ content.metodo_kicker|default:'Método GEPUB' }}</p>
+          <h2>{{ content.metodo_titulo|default:'Implantação orientada por etapas e metas.' }}</h2>
+          <p>{{ content.oferta_descricao|default:'Do diagnóstico ao onboarding com suporte contínuo para a prefeitura.' }}</p>
+
+          <ul class="ins-checklist">
+            {% for step in method_steps %}
+              <li>
+                <i class="{{ step.icone|default:'fa-solid fa-check' }}"></i>
+                <div>
+                  <strong>{{ step.titulo }}</strong>
+                  <p>{{ step.descricao }}</p>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+
+          <a class="ins-link" href="{{ content.metodo_cta_link|default:'#simulador' }}">{{ content.metodo_cta_label|default:'Quero avaliar meu município' }} <i class="fa-solid fa-arrow-right"></i></a>
+        </article>
+
+        <article class="ins-media-stack">
+          <div class="ins-media-stack__main">
+            {% if slides and slides.0.imagem_url %}
+              <img src="{{ slides.0.imagem_url }}" alt="{{ slides.0.titulo }}">
+            {% else %}
+              <img src="{% static 'img/design-admin-panel-ui-ux-for-web-app-saas-dashboard-software-in-figma-or-xd.webp' %}" alt="Visão geral GEPUB">
+            {% endif %}
+            <button type="button" aria-label="Assistir apresentação">
+              <i class="fa-solid fa-play"></i>
+            </button>
           </div>
-          <div>
-            <h3>Operação segura e rastreável</h3>
-            <ul>
-              <li>Ambiente seguro com rastreabilidade de ações</li>
-              <li>Interface moderna, intuitiva e padronizada</li>
-              <li>Base pronta para auditoria e evolução contínua</li>
-            </ul>
+          <div class="ins-media-stack__cards">
+            {% for slide in slides|slice:':3' %}
+              <article>
+                <strong>{{ slide.titulo }}</strong>
+                <p>{{ slide.descricao|default:slide.subtitulo }}</p>
+                <a href="{{ slide.cta_link|default:cta_docs }}">{{ slide.cta_label|default:'Saber mais' }}</a>
+              </article>
+            {% endfor %}
           </div>
         </article>
       </div>
     </section>
 
     <section class="ins-section" id="modulos">
-      <div class="ins-wrap reveal-up" style="--d:.22s;">
-        <div class="ins-section__head">
-          <p class="ins-kicker">Módulos do sistema</p>
-          <h2>Áreas estratégicas da gestão pública em uma única plataforma.</h2>
-          <p>
-            O GEPUB é dividido em módulos que atendem às rotinas essenciais da administração municipal,
-            com consistência de dados e operação integrada entre equipes.
-          </p>
-        </div>
+      <div class="ins-wrap ins-split reveal-up" style="--d:.20s;">
+        <article class="ins-gallery-grid">
+          {% for slide in slides|slice:':8' %}
+            <div>
+              {% if slide.imagem_url %}
+                <img src="{{ slide.imagem_url }}" alt="{{ slide.titulo }}">
+              {% else %}
+                <span><i class="{{ slide.icone|default:'fa-solid fa-cube' }}"></i></span>
+              {% endif %}
+            </div>
+          {% endfor %}
+          {% if not slides %}
+            {% for service in service_cards|slice:':8' %}
+              <div><span><i class="{{ service.icone|default:'fa-solid fa-cube' }}"></i></span></div>
+            {% endfor %}
+          {% endif %}
+        </article>
 
-        <div class="ins-module-grid">
-          <article>
-            <h3><i class="fa-solid fa-graduation-cap"></i> Educação</h3>
-            <ul>
-              <li>Cadastro de alunos, matrículas e turmas</li>
-              <li>Controle de frequência e lançamento de notas</li>
-              <li>Relatórios pedagógicos por unidade escolar</li>
-            </ul>
-          </article>
+        <article>
+          <p class="ins-kicker">Integração total</p>
+          <h2>Secretarias, equipes e dados em uma única plataforma</h2>
+          <p>{{ content.oferta_titulo|default:'Estrutura preparada para contratação pública e operação contínua.' }}</p>
 
-          <article>
-            <h3><i class="fa-solid fa-universal-access"></i> NEE - Educação Especial</h3>
-            <ul>
-              <li>Cadastro detalhado de necessidades</li>
-              <li>Laudos, acompanhamentos e estatísticas</li>
-              <li>Apoio técnico para tomada de decisão</li>
-            </ul>
-          </article>
-
-          <article>
-            <h3><i class="fa-solid fa-heart-pulse"></i> Saúde</h3>
-            <ul>
-              <li>Gestão das unidades de saúde municipais</li>
-              <li>Organização administrativa por secretaria</li>
-              <li>Estrutura preparada para expansão assistencial</li>
-            </ul>
-          </article>
-
-          <article>
-            <h3><i class="fa-solid fa-sitemap"></i> Administração Pública</h3>
-            <ul>
-              <li>Cadastro de municípios, secretarias e setores</li>
-              <li>Usuários institucionais e permissões</li>
-              <li>Hierarquia administrativa clara</li>
-            </ul>
-          </article>
-
-          <article>
-            <h3><i class="fa-solid fa-wallet"></i> Financeiro Administrativo</h3>
-            <ul>
-              <li>Organização financeira por secretaria</li>
-              <li>Controle administrativo interno</li>
-              <li>Base preparada para integração contábil</li>
-            </ul>
-          </article>
-
-          <article>
-            <h3><i class="fa-solid fa-chart-line"></i> Relatórios e Inteligência</h3>
-            <ul>
-              <li>Relatórios por secretaria, unidade e município</li>
-              <li>Exportação em PDF e indicadores quantitativos</li>
-              <li>Análise estratégica para gestores públicos</li>
-            </ul>
-          </article>
-
-          <article>
-            <h3><i class="fa-solid fa-globe"></i> Portal Institucional do Município</h3>
-            <ul>
-              <li>Página personalizada com identidade municipal</li>
-              <li>Transparência integrada e conteúdo público</li>
-              <li>Editor institucional para atualização em tempo real</li>
-            </ul>
-          </article>
-        </div>
-
-        {% if service_cards %}
-          <div class="ins-extra-services">
-            {% for service in service_cards %}
-              <article>
-                <i class="{{ service.icone|default:'fa-solid fa-square' }}"></i>
-                <div>
-                  <strong>{{ service.titulo }}</strong>
-                  <p>{{ service.descricao }}</p>
-                </div>
-              </article>
+          <div class="ins-feature-list">
+            {% for service in service_cards|slice:':6' %}
+              <p><i class="{{ service.icone|default:'fa-solid fa-check' }}"></i> {{ service.titulo }}: {{ service.descricao }}</p>
             {% endfor %}
           </div>
-        {% endif %}
-      </div>
-    </section>
 
-    <section class="ins-section" id="diferenciais">
-      <div class="ins-wrap reveal-up" style="--d:.28s;">
-        <div class="ins-section__head">
-          <p class="ins-kicker">Experiência, segurança e escala</p>
-          <h2>Um padrão operacional único para todas as áreas da prefeitura.</h2>
-        </div>
-
-        <div class="ins-feature-panels">
-          <article>
-            <h3><i class="fa-solid fa-compass-drafting"></i> Experiência e usabilidade</h3>
-            <ul>
-              <li>Interface moderna com navegação intuitiva</li>
-              <li>Componentes padronizados em todos os módulos</li>
-              <li>Uso simples para equipes com baixa familiaridade tecnológica</li>
-            </ul>
-          </article>
-
-          <article>
-            <h3><i class="fa-solid fa-lock"></i> Segurança e controle</h3>
-            <ul>
-              <li>Controle de acesso por perfil e secretaria</li>
-              <li>Rastreamento de ações e validação documental</li>
-              <li>Emissão com QR Code e estrutura para auditoria</li>
-            </ul>
-          </article>
-
-          <article>
-            <h3><i class="fa-solid fa-cubes-stacked"></i> Estrutura modular inteligente</h3>
-            <ul>
-              <li>Comece com módulos essenciais e expanda depois</li>
-              <li>Ative novos recursos sem perder dados históricos</li>
-              <li>Operação integrada na mesma base institucional</li>
-            </ul>
-          </article>
-        </div>
-
-        <article class="ins-why-card">
-          <h3>Por que escolher o GEPUB?</h3>
-          <div class="ins-why-grid">
-            <p><i class="fa-solid fa-check"></i> Integra todas as secretarias</p>
-            <p><i class="fa-solid fa-check"></i> Centraliza informações estratégicas</p>
-            <p><i class="fa-solid fa-check"></i> Organiza a estrutura administrativa</p>
-            <p><i class="fa-solid fa-check"></i> Facilita auditorias e conformidade</p>
-            <p><i class="fa-solid fa-check"></i> Gera relatórios de apoio à decisão</p>
-            <p><i class="fa-solid fa-check"></i> Fortalece a transparência pública</p>
-            <p><i class="fa-solid fa-check"></i> Moderniza a gestão municipal</p>
-          </div>
-          <p class="ins-why-card__note">O GEPUB não é apenas um sistema. É uma plataforma estratégica de organização pública.</p>
+          <a class="ins-link" href="{{ cta_docs }}">Explorar módulos e documentação <i class="fa-solid fa-arrow-right"></i></a>
         </article>
       </div>
     </section>
 
-    <section class="ins-section" id="planos">
-      <div class="ins-wrap reveal-up" style="--d:.34s;">
-        <div class="ins-section__head">
-          <p class="ins-kicker">Planos de implantação</p>
-          <h2>Modelos estruturados para diferentes realidades municipais.</h2>
-          <p>Valores sob consulta técnica personalizada.</p>
-        </div>
-
-        {% if planos %}
-          <div class="ins-plan-grid">
-            {% for plano in planos %}
-              <article class="ins-plan-card {% if plano.destaque == 'Recomendado' %}is-featured{% endif %}">
-                <div class="ins-plan-card__head">
-                  {% if plano.destaque %}<span>{{ plano.destaque }}</span>{% endif %}
-                  <h3>{{ plano.nome }}</h3>
-                  <p>{{ plano.descricao }}</p>
-                </div>
-
-                {% if plano.features %}
-                  <ul>
-                    {% for item in plano.features|slice:":5" %}
-                      <li>{{ item }}</li>
-                    {% endfor %}
-                  </ul>
-                {% endif %}
-
-                <a class="btn-ins btn-ins--ghost" href="{{ cta_contato }}">Solicitar proposta</a>
-              </article>
-            {% endfor %}
-          </div>
-        {% else %}
-          <div class="ins-plan-grid">
-            <article class="ins-plan-card">
-              <div class="ins-plan-card__head">
-                <h3>Plano Essencial</h3>
-                <p>Ideal para municípios que desejam organizar a estrutura administrativa e iniciar a digitalização.</p>
-              </div>
-            </article>
-            <article class="ins-plan-card is-featured">
-              <div class="ins-plan-card__head">
-                <span>Recomendado</span>
-                <h3>Plano Gestão Integrada</h3>
-                <p>Inclui Educação, Administração Pública e relatórios estratégicos integrados.</p>
-              </div>
-            </article>
-            <article class="ins-plan-card">
-              <div class="ins-plan-card__head">
-                <h3>Plano Estratégico Completo</h3>
-                <p>Integra todos os módulos com suporte expandido e estrutura completa de dados.</p>
-              </div>
-            </article>
-          </div>
-        {% endif %}
+    <section class="ins-stats reveal-up" style="--d:.24s;">
+      <div class="ins-wrap ins-stats__grid">
+        <article>
+          <i class="fa-solid fa-layer-group"></i>
+          <strong>{{ planos|length }}</strong>
+          <span>planos municipais</span>
+        </article>
+        <article>
+          <i class="fa-solid fa-cubes"></i>
+          <strong>{{ service_cards|length }}</strong>
+          <span>módulos integrados</span>
+        </article>
+        <article>
+          <i class="fa-solid fa-list-check"></i>
+          <strong>{{ method_steps|length }}</strong>
+          <span>etapas de implantação</span>
+        </article>
       </div>
     </section>
 
-    <section class="ins-cta" id="contato">
-      <div class="ins-wrap reveal-up" style="--d:.40s;">
-        <p class="ins-kicker">Nossa missão</p>
-        <h2>Transformar a gestão pública municipal por meio da tecnologia, organização e inteligência de dados.</h2>
-        <p>
-          Modernize sua prefeitura. Organize sua gestão. Transforme seu município.
-          <strong>GEPUB - Gestão Estratégica Pública.</strong>
-          Tecnologia a serviço da administração municipal.
-        </p>
-        <div class="ins-cta__actions">
-          <a class="btn-ins btn-ins--primary" href="{{ cta_contato }}">Agendar apresentação</a>
-          <a class="btn-ins btn-ins--ghost" href="{{ cta_login }}">Entrar na plataforma</a>
+    <section class="ins-section" id="depoimentos">
+      <div class="ins-wrap reveal-up" style="--d:.28s;">
+        <div class="ins-section__head">
+          <h2>O que os gestores perguntam</h2>
+        </div>
+
+        <div class="ins-testimonial-grid">
+          {% for item in faq_items %}
+            <article>
+              <p>{{ item.pergunta }}</p>
+              <strong>{{ item.resposta }}</strong>
+            </article>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="ins-section" id="planos">
+      <div class="ins-wrap reveal-up" style="--d:.32s;">
+        <div class="ins-section__head">
+          <p class="ins-kicker">{{ content.planos_kicker|default:'Planos municipais' }}</p>
+          <h2>{{ content.planos_titulo|default:'Planos para diferentes portes de município' }}</h2>
+          <p>{{ content.planos_descricao|default:'Modelos de contratação estruturados para escala e previsibilidade.' }}</p>
+        </div>
+
+        <div class="ins-plan-grid">
+          {% for plano in planos %}
+            <article class="ins-plan-card {% if plano.destaque == 'Recomendado' %}is-featured{% endif %}">
+              <div class="ins-plan-card__head">
+                {% if plano.destaque %}<span>{{ plano.destaque }}</span>{% endif %}
+                <h3>{{ plano.nome }}</h3>
+                <p>{{ plano.descricao }}</p>
+              </div>
+
+              <ul>
+                {% for feature in plano.features|slice:':5' %}
+                  <li>{{ feature }}</li>
+                {% endfor %}
+              </ul>
+
+              <div class="ins-plan-card__price">R$ {{ plano.preco }}/mês</div>
+              <a class="ins-btn ins-btn--soft" href="{{ cta_contato }}">Solicitar proposta</a>
+            </article>
+          {% empty %}
+            <article class="ins-plan-card">
+              <h3>Sem planos ativos</h3>
+              <p>Cadastre planos no módulo Billing para exibir nesta seção.</p>
+            </article>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="ins-sim" id="contato">
+      <div class="ins-wrap reveal-up" style="--d:.36s;">
+        <div class="ins-sim__box" id="simulador">
+          <div class="ins-sim__intro">
+            <p class="ins-kicker">Simulador GEPUB</p>
+            <h2>Entre para uma gestão orientada por dados</h2>
+            <p>Faça uma estimativa inicial do plano ideal para seu município e receba uma proposta técnica.</p>
+          </div>
+
+          <form method="post" class="ins-sim-form">
+            {% csrf_token %}
+            {% for field in form %}
+              <div class="ins-sim-form__field">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}<p class="ins-sim-form__error">{{ field.errors|striptags }}</p>{% endif %}
+              </div>
+            {% endfor %}
+            <button class="ins-btn ins-btn--primary" type="submit">Simular plano</button>
+          </form>
+
+          {% if simulacao %}
+            <div class="ins-sim-result">
+              <article>
+                <span>Plano recomendado</span>
+                <strong>{{ simulacao.plano.nome }}</strong>
+                <p>{{ simulacao.justificativa }}</p>
+              </article>
+              <article>
+                <span>Base mensal</span>
+                <strong>R$ {{ simulacao.preco_base }}</strong>
+                <p>Sem adicionais</p>
+              </article>
+              <article>
+                <span>Total estimado</span>
+                <strong>R$ {{ simulacao.total_mensal }}</strong>
+                <p>Adicionais: R$ {{ simulacao.total_adicionais }}</p>
+              </article>
+            </div>
+
+            <div class="ins-sim-table-wrap">
+              <table class="ins-sim-table">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Quantidade</th>
+                    <th>Valor unitário</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for a in simulacao.adicionais %}
+                    <tr>
+                      <td>{{ a.nome }}</td>
+                      <td>{{ a.quantidade }}</td>
+                      <td>R$ {{ a.valor_unitario }}</td>
+                      <td>R$ {{ a.valor_total }}</td>
+                    </tr>
+                  {% empty %}
+                    <tr><td colspan="4">Sem adicionais para este cenário.</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% endif %}
         </div>
       </div>
     </section>
   </main>
 
   <footer class="ins-footer">
-    <div class="ins-wrap">
+    <div class="ins-wrap ins-footer__inner">
+      <a class="ins-brand" href="#topo">
+        <span class="ins-brand__mark">
+          {% if content.marca_logo_url %}
+            <img src="{{ content.marca_logo_url }}" alt="{{ content.marca_nome|default:'GEPUB' }}" class="ins-brand__logo">
+          {% else %}
+            <i class="fa-solid fa-building-columns"></i>
+          {% endif %}
+        </span>
+        <span>
+          <strong>{{ content.marca_nome|default:'GEPUB' }}</strong>
+          <small>Gestão Estratégica Pública</small>
+        </span>
+      </a>
+
+      <nav>
+        <a href="#topo">Início</a>
+        <a href="#modulos">Módulos</a>
+        <a href="#planos">Planos</a>
+        <a href="{{ cta_transparencia }}">Transparência</a>
+        <a href="{{ cta_login }}">Sistema Interno</a>
+      </nav>
+
       <p>{{ content.rodape_texto|default:'© GEPUB • Gestão Estratégica Pública. Todos os direitos reservados.' }}</p>
     </div>
   </footer>

@@ -1,330 +1,479 @@
+/* =========================================================
+   GEPUB Login (inspirado no layout Figma de referência)
+   ========================================================= */
+
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&display=swap");
+
 body.public-body {
   overflow-y: auto !important;
   overflow-x: hidden;
-  background: linear-gradient(180deg, #3f7fba 0%, #2f6ea9 100%);
+  background: #eceef1;
 }
 
-.suap-login {
-  --bg-900: #0d4678;
-  --bg-850: #175687;
-  --bg-800: #226495;
-  --panel-900: #0e3f68;
-  --panel-850: #14507d;
-  --mint-400: #d8efff;
-  --mint-300: #f0f9ff;
-  --text-100: #f6fbff;
-  --text-200: #d4e8f8;
-  --text-300: #bdd8ec;
-  --danger-bg: #fff1f1;
-  --danger-border: #f3c5c5;
-  --danger-text: #8d2b2b;
+.gepub-login-page {
+  --login-bg: #eceef1;
+  --login-surface: #dfe3e8;
+  --login-panel: #f2f4f7;
+  --login-panel-2: #e7ebf1;
+  --login-ink: #0f172a;
+  --login-muted: #475569;
+  --login-border: var(--color-primary-700);
+  --login-primary: var(--color-primary-600);
+  --login-primary-strong: var(--color-primary-700);
+  --login-accent: #16a34a;
+  --login-accent-strong: #15803d;
+  --login-accent-soft: #dcfce7;
 
-  min-height: 100vh;
-  background: linear-gradient(180deg, #3f7fba 0%, #2f6ea9 100%);
-  padding: clamp(14px, 2vw, 26px);
-  color: var(--text-100);
-}
-
-.suap-login__hero,
-.suap-services {
-  width: min(1280px, 100%);
-  margin: 0 auto;
-}
-
-.suap-login__hero {
-  border-radius: 28px;
-  background: linear-gradient(135deg, var(--bg-800) 0%, var(--bg-900) 72%);
-  border: 1px solid rgba(76, 131, 179, 0.34);
-  overflow: hidden;
-  display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  min-height: 620px;
-}
-
-.suap-login__left {
-  padding: clamp(30px, 4.2vw, 56px);
   position: relative;
+  min-height: 100vh;
+  padding: clamp(20px, 3.5vw, 44px);
+  background: var(--login-bg);
 }
 
-.suap-brand {
-  display: flex;
-  align-items: flex-start;
-  gap: 20px;
+.gepub-login-page__accent {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: min(20vw, 320px);
+  height: 100%;
+  background: linear-gradient(180deg, var(--login-accent) 0%, var(--login-accent-strong) 100%);
 }
 
-.suap-brand__line {
-  width: 4px;
-  min-height: 188px;
-  border-radius: 4px;
-  background: rgba(207, 233, 255, 0.95);
-  margin-top: 8px;
+.gepub-login {
+  position: relative;
+  z-index: 1;
+  width: min(1380px, 100%);
+  margin: 0 auto;
+  min-height: calc(100vh - clamp(40px, 7vw, 88px));
+  display: grid;
+  grid-template-columns: minmax(280px, 0.78fr) minmax(780px, 1.42fr);
+  gap: clamp(20px, 4vw, 56px);
+  align-items: center;
 }
 
-.suap-brand__title {
+.gepub-login__intro {
+  display: grid;
+  gap: 14px;
+  color: var(--login-ink);
+  padding-left: clamp(4px, 1vw, 16px);
+}
+
+.gepub-mark {
+  display: inline-grid;
+  grid-template-columns: repeat(3, 16px);
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.gepub-mark__dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+}
+
+.gepub-mark__dot--a { background: var(--login-primary); }
+.gepub-mark__dot--b { background: #38bdf8; }
+.gepub-mark__dot--c { background: #22c55e; }
+
+.gepub-login__eyebrow {
   margin: 0;
-  font-size: clamp(3.4rem, 9vw, 8.5rem);
-  line-height: 0.95;
-  letter-spacing: -2px;
-  color: #e3f4ff;
+  font-size: 14px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--login-primary-strong);
   font-weight: 700;
 }
 
-.suap-brand__subtitle {
-  margin: 6px 0 0;
-  font-size: clamp(1rem, 2vw, 1.38rem);
-  color: var(--text-200);
+.gepub-login__title {
+  margin: 0;
+  font-size: clamp(2.3rem, 6.5vw, 5.2rem);
+  line-height: 0.95;
+  letter-spacing: -1.4px;
+  font-family: "Outfit", var(--font-family-base);
+  font-weight: 800;
+  color: #020617;
 }
 
-.suap-brand__lead {
-  margin: clamp(30px, 4vw, 42px) 0 0;
-  max-width: 560px;
-  font-size: clamp(1.28rem, 2.1vw, 2rem);
-  line-height: 1.34;
-  color: #edf7ff;
+.gepub-login__subtitle {
+  margin: 8px 0 0;
+  max-width: 420px;
+  font-size: clamp(1rem, 1.25vw, 1.18rem);
+  line-height: 1.55;
+  color: #1e293b;
 }
 
-.suap-brand__highlights {
-  margin: 26px 0 0;
+.gepub-login__bullets {
+  margin: 4px 0 0;
   padding: 0;
   list-style: none;
   display: grid;
   gap: 10px;
-  max-width: 560px;
+  max-width: 420px;
 }
 
-.suap-brand__highlights li {
-  padding-left: 22px;
+.gepub-login__bullets li {
   position: relative;
-  color: var(--text-200);
-  line-height: 1.5;
+  padding-left: 20px;
+  color: var(--login-muted);
+  line-height: 1.46;
 }
 
-.suap-brand__highlights li::before {
+.gepub-login__bullets li::before {
   content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #d5ecff;
   position: absolute;
   left: 0;
-  top: 0.57em;
+  top: 0.62em;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--login-accent);
 }
 
-.suap-login__right {
-  background: linear-gradient(180deg, rgba(10, 63, 103, 0.62) 0%, rgba(9, 54, 88, 0.86) 100%);
-  padding: clamp(24px, 4vw, 46px);
+.gepub-login__links {
   display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.gepub-login__links a {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
 }
 
-.suap-auth-card {
-  width: min(470px, 100%);
-  border-radius: 22px;
-  background: linear-gradient(180deg, var(--panel-850) 0%, var(--panel-900) 100%);
-  border: 1px solid rgba(158, 201, 237, 0.22);
-  padding: clamp(22px, 4vw, 34px);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+.gepub-login__links a:hover {
+  border-color: var(--login-primary);
+  color: var(--login-primary-strong);
 }
 
-.suap-auth-card__title {
+.gepub-login__frame {
+  display: grid;
+  grid-template-columns: minmax(310px, 360px) 1fr;
+  min-height: min(700px, calc(100vh - 90px));
+  border: 6px solid var(--login-border);
+  border-radius: 34px;
+  overflow: hidden;
+  background: var(--login-surface);
+  box-shadow: 0 24px 40px rgba(15, 23, 42, 0.12);
+  position: relative;
+}
+
+.gepub-login__frame::before {
+  content: "";
+  position: absolute;
+  width: 88px;
+  height: 88px;
+  left: -62px;
+  bottom: -46px;
+  background-image: radial-gradient(var(--login-accent) 3px, transparent 3px);
+  background-size: 14px 14px;
+}
+
+.gepub-login__form-panel {
+  background: linear-gradient(180deg, #f3f4f6 0%, #eaedf2 100%);
+  border-right: 1px solid #d5dae3;
+  padding: clamp(22px, 3.2vw, 34px);
+  display: flex;
+  flex-direction: column;
+}
+
+.gepub-auth__head {
+  margin-bottom: 14px;
+}
+
+.gepub-auth__brand {
   margin: 0;
-  font-size: clamp(2.2rem, 4vw, 3.2rem);
-  color: var(--text-100);
-  line-height: 1;
-  text-align: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--login-primary-strong);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
-.suap-auth-card__subtitle {
-  margin: 8px 0 0;
-  text-align: center;
-  color: var(--text-200);
-  font-size: 1.1rem;
+.gepub-auth__title {
+  margin: 6px 0 0;
+  font-size: clamp(1.4rem, 2.4vw, 2rem);
+  line-height: 1.12;
+  font-family: "Outfit", var(--font-family-base);
+  font-weight: 700;
+  color: #0f172a;
 }
 
-.suap-auth-card__alert {
-  margin-top: 16px;
-  border: 1px solid var(--danger-border);
-  background: var(--danger-bg);
-  color: var(--danger-text);
+.gepub-auth__alert {
+  margin: 6px 0 12px;
   border-radius: 10px;
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  color: #991b1b;
   padding: 10px 12px;
-  font-size: 0.9rem;
+  font-size: 13px;
+  line-height: 1.4;
 }
 
-.suap-auth-card__form {
-  margin-top: 18px;
+.gepub-auth__form {
   display: grid;
   gap: 8px;
 }
 
-.suap-auth-card__form label {
-  color: var(--text-200);
-  font-size: 0.95rem;
+.gepub-auth__form label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
 }
 
-.suap-auth-card__form input {
+.gepub-auth__field {
+  position: relative;
+}
+
+.gepub-auth__field input {
   width: 100%;
-  min-height: 48px;
-  border: 1px solid rgba(147, 189, 223, 0.75);
-  border-radius: 8px;
-  background: #f7fbff;
-  color: #0d3351;
-  font-size: 1rem;
-  padding: 0 12px;
+  height: 46px;
+  border: 1px solid #ced6e1;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 0 44px 0 12px;
+  color: #0f172a;
+}
+
+.gepub-auth__field input::placeholder {
+  color: #94a3b8;
+}
+
+.gepub-auth__field input:focus {
+  border-color: var(--login-primary);
+  box-shadow: 0 0 0 3px rgba(31, 95, 191, 0.18);
   outline: none;
 }
 
-.suap-auth-card__form input:focus {
-  border-color: #7ea9ce;
-  box-shadow: 0 0 0 3px rgba(125, 171, 211, 0.24);
-}
-
-.suap-auth-card__form button {
-  margin-top: 14px;
-  min-height: 48px;
-  border: 0;
-  border-radius: 999px;
-  font-size: 1.35rem;
-  font-weight: 700;
-  letter-spacing: 0.2px;
-  color: #ffffff;
-  background: linear-gradient(180deg, #3f7fba 0%, #2f6ea9 100%);
-  cursor: pointer;
-  transition: transform 0.16s ease, filter 0.16s ease;
-}
-
-.suap-auth-card__form button:hover {
-  filter: brightness(1.04);
-  transform: translateY(-1px);
-}
-
-.suap-auth-card__help {
-  margin: 14px 0 0;
-  color: var(--text-300);
-  font-size: 0.86rem;
-  line-height: 1.45;
-  text-align: center;
-}
-
-.suap-auth-card__divider {
-  margin: 14px 0 14px;
-  height: 1px;
-  background: rgba(180, 214, 240, 0.24);
-}
-
-.suap-auth-card__gov {
-  display: block;
-  width: fit-content;
-  margin: 0 auto;
-  padding: 10px 22px;
-  border-radius: 999px;
-  text-decoration: none;
-  font-weight: 700;
-  color: #1657b6;
-  background: #ffffff;
-}
-
-.suap-services {
-  margin-top: 14px;
-}
-
-.suap-services__panel {
-  border-radius: 22px;
-  border: 1px solid rgba(76, 131, 179, 0.28);
-  background: linear-gradient(180deg, #0f4778 0%, #0b3f6d 100%);
-  overflow: hidden;
-}
-
-.suap-services__panel > summary {
-  list-style: none;
-  cursor: pointer;
-  text-align: center;
-  font-size: clamp(1.3rem, 2.8vw, 2rem);
-  color: #e1f3ff;
-  padding: 18px 16px;
-  font-weight: 700;
-  border-bottom: 1px solid rgba(154, 198, 233, 0.24);
-}
-
-.suap-services__panel > summary::-webkit-details-marker {
-  display: none;
-}
-
-.suap-services__grid {
-  padding: clamp(20px, 3.2vw, 34px);
+.gepub-auth__field-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
   display: grid;
-  grid-template-columns: 1.05fr 1fr 1fr 1fr;
-  gap: 20px;
+  place-items: center;
+  border-radius: 7px;
+  background: var(--login-accent);
 }
 
-.suap-services__about {
-  border-radius: 14px;
-  border: 1px solid rgba(145, 191, 229, 0.25);
-  background: rgba(13, 71, 118, 0.54);
-  padding: 18px;
+.gepub-auth__field-icon svg {
+  width: 14px;
+  height: 14px;
+  fill: #fff;
 }
 
-.suap-services__about h3 {
-  margin: 0;
-  color: var(--text-100);
-  font-size: 1.35rem;
+.gepub-auth__submit {
+  margin-top: 14px;
+  height: 46px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(180deg, var(--login-primary) 0%, var(--login-primary-strong) 100%);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: transform 0.14s ease, filter 0.14s ease;
 }
 
-.suap-services__about p {
-  margin: 12px 0 0;
-  color: var(--text-200);
+.gepub-auth__submit:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+}
+
+.gepub-auth__help {
+  margin: 14px 0 0;
+  font-size: 12px;
   line-height: 1.5;
+  color: #64748b;
 }
 
-.suap-services__col h4 {
-  margin: 0 0 12px;
-  color: var(--text-300);
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.suap-services__col {
+.gepub-auth__separator {
+  margin: 14px 0;
   display: flex;
-  flex-direction: column;
-  gap: 9px;
+  align-items: center;
+  gap: 12px;
+  color: #94a3b8;
+  font-size: 12px;
+  text-transform: uppercase;
 }
 
-.suap-services__col a {
-  color: #f2fffd;
+.gepub-auth__separator::before,
+.gepub-auth__separator::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #d1d9e4;
+}
+
+.gepub-auth__secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid rgba(22, 163, 74, 0.36);
+  color: #166534;
+  background: var(--login-accent-soft);
+  font-size: 14px;
+  font-weight: 700;
   text-decoration: none;
-  font-size: 1.32rem;
-  line-height: 1.25;
 }
 
-.suap-services__col a:hover {
-  color: #cde9ff;
+.gepub-auth__secondary:hover {
+  border-color: var(--login-accent);
+  color: #14532d;
 }
 
-@media (max-width: 1180px) {
-  .suap-login__hero {
+.gepub-login__visual {
+  background: linear-gradient(180deg, var(--login-panel) 0%, var(--login-panel-2) 100%);
+  display: grid;
+  place-items: center;
+  padding: clamp(20px, 4vw, 44px);
+}
+
+.gepub-visual-card {
+  position: relative;
+  width: min(430px, 100%);
+  aspect-ratio: 1 / 1;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.56) 0%, rgba(248, 250, 252, 0.9) 100%);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  display: grid;
+  place-items: center;
+}
+
+.gepub-visual-card__phone {
+  width: clamp(150px, 34%, 190px);
+  height: clamp(290px, 58%, 360px);
+  border-radius: 26px;
+  background: #ffffff;
+  border: 6px solid #475569;
+  box-shadow: 0 16px 26px rgba(15, 23, 42, 0.14);
+  padding: 24px 16px;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+
+.gepub-visual-card__notch {
+  width: 62px;
+  height: 8px;
+  border-radius: 999px;
+  background: #0f172a;
+  margin: 0 auto 6px;
+}
+
+.gepub-visual-card__line {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: #e2e8f0;
+}
+
+.gepub-visual-card__line--short {
+  width: 68%;
+  background: #cbd5e1;
+}
+
+.gepub-visual-card__btn {
+  margin-top: auto;
+  height: 26px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, var(--login-accent) 0%, var(--login-accent-strong) 100%);
+}
+
+.gepub-visual-card__badge {
+  position: absolute;
+  top: 56px;
+  right: 62px;
+  width: 62px;
+  height: 48px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, var(--login-accent) 0%, var(--login-accent-strong) 100%);
+  transform: rotate(-18deg);
+}
+
+.gepub-visual-card__shape {
+  position: absolute;
+  right: 56px;
+  bottom: 54px;
+  width: 110px;
+  height: 76px;
+  border-radius: 20px 40px 24px 50px;
+  background: linear-gradient(180deg, #4ade80 0%, var(--login-accent) 100%);
+  opacity: 0.92;
+}
+
+@media (max-width: 1240px) {
+  .gepub-login {
     grid-template-columns: 1fr;
+    gap: 22px;
   }
 
-  .suap-services__grid {
-    grid-template-columns: 1fr 1fr;
+  .gepub-login-page__accent {
+    width: min(24vw, 260px);
+  }
+
+  .gepub-login__intro {
+    order: 2;
+    max-width: 760px;
+  }
+
+  .gepub-login__frame {
+    order: 1;
+    min-height: 620px;
   }
 }
 
-@media (max-width: 740px) {
-  .suap-brand__line {
-    min-height: 110px;
+@media (max-width: 880px) {
+  .gepub-login-page {
+    padding: 14px;
   }
 
-  .suap-auth-card__form button {
-    font-size: 1.32rem;
-  }
-
-  .suap-services__grid {
+  .gepub-login__frame {
     grid-template-columns: 1fr;
+    border-radius: 24px;
+    min-height: auto;
   }
 
-  .suap-services__col a {
-    font-size: 1.08rem;
+  .gepub-login__form-panel {
+    border-right: 0;
+    border-bottom: 1px solid #d5dae3;
+  }
+
+  .gepub-login__visual {
+    min-height: 280px;
+  }
+
+  .gepub-login-page__accent {
+    width: 34vw;
+    opacity: 0.9;
+  }
+}
+
+@media (max-width: 560px) {
+  .gepub-login__title {
+    letter-spacing: -0.8px;
+  }
+
+  .gepub-login__links {
+    gap: 6px;
+  }
+
+  .gepub-login__links a {
+    padding: 7px 10px;
+    font-size: 12px;
   }
 }

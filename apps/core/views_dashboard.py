@@ -55,6 +55,7 @@ def dashboard_view(request):
     base_ctx = {
         "page_title": "Dashboard",
         "page_subtitle": "Visão geral",
+        "show_page_head": False,
     }
 
     if is_admin(user) or getattr(user, "is_superuser", False) or getattr(user, "is_staff", False):

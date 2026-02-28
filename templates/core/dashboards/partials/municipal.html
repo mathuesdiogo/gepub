@@ -1,176 +1,181 @@
 {% load static %}
 
-<div class="dash">
+<div class="admin-dash">
+  <div class="dash-actions admin-dash__actions">
+    <a class="btn btn-primary" href="{% url 'org:secretaria_list' %}"><i class="fa-solid fa-building-columns"></i> Secretarias</a>
+    <a class="btn btn-primary" href="{% url 'org:unidade_list' %}"><i class="fa-solid fa-school"></i> Unidades</a>
+    <a class="btn btn-primary" href="{% url 'educacao:aluno_list' %}"><i class="fa-solid fa-user-graduate"></i> Alunos</a>
+    <a class="btn btn-primary" href="{{ onboarding_url }}"><i class="fa-solid fa-list-check"></i> Onboarding</a>
+  </div>
 
-  <!-- KPI CARDS (clicáveis) -->
-  <div class="kpi-grid">
-    <a class="kpi-card kpi-card--blue" href="{% url 'org:secretaria_list' %}">
-      <div class="kpi-card__icon"><i class="fa-solid fa-building-columns"></i></div>
-      <div class="kpi-card__meta">
-        <div class="kpi-card__label">Secretarias</div>
-        <div class="kpi-card__value">{{ secretarias_total|default:0 }}</div>
-        <div class="kpi-card__hint">Ver lista</div>
+  <div class="dash-kpi-grid">
+    <a class="admin-kpi admin-kpi--blue" href="{% url 'org:secretaria_list' %}">
+      <div class="admin-kpi__icon"><i class="fa-solid fa-building-columns"></i></div>
+      <div class="admin-kpi__content">
+        <div class="admin-kpi__label">Secretarias</div>
+        <div class="admin-kpi__value">{{ secretarias_total|default:0 }}</div>
+        <div class="admin-kpi__meta">Estrutura municipal ativa</div>
       </div>
     </a>
 
-    <a class="kpi-card kpi-card--indigo" href="{% url 'org:unidade_list' %}">
-      <div class="kpi-card__icon"><i class="fa-solid fa-school"></i></div>
-      <div class="kpi-card__meta">
-        <div class="kpi-card__label">Unidades</div>
-        <div class="kpi-card__value">{{ unidades_total|default:0 }}</div>
-        <div class="kpi-card__hint">Ver lista</div>
+    <a class="admin-kpi admin-kpi--green" href="{% url 'org:unidade_list' %}">
+      <div class="admin-kpi__icon"><i class="fa-solid fa-school"></i></div>
+      <div class="admin-kpi__content">
+        <div class="admin-kpi__label">Unidades</div>
+        <div class="admin-kpi__value">{{ unidades_total|default:0 }}</div>
+        <div class="admin-kpi__meta">Rede de ensino vinculada</div>
       </div>
     </a>
 
-    <a class="kpi-card kpi-card--green" href="{% url 'educacao:turma_list' %}">
-      <div class="kpi-card__icon"><i class="fa-solid fa-users"></i></div>
-      <div class="kpi-card__meta">
-        <div class="kpi-card__label">Turmas</div>
-        <div class="kpi-card__value">{{ turmas_total|default:0 }}</div>
-        <div class="kpi-card__hint">Abrir turmas</div>
+    <a class="admin-kpi admin-kpi--slate" href="{% url 'educacao:turma_list' %}">
+      <div class="admin-kpi__icon"><i class="fa-solid fa-people-group"></i></div>
+      <div class="admin-kpi__content">
+        <div class="admin-kpi__label">Turmas</div>
+        <div class="admin-kpi__value">{{ turmas_total|default:0 }}</div>
+        <div class="admin-kpi__meta">Turmas do município</div>
       </div>
     </a>
 
-    <a class="kpi-card kpi-card--amber" href="{% url 'educacao:aluno_list' %}">
-      <div class="kpi-card__icon"><i class="fa-solid fa-user-graduate"></i></div>
-      <div class="kpi-card__meta">
-        <div class="kpi-card__label">Alunos</div>
-        <div class="kpi-card__value">{{ alunos_total|default:0 }}</div>
-        <div class="kpi-card__hint">Ver alunos</div>
+    <a class="admin-kpi admin-kpi--amber" href="{% url 'educacao:aluno_list' %}">
+      <div class="admin-kpi__icon"><i class="fa-solid fa-user-graduate"></i></div>
+      <div class="admin-kpi__content">
+        <div class="admin-kpi__label">Alunos</div>
+        <div class="admin-kpi__value">{{ alunos_total|default:0 }}</div>
+        <div class="admin-kpi__meta">Alunos matriculados</div>
       </div>
     </a>
 
-    <a class="kpi-card kpi-card--slate" href="{% url 'educacao:matricula_create' %}">
-      <div class="kpi-card__icon"><i class="fa-solid fa-id-card-clip"></i></div>
-      <div class="kpi-card__meta">
-        <div class="kpi-card__label">Matrículas</div>
-        <div class="kpi-card__value">{{ matriculas_total|default:0 }}</div>
-        <div class="kpi-card__hint">Ver por turmas</div>
+    <a class="admin-kpi admin-kpi--slate" href="{% url 'educacao:matricula_create' %}">
+      <div class="admin-kpi__icon"><i class="fa-solid fa-id-card-clip"></i></div>
+      <div class="admin-kpi__content">
+        <div class="admin-kpi__label">Matrículas</div>
+        <div class="admin-kpi__value">{{ matriculas_total|default:0 }}</div>
+        <div class="admin-kpi__meta">Vínculos ativos e históricos</div>
       </div>
     </a>
 
-    <a class="kpi-card kpi-card--teal" href="{{ onboarding_url }}">
-      <div class="kpi-card__icon"><i class="fa-solid fa-list-check"></i></div>
-      <div class="kpi-card__meta">
-        <div class="kpi-card__label">Onboarding</div>
-        <div class="kpi-card__value">{{ onboarding_done_steps|default:0 }}/{{ onboarding_total_steps|default:0 }}</div>
-        <div class="kpi-card__hint">{{ onboarding_modules_active|default:0 }} módulos ativos</div>
+    <a class="admin-kpi admin-kpi--blue" href="{{ onboarding_url }}">
+      <div class="admin-kpi__icon"><i class="fa-solid fa-list-check"></i></div>
+      <div class="admin-kpi__content">
+        <div class="admin-kpi__label">Onboarding</div>
+        <div class="admin-kpi__value">{{ onboarding_done_steps|default:0 }}/{{ onboarding_total_steps|default:0 }}</div>
+        <div class="admin-kpi__meta">{{ onboarding_modules_active|default:0 }} módulos ativos</div>
       </div>
     </a>
   </div>
 
-  <!-- GRÁFICOS / INDICADORES (se existirem) -->
-  <div class="dash-grid">
-    <div class="dash-card">
-      <div class="dash-card__head">
+  <div class="dash-panel-grid">
+    <section class="admin-panel">
+      <div class="admin-panel__head">
         <div>
-          <div class="dash-card__title">Unidades por secretaria</div>
-          <div class="dash-card__sub small">Top secretarias por quantidade de unidades</div>
+          <h3 class="admin-panel__title">Unidades por secretaria</h3>
+          <p class="admin-panel__sub">Top secretarias por volume de unidades</p>
         </div>
       </div>
-      <div class="dash-card__body">
-        {% if chart1_labels %}
-          <canvas id="chartUnidadesSecretaria" height="140"></canvas>
-        {% else %}
-          {% include "core/partials/components/feedback/empty_state.html" with title="Sem dados" text="Ainda não há dados de unidades por secretaria." %}
-        {% endif %}
-      </div>
-    </div>
+      {% if chart1_labels %}
+        <div class="admin-line-wrap">
+          <canvas id="chartUnidadesSecretaria" height="220"></canvas>
+        </div>
+      {% else %}
+        {% include "core/partials/components/feedback/empty_state.html" with title="Sem dados" text="Ainda não há dados de unidades por secretaria." %}
+      {% endif %}
+    </section>
 
-    <div class="dash-card">
-      <div class="dash-card__head">
+    <section class="admin-panel">
+      <div class="admin-panel__head">
         <div>
-          <div class="dash-card__title">Alunos por secretaria</div>
-          <div class="dash-card__sub small">Top secretarias por alunos matriculados</div>
+          <h3 class="admin-panel__title">Alunos por secretaria</h3>
+          <p class="admin-panel__sub">Top secretarias por alunos matriculados</p>
         </div>
       </div>
-      <div class="dash-card__body">
-        {% if chart2_labels %}
-          <canvas id="chartAlunosSecretaria" height="140"></canvas>
-        {% else %}
-          {% include "core/partials/components/feedback/empty_state.html" with title="Sem dados" text="Ainda não há dados de alunos por secretaria." %}
-        {% endif %}
-      </div>
-    </div>
+      {% if chart2_labels %}
+        <div class="admin-line-wrap">
+          <canvas id="chartAlunosSecretaria" height="220"></canvas>
+        </div>
+      {% else %}
+        {% include "core/partials/components/feedback/empty_state.html" with title="Sem dados" text="Ainda não há dados de alunos por secretaria." %}
+      {% endif %}
+    </section>
   </div>
 
-  <!-- LISTAS -->
-  <div class="dash-grid dash-grid--2">
-    <!-- ÚLTIMAS SECRETARIAS -->
-    <div class="dash-card">
-      <div class="dash-card__head">
+  <div class="dash-panel-grid">
+    <section class="admin-panel">
+      <div class="admin-panel__head">
         <div>
-          <div class="dash-card__title">Últimas secretarias</div>
-          <div class="dash-card__sub small">Cadastros recentes</div>
+          <h3 class="admin-panel__title">Últimas secretarias</h3>
+          <p class="admin-panel__sub">Cadastros recentes do município</p>
         </div>
         <a class="btn btn--ghost" href="{% url 'org:secretaria_list' %}"><i class="fa-solid fa-list"></i> Ver todas</a>
       </div>
 
-      <div class="dash-table">
-        <div class="dash-table__head small">
-          <div>Secretaria</div>
-          <div class="dash-table__right">Ação</div>
+      {% if ultimas_secretarias %}
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Secretaria</th>
+                <th>Município</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for s in ultimas_secretarias %}
+                <tr>
+                  <td>{{ s.nome }}</td>
+                  <td>{{ s.municipio.nome|default:"—" }}</td>
+                  <td><a class="btn btn--ghost" href="{% url 'org:secretaria_detail' s.pk %}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir</a></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
+      {% else %}
+        {% include "core/partials/components/feedback/empty_state.html" with title="Sem secretarias" text="Ainda não há secretarias cadastradas." %}
+      {% endif %}
+    </section>
 
-        {% for s in ultimas_secretarias %}
-          <div class="dash-table__row">
-            <div class="dash-table__left">
-              <div class="dash-table__primary">{{ s.nome }}</div>
-              <div class="dash-table__muted small">{{ s.municipio.nome|default:"—" }}</div>
-            </div>
-            <div class="dash-table__right">
-              <a class="btn btn--ghost" href="{% url 'org:secretaria_detail' s.pk %}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir</a>
-            </div>
-          </div>
-        {% empty %}
-          <div class="dash-empty">
-            <div class="dash-empty__title">Nenhuma secretaria</div>
-            <div class="dash-empty__text">Ainda não há secretarias cadastradas.</div>
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-
-    <!-- ÚLTIMOS ALUNOS -->
-    <div class="dash-card">
-      <div class="dash-card__head">
+    <section class="admin-panel">
+      <div class="admin-panel__head">
         <div>
-          <div class="dash-card__title">Últimos alunos</div>
-          <div class="dash-card__sub small">Cadastros recentes</div>
+          <h3 class="admin-panel__title">Últimos alunos</h3>
+          <p class="admin-panel__sub">Cadastros recentes de alunos</p>
         </div>
         <a class="btn btn--ghost" href="{% url 'educacao:aluno_list' %}"><i class="fa-solid fa-list"></i> Ver todos</a>
       </div>
 
-      <div class="dash-table">
-        <div class="dash-table__head small">
-          <div>Aluno</div>
-          <div class="dash-table__right">Ação</div>
+      {% if ultimos_alunos %}
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Aluno</th>
+                <th>Turma/Unidade</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for a in ultimos_alunos %}
+                <tr>
+                  <td>{{ a.nome }}</td>
+                  <td>
+                    {% if a.matriculas.all %}
+                      {% with m=a.matriculas.all.0 %}
+                        {{ m.turma.nome }} • {{ m.turma.unidade.nome }}
+                      {% endwith %}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+                  <td><a class="btn btn--ghost" href="{% url 'educacao:aluno_detail' a.pk %}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir</a></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
-
-        {% for a in ultimos_alunos %}
-          <div class="dash-table__row">
-            <div class="dash-table__left">
-              <div class="dash-table__primary">{{ a.nome }}</div>
-              <div class="dash-table__muted small">
-                {% if a.matriculas.all %}
-                  {% with m=a.matriculas.all.0 %}
-                    {{ m.turma.nome }} • {{ m.turma.unidade.nome }}
-                  {% endwith %}
-                {% endif %}
-              </div>
-            </div>
-            <div class="dash-table__right">
-              <a class="btn btn--ghost" href="{% url 'educacao:aluno_detail' a.pk %}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir</a>
-            </div>
-          </div>
-        {% empty %}
-          <div class="dash-empty">
-            <div class="dash-empty__title">Nenhum aluno</div>
-            <div class="dash-empty__text">Ainda não há alunos cadastrados.</div>
-          </div>
-        {% endfor %}
-      </div>
-    </div>
+      {% else %}
+        {% include "core/partials/components/feedback/empty_state.html" with title="Sem alunos" text="Ainda não há alunos cadastrados." %}
+      {% endif %}
+    </section>
   </div>
 </div>
 
@@ -183,46 +188,56 @@
 (function () {
   function loadChart(cb) {
     if (window.Chart) return cb();
-    const script = document.createElement("script");
+    var script = document.createElement("script");
     script.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js";
     script.onload = cb;
     document.head.appendChild(script);
   }
 
   loadChart(function () {
-    const labels1 = JSON.parse(document.getElementById("chart1-labels").textContent || "[]");
-    const values1 = JSON.parse(document.getElementById("chart1-values").textContent || "[]");
-    const labels2 = JSON.parse(document.getElementById("chart2-labels").textContent || "[]");
-    const values2 = JSON.parse(document.getElementById("chart2-values").textContent || "[]");
+    var labels1 = JSON.parse(document.getElementById("chart1-labels").textContent || "[]");
+    var values1 = JSON.parse(document.getElementById("chart1-values").textContent || "[]");
+    var labels2 = JSON.parse(document.getElementById("chart2-labels").textContent || "[]");
+    var values2 = JSON.parse(document.getElementById("chart2-values").textContent || "[]");
 
-    const chart1 = document.getElementById("chartUnidadesSecretaria");
+    var chart1 = document.getElementById("chartUnidadesSecretaria");
     if (chart1 && labels1.length) {
       new Chart(chart1, {
         type: "bar",
         data: {
           labels: labels1,
-          datasets: [{ data: values1 }]
+          datasets: [{
+            data: values1,
+            backgroundColor: "rgba(31,95,191,0.85)",
+            borderRadius: 8
+          }]
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true } }
+          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
         }
       });
     }
 
-    const chart2 = document.getElementById("chartAlunosSecretaria");
+    var chart2 = document.getElementById("chartAlunosSecretaria");
     if (chart2 && labels2.length) {
       new Chart(chart2, {
         type: "bar",
         data: {
           labels: labels2,
-          datasets: [{ data: values2 }]
+          datasets: [{
+            data: values2,
+            backgroundColor: "rgba(5,150,105,0.85)",
+            borderRadius: 8
+          }]
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true } }
+          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
         }
       });
     }

@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block page_content %}
-<section class="pp-card">
+<section class="pp-card pp-section-space">
   <form method="get" class="pp-form-inline pp-form-inline--3">
     <div>
       <label for="id_q">Busca</label>
@@ -31,24 +31,28 @@
 </section>
 
 {% if banners %}
-<section class="pp-grid pp-grid--3" style="margin-top:10px;">
+<section class="pp-grid pp-grid--3 pp-news-banners">
   {% for banner in banners %}
-    <article class="pp-card">
+    <article class="pp-card pp-news-banner-card">
       <h3>{{ banner.titulo }}</h3>
       {% if banner.subtitulo %}<p class="pp-meta">{{ banner.subtitulo }}</p>{% endif %}
-      {% if banner.imagem %}<img src="{{ banner.imagem.url }}" alt="{{ banner.titulo }}" style="width:100%;border-radius:10px;margin-top:8px;">{% endif %}
-      {% if banner.link %}<p><a class="pp-btn pp-btn--soft" href="{{ banner.link }}">Acessar</a></p>{% endif %}
+      {% if banner.imagem %}<img src="{{ banner.imagem.url }}" alt="{{ banner.titulo }}">{% endif %}
+      {% if banner.link %}
+        <p>
+          <a class="pp-btn pp-btn--soft" href="{{ banner.link }}" target="_blank" rel="noopener">Acessar</a>
+        </p>
+      {% endif %}
     </article>
   {% endfor %}
 </section>
 {% endif %}
 
-<section style="margin-top:10px;">
+<section class="pp-section-space">
   <ul class="pp-list">
     {% for item in items %}
-      <li class="pp-list__item">
+      <li class="pp-list__item pp-news-list-item">
         <p class="pp-meta">{{ item.get_categoria_display }} • {{ item.publicado_em|date:"d/m/Y H:i" }}</p>
-        <h3><a href="{% url 'core:portal_noticia_detail_public' item.slug %}" style="text-decoration:none;color:inherit;">{{ item.titulo }}</a></h3>
+        <h3><a class="pp-link-reset" href="{% url 'core:portal_noticia_detail_public' item.slug %}">{{ item.titulo }}</a></h3>
         {% if item.resumo %}<p>{{ item.resumo }}</p>{% endif %}
         <div class="pp-actions">
           <a class="pp-btn pp-btn--soft" href="{% url 'core:portal_noticia_detail_public' item.slug %}">Ler notícia</a>

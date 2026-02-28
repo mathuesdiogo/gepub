@@ -2,8 +2,14 @@
 {% block title %}{{ title }} • Saúde • GEPUB{% endblock %}
 
 {% block module_content %}
-<div class="card"><div class="card__body">
+<div class="card saude-panel saude-panel--form"><div class="card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=None %}
+
+  <div class="saude-form-note">
+    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+    <span>Preencha os campos obrigatórios para manter o prontuário e os indicadores atualizados.</span>
+  </div>
+
   {% include "core/partials/components/forms/form_shell.html" with form=form cancel_url=cancel_url submit_label=submit_label action_url=action_url %}
 </div></div>
 {% endblock %}

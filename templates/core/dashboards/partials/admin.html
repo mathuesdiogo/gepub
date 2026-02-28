@@ -1,180 +1,316 @@
-<div class="dash-actions">
-  <a class="btn btn-primary" href="{% url 'org:municipio_list' %}"><i class="fa-solid fa-city"></i> Municípios</a>
-  <a class="btn btn-primary" href="{% url 'accounts:usuarios_list' %}"><i class="fa-solid fa-users"></i> Usuários</a>
-  <a class="btn btn-primary" href="{% url 'core:institutional_admin' %}"><i class="fa-solid fa-pen-ruler"></i> Editor Institucional</a>
-  <a class="btn btn-primary" href="{% url 'nee:relatorios_index' %}"><i class="fa-solid fa-file-lines"></i> Relatórios NEE</a>
-</div>
-
-<div class="dash-grid dash-col-3">
-  <a class="metric-card metric-card--primary" href="{% url 'org:municipio_list' %}">
-    <div class="metric-label">Municípios</div>
-    <div class="metric-value">{{ kpis.municipios }}</div>
-    <div class="metric-meta">Prefeituras cadastradas</div>
-  </a>
-
-  <a class="metric-card metric-card--blue" href="{% url 'accounts:usuarios_list' %}">
-    <div class="metric-label">Usuários</div>
-    <div class="metric-value">{{ kpis.usuarios }}</div>
-    <div class="metric-meta">Contas no sistema</div>
-  </a>
-
-  <a class="metric-card metric-card--green" href="{% url 'org:secretaria_list' %}">
-    <div class="metric-label">Secretarias</div>
-    <div class="metric-value">{{ kpis.secretarias }}</div>
-    <div class="metric-meta">Estrutura organizacional</div>
-  </a>
-
-  <a class="metric-card" href="{% url 'org:unidade_list' %}">
-    <div class="metric-label">Unidades</div>
-    <div class="metric-value">{{ kpis.unidades }}</div>
-    <div class="metric-meta">Escolas / unidades</div>
-  </a>
-
-  <div class="metric-card">
-    <div class="metric-label">Setores</div>
-    <div class="metric-value">{{ kpis.setores }}</div>
-    <div class="metric-meta">Departamentos</div>
+<div class="admin-dash">
+  <div class="dash-actions admin-dash__actions">
+    <a class="btn btn-primary" href="{% url 'org:municipio_list' %}"><i class="fa-solid fa-city"></i> Municípios</a>
+    <a class="btn btn-primary" href="{% url 'accounts:usuarios_list' %}"><i class="fa-solid fa-users"></i> Usuários</a>
+    <a class="btn btn-primary" href="{% url 'org:secretaria_list' %}"><i class="fa-solid fa-sitemap"></i> Secretarias</a>
+    <a class="btn btn-primary" href="{% url 'core:institutional_admin' %}"><i class="fa-solid fa-pen-ruler"></i> Editor Institucional</a>
   </div>
 
-  <a class="metric-card" href="{% url 'educacao:turma_list' %}">
-    <div class="metric-label">Turmas</div>
-    <div class="metric-value">{{ kpis.turmas }}</div>
-    <div class="metric-meta">Ano letivo e histórico</div>
-  </a>
-
-  <a class="metric-card" href="{% url 'educacao:aluno_list' %}">
-    <div class="metric-label">Alunos</div>
-    <div class="metric-value">{{ kpis.alunos }}</div>
-    <div class="metric-meta">Cadastros</div>
-  </a>
-
-  <div class="metric-card">
-    <div class="metric-label">Matrículas</div>
-    <div class="metric-value">{{ kpis.matriculas }}</div>
-    <div class="metric-meta">Vínculos turma ↔ aluno</div>
-  </div>
-</div>
-
-<div class="dash-two">
-  <div class="dash-card">
-    <div class="dash-card__head">
-      <div>
-        <div class="dash-card__title">Usuários por perfil</div>
-        <div class="dash-card__sub">Distribuição de acessos no sistema</div>
+  <div class="admin-kpi-grid">
+    <a class="admin-kpi admin-kpi--blue" href="{% url 'org:municipio_list' %}">
+      <div class="admin-kpi__icon"><i class="fa-solid fa-city"></i></div>
+      <div class="admin-kpi__content">
+        <div class="admin-kpi__label">Municípios</div>
+        <div class="admin-kpi__value">{{ kpis.municipios }}</div>
+        <div class="admin-kpi__meta">Prefeituras cadastradas</div>
       </div>
-    </div>
-    <div class="dash-card__body">
-      <canvas id="chartRoles" height="160"></canvas>
-    </div>
+    </a>
+
+    <a class="admin-kpi admin-kpi--slate" href="{% url 'accounts:usuarios_list' %}">
+      <div class="admin-kpi__icon"><i class="fa-solid fa-user-shield"></i></div>
+      <div class="admin-kpi__content">
+        <div class="admin-kpi__label">Usuários</div>
+        <div class="admin-kpi__value">{{ kpis.usuarios }}</div>
+        <div class="admin-kpi__meta">Contas ativas no sistema</div>
+      </div>
+    </a>
+
+    <a class="admin-kpi admin-kpi--green" href="{% url 'org:secretaria_list' %}">
+      <div class="admin-kpi__icon"><i class="fa-solid fa-building-columns"></i></div>
+      <div class="admin-kpi__content">
+        <div class="admin-kpi__label">Secretarias</div>
+        <div class="admin-kpi__value">{{ kpis.secretarias }}</div>
+        <div class="admin-kpi__meta">Estrutura administrativa</div>
+      </div>
+    </a>
+
+    <a class="admin-kpi admin-kpi--amber" href="{% url 'educacao:aluno_list' %}">
+      <div class="admin-kpi__icon"><i class="fa-solid fa-user-graduate"></i></div>
+      <div class="admin-kpi__content">
+        <div class="admin-kpi__label">Alunos</div>
+        <div class="admin-kpi__value">{{ kpis.alunos }}</div>
+        <div class="admin-kpi__meta">Cadastros com vínculo escolar</div>
+      </div>
+    </a>
   </div>
 
-  <div class="dash-card">
-    <div class="dash-card__head">
-      <div>
-        <div class="dash-card__title">Unidades por município (Top 10)</div>
-        <div class="dash-card__sub">Maiores estruturas por prefeitura</div>
+  <div class="admin-grid">
+    <section class="admin-panel admin-panel--table">
+      <div class="admin-panel__head">
+        <div>
+          <h3 class="admin-panel__title">Resumo por município</h3>
+          <p class="admin-panel__sub">Secretarias e unidades com maior volume</p>
+        </div>
+        <a class="btn btn--ghost" href="{% url 'org:municipio_list' %}"><i class="fa-solid fa-list"></i> Ver todos</a>
       </div>
-    </div>
-    <div class="dash-card__body">
-      <canvas id="chartMunicipios" height="160"></canvas>
-    </div>
-  </div>
-</div>
 
-<div class="dash-two">
-  <div class="dash-card">
-    <div class="dash-card__head">
-      <div>
-        <div class="dash-card__title">Top municípios</div>
-        <div class="dash-card__sub">Secretarias e unidades</div>
-      </div>
-      <a class="btn btn--ghost" href="{% url 'org:municipio_list' %}"><i class="fa-solid fa-list"></i> Ver todos</a>
-    </div>
-    <div class="dash-card__body">
-      <div class="dash-table">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Município</th>
-              <th>Secretarias</th>
-              <th>Unidades</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for m in top_municipios %}
+      {% if top_municipios %}
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
               <tr>
-                <td><a class="link" href="{% url 'org:municipio_detail' m.id %}">{{ m.nome }}</a></td>
-                <td>{{ m.secretarias }}</td>
-                <td>{{ m.unidades }}</td>
+                <th>Município</th>
+                <th>Secretarias</th>
+                <th>Unidades</th>
+                <th>Cobertura</th>
+                <th>Status</th>
               </tr>
-            {% empty %}
-              <tr><td colspan="3">Sem dados.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {% for m in top_municipios %}
+                <tr>
+                  <td>
+                    <a class="admin-table__name" href="{% url 'org:municipio_detail' m.id %}">{{ m.nome }}</a>
+                  </td>
+                  <td>{{ m.secretarias }}</td>
+                  <td>{{ m.unidades }}</td>
+                  <td>
+                    <div class="admin-meter" data-value="{{ m.unidades }}" aria-hidden="true">
+                      <span class="admin-meter__fill"></span>
+                    </div>
+                  </td>
+                  <td>
+                    {% if m.secretarias >= 4 %}
+                      <span class="admin-status admin-status--ok">Consolidado</span>
+                    {% elif m.secretarias >= 1 %}
+                      <span class="admin-status admin-status--progress">Em expansão</span>
+                    {% else %}
+                      <span class="admin-status admin-status--alert">Inicial</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        {% include "core/partials/components/feedback/empty_state.html" with title="Sem dados" text="Ainda não há municípios suficientes para montar o resumo." %}
+      {% endif %}
+    </section>
+
+    <section class="admin-panel admin-panel--donut">
+      <div class="admin-panel__head">
+        <div>
+          <h3 class="admin-panel__title">Perfis de acesso</h3>
+          <p class="admin-panel__sub">Distribuição de usuários por perfil</p>
+        </div>
       </div>
-    </div>
+      <div class="admin-donut-wrap">
+        <canvas id="chartRoles" height="220"></canvas>
+      </div>
+      <div class="admin-legend" id="rolesLegend"></div>
+    </section>
   </div>
 
-  <div class="dash-card">
-    <div class="dash-card__head">
-      <div>
-        <div class="dash-card__title">Top unidades por turmas</div>
-        <div class="dash-card__sub">Unidades com mais turmas</div>
+  <div class="admin-grid admin-grid--bottom">
+    <section class="admin-panel admin-panel--line">
+      <div class="admin-panel__head">
+        <div>
+          <h3 class="admin-panel__title">Unidades por município</h3>
+          <p class="admin-panel__sub">Comparativo do top 10 por estrutura escolar</p>
+        </div>
       </div>
-      <a class="btn btn--ghost" href="{% url 'org:unidade_list' %}"><i class="fa-solid fa-list"></i> Ver todas</a>
-    </div>
-    <div class="dash-card__body">
-      <div class="dash-table">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Unidade</th>
-              <th>Turmas</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for u in top_unidades %}
-              <tr>
-                <td><a class="link" href="{% url 'org:unidade_detail' u.id %}">{{ u.nome }}</a></td>
-                <td>{{ u.turmas }}</td>
-              </tr>
-            {% empty %}
-              <tr><td colspan="2">Sem dados.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
+
+      {% if top_municipios %}
+        <div class="admin-line-wrap">
+          <canvas id="chartMunicipios" height="240"></canvas>
+        </div>
+      {% else %}
+        {% include "core/partials/components/feedback/empty_state.html" with title="Sem dados" text="Ainda não há dados para o gráfico de municípios." %}
+      {% endif %}
+    </section>
+
+    <section class="admin-panel admin-panel--ranking">
+      <div class="admin-panel__head">
+        <div>
+          <h3 class="admin-panel__title">Top unidades por turmas</h3>
+          <p class="admin-panel__sub">Ranking das 10 unidades com mais turmas</p>
+        </div>
+        <a class="btn btn--ghost" href="{% url 'org:unidade_list' %}"><i class="fa-solid fa-list"></i> Ver todas</a>
       </div>
-    </div>
+
+      {% if top_unidades %}
+        <div class="admin-ranking">
+          {% for u in top_unidades %}
+            <a class="admin-ranking__row" href="{% url 'org:unidade_detail' u.id %}">
+              <div class="admin-ranking__head">
+                <span class="admin-ranking__name">{{ u.nome }}</span>
+                <span class="admin-ranking__value">{{ u.turmas }} turmas</span>
+              </div>
+              <div class="admin-meter" data-value="{{ u.turmas }}" aria-hidden="true">
+                <span class="admin-meter__fill"></span>
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        {% include "core/partials/components/feedback/empty_state.html" with title="Sem dados" text="Ainda não há turmas suficientes para formar o ranking." %}
+      {% endif %}
+    </section>
   </div>
 </div>
 
 <script>
 (function () {
-  function ensureChart(cb){
-    if (window.Chart) return cb();
-    var s = document.createElement("script");
-    s.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js";
-    s.onload = cb;
-    document.head.appendChild(s);
+  function ensureChart(callback) {
+    if (window.Chart) {
+      callback();
+      return;
+    }
+
+    var script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js";
+    script.onload = callback;
+    document.head.appendChild(script);
   }
 
-  ensureChart(function () {
-    const roleLabels = {{ chart_roles.labels|safe }};
-    const roleValues = {{ chart_roles.values|safe }};
-    new Chart(document.getElementById("chartRoles"), {
-      type: "doughnut",
-      data: { labels: roleLabels, datasets: [{ data: roleValues }] },
-      options: { responsive: true, plugins: { legend: { position: "bottom" } } }
-    });
+  function applyMeters(selector) {
+    var meters = Array.prototype.slice.call(document.querySelectorAll(selector));
+    if (!meters.length) return;
 
-    const munLabels = {{ chart_municipios.labels|safe }};
-    const munValues = {{ chart_municipios.values|safe }};
-    new Chart(document.getElementById("chartMunicipios"), {
-      type: "bar",
-      data: { labels: munLabels, datasets: [{ data: munValues }] },
-      options: { responsive: true, plugins: { legend: { display:false } }, scales: { y: { beginAtZero: true } } }
+    var maxValue = meters.reduce(function (acc, meter) {
+      var value = Number(meter.getAttribute("data-value") || 0);
+      return value > acc ? value : acc;
+    }, 0);
+
+    meters.forEach(function (meter) {
+      var value = Number(meter.getAttribute("data-value") || 0);
+      var width = maxValue > 0 ? (value / maxValue) * 100 : 0;
+      var fill = meter.querySelector(".admin-meter__fill");
+      if (fill) {
+        fill.style.width = width + "%";
+      }
     });
+  }
+
+  function renderRolesLegend(labels, values, colors) {
+    var root = document.getElementById("rolesLegend");
+    if (!root) return;
+    root.innerHTML = "";
+
+    var total = values.reduce(function (sum, value) {
+      return sum + value;
+    }, 0);
+
+    if (!labels.length || !total) {
+      var empty = document.createElement("div");
+      empty.className = "admin-legend__empty";
+      empty.textContent = "Sem dados de perfis.";
+      root.appendChild(empty);
+      return;
+    }
+
+    labels.forEach(function (label, index) {
+      var value = values[index] || 0;
+      var percent = Math.round((value / total) * 100);
+
+      var row = document.createElement("div");
+      row.className = "admin-legend__row";
+
+      var left = document.createElement("div");
+      left.className = "admin-legend__left";
+
+      var dot = document.createElement("span");
+      dot.className = "admin-legend__dot";
+      dot.style.backgroundColor = colors[index % colors.length];
+
+      var text = document.createElement("span");
+      text.className = "admin-legend__text";
+      text.textContent = label;
+
+      left.appendChild(dot);
+      left.appendChild(text);
+
+      var right = document.createElement("span");
+      right.className = "admin-legend__value";
+      right.textContent = value + " (" + percent + "%)";
+
+      row.appendChild(left);
+      row.appendChild(right);
+      root.appendChild(row);
+    });
+  }
+
+  applyMeters(".admin-meter");
+
+  ensureChart(function () {
+    var roleLabels = {{ chart_roles.labels|safe }};
+    var roleValues = {{ chart_roles.values|safe }};
+    var municipioLabels = {{ chart_municipios.labels|safe }};
+    var municipioValues = {{ chart_municipios.values|safe }};
+
+    var palette = ["#1f5fbf", "#3b82f6", "#0ea5e9", "#14b8a6", "#f59e0b", "#ef4444", "#8b5cf6", "#10b981"];
+
+    var rolesCanvas = document.getElementById("chartRoles");
+    if (rolesCanvas && roleValues.length) {
+      new Chart(rolesCanvas, {
+        type: "doughnut",
+        data: {
+          labels: roleLabels,
+          datasets: [{
+            data: roleValues,
+            backgroundColor: roleLabels.map(function (_, index) {
+              return palette[index % palette.length];
+            }),
+            borderWidth: 0,
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: "68%",
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      });
+    }
+
+    renderRolesLegend(roleLabels, roleValues, palette);
+
+    var municipiosCanvas = document.getElementById("chartMunicipios");
+    if (municipiosCanvas && municipioValues.length) {
+      new Chart(municipiosCanvas, {
+        type: "line",
+        data: {
+          labels: municipioLabels,
+          datasets: [{
+            label: "Unidades",
+            data: municipioValues,
+            borderColor: "#1f5fbf",
+            backgroundColor: "rgba(31,95,191,0.16)",
+            pointBackgroundColor: "#1f5fbf",
+            pointRadius: 3,
+            tension: 0.35,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { precision: 0 }
+            }
+          }
+        }
+      });
+    }
   });
 })();
 </script>

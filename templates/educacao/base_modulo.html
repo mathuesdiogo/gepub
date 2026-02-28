@@ -1,9 +1,15 @@
 {% extends "core/base.html" %}
+{% load static %}
 
 {% block header %}Educação{% endblock %}
 
+{% block extra_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/pages/educacao-module.css' %}">
+{% endblock %}
+
 {% block content %}
-  <div class="module-shell">
+  <div class="module-shell educacao-module">
     <aside class="module-shell__aside">
       {% include "educacao/_menu_modulo.html" %}
     </aside>

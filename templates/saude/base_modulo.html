@@ -1,9 +1,15 @@
 {% extends "core/base.html" %}
+{% load static %}
 {% block title %}Saúde • GEPUB{% endblock %}
 {% block header %}Saúde{% endblock %}
 
+{% block extra_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/pages/saude-module.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="module-shell">
+<div class="module-shell module-shell--saude saude-module">
   <aside class="module-shell__aside">{% include "saude/_menu_modulo.html" %}</aside>
   <main class="module-shell__main">{% block module_content %}{% endblock %}</main>
 </div>

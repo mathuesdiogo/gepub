@@ -1,96 +1,171 @@
-<div class="dash-grid">
-  <div class="dash-col-4">
-    <div class="metric-card">
-      <div class="metric-label">Turmas</div>
-      <div class="metric-value">{{ turmas_total|default:0 }}</div>
-      <div class="metric-meta">Ativas e históricas</div>
-    </div>
+<div class="admin-dash">
+  <div class="dash-actions admin-dash__actions">
+    <a class="btn btn-primary" href="{% url 'educacao:turma_list' %}"><i class="fa-solid fa-people-group"></i> Turmas</a>
+    <a class="btn btn-primary" href="{% url 'educacao:aluno_list' %}"><i class="fa-solid fa-user-graduate"></i> Alunos</a>
+    <a class="btn btn-primary" href="{% url 'educacao:matricula_create' %}"><i class="fa-solid fa-id-card-clip"></i> Nova matrícula</a>
   </div>
 
-  <div class="dash-col-4">
-    <div class="metric-card">
-      <div class="metric-label">Alunos</div>
-      <div class="metric-value">{{ alunos_total|default:0 }}</div>
-      <div class="metric-meta">Vínculos na unidade</div>
+  <div class="dash-kpi-grid">
+    <div class="admin-kpi admin-kpi--slate">
+      <div class="admin-kpi__icon"><i class="fa-solid fa-people-group"></i></div>
+      <div class="admin-kpi__content">
+        <div class="admin-kpi__label">Turmas</div>
+        <div class="admin-kpi__value">{{ turmas_total|default:0 }}</div>
+        <div class="admin-kpi__meta">Ativas e históricas na unidade</div>
+      </div>
     </div>
-  </div>
 
-  <div class="dash-col-4">
-    <div class="metric-card">
-      <div class="metric-label">Matrículas</div>
-      <div class="metric-value">{{ matriculas_total|default:0 }}</div>
-      <div class="metric-meta">Registros no escopo</div>
+    <div class="admin-kpi admin-kpi--amber">
+      <div class="admin-kpi__icon"><i class="fa-solid fa-user-graduate"></i></div>
+      <div class="admin-kpi__content">
+        <div class="admin-kpi__label">Alunos</div>
+        <div class="admin-kpi__value">{{ alunos_total|default:0 }}</div>
+        <div class="admin-kpi__meta">Alunos vinculados</div>
+      </div>
     </div>
-  </div>
 
-  <div class="dash-col-6">
-    <div class="card">
-      <div class="card__title">Matrículas por turma (Top 10)</div>
-      <div class="card__body">
-        {% if graf_matriculas_por_turma %}
-          <div class="dash-chart">
-            <canvas id="chartMatriculasTurma" height="160"></canvas>
-          </div>
-        {% else %}
-          {% include "core/partials/components/feedback/empty_state.html" with title="Sem dados" text="Ainda não há matrículas suficientes para gerar o gráfico." %}
-        {% endif %}
+    <div class="admin-kpi admin-kpi--green">
+      <div class="admin-kpi__icon"><i class="fa-solid fa-id-card-clip"></i></div>
+      <div class="admin-kpi__content">
+        <div class="admin-kpi__label">Matrículas</div>
+        <div class="admin-kpi__value">{{ matriculas_total|default:0 }}</div>
+        <div class="admin-kpi__meta">Registros no escopo da unidade</div>
       </div>
     </div>
   </div>
 
-  <div class="dash-col-6">
-    <div class="card">
-      <div class="card__title">Turmas</div>
-      <div class="card__body">
-        {% if turmas %}
-          <div class="dash-table">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Turma</th>
-                  <th>Ano letivo</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for t in turmas %}
-                  <tr>
-                    <td>{{ t.nome }}</td>
-                    <td>{{ t.ano_letivo|default:"—" }}</td>
-                    <td><a class="btn btn--ghost" href="{% url 'educacao:turma_detail' t.pk %}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir</a></td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        {% else %}
-          {% include "core/partials/components/feedback/empty_state.html" with title="Sem turmas" text="Nenhuma turma encontrada para esta unidade." %}
-        {% endif %}
+  <div class="dash-panel-grid dash-panel-grid--main">
+    <section class="admin-panel">
+      <div class="admin-panel__head">
+        <div>
+          <h3 class="admin-panel__title">Matrículas por turma</h3>
+          <p class="admin-panel__sub">Top 10 turmas por volume de matrículas</p>
+        </div>
       </div>
-    </div>
+      {% if graf_matriculas_por_turma %}
+        <div class="admin-line-wrap">
+          <canvas id="chartMatriculasTurma" height="230"></canvas>
+        </div>
+      {% else %}
+        {% include "core/partials/components/feedback/empty_state.html" with title="Sem dados" text="Ainda não há matrículas suficientes para gerar o gráfico." %}
+      {% endif %}
+    </section>
+
+    <section class="admin-panel">
+      <div class="admin-panel__head">
+        <div>
+          <h3 class="admin-panel__title">Ranking por turma</h3>
+          <p class="admin-panel__sub">Distribuição de matrículas nas turmas</p>
+        </div>
+      </div>
+
+      {% if graf_matriculas_por_turma %}
+        <div class="admin-ranking">
+          {% for row in graf_matriculas_por_turma %}
+            <div class="admin-ranking__row">
+              <div class="admin-ranking__head">
+                <span class="admin-ranking__name">{{ row.turma__nome|default:"—" }}</span>
+                <span class="admin-ranking__value">{{ row.total|default:0 }} matrículas</span>
+              </div>
+              <div class="admin-meter" data-value="{{ row.total|default:0 }}" aria-hidden="true"><span class="admin-meter__fill"></span></div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        {% include "core/partials/components/feedback/empty_state.html" with title="Sem ranking" text="Ainda não há matrículas para montar o ranking." %}
+      {% endif %}
+    </section>
   </div>
+
+  <section class="admin-panel">
+    <div class="admin-panel__head">
+      <div>
+        <h3 class="admin-panel__title">Turmas da unidade</h3>
+        <p class="admin-panel__sub">Lista das turmas disponíveis para acompanhamento</p>
+      </div>
+      <a class="btn btn--ghost" href="{% url 'educacao:turma_list' %}"><i class="fa-solid fa-list"></i> Ver todas</a>
+    </div>
+
+    {% if turmas %}
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Turma</th>
+              <th>Ano letivo</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for t in turmas %}
+              <tr>
+                <td>{{ t.nome }}</td>
+                <td>{{ t.ano_letivo|default:"—" }}</td>
+                <td><a class="btn btn--ghost" href="{% url 'educacao:turma_detail' t.pk %}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      {% include "core/partials/components/feedback/empty_state.html" with title="Sem turmas" text="Nenhuma turma encontrada para esta unidade." %}
+    {% endif %}
+  </section>
 </div>
 
 {% if graf_matriculas_por_turma %}
 <script>
 (function () {
-  function loadChart(cb){
+  function loadChart(cb) {
     if (window.Chart) return cb();
-    const s = document.createElement("script");
-    s.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js";
-    s.onload = cb;
-    document.head.appendChild(s);
+    var script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js";
+    script.onload = cb;
+    document.head.appendChild(script);
   }
 
-  loadChart(function(){
-    const labels = [{% for r in graf_matriculas_por_turma %}"{{ r.turma__nome|default:'—'|escapejs }}"{% if not forloop.last %},{% endif %}{% endfor %}];
-    const values = [{% for r in graf_matriculas_por_turma %}{{ r.total|default:0 }}{% if not forloop.last %},{% endif %}{% endfor %}];
+  function applyMeters(selector) {
+    var meters = Array.prototype.slice.call(document.querySelectorAll(selector));
+    if (!meters.length) return;
 
-    new Chart(document.getElementById('chartMatriculasTurma'), {
-      type: 'bar',
-      data: { labels: labels, datasets: [{ data: values }] },
-      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    var maxValue = meters.reduce(function (acc, meter) {
+      var value = Number(meter.getAttribute("data-value") || 0);
+      return value > acc ? value : acc;
+    }, 0);
+
+    meters.forEach(function (meter) {
+      var value = Number(meter.getAttribute("data-value") || 0);
+      var width = maxValue > 0 ? (value / maxValue) * 100 : 0;
+      var fill = meter.querySelector(".admin-meter__fill");
+      if (fill) {
+        fill.style.width = width + "%";
+      }
     });
+  }
+
+  loadChart(function () {
+    var labels = [{% for r in graf_matriculas_por_turma %}"{{ r.turma__nome|default:'—'|escapejs }}"{% if not forloop.last %},{% endif %}{% endfor %}];
+    var values = [{% for r in graf_matriculas_por_turma %}{{ r.total|default:0 }}{% if not forloop.last %},{% endif %}{% endfor %}];
+
+    new Chart(document.getElementById("chartMatriculasTurma"), {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [{
+          data: values,
+          backgroundColor: "rgba(31,95,191,0.85)",
+          borderRadius: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+      }
+    });
+
+    applyMeters(".admin-meter");
   });
 })();
 </script>

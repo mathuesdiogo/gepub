@@ -1,263 +1,211 @@
 /* =========================================================
-   GEPUB — SIDEBAR (AZUL SÓLIDO, ESTILO IMAGEM)
-   - Sem gradiente
-   - Ícones brancos
-   - Ativo em formato pill
+   GEPUB — SIDEBAR (ergonômica, foco em acessos frequentes)
    ========================================================= */
 
-.sidebar{
-  background: var(--primary); /* azul da imagem (sólido) */
-  color: rgba(255,255,255,.92);
-  padding: 18px;
-  border-right: 0;
+.sidebar {
   position: relative;
-  overflow: hidden;
-}
-
-/* Linha separadora suave (como na imagem) */
-.sidebar__header{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 6px 16px;
-  margin-bottom: 16px;
-  border-bottom: 1px solid rgba(255,255,255,.18);
-}
-
-.brand{
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-
-.brand__logo{
-  width: 46px;
-  height: 46px;
-  border-radius: 14px;
-  display: grid;
-  place-items: center;
-  background: rgba(255,255,255,.14);
-  border: 1px solid rgba(255,255,255,.20);
-  color: #fff;
-  font-weight: 900;
-}
-
-.brand__name{
-  color: #fff;
-  font-weight: 800;
-  letter-spacing: .2px;
-  line-height: 1.1;
-}
-
-.brand__sub{
-  margin-top: 2px;
-  font-size: 12px;
-  color: rgba(255,255,255,.78);
-}
-
-/* Botão do toggle (hamburger) */
-.sidebar__toggle{
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.20);
-  background: rgba(255,255,255,.12);
-  color: #fff;
-  cursor: pointer;
-}
-
-.sidebar__toggle:hover{
-  background: rgba(255,255,255,.18);
-}
-
-.sidebar__toggle:focus-visible{
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(255,255,255,.22);
-}
-
-/* MENU */
-.menu{
-  display: grid;
-  gap: 10px;
-  padding: 10px 6px;
-}
-
-.menu__item{
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 14px;
-  border-radius: 16px;
-  color: #fff;
-  text-decoration: none;
-  background: transparent;
-  border: 1px solid transparent;
-  transition: background .12s ease, transform .08s ease;
-}
-
-.menu__item:hover{
-  background: rgba(0,0,0,.12);
-}
-
-.menu__item:active{ transform: translateY(1px); }
-
-.menu__item.is-active{
-  background: rgba(0,0,0,.18); /* “pill” mais escuro */
-}
-
-/* Ícone à esquerda */
-.menu__icon{
-  width: 40px;
-  height: 40px;
-  border-radius: 14px;
-  display: grid;
-  place-items: center;
-  background: transparent; /* na imagem, ícone solto */
-  border: 0;
-  color: #fff;
-  flex: 0 0 auto;
-  font-size: 22px;
-}
-
-/* Se dentro tiver <i class="fa-..."> */
-.menu__icon i{
-  font-size: 22px;
-  line-height: 1;
-}
-
-/* Label */
-.menu__label{
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: .2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Separador antes de ajuda/sair (como na imagem) */
-.menu__divider{
-  margin: 8px 0;
-  border-top: 1px solid rgba(255,255,255,.18);
-}
-
-.sidebar__footer{
-  position: static;
-  margin-top: 18px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255,255,255,.18);
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-
-.sidebar__avatar{
-  width: 54px;
-  height: 54px;
-  border-radius: 999px;
-  background: rgba(255,255,255,.20);
-  border: 1px solid rgba(255,255,255,.22);
-  flex: 0 0 auto;
-}
-
-.sidebar__user-info{
-  min-width: 0;
-}
-
-.sidebar__user-name{
-  color: #fff;
-  font-weight: 800;
-  font-size: 20px;
-  line-height: 1.1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.sidebar__user-role{
-  color: rgba(255,255,255,.78);
-  font-size: 16px;
-  margin-top: 2px;
-}
-
-/* Collapsed */
-body.sidebar-collapsed .brand__text{ display: none; }
-body.sidebar-collapsed .menu__label{ display: none; }
-
-body.sidebar-collapsed .sidebar__footer{
-  justify-content: center;
-}
-
-body.sidebar-collapsed .sidebar__user-info{
-  display: none;
-}
-/* ======================================================
-   SIDEBAR LAYOUT: header topo, menu rola, footer fixo
-   ====================================================== */
-
-.sidebar{
   display: flex;
   flex-direction: column;
   height: 100vh;
+  padding: 16px;
+  color: rgba(241, 245, 249, 0.96);
+  background: linear-gradient(180deg, #13213d 0%, #0f172a 100%);
+  border-right: 1px solid rgba(148, 163, 184, 0.16);
+  overflow: hidden;
 }
 
-/* Menu ocupa o espaço do meio e rola */
-.menu{
+.sidebar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(59, 130, 246, 0.24), transparent 44%),
+    radial-gradient(circle at 84% 0%, rgba(14, 165, 233, 0.17), transparent 34%);
+}
+
+.sidebar > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Header */
+.sidebar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 4px 14px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.brand__logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  background: linear-gradient(180deg, #1f5fbf 0%, #1d4ed8 100%);
+  border: 1px solid rgba(191, 219, 254, 0.4);
+}
+
+.brand__name {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.brand__sub {
+  margin-top: 2px;
+  color: rgba(203, 213, 225, 0.9);
+  font-size: 11px;
+}
+
+.sidebar__toggle {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(15, 23, 42, 0.55);
+  color: rgba(226, 232, 240, 0.96);
+  cursor: pointer;
+}
+
+.sidebar__toggle:hover {
+  background: rgba(30, 41, 59, 0.75);
+}
+
+.sidebar__toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+/* Menu */
+.menu {
   flex: 1 1 auto;
   overflow: auto;
-  padding-bottom: 14px; /* respiro antes do footer */
+  padding: 6px 4px;
+  display: grid;
+  gap: 6px;
 }
 
-/* Footer sempre no final, sem ser “empurrado” */
-.sidebar__footer{
-  flex: 0 0 auto;
-  margin-top: 14px;
+.menu::-webkit-scrollbar {
+  width: 8px;
 }
-/* ======================================================
-   COMPACT MODE: alinhado e elegante (igual sistemas SaaS)
-   ====================================================== */
 
-.menu{
+.menu::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.32);
+  border-radius: 999px;
+}
+
+.menu-search {
+  display: flex;
+  align-items: center;
   gap: 8px;
+  height: 38px;
+  padding: 0 10px;
+  border-radius: 11px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.52);
+  margin-bottom: 8px;
 }
 
-.menu__item{
-  padding: 10px 12px;      /* menor */
-  border-radius: 14px;
-  gap: 12px;
+.menu-search i {
+  color: rgba(148, 163, 184, 0.95);
+  font-size: 12px;
 }
 
-.menu__icon{
-  width: 34px;             /* menor */
-  height: 34px;
-  border-radius: 12px;
-  font-size: 18px;         /* menor */
+.menu-search input {
+  border: 0;
+  outline: none;
+  width: 100%;
+  background: transparent;
+  color: rgba(226, 232, 240, 0.95);
+  font-size: 12px;
+  pointer-events: none;
 }
 
-.menu__icon i{
-  font-size: 18px;
+.menu-search input::placeholder {
+  color: rgba(148, 163, 184, 0.88);
 }
 
-.menu__label{
-  font-size: 15px;         /* bem mais harmônico */
-  font-weight: 700;
-}
-
-/* Sections menores */
-.menu__section{
-  margin-top: 12px;
+.menu__section {
+  margin-top: 10px;
+  padding: 8px 10px 2px;
+  color: rgba(148, 163, 184, 0.9);
   font-size: 10px;
-  letter-spacing: .14em;
-  padding: 8px 10px 4px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.menu__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  color: rgba(226, 232, 240, 0.96);
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: background .15s ease, border-color .15s ease, transform .1s ease;
+}
+
+.menu__item:hover {
+  background: rgba(30, 41, 59, 0.75);
+  border-color: rgba(148, 163, 184, 0.26);
+}
+
+.menu__item:active {
+  transform: translateY(1px);
+}
+
+.menu__item.is-active {
+  border-color: rgba(96, 165, 250, 0.45);
+  background: rgba(37, 99, 235, 0.36);
+}
+
+.menu__item--primary {
+  border-color: rgba(59, 130, 246, 0.44);
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.42) 0%, rgba(30, 64, 175, 0.35) 100%);
+}
+
+.menu__icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: rgba(226, 232, 240, 0.98);
+  background: rgba(15, 23, 42, 0.5);
+  font-size: 14px;
+}
+
+.menu__label {
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .menu__group {
-  border: 0;
   margin: 0;
-  padding: 0;
+  border: 0;
 }
 
 .menu__group summary {
@@ -274,9 +222,9 @@ body.sidebar-collapsed .sidebar__user-info{
 
 .menu__caret {
   margin-left: auto;
-  color: rgba(255, 255, 255, .78);
-  font-size: 12px;
-  transition: transform .14s ease;
+  color: rgba(148, 163, 184, 0.95);
+  font-size: 11px;
+  transition: transform .15s ease;
 }
 
 .menu__group[open] .menu__caret {
@@ -285,8 +233,8 @@ body.sidebar-collapsed .sidebar__user-info{
 
 .menu__submenu {
   display: grid;
-  gap: 6px;
-  padding: 4px 0 8px 42px;
+  gap: 4px;
+  padding: 4px 0 8px 40px;
 }
 
 .menu__subitem {
@@ -294,46 +242,131 @@ body.sidebar-collapsed .sidebar__user-info{
   align-items: center;
   gap: 8px;
   min-height: 32px;
-  padding: 7px 10px;
-  border-radius: 12px;
+  padding: 6px 9px;
+  border-radius: 10px;
+  color: rgba(203, 213, 225, 0.95);
   text-decoration: none;
-  color: rgba(255, 255, 255, .88);
+  border: 1px solid transparent;
   font-size: 12px;
   font-weight: 600;
-  border: 1px solid transparent;
 }
 
 .menu__subitem i {
   width: 14px;
-  font-size: 12px;
   text-align: center;
+  font-size: 11px;
 }
 
 .menu__subitem:hover {
-  background: rgba(0, 0, 0, .12);
-  color: #fff;
+  color: #f8fafc;
+  background: rgba(30, 41, 59, 0.74);
+  border-color: rgba(148, 163, 184, 0.22);
 }
 
 .menu__subitem.is-active {
-  background: rgba(0, 0, 0, .2);
-  color: #fff;
+  color: #f8fafc;
+  border-color: rgba(96, 165, 250, 0.45);
+  background: rgba(37, 99, 235, 0.34);
 }
 
-body.sidebar-collapsed .menu__caret {
+/* Footer */
+.sidebar__footer {
+  flex: 0 0 auto;
+  margin-top: 10px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.sidebar__footer-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.sidebar__footer-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(226, 232, 240, 0.96);
+  background: rgba(15, 23, 42, 0.56);
+  text-decoration: none;
+  transition: background .15s ease, border-color .15s ease;
+}
+
+.sidebar__footer-btn:hover {
+  background: rgba(30, 41, 59, 0.76);
+  border-color: rgba(148, 163, 184, 0.46);
+}
+
+.sidebar__footer-btn--danger:hover {
+  border-color: rgba(248, 113, 113, 0.52);
+  color: rgba(254, 226, 226, 0.98);
+  background: rgba(127, 29, 29, 0.35);
+}
+
+/* Collapsed */
+body.sidebar-collapsed .sidebar__header {
+  justify-content: center;
+  padding: 6px 0 12px;
+}
+
+body.sidebar-collapsed .brand {
   display: none;
+}
+
+body.sidebar-collapsed .brand__text,
+body.sidebar-collapsed .menu__label,
+body.sidebar-collapsed .menu__section,
+body.sidebar-collapsed .menu__caret,
+body.sidebar-collapsed .menu-search {
+  display: none;
+}
+
+body.sidebar-collapsed .menu {
+  justify-items: center;
+  gap: 8px;
+}
+
+body.sidebar-collapsed .menu__item,
+body.sidebar-collapsed .menu__group-summary {
+  width: 44px;
+  min-height: 44px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 12px;
+}
+
+body.sidebar-collapsed .menu__icon {
+  width: 30px;
+  height: 30px;
+  margin: 0;
 }
 
 body.sidebar-collapsed .menu__submenu {
   display: none;
 }
 
-body.sidebar-collapsed .menu__group[open] {
-  background: rgba(0, 0, 0, .08);
-  border-radius: 14px;
+body.sidebar-collapsed .sidebar__footer-tools {
+  justify-content: center;
 }
 
-/* Deixar “Sair” mais discreto (não competir com módulos) */
-.menu__item[href*="logout"]{
-  margin-top: 6px;
-  background: rgba(192, 9, 9, 0.08);
+@media (max-width: 920px) {
+  .sidebar {
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  }
+
+  .menu {
+    overflow: visible;
+  }
+
+  .sidebar__footer-tools {
+    justify-content: flex-start;
+  }
 }

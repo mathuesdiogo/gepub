@@ -5,22 +5,22 @@
 {% endblock %}
 
 {% block page_content %}
-<section class="pp-grid pp-grid--3">
-  <article class="pp-card">
+<section class="pp-grid pp-grid--3 pp-section-space">
+  <article class="pp-card pp-kpi-card">
     <h3>Total de contratos</h3>
     <p class="pp-kpi-value">{{ indicadores.total }}</p>
   </article>
-  <article class="pp-card">
+  <article class="pp-card pp-kpi-card pp-kpi-card--deep">
     <h3>Contratos ativos</h3>
     <p class="pp-kpi-value">{{ indicadores.ativos }}</p>
   </article>
-  <article class="pp-card">
+  <article class="pp-card pp-kpi-card pp-kpi-card--green">
     <h3>Valor total</h3>
     <p class="pp-kpi-value">R$ {{ indicadores.valor_total|default:0|floatformat:2 }}</p>
   </article>
 </section>
 
-<section class="pp-card">
+<section class="pp-card pp-section-space">
   <form method="get" class="pp-form-inline pp-form-inline--3">
     <div>
       <label for="id_q">Busca</label>
@@ -44,7 +44,7 @@
     </div>
   </form>
 
-  <div class="pp-table-wrap" style="margin-top:10px;">
+  <div class="pp-table-wrap pp-section-space">
     <table class="pp-table">
       <thead>
         <tr>

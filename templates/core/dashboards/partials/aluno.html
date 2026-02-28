@@ -1,126 +1,142 @@
 {% if sem_vinculo %}
-  {% include "core/partials/components/feedback/empty_state.html" with title="Sem vínculo de aluno" text="Seu perfil ainda não está associado a um aluno. Fale com a administração." %}
+  <section class="admin-panel">
+    {% include "core/partials/components/feedback/empty_state.html" with title="Sem vínculo de aluno" text="Seu perfil ainda não está associado a um aluno. Fale com a administração." %}
+  </section>
 {% else %}
-  <div class="dash-grid">
-    <div class="dash-col-6">
-      <div class="metric-card">
-        <div class="metric-label">Avisos</div>
-        <div class="metric-value">{{ avisos|length }}</div>
-        <div class="metric-meta">Comunicados recentes</div>
+  <div class="admin-dash">
+    <div class="dash-kpi-grid">
+      <div class="admin-kpi admin-kpi--blue">
+        <div class="admin-kpi__icon"><i class="fa-solid fa-bullhorn"></i></div>
+        <div class="admin-kpi__content">
+          <div class="admin-kpi__label">Avisos</div>
+          <div class="admin-kpi__value">{{ avisos|length }}</div>
+          <div class="admin-kpi__meta">Comunicados recentes para você</div>
+        </div>
       </div>
-    </div>
 
-    <div class="dash-col-6">
-      <div class="metric-card">
-        <div class="metric-label">Arquivos</div>
-        <div class="metric-value">{{ arquivos|length }}</div>
-        <div class="metric-meta">Materiais e anexos</div>
+      <div class="admin-kpi admin-kpi--green">
+        <div class="admin-kpi__icon"><i class="fa-solid fa-file-arrow-down"></i></div>
+        <div class="admin-kpi__content">
+          <div class="admin-kpi__label">Arquivos</div>
+          <div class="admin-kpi__value">{{ arquivos|length }}</div>
+          <div class="admin-kpi__meta">Materiais e anexos publicados</div>
+        </div>
       </div>
-    </div>
 
-    <div class="dash-col-12">
-      <div class="card">
-        <div class="card__title">Avisos recentes</div>
-        <div class="card__body">
-          {% if avisos %}
-            <div class="dash-table">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>Título</th>
-                    <th>Data</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for a in avisos %}
-                    <tr>
-                      <td>{{ a.titulo|default:"Aviso" }}</td>
-                      <td>{{ a.criado_em|date:"d/m/Y H:i" }}</td>
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          {% else %}
-            {% include "core/partials/components/feedback/empty_state.html" with title="Sem avisos" text="Nenhum aviso encontrado para seu perfil." %}
-          {% endif %}
+      <div class="admin-kpi admin-kpi--amber">
+        <div class="admin-kpi__icon"><i class="fa-solid fa-calendar-days"></i></div>
+        <div class="admin-kpi__content">
+          <div class="admin-kpi__label">Eventos</div>
+          <div class="admin-kpi__value">{{ eventos_calendario|length }}</div>
+          <div class="admin-kpi__meta">Compromissos no calendário escolar</div>
         </div>
       </div>
     </div>
 
-    <div class="dash-col-12">
-      <div class="card">
-        <div class="card__title">Arquivos recentes</div>
-        <div class="card__body">
-          {% if arquivos %}
-            <div class="dash-table">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>Arquivo</th>
-                    <th>Data</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for arq in arquivos %}
-                    <tr>
-                      <td>{{ arq.titulo|default:"Arquivo" }}</td>
-                      <td>{{ arq.criado_em|date:"d/m/Y H:i" }}</td>
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          {% else %}
-            {% include "core/partials/components/feedback/empty_state.html" with title="Sem arquivos" text="Nenhum arquivo encontrado para seu perfil." %}
-          {% endif %}
+    <section class="admin-panel">
+      <div class="admin-panel__head">
+        <div>
+          <h3 class="admin-panel__title">Avisos recentes</h3>
+          <p class="admin-panel__sub">Comunicados direcionados ao seu perfil</p>
         </div>
       </div>
-    </div>
 
-    <div class="dash-col-12">
-      <div class="card">
-        <div class="card__title">Calendário educacional</div>
-        <div class="card__body">
-          {% if eventos_calendario %}
-            <div class="dash-table">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>Data</th>
-                    <th>Evento</th>
-                    <th>Tipo</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for ev in eventos_calendario %}
-                    <tr>
-                      <td>
-                        {{ ev.data_inicio|date:"d/m/Y" }}
-                        {% if ev.data_fim and ev.data_fim != ev.data_inicio %}
-                          até {{ ev.data_fim|date:"d/m/Y" }}
-                        {% endif %}
-                      </td>
-                      <td>{{ ev.titulo }}</td>
-                      <td>{{ ev.get_tipo_display }}</td>
-                      <td>
-                        {% if perms.educacao.view %}
-                          <a class="btn btn--ghost" href="{% url 'educacao:calendario_index' %}"><i class="fa-solid fa-calendar-week"></i> Ver calendário</a>
-                        {% else %}
-                          —
-                        {% endif %}
-                      </td>
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          {% else %}
-            {% include "core/partials/components/feedback/empty_state.html" with title="Sem eventos" text="Ainda não há eventos de calendário para você." %}
-          {% endif %}
+      {% if avisos %}
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Data</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for a in avisos %}
+                <tr>
+                  <td>{{ a.titulo|default:"Aviso" }}</td>
+                  <td>{{ a.criado_em|date:"d/m/Y H:i" }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        {% include "core/partials/components/feedback/empty_state.html" with title="Sem avisos" text="Nenhum aviso encontrado para seu perfil." %}
+      {% endif %}
+    </section>
+
+    <section class="admin-panel">
+      <div class="admin-panel__head">
+        <div>
+          <h3 class="admin-panel__title">Arquivos recentes</h3>
+          <p class="admin-panel__sub">Materiais disponibilizados para seu escopo</p>
         </div>
       </div>
-    </div>
+
+      {% if arquivos %}
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Arquivo</th>
+                <th>Data</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for arq in arquivos %}
+                <tr>
+                  <td>{{ arq.titulo|default:"Arquivo" }}</td>
+                  <td>{{ arq.criado_em|date:"d/m/Y H:i" }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        {% include "core/partials/components/feedback/empty_state.html" with title="Sem arquivos" text="Nenhum arquivo encontrado para seu perfil." %}
+      {% endif %}
+    </section>
+
+    <section class="admin-panel">
+      <div class="admin-panel__head">
+        <div>
+          <h3 class="admin-panel__title">Calendário educacional</h3>
+          <p class="admin-panel__sub">Eventos vigentes no seu calendário escolar</p>
+        </div>
+        {% if perms.educacao.view %}
+          <a class="btn btn--ghost" href="{% url 'educacao:calendario_index' %}"><i class="fa-solid fa-calendar-week"></i> Ver calendário</a>
+        {% endif %}
+      </div>
+
+      {% if eventos_calendario %}
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Evento</th>
+                <th>Tipo</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for ev in eventos_calendario %}
+                <tr>
+                  <td>
+                    {{ ev.data_inicio|date:"d/m/Y" }}
+                    {% if ev.data_fim and ev.data_fim != ev.data_inicio %}
+                      até {{ ev.data_fim|date:"d/m/Y" }}
+                    {% endif %}
+                  </td>
+                  <td>{{ ev.titulo }}</td>
+                  <td>{{ ev.get_tipo_display }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        {% include "core/partials/components/feedback/empty_state.html" with title="Sem eventos" text="Ainda não há eventos de calendário para você." %}
+      {% endif %}
+    </section>
   </div>
 {% endif %}

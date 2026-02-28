@@ -107,6 +107,10 @@ urlpatterns = [
 
     # API (UX)
     path("api/profissionais-por-unidade/", views_api.api_profissionais_por_unidade, name="api_profissionais_por_unidade"),
+    path("api/alunos/suggest/", views_api.api_alunos_suggest, name="api_alunos_suggest"),
+    path("api/pacientes/suggest/", views_api.api_pacientes_suggest, name="api_pacientes_suggest"),
+    path("api/atendimentos/suggest/", views_api.api_atendimentos_suggest, name="api_atendimentos_suggest"),
+    path("api/agendamentos/suggest/", views_api.api_agendamentos_suggest, name="api_agendamentos_suggest"),
     path("api/profissionais/suggest/", views_profissionais.api_profissionais_suggest, name="api_profissionais_suggest"),
     path("api/unidades/suggest/", views_unidades.api_unidades_suggest, name="api_unidades_suggest"),
     path("relatorios/mensal/", views_relatorios.relatorio_mensal, name="relatorio_mensal"),

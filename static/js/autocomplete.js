@@ -75,6 +75,10 @@
 
     input.addEventListener("input", () => {
       const q = (input.value || "").trim();
+      if (mode === "fill" && fillTarget) {
+        const target = document.querySelector(fillTarget);
+        if (target) target.value = "";
+      }
       if (q.length < min) { hide(); return; }
       if (q === last) return;
       last = q;

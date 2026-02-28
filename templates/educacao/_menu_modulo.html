@@ -1,163 +1,172 @@
-<nav class="module-menu">
+{% with route=request.resolver_match.url_name|default:'' %}
+<nav class="module-menu module-menu--educacao">
   <div class="module-menu__title">
     <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
     <span>Educação</span>
   </div>
+  <p class="module-menu__subtitle">Gestão escolar e acadêmica</p>
 
-  <ul class="module-menu__list">
-    {% if is_professor_role %}
+  {% if is_professor_role %}
+    <ul class="module-menu__list">
       <li class="module-menu__item">
-        <a class="module-menu__link" href="{% url 'educacao:index' %}">
+        <a class="module-menu__link {% if route == 'index' %}is-active{% endif %}" href="{% url 'educacao:index' %}">
           <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
           <span>Painel Professor</span>
         </a>
       </li>
       <li class="module-menu__item">
-        <a class="module-menu__link" href="{% url 'educacao:turma_list' %}">
+        <a class="module-menu__link {% if 'turma' in route %}is-active{% endif %}" href="{% url 'educacao:turma_list' %}">
           <i class="fa-solid fa-people-group" aria-hidden="true"></i>
           <span>Minhas Turmas</span>
         </a>
       </li>
       <li class="module-menu__item">
-        <a class="module-menu__link" href="{% url 'educacao:aluno_list' %}">
+        <a class="module-menu__link {% if 'aluno' in route %}is-active{% endif %}" href="{% url 'educacao:aluno_list' %}">
           <i class="fa-solid fa-user-graduate" aria-hidden="true"></i>
           <span>Meus Alunos</span>
         </a>
       </li>
       <li class="module-menu__item">
-        <a class="module-menu__link" href="{% url 'educacao:meus_diarios' %}">
+        <a class="module-menu__link {% if route == 'meus_diarios' %}is-active{% endif %}" href="{% url 'educacao:meus_diarios' %}">
           <i class="fa-solid fa-book" aria-hidden="true"></i>
           <span>Diário de Classe</span>
         </a>
       </li>
       <li class="module-menu__item">
-        <a class="module-menu__link" href="{% url 'educacao:portal_professor' %}">
+        <a class="module-menu__link {% if route == 'portal_professor' %}is-active{% endif %}" href="{% url 'educacao:portal_professor' %}">
           <i class="fa-solid fa-chalkboard-user" aria-hidden="true"></i>
           <span>Portal Professor</span>
         </a>
       </li>
-    {% else %}
-      <li class="module-menu__item">
-        <a class="module-menu__link" href="{% url 'educacao:index' %}">
-          <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
-          <span>Dashboard</span>
-        </a>
-      </li>
+    </ul>
+  {% else %}
+    <div class="module-menu__group">
+      <div class="module-menu__group-title">Painel</div>
+      <ul class="module-menu__list">
+        <li class="module-menu__item">
+          <a class="module-menu__link {% if route == 'index' %}is-active{% endif %}" href="{% url 'educacao:index' %}">
+            <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="module-menu__item">
+          <a class="module-menu__link {% if route == 'indicadores_gerenciais' %}is-active{% endif %}" href="{% url 'educacao:indicadores_gerenciais' %}">
+            <i class="fa-solid fa-chart-simple" aria-hidden="true"></i>
+            <span>Indicadores</span>
+          </a>
+        </li>
+        <li class="module-menu__item">
+          <a class="module-menu__link {% if route == 'relatorio_mensal' %}is-active{% endif %}" href="{% url 'educacao:relatorio_mensal' %}">
+            <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
+            <span>Relatório Mensal</span>
+          </a>
+        </li>
+      </ul>
+    </div>
 
-      <li class="module-menu__item">
-        <a class="module-menu__link" href="{% url 'educacao:relatorio_mensal' %}">
-          <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
-          <span>Relatório Mensal</span>
-        </a>
-      </li>
+    <div class="module-menu__group">
+      <div class="module-menu__group-title">Acadêmico</div>
+      <ul class="module-menu__list">
+        <li class="module-menu__item">
+          <a class="module-menu__link {% if 'aluno' in route %}is-active{% endif %}" href="{% url 'educacao:aluno_list' %}">
+            <i class="fa-solid fa-user-graduate" aria-hidden="true"></i>
+            <span>Alunos</span>
+          </a>
+        </li>
+        <li class="module-menu__item">
+          <a class="module-menu__link {% if 'turma' in route %}is-active{% endif %}" href="{% url 'educacao:turma_list' %}">
+            <i class="fa-solid fa-people-group" aria-hidden="true"></i>
+            <span>Turmas</span>
+          </a>
+        </li>
+        <li class="module-menu__item">
+          <a class="module-menu__link {% if 'matricula' in route %}is-active{% endif %}" href="{% url 'educacao:matricula_create' %}">
+            <i class="fa-solid fa-id-card" aria-hidden="true"></i>
+            <span>Matrículas</span>
+          </a>
+        </li>
+        <li class="module-menu__item">
+          <a class="module-menu__link {% if route == 'meus_diarios' %}is-active{% endif %}" href="{% url 'educacao:meus_diarios' %}">
+            <i class="fa-solid fa-book" aria-hidden="true"></i>
+            <span>Diário de Classe</span>
+          </a>
+        </li>
+        <li class="module-menu__item">
+          <a class="module-menu__link {% if route == 'portal_professor' %}is-active{% endif %}" href="{% url 'educacao:portal_professor' %}">
+            <i class="fa-solid fa-chalkboard-user" aria-hidden="true"></i>
+            <span>Portal Professor</span>
+          </a>
+        </li>
+      </ul>
+    </div>
 
-      <li class="module-menu__item">
-        <a class="module-menu__link" href="{% url 'educacao:indicadores_gerenciais' %}">
-          <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
-          <span>Indicadores</span>
-        </a>
-      </li>
+    <div class="module-menu__group">
+      <div class="module-menu__group-title">Gestão Escolar</div>
+      <ul class="module-menu__list">
+        <li class="module-menu__item">
+          <a class="module-menu__link {% if route == 'calendario_index' %}is-active{% endif %}" href="{% url 'educacao:calendario_index' %}">
+            <i class="fa-solid fa-calendar-week" aria-hidden="true"></i>
+            <span>Calendário Educacional</span>
+          </a>
+        </li>
+        <li class="module-menu__item">
+          <a class="module-menu__link {% if 'periodo' in route %}is-active{% endif %}" href="{% url 'educacao:periodo_list' %}">
+            <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
+            <span>Períodos Letivos</span>
+          </a>
+        </li>
+        <li class="module-menu__item">
+          <a class="module-menu__link {% if route == 'componente_list' %}is-active{% endif %}" href="{% url 'educacao:componente_list' %}">
+            <i class="fa-solid fa-book-open" aria-hidden="true"></i>
+            <span>Componentes</span>
+          </a>
+        </li>
+        <li class="module-menu__item">
+          <a class="module-menu__link {% if route == 'horarios_index' %}is-active{% endif %}" href="{% url 'educacao:horarios_index' %}">
+            <i class="fa-solid fa-clock" aria-hidden="true"></i>
+            <span>Horários</span>
+          </a>
+        </li>
+        <li class="module-menu__item">
+          <a class="module-menu__link {% if 'coordenacao' in route %}is-active{% endif %}" href="{% url 'educacao:coordenacao_list' %}">
+            <i class="fa-solid fa-user-tie" aria-hidden="true"></i>
+            <span>Coordenação</span>
+          </a>
+        </li>
+        <li class="module-menu__item">
+          <a class="module-menu__link {% if 'curso' in route %}is-active{% endif %}" href="{% url 'educacao:curso_list' %}">
+            <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
+            <span>Cursos</span>
+          </a>
+        </li>
+      </ul>
+    </div>
 
-      <li class="module-menu__item">
-        <a class="module-menu__link" href="{% url 'educacao:censo_escolar' %}">
-          <i class="fa-solid fa-database" aria-hidden="true"></i>
-          <span>Censo Escolar</span>
-        </a>
-      </li>
-
-      <li class="module-menu__item">
-        <a class="module-menu__link" href="{% url 'educacao:periodo_list' %}">
-          <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
-          <span>Períodos Letivos</span>
-        </a>
-      </li>
-
-      <li class="module-menu__item">
-        <a class="module-menu__link" href="{% url 'educacao:calendario_index' %}">
-          <i class="fa-solid fa-calendar-week" aria-hidden="true"></i>
-          <span>Calendário Educacional</span>
-        </a>
-      </li>
-
-      <li class="module-menu__item">
-        <a class="module-menu__link" href="{% url 'educacao:componente_list' %}">
-          <i class="fa-solid fa-book-open" aria-hidden="true"></i>
-          <span>Componentes</span>
-        </a>
-      </li>
-
-      <li class="module-menu__item">
-        <a class="module-menu__link" href="{% url 'educacao:meus_diarios' %}">
-          <i class="fa-solid fa-book" aria-hidden="true"></i>
-          <span>Diário de Classe</span>
-        </a>
-      </li>
-
-      <li class="module-menu__item">
-        <a class="module-menu__link" href="{% url 'educacao:portal_professor' %}">
-          <i class="fa-solid fa-chalkboard-user" aria-hidden="true"></i>
-          <span>Portal Professor</span>
-        </a>
-      </li>
-
-      <li class="module-menu__item">
-        <a class="module-menu__link" href="{% url 'educacao:horarios_index' %}">
-          <i class="fa-solid fa-clock" aria-hidden="true"></i>
-          <span>Horários</span>
-        </a>
-      </li>
-
-      <li class="module-menu__item">
-        <a class="module-menu__link" href="{% url 'educacao:aluno_list' %}">
-          <i class="fa-solid fa-user-graduate" aria-hidden="true"></i>
-          <span>Alunos</span>
-        </a>
-      </li>
-
-      <li class="module-menu__item">
-        <a class="module-menu__link" href="{% url 'educacao:turma_list' %}">
-          <i class="fa-solid fa-people-group" aria-hidden="true"></i>
-          <span>Turmas</span>
-        </a>
-      </li>
-
-      <li class="module-menu__item">
-        <a class="module-menu__link" href="{% url 'educacao:coordenacao_list' %}">
-          <i class="fa-solid fa-user-tie" aria-hidden="true"></i>
-          <span>Coordenação</span>
-        </a>
-      </li>
-
-      <li class="module-menu__item">
-        <a class="module-menu__link" href="{% url 'educacao:curso_list' %}">
-          <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
-          <span>Cursos</span>
-        </a>
-      </li>
-
-      <li class="module-menu__item">
-        <a class="module-menu__link" href="{% url 'educacao:matricula_create' %}">
-          <i class="fa-solid fa-id-card" aria-hidden="true"></i>
-          <span>Matrículas</span>
-        </a>
-      </li>
-
-      <li class="module-menu__item">
-        <a class="module-menu__link" href="{% url 'educacao:assistencia_index' %}">
-          <i class="fa-solid fa-utensils" aria-hidden="true"></i>
-          <span>Assistência Escolar</span>
-        </a>
-      </li>
-
-      {% if perms.nee.view %}
-      <li class="module-menu__item">
-        <a class="module-menu__link" href="{% url 'nee:relatorios_index' %}">
-          <i class="fa-solid fa-wheelchair" aria-hidden="true"></i>
-          <span>Relatórios NEE</span>
-        </a>
-      </li>
-      {% endif %}
-    {% endif %}
-
-  </ul>
+    <div class="module-menu__group">
+      <div class="module-menu__group-title">Apoio</div>
+      <ul class="module-menu__list">
+        <li class="module-menu__item">
+          <a class="module-menu__link {% if route == 'assistencia_index' %}is-active{% endif %}" href="{% url 'educacao:assistencia_index' %}">
+            <i class="fa-solid fa-utensils" aria-hidden="true"></i>
+            <span>Assistência Escolar</span>
+          </a>
+        </li>
+        <li class="module-menu__item">
+          <a class="module-menu__link {% if route == 'censo_escolar' %}is-active{% endif %}" href="{% url 'educacao:censo_escolar' %}">
+            <i class="fa-solid fa-database" aria-hidden="true"></i>
+            <span>Censo Escolar</span>
+          </a>
+        </li>
+        {% if perms.nee.view %}
+          <li class="module-menu__item">
+            <a class="module-menu__link {% if request.resolver_match.app_name|default:'' == 'nee' %}is-active{% endif %}" href="{% url 'nee:relatorios_index' %}">
+              <i class="fa-solid fa-wheelchair" aria-hidden="true"></i>
+              <span>Relatórios NEE</span>
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  {% endif %}
 </nav>
+{% endwith %}

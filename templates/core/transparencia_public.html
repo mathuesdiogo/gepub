@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block page_content %}
-<section class="pp-grid pp-grid--3">
+<section class="pp-grid pp-grid--3 pp-section-space">
   <article class="pp-card tp-kpi-card tp-kpi-card--blue">
     <h3>Eventos listados</h3>
     <p class="pp-kpi-value">{{ total_eventos }}</p>
@@ -31,7 +31,7 @@
   </article>
 </section>
 
-<section class="pp-card" style="margin-top:12px;">
+<section class="pp-card pp-section-space">
   <form method="get" class="tp-filter-form">
     <input class="pp-input" type="text" name="q" value="{{ filtro_q }}" placeholder="Buscar por título, referência ou município">
 
@@ -69,7 +69,7 @@
 </section>
 
 {% if secoes_transparencia %}
-<section class="tp-sections" style="margin-top:12px;">
+<section class="tp-sections pp-section-space">
   {% for secao in secoes_transparencia %}
     <article class="pp-card tp-section">
       <header class="tp-section__header">
@@ -119,13 +119,13 @@
 {% endif %}
 
 {% if arquivos_publicos %}
-<section class="pp-card" style="margin-top:12px;">
+<section class="pp-card pp-section-space">
   <div class="pp-card__subhead">
     <h2>Arquivos públicos</h2>
     <span class="pp-badge">{{ total_arquivos_publicos }} arquivo(s)</span>
   </div>
 
-  <div class="pp-table-wrap" style="margin-top:10px;">
+  <div class="pp-table-wrap pp-section-space">
     <table class="pp-table">
       <thead>
         <tr>
@@ -166,13 +166,13 @@
 {% endif %}
 
 {% if eventos %}
-<section class="pp-card" style="margin-top:12px;">
+<section class="pp-card pp-section-space">
   <div class="pp-card__subhead">
     <h2>Eventos públicos</h2>
     <span class="pp-badge">{{ total_eventos }} evento(s)</span>
   </div>
 
-  <div class="pp-table-wrap" style="margin-top:10px;">
+  <div class="pp-table-wrap pp-section-space">
     <table class="pp-table">
       <thead>
         <tr>
@@ -205,9 +205,9 @@
   </div>
 </section>
 {% else %}
-<section class="pp-card" style="margin-top:12px; text-align:center;">
-  <i class="fa-regular fa-folder-open" style="color:#1f63c4;font-size:22px;"></i>
-  <h3 style="margin:10px 0 6px;">Nenhum evento público encontrado.</h3>
+<section class="pp-card pp-section-space pp-empty-state">
+  <i class="fa-regular fa-folder-open"></i>
+  <h3>Nenhum evento público encontrado.</h3>
   <p class="pp-meta">Ajuste os filtros para ampliar a pesquisa.</p>
 </section>
 {% endif %}

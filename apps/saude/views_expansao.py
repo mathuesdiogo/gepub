@@ -88,10 +88,8 @@ def procedimento_list(request):
 @require_perm("saude.manage")
 def procedimento_create(request):
     unidades_qs = _scoped_unidades(request.user)
-    atendimentos_qs = _scoped_atendimentos(unidades_qs)
     if request.method == "POST":
-        form = ProcedimentoSaudeForm(request.POST)
-        form.fields["atendimento"].queryset = atendimentos_qs
+        form = ProcedimentoSaudeForm(request.POST, unidades_qs=unidades_qs)
         if form.is_valid():
             obj = form.save(commit=False)
             obj.criado_por = request.user
@@ -100,8 +98,7 @@ def procedimento_create(request):
             return redirect("saude:procedimento_detail", pk=obj.pk)
         messages.error(request, "Corrija os erros do formulário.")
     else:
-        form = ProcedimentoSaudeForm()
-        form.fields["atendimento"].queryset = atendimentos_qs
+        form = ProcedimentoSaudeForm(unidades_qs=unidades_qs)
     return render(
         request,
         "saude/procedimento_form.html",
@@ -113,7 +110,6 @@ def procedimento_create(request):
 @require_perm("saude.manage")
 def procedimento_update(request, pk: int):
     unidades_qs = _scoped_unidades(request.user)
-    atendimentos_qs = _scoped_atendimentos(unidades_qs)
     obj = get_object_or_404(
         ProcedimentoSaude.objects.select_related("atendimento").filter(
             atendimento__unidade_id__in=unidades_qs.values_list("id", flat=True)
@@ -121,16 +117,14 @@ def procedimento_update(request, pk: int):
         pk=pk,
     )
     if request.method == "POST":
-        form = ProcedimentoSaudeForm(request.POST, instance=obj)
-        form.fields["atendimento"].queryset = atendimentos_qs
+        form = ProcedimentoSaudeForm(request.POST, instance=obj, unidades_qs=unidades_qs)
         if form.is_valid():
             form.save()
             messages.success(request, "Procedimento atualizado com sucesso.")
             return redirect("saude:procedimento_detail", pk=obj.pk)
         messages.error(request, "Corrija os erros do formulário.")
     else:
-        form = ProcedimentoSaudeForm(instance=obj)
-        form.fields["atendimento"].queryset = atendimentos_qs
+        form = ProcedimentoSaudeForm(instance=obj, unidades_qs=unidades_qs)
     return render(
         request,
         "saude/procedimento_form.html",
@@ -220,10 +214,8 @@ def vacinacao_list(request):
 def vacinacao_create(request):
     unidades_qs = _scoped_unidades(request.user)
     profissionais_qs = _scoped_profissionais(unidades_qs)
-    atendimentos_qs = _scoped_atendimentos(unidades_qs)
     if request.method == "POST":
         form = VacinacaoSaudeForm(request.POST, unidades_qs=unidades_qs, profissionais_qs=profissionais_qs)
-        form.fields["atendimento"].queryset = atendimentos_qs
         if form.is_valid():
             obj = form.save(commit=False)
             obj.criado_por = request.user
@@ -233,7 +225,6 @@ def vacinacao_create(request):
         messages.error(request, "Corrija os erros do formulário.")
     else:
         form = VacinacaoSaudeForm(unidades_qs=unidades_qs, profissionais_qs=profissionais_qs)
-        form.fields["atendimento"].queryset = atendimentos_qs
     return render(
         request,
         "saude/vacinacao_form.html",
@@ -246,7 +237,6 @@ def vacinacao_create(request):
 def vacinacao_update(request, pk: int):
     unidades_qs = _scoped_unidades(request.user)
     profissionais_qs = _scoped_profissionais(unidades_qs)
-    atendimentos_qs = _scoped_atendimentos(unidades_qs)
     obj = get_object_or_404(
         VacinacaoSaude.objects.select_related("unidade_aplicadora").filter(
             unidade_aplicadora_id__in=unidades_qs.values_list("id", flat=True)
@@ -255,7 +245,6 @@ def vacinacao_update(request, pk: int):
     )
     if request.method == "POST":
         form = VacinacaoSaudeForm(request.POST, instance=obj, unidades_qs=unidades_qs, profissionais_qs=profissionais_qs)
-        form.fields["atendimento"].queryset = atendimentos_qs
         if form.is_valid():
             form.save()
             messages.success(request, "Vacinação atualizada com sucesso.")
@@ -263,7 +252,6 @@ def vacinacao_update(request, pk: int):
         messages.error(request, "Corrija os erros do formulário.")
     else:
         form = VacinacaoSaudeForm(instance=obj, unidades_qs=unidades_qs, profissionais_qs=profissionais_qs)
-        form.fields["atendimento"].queryset = atendimentos_qs
     return render(
         request,
         "saude/vacinacao_form.html",

@@ -2,74 +2,163 @@
 {% block title %}Dashboard • Saúde • GEPUB{% endblock %}
 
 {% block module_content %}
-<div class="card dashboard-shell">
+<div class="card saude-dashboard">
   <div class="card__body">
 
     {% include "core/partials/components/layout/page_head.html" with title="Saúde" subtitle="Painel do módulo de Saúde" actions=None %}
 
-    <div class="sec-metrics">
-      <div class="sec-kpi kpi-blue">
-        <div>
-          <div class="sec-kpi__label">Unidades de Saúde</div>
-          <div class="sec-kpi__value">{{ unidades_total }}</div>
-          <div class="sec-kpi__meta">Total no seu escopo</div>
+    <section class="saude-hero">
+      <div class="saude-hero__content">
+        <div class="saude-hero__eyebrow">Rede Municipal Integrada</div>
+        <h2 class="saude-hero__title">Central de atenção clínica e regulação</h2>
+        <p class="saude-hero__text">
+          Acompanhe cobertura assistencial, produtividade da equipe e operação da agenda
+          em um único painel.
+        </p>
+        <div class="saude-hero__chips">
+          <span class="saude-chip"><i class="fa-solid fa-hospital"></i>{{ unidades_total }} unidades</span>
+          <span class="saude-chip"><i class="fa-solid fa-user-doctor"></i>{{ profissionais_total }} profissionais ativos</span>
+          <span class="saude-chip"><i class="fa-solid fa-notes-medical"></i>{{ atendimentos_total }} atendimentos</span>
         </div>
-        <div class="sec-kpi__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2 3 7v10l9 5 9-5V7l-9-5Zm0 2.2 7 3.9v8l-7 3.9-7-3.9v-8l7-3.9Z"/></svg></div>
       </div>
-
-      <div class="sec-kpi kpi-green">
-        <div>
-          <div class="sec-kpi__label">Ativas</div>
-          <div class="sec-kpi__value">{{ unidades_ativas }}</div>
-          <div class="sec-kpi__meta">Em funcionamento</div>
-        </div>
-        <div class="sec-kpi__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4Z"/></svg></div>
-      </div>
-
-      <div class="sec-kpi kpi-red">
-        <div>
-          <div class="sec-kpi__label">Inativas</div>
-          <div class="sec-kpi__value">{{ unidades_inativas }}</div>
-          <div class="sec-kpi__meta">Desativadas</div>
-        </div>
-        <div class="sec-kpi__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7 4.3 4.3l6.3 6.3 6.3-6.3Z"/></svg></div>
-      </div>
-
-      <div class="sec-kpi kpi-blue">
-        <div>
-          <div class="sec-kpi__label">Agendamentos</div>
-          <div class="sec-kpi__value">{{ agendamentos_total }}</div>
-          <div class="sec-kpi__meta">Agenda clínica no escopo</div>
-        </div>
-        <div class="sec-kpi__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2Zm12 8H5v10h14V10Z"/></svg></div>
-      </div>
-
-      <div class="sec-kpi kpi-green">
-        <div>
-          <div class="sec-kpi__label">Especialidades</div>
-          <div class="sec-kpi__value">{{ especialidades_total }}</div>
-          <div class="sec-kpi__meta">Cadastro clínico ativo</div>
-        </div>
-        <div class="sec-kpi__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm1 5v4h4v2h-4v4h-2v-4H7v-2h4V7Z"/></svg></div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section__header">
-        <div class="section__title">Acesso rápido</div>
-        <div class="section__meta">Gestão</div>
-      </div>
-
-      <div class="actions-row">
-        <a class="btn btn-primary" href="{% url 'saude:unidade_list' %}"><i class="fa-solid fa-hospital"></i><span>Ver Unidades</span></a>
-        <a class="btn btn--ghost" href="{% url 'saude:agenda_list' %}"><i class="fa-solid fa-calendar-days"></i><span>Ver Agenda</span></a>
+      <div class="saude-hero__actions">
+        <a class="btn btn-primary" href="{% url 'saude:agenda_list' %}">
+          <i class="fa-solid fa-calendar-days"></i><span>Ver Agenda</span>
+        </a>
+        <a class="btn btn--ghost" href="{% url 'saude:atendimento_list' %}">
+          <i class="fa-solid fa-notes-medical"></i><span>Ver Atendimentos</span>
+        </a>
         {% if perms.saude.manage %}
-          <a class="btn btn--ghost" href="{% url 'saude:unidade_create' %}"><i class="fa-solid fa-plus"></i><span>Nova Unidade</span></a>
+          <a class="btn btn--ghost" href="{% url 'saude:agenda_create' %}">
+            <i class="fa-solid fa-plus"></i><span>Novo Agendamento</span>
+          </a>
         {% endif %}
       </div>
+    </section>
 
-      <div class="small mt-2">Próximo passo: cadastrar profissionais e atendimentos (vai alimentar esses KPIs).</div>
+    <div class="saude-metrics">
+      <div class="saude-metric">
+        <div>
+          <div class="saude-metric__label">Unidades de Saúde</div>
+          <div class="saude-metric__value">{{ unidades_total }}</div>
+          <div class="saude-metric__meta">Total no seu escopo</div>
+        </div>
+        <div class="saude-metric__icon" aria-hidden="true"><i class="fa-solid fa-hospital"></i></div>
+      </div>
+
+      <div class="saude-metric">
+        <div>
+          <div class="saude-metric__label">Unidades Ativas</div>
+          <div class="saude-metric__value">{{ unidades_ativas }}</div>
+          <div class="saude-metric__meta">Em funcionamento</div>
+        </div>
+        <div class="saude-metric__icon" aria-hidden="true"><i class="fa-solid fa-circle-check"></i></div>
+      </div>
+
+      <div class="saude-metric">
+        <div>
+          <div class="saude-metric__label">Unidades Inativas</div>
+          <div class="saude-metric__value">{{ unidades_inativas }}</div>
+          <div class="saude-metric__meta">Desativadas</div>
+        </div>
+        <div class="saude-metric__icon" aria-hidden="true"><i class="fa-solid fa-ban"></i></div>
+      </div>
+
+      <div class="saude-metric">
+        <div>
+          <div class="saude-metric__label">Agendamentos</div>
+          <div class="saude-metric__value">{{ agendamentos_total }}</div>
+          <div class="saude-metric__meta">Agenda clínica no escopo</div>
+        </div>
+        <div class="saude-metric__icon" aria-hidden="true"><i class="fa-solid fa-calendar-days"></i></div>
+      </div>
+
+      <div class="saude-metric">
+        <div>
+          <div class="saude-metric__label">Especialidades</div>
+          <div class="saude-metric__value">{{ especialidades_total }}</div>
+          <div class="saude-metric__meta">Catálogo assistencial</div>
+        </div>
+        <div class="saude-metric__icon" aria-hidden="true"><i class="fa-solid fa-stethoscope"></i></div>
+      </div>
+
+      <div class="saude-metric">
+        <div>
+          <div class="saude-metric__label">Profissionais Inativos</div>
+          <div class="saude-metric__value">{{ profissionais_inativos }}</div>
+          <div class="saude-metric__meta">Necessitam revisão cadastral</div>
+        </div>
+        <div class="saude-metric__icon" aria-hidden="true"><i class="fa-solid fa-user-clock"></i></div>
+      </div>
     </div>
+
+    <section class="saude-insights">
+      <article class="saude-insight-card">
+        <h3>Resumo Operacional</h3>
+        <p>Visão rápida dos principais volumes monitorados no módulo.</p>
+        <ul class="saude-insight-list">
+          <li><span>Profissionais ativos</span><strong>{{ profissionais_total }}</strong></li>
+          <li><span>Atendimentos registrados</span><strong>{{ atendimentos_total }}</strong></li>
+          <li><span>Agendamentos ativos</span><strong>{{ agendamentos_total }}</strong></li>
+          <li><span>Unidades em funcionamento</span><strong>{{ unidades_ativas }}</strong></li>
+        </ul>
+      </article>
+
+      <article class="saude-insight-card saude-insight-card--accent">
+        <h3>Rotina da Equipe</h3>
+        <p>Atalhos para ações diárias do time assistencial e de regulação.</p>
+        <div class="saude-insight-actions">
+          <a class="btn btn-primary" href="{% url 'saude:agenda_list' %}">
+            <i class="fa-solid fa-calendar-days"></i><span>Gerenciar Agenda</span>
+          </a>
+          <a class="btn btn--ghost" href="{% url 'saude:fila_list' %}">
+            <i class="fa-solid fa-people-line"></i><span>Acompanhar Fila</span>
+          </a>
+          <a class="btn btn--ghost" href="{% url 'saude:relatorio_mensal' %}">
+            <i class="fa-solid fa-chart-column"></i><span>Ver Relatório</span>
+          </a>
+        </div>
+      </article>
+    </section>
+
+    <section class="saude-quick-links">
+      <div class="saude-quick-links__head">
+        <h3>Acesso rápido por fluxo</h3>
+        <p>Atalhos para as rotinas mais usadas pela equipe</p>
+      </div>
+      <div class="saude-quick-links__grid">
+        <a class="saude-quick-card" href="{% url 'saude:unidade_list' %}">
+          <i class="fa-solid fa-hospital"></i>
+          <strong>Unidades</strong>
+          <span>Estrutura e cobertura territorial</span>
+        </a>
+        <a class="saude-quick-card" href="{% url 'saude:profissional_list' %}">
+          <i class="fa-solid fa-user-doctor"></i>
+          <strong>Profissionais</strong>
+          <span>Equipe clínica e vínculos</span>
+        </a>
+        <a class="saude-quick-card" href="{% url 'saude:agenda_list' %}">
+          <i class="fa-solid fa-calendar-days"></i>
+          <strong>Agenda Clínica</strong>
+          <span>Marcação e remarcação de consultas</span>
+        </a>
+        <a class="saude-quick-card" href="{% url 'saude:fila_list' %}">
+          <i class="fa-solid fa-people-line"></i>
+          <strong>Fila de Espera</strong>
+          <span>Priorização e status de espera</span>
+        </a>
+        <a class="saude-quick-card" href="{% url 'saude:encaminhamento_list' %}">
+          <i class="fa-solid fa-share-from-square"></i>
+          <strong>Encaminhamentos</strong>
+          <span>Fluxo de referência e contrarreferência</span>
+        </a>
+        <a class="saude-quick-card" href="{% url 'saude:auditoria_prontuario_list' %}">
+          <i class="fa-solid fa-shield-halved"></i>
+          <strong>Auditoria</strong>
+          <span>Rastreabilidade do prontuário</span>
+        </a>
+      </div>
+    </section>
 
   </div>
 </div>

@@ -1,27 +1,154 @@
-<nav class="module-menu">
-  <div class="module-menu__title"><i class="fa-solid fa-heart-pulse" aria-hidden="true"></i><span>Saúde</span></div>
-  <ul class="module-menu__list">
-    <li class="module-menu__item"><a class="module-menu__link" href="{% url 'saude:index' %}"><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>Dashboard</span></a></li>
-    <li class="module-menu__item"><a class="module-menu__link" href="{% url 'saude:unidade_list' %}"><i class="fa-solid fa-hospital" aria-hidden="true"></i><span>Unidades</span></a></li>
-    <li class="module-menu__item"><a class="module-menu__link" href="{% url 'saude:profissional_list' %}"><i class="fa-solid fa-user-doctor" aria-hidden="true"></i><span>Profissionais</span></a></li>
-    <li class="module-menu__item"><a class="module-menu__link" href="{% url 'saude:especialidade_list' %}"><i class="fa-solid fa-stethoscope" aria-hidden="true"></i><span>Especialidades</span></a></li>
-    <li class="module-menu__item"><a class="module-menu__link" href="{% url 'saude:cid_list' %}"><i class="fa-solid fa-disease" aria-hidden="true"></i><span>CID</span></a></li>
-    <li class="module-menu__item"><a class="module-menu__link" href="{% url 'saude:programa_list' %}"><i class="fa-solid fa-hand-holding-medical" aria-hidden="true"></i><span>Programas</span></a></li>
-    <li class="module-menu__item"><a class="module-menu__link" href="{% url 'saude:paciente_list' %}"><i class="fa-solid fa-user-injured" aria-hidden="true"></i><span>Pacientes</span></a></li>
-    <li class="module-menu__item"><a class="module-menu__link" href="{% url 'saude:agenda_list' %}"><i class="fa-solid fa-calendar-days" aria-hidden="true"></i><span>Agenda Clínica</span></a></li>
-    <li class="module-menu__item"><a class="module-menu__link" href="{% url 'saude:grade_list' %}"><i class="fa-solid fa-table-cells" aria-hidden="true"></i><span>Grades</span></a></li>
-    <li class="module-menu__item"><a class="module-menu__link" href="{% url 'saude:bloqueio_list' %}"><i class="fa-solid fa-calendar-xmark" aria-hidden="true"></i><span>Bloqueios</span></a></li>
-    <li class="module-menu__item"><a class="module-menu__link" href="{% url 'saude:fila_list' %}"><i class="fa-solid fa-people-line" aria-hidden="true"></i><span>Fila de Espera</span></a></li>
-    <li class="module-menu__item"><a class="module-menu__link" href="{% url 'saude:checkin_list' %}"><i class="fa-solid fa-clipboard-check" aria-hidden="true"></i><span>Check-in</span></a></li>
-    <li class="module-menu__item"><a class="module-menu__link" href="{% url 'saude:atendimento_list' %}"><i class="fa-solid fa-notes-medical" aria-hidden="true"></i><span>Atendimentos</span></a></li>
-    <li class="module-menu__item"><a class="module-menu__link" href="{% url 'saude:medicamento_uso_list' %}"><i class="fa-solid fa-pills" aria-hidden="true"></i><span>Medicação Contínua</span></a></li>
-    <li class="module-menu__item"><a class="module-menu__link" href="{% url 'saude:procedimento_list' %}"><i class="fa-solid fa-kit-medical" aria-hidden="true"></i><span>Procedimentos</span></a></li>
-    <li class="module-menu__item"><a class="module-menu__link" href="{% url 'saude:dispensacao_list' %}"><i class="fa-solid fa-capsules" aria-hidden="true"></i><span>Dispensação</span></a></li>
-    <li class="module-menu__item"><a class="module-menu__link" href="{% url 'saude:vacinacao_list' %}"><i class="fa-solid fa-syringe" aria-hidden="true"></i><span>Vacinação</span></a></li>
-    <li class="module-menu__item"><a class="module-menu__link" href="{% url 'saude:exame_coleta_list' %}"><i class="fa-solid fa-vials" aria-hidden="true"></i><span>Fluxo de Exames</span></a></li>
-    <li class="module-menu__item"><a class="module-menu__link" href="{% url 'saude:encaminhamento_list' %}"><i class="fa-solid fa-share-from-square" aria-hidden="true"></i><span>Encaminhamentos</span></a></li>
-    <li class="module-menu__item"><a class="module-menu__link" href="{% url 'saude:internacao_list' %}"><i class="fa-solid fa-bed-pulse" aria-hidden="true"></i><span>Internação/Observação</span></a></li>
-    <li class="module-menu__item"><a class="module-menu__link" href="{% url 'saude:auditoria_prontuario_list' %}"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span>Auditoria</span></a></li>
-    <li class="module-menu__item"><a class="module-menu__link" href="{% url 'saude:relatorio_mensal' %}"><i class="fa-solid fa-chart-column" aria-hidden="true"></i><span>Relatório Mensal</span></a></li>
-  </ul>
+{% with route=request.resolver_match.url_name|default:'' %}
+<nav class="module-menu module-menu--saude">
+  <div class="module-menu__title">
+    <i class="fa-solid fa-heart-pulse" aria-hidden="true"></i>
+    <span>Saúde</span>
+  </div>
+  <p class="module-menu__subtitle">Gestão clínica e assistencial</p>
+
+  <div class="module-menu__group">
+    <div class="module-menu__group-title">Essenciais</div>
+    <ul class="module-menu__list">
+      <li class="module-menu__item">
+        <a class="module-menu__link {% if route == 'index' %}is-active{% endif %}" href="{% url 'saude:index' %}">
+          <i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>Dashboard</span>
+        </a>
+      </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link {% if 'agenda_' in route %}is-active{% endif %}" href="{% url 'saude:agenda_list' %}">
+          <i class="fa-solid fa-calendar-days" aria-hidden="true"></i><span>Agenda Clínica</span>
+        </a>
+      </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link {% if 'atendimento_' in route or route == 'prontuario_hub' or 'documento_' in route %}is-active{% endif %}" href="{% url 'saude:atendimento_list' %}">
+          <i class="fa-solid fa-notes-medical" aria-hidden="true"></i><span>Atendimentos</span>
+        </a>
+      </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link {% if 'fila_' in route %}is-active{% endif %}" href="{% url 'saude:fila_list' %}">
+          <i class="fa-solid fa-people-line" aria-hidden="true"></i><span>Fila de Espera</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="module-menu__group">
+    <div class="module-menu__group-title">Operação Clínica</div>
+    <ul class="module-menu__list">
+      <li class="module-menu__item">
+        <a class="module-menu__link {% if 'checkin_' in route %}is-active{% endif %}" href="{% url 'saude:checkin_list' %}">
+          <i class="fa-solid fa-clipboard-check" aria-hidden="true"></i><span>Check-in</span>
+        </a>
+      </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link {% if 'procedimento_' in route %}is-active{% endif %}" href="{% url 'saude:procedimento_list' %}">
+          <i class="fa-solid fa-kit-medical" aria-hidden="true"></i><span>Procedimentos</span>
+        </a>
+      </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link {% if 'vacinacao_' in route %}is-active{% endif %}" href="{% url 'saude:vacinacao_list' %}">
+          <i class="fa-solid fa-syringe" aria-hidden="true"></i><span>Vacinação</span>
+        </a>
+      </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link {% if 'encaminhamento_' in route %}is-active{% endif %}" href="{% url 'saude:encaminhamento_list' %}">
+          <i class="fa-solid fa-share-from-square" aria-hidden="true"></i><span>Encaminhamentos</span>
+        </a>
+      </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link {% if 'internacao_' in route %}is-active{% endif %}" href="{% url 'saude:internacao_list' %}">
+          <i class="fa-solid fa-bed-pulse" aria-hidden="true"></i><span>Internações</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="module-menu__group">
+    <div class="module-menu__group-title">Cadastros</div>
+    <ul class="module-menu__list">
+      <li class="module-menu__item">
+        <a class="module-menu__link {% if 'unidade_' in route %}is-active{% endif %}" href="{% url 'saude:unidade_list' %}">
+          <i class="fa-solid fa-hospital" aria-hidden="true"></i><span>Unidades</span>
+        </a>
+      </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link {% if 'profissional_' in route %}is-active{% endif %}" href="{% url 'saude:profissional_list' %}">
+          <i class="fa-solid fa-user-doctor" aria-hidden="true"></i><span>Profissionais</span>
+        </a>
+      </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link {% if 'paciente_' in route %}is-active{% endif %}" href="{% url 'saude:paciente_list' %}">
+          <i class="fa-solid fa-user-injured" aria-hidden="true"></i><span>Pacientes</span>
+        </a>
+      </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link {% if 'especialidade_' in route %}is-active{% endif %}" href="{% url 'saude:especialidade_list' %}">
+          <i class="fa-solid fa-stethoscope" aria-hidden="true"></i><span>Especialidades</span>
+        </a>
+      </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link {% if 'cid_' in route %}is-active{% endif %}" href="{% url 'saude:cid_list' %}">
+          <i class="fa-solid fa-disease" aria-hidden="true"></i><span>CID</span>
+        </a>
+      </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link {% if 'programa_' in route %}is-active{% endif %}" href="{% url 'saude:programa_list' %}">
+          <i class="fa-solid fa-hand-holding-medical" aria-hidden="true"></i><span>Programas</span>
+        </a>
+      </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link {% if 'medicamento_uso_' in route %}is-active{% endif %}" href="{% url 'saude:medicamento_uso_list' %}">
+          <i class="fa-solid fa-pills" aria-hidden="true"></i><span>Medicação Contínua</span>
+        </a>
+      </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link {% if 'dispensacao_' in route %}is-active{% endif %}" href="{% url 'saude:dispensacao_list' %}">
+          <i class="fa-solid fa-capsules" aria-hidden="true"></i><span>Dispensação</span>
+        </a>
+      </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link {% if 'exame_coleta_' in route %}is-active{% endif %}" href="{% url 'saude:exame_coleta_list' %}">
+          <i class="fa-solid fa-vials" aria-hidden="true"></i><span>Fluxo de Exames</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="module-menu__group">
+    <div class="module-menu__group-title">Governança</div>
+    <ul class="module-menu__list">
+      <li class="module-menu__item">
+        <a class="module-menu__link {% if 'grade_' in route %}is-active{% endif %}" href="{% url 'saude:grade_list' %}">
+          <i class="fa-solid fa-table-cells" aria-hidden="true"></i><span>Grades</span>
+        </a>
+      </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link {% if 'bloqueio_' in route %}is-active{% endif %}" href="{% url 'saude:bloqueio_list' %}">
+          <i class="fa-solid fa-calendar-xmark" aria-hidden="true"></i><span>Bloqueios</span>
+        </a>
+      </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link {% if route == 'auditoria_prontuario_list' %}is-active{% endif %}" href="{% url 'saude:auditoria_prontuario_list' %}">
+          <i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span>Auditoria</span>
+        </a>
+      </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link {% if route == 'relatorio_mensal' %}is-active{% endif %}" href="{% url 'saude:relatorio_mensal' %}">
+          <i class="fa-solid fa-chart-column" aria-hidden="true"></i><span>Relatório Mensal</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  {% if perms.saude.manage %}
+    <div class="module-menu__actions">
+      <a class="module-menu__action" href="{% url 'saude:agenda_create' %}">
+        <i class="fa-solid fa-plus"></i><span>Novo Agendamento</span>
+      </a>
+      <a class="module-menu__action module-menu__action--ghost" href="{% url 'saude:atendimento_create' %}">
+        <i class="fa-solid fa-notes-medical"></i><span>Novo Atendimento</span>
+      </a>
+    </div>
+  {% endif %}
 </nav>
+{% endwith %}

@@ -1,94 +1,103 @@
-<div class="dash-grid">
-  <div class="dash-col-6">
-    <div class="metric-card">
-      <div class="metric-label">Minhas turmas</div>
-      <div class="metric-value">{{ turmas_total|default:0 }}</div>
-      <div class="metric-meta">Ano {{ ano_atual }}</div>
-    </div>
+<div class="admin-dash">
+  <div class="dash-actions admin-dash__actions">
+    <a class="btn btn-primary" href="{% url 'educacao:turma_list' %}"><i class="fa-solid fa-people-group"></i> Minhas turmas</a>
+    <a class="btn btn-primary" href="{% url 'educacao:meus_diarios' %}"><i class="fa-solid fa-clipboard-check"></i> Diário</a>
+    <a class="btn btn-primary" href="{% url 'educacao:portal_professor' %}"><i class="fa-solid fa-chalkboard-user"></i> Portal Professor</a>
   </div>
 
-  <div class="dash-col-6">
-    <div class="metric-card">
-      <div class="metric-label">Meus alunos</div>
-      <div class="metric-value">{{ alunos_total|default:0 }}</div>
-      <div class="metric-meta">Vínculos nas minhas turmas</div>
+  <div class="dash-kpi-grid">
+    <div class="admin-kpi admin-kpi--blue">
+      <div class="admin-kpi__icon"><i class="fa-solid fa-people-group"></i></div>
+      <div class="admin-kpi__content">
+        <div class="admin-kpi__label">Minhas turmas</div>
+        <div class="admin-kpi__value">{{ turmas_total|default:0 }}</div>
+        <div class="admin-kpi__meta">Referência do ano {{ ano_atual }}</div>
+      </div>
     </div>
-  </div>
 
-  <div class="dash-col-12">
-    <div class="card">
-      <div class="card__title">Turmas do ano ({{ ano_atual }})</div>
-      <div class="card__body">
-        {% if turmas %}
-          <div class="dash-table">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Turma</th>
-                  <th>Unidade</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for t in turmas %}
-                  <tr>
-                    <td>{{ t.nome }}</td>
-                    <td>{{ t.unidade.nome }}</td>
-                    <td><a class="btn btn--ghost" href="{% url 'educacao:turma_detail' t.pk %}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir</a></td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        {% else %}
-          {% include "core/partials/components/feedback/empty_state.html" with title="Sem turmas" text="Nenhuma turma encontrada para este ano." %}
-        {% endif %}
+    <div class="admin-kpi admin-kpi--amber">
+      <div class="admin-kpi__icon"><i class="fa-solid fa-user-graduate"></i></div>
+      <div class="admin-kpi__content">
+        <div class="admin-kpi__label">Meus alunos</div>
+        <div class="admin-kpi__value">{{ alunos_total|default:0 }}</div>
+        <div class="admin-kpi__meta">Vínculos em turmas atribuídas</div>
       </div>
     </div>
   </div>
 
-  <div class="dash-col-12">
-    <div class="card">
-      <div class="card__title">Calendário educacional</div>
-      <div class="card__body">
-        {% if eventos_calendario %}
-          <div class="dash-table">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Data</th>
-                  <th>Evento</th>
-                  <th>Tipo</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for ev in eventos_calendario %}
-                  <tr>
-                    <td>
-                      {{ ev.data_inicio|date:"d/m/Y" }}
-                      {% if ev.data_fim and ev.data_fim != ev.data_inicio %}
-                        até {{ ev.data_fim|date:"d/m/Y" }}
-                      {% endif %}
-                    </td>
-                    <td>{{ ev.titulo }}</td>
-                    <td>{{ ev.get_tipo_display }}</td>
-                    <td>
-                      {% if perms.educacao.view %}
-                        <a class="btn btn--ghost" href="{% url 'educacao:calendario_index' %}"><i class="fa-solid fa-calendar-week"></i> Ver calendário</a>
-                      {% else %}
-                        —
-                      {% endif %}
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        {% else %}
-          {% include "core/partials/components/feedback/empty_state.html" with title="Sem eventos" text="Não há eventos de calendário visíveis para você." %}
-        {% endif %}
+  <section class="admin-panel">
+    <div class="admin-panel__head">
+      <div>
+        <h3 class="admin-panel__title">Turmas do ano ({{ ano_atual }})</h3>
+        <p class="admin-panel__sub">Acesso rápido às turmas vinculadas ao seu perfil</p>
       </div>
     </div>
-  </div>
+
+    {% if turmas %}
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Turma</th>
+              <th>Unidade</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for t in turmas %}
+              <tr>
+                <td>{{ t.nome }}</td>
+                <td>{{ t.unidade.nome }}</td>
+                <td><a class="btn btn--ghost" href="{% url 'educacao:turma_detail' t.pk %}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      {% include "core/partials/components/feedback/empty_state.html" with title="Sem turmas" text="Nenhuma turma encontrada para este ano." %}
+    {% endif %}
+  </section>
+
+  <section class="admin-panel">
+    <div class="admin-panel__head">
+      <div>
+        <h3 class="admin-panel__title">Calendário educacional</h3>
+        <p class="admin-panel__sub">Eventos e marcos letivos visíveis para seu escopo</p>
+      </div>
+      {% if perms.educacao.view %}
+        <a class="btn btn--ghost" href="{% url 'educacao:calendario_index' %}"><i class="fa-solid fa-calendar-week"></i> Ver calendário</a>
+      {% endif %}
+    </div>
+
+    {% if eventos_calendario %}
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Evento</th>
+              <th>Tipo</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ev in eventos_calendario %}
+              <tr>
+                <td>
+                  {{ ev.data_inicio|date:"d/m/Y" }}
+                  {% if ev.data_fim and ev.data_fim != ev.data_inicio %}
+                    até {{ ev.data_fim|date:"d/m/Y" }}
+                  {% endif %}
+                </td>
+                <td>{{ ev.titulo }}</td>
+                <td>{{ ev.get_tipo_display }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      {% include "core/partials/components/feedback/empty_state.html" with title="Sem eventos" text="Não há eventos de calendário visíveis para você." %}
+    {% endif %}
+  </section>
 </div>

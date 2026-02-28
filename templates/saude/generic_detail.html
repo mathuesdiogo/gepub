@@ -2,8 +2,17 @@
 {% block title %}{{ title }} • Saúde • GEPUB{% endblock %}
 
 {% block module_content %}
-<div class="card"><div class="card__body">
+<div class="card saude-panel saude-panel--detail"><div class="card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="saude-profile">
+    <div class="saude-profile__avatar">{{ title|slice:":1"|upper }}</div>
+    <div class="saude-profile__content">
+      <div class="saude-profile__title">{{ title }}</div>
+      <div class="saude-profile__meta">{{ subtitle|default:"Registro clínico" }}</div>
+    </div>
+  </div>
+
   {% include "core/partials/components/layout/detail_summary.html" with fields=fields pills=pills %}
 </div></div>
 {% endblock %}

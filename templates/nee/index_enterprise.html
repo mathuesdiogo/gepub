@@ -1,19 +1,35 @@
 {% extends "nee/base_modulo.html" %}
 {% block module_title %}NEE • Painel{% endblock %}
 {% block module_content %}
-<div class="card"><div class="card__body">
+<div class="card nee-dashboard"><div class="card__body">
   {% include "core/partials/components/layout/page_head.html" with title="NEE" subtitle="Necessidades Educacionais Especiais" actions=actions %}
 
-  <div class="section-grid cols-2">
-    {% for c in cards %}
-      <a class="link-card" href="{{ c.url }}">
-        <div class="link-card__icon"><i class="{{ c.icon }}"></i></div>
-        <div class="link-card__content">
-          <div class="link-card__title">{{ c.title }}</div>
-          <div class="link-card__desc">{{ c.description }}</div>
-        </div>
+  <section class="nee-hero">
+    <div class="nee-hero__content">
+      <div class="nee-hero__eyebrow">Acompanhamento Integrado</div>
+      <h2 class="nee-hero__title">Painel de inclusão e suporte pedagógico</h2>
+      <p class="nee-hero__text">
+        Monitore as principais rotinas de NEE com acesso rápido para busca, alertas,
+        cadastros e relatórios consolidados.
+      </p>
+      <div class="nee-hero__chips">
+        <span class="nee-chip"><i class="fa-solid fa-layer-group"></i>{{ cards|length }} áreas do módulo</span>
+        <span class="nee-chip"><i class="fa-solid fa-user-graduate"></i>Fluxo por aluno</span>
+        <span class="nee-chip"><i class="fa-solid fa-file-medical"></i>Visão clínica e pedagógica</span>
+      </div>
+    </div>
+    <div class="nee-hero__actions">
+      <a class="btn btn-primary" href="{% url 'nee:buscar_aluno' %}">
+        <i class="fa-solid fa-magnifying-glass"></i><span>Buscar aluno</span>
       </a>
-    {% endfor %}
-  </div>
+      <a class="btn btn--ghost" href="{% url 'nee:alertas_index' %}">
+        <i class="fa-solid fa-triangle-exclamation"></i><span>Ver alertas</span>
+      </a>
+      <a class="btn btn--ghost" href="{% url 'nee:relatorios_index' %}">
+        <i class="fa-solid fa-chart-column"></i><span>Relatórios</span>
+      </a>
+    </div>
+  </section>
+
 </div></div>
 {% endblock %}

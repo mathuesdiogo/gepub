@@ -5,16 +5,16 @@
 {% endblock %}
 
 {% block page_content %}
-<section class="pp-grid pp-grid--2">
+<section class="pp-grid pp-grid--2 pp-section-space">
   <article class="pp-card">
     <h2>Novo atendimento</h2>
-    <form method="post" style="display:grid;gap:8px;margin-top:10px;">
+    <form method="post" class="pp-form-stack pp-section-space">
       {% csrf_token %}
       {% for field in form %}
-        <div>
+        <div class="pp-field">
           <label for="{{ field.id_for_label }}">{{ field.label }}</label>
           {{ field }}
-          {% if field.errors %}<p class="pp-meta" style="color:#c03737;">{{ field.errors|striptags }}</p>{% endif %}
+          {% if field.errors %}<p class="pp-error-text">{{ field.errors|striptags }}</p>{% endif %}
         </div>
       {% endfor %}
       <button class="pp-btn pp-btn--primary" type="submit">Registrar solicitação</button>
@@ -23,7 +23,7 @@
 
   <article class="pp-card">
     <h2>Acompanhar protocolo</h2>
-    <form method="get" class="pp-form-inline pp-form-inline--3" style="margin-top:10px;">
+    <form method="get" class="pp-form-inline pp-form-inline--3 pp-section-space">
       <div>
         <label for="id_protocolo">Protocolo</label>
         <input id="id_protocolo" class="pp-input" type="text" name="protocolo" value="{{ protocolo_busca }}" placeholder="Ex.: OUV-10-20260226-0001">
@@ -38,14 +38,14 @@
     </form>
 
     {% if acompanhamento %}
-      <div class="pp-list__item" style="margin-top:10px;">
+      <div class="pp-list__item pp-query-card">
         <p class="pp-meta">{{ acompanhamento.protocolo }} • {{ acompanhamento.get_tipo_display }}</p>
         <h3>{{ acompanhamento.assunto }}</h3>
         <p>Status: <strong>{{ acompanhamento.get_status_display }}</strong></p>
         <p>Prazo de resposta: {{ acompanhamento.prazo_resposta|date:"d/m/Y"|default:"—" }}</p>
         {% if respostas_publicas %}
-          <h4 style="margin:10px 0 0;">Respostas</h4>
-          <ul class="pp-list" style="margin-top:8px;">
+          <h4>Respostas</h4>
+          <ul class="pp-list pp-section-space">
             {% for resposta in respostas_publicas %}
               <li class="pp-list__item">
                 <p class="pp-meta">{{ resposta.criado_em|date:"d/m/Y H:i" }}</p>
@@ -58,15 +58,15 @@
         {% endif %}
       </div>
     {% elif protocolo_busca %}
-      <p class="pp-meta" style="margin-top:10px;">Protocolo não encontrado para este município.</p>
+      <p class="pp-meta pp-section-space">Protocolo não encontrado para este município.</p>
     {% endif %}
   </article>
 </section>
 
-<section class="pp-card" style="margin-top:10px;">
+<section class="pp-card pp-section-space">
   <h3>Solicitações recentes</h3>
-  <div class="pp-table-wrap" style="margin-top:8px;">
-    <table class="pp-table" style="min-width:560px;">
+  <div class="pp-table-wrap pp-section-space">
+    <table class="pp-table pp-table--narrow">
       <thead>
         <tr>
           <th>Protocolo</th>
