@@ -1,4 +1,4 @@
-import { Suspense, lazy, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import * as Select from '@radix-ui/react-select'
 import * as Tabs from '@radix-ui/react-tabs'
@@ -38,10 +38,14 @@ import {
 import { Bar } from 'react-chartjs-2'
 import { useForm, useWatch } from 'react-hook-form'
 import {
+  Cell,
   CartesianGrid,
   Line,
   LineChart,
+  Pie,
+  PieChart,
   ResponsiveContainer,
+  Legend as RechartsLegend,
   Tooltip as RechartsTooltip,
   XAxis,
   YAxis,
@@ -54,13 +58,6 @@ import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ChartTooltip, Legend)
-const Plot = lazy(async () => {
-  const [{ default: createPlotlyComponent }, { default: Plotly }] = await Promise.all([
-    import('react-plotly.js/factory'),
-    import('plotly.js-basic-dist-min'),
-  ])
-  return { default: createPlotlyComponent(Plotly) }
-})
 
 interface Kpis {
   municipios: number
@@ -480,38 +477,28 @@ function App() {
                   </div>
 
                   <Card className="p-4">
-                    <h3 className="mb-3 text-sm font-semibold text-slate-800">Distribuição por modelo de secretaria (Plotly)</h3>
-                    <Suspense
-                      fallback={
-                        <div className="flex h-[340px] items-center justify-center text-sm text-slate-500">
-                          Carregando gráfico avançado...
-                        </div>
-                      }
-                    >
-                      <Plot
-                        data={[
-                          {
-                            labels: (overviewQuery.data?.distribuicao_tipos ?? []).map((item) => item.nome),
-                            values: (overviewQuery.data?.distribuicao_tipos ?? []).map((item) => item.total),
-                            type: 'pie',
-                            hole: 0.45,
-                            marker: {
-                              colors: ['#2468d6', '#34a853', '#fbbc05', '#ea4335', '#7e57c2', '#00acc1'],
-                            },
-                            textinfo: 'label+percent',
-                          },
-                        ]}
-                        layout={{
-                          paper_bgcolor: 'transparent',
-                          plot_bgcolor: 'transparent',
-                          margin: { t: 12, b: 12, l: 12, r: 12 },
-                          showlegend: true,
-                          legend: { orientation: 'h', y: -0.2 },
-                        }}
-                        style={{ width: '100%', height: 340 }}
-                        config={{ displayModeBar: false, responsive: true }}
-                      />
-                    </Suspense>
+                    <h3 className="mb-3 text-sm font-semibold text-slate-800">Distribuição por modelo de secretaria</h3>
+                    <div className="h-[340px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={overviewQuery.data?.distribuicao_tipos ?? []}
+                            dataKey="total"
+                            nameKey="nome"
+                            innerRadius={70}
+                            outerRadius={115}
+                            paddingAngle={3}
+                          >
+                            {(overviewQuery.data?.distribuicao_tipos ?? []).map((item, index) => {
+                              const palette = ['#2468d6', '#34a853', '#fbbc05', '#ea4335', '#7e57c2', '#00acc1']
+                              return <Cell key={item.nome} fill={palette[index % palette.length]} />
+                            })}
+                          </Pie>
+                          <RechartsTooltip />
+                          <RechartsLegend verticalAlign="bottom" height={36} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
                   </Card>
                 </>
               )}
