@@ -9,7 +9,7 @@ from django.utils import timezone
 from apps.accounts.models import Profile
 from apps.billing.models import PlanoMunicipal
 from apps.billing.services import get_assinatura_ativa
-from apps.core.middleware import RBACMiddleware
+from apps.core.middleware import RBACMiddleware, _build_app_url
 from apps.core.models import (
     DocumentoEmitido,
     PortalBanner,
@@ -609,6 +609,32 @@ class PublicTenantHostRoutingTestCase(TestCase):
     def test_unknown_tenant_slug_returns_404_on_public_home(self):
         response = self.client.get("/", HTTP_HOST="inexistente.gepub.com.br")
         self.assertEqual(response.status_code, 404)
+
+    @override_settings(
+        GEPUB_APP_HOSTS=["127.0.0.1", "localhost"],
+        GEPUB_APP_CANONICAL_HOST="",
+        SECURE_SSL_REDIRECT=False,
+    )
+    def test_accounts_login_on_tenant_host_does_not_loop_when_local_app_host(self):
+        response = self.client.get(reverse("accounts:login"), HTTP_HOST="governador-archer.gepub.com.br")
+        self.assertEqual(response.status_code, 200)
+
+
+@override_settings(
+    DEBUG=False,
+    SECURE_SSL_REDIRECT=False,
+    GEPUB_APP_HOSTS=["127.0.0.1", "localhost"],
+    GEPUB_APP_CANONICAL_HOST="",
+    ALLOWED_HOSTS=["testserver", "localhost", "127.0.0.1", "159.203.135.83"],
+)
+class BuildAppUrlFallbackTestCase(TestCase):
+    def test_fallback_uses_current_host_when_app_host_is_local(self):
+        factory = RequestFactory()
+        request = factory.get("/", HTTP_HOST="159.203.135.83:8000")
+        self.assertEqual(
+            _build_app_url(request, "/accounts/login/"),
+            "http://159.203.135.83:8000/accounts/login/",
+        )
 
 
 class PortalSeedServiceTestCase(TestCase):

@@ -145,7 +145,8 @@ def _portal_public_url(request, municipio: Municipio) -> str:
         domain = _sanitize_domain(f"{municipio.slug_site}.{root}" if root else municipio.slug_site)
     if not domain:
         return reverse("core:institucional_public")
-    scheme = "https" if (request.is_secure() or not settings.DEBUG) else "http"
+    force_https = bool(getattr(settings, "SECURE_SSL_REDIRECT", False))
+    scheme = "https" if (request.is_secure() or force_https) else "http"
     return f"{scheme}://{domain}"
 
 

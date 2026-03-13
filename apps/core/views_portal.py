@@ -25,6 +25,7 @@ from apps.billing.services import (
 from apps.compras.models import ProcessoLicitatorio
 from apps.contratos.models import AditivoContrato, ContratoAdministrativo
 from apps.core.module_access import module_enabled_for_user
+from apps.core.middleware import _build_app_url
 from apps.core.models import (
     ConcursoPublico,
     DiarioOficialEdicao,
@@ -520,14 +521,7 @@ def _app_login_url(request) -> str:
     from_mw = (getattr(request, "public_login_url", "") or "").strip()
     if from_mw:
         return from_mw
-
-    explicit = (getattr(settings, "GEPUB_APP_CANONICAL_HOST", "") or "").strip().lower()
-    app_hosts = list(getattr(settings, "GEPUB_APP_HOSTS", []) or [])
-    host = explicit or ((app_hosts[0] if app_hosts else "") or "").strip().lower()
-    if not host:
-        return reverse("accounts:login")
-    scheme = "https" if (request.is_secure() or not settings.DEBUG) else "http"
-    return f"{scheme}://{host}{reverse('accounts:login')}"
+    return _build_app_url(request, reverse("accounts:login"))
 
 
 def _render_municipio_public_home(request, municipio: Municipio):

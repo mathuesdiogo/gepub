@@ -1,6 +1,8 @@
 # apps/core/middleware.py
 from __future__ import annotations
 
+from urllib.parse import urlparse
+
 from django.conf import settings
 from django.shortcuts import redirect
 from django.urls import resolve
@@ -93,6 +95,20 @@ def _normalize_host(raw_host: str) -> str:
     return host
 
 
+def _extract_request_host(request) -> str:
+    try:
+        host = (request.get_host() or "").strip()
+    except Exception:
+        host = (
+            request.META.get("HTTP_X_FORWARDED_HOST")
+            or request.META.get("HTTP_HOST")
+            or ""
+        ).strip()
+    if "," in host:
+        host = host.split(",", 1)[0].strip()
+    return host
+
+
 def _resolve_app_host() -> str:
     explicit = (getattr(settings, "GEPUB_APP_CANONICAL_HOST", "") or "").strip().lower()
     if explicit:
@@ -102,25 +118,24 @@ def _resolve_app_host() -> str:
 
 
 def _build_app_url(request, path: str) -> str:
+    current_host_raw = _extract_request_host(request)
+    current_host = _normalize_host(current_host_raw)
+
     if settings.DEBUG:
         # Em desenvolvimento, preservar o host atual evita redirecionar
         # para um domínio canônico que não existe em outros dispositivos da rede.
-        try:
-            current_host = (request.get_host() or "").strip()
-        except Exception:
-            current_host = (
-                request.META.get("HTTP_X_FORWARDED_HOST")
-                or request.META.get("HTTP_HOST")
-                or ""
-            ).strip()
-        if current_host:
+        if current_host_raw:
             scheme = "https" if request.is_secure() else "http"
-            return f"{scheme}://{current_host}{path}"
+            return f"{scheme}://{current_host_raw}{path}"
 
     app_host = _resolve_app_host()
+    if app_host in {"", "127.0.0.1", "localhost"} and current_host and current_host not in {"127.0.0.1", "localhost"}:
+        # Fallback para deploy por IP sem domínio/TLS configurados.
+        app_host = current_host_raw or current_host
     if not app_host:
         return path
-    scheme = "https" if (request.is_secure() or not settings.DEBUG) else "http"
+    force_https = bool(getattr(settings, "SECURE_SSL_REDIRECT", False))
+    scheme = "https" if (request.is_secure() or force_https) else "http"
     return f"{scheme}://{app_host}{path}"
 
 
@@ -238,7 +253,14 @@ class TenantHostMiddleware:
 
         # Área administrativa sempre no host central do app.
         if (request.is_public_tenant or request.tenant_lookup_failed) and path.startswith("/accounts/"):
-            return redirect(request.public_login_url)
+            login_target = (request.public_login_url or "").strip()
+            current_host = _normalize_host(_extract_request_host(request))
+            target_host = _normalize_host(urlparse(login_target).netloc) if login_target else ""
+            # Evita loop quando app host canônico não está configurado e o alvo
+            # resolve para o mesmo host atual.
+            if target_host and current_host and target_host == current_host:
+                return self.get_response(request)
+            return redirect(login_target or "/accounts/login/")
 
         return self.get_response(request)
 

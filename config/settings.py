@@ -102,7 +102,7 @@ ALLOWED_HOSTS = _env_list(
 GEPUB_PUBLIC_ROOT_DOMAIN = (os.getenv("GEPUB_PUBLIC_ROOT_DOMAIN", "gepub.com.br") or "").strip().lower().strip(".")
 GEPUB_APP_HOSTS = _env_list(
     "GEPUB_APP_HOSTS",
-    default=["app.gepub.com.br", "127.0.0.1", "localhost"],
+    default=["127.0.0.1", "localhost"],
 )
 GEPUB_APP_CANONICAL_HOST = (os.getenv("GEPUB_APP_CANONICAL_HOST", "") or "").strip().lower()
 GEPUB_RESERVED_SUBDOMAINS = _env_list(
