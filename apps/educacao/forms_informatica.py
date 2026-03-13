@@ -276,7 +276,10 @@ class InformaticaTurmaForm(forms.ModelForm):
             self.fields["instrutor"].queryset = _professores_scope(self.user)
 
         self.fields["ano_letivo"].initial = timezone.localdate().year
-        self.fields["grade_horario"].help_text = "A turma herda laboratório, turno, dias e horários da grade selecionada."
+        self.fields["grade_horario"].help_text = (
+            "A turma herda laboratório, turno, dias, horários e professor principal da grade selecionada."
+        )
+        self.fields["instrutor"].help_text = "Definido automaticamente pela grade de horários."
 
     def clean(self):
         cleaned = super().clean()

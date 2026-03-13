@@ -453,7 +453,8 @@ class InformaticaTurma(models.Model):
                 self.grade_horario.quantidade_encontros_semana
             )
             self.encontro_unico_semana = bool(self.grade_horario.encontro_unico_semana)
-            if not self.instrutor_id and self.grade_horario.professor_principal_id:
+            # Regra operacional: a turma sempre segue o professor principal da grade.
+            if self.grade_horario.professor_principal_id:
                 self.instrutor_id = self.grade_horario.professor_principal_id
             if not self.periodo_letivo and self.grade_horario.periodo_letivo:
                 self.periodo_letivo = self.grade_horario.periodo_letivo
