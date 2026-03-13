@@ -6,398 +6,2252 @@
 {% block extra_head %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
 <link rel="stylesheet" href="{% static 'css/pages/institucional.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="ins-page" id="topo">
+<div class="lp-page" id="inicio">
   {% if preview_mode %}
-    <div class="ins-preview-banner">
+    <div class="lp-preview-banner">
       Visualização do editor institucional (modo preview).
       <a href="{% url 'core:institutional_admin' %}">Voltar ao editor</a>
     </div>
   {% endif %}
 
-  <header class="ins-header">
-    <div class="ins-wrap ins-header__inner">
-      <a class="ins-brand" href="#topo">
-        <span class="ins-brand__mark">
+  <header class="lp-header">
+    <div class="lp-wrap lp-header__inner">
+      <a class="lp-brand" href="#inicio">
+        <span class="lp-brand__mark">
           {% if content.marca_logo_url %}
-            <img src="{{ content.marca_logo_url }}" alt="{{ content.marca_nome|default:'GEPUB' }}" class="ins-brand__logo">
+            <img src="{{ content.marca_logo_url }}" alt="{{ content.marca_nome|default:'GEPUB' }}">
           {% else %}
-            <i class="fa-solid fa-building-columns"></i>
+            <i class="fa-solid fa-burst"></i>
           {% endif %}
         </span>
-        <span>
-          <strong>{{ content.marca_nome|default:'GEPUB' }}</strong>
-          <small>Gestão Estratégica Pública</small>
-        </span>
+        <span class="lp-brand__name">{{ content.marca_nome|default:'GEPUB' }}</span>
       </a>
 
-      <nav class="ins-nav" aria-label="Navegação institucional">
-        <a href="#ferramentas">{{ content.nav_servicos_label|default:'Serviços' }}</a>
-        <a href="#metodo">{{ content.nav_metodo_label|default:'Método' }}</a>
-        <a href="#modulos">Módulos</a>
-        <a href="#planos">{{ content.nav_planos_label|default:'Planos' }}</a>
-        <a href="#simulador">{{ content.nav_simulador_label|default:'Simulador' }}</a>
+      <nav class="lp-nav" aria-label="Navegação principal">
+        <a href="{% url 'core:blog_public' %}">Blog</a>
+        <a href="{% url 'core:documentacao_public' %}">Documentação</a>
+        <a href="{% url 'core:validar_documento_public' %}">Validação</a>
+        <a href="{% url 'core:politica_privacidade_public' %}">Privacidade</a>
+        <a href="{% url 'core:politica_cookies_public' %}">Cookies</a>
+        <a href="{% url 'core:termos_servico_public' %}">Termos</a>
       </nav>
 
-      <div class="ins-header__actions">
-        <a class="ins-btn ins-btn--ghost" href="{{ cta_login }}">{{ content.botao_login_label|default:'Entrar' }}</a>
-        <a class="ins-btn ins-btn--primary" href="{{ cta_contato }}">Agendar Demo</a>
-      </div>
+      <a class="lp-btn lp-btn--dark lp-header__cta" href="{{ cta_contato }}">Solicitar Demonstração</a>
     </div>
   </header>
 
-  <main class="ins-main">
-    <section class="ins-hero">
-      <div class="ins-wrap ins-hero__inner">
-        <article class="ins-hero__content reveal-up" style="--d:.02s;">
-          <p class="ins-kicker">{{ content.hero_kicker|default:'GEPUB' }}</p>
-          <h1>{{ content.hero_titulo|default:'Tecnologia inteligente para gestão pública municipal' }}</h1>
-          <p>{{ content.hero_descricao|default:'Plataforma integrada para organizar secretarias, ampliar transparência e acelerar resultados da prefeitura.' }}</p>
-
-          <div class="ins-hero__actions">
-            <a class="ins-btn ins-btn--primary" href="{{ content.hero_cta_primario_link|default:'#simulador' }}">{{ content.hero_cta_primario_label|default:'Simular plano' }}</a>
-            <a class="ins-btn ins-btn--soft" href="{{ content.hero_cta_secundario_link|default:'#planos' }}">{{ content.hero_cta_secundario_label|default:'Ver planos' }}</a>
-          </div>
-
-          <div class="ins-hero__trusted">
-            <span>Ecossistema integrado:</span>
-            <div class="ins-hero__icons">
-              {% for service in service_cards|slice:':7' %}
-                <i class="{{ service.icone|default:'fa-solid fa-cube' }}" title="{{ service.titulo }}"></i>
-              {% endfor %}
-            </div>
-          </div>
-        </article>
-
-        <aside class="ins-hero__visual reveal-up" style="--d:.08s;">
-          {% with first=slides.0 second=slides.1 third=slides.2 %}
-            <article class="ins-bubble ins-bubble--main">
-              {% if first and first.imagem_url %}
-                <img src="{{ first.imagem_url }}" alt="{{ first.titulo }}">
-              {% else %}
-                <span><i class="fa-solid fa-user-tie"></i></span>
-              {% endif %}
-            </article>
-
-            <article class="ins-bubble ins-bubble--secondary">
-              {% if second and second.imagem_url %}
-                <img src="{{ second.imagem_url }}" alt="{{ second.titulo }}">
-              {% else %}
-                <span><i class="fa-solid fa-users"></i></span>
-              {% endif %}
-            </article>
-
-            {% if first %}
-              <article class="ins-float-card is-top">
-                <strong>{{ first.titulo }}</strong>
-                {% if first.subtitulo %}<p>{{ first.subtitulo }}</p>{% endif %}
-              </article>
-            {% endif %}
-
-            {% if second %}
-              <article class="ins-float-card is-mid">
-                <strong>{{ second.titulo }}</strong>
-                {% if second.subtitulo %}<p>{{ second.subtitulo }}</p>{% endif %}
-              </article>
-            {% endif %}
-
-            {% if third %}
-              <article class="ins-float-card is-bottom">
-                <strong>{{ third.titulo }}</strong>
-                {% if third.subtitulo %}<p>{{ third.subtitulo }}</p>{% endif %}
-              </article>
-            {% endif %}
-
-            <article class="ins-score-card">
-              <p>Operação única para o município</p>
-              <div>
-                <strong>{{ service_cards|length }}</strong>
-                <span>módulos conectados</span>
-              </div>
-            </article>
-          {% endwith %}
-        </aside>
-      </div>
-    </section>
-
-    <section class="ins-section" id="ferramentas">
-      <div class="ins-wrap reveal-up" style="--d:.12s;">
-        <div class="ins-section__head ins-section__head--center">
-          <p class="ins-kicker">{{ content.servicos_kicker|default:'Nossos serviços' }}</p>
-          <h2>Todas as ferramentas que sua gestão precisa</h2>
-          <p>{{ content.servicos_titulo|default:'Solução completa para operação pública integrada, com governança e transparência.' }}</p>
-        </div>
-
-        <article class="ins-platform-shot">
-          <img src="{% static 'img/design-admin-panel-ui-ux-for-web-app-saas-dashboard-software-in-figma-or-xd.webp' %}" alt="Painel administrativo GEPUB">
-        </article>
-
-        <div class="ins-service-chips">
-          {% for service in service_cards %}
-            <article>
-              <i class="{{ service.icone|default:'fa-solid fa-cube' }}"></i>
-              <span>{{ service.titulo }}</span>
-            </article>
-          {% endfor %}
+  <main>
+    <section class="lp-hero" aria-labelledby="hero-title">
+      <div class="lp-wrap lp-hero__inner">
+        <p class="lp-eyebrow">Plataforma completa para gestão pública</p>
+        <h1 id="hero-title">Gestão Estratégica Pública</h1>
+        <div class="lp-hero__actions">
+          <a class="lp-btn lp-btn--dark" href="#modulos">Começar agora</a>
+          <a class="lp-btn lp-btn--glass" href="{{ cta_contato }}">Ver demonstração</a>
         </div>
       </div>
     </section>
 
-    <section class="ins-section ins-section--split" id="metodo">
-      <div class="ins-wrap ins-split reveal-up" style="--d:.16s;">
-        <article>
-          <p class="ins-kicker">{{ content.metodo_kicker|default:'Método GEPUB' }}</p>
-          <h2>{{ content.metodo_titulo|default:'Implantação orientada por etapas e metas.' }}</h2>
-          <p>{{ content.oferta_descricao|default:'Do diagnóstico ao onboarding com suporte contínuo para a prefeitura.' }}</p>
+    <section class="lp-section lp-themes" id="modulos">
+      <div class="lp-wrap">
+        <header class="lp-section__header">
+          <p class="lp-kicker">Módulos interativos</p>
+          <h2>Como o GEPUB transforma a gestão</h2>
+        </header>
 
-          <ul class="ins-checklist">
-            {% for step in method_steps %}
-              <li>
-                <i class="{{ step.icone|default:'fa-solid fa-check' }}"></i>
-                <div>
-                  <strong>{{ step.titulo }}</strong>
-                  <p>{{ step.descricao }}</p>
-                </div>
-              </li>
-            {% endfor %}
-          </ul>
-
-          <a class="ins-link" href="{{ content.metodo_cta_link|default:'#simulador' }}">{{ content.metodo_cta_label|default:'Quero avaliar meu município' }} <i class="fa-solid fa-arrow-right"></i></a>
-        </article>
-
-        <article class="ins-media-stack">
-          <div class="ins-media-stack__main">
-            {% if slides and slides.0.imagem_url %}
-              <img src="{{ slides.0.imagem_url }}" alt="{{ slides.0.titulo }}">
-            {% else %}
-              <img src="{% static 'img/design-admin-panel-ui-ux-for-web-app-saas-dashboard-software-in-figma-or-xd.webp' %}" alt="Visão geral GEPUB">
-            {% endif %}
-            <button type="button" aria-label="Assistir apresentação">
-              <i class="fa-solid fa-play"></i>
+        <div class="lp-themes__grid">
+          <aside class="lp-themes__menu" role="tablist" aria-label="Temas do GEPUB">
+            <button class="lp-theme-tab lp-theme-tab--educacao is-active" role="tab" aria-selected="true" aria-controls="theme-educacao" id="tab-educacao" data-target="theme-educacao">
+              <span class="lp-theme-tab__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" focusable="false">
+                  <path d="M2 9L12 4L22 9L12 14L2 9Z"></path>
+                  <path d="M6 11V15C6 16.66 8.69 18 12 18C15.31 18 18 16.66 18 15V11"></path>
+                </svg>
+              </span>
+              <span class="lp-theme-tab__label">Gestão Educacional</span>
             </button>
-          </div>
-          <div class="ins-media-stack__cards">
-            {% for slide in slides|slice:':3' %}
-              <article>
-                <strong>{{ slide.titulo }}</strong>
-                <p>{{ slide.descricao|default:slide.subtitulo }}</p>
-                <a href="{{ slide.cta_link|default:cta_docs }}">{{ slide.cta_label|default:'Saber mais' }}</a>
-              </article>
-            {% endfor %}
-          </div>
-        </article>
-      </div>
-    </section>
+            <button class="lp-theme-tab lp-theme-tab--saude" role="tab" aria-selected="false" aria-controls="theme-saude" id="tab-saude" data-target="theme-saude">
+              <span class="lp-theme-tab__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" focusable="false">
+                  <path d="M12 21C7.24 17.97 4 14.7 4 11C4 8.24 6.24 6 9 6C10.32 6 11.52 6.51 12.41 7.34C13.3 6.51 14.5 6 15.82 6C18.58 6 20.82 8.24 20.82 11C20.82 14.7 17.58 17.97 12.82 21H12Z"></path>
+                  <path d="M12.41 9.6V14.4"></path>
+                  <path d="M10.01 12H14.81"></path>
+                </svg>
+              </span>
+              <span class="lp-theme-tab__label">Gestão de Saúde</span>
+            </button>
+            <button class="lp-theme-tab lp-theme-tab--admin" role="tab" aria-selected="false" aria-controls="theme-admin" id="tab-admin" data-target="theme-admin">
+              <span class="lp-theme-tab__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" focusable="false">
+                  <path d="M3 10L12 4L21 10"></path>
+                  <path d="M5 10H19V21H5V10Z"></path>
+                  <path d="M9 14V18"></path>
+                  <path d="M12 14V18"></path>
+                  <path d="M15 14V18"></path>
+                  <path d="M3 21H21"></path>
+                </svg>
+              </span>
+              <span class="lp-theme-tab__label">Administração Municipal</span>
+            </button>
+            <button class="lp-theme-tab lp-theme-tab--cidadao" role="tab" aria-selected="false" aria-controls="theme-cidadao" id="tab-cidadao" data-target="theme-cidadao">
+              <span class="lp-theme-tab__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" focusable="false">
+                  <path d="M4 4H20V16H13L9 20V16H4V4Z"></path>
+                  <path d="M12 9C13.1 9 14 8.1 14 7C14 5.9 13.1 5 12 5C10.9 5 10 5.9 10 7C10 8.1 10.9 9 12 9Z"></path>
+                  <path d="M8.5 12.5C9.3 11.6 10.5 11 12 11C13.5 11 14.7 11.6 15.5 12.5"></path>
+                </svg>
+              </span>
+              <span class="lp-theme-tab__label">Portal do Cidadão e Serviços Digitais</span>
+            </button>
+            <button class="lp-theme-tab lp-theme-tab--transparencia" role="tab" aria-selected="false" aria-controls="theme-transparencia" id="tab-transparencia" data-target="theme-transparencia">
+              <span class="lp-theme-tab__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" focusable="false">
+                  <path d="M7 3H14L18 7V18C18 19.1 17.1 20 16 20H7C5.9 20 5 19.1 5 18V5C5 3.9 5.9 3 7 3Z"></path>
+                  <path d="M14 3V8H18"></path>
+                  <path d="M10.5 14.5C11.9 14.5 13 13.4 13 12C13 10.6 11.9 9.5 10.5 9.5C9.1 9.5 8 10.6 8 12C8 13.4 9.1 14.5 10.5 14.5Z"></path>
+                  <path d="M12.4 13.9L14 15.5"></path>
+                </svg>
+              </span>
+              <span class="lp-theme-tab__label">Transparência e Publicações Oficiais</span>
+            </button>
+            <button class="lp-theme-tab lp-theme-tab--painel" role="tab" aria-selected="false" aria-controls="theme-painel" id="tab-painel" data-target="theme-painel">
+              <span class="lp-theme-tab__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" focusable="false">
+                  <path d="M4 20H20"></path>
+                  <path d="M7 20V12"></path>
+                  <path d="M12 20V9"></path>
+                  <path d="M17 20V6"></path>
+                  <path d="M6 10L10 7L13 9L18 4"></path>
+                  <path d="M18 4H15"></path>
+                  <path d="M18 4V7"></path>
+                </svg>
+              </span>
+              <span class="lp-theme-tab__label">Painel Estratégico da Gestão Municipal</span>
+            </button>
+          </aside>
 
-    <section class="ins-section" id="modulos">
-      <div class="ins-wrap ins-split reveal-up" style="--d:.20s;">
-        <article class="ins-gallery-grid">
-          {% for slide in slides|slice:':8' %}
-            <div>
-              {% if slide.imagem_url %}
-                <img src="{{ slide.imagem_url }}" alt="{{ slide.titulo }}">
-              {% else %}
-                <span><i class="{{ slide.icone|default:'fa-solid fa-cube' }}"></i></span>
-              {% endif %}
-            </div>
-          {% endfor %}
-          {% if not slides %}
-            {% for service in service_cards|slice:':8' %}
-              <div><span><i class="{{ service.icone|default:'fa-solid fa-cube' }}"></i></span></div>
-            {% endfor %}
-          {% endif %}
-        </article>
-
-        <article>
-          <p class="ins-kicker">Integração total</p>
-          <h2>Secretarias, equipes e dados em uma única plataforma</h2>
-          <p>{{ content.oferta_titulo|default:'Estrutura preparada para contratação pública e operação contínua.' }}</p>
-
-          <div class="ins-feature-list">
-            {% for service in service_cards|slice:':6' %}
-              <p><i class="{{ service.icone|default:'fa-solid fa-check' }}"></i> {{ service.titulo }}: {{ service.descricao }}</p>
-            {% endfor %}
-          </div>
-
-          <a class="ins-link" href="{{ cta_docs }}">Explorar módulos e documentação <i class="fa-solid fa-arrow-right"></i></a>
-        </article>
-      </div>
-    </section>
-
-    <section class="ins-stats reveal-up" style="--d:.24s;">
-      <div class="ins-wrap ins-stats__grid">
-        <article>
-          <i class="fa-solid fa-layer-group"></i>
-          <strong>{{ planos|length }}</strong>
-          <span>planos municipais</span>
-        </article>
-        <article>
-          <i class="fa-solid fa-cubes"></i>
-          <strong>{{ service_cards|length }}</strong>
-          <span>módulos integrados</span>
-        </article>
-        <article>
-          <i class="fa-solid fa-list-check"></i>
-          <strong>{{ method_steps|length }}</strong>
-          <span>etapas de implantação</span>
-        </article>
-      </div>
-    </section>
-
-    <section class="ins-section" id="depoimentos">
-      <div class="ins-wrap reveal-up" style="--d:.28s;">
-        <div class="ins-section__head">
-          <h2>O que os gestores perguntam</h2>
-        </div>
-
-        <div class="ins-testimonial-grid">
-          {% for item in faq_items %}
-            <article>
-              <p>{{ item.pergunta }}</p>
-              <strong>{{ item.resposta }}</strong>
-            </article>
-          {% endfor %}
-        </div>
-      </div>
-    </section>
-
-    <section class="ins-section" id="planos">
-      <div class="ins-wrap reveal-up" style="--d:.32s;">
-        <div class="ins-section__head">
-          <p class="ins-kicker">{{ content.planos_kicker|default:'Planos municipais' }}</p>
-          <h2>{{ content.planos_titulo|default:'Planos para diferentes portes de município' }}</h2>
-          <p>{{ content.planos_descricao|default:'Modelos de contratação estruturados para escala e previsibilidade.' }}</p>
-        </div>
-
-        <div class="ins-plan-grid">
-          {% for plano in planos %}
-            <article class="ins-plan-card {% if plano.destaque == 'Recomendado' %}is-featured{% endif %}">
-              <div class="ins-plan-card__head">
-                {% if plano.destaque %}<span>{{ plano.destaque }}</span>{% endif %}
-                <h3>{{ plano.nome }}</h3>
-                <p>{{ plano.descricao }}</p>
+          <div class="lp-themes__content">
+            <article class="lp-theme-panel is-active" id="theme-educacao" role="tabpanel" aria-labelledby="tab-educacao">
+              <h3>Gestão Educacional Completa</h3>
+              <p>Controle alunos, turmas, diários, indicadores e gestão pedagógica em uma única operação municipal.</p>
+              <div class="lp-accordion" data-accordion>
+                <article class="lp-accordion__item is-open">
+                  <button class="lp-accordion__trigger" type="button" aria-expanded="true">
+                    <span class="lp-accordion__headline">
+                      <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
+                      <span>Matrículas, turmas e diário digital</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-down lp-accordion__state" aria-hidden="true"></i>
+                  </button>
+                  <div class="lp-accordion__content">
+                    <p>Centralize matrículas, enturmação, frequência e lançamento de notas com fluxo contínuo entre escola, secretaria e coordenação pedagógica.</p>
+                  </div>
+                </article>
+                <article class="lp-accordion__item">
+                  <button class="lp-accordion__trigger" type="button" aria-expanded="false">
+                    <span class="lp-accordion__headline">
+                      <i class="fa-solid fa-users-line" aria-hidden="true"></i>
+                      <span>Professores, coordenação e secretaria</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-down lp-accordion__state" aria-hidden="true"></i>
+                  </button>
+                  <div class="lp-accordion__content" hidden>
+                    <p>Organize equipes por unidade e disciplina, distribua turmas, acompanhe produtividade e mantenha comunicação padronizada entre os setores.</p>
+                  </div>
+                </article>
+                <article class="lp-accordion__item">
+                  <button class="lp-accordion__trigger" type="button" aria-expanded="false">
+                    <span class="lp-accordion__headline">
+                      <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+                      <span>Indicadores e relatórios educacionais</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-down lp-accordion__state" aria-hidden="true"></i>
+                  </button>
+                  <div class="lp-accordion__content" hidden>
+                    <p>Gere relatórios de desempenho, evasão, frequência e evolução de aprendizagem para apoiar decisões estratégicas da rede municipal.</p>
+                  </div>
+                </article>
               </div>
-
-              <ul>
-                {% for feature in plano.features|slice:':5' %}
-                  <li>{{ feature }}</li>
-                {% endfor %}
-              </ul>
-
-              <div class="ins-plan-card__price">R$ {{ plano.preco }}/mês</div>
-              <a class="ins-btn ins-btn--soft" href="{{ cta_contato }}">Solicitar proposta</a>
             </article>
-          {% empty %}
-            <article class="ins-plan-card">
-              <h3>Sem planos ativos</h3>
-              <p>Cadastre planos no módulo Billing para exibir nesta seção.</p>
+
+            <article class="lp-theme-panel" id="theme-saude" role="tabpanel" aria-labelledby="tab-saude" hidden>
+              <h3>Gestão de Saúde Municipal</h3>
+              <p>Organize atendimentos, prontuários e fluxos da rede de saúde com rastreabilidade e visão estratégica.</p>
+              <div class="lp-accordion" data-accordion>
+                <article class="lp-accordion__item is-open">
+                  <button class="lp-accordion__trigger" type="button" aria-expanded="true">
+                    <span class="lp-accordion__headline">
+                      <i class="fa-solid fa-hospital" aria-hidden="true"></i>
+                      <span>Unidades, filas e especialidades</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-down lp-accordion__state" aria-hidden="true"></i>
+                  </button>
+                  <div class="lp-accordion__content">
+                    <p>Gerencie agenda de atendimento, filas por prioridade e encaminhamentos entre unidades, com visão completa da capacidade assistencial.</p>
+                  </div>
+                </article>
+                <article class="lp-accordion__item">
+                  <button class="lp-accordion__trigger" type="button" aria-expanded="false">
+                    <span class="lp-accordion__headline">
+                      <i class="fa-solid fa-file-medical" aria-hidden="true"></i>
+                      <span>Prontuário, documentos e evolução</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-down lp-accordion__state" aria-hidden="true"></i>
+                  </button>
+                  <div class="lp-accordion__content" hidden>
+                    <p>Unifique prontuários eletrônicos, registros clínicos e histórico de atendimento para garantir continuidade do cuidado em toda a rede.</p>
+                  </div>
+                </article>
+                <article class="lp-accordion__item">
+                  <button class="lp-accordion__trigger" type="button" aria-expanded="false">
+                    <span class="lp-accordion__headline">
+                      <i class="fa-solid fa-heart-pulse" aria-hidden="true"></i>
+                      <span>Painéis clínicos e relatórios assistenciais</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-down lp-accordion__state" aria-hidden="true"></i>
+                  </button>
+                  <div class="lp-accordion__content" hidden>
+                    <p>Monitore produção por unidade, tempo de espera, cobertura de serviços e indicadores de saúde para orientar ações e investimentos.</p>
+                  </div>
+                </article>
+              </div>
             </article>
-          {% endfor %}
+
+            <article class="lp-theme-panel" id="theme-admin" role="tabpanel" aria-labelledby="tab-admin" hidden>
+              <h3>Administração Municipal Organizada</h3>
+              <p>Integre processos administrativos, secretarias, documentos e governança em uma base única e segura.</p>
+              <div class="lp-accordion" data-accordion>
+                <article class="lp-accordion__item is-open">
+                  <button class="lp-accordion__trigger" type="button" aria-expanded="true">
+                    <span class="lp-accordion__headline">
+                      <i class="fa-solid fa-folder-open" aria-hidden="true"></i>
+                      <span>Gestão de processos e documentos</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-down lp-accordion__state" aria-hidden="true"></i>
+                  </button>
+                  <div class="lp-accordion__content">
+                    <p>Tramite processos eletrônicos com prazos, responsáveis e histórico de movimentação para reduzir retrabalho e aumentar controle.</p>
+                  </div>
+                </article>
+                <article class="lp-accordion__item">
+                  <button class="lp-accordion__trigger" type="button" aria-expanded="false">
+                    <span class="lp-accordion__headline">
+                      <i class="fa-solid fa-building-columns" aria-hidden="true"></i>
+                      <span>Estrutura por secretaria e unidade</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-down lp-accordion__state" aria-hidden="true"></i>
+                  </button>
+                  <div class="lp-accordion__content" hidden>
+                    <p>Modele organograma municipal, lotações e responsabilidades por setor para padronizar fluxos e dar clareza de governança.</p>
+                  </div>
+                </article>
+                <article class="lp-accordion__item">
+                  <button class="lp-accordion__trigger" type="button" aria-expanded="false">
+                    <span class="lp-accordion__headline">
+                      <i class="fa-solid fa-gauge" aria-hidden="true"></i>
+                      <span>Painel executivo com dados operacionais</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-down lp-accordion__state" aria-hidden="true"></i>
+                  </button>
+                  <div class="lp-accordion__content" hidden>
+                    <p>Consolide informações das áreas administrativas em painéis únicos para acompanhar produtividade, custos e status das ações.</p>
+                  </div>
+                </article>
+              </div>
+            </article>
+
+            <article class="lp-theme-panel" id="theme-cidadao" role="tabpanel" aria-labelledby="tab-cidadao" hidden>
+              <h3>Portal do Cidadão e Serviços Digitais</h3>
+              <p>Ofereça serviços públicos digitais para cidadãos, centralizando solicitações, documentos e acompanhamento de demandas.</p>
+              <div class="lp-accordion" data-accordion>
+                <article class="lp-accordion__item is-open">
+                  <button class="lp-accordion__trigger" type="button" aria-expanded="true">
+                    <span class="lp-accordion__headline">
+                      <i class="fa-solid fa-clipboard-list" aria-hidden="true"></i>
+                      <span>Solicitação e acompanhamento de serviços</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-down lp-accordion__state" aria-hidden="true"></i>
+                  </button>
+                  <div class="lp-accordion__content">
+                    <p>Permita abertura de solicitações online com consulta de status em tempo real, histórico de atendimento e transparência no prazo.</p>
+                  </div>
+                </article>
+                <article class="lp-accordion__item">
+                  <button class="lp-accordion__trigger" type="button" aria-expanded="false">
+                    <span class="lp-accordion__headline">
+                      <i class="fa-solid fa-file-lines" aria-hidden="true"></i>
+                      <span>Protocolos digitais e atendimento online</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-down lp-accordion__state" aria-hidden="true"></i>
+                  </button>
+                  <div class="lp-accordion__content" hidden>
+                    <p>Digitalize protocolos e documentos para reduzir filas presenciais, acelerar respostas e melhorar a experiência do cidadão.</p>
+                  </div>
+                </article>
+                <article class="lp-accordion__item">
+                  <button class="lp-accordion__trigger" type="button" aria-expanded="false">
+                    <span class="lp-accordion__headline">
+                      <i class="fa-solid fa-comments" aria-hidden="true"></i>
+                      <span>Comunicação direta entre cidadão e prefeitura</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-down lp-accordion__state" aria-hidden="true"></i>
+                  </button>
+                  <div class="lp-accordion__content" hidden>
+                    <p>Envie notificações, atualizações de atendimento e mensagens de retorno em um canal único, com rastreabilidade de interações.</p>
+                  </div>
+                </article>
+              </div>
+            </article>
+
+            <article class="lp-theme-panel" id="theme-transparencia" role="tabpanel" aria-labelledby="tab-transparencia" hidden>
+              <h3>Transparência e Publicações Oficiais</h3>
+              <p>Centralize publicações oficiais e dados públicos em um portal transparente e organizado.</p>
+              <div class="lp-accordion" data-accordion>
+                <article class="lp-accordion__item is-open">
+                  <button class="lp-accordion__trigger" type="button" aria-expanded="true">
+                    <span class="lp-accordion__headline">
+                      <i class="fa-solid fa-scale-balanced" aria-hidden="true"></i>
+                      <span>Portal da Transparência integrado</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-down lp-accordion__state" aria-hidden="true"></i>
+                  </button>
+                  <div class="lp-accordion__content">
+                    <p>Reúna despesas, contratos, convênios e execução orçamentária em um ambiente público padronizado e fácil de consultar.</p>
+                  </div>
+                </article>
+                <article class="lp-accordion__item">
+                  <button class="lp-accordion__trigger" type="button" aria-expanded="false">
+                    <span class="lp-accordion__headline">
+                      <i class="fa-solid fa-bullhorn" aria-hidden="true"></i>
+                      <span>Publicação de editais e documentos</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-down lp-accordion__state" aria-hidden="true"></i>
+                  </button>
+                  <div class="lp-accordion__content" hidden>
+                    <p>Publique atos oficiais com versionamento, organização por categoria e controle de validade para acesso seguro da população.</p>
+                  </div>
+                </article>
+                <article class="lp-accordion__item">
+                  <button class="lp-accordion__trigger" type="button" aria-expanded="false">
+                    <span class="lp-accordion__headline">
+                      <i class="fa-solid fa-database" aria-hidden="true"></i>
+                      <span>Relatórios públicos e dados abertos</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-down lp-accordion__state" aria-hidden="true"></i>
+                  </button>
+                  <div class="lp-accordion__content" hidden>
+                    <p>Disponibilize relatórios e bases abertas para auditoria social, imprensa e órgãos de controle com atualização recorrente.</p>
+                  </div>
+                </article>
+              </div>
+            </article>
+
+            <article class="lp-theme-panel" id="theme-painel" role="tabpanel" aria-labelledby="tab-painel" hidden>
+              <h3>Painel Estratégico da Gestão Municipal</h3>
+              <p>Acompanhe indicadores da prefeitura em tempo real e tome decisões baseadas em dados.</p>
+              <div class="lp-accordion" data-accordion>
+                <article class="lp-accordion__item is-open">
+                  <button class="lp-accordion__trigger" type="button" aria-expanded="true">
+                    <span class="lp-accordion__headline">
+                      <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+                      <span>Indicadores de todas as secretarias</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-down lp-accordion__state" aria-hidden="true"></i>
+                  </button>
+                  <div class="lp-accordion__content">
+                    <p>Consolide metas e indicadores de diferentes áreas em um único painel para acompanhar desempenho municipal de ponta a ponta.</p>
+                  </div>
+                </article>
+                <article class="lp-accordion__item">
+                  <button class="lp-accordion__trigger" type="button" aria-expanded="false">
+                    <span class="lp-accordion__headline">
+                      <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
+                      <span>Relatórios estratégicos e comparativos</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-down lp-accordion__state" aria-hidden="true"></i>
+                  </button>
+                  <div class="lp-accordion__content" hidden>
+                    <p>Compare períodos, unidades e políticas públicas com relatórios analíticos para identificar gargalos e oportunidades de melhoria.</p>
+                  </div>
+                </article>
+                <article class="lp-accordion__item">
+                  <button class="lp-accordion__trigger" type="button" aria-expanded="false">
+                    <span class="lp-accordion__headline">
+                      <i class="fa-solid fa-gauge-high" aria-hidden="true"></i>
+                      <span>Dashboards executivos para gestores</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-down lp-accordion__state" aria-hidden="true"></i>
+                  </button>
+                  <div class="lp-accordion__content" hidden>
+                    <p>Entregue visão executiva com filtros, alertas e acompanhamento de resultados para reuniões de governança e tomada de decisão rápida.</p>
+                  </div>
+                </article>
+              </div>
+            </article>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="ins-sim" id="contato">
-      <div class="ins-wrap reveal-up" style="--d:.36s;">
-        <div class="ins-sim__box" id="simulador">
-          <div class="ins-sim__intro">
-            <p class="ins-kicker">Simulador GEPUB</p>
-            <h2>Entre para uma gestão orientada por dados</h2>
-            <p>Faça uma estimativa inicial do plano ideal para seu município e receba uma proposta técnica.</p>
-          </div>
+    <section class="lp-tech" id="tecnologia">
+      <div class="lp-wrap">
+        <h2 class="lp-title">Tecnologias que impulsionam nossa plataforma</h2>
+      </div>
 
-          <form method="post" class="ins-sim-form">
-            {% csrf_token %}
-            {% for field in form %}
-              <div class="ins-sim-form__field">
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {{ field }}
-                {% if field.errors %}<p class="ins-sim-form__error">{{ field.errors|striptags }}</p>{% endif %}
+      <div class="lp-tech__marquee" aria-label="Tecnologias utilizadas no GEPUB">
+        <div class="lp-tech__track">
+          <article class="lp-tech-item">
+            <img src="{% static 'img/institucional/tech/python.svg' %}" alt="Logo Python">
+            <span>Python</span>
+          </article>
+          <article class="lp-tech-item">
+            <img src="{% static 'img/institucional/tech/django.svg' %}" alt="Logo Django">
+            <span>Django</span>
+          </article>
+          <article class="lp-tech-item">
+            <img src="{% static 'img/institucional/tech/react.svg' %}" alt="Logo React">
+            <span>React</span>
+          </article>
+          <article class="lp-tech-item">
+            <img src="{% static 'img/institucional/tech/postgresql.svg' %}" alt="Logo PostgreSQL">
+            <span>PostgreSQL</span>
+          </article>
+          <article class="lp-tech-item">
+            <img src="{% static 'img/institucional/tech/docker.svg' %}" alt="Logo Docker">
+            <span>Docker</span>
+          </article>
+          <article class="lp-tech-item">
+            <img src="{% static 'img/institucional/tech/googlecloud.svg' %}" alt="Logo Google Cloud">
+            <span>Cloud</span>
+          </article>
+
+          <article class="lp-tech-item" aria-hidden="true">
+            <img src="{% static 'img/institucional/tech/python.svg' %}" alt="">
+            <span>Python</span>
+          </article>
+          <article class="lp-tech-item" aria-hidden="true">
+            <img src="{% static 'img/institucional/tech/django.svg' %}" alt="">
+            <span>Django</span>
+          </article>
+          <article class="lp-tech-item" aria-hidden="true">
+            <img src="{% static 'img/institucional/tech/react.svg' %}" alt="">
+            <span>React</span>
+          </article>
+          <article class="lp-tech-item" aria-hidden="true">
+            <img src="{% static 'img/institucional/tech/postgresql.svg' %}" alt="">
+            <span>PostgreSQL</span>
+          </article>
+          <article class="lp-tech-item" aria-hidden="true">
+            <img src="{% static 'img/institucional/tech/docker.svg' %}" alt="">
+            <span>Docker</span>
+          </article>
+          <article class="lp-tech-item" aria-hidden="true">
+            <img src="{% static 'img/institucional/tech/googlecloud.svg' %}" alt="">
+            <span>Cloud</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="lp-section lp-role-showcase" id="telas">
+      <div class="lp-wrap">
+        <header class="lp-section__header lp-section__header--center">
+          <p class="lp-kicker">Experiência por perfil</p>
+          <h2>Telas do sistema por tipo de usuário</h2>
+          <p>Clique nos apps do dock para trocar a visualização de cada perfil operacional da prefeitura.</p>
+        </header>
+
+        <div class="lp-role-viewer">
+          <div class="lp-role-stage">
+            <article class="lp-role-screen is-active" id="role-screen-aluno" data-role-screen="aluno" role="tabpanel" aria-labelledby="role-app-aluno">
+              <div class="lp-role-ui lp-role-ui--aluno">
+                <header class="lp-role-ui__top">
+                  <div class="lp-role-ui__dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                  <strong>Área do Aluno</strong>
+                  <span class="lp-role-ui__status">Portal acadêmico</span>
+                </header>
+                <div class="lp-role-ui__body">
+                  <aside class="lp-role-ui__nav">
+                    <a href="#" class="is-active" data-role-subscreen-target="dashboard">Dashboard</a>
+                    <a href="#" data-role-subscreen-target="boletim">Boletim Escolar</a>
+                    <a href="#" data-role-subscreen-target="disciplinas">Minhas Disciplinas</a>
+                    <a href="#" data-role-subscreen-target="atividades">Atividades e Avaliações</a>
+                    <a href="#" data-role-subscreen-target="horarios">Horários de Aula</a>
+                    <a href="#" data-role-subscreen-target="mensagens">Mensagens</a>
+                  </aside>
+                  <section class="lp-role-ui__main">
+                    <div class="lp-role-subscreen is-active" data-role-subscreen="dashboard">
+                      <div class="lp-role-kpis">
+                        <article class="lp-role-kpi"><span>Frequência geral</span><strong>94%</strong></article>
+                        <article class="lp-role-kpi"><span>Notas recentes</span><strong>4 lançadas</strong></article>
+                        <article class="lp-role-kpi"><span>Atividades pendentes</span><strong>3</strong></article>
+                      </div>
+                      <div class="lp-role-grid lp-role-grid--2">
+                        <article class="lp-role-card">
+                          <h4>Próximas aulas do dia</h4>
+                          <ul class="lp-role-list">
+                            <li><span>Matemática</span><small>08:00 • Sala 04</small></li>
+                            <li><span>Ciências</span><small>10:00 • Laboratório</small></li>
+                            <li><span>História</span><small>13:30 • Sala 02</small></li>
+                          </ul>
+                        </article>
+                        <article class="lp-role-card">
+                          <h4>Avisos da escola</h4>
+                          <ul class="lp-role-check">
+                            <li>Entrega de documentos até sexta-feira</li>
+                            <li>Simulado municipal na próxima semana</li>
+                            <li>Atividade de leitura ainda pendente</li>
+                          </ul>
+                        </article>
+                      </div>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="boletim" hidden>
+                      <article class="lp-role-card">
+                        <h4>Boletim Escolar</h4>
+                        <p>Visualização das notas por disciplina, média geral e situação de aprovação.</p>
+                        <div class="lp-role-table">
+                          <div><span>Matemática</span><small>Nota: 8,7 • Média: 8,4 • Frequência: 95% • Situação: Aprovado</small></div>
+                          <div><span>Português</span><small>Nota: 7,9 • Média: 8,0 • Frequência: 92% • Situação: Aprovado</small></div>
+                          <div><span>Ciências</span><small>Nota: 6,2 • Média: 6,8 • Frequência: 88% • Situação: Recuperação</small></div>
+                        </div>
+                      </article>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="disciplinas" hidden>
+                      <article class="lp-role-card">
+                        <h4>Minhas Disciplinas</h4>
+                        <p>Disciplinas matriculadas no semestre com professor, horário, sala e conteúdo.</p>
+                        <ul class="lp-role-list">
+                          <li><span>Matemática • Prof. Carla</span><small>Seg/Qua • 08:00 • Sala 04 • Álgebra e frações</small></li>
+                          <li><span>Ciências • Prof. Lucas</span><small>Ter/Qui • 10:00 • Lab • Ecossistemas</small></li>
+                          <li><span>História • Prof. Ana</span><small>Sex • 13:30 • Sala 02 • Brasil República</small></li>
+                        </ul>
+                      </article>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="atividades" hidden>
+                      <article class="lp-role-card">
+                        <h4>Atividades e Avaliações</h4>
+                        <p>Acompanhamento de tarefas e provas com data de entrega, arquivo e status.</p>
+                        <div class="lp-role-table">
+                          <div><span>Redação: Cultura local</span><small>Entrega: 21/03 • Arquivo enviado: sim • Status: Em correção</small></div>
+                          <div><span>Lista de frações</span><small>Entrega: 19/03 • Arquivo enviado: não • Status: Pendente</small></div>
+                          <div><span>Prova de Ciências</span><small>Aplicação: 25/03 • Arquivo: n/a • Status: Agendada</small></div>
+                        </div>
+                      </article>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="horarios" hidden>
+                      <article class="lp-role-card">
+                        <h4>Horários de Aula</h4>
+                        <p>Grade semanal com dia da semana, disciplina, professor e sala.</p>
+                        <ul class="lp-role-list">
+                          <li><span>Segunda • Matemática</span><small>Prof. Carla • Sala 04</small></li>
+                          <li><span>Terça • Ciências</span><small>Prof. Lucas • Laboratório</small></li>
+                          <li><span>Quarta • Português</span><small>Prof. Fernanda • Sala 03</small></li>
+                        </ul>
+                      </article>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="mensagens" hidden>
+                      <article class="lp-role-card">
+                        <h4>Mensagens</h4>
+                        <p>Comunicação entre aluno, coordenação, secretaria e professores.</p>
+                        <ul class="lp-role-check">
+                          <li>Coordenação: reunião de pais confirmada para 22/03</li>
+                          <li>Secretaria: atualização cadastral disponível</li>
+                          <li>Professor de História: novo material publicado</li>
+                        </ul>
+                      </article>
+                    </div>
+                  </section>
+                </div>
               </div>
-            {% endfor %}
-            <button class="ins-btn ins-btn--primary" type="submit">Simular plano</button>
-          </form>
+            </article>
 
-          {% if simulacao %}
-            <div class="ins-sim-result">
-              <article>
-                <span>Plano recomendado</span>
-                <strong>{{ simulacao.plano.nome }}</strong>
-                <p>{{ simulacao.justificativa }}</p>
-              </article>
-              <article>
-                <span>Base mensal</span>
-                <strong>R$ {{ simulacao.preco_base }}</strong>
-                <p>Sem adicionais</p>
-              </article>
-              <article>
-                <span>Total estimado</span>
-                <strong>R$ {{ simulacao.total_mensal }}</strong>
-                <p>Adicionais: R$ {{ simulacao.total_adicionais }}</p>
-              </article>
+            <article class="lp-role-screen" id="role-screen-professor" data-role-screen="professor" role="tabpanel" aria-labelledby="role-app-professor" hidden>
+              <div class="lp-role-ui lp-role-ui--professor">
+                <header class="lp-role-ui__top">
+                  <div class="lp-role-ui__dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                  <strong>Área do Professor</strong>
+                  <span class="lp-role-ui__status">Rotina pedagógica</span>
+                </header>
+                <div class="lp-role-ui__body">
+                  <aside class="lp-role-ui__nav">
+                    <a href="#" class="is-active" data-role-subscreen-target="dashboard">Dashboard</a>
+                    <a href="#" data-role-subscreen-target="turmas">Minhas Turmas</a>
+                    <a href="#" data-role-subscreen-target="diario">Diário de Classe</a>
+                    <a href="#" data-role-subscreen-target="avaliacoes">Avaliações</a>
+                    <a href="#" data-role-subscreen-target="atividades">Atividades</a>
+                    <a href="#" data-role-subscreen-target="relatorio">Relatório da Turma</a>
+                  </aside>
+                  <section class="lp-role-ui__main">
+                    <div class="lp-role-subscreen is-active" data-role-subscreen="dashboard">
+                      <div class="lp-role-kpis">
+                        <article class="lp-role-kpi"><span>Turmas do dia</span><strong>5</strong></article>
+                        <article class="lp-role-kpi"><span>Aulas registradas</span><strong>7</strong></article>
+                        <article class="lp-role-kpi"><span>Correções pendentes</span><strong>23</strong></article>
+                      </div>
+                      <div class="lp-role-grid lp-role-grid--2">
+                        <article class="lp-role-card">
+                          <h4>Frequência das turmas</h4>
+                          <div class="lp-role-bars">
+                            <div><span>6º Ano A</span><small style="--bar: 97%;"></small></div>
+                            <div><span>7º Ano B</span><small style="--bar: 91%;"></small></div>
+                            <div><span>8º Ano C</span><small style="--bar: 86%;"></small></div>
+                          </div>
+                        </article>
+                        <article class="lp-role-card">
+                          <h4>Avisos da coordenação</h4>
+                          <ul class="lp-role-check">
+                            <li>Conselho de classe confirmado para sexta</li>
+                            <li>Atualizar conteúdo do diário até 18h</li>
+                            <li>Publicar plano semanal para turmas finais</li>
+                          </ul>
+                        </article>
+                      </div>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="turmas" hidden>
+                      <article class="lp-role-card">
+                        <h4>Minhas Turmas</h4>
+                        <p>Relação das turmas com total de alunos, horário e disciplina.</p>
+                        <div class="lp-role-table">
+                          <div><span>6º Ano A • Matemática</span><small>32 alunos • Seg/Qua 08:00</small></div>
+                          <div><span>7º Ano B • Matemática</span><small>29 alunos • Ter/Qui 10:00</small></div>
+                          <div><span>8º Ano C • Matemática</span><small>31 alunos • Sex 13:30</small></div>
+                        </div>
+                      </article>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="diario" hidden>
+                      <article class="lp-role-card">
+                        <h4>Diário de Classe</h4>
+                        <p>Registro diário de presença, conteúdo ministrado e observações pedagógicas.</p>
+                        <ul class="lp-role-list">
+                          <li><span>18/03 • 6º Ano A</span><small>Conteúdo: Equações • Frequência: 30/32 • Observação: revisão</small></li>
+                          <li><span>18/03 • 7º Ano B</span><small>Conteúdo: Razão e proporção • Frequência: 27/29 • Observação: dúvidas gerais</small></li>
+                        </ul>
+                      </article>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="avaliacoes" hidden>
+                      <article class="lp-role-card">
+                        <h4>Avaliações</h4>
+                        <p>Gestão das provas e atividades avaliativas por turma.</p>
+                        <div class="lp-role-table">
+                          <div><span>Prova bimestral • 7º Ano B</span><small>Aplicação: 25/03 • Notas lançadas: 18/29 • Média: 7,3</small></div>
+                          <div><span>Atividade prática • 6º Ano A</span><small>Aplicação: 19/03 • Notas lançadas: 30/32 • Média: 8,1</small></div>
+                        </div>
+                      </article>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="atividades" hidden>
+                      <article class="lp-role-card">
+                        <h4>Atividades</h4>
+                        <p>Envio de tarefas com anexo e acompanhamento de entregas.</p>
+                        <div class="lp-role-table">
+                          <div><span>Lista de exercícios 03</span><small>Entrega: 21/03 • Anexo: PDF • Status: 20/29 entregues</small></div>
+                          <div><span>Projeto estatística local</span><small>Entrega: 28/03 • Anexo: planilha • Status: em andamento</small></div>
+                        </div>
+                      </article>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="relatorio" hidden>
+                      <article class="lp-role-card">
+                        <h4>Relatório da Turma</h4>
+                        <p>Indicadores pedagógicos para acompanhamento de desempenho.</p>
+                        <ul class="lp-role-list">
+                          <li><span>Média da turma</span><small>7,5 geral</small></li>
+                          <li><span>Frequência geral</span><small>92%</small></li>
+                          <li><span>Alunos em risco</span><small>4 com baixa frequência/nota</small></li>
+                          <li><span>Evolução das notas</span><small>+0,6 no último bimestre</small></li>
+                        </ul>
+                      </article>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </article>
+
+            <article class="lp-role-screen" id="role-screen-gestor" data-role-screen="gestor" role="tabpanel" aria-labelledby="role-app-gestor" hidden>
+              <div class="lp-role-ui lp-role-ui--gestor">
+                <header class="lp-role-ui__top">
+                  <div class="lp-role-ui__dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                  <strong>Área da Secretaria Escolar</strong>
+                  <span class="lp-role-ui__status">Gestão administrativa</span>
+                </header>
+                <div class="lp-role-ui__body">
+                  <aside class="lp-role-ui__nav">
+                    <a href="#" class="is-active" data-role-subscreen-target="dashboard">Dashboard</a>
+                    <a href="#" data-role-subscreen-target="matriculas">Matrículas</a>
+                    <a href="#" data-role-subscreen-target="turmas">Turmas</a>
+                    <a href="#" data-role-subscreen-target="documentos">Documentos Escolares</a>
+                    <a href="#" data-role-subscreen-target="cadastro">Cadastro de Alunos</a>
+                    <a href="#" data-role-subscreen-target="relatorios">Relatórios Educacionais</a>
+                  </aside>
+                  <section class="lp-role-ui__main">
+                    <div class="lp-role-subscreen is-active" data-role-subscreen="dashboard">
+                      <div class="lp-role-kpis">
+                        <article class="lp-role-kpi"><span>Alunos matriculados</span><strong>4.286</strong></article>
+                        <article class="lp-role-kpi"><span>Turmas ativas</span><strong>142</strong></article>
+                        <article class="lp-role-kpi"><span>Professores cadastrados</span><strong>318</strong></article>
+                      </div>
+                      <div class="lp-role-grid lp-role-grid--2">
+                        <article class="lp-role-card">
+                          <h4>Matrículas recentes</h4>
+                          <ul class="lp-role-list">
+                            <li><span>Maria L.</span><small>5º Ano • Escola Central • Ativa</small></li>
+                            <li><span>João P.</span><small>8º Ano • Escola Norte • Ativa</small></li>
+                            <li><span>Ana C.</span><small>2º Ano • Escola Sul • Transferência</small></li>
+                          </ul>
+                        </article>
+                        <article class="lp-role-card">
+                          <h4>Avisos institucionais</h4>
+                          <ul class="lp-role-check">
+                            <li>Fechamento de censo em 2 dias</li>
+                            <li>Atualizar documentação pendente</li>
+                            <li>Publicar calendário letivo final</li>
+                          </ul>
+                        </article>
+                      </div>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="matriculas" hidden>
+                      <article class="lp-role-card">
+                        <h4>Matrículas</h4>
+                        <p>Gestão da situação de matrícula por aluno, série/ano e escola.</p>
+                        <div class="lp-role-table">
+                          <div><span>Larissa M.</span><small>6º Ano • Escola Norte • Situação: Ativa</small></div>
+                          <div><span>Pedro A.</span><small>7º Ano • Escola Centro • Situação: Em análise</small></div>
+                          <div><span>Juliana R.</span><small>9º Ano • Escola Sul • Situação: Transferida</small></div>
+                        </div>
+                      </article>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="turmas" hidden>
+                      <article class="lp-role-card">
+                        <h4>Turmas</h4>
+                        <p>Controle de turmas com quantidade de alunos, professor e turno.</p>
+                        <ul class="lp-role-list">
+                          <li><span>7º Ano B</span><small>31 alunos • Prof. Carla • Turno manhã</small></li>
+                          <li><span>8º Ano A</span><small>29 alunos • Prof. Lucas • Turno tarde</small></li>
+                          <li><span>9º Ano C</span><small>30 alunos • Prof. Ana • Turno manhã</small></li>
+                        </ul>
+                      </article>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="documentos" hidden>
+                      <article class="lp-role-card">
+                        <h4>Documentos Escolares</h4>
+                        <p>Emissão de histórico, declaração de matrícula, boletim e certificados.</p>
+                        <ul class="lp-role-check">
+                          <li>Histórico escolar: 12 emissões hoje</li>
+                          <li>Declaração de matrícula: 18 solicitações</li>
+                          <li>Boletim escolar: lote do bimestre pronto</li>
+                          <li>Certificados: 7 em processamento</li>
+                        </ul>
+                      </article>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="cadastro" hidden>
+                      <article class="lp-role-card">
+                        <h4>Cadastro de Alunos</h4>
+                        <p>Registro completo com dados pessoais, responsáveis, endereço e documentação.</p>
+                        <div class="lp-role-table">
+                          <div><span>Dados pessoais</span><small>Nome, data de nascimento, NIS e CPF</small></div>
+                          <div><span>Responsáveis</span><small>Contato, parentesco e autorização escolar</small></div>
+                          <div><span>Endereço e documentação</span><small>Comprovante de residência e certidão</small></div>
+                        </div>
+                      </article>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="relatorios" hidden>
+                      <article class="lp-role-card">
+                        <h4>Relatórios Educacionais</h4>
+                        <p>Relatórios administrativos com exportação de indicadores por série e rede.</p>
+                        <div class="lp-role-bars">
+                          <div><span>Alunos por série</span><small style="--bar: 82%;"></small></div>
+                          <div><span>Frequência geral</span><small style="--bar: 91%;"></small></div>
+                          <div><span>Indicadores educacionais</span><small style="--bar: 76%;"></small></div>
+                        </div>
+                      </article>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </article>
+
+            <article class="lp-role-screen" id="role-screen-coordenador" data-role-screen="coordenador" role="tabpanel" aria-labelledby="role-app-coordenador" hidden>
+              <div class="lp-role-ui lp-role-ui--coordenador">
+                <header class="lp-role-ui__top">
+                  <div class="lp-role-ui__dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                  <strong>Área do Coordenador Pedagógico</strong>
+                  <span class="lp-role-ui__status">Visão pedagógica</span>
+                </header>
+                <div class="lp-role-ui__body">
+                  <aside class="lp-role-ui__nav">
+                    <a href="#" class="is-active" data-role-subscreen-target="dashboard">Dashboard</a>
+                    <a href="#" data-role-subscreen-target="desempenho">Desempenho das Turmas</a>
+                    <a href="#" data-role-subscreen-target="professores">Acompanhamento de Professores</a>
+                    <a href="#" data-role-subscreen-target="indicadores">Indicadores Educacionais</a>
+                    <a href="#" data-role-subscreen-target="planejamento">Planejamento Pedagógico</a>
+                    <a href="#" data-role-subscreen-target="relatorios">Relatórios da Escola</a>
+                  </aside>
+                  <section class="lp-role-ui__main">
+                    <div class="lp-role-subscreen is-active" data-role-subscreen="dashboard">
+                      <div class="lp-role-kpis">
+                        <article class="lp-role-kpi"><span>Desempenho médio</span><strong>7,4</strong></article>
+                        <article class="lp-role-kpi"><span>Frequência média</span><strong>91%</strong></article>
+                        <article class="lp-role-kpi"><span>Alertas pedagógicos</span><strong>5</strong></article>
+                      </div>
+                      <div class="lp-role-grid lp-role-grid--2">
+                        <article class="lp-role-card">
+                          <h4>Painel de acompanhamento</h4>
+                          <ul class="lp-role-list">
+                            <li><span>Avaliações aplicadas</span><small>38 no mês</small></li>
+                            <li><span>Professores ativos</span><small>64 com diário atualizado</small></li>
+                            <li><span>Turmas monitoradas</span><small>18 com plano de ação</small></li>
+                          </ul>
+                        </article>
+                        <article class="lp-role-card">
+                          <h4>Alertas pedagógicos</h4>
+                          <ul class="lp-role-check">
+                            <li>3 turmas com queda em matemática</li>
+                            <li>2 turmas com frequência abaixo da meta</li>
+                            <li>1 turma com avaliações em atraso</li>
+                          </ul>
+                        </article>
+                      </div>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="desempenho" hidden>
+                      <article class="lp-role-card">
+                        <h4>Desempenho das Turmas</h4>
+                        <p>Análise de médias por turma, evolução das notas e indicadores de aprendizagem.</p>
+                        <div class="lp-role-bars">
+                          <div><span>7º Ano B • Média por turma</span><small style="--bar: 74%;"></small></div>
+                          <div><span>8º Ano A • Evolução das notas</span><small style="--bar: 81%;"></small></div>
+                          <div><span>9º Ano C • Aprendizagem</span><small style="--bar: 69%;"></small></div>
+                        </div>
+                      </article>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="professores" hidden>
+                      <article class="lp-role-card">
+                        <h4>Acompanhamento de Professores</h4>
+                        <p>Supervisão de aulas registradas, conteúdos aplicados e avaliações realizadas.</p>
+                        <div class="lp-role-table">
+                          <div><span>Prof. Carla</span><small>Aulas registradas: 22 • Conteúdos aplicados: 18 • Avaliações: 4</small></div>
+                          <div><span>Prof. Lucas</span><small>Aulas registradas: 20 • Conteúdos aplicados: 16 • Avaliações: 3</small></div>
+                        </div>
+                      </article>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="indicadores" hidden>
+                      <article class="lp-role-card">
+                        <h4>Indicadores Educacionais</h4>
+                        <p>Relatórios de média geral da escola, frequência e índice de aprovação.</p>
+                        <ul class="lp-role-list">
+                          <li><span>Média geral da escola</span><small>7,2</small></li>
+                          <li><span>Frequência dos alunos</span><small>91%</small></li>
+                          <li><span>Índice de aprovação</span><small>87%</small></li>
+                        </ul>
+                      </article>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="planejamento" hidden>
+                      <article class="lp-role-card">
+                        <h4>Planejamento Pedagógico</h4>
+                        <p>Organização do calendário pedagógico, planos de aula e projetos educacionais.</p>
+                        <ul class="lp-role-check">
+                          <li>Calendário pedagógico do bimestre validado</li>
+                          <li>Planejamento de aulas em revisão final</li>
+                          <li>Projeto de leitura com início em abril</li>
+                        </ul>
+                      </article>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="relatorios" hidden>
+                      <article class="lp-role-card">
+                        <h4>Relatórios da Escola</h4>
+                        <p>Visão consolidada de desempenho, indicadores educacionais e exportação de dados.</p>
+                        <div class="lp-role-table">
+                          <div><span>Relatório de desempenho</span><small>Última atualização: hoje 11:30</small></div>
+                          <div><span>Indicadores educacionais</span><small>Base consolidada por escola e turma</small></div>
+                          <div><span>Exportação de dados</span><small>CSV/PDF disponível para gestão</small></div>
+                        </div>
+                      </article>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </article>
+
+            <article class="lp-role-screen" id="role-screen-nee" data-role-screen="nee" role="tabpanel" aria-labelledby="role-app-nee" hidden>
+              <div class="lp-role-ui lp-role-ui--nee">
+                <header class="lp-role-ui__top">
+                  <div class="lp-role-ui__dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                  <strong>Área do NEE</strong>
+                  <span class="lp-role-ui__status">Acompanhamento especializado</span>
+                </header>
+                <div class="lp-role-ui__body">
+                  <aside class="lp-role-ui__nav">
+                    <a href="#" class="is-active" data-role-subscreen-target="dashboard">Dashboard</a>
+                    <a href="#" data-role-subscreen-target="alunos">Alunos Acompanhados</a>
+                    <a href="#" data-role-subscreen-target="pei">Plano Educacional Individual</a>
+                    <a href="#" data-role-subscreen-target="atendimentos">Atendimentos</a>
+                    <a href="#" data-role-subscreen-target="relatorios">Relatórios de Acompanhamento</a>
+                    <a href="#" data-role-subscreen-target="documentos">Documentos e Avaliações</a>
+                  </aside>
+                  <section class="lp-role-ui__main">
+                    <div class="lp-role-subscreen is-active" data-role-subscreen="dashboard">
+                      <div class="lp-role-kpis">
+                        <article class="lp-role-kpi"><span>Alunos acompanhados</span><strong>42</strong></article>
+                        <article class="lp-role-kpi"><span>Atendimentos realizados</span><strong>31</strong></article>
+                        <article class="lp-role-kpi"><span>PEIs ativos</span><strong>38</strong></article>
+                      </div>
+                      <div class="lp-role-grid lp-role-grid--2">
+                        <article class="lp-role-card">
+                          <h4>Avaliações e alertas</h4>
+                          <ul class="lp-role-list">
+                            <li><span>Avaliações pedagógicas</span><small>12 em andamento</small></li>
+                            <li><span>Alertas de acompanhamento</span><small>6 pendentes de revisão</small></li>
+                            <li><span>Rede de apoio ativa</span><small>23 profissionais vinculados</small></li>
+                          </ul>
+                        </article>
+                        <article class="lp-role-card">
+                          <h4>Pendências imediatas</h4>
+                          <ul class="lp-role-check">
+                            <li>Atualizar PEI de 4 alunos até sexta</li>
+                            <li>Registrar devolutiva com famílias</li>
+                            <li>Fechar relatórios técnicos do mês</li>
+                          </ul>
+                        </article>
+                      </div>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="alunos" hidden>
+                      <article class="lp-role-card">
+                        <h4>Alunos Acompanhados</h4>
+                        <p>Lista dos estudantes atendidos, turma, tipo de acompanhamento e escola.</p>
+                        <div class="lp-role-table">
+                          <div><span>Ana C. • 7º Ano B</span><small>Acompanhamento pedagógico • Escola Central</small></div>
+                          <div><span>Pedro M. • 5º Ano A</span><small>Acompanhamento multiprofissional • Escola Norte</small></div>
+                          <div><span>Luiza R. • 8º Ano C</span><small>Acompanhamento cognitivo • Escola Sul</small></div>
+                        </div>
+                      </article>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="pei" hidden>
+                      <article class="lp-role-card">
+                        <h4>Plano Educacional Individual</h4>
+                        <p>Gestão de objetivos pedagógicos, estratégias de ensino e avaliação de evolução.</p>
+                        <ul class="lp-role-list">
+                          <li><span>Objetivos pedagógicos</span><small>Leitura funcional, autonomia e socialização</small></li>
+                          <li><span>Estratégias de ensino</span><small>Rotina visual, mediação e atividades adaptadas</small></li>
+                          <li><span>Avaliação de evolução</span><small>Revisão quinzenal com equipe técnica</small></li>
+                        </ul>
+                      </article>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="atendimentos" hidden>
+                      <article class="lp-role-card">
+                        <h4>Atendimentos</h4>
+                        <p>Registro da data, profissional responsável e observações pedagógicas.</p>
+                        <div class="lp-role-table">
+                          <div><span>18/03 • Ana C.</span><small>Profissional: Psicopedagoga • Observação: avanço em leitura</small></div>
+                          <div><span>18/03 • Pedro M.</span><small>Profissional: Terapeuta ocupacional • Observação: adaptação concluída</small></div>
+                        </div>
+                      </article>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="relatorios" hidden>
+                      <article class="lp-role-card">
+                        <h4>Relatórios de Acompanhamento</h4>
+                        <p>Análise de evolução pedagógica, frequência nos atendimentos e recomendações.</p>
+                        <ul class="lp-role-check">
+                          <li>Evolução pedagógica consolidada por estudante</li>
+                          <li>Frequência em atendimentos acima de 89%</li>
+                          <li>Recomendações educacionais atualizadas</li>
+                        </ul>
+                      </article>
+                    </div>
+
+                    <div class="lp-role-subscreen" data-role-subscreen="documentos" hidden>
+                      <article class="lp-role-card">
+                        <h4>Documentos e Avaliações</h4>
+                        <p>Registro de laudos educacionais, avaliações pedagógicas e relatórios técnicos.</p>
+                        <div class="lp-role-table">
+                          <div><span>Laudos educacionais</span><small>22 ativos com validade vigente</small></div>
+                          <div><span>Avaliações pedagógicas</span><small>15 revisadas no mês</small></div>
+                          <div><span>Relatórios técnicos</span><small>8 prontos para envio à secretaria</small></div>
+                        </div>
+                      </article>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </article>
+
+            <div class="lp-role-dock" role="tablist" aria-label="Perfis de tela">
+              <button class="lp-role-app lp-role-app--aluno is-active" id="role-app-aluno" role="tab" aria-selected="true" aria-controls="role-screen-aluno" data-role-target="aluno" data-role-name="Aluno">
+                <span class="lp-role-app__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M3.5 8.4 12 4.2l8.5 4.2L12 12.8 3.5 8.4Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                    <path d="M6.8 10.1v3.8c0 1.5 2.3 2.8 5.2 2.8s5.2-1.3 5.2-2.8v-3.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9.2 19.7h5.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                    <path d="M12 16.7v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                  </svg>
+                </span>
+                <span class="lp-role-app__label">Aluno</span>
+              </button>
+              <button class="lp-role-app lp-role-app--professor" id="role-app-professor" role="tab" aria-selected="false" aria-controls="role-screen-professor" data-role-target="professor" data-role-name="Professor">
+                <span class="lp-role-app__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <rect x="3.4" y="4.4" width="12.6" height="9.1" rx="1.9" stroke="currentColor" stroke-width="1.7"/>
+                    <path d="M9.7 13.5v4.1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                    <path d="M6.9 17.6h5.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                    <path d="m20.2 7.5-4.4 4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                    <circle cx="20.2" cy="14.6" r="1.8" stroke="currentColor" stroke-width="1.7"/>
+                  </svg>
+                </span>
+                <span class="lp-role-app__label">Professor</span>
+              </button>
+              <button class="lp-role-app lp-role-app--gestor" id="role-app-gestor" role="tab" aria-selected="false" aria-controls="role-screen-gestor" data-role-target="gestor" data-role-name="Secretaria">
+                <span class="lp-role-app__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <rect x="4" y="7.4" width="16" height="10.8" rx="2.2" stroke="currentColor" stroke-width="1.7"/>
+                    <path d="M9 7.4V6.6c0-1 .8-1.8 1.8-1.8h2.4c1 0 1.8.8 1.8 1.8v.8" stroke="currentColor" stroke-width="1.7"/>
+                    <path d="M4 11.9h16" stroke="currentColor" stroke-width="1.7"/>
+                    <path d="m8 15.7 2.5-2.5 1.9 1.9 3.5-3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+                <span class="lp-role-app__label">Secretaria</span>
+              </button>
+              <button class="lp-role-app lp-role-app--coordenador" id="role-app-coordenador" role="tab" aria-selected="false" aria-controls="role-screen-coordenador" data-role-target="coordenador" data-role-name="Coordenador">
+                <span class="lp-role-app__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12.2" r="2.3" stroke="currentColor" stroke-width="1.7"/>
+                    <circle cx="6.4" cy="7.2" r="1.8" stroke="currentColor" stroke-width="1.7"/>
+                    <circle cx="17.6" cy="7.2" r="1.8" stroke="currentColor" stroke-width="1.7"/>
+                    <circle cx="6.4" cy="17" r="1.8" stroke="currentColor" stroke-width="1.7"/>
+                    <circle cx="17.6" cy="17" r="1.8" stroke="currentColor" stroke-width="1.7"/>
+                    <path d="M10.3 10.6 7.8 8.8M13.7 10.6 16.2 8.8M10.3 13.8 7.8 15.5M13.7 13.8l2.5 1.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                  </svg>
+                </span>
+                <span class="lp-role-app__label">Coordenador</span>
+              </button>
+              <button class="lp-role-app lp-role-app--nee" id="role-app-nee" role="tab" aria-selected="false" aria-controls="role-screen-nee" data-role-target="nee" data-role-name="NEE">
+                <span class="lp-role-app__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M12 11.7c1.9-1.7 3.1-2.9 3.1-4.5a2.4 2.4 0 0 0-4.7-.9 2.4 2.4 0 0 0-4.7.9c0 1.6 1.2 2.8 3.1 4.5L12 14.6l.1-.1 2.9-2.8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                    <path d="M4.2 16.3c1-.9 2-1.4 3.2-1.4h2.2c.8 0 1.4.6 1.4 1.4v.1c0 .8-.6 1.4-1.4 1.4H8.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                    <path d="M19.8 16.3c-1-.9-2-1.4-3.2-1.4h-2.2c-.8 0-1.4.6-1.4 1.4v.1c0 .8.6 1.4 1.4 1.4h1.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                    <path d="M8.2 20.1h7.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                  </svg>
+                </span>
+                <span class="lp-role-app__label">NEE</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lp-section lp-split lp-split--studio">
+      <div class="lp-wrap">
+        <div class="lp-split__grid">
+          <article class="lp-copy-block lp-copy-block--studio">
+            <p class="lp-copy-block__kicker">Painel Integrado Municipal</p>
+            <h2>Uma Plataforma Completa para Gestão Municipal</h2>
+            <p>Conecte secretarias, organize processos e facilite o acesso às informações públicas com uma arquitetura confiável e escalável.</p>
+            <a class="lp-btn lp-platform-btn" href="#funcionalidades">Saiba mais</a>
+            <p class="lp-copy-block__footnote">Secretarias conectadas • Processos digitais • Arquitetura escalável</p>
+          </article>
+
+          <figure class="lp-panel-shot lp-panel-shot--studio" aria-label="Painel integrado da plataforma" data-platform-root>
+            <header class="lp-panel-shot__top">
+              <div class="lp-panel-shot__dots" aria-hidden="true"><span></span><span></span><span></span></div>
+              <strong>GEPUB Platform</strong>
+              <span class="lp-panel-shot__env">My app</span>
+            </header>
+
+            <div class="lp-panel-shot__layout">
+              <aside class="lp-panel-shot__sidebar" aria-label="Menu lateral de módulos">
+                <small>Builder</small>
+                <div class="lp-panel-shot__menu" role="tablist" aria-label="Menu do painel integrado">
+                  <button class="lp-panel-shot__menu-item is-active" type="button" role="tab" aria-selected="true" aria-controls="platform-panel-integracao" data-platform-target="integracao">
+                    <span class="lp-panel-shot__menu-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <rect x="3.5" y="5" width="7.2" height="6.2" rx="1.4" stroke="currentColor" stroke-width="1.7"/>
+                        <rect x="13.3" y="5" width="7.2" height="6.2" rx="1.4" stroke="currentColor" stroke-width="1.7"/>
+                        <rect x="8.4" y="13" width="7.2" height="6.2" rx="1.4" stroke="currentColor" stroke-width="1.7"/>
+                      </svg>
+                    </span>
+                    <span>Integração</span>
+                  </button>
+                  <button class="lp-panel-shot__menu-item" type="button" role="tab" aria-selected="false" aria-controls="platform-panel-processos" data-platform-target="processos">
+                    <span class="lp-panel-shot__menu-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M4.3 12h15.4M4.3 7.5h9.2M4.3 16.5h6.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                        <circle cx="16.8" cy="7.5" r="1.7" stroke="currentColor" stroke-width="1.7"/>
+                        <circle cx="13.1" cy="16.5" r="1.7" stroke="currentColor" stroke-width="1.7"/>
+                        <circle cx="9.6" cy="12" r="1.7" stroke="currentColor" stroke-width="1.7"/>
+                      </svg>
+                    </span>
+                    <span>Processos</span>
+                  </button>
+                  <button class="lp-panel-shot__menu-item" type="button" role="tab" aria-selected="false" aria-controls="platform-panel-transparencia" data-platform-target="transparencia">
+                    <span class="lp-panel-shot__menu-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M12 4.8 5.1 7.9v4.7c0 3.3 2.7 6.1 6.9 6.9 4.2-.8 6.9-3.6 6.9-6.9V7.9L12 4.8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                        <path d="m9.4 11.9 1.8 1.8 3.4-3.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </span>
+                    <span>Transparência</span>
+                  </button>
+                  <button class="lp-panel-shot__menu-item" type="button" role="tab" aria-selected="false" aria-controls="platform-panel-arquitetura" data-platform-target="arquitetura">
+                    <span class="lp-panel-shot__menu-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M4.2 17.6h15.6M6.4 17.6V9.8m3.8 7.8V6.9m3.8 10.7v-4.2m3.8 4.2V8.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                        <path d="M6.4 9.8 10.2 6.9l3.8 2.3 3.8-0.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </span>
+                    <span>Arquitetura</span>
+                  </button>
+                </div>
+              </aside>
+
+              <div class="lp-panel-shot__content">
+                <div class="lp-platform-panels">
+                  <article class="lp-platform-panel is-active" id="platform-panel-integracao" role="tabpanel" data-platform-panel="integracao">
+                    <h4>Integração de Secretarias</h4>
+                    <p>Unifica educação, saúde e administração em uma operação municipal conectada.</p>
+                    <ul>
+                      <li>Cadastros compartilhados entre setores</li>
+                      <li>Fluxo único entre secretaria e unidade</li>
+                      <li>Histórico centralizado por protocolo</li>
+                    </ul>
+                  </article>
+
+                  <article class="lp-platform-panel" id="platform-panel-processos" role="tabpanel" data-platform-panel="processos" hidden>
+                    <h4>Processos Organizados</h4>
+                    <p>Fluxos padronizados, rastreáveis e com visão clara de execução por setor.</p>
+                    <ul>
+                      <li>Etapas com responsáveis e prazos</li>
+                      <li>Fila operacional por secretaria</li>
+                      <li>Controle de status e produtividade</li>
+                    </ul>
+                  </article>
+
+                  <article class="lp-platform-panel" id="platform-panel-transparencia" role="tabpanel" data-platform-panel="transparencia" hidden>
+                    <h4>Transparência e Controle</h4>
+                    <p>Publicações e dados com segurança, governança e acesso simplificado ao cidadão.</p>
+                    <ul>
+                      <li>Portal da transparência integrado</li>
+                      <li>Auditoria e trilha de ações</li>
+                      <li>Publicações oficiais com validação</li>
+                    </ul>
+                  </article>
+
+                  <article class="lp-platform-panel" id="platform-panel-arquitetura" role="tabpanel" data-platform-panel="arquitetura" hidden>
+                    <h4>Arquitetura Escalável</h4>
+                    <p>Estrutura confiável para crescer com o município e suportar novas demandas.</p>
+                    <ul>
+                      <li>Expansão por módulos conforme demanda</li>
+                      <li>Integrações com serviços externos</li>
+                      <li>Base segura para operação contínua</li>
+                    </ul>
+                  </article>
+                </div>
+              </div>
+            </div>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="lp-section lp-process" id="processo">
+      <div class="lp-wrap">
+        <header class="lp-section__header lp-section__header--center">
+          <p class="lp-kicker">Fluxo operacional</p>
+          <h2>Como funciona a plataforma</h2>
+          <p>Uma implementação guiada, simples e estruturada em três etapas.</p>
+        </header>
+
+        <div class="lp-onboarding" data-onboarding>
+          <header class="lp-onboarding__top">
+            <div class="lp-onboarding__dots" aria-hidden="true"><span></span><span></span><span></span></div>
+            <strong>Assistente de Implantação GEPUB</strong>
+            <span class="lp-onboarding__status">Onboarding guiado</span>
+          </header>
+
+          <div class="lp-onboarding__body">
+            <div class="lp-onboarding__steps" role="tablist" aria-label="Etapas do onboarding">
+              <button
+                class="lp-onboarding-step is-active"
+                type="button"
+                role="tab"
+                aria-selected="true"
+                aria-controls="onboarding-step-cadastro"
+                data-step-target="cadastro"
+              >
+                <span class="lp-onboarding-step__idx">1</span>
+                <span class="lp-onboarding-step__text">
+                  <strong>Cadastro da Prefeitura</strong><small>Dados iniciais</small>
+                </span>
+              </button>
+
+              <button
+                class="lp-onboarding-step"
+                type="button"
+                role="tab"
+                aria-selected="false"
+                aria-controls="onboarding-step-modulos"
+                data-step-target="modulos"
+              >
+                <span class="lp-onboarding-step__idx">2</span>
+                <span class="lp-onboarding-step__text">
+                  <strong>Configuração dos módulos</strong><small>Ativação por área</small>
+                </span>
+              </button>
+
+              <button
+                class="lp-onboarding-step"
+                type="button"
+                role="tab"
+                aria-selected="false"
+                aria-controls="onboarding-step-operacao"
+                data-step-target="operacao"
+              >
+                <span class="lp-onboarding-step__idx">3</span>
+                <span class="lp-onboarding-step__text">
+                  <strong>Operação pelas secretarias</strong><small>Finalização</small>
+                </span>
+              </button>
             </div>
 
-            <div class="ins-sim-table-wrap">
-              <table class="ins-sim-table">
-                <thead>
-                  <tr>
-                    <th>Item</th>
-                    <th>Quantidade</th>
-                    <th>Valor unitário</th>
-                    <th>Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for a in simulacao.adicionais %}
-                    <tr>
-                      <td>{{ a.nome }}</td>
-                      <td>{{ a.quantidade }}</td>
-                      <td>R$ {{ a.valor_unitario }}</td>
-                      <td>R$ {{ a.valor_total }}</td>
-                    </tr>
-                  {% empty %}
-                    <tr><td colspan="4">Sem adicionais para este cenário.</td></tr>
-                  {% endfor %}
-                </tbody>
-              </table>
+            <section class="lp-onboarding__content">
+                <div class="lp-onboarding-progress">
+                  <div class="lp-onboarding-progress__track">
+                    <span class="lp-onboarding-progress__fill" data-onboarding-progress-fill></span>
+                  </div>
+                  <span class="lp-onboarding-progress__label" data-onboarding-progress-label>Etapa 1 de 3</span>
+                </div>
+
+              <article
+                class="lp-onboarding-panel is-active"
+                id="onboarding-step-cadastro"
+                role="tabpanel"
+                data-onboarding-panel="cadastro"
+              >
+                <h3>Cadastro da Prefeitura</h3>
+                <p>Configuração inicial da estrutura institucional com dados-base e perfis de acesso.</p>
+                <div class="lp-onboarding-form">
+                  <label class="lp-onboarding-field">
+                    <span>Nome do município</span>
+                    <input type="text" value="Nova Esperança" placeholder="Digite o nome do município" data-onboarding-field="municipio">
+                  </label>
+                  <label class="lp-onboarding-field">
+                    <span>UF</span>
+                    <select data-onboarding-field="uf">
+                      <option>MA</option>
+                      <option>PA</option>
+                      <option>TO</option>
+                    </select>
+                  </label>
+                  <label class="lp-onboarding-field">
+                    <span>Secretarias iniciais</span>
+                    <input type="text" value="Educação, Saúde, Administração" data-onboarding-field="secretarias">
+                  </label>
+                  <label class="lp-onboarding-field">
+                    <span>Responsável pelo projeto</span>
+                    <input type="text" value="Gabinete do Prefeito" data-onboarding-field="responsavel">
+                  </label>
+                  <label class="lp-onboarding-field">
+                    <span>Telefone de contato</span>
+                    <input type="tel" value="(98) 99999-0000" placeholder="(00) 00000-0000" data-onboarding-field="telefone">
+                  </label>
+                  <label class="lp-onboarding-field">
+                    <span>E-mail de contato</span>
+                    <input type="email" value="implantacao@prefeitura.gov.br" placeholder="email@prefeitura.gov.br" data-onboarding-field="email">
+                  </label>
+                </div>
+                <div class="lp-onboarding-actions">
+                  <button class="lp-onboarding-nav lp-onboarding-nav--next" type="button" data-step-go="modulos">Continuar</button>
+                </div>
+              </article>
+
+              <article
+                class="lp-onboarding-panel"
+                id="onboarding-step-modulos"
+                role="tabpanel"
+                data-onboarding-panel="modulos"
+                hidden
+              >
+                <h3>Configuração dos módulos</h3>
+                <p>Ativação orientada dos módulos por secretaria, com parâmetros e regras de operação.</p>
+                <div class="lp-onboarding-store" aria-label="Loja de módulos">
+                  <label class="lp-store-app">
+                    <input type="checkbox" checked data-onboarding-module="Educação">
+                    <span class="lp-store-app__ui">
+                      <span class="lp-store-app__logo" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                          <path d="M4.5 7.4 12 4.5l7.5 2.9L12 10.3 4.5 7.4Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                          <path d="M6.4 9.1v5.6c0 1.3 2.4 2.5 5.6 2.5s5.6-1.2 5.6-2.5V9.1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                          <path d="M9.4 19.4h5.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                        </svg>
+                      </span>
+                      <span class="lp-store-app__meta">
+                        <strong>Educação</strong>
+                        <small>Diário • Matrículas • Indicadores</small>
+                      </span>
+                      <span class="lp-store-app__action">
+                        <span class="lp-store-app__install">Instalar</span>
+                        <span class="lp-store-app__installed">Instalado</span>
+                      </span>
+                    </span>
+                  </label>
+
+                  <label class="lp-store-app">
+                    <input type="checkbox" checked data-onboarding-module="Saúde">
+                    <span class="lp-store-app__ui">
+                      <span class="lp-store-app__logo" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                          <path d="M12 20s-6.2-3.9-6.2-8.9a3.8 3.8 0 0 1 6.2-2.9 3.8 3.8 0 0 1 6.2 2.9C18.2 16.1 12 20 12 20Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                          <path d="M12 9v4.8M9.6 11.4h4.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                        </svg>
+                      </span>
+                      <span class="lp-store-app__meta">
+                        <strong>Saúde</strong>
+                        <small>Regulação • Prontuário • Painéis</small>
+                      </span>
+                      <span class="lp-store-app__action">
+                        <span class="lp-store-app__install">Instalar</span>
+                        <span class="lp-store-app__installed">Instalado</span>
+                      </span>
+                    </span>
+                  </label>
+
+                  <label class="lp-store-app">
+                    <input type="checkbox" checked data-onboarding-module="Administração">
+                    <span class="lp-store-app__ui">
+                      <span class="lp-store-app__logo" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                          <rect x="4.8" y="5.2" width="14.4" height="13.6" rx="2.1" stroke="currentColor" stroke-width="1.7"/>
+                          <path d="M4.8 9.6h14.4M9.6 5.2v13.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                          <path d="M12.4 12.4h4.2M12.4 15.3h2.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                        </svg>
+                      </span>
+                      <span class="lp-store-app__meta">
+                        <strong>Administração</strong>
+                        <small>Processos • Contratos • Compras</small>
+                      </span>
+                      <span class="lp-store-app__action">
+                        <span class="lp-store-app__install">Instalar</span>
+                        <span class="lp-store-app__installed">Instalado</span>
+                      </span>
+                    </span>
+                  </label>
+
+                  <label class="lp-store-app">
+                    <input type="checkbox" data-onboarding-module="Portal do Cidadão">
+                    <span class="lp-store-app__ui">
+                      <span class="lp-store-app__logo" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                          <rect x="4.5" y="5.2" width="15" height="13.8" rx="2.3" stroke="currentColor" stroke-width="1.7"/>
+                          <path d="M8.2 10.1h7.6M8.2 13.7h5.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                          <path d="M16.1 17.1h2.6v-2.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </span>
+                      <span class="lp-store-app__meta">
+                        <strong>Portal do Cidadão</strong>
+                        <small>Serviços digitais e protocolos</small>
+                      </span>
+                      <span class="lp-store-app__action">
+                        <span class="lp-store-app__install">Instalar</span>
+                        <span class="lp-store-app__installed">Instalado</span>
+                      </span>
+                    </span>
+                  </label>
+                </div>
+                <div class="lp-onboarding-actions">
+                  <button class="lp-onboarding-nav" type="button" data-step-go="cadastro">Voltar</button>
+                  <button class="lp-onboarding-nav lp-onboarding-nav--next" type="button" data-step-go="operacao">Continuar</button>
+                </div>
+              </article>
+
+              <article
+                class="lp-onboarding-panel"
+                id="onboarding-step-operacao"
+                role="tabpanel"
+                data-onboarding-panel="operacao"
+                hidden
+              >
+                <h3>Operação pelas secretarias</h3>
+                <p>Definição da estratégia de entrada em produção com equipe, prioridade e próxima ação.</p>
+                <div class="lp-onboarding-form">
+                  <label class="lp-onboarding-field">
+                    <span>Modelo de implantação</span>
+                    <select data-onboarding-field="modelo_implantacao">
+                      <option>Implantação guiada pelo time GEPUB</option>
+                      <option>Implantação conjunta por secretaria</option>
+                      <option>Fase piloto e expansão gradual</option>
+                    </select>
+                  </label>
+                  <label class="lp-onboarding-field">
+                    <span>Prazo para iniciar</span>
+                    <select data-onboarding-field="prazo_inicio">
+                      <option>Imediato (até 15 dias)</option>
+                      <option>Curto prazo (até 30 dias)</option>
+                      <option>Planejado (até 60 dias)</option>
+                    </select>
+                  </label>
+                  <label class="lp-onboarding-field lp-onboarding-field--full">
+                    <span>Objetivo principal da implantação</span>
+                    <textarea rows="3" data-onboarding-field="objetivo_implantacao">Unificar secretarias em uma operação integrada com monitoramento executivo.</textarea>
+                  </label>
+                  <label class="lp-onboarding-field lp-onboarding-field--full">
+                    <span>Próxima ação desejada</span>
+                    <select data-onboarding-field="proxima_acao">
+                      <option>Agendar reunião com especialista</option>
+                      <option>Receber proposta técnica</option>
+                      <option>Solicitar diagnóstico inicial</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="lp-onboarding-actions">
+                  <button class="lp-onboarding-nav" type="button" data-step-go="modulos">Voltar</button>
+                  <a
+                    class="lp-btn lp-btn--dark lp-onboarding-contact"
+                    href="{{ cta_contato }}"
+                    data-onboarding-contact
+                    data-contact-base="{{ cta_contato }}"
+                  >Falar com especialista</a>
+                </div>
+              </article>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lp-section lp-carousel-section" id="educacao">
+      <div class="lp-wrap lp-section__header lp-section__header--center">
+        <p class="lp-kicker">Gestão educacional</p>
+        <h2>Uma plataforma moderna para escolas e secretaria</h2>
+        <p>Do cadastro ao indicador: tudo conectado em um fluxo contínuo.</p>
+      </div>
+
+      <div class="lp-carousel" aria-label="Carrossel automático de módulos">
+        <div class="lp-carousel__track">
+          <article class="lp-carousel-card lp-carousel-card--matriculas">
+            <div class="lp-carousel-art" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M4.5 7.4 12 4.5l7.5 2.9L12 10.3 4.5 7.4Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                <path d="M6.4 9.1v5.6c0 1.3 2.4 2.5 5.6 2.5s5.6-1.2 5.6-2.5V9.1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M9.4 19.4h5.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
             </div>
-          {% endif %}
+            <h3>Matrículas</h3>
+            <p>Cadastro, transferências e controle de vagas em fluxo único.</p>
+          </article>
+          <article class="lp-carousel-card lp-carousel-card--diario">
+            <div class="lp-carousel-art" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <rect x="4.5" y="4.8" width="15" height="14.4" rx="2.1" stroke="currentColor" stroke-width="1.7"/>
+                <path d="M8.2 3.8v2M15.8 3.8v2M7.5 10.1h9M7.5 13.5h6.2M7.5 16.9h4.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>Diário Digital</h3>
+            <p>Presença, conteúdo e registros pedagógicos em tempo real.</p>
+          </article>
+          <article class="lp-carousel-card lp-carousel-card--indicadores">
+            <div class="lp-carousel-art" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M4.8 18.2h14.4M7.2 18.2v-4.3m4.8 4.3V9.7m4.8 8.5V6.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                <path d="M7.2 13.9 12 9.7l4.8-3.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h3>Indicadores</h3>
+            <p>Painéis de desempenho com métricas por turma e período.</p>
+          </article>
+          <article class="lp-carousel-card lp-carousel-card--relatorios">
+            <div class="lp-carousel-art" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M7.2 5.2h6.8l2.8 2.8v10.6H7.2V5.2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                <path d="M14 5.2v2.8h2.8M9.5 11.1h5.1M9.5 14.1h5.1M9.5 17.1h3.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>Relatórios</h3>
+            <p>Relatórios exportáveis para gestão pedagógica e auditoria.</p>
+          </article>
+          <article class="lp-carousel-card lp-carousel-card--matriculas">
+            <div class="lp-carousel-art" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M4.5 7.4 12 4.5l7.5 2.9L12 10.3 4.5 7.4Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                <path d="M6.4 9.1v5.6c0 1.3 2.4 2.5 5.6 2.5s5.6-1.2 5.6-2.5V9.1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M9.4 19.4h5.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>Matrículas</h3>
+            <p>Cadastro, transferências e controle de vagas em fluxo único.</p>
+          </article>
+          <article class="lp-carousel-card lp-carousel-card--diario">
+            <div class="lp-carousel-art" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <rect x="4.5" y="4.8" width="15" height="14.4" rx="2.1" stroke="currentColor" stroke-width="1.7"/>
+                <path d="M8.2 3.8v2M15.8 3.8v2M7.5 10.1h9M7.5 13.5h6.2M7.5 16.9h4.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>Diário Digital</h3>
+            <p>Presença, conteúdo e registros pedagógicos em tempo real.</p>
+          </article>
+          <article class="lp-carousel-card lp-carousel-card--indicadores">
+            <div class="lp-carousel-art" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M4.8 18.2h14.4M7.2 18.2v-4.3m4.8 4.3V9.7m4.8 8.5V6.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                <path d="M7.2 13.9 12 9.7l4.8-3.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h3>Indicadores</h3>
+            <p>Painéis de desempenho com métricas por turma e período.</p>
+          </article>
+          <article class="lp-carousel-card lp-carousel-card--relatorios">
+            <div class="lp-carousel-art" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M7.2 5.2h6.8l2.8 2.8v10.6H7.2V5.2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                <path d="M14 5.2v2.8h2.8M9.5 11.1h5.1M9.5 14.1h5.1M9.5 17.1h3.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>Relatórios</h3>
+            <p>Relatórios exportáveis para gestão pedagógica e auditoria.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="lp-section lp-features" id="funcionalidades">
+      <div class="lp-wrap">
+        <header class="lp-section__header lp-section__header--center">
+          <p class="lp-kicker">Funcionalidades</p>
+          <h2>Funcionalidades que fazem diferença</h2>
+          <p>Recursos essenciais para gestão pública municipal com eficiência e transparência.</p>
+        </header>
+
+        <div class="lp-terminal" data-terminal-project>
+          <header class="lp-terminal__top">
+            <div class="lp-terminal__dots" aria-hidden="true"><span></span><span></span><span></span></div>
+            <strong>gepub-municipal-suite</strong>
+            <span class="lp-terminal__status">Projeto ativo</span>
+          </header>
+          <div class="lp-terminal__body">
+            <aside class="lp-terminal__folders" aria-label="Pastas de funcionalidades">
+              <button class="lp-folder is-active" type="button" data-terminal-file="documentos">
+                <span class="lp-folder__glyph" aria-hidden="true"></span>
+                <span class="lp-folder__text"><strong>Documentos digitais</strong><small>documentos.md</small></span>
+              </button>
+              <button class="lp-folder" type="button" data-terminal-file="equipes">
+                <span class="lp-folder__glyph" aria-hidden="true"></span>
+                <span class="lp-folder__text"><strong>Gestão de equipes</strong><small>equipes.md</small></span>
+              </button>
+              <button class="lp-folder" type="button" data-terminal-file="indicadores">
+                <span class="lp-folder__glyph" aria-hidden="true"></span>
+                <span class="lp-folder__text"><strong>Painéis de indicadores</strong><small>indicadores.md</small></span>
+              </button>
+              <button class="lp-folder" type="button" data-terminal-file="seguranca">
+                <span class="lp-folder__glyph" aria-hidden="true"></span>
+                <span class="lp-folder__text"><strong>Segurança e auditoria</strong><small>seguranca.md</small></span>
+              </button>
+              <button class="lp-folder" type="button" data-terminal-file="integracoes">
+                <span class="lp-folder__glyph" aria-hidden="true"></span>
+                <span class="lp-folder__text"><strong>Integrações</strong><small>integracoes.md</small></span>
+              </button>
+              <button class="lp-folder" type="button" data-terminal-file="fluxos">
+                <span class="lp-folder__glyph" aria-hidden="true"></span>
+                <span class="lp-folder__text"><strong>Fluxos municipais</strong><small>fluxos.md</small></span>
+              </button>
+            </aside>
+
+            <section class="lp-terminal__screen" aria-live="polite">
+              <pre class="lp-terminal__output" data-terminal-output></pre>
+              <span class="lp-terminal__cursor" data-terminal-cursor aria-hidden="true"></span>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lp-section lp-final-cta" id="contato">
+      <div class="lp-wrap lp-final-cta__inner">
+        <h2>Transforme a gestão do seu município</h2>
+        <p>Organize secretarias, dados e processos em um só sistema.</p>
+        <div class="lp-final-cta__actions">
+          <a class="lp-btn lp-btn--dark" href="{{ cta_contato }}">Solicitar demonstração</a>
+          <a class="lp-btn lp-btn--light-gray" href="{{ cta_login }}">Falar com especialista</a>
+        </div>
+      </div>
+
+      <div class="lp-wrap">
+        <div class="lp-contact-panel" aria-label="Bloco de contato">
+          <article class="lp-contact-panel__intro">
+            <p class="lp-kicker">Contato</p>
+            <h3>Fale com o time GEPUB</h3>
+            <p>Atendimento consultivo para apresentar módulos, fluxo de implantação e próximos passos para sua prefeitura.</p>
+          </article>
+
+          <div class="lp-contact-panel__list">
+            <a class="lp-contact-link" href="{{ cta_contato }}">
+              <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>
+              <span>
+                <strong>Agendar demonstração</strong>
+                <small>Apresentação guiada com foco na sua realidade municipal.</small>
+              </span>
+              <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+            </a>
+
+            <a class="lp-contact-link" href="{{ cta_login }}">
+              <i class="fa-solid fa-comments" aria-hidden="true"></i>
+              <span>
+                <strong>Falar com especialista</strong>
+                <small>Tire dúvidas sobre operação, perfis e acesso ao sistema.</small>
+              </span>
+              <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+            </a>
+
+            <a class="lp-contact-link" href="{{ cta_transparencia }}">
+              <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+              <span>
+                <strong>Portal de transparência</strong>
+                <small>Acompanhe informações públicas e governança digital.</small>
+              </span>
+              <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+            </a>
+          </div>
         </div>
       </div>
     </section>
   </main>
 
-  <footer class="ins-footer">
-    <div class="ins-wrap ins-footer__inner">
-      <a class="ins-brand" href="#topo">
-        <span class="ins-brand__mark">
-          {% if content.marca_logo_url %}
-            <img src="{{ content.marca_logo_url }}" alt="{{ content.marca_nome|default:'GEPUB' }}" class="ins-brand__logo">
-          {% else %}
-            <i class="fa-solid fa-building-columns"></i>
-          {% endif %}
-        </span>
-        <span>
-          <strong>{{ content.marca_nome|default:'GEPUB' }}</strong>
-          <small>Gestão Estratégica Pública</small>
-        </span>
-      </a>
-
-      <nav>
-        <a href="#topo">Início</a>
-        <a href="#modulos">Módulos</a>
-        <a href="#planos">Planos</a>
+  <footer class="lp-footer">
+    <div class="lp-wrap lp-footer__grid">
+      <article>
+        <h3>Gepub.com.br</h3>
+        <p>Soluções inteligentes para gestão pública digital.</p>
+        <div class="lp-footer__social">
+          <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+          <a href="#" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
+        </div>
+      </article>
+      <article>
+        <h4>Recursos</h4>
+        <a href="#modulos">Módulos principais</a>
+        <a href="#funcionalidades">Funcionalidades</a>
+        <a href="#tecnologia">Tecnologia</a>
+        <a href="{% url 'core:blog_public' %}">Blog</a>
+        <a href="{% url 'core:documentacao_public' %}">Documentação</a>
+        <a href="{% url 'core:validar_documento_public' %}">Validação de Documento</a>
+      </article>
+      <article>
+        <h4>Políticas</h4>
+        <a href="#inicio">Início</a>
+        <a href="{% url 'core:politica_privacidade_public' %}">Política de Privacidade</a>
+        <a href="{% url 'core:politica_cookies_public' %}">Política de Cookies</a>
+        <a href="{% url 'core:termos_servico_public' %}">Termos de Serviço</a>
+      </article>
+      <article>
+        <h4>Suporte</h4>
+        <a href="{{ cta_contato }}">Solicitar demonstração</a>
+        <a href="{{ cta_login }}">Acesso ao sistema</a>
         <a href="{{ cta_transparencia }}">Transparência</a>
-        <a href="{{ cta_login }}">Sistema Interno</a>
-      </nav>
-
-      <p>{{ content.rodape_texto|default:'© GEPUB • Gestão Estratégica Pública. Todos os direitos reservados.' }}</p>
+      </article>
+    </div>
+    <div class="lp-wrap lp-footer__copy">
+      <p>© {% now "Y" %} {{ content.marca_nome|default:'GEPUB' }}. Todos os direitos reservados.</p>
     </div>
   </footer>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (() => {
+    const tabs = Array.from(document.querySelectorAll('.lp-theme-tab'));
+    const panels = Array.from(document.querySelectorAll('.lp-theme-panel'));
+    const accordionGroups = Array.from(document.querySelectorAll('[data-accordion]'));
+    const roleApps = Array.from(document.querySelectorAll('.lp-role-app'));
+    const roleScreens = Array.from(document.querySelectorAll('.lp-role-screen'));
+    const roleNavLinks = Array.from(document.querySelectorAll('.lp-role-ui__nav a[data-role-subscreen-target]'));
+    const roleDock = document.querySelector('.lp-role-dock');
+    const heroTitle = document.getElementById('hero-title');
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const cleanTitleText = (value) => value.replace(/\s+/g, ' ').trim();
+
+    const lockTitleHeight = (el) => {
+      const height = el.getBoundingClientRect().height;
+      if (height > 0) {
+        el.style.minHeight = `${Math.ceil(height)}px`;
+      }
+    };
+
+    const typeTitle = (el, text, speed) => new Promise((resolve) => {
+      if (!el) {
+        resolve();
+        return;
+      }
+
+      const finalText = cleanTitleText(text);
+      if (!finalText) {
+        el.textContent = '';
+        el.classList.remove('is-typing');
+        el.style.minHeight = '';
+        resolve();
+        return;
+      }
+
+      let idx = 0;
+      el.classList.add('lp-typed-title', 'is-typing');
+
+      const step = () => {
+        idx += 1;
+        el.textContent = finalText.slice(0, idx);
+
+        if (idx >= finalText.length) {
+          el.classList.remove('is-typing');
+          el.classList.add('is-typed');
+          el.style.minHeight = '';
+          resolve();
+          return;
+        }
+
+        const lastChar = finalText.charAt(idx - 1);
+        const pause = /[,.!?;:]/.test(lastChar) ? speed * 5 : /\s/.test(lastChar) ? speed * 0.72 : speed;
+        window.setTimeout(step, pause);
+      };
+
+      window.setTimeout(step, 120);
+    });
+
+    if (heroTitle) {
+      const heroText = cleanTitleText(heroTitle.textContent || '');
+      if (prefersReducedMotion) {
+        heroTitle.textContent = heroText;
+      } else {
+        lockTitleHeight(heroTitle);
+        heroTitle.textContent = '';
+        typeTitle(heroTitle, heroText, 86);
+      }
+    }
+
+    const activateTheme = (targetId) => {
+      tabs.forEach((tab) => {
+        const active = tab.dataset.target === targetId;
+        tab.classList.toggle('is-active', active);
+        tab.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+
+      panels.forEach((panel) => {
+        const active = panel.id === targetId;
+        panel.classList.toggle('is-active', active);
+        panel.hidden = !active;
+      });
+    };
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => activateTheme(tab.dataset.target));
+      tab.addEventListener('keydown', (event) => {
+        if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+        event.preventDefault();
+        const idx = tabs.indexOf(tab);
+        const next = event.key === 'ArrowDown'
+          ? tabs[(idx + 1) % tabs.length]
+          : tabs[(idx - 1 + tabs.length) % tabs.length];
+        next.focus();
+        activateTheme(next.dataset.target);
+      });
+    });
+
+    const setAccordionState = (item, open) => {
+      const trigger = item.querySelector('.lp-accordion__trigger');
+      const content = item.querySelector('.lp-accordion__content');
+      item.classList.toggle('is-open', open);
+      if (trigger) trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (content) content.hidden = !open;
+    };
+
+    accordionGroups.forEach((group) => {
+      const items = Array.from(group.querySelectorAll('.lp-accordion__item'));
+      if (!items.length) return;
+
+      const initiallyOpen = items.find((item) => item.classList.contains('is-open')) || items[0];
+      items.forEach((item) => setAccordionState(item, item === initiallyOpen));
+
+      items.forEach((item) => {
+        const trigger = item.querySelector('.lp-accordion__trigger');
+        if (!trigger) return;
+        trigger.addEventListener('click', () => {
+          if (item.classList.contains('is-open')) return;
+          items.forEach((peer) => setAccordionState(peer, peer === item));
+        });
+      });
+    });
+
+    const activateRole = (target) => {
+      roleApps.forEach((app) => {
+        const active = app.dataset.roleTarget === target;
+        app.classList.toggle('is-active', active);
+        app.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+
+      roleScreens.forEach((screen) => {
+        const active = screen.dataset.roleScreen === target;
+        screen.classList.toggle('is-active', active);
+        screen.hidden = !active;
+        if (!active) return;
+        const currentNav = screen.querySelector('.lp-role-ui__nav a.is-active[data-role-subscreen-target]')
+          || screen.querySelector('.lp-role-ui__nav a[data-role-subscreen-target]');
+        if (currentNav) activateRoleSubscreen(screen, currentNav.dataset.roleSubscreenTarget);
+      });
+    };
+
+    const activateRoleSubscreen = (screen, target) => {
+      if (!screen || !target) return;
+      const links = Array.from(screen.querySelectorAll('.lp-role-ui__nav a[data-role-subscreen-target]'));
+      const panels = Array.from(screen.querySelectorAll('.lp-role-subscreen'));
+
+      links.forEach((link) => {
+        const active = link.dataset.roleSubscreenTarget === target;
+        link.classList.toggle('is-active', active);
+      });
+
+      panels.forEach((panel) => {
+        const active = panel.dataset.roleSubscreen === target;
+        panel.classList.toggle('is-active', active);
+        panel.hidden = !active;
+      });
+    };
+
+    if (roleApps.length && roleScreens.length) {
+      roleApps.forEach((app) => {
+        app.addEventListener('click', () => activateRole(app.dataset.roleTarget));
+        app.addEventListener('keydown', (event) => {
+          if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+          event.preventDefault();
+          const idx = roleApps.indexOf(app);
+          const next = event.key === 'ArrowRight'
+            ? roleApps[(idx + 1) % roleApps.length]
+            : roleApps[(idx - 1 + roleApps.length) % roleApps.length];
+          next.focus();
+          activateRole(next.dataset.roleTarget);
+        });
+      });
+    }
+
+    const resetDockMagnification = () => {
+      roleApps.forEach((app) => app.style.setProperty('--dock-power', '0'));
+      if (roleDock) roleDock.style.setProperty('--dock-focus', '0');
+    };
+
+    const updateDockMagnification = (clientX) => {
+      const radius = 190;
+      let maxPower = 0;
+      roleApps.forEach((app) => {
+        const icon = app.querySelector('.lp-role-app__icon');
+        if (!icon) return;
+        const rect = icon.getBoundingClientRect();
+        const centerX = rect.left + (rect.width / 2);
+        const distance = Math.abs(clientX - centerX);
+        const rawPower = Math.max(0, 1 - (distance / radius));
+        const power = Math.pow(rawPower, 1.12);
+        maxPower = Math.max(maxPower, power);
+        app.style.setProperty('--dock-power', power.toFixed(3));
+      });
+      if (roleDock) roleDock.style.setProperty('--dock-focus', maxPower.toFixed(3));
+    };
+
+    if (roleDock && roleApps.length) {
+      roleDock.addEventListener('mousemove', (event) => updateDockMagnification(event.clientX));
+      roleDock.addEventListener('mouseleave', resetDockMagnification);
+      roleDock.addEventListener('touchstart', resetDockMagnification, { passive: true });
+    }
+
+    roleNavLinks.forEach((link) => {
+      link.addEventListener('click', (event) => {
+        event.preventDefault();
+        const screen = link.closest('.lp-role-screen');
+        activateRoleSubscreen(screen, link.dataset.roleSubscreenTarget);
+      });
+    });
+
+    const platformRoot = document.querySelector('[data-platform-root]');
+    const platformMenuItems = Array.from(document.querySelectorAll('.lp-panel-shot__menu-item[data-platform-target]'));
+    const platformPanels = Array.from(document.querySelectorAll('.lp-platform-panel[data-platform-panel]'));
+
+    const activatePlatformPanel = (target) => {
+      if (!target) return;
+
+      platformMenuItems.forEach((item) => {
+        const active = item.dataset.platformTarget === target;
+        item.classList.toggle('is-active', active);
+        item.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+
+      platformPanels.forEach((panel) => {
+        const active = panel.dataset.platformPanel === target;
+        panel.classList.toggle('is-active', active);
+        panel.hidden = !active;
+      });
+    };
+
+    if (platformRoot && platformMenuItems.length && platformPanels.length) {
+      platformMenuItems.forEach((item) => {
+        item.addEventListener('click', () => activatePlatformPanel(item.dataset.platformTarget));
+        item.addEventListener('keydown', (event) => {
+          if (!['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft'].includes(event.key)) return;
+          event.preventDefault();
+          const idx = platformMenuItems.indexOf(item);
+          const next = (event.key === 'ArrowDown' || event.key === 'ArrowRight')
+            ? platformMenuItems[(idx + 1) % platformMenuItems.length]
+            : platformMenuItems[(idx - 1 + platformMenuItems.length) % platformMenuItems.length];
+          next.focus();
+          activatePlatformPanel(next.dataset.platformTarget);
+        });
+      });
+
+      const activeItem = platformMenuItems.find((item) => item.classList.contains('is-active')) || platformMenuItems[0];
+      activatePlatformPanel(activeItem.dataset.platformTarget);
+    }
+
+    const onboardingRoot = document.querySelector('[data-onboarding]');
+    const onboardingSteps = Array.from(document.querySelectorAll('.lp-onboarding-step[data-step-target]'));
+    const onboardingGoButtons = Array.from(document.querySelectorAll('[data-step-go]'));
+    const onboardingPanels = Array.from(document.querySelectorAll('.lp-onboarding-panel[data-onboarding-panel]'));
+    const onboardingProgressFill = document.querySelector('[data-onboarding-progress-fill]');
+    const onboardingProgressLabel = document.querySelector('[data-onboarding-progress-label]');
+    const onboardingContactButtons = Array.from(document.querySelectorAll('[data-onboarding-contact]'));
+    const onboardingModuleChecks = Array.from(document.querySelectorAll('[data-onboarding-module]'));
+
+    const getOnboardingFieldValue = (key) => {
+      const field = document.querySelector(`[data-onboarding-field="${key}"]`);
+      if (!field) return "";
+      return (field.value || "").toString().trim();
+    };
+
+    const collectOnboardingData = () => {
+      const selectedModules = onboardingModuleChecks
+        .filter((check) => check.checked)
+        .map((check) => (check.dataset.onboardingModule || "").trim())
+        .filter(Boolean);
+
+      return {
+        municipio: getOnboardingFieldValue("municipio"),
+        uf: getOnboardingFieldValue("uf"),
+        secretarias: getOnboardingFieldValue("secretarias"),
+        responsavel: getOnboardingFieldValue("responsavel"),
+        telefone: getOnboardingFieldValue("telefone"),
+        email: getOnboardingFieldValue("email"),
+        modulos: selectedModules.join(", "),
+        modeloImplantacao: getOnboardingFieldValue("modelo_implantacao"),
+        prazoInicio: getOnboardingFieldValue("prazo_inicio"),
+        objetivoImplantacao: getOnboardingFieldValue("objetivo_implantacao"),
+        proximaAcao: getOnboardingFieldValue("proxima_acao"),
+      };
+    };
+
+    const buildOnboardingContactMessage = () => {
+      const data = collectOnboardingData();
+      return [
+        "Olá! Quero atendimento sobre implantação do GEPUB.",
+        "",
+        "Resumo do onboarding:",
+        `• Município: ${data.municipio || "-"}`,
+        `• UF: ${data.uf || "-"}`,
+        `• Secretarias: ${data.secretarias || "-"}`,
+        `• Responsável: ${data.responsavel || "-"}`,
+        `• Telefone: ${data.telefone || "-"}`,
+        `• E-mail: ${data.email || "-"}`,
+        `• Módulos selecionados: ${data.modulos || "-"}`,
+        `• Modelo de implantação: ${data.modeloImplantacao || "-"}`,
+        `• Prazo para iniciar: ${data.prazoInicio || "-"}`,
+        `• Objetivo principal: ${data.objetivoImplantacao || "-"}`,
+        `• Próxima ação: ${data.proximaAcao || "-"}`,
+      ].join("\n");
+    };
+
+    const buildOnboardingContactUrl = (rawBaseUrl, message) => {
+      const baseUrl = (rawBaseUrl || "").trim();
+      const fallbackUrl = new URL("https://api.whatsapp.com/send");
+      fallbackUrl.searchParams.set("text", message);
+
+      if (!baseUrl || baseUrl === "#contato" || baseUrl === "#simulador") {
+        return fallbackUrl.toString();
+      }
+
+      try {
+        const url = new URL(baseUrl, window.location.origin);
+        const host = url.hostname.toLowerCase();
+        const isWhatsapp = host.includes("wa.me") || host.includes("whatsapp.com");
+
+        if (isWhatsapp) {
+          url.searchParams.set("text", message);
+          return url.toString();
+        }
+
+        if (url.origin === window.location.origin && url.hash === "#contato") {
+          return fallbackUrl.toString();
+        }
+
+        url.searchParams.set("onboarding_data", message);
+        return url.toString();
+      } catch (error) {
+        return fallbackUrl.toString();
+      }
+    };
+
+    const activateOnboardingStep = (target) => {
+      if (!target) return;
+      const stepIndex = onboardingSteps.findIndex((step) => step.dataset.stepTarget === target);
+      if (stepIndex === -1) return;
+
+      onboardingSteps.forEach((step) => {
+        const active = step.dataset.stepTarget === target;
+        step.classList.toggle('is-active', active);
+        step.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+
+      onboardingPanels.forEach((panel) => {
+        const active = panel.dataset.onboardingPanel === target;
+        panel.classList.toggle('is-active', active);
+        panel.hidden = !active;
+      });
+
+      const progress = ((stepIndex + 1) / onboardingSteps.length) * 100;
+      if (onboardingProgressFill) onboardingProgressFill.style.width = `${progress}%`;
+      if (onboardingProgressLabel) onboardingProgressLabel.textContent = `Etapa ${stepIndex + 1} de ${onboardingSteps.length}`;
+    };
+
+    if (onboardingRoot && onboardingSteps.length && onboardingPanels.length) {
+      onboardingSteps.forEach((step) => {
+        step.addEventListener('click', () => activateOnboardingStep(step.dataset.stepTarget));
+        step.addEventListener('keydown', (event) => {
+          if (!['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft'].includes(event.key)) return;
+          event.preventDefault();
+          const idx = onboardingSteps.indexOf(step);
+          const next = (event.key === 'ArrowDown' || event.key === 'ArrowRight')
+            ? onboardingSteps[(idx + 1) % onboardingSteps.length]
+            : onboardingSteps[(idx - 1 + onboardingSteps.length) % onboardingSteps.length];
+          next.focus();
+          activateOnboardingStep(next.dataset.stepTarget);
+        });
+      });
+
+      onboardingGoButtons.forEach((button) => {
+        button.addEventListener('click', () => activateOnboardingStep(button.dataset.stepGo));
+      });
+
+      onboardingContactButtons.forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          const message = buildOnboardingContactMessage();
+          const baseUrl = button.dataset.contactBase || button.getAttribute("href") || "";
+          const destination = buildOnboardingContactUrl(baseUrl, message);
+          window.location.href = destination;
+        });
+      });
+
+      const activeStep = onboardingSteps.find((step) => step.classList.contains('is-active')) || onboardingSteps[0];
+      activateOnboardingStep(activeStep.dataset.stepTarget);
+    }
+
+    const terminalRoot = document.querySelector('[data-terminal-project]');
+    const terminalFolders = Array.from(document.querySelectorAll('.lp-folder[data-terminal-file]'));
+    const terminalOutput = document.querySelector('[data-terminal-output]');
+    const terminalCursor = document.querySelector('[data-terminal-cursor]');
+    const terminalScripts = {
+      documentos: [
+        '$ cd funcionalidades/documentos-digitais',
+        '$ open wireframe/documentos',
+        '',
+        '+-------------------------------------------------------------------+',
+        '| GEPUB :: Documentos Digitais                 [Buscar documento]   |',
+        '+-------------------------------------------------------------------+',
+        '| Filtros: [Tipo v] [Secretaria v] [Periodo v] [Status v]          |',
+        '|-------------------------------------------------------------------|',
+        '| #  Titulo                      Tipo         Status      Emissao   |',
+        '| 1  Contrato 014-2026           Contrato     Assinado    12/03     |',
+        '| 2  Portaria 112                Portaria     Publicado   11/03     |',
+        '| 3  Memorando 089               Memorando    Em analise  11/03     |',
+        '|-------------------------------------------------------------------|',
+        '| Acoes rapidas: [Emitir] [Assinar] [Validar] [Exportar PDF]       |',
+        '+-------------------------------------------------------------------+',
+        '| Info: Registro e controle completo de documentos oficiais.        |',
+        '+-------------------------------------------------------------------+',
+      ],
+      equipes: [
+        '$ cd funcionalidades/gestao-de-equipes',
+        '$ open wireframe/equipes',
+        '',
+        '+-------------------------------------------------------------------+',
+        '| GEPUB :: Gestao de Equipes                      [Novo usuario]    |',
+        '+-------------------------------------------------------------------+',
+        '| Perfis por secretaria                                             |',
+        '|-------------------------------------------------------------------|',
+        '| Educacao      -> 58 usuarios  (Admin, Gestor, Coordenador)       |',
+        '| Saude         -> 42 usuarios  (Admin, Regulacao, Atendimento)    |',
+        '| Administracao -> 27 usuarios  (Compras, Contratos, Financeiro)   |',
+        '|-------------------------------------------------------------------|',
+        '| Permissoes: RBAC | Acesso por funcao | Trilhas de aprovacao      |',
+        '| Acoes: [Criar perfil] [Vincular usuario] [Revisar acessos]       |',
+        '+-------------------------------------------------------------------+',
+        '| Info: Perfis e acessos organizados por secretaria e funcao.       |',
+        '+-------------------------------------------------------------------+',
+      ],
+      indicadores: [
+        '$ cd funcionalidades/paineis-de-indicadores',
+        '$ open wireframe/indicadores',
+        '',
+        '+-------------------------------------------------------------------+',
+        '| GEPUB :: Painel Executivo                        [Periodo: Mar]   |',
+        '+-------------------------------------------------------------------+',
+        '| KPIs                                                            ^ |',
+        '| [Atendimentos: 12.430] [Matriculas: 4.286] [Processos: 1.102]   |',
+        '| [Execucao Orc: 78%] [SLA Medio: 2.4d] [Satisfacao: 92%]         |',
+        '|-------------------------------------------------------------------|',
+        '| Graficos:                                                        |',
+        '| - Evolucao mensal por secretaria                                |',
+        '| - Comparativo de metas x realizado                              |',
+        '| - Alertas de queda de desempenho                                |',
+        '|-------------------------------------------------------------------|',
+        '| Acoes: [Ver dashboard] [Exportar CSV] [Gerar relatorio]         |',
+        '+-------------------------------------------------------------------+',
+        '| Info: Visao executiva para monitorar resultados em tempo real.   |',
+        '+-------------------------------------------------------------------+',
+      ],
+      seguranca: [
+        '$ cd funcionalidades/seguranca-e-auditoria',
+        '$ open wireframe/seguranca',
+        '',
+        '+-------------------------------------------------------------------+',
+        '| GEPUB :: Seguranca e Auditoria                  [Nivel: Alto]    |',
+        '+-------------------------------------------------------------------+',
+        '| Trilhas de log                                                   |',
+        '|-------------------------------------------------------------------|',
+        '| 12:44  user.maria    EDITOU   Contrato 014-2026                 |',
+        '| 12:42  user.carlos   APROVOU  Portaria 112                      |',
+        '| 12:40  user.ana      EXPORTOU Relatorio Financeiro              |',
+        '|-------------------------------------------------------------------|',
+        '| Governanca: MFA ativo | Sessoes monitoradas | Alertas em tempo real |',
+        '| Acoes: [Ver trilha completa] [Bloquear acesso] [Gerar evidencia] |',
+        '+-------------------------------------------------------------------+',
+        '| Info: Rastreabilidade de acoes e governanca por trilhas de log.  |',
+        '+-------------------------------------------------------------------+',
+      ],
+      integracoes: [
+        '$ cd funcionalidades/integracoes',
+        '$ open wireframe/integracoes',
+        '',
+        '+-------------------------------------------------------------------+',
+        '| GEPUB :: Integracoes                              [Sync: Online]  |',
+        '+-------------------------------------------------------------------+',
+        '| Conectores                                                         |',
+        '|-------------------------------------------------------------------|',
+        '| Receita Federal API          -> OK      Ultima sync: 11:55       |',
+        '| SIOPE / Educacao             -> OK      Ultima sync: 11:42       |',
+        '| CNES / Saude                 -> OK      Ultima sync: 11:39       |',
+        '| Portal da Transparencia      -> Warning Latencia alta            |',
+        '|-------------------------------------------------------------------|',
+        '| Filas: 23 eventos pendentes | Reprocesso automatico: ativo       |',
+        '| Acoes: [Sincronizar agora] [Ver logs] [Configurar webhook]       |',
+        '+-------------------------------------------------------------------+',
+        '| Info: Conectividade com sistemas estaduais e federais.           |',
+        '+-------------------------------------------------------------------+',
+      ],
+      fluxos: [
+        '$ cd funcionalidades/fluxos-municipais',
+        '$ open wireframe/fluxos',
+        '',
+        '+-------------------------------------------------------------------+',
+        '| GEPUB :: Fluxos Municipais                       [Modelo: Base]   |',
+        '+-------------------------------------------------------------------+',
+        '| Processo: Compra de material escolar                              |',
+        '|-------------------------------------------------------------------|',
+        '| 1. Solicitacao da unidade        [Concluido]                      |',
+        '| 2. Analise da secretaria          [Concluido]                      |',
+        '| 3. Cotacao / mapa de preco        [Em execucao]                    |',
+        '| 4. Empenho e contrato             [Pendente]                       |',
+        '| 5. Recebimento e conferencia      [Pendente]                       |',
+        '|-------------------------------------------------------------------|',
+        '| SLA medio: 4.2 dias | gargalo atual: etapa de cotacao            |',
+        '| Acoes: [Abrir processo] [Atribuir responsavel] [Ver historico]   |',
+        '+-------------------------------------------------------------------+',
+        '| Info: Processos modelados para a realidade publica municipal.     |',
+        '+-------------------------------------------------------------------+',
+      ],
+    };
+
+    let terminalTypeToken = 0;
+
+    const renderTerminalOutput = (key) => {
+      if (!terminalOutput) return;
+      const lines = terminalScripts[key] || [];
+      const text = lines.join('\n');
+      const currentToken = ++terminalTypeToken;
+
+      terminalFolders.forEach((folder) => {
+        folder.classList.toggle('is-active', folder.dataset.terminalFile === key);
+      });
+
+      if (prefersReducedMotion) {
+        terminalOutput.textContent = text;
+        return;
+      }
+
+      terminalOutput.textContent = '';
+      let index = 0;
+
+      const typeStep = () => {
+        if (currentToken !== terminalTypeToken) return;
+        index += 1;
+        terminalOutput.textContent = text.slice(0, index);
+        if (index >= text.length) return;
+
+        const currentChar = text.charAt(index - 1);
+        const pause = currentChar === '\n' ? 170 : currentChar === ' ' ? 24 : 16;
+        window.setTimeout(typeStep, pause);
+      };
+
+      window.setTimeout(typeStep, 120);
+    };
+
+    if (terminalRoot && terminalFolders.length && terminalOutput) {
+      terminalFolders.forEach((folder) => {
+        folder.addEventListener('click', () => renderTerminalOutput(folder.dataset.terminalFile));
+        folder.addEventListener('keydown', (event) => {
+          if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+          event.preventDefault();
+          const idx = terminalFolders.indexOf(folder);
+          const next = event.key === 'ArrowDown'
+            ? terminalFolders[(idx + 1) % terminalFolders.length]
+            : terminalFolders[(idx - 1 + terminalFolders.length) % terminalFolders.length];
+          next.focus();
+          renderTerminalOutput(next.dataset.terminalFile);
+        });
+      });
+
+      const firstActive = terminalFolders.find((folder) => folder.classList.contains('is-active')) || terminalFolders[0];
+      renderTerminalOutput(firstActive.dataset.terminalFile);
+      if (terminalCursor) terminalCursor.hidden = false;
+    }
+  })();
+</script>
 {% endblock %}
