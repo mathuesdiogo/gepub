@@ -1345,7 +1345,7 @@ def informatica_turma_detail(request, pk: int):
         turma.matriculas.select_related("aluno", "escola_origem")
         .order_by("-status", "aluno__nome")
     )
-    aulas = turma.aulas.order_by("-data_aula", "-id")[:10]
+    aulas = turma.aulas.filter(data_aula__lte=timezone.localdate()).order_by("-data_aula", "-id")[:10]
     lista_espera = (
         InformaticaListaEspera.objects.filter(curso_id=turma.curso_id, status=InformaticaListaEspera.Status.ATIVA)
         .select_related("aluno", "escola_origem")
