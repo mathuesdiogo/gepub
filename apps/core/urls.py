@@ -145,6 +145,7 @@ urlpatterns = [
     path("sistema/design-system/componentes/", views.design_system_components, name="design_system_components"),
     path("sistema/design-system/temas/", views.design_system_themes, name="design_system_themes"),
     path("sistema/design-system/tokens.json", views.design_system_tokens_api, name="design_system_tokens_api"),
+    path("sistema/frontend-lab/", views.frontend_lab, name="frontend_lab"),
     path("sistema/exclusoes/", views.sistema_exclusoes, name="sistema_exclusoes"),
     path(
         "sistema/exclusoes/<str:entity_type>/<int:pk>/",

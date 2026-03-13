@@ -18,6 +18,39 @@ python manage.py migrate
 python manage.py runserver
 ```
 
+## Frontend (React + Vite)
+
+```bash
+# se o node nao estiver no PATH do sistema
+export PATH="$HOME/.local/node/bin:$PATH"
+
+cd frontend
+npm install
+npm run build
+```
+
+## Docker (stack completa)
+
+Serviços incluídos no `docker-compose.yml`:
+- `web` (Django ASGI com Daphne)
+- `worker` (Celery worker)
+- `beat` (Celery beat)
+- `db` (PostgreSQL)
+- `redis` (cache/broker/channels)
+- `meilisearch` (busca)
+
+Passos:
+
+```bash
+cp .env.docker.example .env.docker
+docker compose up --build -d
+docker compose logs -f web
+```
+
+Endpoints:
+- App: `http://127.0.0.1:8000`
+- Frontend Lab: `http://127.0.0.1:8000/sistema/frontend-lab/`
+
 ## UI Core
 
 - Layout base: `templates/core/base.html`

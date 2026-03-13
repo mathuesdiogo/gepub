@@ -1,0 +1,109 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-gepub}
+      POSTGRES_USER: ${POSTGRES_USER:-gepub}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gepub123}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gepub} -d ${POSTGRES_DB:-gepub}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - redis_data:/data
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.12
+    environment:
+      MEILI_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-troque-esta-chave-meili}
+      MEILI_NO_ANALYTICS: "true"
+      MEILI_ENV: "production"
+    volumes:
+      - meili_data:/meili_data
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env.docker
+    environment:
+      PORT: 8000
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      WAIT_FOR_REDIS: 1
+      COLLECTSTATIC_ON_START: 1
+    command: ["web"]
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      meilisearch:
+        condition: service_started
+    ports:
+      - "8000:8000"
+    volumes:
+      - media_data:/app/media
+      - staticfiles_data:/app/staticfiles
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env.docker
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      WAIT_FOR_REDIS: 1
+    command: ["worker"]
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      meilisearch:
+        condition: service_started
+    volumes:
+      - media_data:/app/media
+
+  beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env.docker
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      WAIT_FOR_REDIS: 1
+    command: ["beat"]
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      meilisearch:
+        condition: service_started
+    volumes:
+      - media_data:/app/media
+
+volumes:
+  postgres_data:
+  redis_data:
+  meili_data:
+  media_data:
+  staticfiles_data:

@@ -69,10 +69,18 @@ def _validate_profile_photo(uploaded) -> None:
 
 MFA_SESSION_USER_KEY = "accounts_mfa_pending_user_id"
 MFA_SESSION_CODE_KEY = "accounts_mfa_pending_codigo"
+MFA_SESSION_BACKEND_KEY = "accounts_mfa_pending_backend"
 MFA_CACHE_PREFIX = "accounts:mfa_code:"
 MFA_TTL_SECONDS = 10 * 60
 MFA_MAX_ATTEMPTS = 5
 DEFAULT_PASSWORD_EXPIRE_DAYS = 90
+
+
+def _default_auth_backend() -> str:
+    backends = tuple(getattr(settings, "AUTHENTICATION_BACKENDS", ()) or ())
+    if backends:
+        return backends[0]
+    return "django.contrib.auth.backends.ModelBackend"
 
 
 def _password_expired(profile: Profile) -> bool:
@@ -220,6 +228,7 @@ def login_view(request):
                 )
             request.session[MFA_SESSION_USER_KEY] = user.pk
             request.session[MFA_SESSION_CODE_KEY] = profile.codigo_acesso
+            request.session[MFA_SESSION_BACKEND_KEY] = getattr(user, "backend", _default_auth_backend())
             _dispatch_mfa_code(request, user=user, profile=profile, pref=pref)
             return redirect("accounts:login_mfa")
 
@@ -251,6 +260,7 @@ def login_mfa_view(request):
     if not profile:
         request.session.pop(MFA_SESSION_USER_KEY, None)
         request.session.pop(MFA_SESSION_CODE_KEY, None)
+        request.session.pop(MFA_SESSION_BACKEND_KEY, None)
         return redirect("accounts:login")
 
     error = ""
@@ -276,7 +286,8 @@ def login_mfa_view(request):
         if ok:
             request.session.pop(MFA_SESSION_USER_KEY, None)
             request.session.pop(MFA_SESSION_CODE_KEY, None)
-            login(request, profile.user)
+            backend = request.session.pop(MFA_SESSION_BACKEND_KEY, None) or _default_auth_backend()
+            login(request, profile.user, backend=backend)
             reset(_client_ip(request), profile.codigo_acesso or profile.user.username)
             _ensure_password_not_expired(profile)
             return redirect("core:dashboard")
@@ -284,6 +295,7 @@ def login_mfa_view(request):
         if "Limite de tentativas" in error:
             request.session.pop(MFA_SESSION_USER_KEY, None)
             request.session.pop(MFA_SESSION_CODE_KEY, None)
+            request.session.pop(MFA_SESSION_BACKEND_KEY, None)
             return render(request, "accounts/login.html", {"form": LoginCodigoForm(), "error": error})
 
     return render(

@@ -1,0 +1,17 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Frontend Lab • GEPUB{% endblock %}
+{% block header %}Frontend Lab (React + Tailwind){% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'frontend/app.css' %}">
+{% endblock %}
+
+{% block content %}
+  <div id="root" data-gepub-frontend-lab></div>
+{% endblock %}
+
+{% block extra_js %}
+  <script type="module" src="{% static 'frontend/app.js' %}"></script>
+{% endblock %}

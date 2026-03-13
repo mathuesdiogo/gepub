@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from datetime import timedelta
 from django.core.exceptions import ImproperlyConfigured
 
 
@@ -125,6 +126,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Terceiros (API / permissões / realtime)
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "django_filters",
+    "guardian",
+    "channels",
 
     # Apps do GEPUB
     "apps.core",
@@ -161,6 +168,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "apps.core.middleware.TenantHostMiddleware",
@@ -199,6 +207,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
+ASGI_APPLICATION = "config.asgi.application"
 
 DB_ENGINE = os.getenv("DJANGO_DB_ENGINE", "").strip().lower()
 if DB_ENGINE in {"postgres", "postgresql"}:
@@ -238,6 +247,12 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
+}
+WHITENOISE_USE_FINDERS = DEBUG
+WHITENOISE_AUTOREFRESH = DEBUG
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -247,6 +262,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/accounts/login/"
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.ModelBackend",
+    "guardian.backends.ObjectPermissionBackend",
+)
 
 # =========================
 # Cache (para limitar tentativas)
@@ -271,6 +290,68 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = _env_bool(
     "CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP",
     default=True,
 )
+
+# =========================
+# API (DRF + JWT)
+# =========================
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
+    ),
+    "DEFAULT_FILTER_BACKENDS": (
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.SearchFilter",
+        "rest_framework.filters.OrderingFilter",
+    ),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": _env_int("DRF_PAGE_SIZE", default=25),
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        minutes=_env_int("JWT_ACCESS_TOKEN_MINUTES", default=15)
+    ),
+    "REFRESH_TOKEN_LIFETIME": timedelta(
+        days=_env_int("JWT_REFRESH_TOKEN_DAYS", default=7)
+    ),
+    "ROTATE_REFRESH_TOKENS": _env_bool("JWT_ROTATE_REFRESH_TOKENS", default=True),
+    "BLACKLIST_AFTER_ROTATION": _env_bool(
+        "JWT_BLACKLIST_AFTER_ROTATION", default=False
+    ),
+    "UPDATE_LAST_LOGIN": _env_bool("JWT_UPDATE_LAST_LOGIN", default=False),
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": os.getenv("JWT_SIGNING_KEY", SECRET_KEY),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+# =========================
+# Realtime (Django Channels)
+# =========================
+CHANNEL_LAYER_IN_MEMORY = _env_bool("CHANNEL_LAYER_IN_MEMORY", default=DEBUG)
+if CHANNEL_LAYER_IN_MEMORY:
+    CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
+else:
+    CHANNEL_REDIS_URL = os.getenv(
+        "CHANNEL_REDIS_URL",
+        os.getenv("DJANGO_REDIS_URL", "redis://127.0.0.1:6379/2"),
+    )
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {"hosts": [CHANNEL_REDIS_URL]},
+        }
+    }
+
+# =========================
+# Busca (Meilisearch)
+# =========================
+MEILISEARCH_URL = os.getenv("MEILISEARCH_URL", "http://127.0.0.1:7700").strip()
+MEILISEARCH_MASTER_KEY = os.getenv("MEILISEARCH_MASTER_KEY", "").strip()
+MEILISEARCH_INDEX_PREFIX = os.getenv("MEILISEARCH_INDEX_PREFIX", "gepub").strip()
 
 # =========================
 # Segurança HTTP / Sessão / CSRF

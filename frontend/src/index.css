@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color: #0f172a;
+  background: #e7effd;
+  font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.tab-trigger {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 transition;
+}
+
+.tab-trigger[data-state='active'] {
+  @apply bg-blue-600 text-white shadow;
+}
+
+.select-item {
+  @apply flex cursor-pointer select-none items-center rounded-lg px-3 py-2 text-sm text-slate-700 outline-none transition hover:bg-slate-50 focus:bg-slate-100;
+}
+
+.ProseMirror {
+  @apply min-h-36 outline-none;
+}
+
+.ProseMirror h3 {
+  @apply mb-2 text-lg font-semibold text-slate-900;
+}
+
+.ProseMirror p {
+  @apply text-sm leading-relaxed text-slate-700;
+}

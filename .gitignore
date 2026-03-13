@@ -22,18 +22,23 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+frontend/node_modules/
+frontend/.vite/
 
 # Django / local runtime
 *.sqlite3
 db.sqlite3
 staticfiles/
+static/frontend/
 media/
 media/profiles/
 
 # Environment and secrets
 .env
 .env.*
+.env.docker
 !.env.example
+!.env.docker.example
 *.pem
 *.key
 *.p12

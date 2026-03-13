@@ -97,6 +97,7 @@ from .views_design_system import (
     design_system_components,
     design_system_themes,
     design_system_tokens_api,
+    frontend_lab,
 )
 from .views_exclusoes import (
     sistema_exclusoes,
@@ -192,6 +193,7 @@ __all__ = [
     "design_system_components",
     "design_system_themes",
     "design_system_tokens_api",
+    "frontend_lab",
     "sistema_exclusoes",
     "sistema_exclusoes_confirmar",
 ]

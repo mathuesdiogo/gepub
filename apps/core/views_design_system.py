@@ -88,3 +88,16 @@ def design_system_tokens_api(request):
             "themes": THEME_TOKEN_PRESETS,
         }
     )
+
+
+@login_required
+def frontend_lab(request):
+    return render(
+        request,
+        "core/design_system/frontend_lab.html",
+        {
+            "docs_page": "frontend-lab",
+            "theme_options": ["kassya", "inclusao", "institucional"],
+            "ds_version": GEPUB_DS_VERSION,
+        },
+    )
