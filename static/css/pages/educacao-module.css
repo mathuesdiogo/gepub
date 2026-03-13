@@ -711,6 +711,134 @@
   border-top: 1px solid #deebf5;
 }
 
+/* Turma de informática (detalhe) — versão clean */
+.educacao-module .edu-inf-turma-clean {
+  display: grid;
+  gap: 12px;
+}
+
+.educacao-module .edu-inf-turma-clean__chips {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.educacao-module .edu-inf-turma-clean__chip {
+  border: 1px solid #d8e7f2;
+  border-radius: 12px;
+  background: #f8fbff;
+  padding: 10px 12px;
+  display: grid;
+  gap: 2px;
+}
+
+.educacao-module .edu-inf-turma-clean__chip > span {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: #6f879c;
+  font-weight: 700;
+}
+
+.educacao-module .edu-inf-turma-clean__chip > strong {
+  font-size: 15px;
+  line-height: 1.2;
+  color: #183753;
+}
+
+.educacao-module .edu-inf-turma-clean__chip > small {
+  font-size: 12px;
+  color: #587188;
+}
+
+.educacao-module .edu-inf-turma-clean__schedule {
+  margin-top: 10px;
+  border: 1px solid #d8e7f2;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 12px;
+}
+
+.educacao-module .edu-inf-turma-clean__schedule h4 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: #183753;
+}
+
+.educacao-module .edu-inf-turma-clean__schedule ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #2f4d68;
+  display: grid;
+  gap: 4px;
+}
+
+.educacao-module .edu-inf-turma-clean__actions {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.educacao-module .edu-inf-turma-clean__accordion {
+  display: grid;
+  gap: 10px;
+}
+
+.educacao-module .edu-inf-turma-clean__panel {
+  border: 1px solid #d8e7f2;
+  border-radius: 14px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.educacao-module .edu-inf-turma-clean__panel > summary {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid #e7f0f7;
+  background: #f7fbff;
+}
+
+.educacao-module .edu-inf-turma-clean__panel > summary::-webkit-details-marker {
+  display: none;
+}
+
+.educacao-module .edu-inf-turma-clean__panel > summary > span {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1d3f5c;
+}
+
+.educacao-module .edu-inf-turma-clean__panel > summary > small {
+  min-width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #1f64ba;
+  background: #eaf4ff;
+  border: 1px solid #cfe2f4;
+}
+
+.educacao-module .edu-inf-turma-clean__table-wrap {
+  padding: 10px;
+}
+
+@media (max-width: 1220px) {
+  .educacao-module .edu-inf-turma-clean__chips {
+    grid-template-columns: repeat(2, minmax(160px, 1fr));
+  }
+}
+
 @media (max-width: 1220px) {
   .educacao-module.gp-module-shell {
     grid-template-columns: 1fr;
@@ -755,6 +883,10 @@
 
   .educacao-module .edu-quick .link-list,
   .educacao-module .edu-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .educacao-module .edu-inf-turma-clean__chips {
     grid-template-columns: 1fr;
   }
 }
