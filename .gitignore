@@ -1,18 +1,94 @@
 # Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+*.pyd
+*.so
 
-# Virtualenv
+# Virtual environments
 venv/
+.venv/
+env/
 
-# Django
+# Build, cache and tooling
+*.log
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Django / local runtime
 *.sqlite3
+db.sqlite3
+staticfiles/
 media/
 media/profiles/
-staticfiles/
 
-# Environment
+# Environment and secrets
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.jks
+*credentials*.json
+*secret*.json
+*token*.txt
 
-# Editor
+# IDE / OS
 .vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Local AI/automation artifacts (do not publish)
+skills/
+.codex/
+.cursor/
+.windsurf/
+
+# Personal/local files
+usuariostestes
+usuarios_prefeitura_municipal_acessos.txt
+
+# Local captures and exports
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.wav
+*.mp3
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+*.csv
+*.xlsx
+*.xls
+*.ods
+*.zip
+*.7z
+*.tar
+*.gz
+
+# Keep committed static assets and docs
+!docs/**/*.png
+!docs/**/*.jpg
+!docs/**/*.jpeg
+!docs/**/*.webp
+!docs/**/*.csv
+!static/img/**
