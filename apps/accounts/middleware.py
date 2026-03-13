@@ -20,6 +20,12 @@ class ForcePasswordChangeMiddleware:
         if path.startswith(static_url) or path.startswith(media_url):
             return self.get_response(request)
 
+        design_system_prefixes = (
+            "/sistema/design-system/",
+            "/sistema/frontend-lab/",
+        )
+        is_design_system_area = any(path.startswith(prefix) for prefix in design_system_prefixes)
+
         if request.user.is_authenticated:
             p = getattr(request.user, "profile", None)
             role = ((getattr(p, "role", None) or "") + "").strip().upper()
@@ -41,6 +47,7 @@ class ForcePasswordChangeMiddleware:
                 if is_municipal:
                     if (
                         path not in allowed
+                        and not is_design_system_area
                         and not path.startswith(onboarding_prefix)
                         and not path.startswith("/admin/")
                     ):
@@ -56,6 +63,7 @@ class ForcePasswordChangeMiddleware:
                 }
                 if (
                     path not in allowed_paths
+                    and not is_design_system_area
                     and not path.startswith(onboarding_prefix)
                     and not path.startswith("/admin/")
                 ):
