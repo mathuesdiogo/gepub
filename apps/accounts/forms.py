@@ -224,7 +224,7 @@ class _UsuarioBaseForm(forms.Form):
 
 
 class UsuarioCreateForm(_UsuarioBaseForm):
-    cpf = forms.CharField(label="CPF (senha inicial)", max_length=14)
+    cpf = forms.CharField(label="CPF", max_length=14)
 
 
 class UsuarioUpdateForm(_UsuarioBaseForm):
