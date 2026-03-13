@@ -249,23 +249,6 @@
                 {{ form.setores_gestao.errors }}
               </div>
             {% elif wizard_step == 7 %}
-              <div class="onboarding-grid">
-                <div class="onboarding-field"><label for="{{ form.gestao_nome.id_for_label }}">Gestão - Nome</label>{{ form.gestao_nome }}{{ form.gestao_nome.errors }}</div>
-                <div class="onboarding-field"><label for="{{ form.gestao_cpf.id_for_label }}">Gestão - CPF</label>{{ form.gestao_cpf }}{{ form.gestao_cpf.errors }}</div>
-                <div class="onboarding-field"><label for="{{ form.gestao_email.id_for_label }}">Gestão - E-mail</label>{{ form.gestao_email }}{{ form.gestao_email.errors }}</div>
-                <div class="onboarding-field"><label for="{{ form.gestao_telefone.id_for_label }}">Gestão - Telefone</label>{{ form.gestao_telefone }}{{ form.gestao_telefone.errors }}</div>
-
-                <div class="onboarding-field"><label for="{{ form.educacao_nome.id_for_label }}">Educação - Nome</label>{{ form.educacao_nome }}{{ form.educacao_nome.errors }}</div>
-                <div class="onboarding-field"><label for="{{ form.educacao_cpf.id_for_label }}">Educação - CPF</label>{{ form.educacao_cpf }}{{ form.educacao_cpf.errors }}</div>
-                <div class="onboarding-field"><label for="{{ form.educacao_email.id_for_label }}">Educação - E-mail</label>{{ form.educacao_email }}{{ form.educacao_email.errors }}</div>
-                <div class="onboarding-field"><label for="{{ form.educacao_telefone.id_for_label }}">Educação - Telefone</label>{{ form.educacao_telefone }}{{ form.educacao_telefone.errors }}</div>
-
-                <div class="onboarding-field"><label for="{{ form.saude_nome.id_for_label }}">Saúde - Nome</label>{{ form.saude_nome }}{{ form.saude_nome.errors }}</div>
-                <div class="onboarding-field"><label for="{{ form.saude_cpf.id_for_label }}">Saúde - CPF</label>{{ form.saude_cpf }}{{ form.saude_cpf.errors }}</div>
-                <div class="onboarding-field"><label for="{{ form.saude_email.id_for_label }}">Saúde - E-mail</label>{{ form.saude_email }}{{ form.saude_email.errors }}</div>
-                <div class="onboarding-field"><label for="{{ form.saude_telefone.id_for_label }}">Saúde - Telefone</label>{{ form.saude_telefone }}{{ form.saude_telefone.errors }}</div>
-              </div>
-            {% elif wizard_step == 8 %}
               <div class="onboarding-note">
                 Alguns recursos funcionam em conjunto: <strong>NEE</strong> depende dos fluxos de
                 Educação e Saúde para acompanhamento integrado.
@@ -296,33 +279,6 @@
                   <p class="onboarding-summary__item">Ativas: {{ resumo_steps.secretarias.secretarias_ativas|length|default:3 }}</p>
                   <p class="onboarding-summary__item">NEE: {% if resumo_steps.modulos.ativar_nee %}Ativo{% else %}Inativo{% endif %}</p>
                   <p class="onboarding-summary__item">Ano letivo: {{ resumo_steps.modulos.ano_letivo_atual|default:"-" }}</p>
-                </div>
-                <div class="onboarding-summary__card">
-                  <p class="onboarding-summary__title">Credenciais iniciais</p>
-                  {% if credenciais_iniciais %}
-                    <table class="credentials-table">
-                      <thead>
-                        <tr>
-                          <th>Nome</th>
-                          <th>Código</th>
-                          <th>Usuário</th>
-                          <th>Status</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {% for c in credenciais_iniciais %}
-                          <tr>
-                            <td>{{ c.nome }}</td>
-                            <td>{{ c.codigo_acesso|default:"-" }}</td>
-                            <td>{{ c.username }}</td>
-                            <td>{{ c.credencial_status|default:"Usuário existente" }}</td>
-                          </tr>
-                        {% endfor %}
-                      </tbody>
-                    </table>
-                  {% else %}
-                    <p class="onboarding-summary__item">Nenhuma credencial gerada nesta sessão.</p>
-                  {% endif %}
                 </div>
                 <div class="onboarding-field">
                   <label for="{{ form.confirmar.id_for_label }}">{{ form.confirmar }} Confirmo que os dados estão corretos.</label>

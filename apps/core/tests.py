@@ -47,8 +47,8 @@ def _mark_onboarding_completed(user, municipio=None):
         user=user,
         defaults={
             "municipio": resolved_municipio,
-            "current_step": 9,
-            "total_steps": 9,
+            "current_step": 8,
+            "total_steps": 8,
             "completed_at": timezone.now(),
         },
     )

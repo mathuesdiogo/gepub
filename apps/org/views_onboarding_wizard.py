@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-import secrets
 from typing import Any
 
 from django.contrib import messages
-from django.contrib.auth import get_user_model, update_session_auth_hash
+from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import HttpResponseForbidden, JsonResponse
@@ -12,7 +11,7 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 
 from apps.accounts.models import Profile
-from apps.billing.services import MetricaLimite, get_assinatura_ativa, verificar_limite_municipio
+from apps.billing.services import get_assinatura_ativa
 from apps.core.decorators import require_perm
 from apps.core.rbac import get_profile, is_admin
 from apps.org.forms_onboarding_wizard import (
@@ -24,7 +23,6 @@ from apps.org.forms_onboarding_wizard import (
     WizardRevisaoStepForm,
     WizardSecretariasStepForm,
     WizardUnidadesStepForm,
-    WizardUsuariosStepForm,
 )
 from apps.org.models import (
     Municipio,
@@ -35,7 +33,7 @@ from apps.org.models import (
     Unidade,
 )
 
-TOTAL_STEPS = 9
+TOTAL_STEPS = 8
 
 STEP_META: dict[int, dict[str, str]] = {
     1: {
@@ -63,14 +61,10 @@ STEP_META: dict[int, dict[str, str]] = {
         "description": "Cadastre escolas, unidades de saúde e setores de gestão. Não é necessário cadastrar unidades por secretaria.",
     },
     7: {
-        "title": "Usuários iniciais",
-        "description": "Crie os usuários mínimos para operar cada secretaria (Gestão, Educação e Saúde).",
-    },
-    8: {
         "title": "Módulos e checklist",
         "description": "Ative módulos essenciais e parâmetros iniciais.",
     },
-    9: {
+    8: {
         "title": "Revisão final",
         "description": "Revise o resumo e conclua a implantação da prefeitura.",
     },
@@ -264,102 +258,6 @@ def _find_secretaria_by_modelo(municipio: Municipio, tipo_modelo: str, fallback_
         .order_by("id")
         .first()
     )
-
-
-def _username_candidate(base: str) -> str:
-    cleaned = "".join(ch.lower() if ch.isalnum() else "." for ch in (base or "").strip())
-    cleaned = ".".join(part for part in cleaned.split(".") if part)
-    return cleaned[:120] or f"user{secrets.randbelow(10_000)}"
-
-
-def _build_unique_username(seed: str) -> str:
-    User = get_user_model()
-    base = _username_candidate(seed)
-    candidate = base
-    idx = 2
-    while User.objects.filter(username__iexact=candidate).exists():
-        suffix = f".{idx}"
-        candidate = f"{base[: max(1, 150 - len(suffix))]}{suffix}"
-        idx += 1
-    return candidate
-
-
-def _upsert_initial_user(
-    *,
-    municipio: Municipio,
-    secretaria: Secretaria,
-    role: str,
-    nome: str,
-    cpf: str,
-    email: str,
-) -> dict[str, str]:
-    User = get_user_model()
-    email_norm = (email or "").strip().lower()
-    user = User.objects.filter(email__iexact=email_norm).order_by("id").first() if email_norm else None
-    created = False
-
-    if not user:
-        first_name, last_name = _split_full_name(nome)
-        username = _build_unique_username(email_norm.split("@")[0] if email_norm else nome)
-        user = User.objects.create(
-            username=username,
-            first_name=first_name,
-            last_name=last_name,
-            email=email_norm,
-            is_active=True,
-        )
-        created = True
-
-    first_name, last_name = _split_full_name(nome)
-    user.first_name = first_name
-    user.last_name = last_name
-    user.email = email_norm
-    user.is_active = True
-
-    temp_password = ""
-    if created:
-        temp_password = secrets.token_urlsafe(8)
-        user.set_password(temp_password)
-    user.save()
-
-    profile, _ = Profile.objects.get_or_create(user=user, defaults={"ativo": True})
-    profile.role = role
-    profile.municipio = municipio
-    profile.secretaria = secretaria
-    profile.ativo = True
-    profile.bloqueado = False
-    profile.cpf = cpf
-    if created:
-        profile.must_change_password = True
-    profile.save()
-
-    return {
-        "nome": nome,
-        "username": user.username,
-        "codigo_acesso": profile.codigo_acesso,
-        "email": email_norm,
-        "credencial_status": "Senha temporária gerada (troca obrigatória no 1º acesso)" if created else "Usuário existente",
-        "status": "criado" if created else "existente",
-    }
-
-
-def _will_increment_user_limit(*, municipio: Municipio, email: str) -> bool:
-    email_norm = (email or "").strip().lower()
-    if not email_norm:
-        return True
-
-    User = get_user_model()
-    user = User.objects.filter(email__iexact=email_norm).order_by("id").first()
-    if not user:
-        return True
-
-    profile = getattr(user, "profile", None)
-    if not profile:
-        return True
-
-    if profile.municipio_id == municipio.id and profile.ativo and not profile.bloqueado:
-        return False
-    return True
 
 
 def _ensure_base_secretarias(municipio: Municipio) -> dict[str, Secretaria]:
@@ -730,86 +628,7 @@ def onboarding_wizard_step(request, step: int):
         return _render_step(request, wizard, step, form)
 
     if step == 7:
-        form = WizardUsuariosStepForm(request.POST or None, initial=_get_step_payload(wizard, 7))
-
-        if request.method == "POST" and action == "continue" and form.is_valid():
-            if not wizard.municipio_id:
-                messages.error(request, "Configure os dados da prefeitura antes de criar usuários.")
-                return redirect("org:onboarding_wizard_step", step=3)
-
-            municipio = wizard.municipio
-            base_secretarias = _ensure_base_secretarias(municipio)
-            sec_edu = _find_secretaria_by_modelo(municipio, "educacao", "Secretaria de Educação") or base_secretarias["educacao"]
-            sec_sau = _find_secretaria_by_modelo(municipio, "saude", "Secretaria de Saúde") or base_secretarias["saude"]
-            sec_ges = _find_secretaria_by_modelo(municipio, "administracao", "Secretaria de Gestão Municipal") or base_secretarias["gestao"]
-
-            incremento = 0
-            for email in [
-                form.cleaned_data["gestao_email"],
-                form.cleaned_data["educacao_email"],
-                form.cleaned_data["saude_email"],
-            ]:
-                if _will_increment_user_limit(municipio=municipio, email=email):
-                    incremento += 1
-            if incremento > 0:
-                limite = verificar_limite_municipio(
-                    municipio,
-                    MetricaLimite.USUARIOS,
-                    incremento=incremento,
-                )
-                if not limite.permitido:
-                    form.add_error(
-                        None,
-                        (
-                            f"Limite de usuários do plano excedido ({limite.atual}/{limite.limite}). "
-                            f"Necessário ampliar {limite.excedente} usuário(s) para concluir esta etapa."
-                        ),
-                    )
-                    return _render_step(request, wizard, step, form)
-
-            creds = []
-            creds.append(
-                _upsert_initial_user(
-                    municipio=municipio,
-                    secretaria=sec_ges,
-                    role=Profile.Role.PROTOCOLO,
-                    nome=form.cleaned_data["gestao_nome"],
-                    cpf=form.cleaned_data["gestao_cpf"],
-                    email=form.cleaned_data["gestao_email"],
-                )
-            )
-            creds.append(
-                _upsert_initial_user(
-                    municipio=municipio,
-                    secretaria=sec_edu,
-                    role=Profile.Role.EDU_SECRETARIO,
-                    nome=form.cleaned_data["educacao_nome"],
-                    cpf=form.cleaned_data["educacao_cpf"],
-                    email=form.cleaned_data["educacao_email"],
-                )
-            )
-            creds.append(
-                _upsert_initial_user(
-                    municipio=municipio,
-                    secretaria=sec_sau,
-                    role=Profile.Role.SAU_SECRETARIO,
-                    nome=form.cleaned_data["saude_nome"],
-                    cpf=form.cleaned_data["saude_cpf"],
-                    email=form.cleaned_data["saude_email"],
-                )
-            )
-
-            payload = dict(form.cleaned_data)
-            payload["credenciais"] = creds
-            _set_step_payload(wizard, 7, payload)
-            _mark_step_completed(wizard, 7)
-            wizard.save(update_fields=["draft_data", "current_step", "updated_at"])
-            return redirect("org:onboarding_wizard_step", step=8)
-
-        return _render_step(request, wizard, step, form)
-
-    if step == 8:
-        initial = _get_step_payload(wizard, 8)
+        initial = _get_step_payload(wizard, 7)
         if not initial:
             initial = {"ano_letivo_atual": timezone.localdate().year}
         form = WizardModulosStepForm(request.POST or None, initial=initial)
@@ -847,17 +666,15 @@ def onboarding_wizard_step(request, step: int):
                 "configurar_whatsapp": bool(form.cleaned_data.get("configurar_whatsapp")),
                 "configurar_sms": bool(form.cleaned_data.get("configurar_sms")),
             }
-            _set_step_payload(wizard, 8, payload)
-            _mark_step_completed(wizard, 8)
+            _set_step_payload(wizard, 7, payload)
+            _mark_step_completed(wizard, 7)
             wizard.save(update_fields=["draft_data", "current_step", "updated_at"])
-            return redirect("org:onboarding_wizard_step", step=9)
+            return redirect("org:onboarding_wizard_step", step=8)
 
         return _render_step(request, wizard, step, form)
 
-    if step == 9:
+    if step == 8:
         form = WizardRevisaoStepForm(request.POST or None)
-        step7_payload = _get_step_payload(wizard, 7)
-        credenciais = step7_payload.get("credenciais") if isinstance(step7_payload, dict) else []
         context_extra = {
             "resumo_steps": {
                 "admin": _get_step_payload(wizard, 2),
@@ -865,14 +682,13 @@ def onboarding_wizard_step(request, step: int):
                 "endereco": _get_step_payload(wizard, 4),
                 "secretarias": _get_step_payload(wizard, 5),
                 "unidades": _get_step_payload(wizard, 6),
-                "modulos": _get_step_payload(wizard, 8),
+                "modulos": _get_step_payload(wizard, 7),
             },
-            "credenciais_iniciais": credenciais,
         }
 
         if request.method == "POST" and action == "continue" and form.is_valid():
-            _set_step_payload(wizard, 9, {"confirmed_at": timezone.now().isoformat()})
-            _mark_step_completed(wizard, 9)
+            _set_step_payload(wizard, 8, {"confirmed_at": timezone.now().isoformat()})
+            _mark_step_completed(wizard, 8)
             wizard.completed_at = timezone.now()
             wizard.current_step = TOTAL_STEPS
             wizard.save(update_fields=["draft_data", "current_step", "completed_at", "updated_at"])
