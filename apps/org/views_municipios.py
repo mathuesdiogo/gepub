@@ -6,6 +6,7 @@ from django.http import JsonResponse, HttpRequest, HttpResponse, HttpResponseFor
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils.html import format_html
 
 from apps.core.rbac import is_admin, scope_filter_municipios
 from apps.org.forms import MunicipioForm
@@ -31,9 +32,12 @@ class MunicipioListView(BaseListViewGepub):
         return qs.filter(Q(nome__icontains=q) | Q(uf__icontains=q))
 
     def get_input_attrs(self, request: HttpRequest, **kwargs) -> str:
-        return 'data-autocomplete-url="%s" data-autocomplete-href="%s"' % (
-            reverse("org:municipio_autocomplete"),
-            reverse("org:municipio_list") + "?q={q}",
+        return str(
+            format_html(
+                'data-autocomplete-url="{}" data-autocomplete-href="{}"',
+                reverse("org:municipio_autocomplete"),
+                reverse("org:municipio_list") + "?q={q}",
+            )
         )
 
     def get_actions(self, request, **kwargs):

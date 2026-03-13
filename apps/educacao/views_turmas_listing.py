@@ -2,7 +2,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-from django.utils.html import escape
+from django.utils.html import format_html
 
 from apps.core.exports import export_csv, export_pdf_table
 from apps.core.rbac import can, is_professor_profile_role, scope_filter_turmas
@@ -133,12 +133,12 @@ def turma_list(request):
             }
         )
 
-    extra_filters = f"""
-      <div class="filter-bar__field">
-        <label class="small">Ano letivo</label>
-        <input name="ano" value="{escape(ano)}" placeholder="Ex.: 2026" />
-      </div>
-    """
+    extra_filters = str(
+        format_html(
+            '<div class="filter-bar__field"><label class="small">Ano letivo</label><input name="ano" value="{}" placeholder="Ex.: 2026" /></div>',
+            ano,
+        )
+    )
 
     return render(
         request,

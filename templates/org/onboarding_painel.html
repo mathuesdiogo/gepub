@@ -50,15 +50,15 @@
 <section class="onboard-card onboard-credentials">
   <div class="onboard-card__head">
     <h3 class="onboard-card__title">Credenciais Geradas no Último Provisionamento</h3>
-    <p class="onboard-card__sub">Anote e compartilhe com cada secretaria. O usuário será forçado a trocar senha no primeiro login.</p>
+    <p class="onboard-card__sub">Contas provisionadas para as secretarias. No primeiro login, a troca de senha é obrigatória.</p>
   </div>
   <div class="onboard-card__body">
     <div class="dash-table">
       <table class="table">
-        <thead><tr><th>Secretaria</th><th>Usuário</th><th>Senha temporária</th></tr></thead>
+        <thead><tr><th>Secretaria</th><th>Usuário</th><th>Status</th></tr></thead>
         <tbody>
           {% for c in credentials %}
-            <tr><td>{{ c.secretaria }}</td><td>{{ c.username }}</td><td>{{ c.password }}</td></tr>
+            <tr><td>{{ c.secretaria }}</td><td>{{ c.username }}</td><td>{{ c.status|default:"Credencial gerada" }}</td></tr>
           {% endfor %}
         </tbody>
       </table>

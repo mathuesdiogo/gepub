@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from django.urls import reverse
+from django.utils.html import format_html
 
 from apps.core.rbac import scope_filter_turmas
 from apps.core.views_gepub import BaseListViewGepub
@@ -80,15 +81,18 @@ class HorariosIndexView(BaseListViewGepub):
 
     def get_extra_filters_html(self, *, q: str, ano: int | None, **kwargs) -> str:
         val = ano or ""
-        return f"""
-<div class="filter-bar__field">
-  <label class="small">Ano letivo</label>
-  <input name="ano" value="{val}" placeholder="Ex.: 2026" />
-</div>
-"""
+        return str(
+            format_html(
+                '<div class="filter-bar__field"><label class="small">Ano letivo</label><input name="ano" value="{}" placeholder="Ex.: 2026" /></div>',
+                val,
+            )
+        )
 
     def get_input_attrs(self, **kwargs) -> str:
-        return (
-            'data-autocomplete-url="' + reverse("educacao:api_turmas_suggest") + '" '
-            'data-autocomplete-href="' + (reverse("educacao:horarios_index") + '?q={q}') + '"'
+        return str(
+            format_html(
+                'data-autocomplete-url="{}" data-autocomplete-href="{}"',
+                reverse("educacao:api_turmas_suggest"),
+                reverse("educacao:horarios_index") + "?q={q}",
+            )
         )

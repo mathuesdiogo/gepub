@@ -338,7 +338,7 @@ def _upsert_initial_user(
         "username": user.username,
         "codigo_acesso": profile.codigo_acesso,
         "email": email_norm,
-        "senha_temporaria": temp_password,
+        "credencial_status": "Senha temporária gerada (troca obrigatória no 1º acesso)" if created else "Usuário existente",
         "status": "criado" if created else "existente",
     }
 

@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
@@ -32,6 +33,21 @@ from .views_users_common import (
 def _sync_user_active(user, profile: Profile):
     user.is_active = bool(profile.ativo and not profile.bloqueado)
     user.save(update_fields=["is_active"])
+
+
+def _generate_temp_password(length: int = 14) -> str:
+    alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%*"
+    while True:
+        pwd = "".join(secrets.choice(alphabet) for _ in range(length))
+        if any(c.islower() for c in pwd) and any(c.isupper() for c in pwd) and any(c.isdigit() for c in pwd):
+            return pwd
+
+
+def _safe_next(request, fallback: str) -> str:
+    next_url = (request.POST.get("next") or request.GET.get("next") or "").strip()
+    if next_url and url_has_allowed_host_and_scheme(next_url, {request.get_host()}):
+        return next_url
+    return fallback
 
 
 def _assign_scope_by_actor_or_form(*, actor, profile: Profile, form_cleaned: dict):
@@ -111,8 +127,8 @@ def usuario_create(request):
             email=form.cleaned_data["email"] or "",
         )
 
-        cpf_digits = "".join(ch for ch in (form.cleaned_data["cpf"] or "") if ch.isdigit())
-        user.set_password(cpf_digits)
+        temp_password = _generate_temp_password()
+        user.set_password(temp_password)
         user.is_active = True
         user.save()
         PasswordHistory.objects.create(user=user, password_hash=user.password)
@@ -124,7 +140,7 @@ def usuario_create(request):
         prof.bloqueado = False
         _assign_scope_by_actor_or_form(actor=request.user, profile=prof, form_cleaned=form.cleaned_data)
         prof.must_change_password = True
-        prof.password_changed_at = timezone.now()
+        prof.password_changed_at = None
         prof.save()
         _sync_user_active(user, prof)
 
@@ -140,10 +156,38 @@ def usuario_create(request):
             details=f"role={prof.role}; municipio={prof.municipio_id}; secretaria={prof.secretaria_id}; unidade={prof.unidade_id}; setor={prof.setor_id}",
         )
 
-        messages.success(
-            request,
-            f"Usuário criado. Código de acesso: {prof.codigo_acesso}. Senha inicial: CPF. (Troca obrigatória no 1º acesso)",
-        )
+        if user.email:
+            try:
+                send_mail(
+                    subject="GEPUB — Acesso criado",
+                    message=(
+                        "Seu acesso foi criado no GEPUB.\n\n"
+                        f"Código de acesso: {prof.codigo_acesso}\n"
+                        f"Usuário: {user.username}\n"
+                        f"Senha temporária: {temp_password}\n\n"
+                        "No primeiro login, você será obrigado a criar uma nova senha."
+                    ),
+                    from_email=None,
+                    recipient_list=[user.email],
+                    fail_silently=True,
+                )
+                messages.success(
+                    request,
+                    f"Usuário criado. Código de acesso: {prof.codigo_acesso}. Senha temporária enviada por e-mail.",
+                )
+            except Exception:
+                messages.success(
+                    request,
+                    f"Usuário criado. Código de acesso: {prof.codigo_acesso}. Senha temporária: {temp_password}",
+                )
+        else:
+            messages.success(
+                request,
+                (
+                    f"Usuário criado. Código de acesso: {prof.codigo_acesso}. "
+                    f"Usuário sem e-mail cadastrado. Senha temporária: {temp_password}"
+                ),
+            )
         return redirect("accounts:usuarios_list")
 
     return render(
@@ -175,7 +219,7 @@ def usuario_prefeitura_onboarding_create(request):
         nome_responsavel = (form.cleaned_data["nome_responsavel"] or "").strip()
         email = (form.cleaned_data.get("email") or "").strip().lower()
         codigo = (form.cleaned_data.get("codigo_acesso") or "").strip().lower() or _build_onboarding_codigo(nome_responsavel)
-        senha = (form.cleaned_data.get("senha_inicial") or "").strip() or secrets.token_urlsafe(8)
+        senha = (form.cleaned_data.get("senha_inicial") or "").strip() or _generate_temp_password()
 
         if Profile.objects.filter(codigo_acesso__iexact=codigo).exists():
             form.add_error("codigo_acesso", "Código de acesso já está em uso.")
@@ -432,7 +476,7 @@ def usuario_toggle_ativo(request, pk: int):
                     f"Solicite upgrade em: {upgrade_url}"
                 ),
             )
-            return redirect(request.POST.get("next") or reverse("accounts:usuarios_list"))
+            return redirect(_safe_next(request, reverse("accounts:usuarios_list")))
 
     prof.ativo = not prof.ativo
     prof.save(update_fields=["ativo"])
@@ -442,7 +486,7 @@ def usuario_toggle_ativo(request, pk: int):
     log_user_action(actor=request.user, target=user, action=action, details=f"ativo={prof.ativo}")
 
     messages.success(request, "Status de ativação atualizado.")
-    return redirect(request.POST.get("next") or reverse("accounts:usuarios_list"))
+    return redirect(_safe_next(request, reverse("accounts:usuarios_list")))
 
 
 @login_required
@@ -469,7 +513,7 @@ def usuario_toggle_bloqueio(request, pk: int):
                     f"Solicite upgrade em: {upgrade_url}"
                 ),
             )
-            return redirect(request.POST.get("next") or reverse("accounts:usuarios_list"))
+            return redirect(_safe_next(request, reverse("accounts:usuarios_list")))
 
     prof.bloqueado = not prof.bloqueado
     prof.save(update_fields=["bloqueado"])
@@ -479,7 +523,7 @@ def usuario_toggle_bloqueio(request, pk: int):
     log_user_action(actor=request.user, target=user, action=action, details=f"bloqueado={prof.bloqueado}")
 
     messages.success(request, "Status de bloqueio atualizado.")
-    return redirect(request.POST.get("next") or reverse("accounts:usuarios_list"))
+    return redirect(_safe_next(request, reverse("accounts:usuarios_list")))
 
 
 @login_required
@@ -500,7 +544,7 @@ def usuario_reset_codigo(request, pk: int):
     )
 
     messages.success(request, f"Código de acesso redefinido para: {prof.codigo_acesso}")
-    return redirect(request.POST.get("next") or reverse("accounts:usuarios_list"))
+    return redirect(_safe_next(request, reverse("accounts:usuarios_list")))
 
 
 @login_required
@@ -514,17 +558,13 @@ def usuario_reset_senha(request, pk: int):
     user = get_object_or_404(scope_users_queryset(request), pk=pk)
     prof, _ = Profile.objects.get_or_create(user=user, defaults={"ativo": True})
 
-    cpf_digits = prof.cpf_digits
-    if not cpf_digits:
-        messages.error(request, "Este usuário não tem CPF no perfil. Preencha o CPF antes de redefinir a senha.")
-        return redirect("accounts:usuario_update", pk=user.pk)
-
-    user.set_password(cpf_digits)
+    temp_password = _generate_temp_password()
+    user.set_password(temp_password)
     user.save(update_fields=["password"])
     PasswordHistory.objects.create(user=user, password_hash=user.password)
 
     prof.must_change_password = True
-    prof.password_changed_at = timezone.now()
+    prof.password_changed_at = None
     prof.save(update_fields=["must_change_password", "password_changed_at"])
 
     if user.email:
@@ -532,8 +572,10 @@ def usuario_reset_senha(request, pk: int):
             send_mail(
                 subject="GEPUB — Senha redefinida",
                 message=(
-                    "Sua senha foi redefinida para o CPF (apenas números).\n\n"
+                    "Sua senha foi redefinida.\n\n"
                     f"Código de acesso: {prof.codigo_acesso}\n"
+                    f"Usuário: {user.username}\n"
+                    f"Senha temporária: {temp_password}\n"
                     "No primeiro login, você será obrigado a criar uma nova senha."
                 ),
                 from_email=None,
@@ -542,14 +584,14 @@ def usuario_reset_senha(request, pk: int):
             )
             messages.success(request, "Senha redefinida. E-mail enviado (se o servidor de e-mail estiver configurado).")
         except Exception:
-            messages.success(request, "Senha redefinida. (Não foi possível enviar e-mail agora.)")
+            messages.success(request, f"Senha redefinida. (Não foi possível enviar e-mail agora.) Senha temporária: {temp_password}")
     else:
-        messages.success(request, "Senha redefinida para o CPF. (Usuário não tem e-mail cadastrado.)")
+        messages.success(request, f"Senha redefinida. Usuário sem e-mail cadastrado. Senha temporária: {temp_password}")
 
     log_user_action(
         actor=request.user,
         target=user,
         action=UserManagementAudit.Action.RESET_PASSWORD,
-        details="reset senha para CPF",
+        details="reset senha para senha temporaria",
     )
-    return redirect(request.POST.get("next") or reverse("accounts:usuarios_list"))
+    return redirect(_safe_next(request, reverse("accounts:usuarios_list")))

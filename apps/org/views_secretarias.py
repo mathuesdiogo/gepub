@@ -7,6 +7,7 @@ from django.db.models import Q
 from django.http import HttpRequest, JsonResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.utils.html import format_html, format_html_join
 from django.utils.text import slugify
 
 from apps.core.rbac import can
@@ -135,15 +136,16 @@ def _secretaria_icon(secretaria: Secretaria) -> str:
 
 
 def _municipio_select_html(selected: str) -> str:
-    opts = ['<option value="">Todos os municípios</option>']
+    opts = [format_html('<option value="">{}</option>', "Todos os municípios")]
     for m in Municipio.objects.order_by("nome"):
         sel = ' selected' if selected and str(m.id) == str(selected) else ''
-        opts.append(f'<option value="{m.id}"{sel}>{m.nome}/{m.uf}</option>')
-    return (
-        '<div class="filter-bar__field">'
-        '<label class="small">Município</label>'
-        f'<select name="municipio">{"".join(opts)}</select>'
-        '</div>'
+        opts.append(format_html('<option value="{}"{}>{}/{}</option>', m.id, sel, m.nome, m.uf))
+    options_html = format_html_join("", "{}", ((item,) for item in opts))
+    return str(
+        format_html(
+            '<div class="filter-bar__field"><label class="small">Município</label><select name="municipio">{}</select></div>',
+            options_html,
+        )
     )
 
 
@@ -187,9 +189,12 @@ class SecretariaListView(BaseListViewGepub):
         return _municipio_select_html(municipio_id)
 
     def get_input_attrs(self, request: HttpRequest, **kwargs) -> str:
-        return 'data-autocomplete-url="%s" data-autocomplete-href="%s"' % (
-            reverse("org:secretaria_autocomplete"),
-            reverse("org:secretaria_list") + "?q={q}",
+        return str(
+            format_html(
+                'data-autocomplete-url="{}" data-autocomplete-href="{}"',
+                reverse("org:secretaria_autocomplete"),
+                reverse("org:secretaria_list") + "?q={q}",
+            )
         )
 
     def get_actions(self, request, **kwargs):

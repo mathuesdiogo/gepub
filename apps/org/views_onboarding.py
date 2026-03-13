@@ -507,7 +507,11 @@ def onboarding_primeiro_acesso(request):
                                     {
                                         "secretaria": result.secretaria.nome if result.secretaria else "—",
                                         "username": result.gestor_username,
-                                        "password": result.gestor_temp_password,
+                                        "status": (
+                                            "Senha temporária gerada (troca obrigatória no 1º acesso)"
+                                            if result.gestor_temp_password
+                                            else "Usuário já existente"
+                                        ),
                                     }
                                 )
 

@@ -264,7 +264,7 @@ def download(request, pk: int):
         return redirect("conversor:index")
 
     token = (request.GET.get("token") or "").strip()
-    if token and not _validate_download_token(job, request.user.id, token):
+    if not token or not _validate_download_token(job, request.user.id, token):
         messages.error(request, "Link de download expirado ou inválido.")
         return redirect("conversor:index")
 

@@ -306,7 +306,7 @@
                           <th>Nome</th>
                           <th>Código</th>
                           <th>Usuário</th>
-                          <th>Senha temporária</th>
+                          <th>Status</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -315,7 +315,7 @@
                             <td>{{ c.nome }}</td>
                             <td>{{ c.codigo_acesso|default:"-" }}</td>
                             <td>{{ c.username }}</td>
-                            <td>{% if c.senha_temporaria %}{{ c.senha_temporaria }}{% else %}usuário existente{% endif %}</td>
+                            <td>{{ c.credencial_status|default:"Usuário existente" }}</td>
                           </tr>
                         {% endfor %}
                       </tbody>

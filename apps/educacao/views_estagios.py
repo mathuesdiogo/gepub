@@ -6,6 +6,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.html import format_html, format_html_join
 
 from apps.core.decorators import require_perm
 from apps.core.rbac import can, scope_filter_unidades
@@ -108,28 +109,28 @@ def estagio_list(request):
             },
         )
 
-    tipo_options = "".join(
-        [f'<option value="{value}" {"selected" if tipo == value else ""}>{label}</option>' for value, label in Estagio.Tipo.choices]
+    tipo_options = format_html_join(
+        "",
+        '<option value="{}"{}>{}</option>',
+        ((value, " selected" if tipo == value else "", label) for value, label in Estagio.Tipo.choices),
     )
-    situacao_options = "".join(
-        [f'<option value="{value}" {"selected" if situacao == value else ""}>{label}</option>' for value, label in Estagio.Situacao.choices]
+    situacao_options = format_html_join(
+        "",
+        '<option value="{}"{}>{}</option>',
+        ((value, " selected" if situacao == value else "", label) for value, label in Estagio.Situacao.choices),
     )
-    extra_filters = f"""
-      <div class="filter-bar__field">
-        <label class="small">Tipo</label>
-        <select name="tipo">
-          <option value="">Todos</option>
-          {tipo_options}
-        </select>
-      </div>
-      <div class="filter-bar__field">
-        <label class="small">Situação</label>
-        <select name="situacao">
-          <option value="">Todas</option>
-          {situacao_options}
-        </select>
-      </div>
-    """
+    extra_filters = str(
+        format_html(
+            (
+                '<div class="filter-bar__field"><label class="small">Tipo</label><select name="tipo">'
+                '<option value="">Todos</option>{}</select></div>'
+                '<div class="filter-bar__field"><label class="small">Situação</label><select name="situacao">'
+                '<option value="">Todas</option>{}</select></div>'
+            ),
+            tipo_options,
+            situacao_options,
+        )
+    )
 
     return render(
         request,

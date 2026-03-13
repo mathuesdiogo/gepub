@@ -7,6 +7,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.html import format_html, format_html_join
 from django.utils import timezone
 
 from apps.core.decorators import require_perm
@@ -386,21 +387,20 @@ def matriz_list(request):
             },
         )
 
-    etapa_options = "".join(
-        [
-            f'<option value="{value}" {"selected" if etapa == value else ""}>{label}</option>'
-            for value, label in MatrizCurricular.EtapaBase.choices
-        ]
+    etapa_options = format_html_join(
+        "",
+        '<option value="{}"{}>{}</option>',
+        ((value, " selected" if etapa == value else "", label) for value, label in MatrizCurricular.EtapaBase.choices),
     )
-    extra_filters = f"""
-      <div class="filter-bar__field">
-        <label class="small">Etapa</label>
-        <select name="etapa">
-          <option value="">Todas</option>
-          {etapa_options}
-        </select>
-      </div>
-    """
+    extra_filters = str(
+        format_html(
+            (
+                '<div class="filter-bar__field"><label class="small">Etapa</label><select name="etapa">'
+                '<option value="">Todas</option>{}</select></div>'
+            ),
+            etapa_options,
+        )
+    )
 
     return render(
         request,
@@ -1041,11 +1041,13 @@ def coordenacao_list(request):
             }
         )
 
-    modalidades_options = "".join(
-        [
-            f'<option value="{value}" {"selected" if modalidade == value else ""}>{label}</option>'
+    modalidades_options = format_html_join(
+        "",
+        '<option value="{}"{}>{}</option>',
+        (
+            (value, " selected" if modalidade == value else "", label)
             for value, label in CoordenacaoEnsino._meta.get_field("modalidade").choices
-        ]
+        ),
     )
 
     actions = [
@@ -1067,15 +1069,15 @@ def coordenacao_list(request):
             },
         )
 
-    extra_filters = f"""
-      <div class="filter-bar__field">
-        <label class="small">Modalidade</label>
-        <select name="modalidade">
-          <option value="">Todas</option>
-          {modalidades_options}
-        </select>
-      </div>
-    """
+    extra_filters = str(
+        format_html(
+            (
+                '<div class="filter-bar__field"><label class="small">Modalidade</label><select name="modalidade">'
+                '<option value="">Todas</option>{}</select></div>'
+            ),
+            modalidades_options,
+        )
+    )
 
     return render(
         request,

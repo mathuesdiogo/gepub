@@ -10,6 +10,7 @@ from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils.html import format_html, format_html_join
 
 from apps.core.decorators import require_perm
 from apps.core.exports import export_csv
@@ -61,26 +62,31 @@ def _date_or_none(value: str) -> date | None:
 
 
 def _build_select_html(*, name: str, label: str, options: list[tuple], selected: str, all_label: str) -> str:
-    opts = [f'<option value="">{all_label}</option>']
+    opts = [format_html('<option value="">{}</option>', all_label)]
     for value, text in options:
         value_str = str(value)
         sel = " selected" if selected and selected == value_str else ""
-        opts.append(f'<option value="{value_str}"{sel}>{text}</option>')
-    return (
-        '<div class="filter-bar__field">'
-        f'<label class="small">{label}</label>'
-        f'<select name="{name}">{"".join(opts)}</select>'
-        "</div>"
+        opts.append(format_html('<option value="{}"{}>{}</option>', value_str, sel, text))
+    options_html = format_html_join("", "{}", ((item,) for item in opts))
+    return str(
+        format_html(
+            '<div class="filter-bar__field"><label class="small">{}</label><select name="{}">{}</select></div>',
+            label,
+            name,
+            options_html,
+        )
     )
 
 
 def _build_date_html(*, name: str, label: str, selected: str) -> str:
     val = selected or ""
-    return (
-        '<div class="filter-bar__field">'
-        f'<label class="small">{label}</label>'
-        f'<input type="date" name="{name}" value="{val}">'
-        "</div>"
+    return str(
+        format_html(
+            '<div class="filter-bar__field"><label class="small">{}</label><input type="date" name="{}" value="{}"></div>',
+            label,
+            name,
+            val,
+        )
     )
 
 
@@ -398,7 +404,13 @@ def usuarios_list(request):
 
     autocomplete_url = reverse("accounts:users_autocomplete")
     autocomplete_href = reverse("accounts:usuarios_list") + "?q={q}"
-    input_attrs = f'data-autocomplete-url="{autocomplete_url}" data-autocomplete-href="{autocomplete_href}"'
+    input_attrs = str(
+        format_html(
+            'data-autocomplete-url="{}" data-autocomplete-href="{}"',
+            autocomplete_url,
+            autocomplete_href,
+        )
+    )
 
     has_filters = any(
         [

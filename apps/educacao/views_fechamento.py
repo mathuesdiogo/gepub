@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.html import format_html, format_html_join
 
 from apps.core.decorators import require_perm
 from apps.core.rbac import can, scope_filter_turmas
@@ -118,19 +119,18 @@ def fechamento_turma_periodo(request, pk: int):
         {"label": "Boletim do Período", "url": reverse("educacao:boletim_turma_periodo", args=[turma.pk]) + f"?periodo={periodo.pk}", "icon": "fa-solid fa-clipboard-list", "variant": "btn--ghost"},
     ]
 
-    periodo_options = "".join(
-        [
-            f'<option value="{p.pk}" {"selected" if p.pk == periodo.pk else ""}>{p}</option>'
-            for p in periodos
-        ]
+    periodo_options = format_html_join(
+        "",
+        '<option value="{}"{}>{}</option>',
+        ((p.pk, " selected" if p.pk == periodo.pk else "", p) for p in periodos),
     )
-    extra_filters = f"""
-    <div class="filter-bar__field">
-      <label>Período</label>
-      <select name="periodo">{periodo_options}</select>
-    </div>
-    """
-    top_extra = f'<input type="hidden" name="periodo" value="{periodo.pk}" />'
+    extra_filters = str(
+        format_html(
+            '<div class="filter-bar__field"><label>Período</label><select name="periodo">{}</select></div>',
+            periodo_options,
+        )
+    )
+    top_extra = str(format_html('<input type="hidden" name="periodo" value="{}" />', periodo.pk))
 
     return render(
         request,

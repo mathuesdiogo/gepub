@@ -7,7 +7,7 @@ from collections import Counter
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 from django.utils.text import slugify
 
@@ -37,6 +37,8 @@ SENSITIVE_HINTS = {
     "logradouro",
     "nascimento",
 }
+
+ALLOWED_GOOGLE_SHEETS_HOSTS = {"docs.google.com"}
 
 
 def _clean_cell(value) -> str:
@@ -196,10 +198,17 @@ def _google_sheet_csv_url(url: str) -> str:
         raise ValueError("URL de Google Sheets não informada.")
 
     parsed = urlparse(raw)
-    if "docs.google.com" not in parsed.netloc.lower():
-        return raw
-
+    scheme = (parsed.scheme or "").lower()
+    host = (parsed.hostname or "").lower()
     path = parsed.path or ""
+
+    if scheme != "https":
+        raise ValueError("A URL do Google Sheets deve usar HTTPS.")
+    if host not in ALLOWED_GOOGLE_SHEETS_HOSTS:
+        raise ValueError("A URL informada deve ser do domínio docs.google.com.")
+    if not path.startswith("/spreadsheets/"):
+        raise ValueError("A URL informada não parece ser de uma planilha do Google Sheets.")
+
     if "/export" in path and "format=csv" in parsed.query:
         return raw
 
@@ -207,18 +216,26 @@ def _google_sheet_csv_url(url: str) -> str:
     gid = (query.get("gid") or [""])[0]
 
     if "/edit" in path:
-        path = path.split("/edit", 1)[0] + "/export"
+        path = path.split("/edit", 1)[0]
+    path = path.rstrip("/") + "/export"
 
     params = {"format": "csv"}
     if gid:
         params["gid"] = gid
 
-    return urlunparse((parsed.scheme, parsed.netloc, path, "", urlencode(params), ""))
+    return urlunparse(("https", parsed.netloc, path, "", urlencode(params), ""))
 
 
 def _fetch_google_sheet(url: str) -> bytes:
     final_url = _google_sheet_csv_url(url)
-    with urlopen(final_url, timeout=20) as resp:
+    req = Request(
+        final_url,
+        headers={
+            "User-Agent": "GEPUB-Ingest/1.0",
+            "Accept": "text/csv,*/*;q=0.8",
+        },
+    )
+    with urlopen(req, timeout=20) as resp:
         return resp.read()
 
 

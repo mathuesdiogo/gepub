@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from urllib.parse import urlparse
+
 from django import forms
 from django.conf import settings
 
@@ -88,6 +90,14 @@ class DatasetCreateForm(forms.ModelForm):
         if fonte == Dataset.Fonte.GOOGLE_SHEETS:
             if not sheet_url:
                 self.add_error("google_sheet_url", "Informe a URL pública CSV da planilha.")
+            else:
+                parsed = urlparse(sheet_url)
+                host = (parsed.hostname or "").lower()
+                if parsed.scheme.lower() != "https" or host != "docs.google.com" or not (parsed.path or "").startswith("/spreadsheets/"):
+                    self.add_error(
+                        "google_sheet_url",
+                        "Informe uma URL HTTPS válida do Google Sheets (docs.google.com/spreadsheets/...).",
+                    )
         else:
             if not arquivo:
                 self.add_error("arquivo", "Envie um arquivo para ingestão do dataset.")

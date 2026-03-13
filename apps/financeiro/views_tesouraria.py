@@ -2,9 +2,17 @@ from __future__ import annotations
 
 from apps.core.exports import export_csv, export_pdf_table
 from apps.core.services_registro_operacao import build_registro_context
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from .views_common import *
 from .views_common import _municipios_admin, _resolve_municipio, _selected_exercicio
+
+
+def _safe_next_url(request, next_url: str, fallback: str = "") -> str:
+    if next_url and url_has_allowed_host_and_scheme(next_url, {request.get_host()}):
+        return next_url
+    return fallback
+
 
 @login_required
 @require_perm("financeiro.tesouraria")
@@ -248,7 +256,7 @@ def extrato_ajuste(request, item_pk: int):
         return redirect("core:dashboard")
 
     item = get_object_or_404(TesExtratoItem.objects.select_related("importacao"), pk=item_pk, municipio=municipio)
-    next_url = (request.GET.get("next") or "").strip()
+    next_url = _safe_next_url(request, (request.GET.get("next") or "").strip(), "")
 
     form = RecConciliacaoAjusteForm(request.POST or None)
     if request.method == "POST" and form.is_valid():

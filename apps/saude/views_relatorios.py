@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Count, DurationField, ExpressionWrapper, F, Q
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils.html import format_html, format_html_join
 
 from apps.core.decorators import require_perm
 from apps.core.exports import export_pdf_table
@@ -195,23 +196,24 @@ def relatorio_mensal(request):
     ]
 
     # filtro extra no padrão do sistema
-    extra_filters = f"""
-    <div class="filter-bar__field">
-        <label>Data início</label>
-        <input type="date" name="inicio" value="{inicio}">
-    </div>
-    <div class="filter-bar__field">
-        <label>Data fim</label>
-        <input type="date" name="fim" value="{fim}">
-    </div>
-    <div class="filter-bar__field">
-        <label>Unidade</label>
-        <select name="unidade">
-            <option value="">Todas</option>
-            {''.join([f'<option value="{u.id}" {"selected" if str(u.id)==str(unidade_id) else ""}>{u.nome}</option>' for u in unidades_qs])}
-        </select>
-    </div>
-    """
+    unidade_options = format_html_join(
+        "",
+        '<option value="{}"{}>{}</option>',
+        ((u.id, " selected" if str(u.id) == str(unidade_id) else "", u.nome) for u in unidades_qs),
+    )
+    extra_filters = str(
+        format_html(
+            (
+                '<div class="filter-bar__field"><label>Data início</label><input type="date" name="inicio" value="{}"></div>'
+                '<div class="filter-bar__field"><label>Data fim</label><input type="date" name="fim" value="{}"></div>'
+                '<div class="filter-bar__field"><label>Unidade</label><select name="unidade">'
+                '<option value="">Todas</option>{}</select></div>'
+            ),
+            inicio,
+            fim,
+            unidade_options,
+        )
+    )
 
     return render(request, "saude/relatorio_mensal.html", {
         "resumo": resumo,

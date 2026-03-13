@@ -3,6 +3,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils.html import format_html
 
 from apps.core.decorators import require_perm
 from apps.core.rbac import can, scope_filter_turmas
@@ -78,12 +79,12 @@ def horarios_index(request):
             "edit_url": "",
         })
 
-    extra_filters = f"""
-      <div class="filter-bar__field">
-        <label class="small">Ano letivo</label>
-        <input name="ano" value="{ano}" placeholder="Ex.: 2026" />
-      </div>
-    """
+    extra_filters = str(
+        format_html(
+            '<div class="filter-bar__field"><label class="small">Ano letivo</label><input name="ano" value="{}" placeholder="Ex.: 2026" /></div>',
+            ano,
+        )
+    )
 
     return render(request, "educacao/horarios_index.html", {
         "q": q,

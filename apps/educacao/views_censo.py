@@ -10,6 +10,7 @@ from django.db.models import Count, Q
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils.html import format_html, format_html_join
 from django.utils import timezone
 
 from apps.core.decorators import require_perm
@@ -338,42 +339,34 @@ def censo_escolar(request):
         },
     ]
 
-    dataset_options_html = "".join(
-        [
-            f'<option value="{k}" {"selected" if dataset == k else ""}>{label}</option>'
-            for (k, label) in DATASET_CHOICES
-        ]
+    dataset_options_html = format_html_join(
+        "",
+        '<option value="{}"{}>{}</option>',
+        ((k, " selected" if dataset == k else "", label) for (k, label) in DATASET_CHOICES),
     )
-    unidade_options_html = "".join(
-        [
-            f'<option value="{u.id}" {"selected" if str(u.id) == str(unidade_id) else ""}>{u.nome}</option>'
-            for u in unidades_options_qs
-        ]
+    unidade_options_html = format_html_join(
+        "",
+        '<option value="{}"{}>{}</option>',
+        ((u.id, " selected" if str(u.id) == str(unidade_id) else "", u.nome) for u in unidades_options_qs),
     )
 
-    extra_filters = f"""
-    <div class=\"filter-bar__field\">
-      <label>Ano Letivo</label>
-      <input type=\"number\" name=\"ano\" value=\"{ano}\" min=\"2000\" max=\"2100\" />
-    </div>
-    <div class=\"filter-bar__field\">
-      <label>Layout Censo</label>
-      <input type=\"number\" name=\"layout\" value=\"{layout}\" min=\"2000\" max=\"2100\" />
-    </div>
-    <div class=\"filter-bar__field\">
-      <label>Unidade</label>
-      <select name=\"unidade\">
-        <option value=\"\">Todas</option>
-        {unidade_options_html}
-      </select>
-    </div>
-    <div class=\"filter-bar__field\">
-      <label>Dataset</label>
-      <select name=\"dataset\">
-        {dataset_options_html}
-      </select>
-    </div>
-    """
+    extra_filters = str(
+        format_html(
+            (
+                '<div class="filter-bar__field"><label>Ano Letivo</label>'
+                '<input type="number" name="ano" value="{}" min="2000" max="2100" /></div>'
+                '<div class="filter-bar__field"><label>Layout Censo</label>'
+                '<input type="number" name="layout" value="{}" min="2000" max="2100" /></div>'
+                '<div class="filter-bar__field"><label>Unidade</label><select name="unidade">'
+                '<option value="">Todas</option>{}</select></div>'
+                '<div class="filter-bar__field"><label>Dataset</label><select name="dataset">{}</select></div>'
+            ),
+            ano,
+            layout,
+            unidade_options_html,
+            dataset_options_html,
+        )
+    )
 
     headers_consistencia = [
         {"label": "Validação"},
