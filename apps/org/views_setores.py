@@ -4,6 +4,7 @@ from django.db.models import Q
 from django.http import HttpRequest, JsonResponse, HttpResponseForbidden, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.utils.html import format_html, format_html_join
 
 from apps.core.rbac import is_admin, scope_filter_unidades
 from apps.org.forms import SetorForm
@@ -13,15 +14,16 @@ from apps.core.views_gepub import BaseListViewGepub, BaseCreateViewGepub, BaseUp
 
 
 def _unidade_select_html(unidades, selected: str) -> str:
-    opts = ['<option value="">Todas as unidades</option>']
+    opts = [format_html('<option value="">{}</option>', "Todas as unidades")]
     for u in unidades:
         sel = ' selected' if selected and str(u.id) == str(selected) else ''
-        opts.append(f'<option value="{u.id}"{sel}>{u.nome}</option>')
-    return (
-        '<div class="filter-bar__field">'
-        '<label class="small">Unidade</label>'
-        f'<select name="unidade">{"".join(opts)}</select>'
-        '</div>'
+        opts.append(format_html('<option value="{}"{}>{}</option>', u.id, sel, u.nome))
+    options_html = format_html_join("", "{}", ((item,) for item in opts))
+    return str(
+        format_html(
+            '<div class="filter-bar__field"><label class="small">Unidade</label><select name="unidade">{}</select></div>',
+            options_html,
+        )
     )
 
 

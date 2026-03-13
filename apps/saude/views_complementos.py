@@ -4,6 +4,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.html import format_html, format_html_join
 
 from apps.core.decorators import require_perm
 from apps.core.rbac import can, scope_filter_unidades
@@ -331,19 +332,20 @@ def checkin_list(request):
         }
         for obj in page_obj
     ]
-    extra_filters = """
-      <div class=\"filter-bar__field\">
-        <label class=\"small\">Status</label>
-        <select name=\"status\">
-          <option value=\"\">Todos</option>
-    """
-    for k, v in CheckInSaude.Status.choices:
-        selected = "selected" if status == k else ""
-        extra_filters += f"<option value=\"{k}\" {selected}>{v}</option>"
-    extra_filters += """
-        </select>
-      </div>
-    """
+    status_options = format_html_join(
+        "",
+        '<option value="{}"{}>{}</option>',
+        ((k, " selected" if status == k else "", v) for k, v in CheckInSaude.Status.choices),
+    )
+    extra_filters = str(
+        format_html(
+            (
+                '<div class="filter-bar__field"><label class="small">Status</label><select name="status">'
+                '<option value="">Todos</option>{}</select></div>'
+            ),
+            status_options,
+        )
+    )
     return render(request, "saude/generic_list.html", {"title": "Check-in e Acolhimento", "subtitle": "Recepção clínica, queixa e classificação de risco", "q": q, "page_obj": page_obj, "actions": actions, "headers": headers, "rows": rows, "action_url": reverse("saude:checkin_list"), "clear_url": reverse("saude:checkin_list"), "has_filters": bool(status or q), "extra_filters": extra_filters, "empty_title": "Nenhum check-in encontrado", "empty_text": "Registre o primeiro check-in."})
 
 
@@ -600,19 +602,20 @@ def exame_coleta_list(request):
         }
         for obj in page_obj
     ]
-    extra_filters = """
-      <div class=\"filter-bar__field\">
-        <label class=\"small\">Status</label>
-        <select name=\"status\">
-          <option value=\"\">Todos</option>
-    """
-    for k, v in ExameColetaSaude.Status.choices:
-        selected = "selected" if status == k else ""
-        extra_filters += f"<option value=\"{k}\" {selected}>{v}</option>"
-    extra_filters += """
-        </select>
-      </div>
-    """
+    status_options = format_html_join(
+        "",
+        '<option value="{}"{}>{}</option>',
+        ((k, " selected" if status == k else "", v) for k, v in ExameColetaSaude.Status.choices),
+    )
+    extra_filters = str(
+        format_html(
+            (
+                '<div class="filter-bar__field"><label class="small">Status</label><select name="status">'
+                '<option value="">Todos</option>{}</select></div>'
+            ),
+            status_options,
+        )
+    )
     return render(request, "saude/generic_list.html", {"title": "Coleta e Encaminhamento de Exames", "subtitle": "Fluxo operacional do exame solicitado até o resultado", "q": q, "page_obj": page_obj, "actions": actions, "headers": headers, "rows": rows, "action_url": reverse("saude:exame_coleta_list"), "clear_url": reverse("saude:exame_coleta_list"), "has_filters": bool(q or status), "extra_filters": extra_filters, "empty_title": "Nenhum fluxo de exame encontrado", "empty_text": "Cadastre o primeiro fluxo de exame."})
 
 
@@ -697,19 +700,20 @@ def internacao_list(request):
         }
         for obj in page_obj
     ]
-    extra_filters = """
-      <div class=\"filter-bar__field\">
-        <label class=\"small\">Status</label>
-        <select name=\"status\">
-          <option value=\"\">Todos</option>
-    """
-    for k, v in InternacaoSaude.Status.choices:
-        selected = "selected" if status == k else ""
-        extra_filters += f"<option value=\"{k}\" {selected}>{v}</option>"
-    extra_filters += """
-        </select>
-      </div>
-    """
+    status_options = format_html_join(
+        "",
+        '<option value="{}"{}>{}</option>',
+        ((k, " selected" if status == k else "", v) for k, v in InternacaoSaude.Status.choices),
+    )
+    extra_filters = str(
+        format_html(
+            (
+                '<div class="filter-bar__field"><label class="small">Status</label><select name="status">'
+                '<option value="">Todos</option>{}</select></div>'
+            ),
+            status_options,
+        )
+    )
     return render(request, "saude/generic_list.html", {"title": "Internação e Observação", "subtitle": "Admissão, leito, evolução e alta", "q": q, "page_obj": page_obj, "actions": actions, "headers": headers, "rows": rows, "action_url": reverse("saude:internacao_list"), "clear_url": reverse("saude:internacao_list"), "has_filters": bool(q or status), "extra_filters": extra_filters, "empty_title": "Nenhum registro de internação/observação", "empty_text": "Cadastre a primeira admissão."})
 
 

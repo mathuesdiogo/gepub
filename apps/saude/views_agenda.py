@@ -8,6 +8,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.html import format_html, format_html_join
 
 from apps.comunicacao.services import queue_event_notifications
 from apps.core.decorators import require_perm
@@ -143,19 +144,20 @@ def agenda_list(request):
             }
         )
 
-    extra_filters = """
-      <div class=\"filter-bar__field\">
-        <label class=\"small\">Status</label>
-        <select name=\"status\">
-          <option value=\"\">Todos</option>
-    """
-    for k, v in AgendamentoSaude.Status.choices:
-        selected = "selected" if status == k else ""
-        extra_filters += f"<option value=\"{k}\" {selected}>{v}</option>"
-    extra_filters += """
-        </select>
-      </div>
-    """
+    status_options = format_html_join(
+        "",
+        '<option value="{}"{}>{}</option>',
+        ((k, " selected" if status == k else "", v) for k, v in AgendamentoSaude.Status.choices),
+    )
+    extra_filters = str(
+        format_html(
+            (
+                '<div class="filter-bar__field"><label class="small">Status</label><select name="status">'
+                '<option value="">Todos</option>{}</select></div>'
+            ),
+            status_options,
+        )
+    )
 
     return render(
         request,

@@ -4,6 +4,7 @@ from django.db.models import Q
 from django.http import HttpResponseForbidden
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.html import format_html, format_html_join
 
 from apps.core.rbac import can, is_professor_profile_role, scope_filter_turmas
 from apps.core.views_gepub import BaseListViewGepub
@@ -99,17 +100,15 @@ class DiarioListView(BaseListViewGepub):
         anos = list(qs.order_by("-ano_letivo").values_list("ano_letivo", flat=True).distinct())[:12]
         if not anos:
             return ""
-        opts = []
-        sel = "selected" if not ano else ""
-        opts.append(f'<option value="" {sel}>Todos os anos</option>')
-        for a in anos:
-            s = "selected" if str(ano) == str(a) else ""
-            opts.append(f'<option value="{a}" {s}>{a}</option>')
-        return f'''
-<div class="filter-bar__field">
-  <label class="small">Ano letivo</label>
-  <select name="ano">
-    {''.join(opts)}
-  </select>
-</div>
-'''.strip()
+        options = [format_html('<option value=""{}>{}</option>', " selected" if not ano else "", "Todos os anos")]
+        options.extend(
+            format_html('<option value="{}"{}>{}</option>', a, " selected" if str(ano) == str(a) else "", a)
+            for a in anos
+        )
+        options_html = format_html_join("", "{}", ((item,) for item in options))
+        return str(
+            format_html(
+                '<div class="filter-bar__field"><label class="small">Ano letivo</label><select name="ano">{}</select></div>',
+                options_html,
+            )
+        )

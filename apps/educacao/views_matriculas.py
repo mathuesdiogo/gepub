@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.html import format_html
 
 from apps.billing.services import MetricaLimite, verificar_limite_municipio
 from apps.core.decorators import require_perm
@@ -190,7 +191,7 @@ def matricula_create(request):
 
     top_extra = ""
     if selected_aluno:
-        top_extra = f'<input type="hidden" name="aluno" value="{selected_aluno.pk}">'
+        top_extra = str(format_html('<input type="hidden" name="aluno" value="{}">', selected_aluno.pk))
 
     selected_matriculas = []
     if selected_aluno:

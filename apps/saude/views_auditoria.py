@@ -3,6 +3,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils.html import format_html, format_html_join
 
 from apps.core.decorators import require_perm
 from apps.core.rbac import scope_filter_unidades
@@ -69,19 +70,20 @@ def auditoria_prontuario_list(request):
         )
 
     action_options = sorted(AuditoriaAcessoProntuarioSaude.objects.values_list("acao", flat=True).distinct())
-    extra_filters = """
-      <div class=\"filter-bar__field\">
-        <label class=\"small\">Ação</label>
-        <select name=\"acao\">
-          <option value=\"\">Todas</option>
-    """
-    for value in action_options:
-        selected = "selected" if acao == value else ""
-        extra_filters += f"<option value=\"{value}\" {selected}>{value}</option>"
-    extra_filters += """
-        </select>
-      </div>
-    """
+    action_select_options = format_html_join(
+        "",
+        '<option value="{}"{}>{}</option>',
+        ((value, " selected" if acao == value else "", value) for value in action_options),
+    )
+    extra_filters = str(
+        format_html(
+            (
+                '<div class="filter-bar__field"><label class="small">Ação</label><select name="acao">'
+                '<option value="">Todas</option>{}</select></div>'
+            ),
+            action_select_options,
+        )
+    )
 
     return render(
         request,

@@ -3,7 +3,7 @@ from __future__ import annotations
 from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.html import escape
+from django.utils.html import escape, format_html, format_html_join
 
 from apps.core.rbac import can, is_admin, scope_filter_turmas
 from apps.core.views_gepub import BaseListViewGepub
@@ -276,71 +276,92 @@ class TurmaListView(BaseListViewGepub):
             Turma.SerieAno.choices,
         )
 
-        modalidades_opts = ['<option value="" {}>Todas modalidades</option>'.format("selected" if not modalidade else "")]
-        for value, label in modalidade_choices:
-            selected = "selected" if modalidade == value else ""
-            modalidades_opts.append(f'<option value="{value}" {selected}>{label}</option>')
+        modalidades_opts = [
+            format_html(
+                '<option value=""{}>{}</option>',
+                " selected" if not modalidade else "",
+                "Todas modalidades",
+            )
+        ]
+        modalidades_opts.extend(
+            format_html(
+                '<option value="{}"{}>{}</option>',
+                value,
+                " selected" if modalidade == value else "",
+                label,
+            )
+            for value, label in modalidade_choices
+        )
+        modalidades_html = format_html_join("", "{}", ((item,) for item in modalidades_opts))
 
-        etapas_opts = ['<option value="" {}>Todas etapas</option>'.format("selected" if not etapa else "")]
-        for value, label in etapa_choices:
-            selected = "selected" if etapa == value else ""
-            etapas_opts.append(f'<option value="{value}" {selected}>{label}</option>')
+        etapas_opts = [
+            format_html(
+                '<option value=""{}>{}</option>',
+                " selected" if not etapa else "",
+                "Todas etapas",
+            )
+        ]
+        etapas_opts.extend(
+            format_html(
+                '<option value="{}"{}>{}</option>',
+                value,
+                " selected" if etapa == value else "",
+                label,
+            )
+            for value, label in etapa_choices
+        )
+        etapas_html = format_html_join("", "{}", ((item,) for item in etapas_opts))
 
-        series_opts = ['<option value="" {}>Todas séries/anos</option>'.format("selected" if not serie else "")]
-        for value, label in serie_choices:
-            selected = "selected" if serie == value else ""
-            series_opts.append(f'<option value="{value}" {selected}>{label}</option>')
+        series_opts = [
+            format_html(
+                '<option value=""{}>{}</option>',
+                " selected" if not serie else "",
+                "Todas séries/anos",
+            )
+        ]
+        series_opts.extend(
+            format_html(
+                '<option value="{}"{}>{}</option>',
+                value,
+                " selected" if serie == value else "",
+                label,
+            )
+            for value, label in serie_choices
+        )
+        series_html = format_html_join("", "{}", ((item,) for item in series_opts))
 
         if not anos:
-            return f'''
-<div class="filter-bar__field">
-  <label class="small">Modalidade</label>
-  <select name="modalidade">
-    {''.join(modalidades_opts)}
-  </select>
-</div>
-<div class="filter-bar__field">
-  <label class="small">Etapa</label>
-  <select name="etapa">
-    {''.join(etapas_opts)}
-  </select>
-</div>
-<div class="filter-bar__field">
-  <label class="small">Série/Ano</label>
-  <select name="serie">
-    {''.join(series_opts)}
-  </select>
-</div>
-'''.strip()
-        opts = []
-        sel = "selected" if not ano else ""
-        opts.append(f'<option value="" {sel}>Todos os anos</option>')
-        for a in anos:
-            s = "selected" if str(ano) == str(a) else ""
-            opts.append(f'<option value="{a}" {s}>{a}</option>')
-        return f'''
-<div class="filter-bar__field">
-  <label class="small">Ano letivo</label>
-  <select name="ano">
-    {''.join(opts)}
-  </select>
-</div>
-<div class="filter-bar__field">
-  <label class="small">Modalidade</label>
-  <select name="modalidade">
-    {''.join(modalidades_opts)}
-  </select>
-</div>
-<div class="filter-bar__field">
-  <label class="small">Etapa</label>
-  <select name="etapa">
-    {''.join(etapas_opts)}
-  </select>
-</div>
-<div class="filter-bar__field">
-  <label class="small">Série/Ano</label>
-  <select name="serie">
-    {''.join(series_opts)}
-  </select>
-</div>
-'''.strip()
+            return str(
+                format_html(
+                    (
+                        '<div class="filter-bar__field"><label class="small">Modalidade</label><select name="modalidade">{}</select></div>'
+                        '<div class="filter-bar__field"><label class="small">Etapa</label><select name="etapa">{}</select></div>'
+                        '<div class="filter-bar__field"><label class="small">Série/Ano</label><select name="serie">{}</select></div>'
+                    ),
+                    modalidades_html,
+                    etapas_html,
+                    series_html,
+                )
+            )
+
+        ano_opts = [format_html('<option value=""{}>{}</option>', " selected" if not ano else "", "Todos os anos")]
+        ano_opts.extend(
+            format_html('<option value="{}"{}>{}</option>', a, " selected" if str(ano) == str(a) else "", a)
+            for a in anos
+        )
+        anos_html = format_html_join("", "{}", ((item,) for item in ano_opts))
+
+        return str(
+            format_html(
+                (
+                    '<div class="filter-bar__field"><label class="small">Ano letivo</label><select name="ano">{}</select></div>'
+                    '<div class="filter-bar__field"><label class="small">Modalidade</label><select name="modalidade">{}</select></div>'
+                    '<div class="filter-bar__field"><label class="small">Etapa</label><select name="etapa">{}</select></div>'
+                    '<div class="filter-bar__field"><label class="small">Série/Ano</label><select name="serie">{}</select></div>'
+                ),
+                anos_html,
+                modalidades_html,
+                etapas_html,
+                series_html,
+            )
+        )
