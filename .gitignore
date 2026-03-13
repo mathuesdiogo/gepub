@@ -37,8 +37,10 @@ media/profiles/
 .env
 .env.*
 .env.docker
+.env.docker.prod
 !.env.example
 !.env.docker.example
+!.env.docker.prod.example
 *.pem
 *.key
 *.p12
@@ -89,6 +91,9 @@ usuarios_prefeitura_municipal_acessos.txt
 *.7z
 *.tar
 *.gz
+
+# Docker backups
+backups/
 
 # Keep committed static assets and docs
 !docs/**/*.png

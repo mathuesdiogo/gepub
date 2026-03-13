@@ -51,6 +51,31 @@ Endpoints:
 - App: `http://127.0.0.1:8000`
 - Frontend Lab: `http://127.0.0.1:8000/sistema/frontend-lab/`
 
+## Docker produção (HTTPS)
+
+Arquivos:
+- `docker-compose.prod.yml`
+- `docker/caddy/Caddyfile`
+- `.env.docker.prod.example`
+
+Passos:
+
+```bash
+cp .env.docker.prod.example .env.docker.prod
+# ajustar domínio, e-mail ACME e segredos
+./scripts/deploy_prod.sh
+```
+
+Operação:
+
+```bash
+# backup (PostgreSQL + media)
+./scripts/backup_docker.sh
+
+# restore
+./scripts/restore_docker.sh backups/<YYYYMMDD_HHMMSS>
+```
+
 ## UI Core
 
 - Layout base: `templates/core/base.html`
