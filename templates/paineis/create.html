@@ -1,0 +1,135 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="bi-shell">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <section class="bi-source-grid">
+    {% for source in source_cards %}
+      <button type="button" class="bi-source-card bi-source-card--{{ source.tone }}" data-bi-set-fonte="{{ source.tipo }}">
+        <span class="bi-source-card__icon"><i class="{{ source.icon }}"></i></span>
+        <span class="bi-source-card__title">{{ source.titulo }}</span>
+        <span class="bi-source-card__desc">{{ source.descricao }}</span>
+      </button>
+    {% endfor %}
+  </section>
+
+  <section class="bi-panel">
+    <form method="post" enctype="multipart/form-data" class="bi-create-form">
+      {% csrf_token %}
+
+      <div class="bi-form-grid">
+        <label class="bi-field bi-field--full" for="{{ form.nome.id_for_label }}">
+          <span>Nome do dataset</span>
+          {{ form.nome }}
+          {% for err in form.nome.errors %}<small class="bi-field__error">{{ err }}</small>{% endfor %}
+        </label>
+
+        <label class="bi-field bi-field--full" for="{{ form.descricao.id_for_label }}">
+          <span>Descrição</span>
+          {{ form.descricao }}
+          {% for err in form.descricao.errors %}<small class="bi-field__error">{{ err }}</small>{% endfor %}
+        </label>
+
+        <label class="bi-field" for="{{ form.categoria.id_for_label }}">
+          <span>Categoria</span>
+          {{ form.categoria }}
+          {% for err in form.categoria.errors %}<small class="bi-field__error">{{ err }}</small>{% endfor %}
+        </label>
+
+        <label class="bi-field" for="{{ form.fonte.id_for_label }}">
+          <span>Fonte de dados</span>
+          {{ form.fonte }}
+          {% for err in form.fonte.errors %}<small class="bi-field__error">{{ err }}</small>{% endfor %}
+        </label>
+
+        <label class="bi-field" for="{{ form.visibilidade.id_for_label }}">
+          <span>Visibilidade</span>
+          {{ form.visibilidade }}
+          {% for err in form.visibilidade.errors %}<small class="bi-field__error">{{ err }}</small>{% endfor %}
+        </label>
+
+        <label class="bi-field" for="{{ form.secretaria.id_for_label }}">
+          <span>Secretaria (opcional)</span>
+          {{ form.secretaria }}
+          {% for err in form.secretaria.errors %}<small class="bi-field__error">{{ err }}</small>{% endfor %}
+        </label>
+
+        <label class="bi-field" for="{{ form.unidade.id_for_label }}">
+          <span>Unidade (opcional)</span>
+          {{ form.unidade }}
+          {% for err in form.unidade.errors %}<small class="bi-field__error">{{ err }}</small>{% endfor %}
+        </label>
+
+        <label class="bi-field" for="{{ form.setor.id_for_label }}">
+          <span>Setor (opcional)</span>
+          {{ form.setor }}
+          {% for err in form.setor.errors %}<small class="bi-field__error">{{ err }}</small>{% endfor %}
+        </label>
+
+        <label class="bi-field bi-field--full" data-bi-arquivo for="{{ form.arquivo.id_for_label }}">
+          <span>Arquivo de dados</span>
+          {{ form.arquivo }}
+          <small class="bi-field__hint">Formatos aceitos no MVP: CSV/TXT e XLSX.</small>
+          {% for err in form.arquivo.errors %}<small class="bi-field__error">{{ err }}</small>{% endfor %}
+        </label>
+
+        <label class="bi-field bi-field--full" data-bi-sheet for="{{ form.google_sheet_url.id_for_label }}">
+          <span>URL Google Sheets</span>
+          {{ form.google_sheet_url }}
+          <small class="bi-field__hint">Use URL pública ou link de exportação CSV.</small>
+          {% for err in form.google_sheet_url.errors %}<small class="bi-field__error">{{ err }}</small>{% endfor %}
+        </label>
+      </div>
+
+      {% if form.non_field_errors %}
+        <div class="bi-form__error-box">
+          {% for err in form.non_field_errors %}<p>{{ err }}</p>{% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="bi-create-form__actions">
+        <button class="gp-button gp-button--primary" type="submit">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          {{ submit_label }}
+        </button>
+        <a class="gp-button gp-button--outline" href="{{ cancel_url }}">Cancelar</a>
+      </div>
+    </form>
+  </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const fonteSelect = document.querySelector("[data-bi-fonte]");
+  const fileField = document.querySelector("[data-bi-arquivo]");
+  const sheetField = document.querySelector("[data-bi-sheet]");
+  const cards = document.querySelectorAll("[data-bi-set-fonte]");
+
+  function syncSourceFields() {
+    if (!fonteSelect) return;
+    const fonte = fonteSelect.value || "";
+    const isSheet = fonte === "GOOGLE_SHEETS";
+    if (fileField) fileField.style.display = isSheet ? "none" : "grid";
+    if (sheetField) sheetField.style.display = isSheet ? "grid" : "none";
+  }
+
+  cards.forEach(function (card) {
+    card.addEventListener("click", function () {
+      if (!fonteSelect) return;
+      fonteSelect.value = card.getAttribute("data-bi-set-fonte") || "";
+      fonteSelect.dispatchEvent(new Event("change"));
+      fonteSelect.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  });
+
+  if (fonteSelect) {
+    fonteSelect.addEventListener("change", syncSourceFields);
+    syncSourceFields();
+  }
+})();
+</script>
+{% endblock %}

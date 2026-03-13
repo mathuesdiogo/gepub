@@ -5,12 +5,13 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.core.exports import export_pdf_table
-from apps.core.rbac import scope_filter_turmas
+from apps.core.rbac import can, scope_filter_turmas
 
 from .forms_diario import AulaForm
 from .forms_bncc import bncc_option_label
 from .models import Turma, Matricula
 from .models_diario import DiarioTurma, Aula
+from .services_requisitos import registrar_override_requisitos_lancamento
 from .views_diario_permissions import can_edit_diario, can_view_diario, is_professor
 
 
@@ -117,6 +118,16 @@ def diario_detail_impl(request, pk: int):
         },
     ]
 
+    if can_edit or can(request.user, "educacao.manage"):
+        actions.append(
+            {
+                "label": "Justificativas de Falta",
+                "url": reverse("educacao:justificativa_falta_list"),
+                "icon": "fa-solid fa-file-signature",
+                "variant": "btn--ghost",
+            }
+        )
+
     if can_edit:
         actions.append(
             {
@@ -175,17 +186,31 @@ def aula_create_impl(request, pk: int):
         return HttpResponseForbidden("403 — Somente o professor responsável pode criar aula.")
 
     if request.method == "POST":
-        form = AulaForm(request.POST, diario=diario)
+        form = AulaForm(request.POST, diario=diario, user=request.user)
         if form.is_valid():
             aula = form.save(commit=False)
             aula.diario = diario
             aula.save()
             form.save_m2m()
+            override_payload = getattr(form, "override_requisitos_payload", {}) or {}
+            if override_payload:
+                registrar_override_requisitos_lancamento(
+                    usuario=request.user,
+                    turma=diario.turma,
+                    componente_id=getattr(aula, "componente_id", None) or 0,
+                    aula_id=aula.id,
+                    justificativa=override_payload.get("justificativa", ""),
+                    pendencias=override_payload.get("pendencias", []),
+                    origem="AULA_CREATE",
+                )
+                messages.warning(request, "Lançamento liberado por override com justificativa auditada.")
+            for aviso in getattr(form, "requisito_avisos", []) or []:
+                messages.warning(request, aviso)
             messages.success(request, "Aula criada com sucesso.")
             return redirect("educacao:diario_detail", pk=diario.pk)
         messages.error(request, "Corrija os erros do formulário.")
     else:
-        form = AulaForm(diario=diario)
+        form = AulaForm(diario=diario, user=request.user)
 
     return render(
         request,
@@ -214,14 +239,28 @@ def aula_update_impl(request, pk: int, aula_id: int):
     aula = get_object_or_404(Aula, pk=aula_id, diario=diario)
 
     if request.method == "POST":
-        form = AulaForm(request.POST, instance=aula, diario=diario)
+        form = AulaForm(request.POST, instance=aula, diario=diario, user=request.user)
         if form.is_valid():
             form.save()
+            override_payload = getattr(form, "override_requisitos_payload", {}) or {}
+            if override_payload:
+                registrar_override_requisitos_lancamento(
+                    usuario=request.user,
+                    turma=diario.turma,
+                    componente_id=getattr(aula, "componente_id", None) or 0,
+                    aula_id=aula.id,
+                    justificativa=override_payload.get("justificativa", ""),
+                    pendencias=override_payload.get("pendencias", []),
+                    origem="AULA_UPDATE",
+                )
+                messages.warning(request, "Atualização liberada por override com justificativa auditada.")
+            for aviso in getattr(form, "requisito_avisos", []) or []:
+                messages.warning(request, aviso)
             messages.success(request, "Aula atualizada com sucesso.")
             return redirect("educacao:diario_detail", pk=diario.pk)
         messages.error(request, "Corrija os erros do formulário.")
     else:
-        form = AulaForm(instance=aula, diario=diario)
+        form = AulaForm(instance=aula, diario=diario, user=request.user)
 
     return render(
         request,
@@ -243,7 +282,7 @@ def diario_create_for_turma_impl(request, pk: int):
     turma_qs = scope_filter_turmas(request.user, Turma.objects.select_related("unidade"))
     turma = get_object_or_404(turma_qs, pk=pk)
 
-    if getattr(getattr(request.user, "profile", None), "role", "") != "PROFESSOR":
+    if not is_professor(request.user):
         return HttpResponseForbidden("403 — Somente professor pode criar diário.")
 
     diario, _created = DiarioTurma.objects.get_or_create(

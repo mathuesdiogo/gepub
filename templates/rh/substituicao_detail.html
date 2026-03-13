@@ -1,0 +1,46 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="gp-card"><div class="gp-card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="gp-card" style="margin-bottom:14px;"><div class="gp-card__body">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;">
+      <div><strong>Substituído</strong><br>{{ item.substituido.nome }}</div>
+      <div><strong>Substituto</strong><br>{{ item.substituto.nome }}</div>
+      <div><strong>Período</strong><br>{{ item.data_inicio|date:"d/m/Y" }} a {{ item.data_fim|date:"d/m/Y" }}</div>
+      <div><strong>Status</strong><br>{{ item.get_status_display }}</div>
+      <div><strong>Setor original do substituto</strong><br>{{ item.setor_original_substituto|default:"-" }}</div>
+      <div><strong>Substituto já tramitador?</strong><br>{{ item.substituto_ja_tramitador|yesno:"Sim,Não" }}</div>
+    </div>
+  </div></div>
+
+  <div class="gp-card" style="margin-bottom:14px;"><div class="gp-card__body">
+    <strong>Motivo</strong>
+    <p>{{ item.motivo }}</p>
+    <strong>Módulos liberados</strong>
+    <p>
+      {% for m in item.modulos_liberados_json %}
+        <span class="gp-badge gp-badge--primary">{{ m }}</span>
+      {% empty %}
+        <span class="gp-text-muted">Nenhum módulo informado.</span>
+      {% endfor %}
+    </p>
+    <strong>Setores liberados</strong>
+    <p>
+      {% for s in item.setores_liberados.all %}
+        <span class="gp-badge gp-badge--neutral">{{ s.nome }}</span>
+      {% empty %}
+        <span class="gp-text-muted">Nenhum setor selecionado.</span>
+      {% endfor %}
+    </p>
+  </div></div>
+
+  {% if is_manager and item.status != "CANCELADA" and item.status != "CONCLUIDA" %}
+    <form method="post" action="{% url 'rh:substituicao_cancelar' item.pk %}?municipio={{ municipio.pk }}">
+      {% csrf_token %}
+      <button class="gp-button gp-button--danger" type="submit">Cancelar substituição</button>
+    </form>
+  {% endif %}
+</div></div>
+{% endblock %}

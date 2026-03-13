@@ -1,0 +1,59 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Pedido de Justificativa • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="gp-card"><div class="gp-card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Pedido de Justificativa de Falta" subtitle=pedido.aluno.nome actions=actions %}
+
+<div class="gp-grid-2">
+  <article class="gp-card"><div class="gp-card__body">
+    <h3>Dados da falta</h3>
+    <dl class="gp-definition-list">
+      <dt>Aluno</dt><dd>{{ pedido.aluno.nome }}</dd>
+      <dt>Turma</dt><dd>{{ pedido.aula.diario.turma.nome }}</dd>
+      <dt>Data da aula</dt><dd>{{ pedido.aula.data|date:"d/m/Y" }}</dd>
+      <dt>Componente</dt><dd>{{ pedido.aula.componente|default:"—" }}</dd>
+      <dt>Professor do diário</dt><dd>{{ pedido.aula.diario.professor.get_full_name|default:pedido.aula.diario.professor.username }}</dd>
+      <dt>Status</dt><dd>{{ pedido.get_status_display }}</dd>
+      <dt>Solicitado em</dt><dd>{{ pedido.criado_em|date:"d/m/Y H:i" }}</dd>
+      <dt>Anexo</dt>
+      <dd>
+        {% if pedido.anexo %}
+          <a class="gp-button gp-button--outline" href="{{ pedido.anexo.url }}" target="_blank" rel="noopener">Baixar anexo</a>
+        {% else %}
+          —
+        {% endif %}
+      </dd>
+    </dl>
+  </div></article>
+
+  <article class="gp-card"><div class="gp-card__body">
+    <h3>Motivo informado pelo aluno</h3>
+    <p>{{ pedido.motivo|linebreaksbr }}</p>
+
+    {% if pedido.parecer %}
+      <h4 class="gp-mt-3">Parecer registrado</h4>
+      <p>{{ pedido.parecer|linebreaksbr }}</p>
+      <p class="gp-text-muted">Respondido em {{ pedido.analisado_em|date:"d/m/Y H:i" }} por {{ pedido.analisado_por.get_full_name|default:pedido.analisado_por.username|default:"—" }}.</p>
+    {% endif %}
+  </div></article>
+</div>
+
+{% if can_decide %}
+  <article class="gp-card gp-mt-3"><div class="gp-card__body">
+    <h3>Decisão do professor</h3>
+    <form method="post" class="gp-form gp-form--smart">
+      {% csrf_token %}
+      <div class="gp-form-group gp-field--full">
+        <label class="gp-form-label" for="id_parecer">Parecer</label>
+        <textarea id="id_parecer" name="parecer" class="gp-textarea" rows="4" placeholder="Justifique a decisão (obrigatório para indeferimento).">{{ pedido.parecer }}</textarea>
+      </div>
+      <div class="gp-flex-wrap-row">
+        <button class="gp-button gp-button--success" type="submit" name="decisao" value="DEFERIDO"><i class="fa-solid fa-check"></i> Deferir</button>
+        <button class="gp-button gp-button--danger" type="submit" name="decisao" value="INDEFERIDO"><i class="fa-solid fa-xmark"></i> Indeferir</button>
+      </div>
+    </form>
+  </div></article>
+{% endif %}
+</div></div>
+{% endblock %}

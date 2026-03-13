@@ -1,0 +1,92 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Saúde • {{ aluno.nome }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <article class="gp-student-stage__card">
+    <h3>Cadastro de Saúde</h3>
+    {% if paciente %}
+      <dl class="gp-student-data-grid">
+        <div><dt>Paciente</dt><dd>{{ paciente.nome }}</dd></div>
+        <div><dt>Unidade de referência</dt><dd>{{ paciente.unidade_referencia.nome }}</dd></div>
+        <div><dt>Programa</dt><dd>{{ paciente.programa|default:"—" }}</dd></div>
+        <div><dt>Telefone</dt><dd>{{ paciente.telefone|default:"—" }}</dd></div>
+      </dl>
+    {% else %}
+      <div class="gp-alert gp-alert--warning">Aluno sem cadastro de paciente na rede de saúde.</div>
+    {% endif %}
+  </article>
+
+  <div class="gp-grid-2 gp-student-stage__grid">
+    <article class="gp-student-stage__card">
+      <h3>Agenda de Atendimentos</h3>
+      <div class="gp-table gp-table--responsive gp-table--striped"><div class="gp-table__body">
+        <table class="gp-table__native">
+          <thead><tr><th>Data/Hora</th><th>Tipo</th><th>Status</th><th>Profissional</th></tr></thead>
+          <tbody>
+            {% for a in agendamentos %}
+              <tr>
+                <td>{{ a.inicio|date:"d/m/Y H:i" }}</td>
+                <td>{{ a.get_tipo_display }}</td>
+                <td>{{ a.get_status_display }}</td>
+                <td>{{ a.profissional }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4">Sem agendamentos cadastrados.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div></div>
+    </article>
+
+    <article class="gp-student-stage__card">
+      <h3>Histórico de Atendimentos</h3>
+      <ul class="gp-student-data-list">
+        {% for at in atendimentos %}
+          <li><strong>{{ at.data|date:"d/m/Y" }}</strong> • {{ at.get_tipo_display }} • {{ at.profissional }} • {{ at.unidade.nome }}</li>
+        {% empty %}
+          <li>Sem atendimentos registrados.</li>
+        {% endfor %}
+      </ul>
+    </article>
+  </div>
+
+  <article class="gp-student-stage__card">
+    <h3>NEE (Necessidades Educacionais Especiais)</h3>
+    <div class="gp-grid gp-grid--3">
+      <div>
+        <h4>Diagnósticos/necessidades</h4>
+        <ul class="gp-student-data-list">
+          {% for n in nee_necessidades %}
+            <li>{{ n.tipo.nome }}{% if n.cid %} • CID {{ n.cid }}{% endif %}</li>
+          {% empty %}
+            <li>Sem necessidades cadastradas.</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div>
+        <h4>Planos educacionais</h4>
+        <ul class="gp-student-data-list">
+          {% for p in nee_planos %}
+            <li>Plano iniciado em {{ p.data_inicio|date:"d/m/Y" }}{% if p.data_revisao %} • Revisão {{ p.data_revisao|date:"d/m/Y" }}{% endif %}</li>
+          {% empty %}
+            <li>Sem plano clínico ativo.</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div>
+        <h4>Relatórios e acompanhamentos</h4>
+        <ul class="gp-student-data-list">
+          {% for ac in nee_acompanhamentos %}
+            <li>{{ ac.data|date:"d/m/Y" }} • {{ ac.get_tipo_evento_display }}</li>
+          {% empty %}
+            <li>Sem acompanhamentos registrados.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </article>
+</section>
+{% endblock %}

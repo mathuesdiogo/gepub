@@ -1,0 +1,947 @@
+role_code,role_name,area,scope_base,module_key,module_name,view,create,edit,delete,approve,export,manage_users,configure_module,reports
+ADMIN,Admin (Sistema),Administracao e Governanca,ADMIN,org,Administracao / ORG,SIM,SIM,SIM,SIM,NAO,SIM,SIM,SIM,SIM
+ADMIN,Admin (Sistema),Administracao e Governanca,ADMIN,educacao,Educacao,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+ADMIN,Admin (Sistema),Administracao e Governanca,ADMIN,avaliacoes,Avaliacoes,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+ADMIN,Admin (Sistema),Administracao e Governanca,ADMIN,nee,NEE,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+ADMIN,Admin (Sistema),Administracao e Governanca,ADMIN,saude,Saude,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+ADMIN,Admin (Sistema),Administracao e Governanca,ADMIN,processos,Processos / Protocolo,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+ADMIN,Admin (Sistema),Administracao e Governanca,ADMIN,financeiro,Financeiro,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+ADMIN,Admin (Sistema),Administracao e Governanca,ADMIN,compras,Compras,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+ADMIN,Admin (Sistema),Administracao e Governanca,ADMIN,contratos,Contratos,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+ADMIN,Admin (Sistema),Administracao e Governanca,ADMIN,integracoes,Integracoes,SIM,SIM,SIM,SIM,NAO,SIM,SIM,SIM,SIM
+ADMIN,Admin (Sistema),Administracao e Governanca,ADMIN,paineis,Paineis / BI,SIM,SIM,SIM,SIM,SIM,SIM,SIM,NAO,SIM
+ADMIN,Admin (Sistema),Administracao e Governanca,ADMIN,conversor,Conversor de Documentos,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+ADMIN,Admin (Sistema),Administracao e Governanca,ADMIN,rh,RH,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+ADMIN,Admin (Sistema),Administracao e Governanca,ADMIN,ponto,Ponto,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+ADMIN,Admin (Sistema),Administracao e Governanca,ADMIN,folha,Folha,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+ADMIN,Admin (Sistema),Administracao e Governanca,ADMIN,patrimonio,Patrimonio,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+ADMIN,Admin (Sistema),Administracao e Governanca,ADMIN,almoxarifado,Almoxarifado,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+ADMIN,Admin (Sistema),Administracao e Governanca,ADMIN,frota,Frota,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+ADMIN,Admin (Sistema),Administracao e Governanca,ADMIN,ouvidoria,Ouvidoria,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+ADMIN,Admin (Sistema),Administracao e Governanca,ADMIN,tributos,Tributos,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+ADMIN,Admin (Sistema),Administracao e Governanca,ADMIN,billing,Billing / Contrato SaaS,SIM,SIM,SIM,SIM,NAO,SIM,SIM,SIM,SIM
+ADMIN,Admin (Sistema),Administracao e Governanca,ADMIN,portal,Portal da Prefeitura,SIM,SIM,SIM,SIM,SIM,SIM,SIM,SIM,SIM
+MUNICIPAL,Gestor Municipal,Administracao e Governanca,MUNICIPAL,org,Administracao / ORG,SIM,SIM,SIM,SIM,NAO,SIM,SIM,SIM,SIM
+MUNICIPAL,Gestor Municipal,Administracao e Governanca,MUNICIPAL,educacao,Educacao,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+MUNICIPAL,Gestor Municipal,Administracao e Governanca,MUNICIPAL,avaliacoes,Avaliacoes,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+MUNICIPAL,Gestor Municipal,Administracao e Governanca,MUNICIPAL,nee,NEE,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+MUNICIPAL,Gestor Municipal,Administracao e Governanca,MUNICIPAL,saude,Saude,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+MUNICIPAL,Gestor Municipal,Administracao e Governanca,MUNICIPAL,processos,Processos / Protocolo,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+MUNICIPAL,Gestor Municipal,Administracao e Governanca,MUNICIPAL,financeiro,Financeiro,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+MUNICIPAL,Gestor Municipal,Administracao e Governanca,MUNICIPAL,compras,Compras,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+MUNICIPAL,Gestor Municipal,Administracao e Governanca,MUNICIPAL,contratos,Contratos,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+MUNICIPAL,Gestor Municipal,Administracao e Governanca,MUNICIPAL,integracoes,Integracoes,SIM,SIM,SIM,SIM,NAO,SIM,SIM,SIM,SIM
+MUNICIPAL,Gestor Municipal,Administracao e Governanca,MUNICIPAL,paineis,Paineis / BI,SIM,SIM,SIM,SIM,SIM,SIM,SIM,NAO,SIM
+MUNICIPAL,Gestor Municipal,Administracao e Governanca,MUNICIPAL,conversor,Conversor de Documentos,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+MUNICIPAL,Gestor Municipal,Administracao e Governanca,MUNICIPAL,rh,RH,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+MUNICIPAL,Gestor Municipal,Administracao e Governanca,MUNICIPAL,ponto,Ponto,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+MUNICIPAL,Gestor Municipal,Administracao e Governanca,MUNICIPAL,folha,Folha,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+MUNICIPAL,Gestor Municipal,Administracao e Governanca,MUNICIPAL,patrimonio,Patrimonio,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+MUNICIPAL,Gestor Municipal,Administracao e Governanca,MUNICIPAL,almoxarifado,Almoxarifado,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+MUNICIPAL,Gestor Municipal,Administracao e Governanca,MUNICIPAL,frota,Frota,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+MUNICIPAL,Gestor Municipal,Administracao e Governanca,MUNICIPAL,ouvidoria,Ouvidoria,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+MUNICIPAL,Gestor Municipal,Administracao e Governanca,MUNICIPAL,tributos,Tributos,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+MUNICIPAL,Gestor Municipal,Administracao e Governanca,MUNICIPAL,billing,Billing / Contrato SaaS,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+MUNICIPAL,Gestor Municipal,Administracao e Governanca,MUNICIPAL,portal,Portal da Prefeitura,SIM,SIM,SIM,SIM,SIM,SIM,SIM,SIM,SIM
+SECRETARIA,Gestor de Secretaria,Administracao e Governanca,SECRETARIA,org,Administracao / ORG,SIM,SIM,SIM,SIM,NAO,SIM,SIM,SIM,SIM
+SECRETARIA,Gestor de Secretaria,Administracao e Governanca,SECRETARIA,educacao,Educacao,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+SECRETARIA,Gestor de Secretaria,Administracao e Governanca,SECRETARIA,avaliacoes,Avaliacoes,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+SECRETARIA,Gestor de Secretaria,Administracao e Governanca,SECRETARIA,nee,NEE,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+SECRETARIA,Gestor de Secretaria,Administracao e Governanca,SECRETARIA,saude,Saude,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+SECRETARIA,Gestor de Secretaria,Administracao e Governanca,SECRETARIA,processos,Processos / Protocolo,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+SECRETARIA,Gestor de Secretaria,Administracao e Governanca,SECRETARIA,financeiro,Financeiro,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+SECRETARIA,Gestor de Secretaria,Administracao e Governanca,SECRETARIA,compras,Compras,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+SECRETARIA,Gestor de Secretaria,Administracao e Governanca,SECRETARIA,contratos,Contratos,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+SECRETARIA,Gestor de Secretaria,Administracao e Governanca,SECRETARIA,integracoes,Integracoes,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+SECRETARIA,Gestor de Secretaria,Administracao e Governanca,SECRETARIA,paineis,Paineis / BI,SIM,SIM,SIM,SIM,SIM,SIM,SIM,NAO,SIM
+SECRETARIA,Gestor de Secretaria,Administracao e Governanca,SECRETARIA,conversor,Conversor de Documentos,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+SECRETARIA,Gestor de Secretaria,Administracao e Governanca,SECRETARIA,rh,RH,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+SECRETARIA,Gestor de Secretaria,Administracao e Governanca,SECRETARIA,ponto,Ponto,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+SECRETARIA,Gestor de Secretaria,Administracao e Governanca,SECRETARIA,folha,Folha,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+SECRETARIA,Gestor de Secretaria,Administracao e Governanca,SECRETARIA,patrimonio,Patrimonio,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+SECRETARIA,Gestor de Secretaria,Administracao e Governanca,SECRETARIA,almoxarifado,Almoxarifado,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+SECRETARIA,Gestor de Secretaria,Administracao e Governanca,SECRETARIA,frota,Frota,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+SECRETARIA,Gestor de Secretaria,Administracao e Governanca,SECRETARIA,ouvidoria,Ouvidoria,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+SECRETARIA,Gestor de Secretaria,Administracao e Governanca,SECRETARIA,tributos,Tributos,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+SECRETARIA,Gestor de Secretaria,Administracao e Governanca,SECRETARIA,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+SECRETARIA,Gestor de Secretaria,Administracao e Governanca,SECRETARIA,portal,Portal da Prefeitura,SIM,SIM,SIM,SIM,SIM,SIM,SIM,NAO,SIM
+UNIDADE,Gestor de Unidade,Administracao e Governanca,UNIDADE,org,Administracao / ORG,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+UNIDADE,Gestor de Unidade,Administracao e Governanca,UNIDADE,educacao,Educacao,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+UNIDADE,Gestor de Unidade,Administracao e Governanca,UNIDADE,avaliacoes,Avaliacoes,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+UNIDADE,Gestor de Unidade,Administracao e Governanca,UNIDADE,nee,NEE,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+UNIDADE,Gestor de Unidade,Administracao e Governanca,UNIDADE,saude,Saude,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+UNIDADE,Gestor de Unidade,Administracao e Governanca,UNIDADE,processos,Processos / Protocolo,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+UNIDADE,Gestor de Unidade,Administracao e Governanca,UNIDADE,financeiro,Financeiro,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+UNIDADE,Gestor de Unidade,Administracao e Governanca,UNIDADE,compras,Compras,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+UNIDADE,Gestor de Unidade,Administracao e Governanca,UNIDADE,contratos,Contratos,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+UNIDADE,Gestor de Unidade,Administracao e Governanca,UNIDADE,integracoes,Integracoes,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+UNIDADE,Gestor de Unidade,Administracao e Governanca,UNIDADE,paineis,Paineis / BI,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+UNIDADE,Gestor de Unidade,Administracao e Governanca,UNIDADE,conversor,Conversor de Documentos,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+UNIDADE,Gestor de Unidade,Administracao e Governanca,UNIDADE,rh,RH,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+UNIDADE,Gestor de Unidade,Administracao e Governanca,UNIDADE,ponto,Ponto,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+UNIDADE,Gestor de Unidade,Administracao e Governanca,UNIDADE,folha,Folha,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+UNIDADE,Gestor de Unidade,Administracao e Governanca,UNIDADE,patrimonio,Patrimonio,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+UNIDADE,Gestor de Unidade,Administracao e Governanca,UNIDADE,almoxarifado,Almoxarifado,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+UNIDADE,Gestor de Unidade,Administracao e Governanca,UNIDADE,frota,Frota,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+UNIDADE,Gestor de Unidade,Administracao e Governanca,UNIDADE,ouvidoria,Ouvidoria,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+UNIDADE,Gestor de Unidade,Administracao e Governanca,UNIDADE,tributos,Tributos,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+UNIDADE,Gestor de Unidade,Administracao e Governanca,UNIDADE,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+UNIDADE,Gestor de Unidade,Administracao e Governanca,UNIDADE,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+PROFESSOR,Professor,Educacao,PROFESSOR,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROFESSOR,Professor,Educacao,PROFESSOR,educacao,Educacao,SIM,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROFESSOR,Professor,Educacao,PROFESSOR,avaliacoes,Avaliacoes,SIM,SIM,SIM,SIM,NAO,NAO,NAO,NAO,NAO
+PROFESSOR,Professor,Educacao,PROFESSOR,nee,NEE,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROFESSOR,Professor,Educacao,PROFESSOR,saude,Saude,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROFESSOR,Professor,Educacao,PROFESSOR,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROFESSOR,Professor,Educacao,PROFESSOR,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROFESSOR,Professor,Educacao,PROFESSOR,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROFESSOR,Professor,Educacao,PROFESSOR,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROFESSOR,Professor,Educacao,PROFESSOR,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROFESSOR,Professor,Educacao,PROFESSOR,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+PROFESSOR,Professor,Educacao,PROFESSOR,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+PROFESSOR,Professor,Educacao,PROFESSOR,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROFESSOR,Professor,Educacao,PROFESSOR,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROFESSOR,Professor,Educacao,PROFESSOR,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROFESSOR,Professor,Educacao,PROFESSOR,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROFESSOR,Professor,Educacao,PROFESSOR,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROFESSOR,Professor,Educacao,PROFESSOR,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROFESSOR,Professor,Educacao,PROFESSOR,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROFESSOR,Professor,Educacao,PROFESSOR,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROFESSOR,Professor,Educacao,PROFESSOR,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROFESSOR,Professor,Educacao,PROFESSOR,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+ALUNO,Aluno,Educacao,ALUNO,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+ALUNO,Aluno,Educacao,ALUNO,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+ALUNO,Aluno,Educacao,ALUNO,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+ALUNO,Aluno,Educacao,ALUNO,nee,NEE,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+ALUNO,Aluno,Educacao,ALUNO,saude,Saude,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+ALUNO,Aluno,Educacao,ALUNO,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+ALUNO,Aluno,Educacao,ALUNO,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+ALUNO,Aluno,Educacao,ALUNO,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+ALUNO,Aluno,Educacao,ALUNO,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+ALUNO,Aluno,Educacao,ALUNO,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+ALUNO,Aluno,Educacao,ALUNO,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+ALUNO,Aluno,Educacao,ALUNO,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+ALUNO,Aluno,Educacao,ALUNO,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+ALUNO,Aluno,Educacao,ALUNO,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+ALUNO,Aluno,Educacao,ALUNO,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+ALUNO,Aluno,Educacao,ALUNO,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+ALUNO,Aluno,Educacao,ALUNO,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+ALUNO,Aluno,Educacao,ALUNO,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+ALUNO,Aluno,Educacao,ALUNO,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+ALUNO,Aluno,Educacao,ALUNO,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+ALUNO,Aluno,Educacao,ALUNO,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+ALUNO,Aluno,Educacao,ALUNO,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE,Técnico NEE,NEE (Inclusao),NEE,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+NEE,Técnico NEE,NEE (Inclusao),NEE,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+NEE,Técnico NEE,NEE (Inclusao),NEE,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+NEE,Técnico NEE,NEE (Inclusao),NEE,nee,NEE,SIM,SIM,SIM,SIM,NAO,SIM,SIM,NAO,SIM
+NEE,Técnico NEE,NEE (Inclusao),NEE,saude,Saude,NAO,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+NEE,Técnico NEE,NEE (Inclusao),NEE,processos,Processos / Protocolo,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+NEE,Técnico NEE,NEE (Inclusao),NEE,financeiro,Financeiro,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+NEE,Técnico NEE,NEE (Inclusao),NEE,compras,Compras,NAO,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+NEE,Técnico NEE,NEE (Inclusao),NEE,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+NEE,Técnico NEE,NEE (Inclusao),NEE,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+NEE,Técnico NEE,NEE (Inclusao),NEE,paineis,Paineis / BI,SIM,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+NEE,Técnico NEE,NEE (Inclusao),NEE,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+NEE,Técnico NEE,NEE (Inclusao),NEE,rh,RH,NAO,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+NEE,Técnico NEE,NEE (Inclusao),NEE,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+NEE,Técnico NEE,NEE (Inclusao),NEE,folha,Folha,NAO,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+NEE,Técnico NEE,NEE (Inclusao),NEE,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+NEE,Técnico NEE,NEE (Inclusao),NEE,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+NEE,Técnico NEE,NEE (Inclusao),NEE,frota,Frota,NAO,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+NEE,Técnico NEE,NEE (Inclusao),NEE,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+NEE,Técnico NEE,NEE (Inclusao),NEE,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+NEE,Técnico NEE,NEE (Inclusao),NEE,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+NEE,Técnico NEE,NEE (Inclusao),NEE,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,SIM,SIM,NAO,SIM
+LEITURA,Somente leitura,Administracao e Governanca,LEITURA,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+LEITURA,Somente leitura,Administracao e Governanca,LEITURA,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+LEITURA,Somente leitura,Administracao e Governanca,LEITURA,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+LEITURA,Somente leitura,Administracao e Governanca,LEITURA,nee,NEE,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+LEITURA,Somente leitura,Administracao e Governanca,LEITURA,saude,Saude,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+LEITURA,Somente leitura,Administracao e Governanca,LEITURA,processos,Processos / Protocolo,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+LEITURA,Somente leitura,Administracao e Governanca,LEITURA,financeiro,Financeiro,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+LEITURA,Somente leitura,Administracao e Governanca,LEITURA,compras,Compras,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+LEITURA,Somente leitura,Administracao e Governanca,LEITURA,contratos,Contratos,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+LEITURA,Somente leitura,Administracao e Governanca,LEITURA,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+LEITURA,Somente leitura,Administracao e Governanca,LEITURA,paineis,Paineis / BI,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+LEITURA,Somente leitura,Administracao e Governanca,LEITURA,conversor,Conversor de Documentos,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+LEITURA,Somente leitura,Administracao e Governanca,LEITURA,rh,RH,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+LEITURA,Somente leitura,Administracao e Governanca,LEITURA,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+LEITURA,Somente leitura,Administracao e Governanca,LEITURA,folha,Folha,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+LEITURA,Somente leitura,Administracao e Governanca,LEITURA,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+LEITURA,Somente leitura,Administracao e Governanca,LEITURA,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+LEITURA,Somente leitura,Administracao e Governanca,LEITURA,frota,Frota,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+LEITURA,Somente leitura,Administracao e Governanca,LEITURA,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+LEITURA,Somente leitura,Administracao e Governanca,LEITURA,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+LEITURA,Somente leitura,Administracao e Governanca,LEITURA,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+LEITURA,Somente leitura,Administracao e Governanca,LEITURA,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+AUDITORIA,Controladoria / Auditoria,Administracao e Governanca,MUNICIPAL,org,Administracao / ORG,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+AUDITORIA,Controladoria / Auditoria,Administracao e Governanca,MUNICIPAL,educacao,Educacao,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+AUDITORIA,Controladoria / Auditoria,Administracao e Governanca,MUNICIPAL,avaliacoes,Avaliacoes,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+AUDITORIA,Controladoria / Auditoria,Administracao e Governanca,MUNICIPAL,nee,NEE,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+AUDITORIA,Controladoria / Auditoria,Administracao e Governanca,MUNICIPAL,saude,Saude,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+AUDITORIA,Controladoria / Auditoria,Administracao e Governanca,MUNICIPAL,processos,Processos / Protocolo,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+AUDITORIA,Controladoria / Auditoria,Administracao e Governanca,MUNICIPAL,financeiro,Financeiro,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+AUDITORIA,Controladoria / Auditoria,Administracao e Governanca,MUNICIPAL,compras,Compras,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+AUDITORIA,Controladoria / Auditoria,Administracao e Governanca,MUNICIPAL,contratos,Contratos,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+AUDITORIA,Controladoria / Auditoria,Administracao e Governanca,MUNICIPAL,integracoes,Integracoes,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+AUDITORIA,Controladoria / Auditoria,Administracao e Governanca,MUNICIPAL,paineis,Paineis / BI,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+AUDITORIA,Controladoria / Auditoria,Administracao e Governanca,MUNICIPAL,conversor,Conversor de Documentos,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+AUDITORIA,Controladoria / Auditoria,Administracao e Governanca,MUNICIPAL,rh,RH,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+AUDITORIA,Controladoria / Auditoria,Administracao e Governanca,MUNICIPAL,ponto,Ponto,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+AUDITORIA,Controladoria / Auditoria,Administracao e Governanca,MUNICIPAL,folha,Folha,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+AUDITORIA,Controladoria / Auditoria,Administracao e Governanca,MUNICIPAL,patrimonio,Patrimonio,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+AUDITORIA,Controladoria / Auditoria,Administracao e Governanca,MUNICIPAL,almoxarifado,Almoxarifado,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+AUDITORIA,Controladoria / Auditoria,Administracao e Governanca,MUNICIPAL,frota,Frota,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+AUDITORIA,Controladoria / Auditoria,Administracao e Governanca,MUNICIPAL,ouvidoria,Ouvidoria,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+AUDITORIA,Controladoria / Auditoria,Administracao e Governanca,MUNICIPAL,tributos,Tributos,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+AUDITORIA,Controladoria / Auditoria,Administracao e Governanca,MUNICIPAL,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+AUDITORIA,Controladoria / Auditoria,Administracao e Governanca,MUNICIPAL,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+RH_GESTOR,RH / Gestão de Pessoas,Administracao e Governanca,MUNICIPAL,org,Administracao / ORG,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+RH_GESTOR,RH / Gestão de Pessoas,Administracao e Governanca,MUNICIPAL,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+RH_GESTOR,RH / Gestão de Pessoas,Administracao e Governanca,MUNICIPAL,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+RH_GESTOR,RH / Gestão de Pessoas,Administracao e Governanca,MUNICIPAL,nee,NEE,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+RH_GESTOR,RH / Gestão de Pessoas,Administracao e Governanca,MUNICIPAL,saude,Saude,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+RH_GESTOR,RH / Gestão de Pessoas,Administracao e Governanca,MUNICIPAL,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+RH_GESTOR,RH / Gestão de Pessoas,Administracao e Governanca,MUNICIPAL,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+RH_GESTOR,RH / Gestão de Pessoas,Administracao e Governanca,MUNICIPAL,compras,Compras,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+RH_GESTOR,RH / Gestão de Pessoas,Administracao e Governanca,MUNICIPAL,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+RH_GESTOR,RH / Gestão de Pessoas,Administracao e Governanca,MUNICIPAL,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+RH_GESTOR,RH / Gestão de Pessoas,Administracao e Governanca,MUNICIPAL,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+RH_GESTOR,RH / Gestão de Pessoas,Administracao e Governanca,MUNICIPAL,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+RH_GESTOR,RH / Gestão de Pessoas,Administracao e Governanca,MUNICIPAL,rh,RH,SIM,SIM,SIM,SIM,NAO,SIM,NAO,NAO,SIM
+RH_GESTOR,RH / Gestão de Pessoas,Administracao e Governanca,MUNICIPAL,ponto,Ponto,SIM,SIM,SIM,SIM,NAO,SIM,NAO,NAO,SIM
+RH_GESTOR,RH / Gestão de Pessoas,Administracao e Governanca,MUNICIPAL,folha,Folha,SIM,SIM,SIM,SIM,NAO,SIM,NAO,NAO,SIM
+RH_GESTOR,RH / Gestão de Pessoas,Administracao e Governanca,MUNICIPAL,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+RH_GESTOR,RH / Gestão de Pessoas,Administracao e Governanca,MUNICIPAL,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+RH_GESTOR,RH / Gestão de Pessoas,Administracao e Governanca,MUNICIPAL,frota,Frota,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+RH_GESTOR,RH / Gestão de Pessoas,Administracao e Governanca,MUNICIPAL,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+RH_GESTOR,RH / Gestão de Pessoas,Administracao e Governanca,MUNICIPAL,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+RH_GESTOR,RH / Gestão de Pessoas,Administracao e Governanca,MUNICIPAL,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+RH_GESTOR,RH / Gestão de Pessoas,Administracao e Governanca,MUNICIPAL,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+PROTOCOLO,Protocolo / Atendimento Geral,Administracao e Governanca,SECRETARIA,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROTOCOLO,Protocolo / Atendimento Geral,Administracao e Governanca,SECRETARIA,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROTOCOLO,Protocolo / Atendimento Geral,Administracao e Governanca,SECRETARIA,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROTOCOLO,Protocolo / Atendimento Geral,Administracao e Governanca,SECRETARIA,nee,NEE,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROTOCOLO,Protocolo / Atendimento Geral,Administracao e Governanca,SECRETARIA,saude,Saude,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROTOCOLO,Protocolo / Atendimento Geral,Administracao e Governanca,SECRETARIA,processos,Processos / Protocolo,SIM,SIM,SIM,SIM,NAO,NAO,NAO,NAO,NAO
+PROTOCOLO,Protocolo / Atendimento Geral,Administracao e Governanca,SECRETARIA,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROTOCOLO,Protocolo / Atendimento Geral,Administracao e Governanca,SECRETARIA,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROTOCOLO,Protocolo / Atendimento Geral,Administracao e Governanca,SECRETARIA,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROTOCOLO,Protocolo / Atendimento Geral,Administracao e Governanca,SECRETARIA,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROTOCOLO,Protocolo / Atendimento Geral,Administracao e Governanca,SECRETARIA,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+PROTOCOLO,Protocolo / Atendimento Geral,Administracao e Governanca,SECRETARIA,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+PROTOCOLO,Protocolo / Atendimento Geral,Administracao e Governanca,SECRETARIA,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROTOCOLO,Protocolo / Atendimento Geral,Administracao e Governanca,SECRETARIA,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROTOCOLO,Protocolo / Atendimento Geral,Administracao e Governanca,SECRETARIA,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROTOCOLO,Protocolo / Atendimento Geral,Administracao e Governanca,SECRETARIA,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROTOCOLO,Protocolo / Atendimento Geral,Administracao e Governanca,SECRETARIA,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROTOCOLO,Protocolo / Atendimento Geral,Administracao e Governanca,SECRETARIA,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROTOCOLO,Protocolo / Atendimento Geral,Administracao e Governanca,SECRETARIA,ouvidoria,Ouvidoria,SIM,SIM,SIM,SIM,NAO,NAO,NAO,NAO,NAO
+PROTOCOLO,Protocolo / Atendimento Geral,Administracao e Governanca,SECRETARIA,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROTOCOLO,Protocolo / Atendimento Geral,Administracao e Governanca,SECRETARIA,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PROTOCOLO,Protocolo / Atendimento Geral,Administracao e Governanca,SECRETARIA,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CAD_GESTOR,Gestor de Cadastros,Administracao e Governanca,MUNICIPAL,org,Administracao / ORG,SIM,SIM,SIM,SIM,NAO,NAO,SIM,SIM,NAO
+CAD_GESTOR,Gestor de Cadastros,Administracao e Governanca,MUNICIPAL,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO
+CAD_GESTOR,Gestor de Cadastros,Administracao e Governanca,MUNICIPAL,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO
+CAD_GESTOR,Gestor de Cadastros,Administracao e Governanca,MUNICIPAL,nee,NEE,NAO,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO
+CAD_GESTOR,Gestor de Cadastros,Administracao e Governanca,MUNICIPAL,saude,Saude,NAO,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO
+CAD_GESTOR,Gestor de Cadastros,Administracao e Governanca,MUNICIPAL,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO
+CAD_GESTOR,Gestor de Cadastros,Administracao e Governanca,MUNICIPAL,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO
+CAD_GESTOR,Gestor de Cadastros,Administracao e Governanca,MUNICIPAL,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO
+CAD_GESTOR,Gestor de Cadastros,Administracao e Governanca,MUNICIPAL,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO
+CAD_GESTOR,Gestor de Cadastros,Administracao e Governanca,MUNICIPAL,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO
+CAD_GESTOR,Gestor de Cadastros,Administracao e Governanca,MUNICIPAL,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,SIM,NAO,NAO
+CAD_GESTOR,Gestor de Cadastros,Administracao e Governanca,MUNICIPAL,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,SIM,NAO,NAO
+CAD_GESTOR,Gestor de Cadastros,Administracao e Governanca,MUNICIPAL,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO
+CAD_GESTOR,Gestor de Cadastros,Administracao e Governanca,MUNICIPAL,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO
+CAD_GESTOR,Gestor de Cadastros,Administracao e Governanca,MUNICIPAL,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO
+CAD_GESTOR,Gestor de Cadastros,Administracao e Governanca,MUNICIPAL,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO
+CAD_GESTOR,Gestor de Cadastros,Administracao e Governanca,MUNICIPAL,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO
+CAD_GESTOR,Gestor de Cadastros,Administracao e Governanca,MUNICIPAL,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO
+CAD_GESTOR,Gestor de Cadastros,Administracao e Governanca,MUNICIPAL,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO
+CAD_GESTOR,Gestor de Cadastros,Administracao e Governanca,MUNICIPAL,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO
+CAD_GESTOR,Gestor de Cadastros,Administracao e Governanca,MUNICIPAL,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO
+CAD_GESTOR,Gestor de Cadastros,Administracao e Governanca,MUNICIPAL,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO
+CAD_OPER,Operador de Cadastros,Administracao e Governanca,SECRETARIA,org,Administracao / ORG,SIM,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CAD_OPER,Operador de Cadastros,Administracao e Governanca,SECRETARIA,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CAD_OPER,Operador de Cadastros,Administracao e Governanca,SECRETARIA,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CAD_OPER,Operador de Cadastros,Administracao e Governanca,SECRETARIA,nee,NEE,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CAD_OPER,Operador de Cadastros,Administracao e Governanca,SECRETARIA,saude,Saude,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CAD_OPER,Operador de Cadastros,Administracao e Governanca,SECRETARIA,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CAD_OPER,Operador de Cadastros,Administracao e Governanca,SECRETARIA,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CAD_OPER,Operador de Cadastros,Administracao e Governanca,SECRETARIA,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CAD_OPER,Operador de Cadastros,Administracao e Governanca,SECRETARIA,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CAD_OPER,Operador de Cadastros,Administracao e Governanca,SECRETARIA,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CAD_OPER,Operador de Cadastros,Administracao e Governanca,SECRETARIA,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+CAD_OPER,Operador de Cadastros,Administracao e Governanca,SECRETARIA,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+CAD_OPER,Operador de Cadastros,Administracao e Governanca,SECRETARIA,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CAD_OPER,Operador de Cadastros,Administracao e Governanca,SECRETARIA,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CAD_OPER,Operador de Cadastros,Administracao e Governanca,SECRETARIA,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CAD_OPER,Operador de Cadastros,Administracao e Governanca,SECRETARIA,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CAD_OPER,Operador de Cadastros,Administracao e Governanca,SECRETARIA,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CAD_OPER,Operador de Cadastros,Administracao e Governanca,SECRETARIA,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CAD_OPER,Operador de Cadastros,Administracao e Governanca,SECRETARIA,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CAD_OPER,Operador de Cadastros,Administracao e Governanca,SECRETARIA,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CAD_OPER,Operador de Cadastros,Administracao e Governanca,SECRETARIA,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CAD_OPER,Operador de Cadastros,Administracao e Governanca,SECRETARIA,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_SECRETARIO,Secretário de Saúde,Saude,SECRETARIA,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_SECRETARIO,Secretário de Saúde,Saude,SECRETARIA,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_SECRETARIO,Secretário de Saúde,Saude,SECRETARIA,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_SECRETARIO,Secretário de Saúde,Saude,SECRETARIA,nee,NEE,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_SECRETARIO,Secretário de Saúde,Saude,SECRETARIA,saude,Saude,SIM,SIM,SIM,SIM,NAO,SIM,NAO,NAO,SIM
+SAU_SECRETARIO,Secretário de Saúde,Saude,SECRETARIA,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_SECRETARIO,Secretário de Saúde,Saude,SECRETARIA,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_SECRETARIO,Secretário de Saúde,Saude,SECRETARIA,compras,Compras,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_SECRETARIO,Secretário de Saúde,Saude,SECRETARIA,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_SECRETARIO,Secretário de Saúde,Saude,SECRETARIA,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_SECRETARIO,Secretário de Saúde,Saude,SECRETARIA,paineis,Paineis / BI,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_SECRETARIO,Secretário de Saúde,Saude,SECRETARIA,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_SECRETARIO,Secretário de Saúde,Saude,SECRETARIA,rh,RH,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_SECRETARIO,Secretário de Saúde,Saude,SECRETARIA,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_SECRETARIO,Secretário de Saúde,Saude,SECRETARIA,folha,Folha,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_SECRETARIO,Secretário de Saúde,Saude,SECRETARIA,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_SECRETARIO,Secretário de Saúde,Saude,SECRETARIA,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_SECRETARIO,Secretário de Saúde,Saude,SECRETARIA,frota,Frota,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_SECRETARIO,Secretário de Saúde,Saude,SECRETARIA,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_SECRETARIO,Secretário de Saúde,Saude,SECRETARIA,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_SECRETARIO,Secretário de Saúde,Saude,SECRETARIA,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_SECRETARIO,Secretário de Saúde,Saude,SECRETARIA,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_DIRETOR,Diretor de Unidade de Saúde,Saude,UNIDADE,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_DIRETOR,Diretor de Unidade de Saúde,Saude,UNIDADE,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_DIRETOR,Diretor de Unidade de Saúde,Saude,UNIDADE,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_DIRETOR,Diretor de Unidade de Saúde,Saude,UNIDADE,nee,NEE,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_DIRETOR,Diretor de Unidade de Saúde,Saude,UNIDADE,saude,Saude,SIM,SIM,SIM,SIM,NAO,SIM,NAO,NAO,SIM
+SAU_DIRETOR,Diretor de Unidade de Saúde,Saude,UNIDADE,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_DIRETOR,Diretor de Unidade de Saúde,Saude,UNIDADE,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_DIRETOR,Diretor de Unidade de Saúde,Saude,UNIDADE,compras,Compras,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_DIRETOR,Diretor de Unidade de Saúde,Saude,UNIDADE,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_DIRETOR,Diretor de Unidade de Saúde,Saude,UNIDADE,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_DIRETOR,Diretor de Unidade de Saúde,Saude,UNIDADE,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_DIRETOR,Diretor de Unidade de Saúde,Saude,UNIDADE,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_DIRETOR,Diretor de Unidade de Saúde,Saude,UNIDADE,rh,RH,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_DIRETOR,Diretor de Unidade de Saúde,Saude,UNIDADE,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_DIRETOR,Diretor de Unidade de Saúde,Saude,UNIDADE,folha,Folha,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_DIRETOR,Diretor de Unidade de Saúde,Saude,UNIDADE,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_DIRETOR,Diretor de Unidade de Saúde,Saude,UNIDADE,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_DIRETOR,Diretor de Unidade de Saúde,Saude,UNIDADE,frota,Frota,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_DIRETOR,Diretor de Unidade de Saúde,Saude,UNIDADE,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_DIRETOR,Diretor de Unidade de Saúde,Saude,UNIDADE,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_DIRETOR,Diretor de Unidade de Saúde,Saude,UNIDADE,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_DIRETOR,Diretor de Unidade de Saúde,Saude,UNIDADE,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+SAU_COORD,Coordenador de Saúde,Saude,UNIDADE,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_COORD,Coordenador de Saúde,Saude,UNIDADE,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_COORD,Coordenador de Saúde,Saude,UNIDADE,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_COORD,Coordenador de Saúde,Saude,UNIDADE,nee,NEE,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_COORD,Coordenador de Saúde,Saude,UNIDADE,saude,Saude,SIM,SIM,SIM,SIM,NAO,NAO,NAO,NAO,NAO
+SAU_COORD,Coordenador de Saúde,Saude,UNIDADE,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_COORD,Coordenador de Saúde,Saude,UNIDADE,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_COORD,Coordenador de Saúde,Saude,UNIDADE,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_COORD,Coordenador de Saúde,Saude,UNIDADE,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_COORD,Coordenador de Saúde,Saude,UNIDADE,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_COORD,Coordenador de Saúde,Saude,UNIDADE,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+SAU_COORD,Coordenador de Saúde,Saude,UNIDADE,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+SAU_COORD,Coordenador de Saúde,Saude,UNIDADE,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_COORD,Coordenador de Saúde,Saude,UNIDADE,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_COORD,Coordenador de Saúde,Saude,UNIDADE,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_COORD,Coordenador de Saúde,Saude,UNIDADE,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_COORD,Coordenador de Saúde,Saude,UNIDADE,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_COORD,Coordenador de Saúde,Saude,UNIDADE,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_COORD,Coordenador de Saúde,Saude,UNIDADE,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_COORD,Coordenador de Saúde,Saude,UNIDADE,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_COORD,Coordenador de Saúde,Saude,UNIDADE,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_COORD,Coordenador de Saúde,Saude,UNIDADE,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_MEDICO,Médico,Saude,UNIDADE,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_MEDICO,Médico,Saude,UNIDADE,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_MEDICO,Médico,Saude,UNIDADE,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_MEDICO,Médico,Saude,UNIDADE,nee,NEE,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_MEDICO,Médico,Saude,UNIDADE,saude,Saude,SIM,SIM,SIM,SIM,NAO,NAO,NAO,NAO,NAO
+SAU_MEDICO,Médico,Saude,UNIDADE,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_MEDICO,Médico,Saude,UNIDADE,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_MEDICO,Médico,Saude,UNIDADE,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_MEDICO,Médico,Saude,UNIDADE,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_MEDICO,Médico,Saude,UNIDADE,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_MEDICO,Médico,Saude,UNIDADE,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+SAU_MEDICO,Médico,Saude,UNIDADE,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+SAU_MEDICO,Médico,Saude,UNIDADE,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_MEDICO,Médico,Saude,UNIDADE,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_MEDICO,Médico,Saude,UNIDADE,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_MEDICO,Médico,Saude,UNIDADE,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_MEDICO,Médico,Saude,UNIDADE,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_MEDICO,Médico,Saude,UNIDADE,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_MEDICO,Médico,Saude,UNIDADE,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_MEDICO,Médico,Saude,UNIDADE,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_MEDICO,Médico,Saude,UNIDADE,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_MEDICO,Médico,Saude,UNIDADE,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ENFERMEIRO,Enfermeiro,Saude,UNIDADE,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ENFERMEIRO,Enfermeiro,Saude,UNIDADE,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ENFERMEIRO,Enfermeiro,Saude,UNIDADE,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ENFERMEIRO,Enfermeiro,Saude,UNIDADE,nee,NEE,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ENFERMEIRO,Enfermeiro,Saude,UNIDADE,saude,Saude,SIM,SIM,SIM,SIM,NAO,NAO,NAO,NAO,NAO
+SAU_ENFERMEIRO,Enfermeiro,Saude,UNIDADE,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ENFERMEIRO,Enfermeiro,Saude,UNIDADE,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ENFERMEIRO,Enfermeiro,Saude,UNIDADE,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ENFERMEIRO,Enfermeiro,Saude,UNIDADE,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ENFERMEIRO,Enfermeiro,Saude,UNIDADE,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ENFERMEIRO,Enfermeiro,Saude,UNIDADE,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+SAU_ENFERMEIRO,Enfermeiro,Saude,UNIDADE,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+SAU_ENFERMEIRO,Enfermeiro,Saude,UNIDADE,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ENFERMEIRO,Enfermeiro,Saude,UNIDADE,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ENFERMEIRO,Enfermeiro,Saude,UNIDADE,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ENFERMEIRO,Enfermeiro,Saude,UNIDADE,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ENFERMEIRO,Enfermeiro,Saude,UNIDADE,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ENFERMEIRO,Enfermeiro,Saude,UNIDADE,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ENFERMEIRO,Enfermeiro,Saude,UNIDADE,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ENFERMEIRO,Enfermeiro,Saude,UNIDADE,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ENFERMEIRO,Enfermeiro,Saude,UNIDADE,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ENFERMEIRO,Enfermeiro,Saude,UNIDADE,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_TEC_ENF,Técnico de Enfermagem,Saude,UNIDADE,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_TEC_ENF,Técnico de Enfermagem,Saude,UNIDADE,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_TEC_ENF,Técnico de Enfermagem,Saude,UNIDADE,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_TEC_ENF,Técnico de Enfermagem,Saude,UNIDADE,nee,NEE,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_TEC_ENF,Técnico de Enfermagem,Saude,UNIDADE,saude,Saude,SIM,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_TEC_ENF,Técnico de Enfermagem,Saude,UNIDADE,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_TEC_ENF,Técnico de Enfermagem,Saude,UNIDADE,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_TEC_ENF,Técnico de Enfermagem,Saude,UNIDADE,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_TEC_ENF,Técnico de Enfermagem,Saude,UNIDADE,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_TEC_ENF,Técnico de Enfermagem,Saude,UNIDADE,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_TEC_ENF,Técnico de Enfermagem,Saude,UNIDADE,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+SAU_TEC_ENF,Técnico de Enfermagem,Saude,UNIDADE,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+SAU_TEC_ENF,Técnico de Enfermagem,Saude,UNIDADE,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_TEC_ENF,Técnico de Enfermagem,Saude,UNIDADE,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_TEC_ENF,Técnico de Enfermagem,Saude,UNIDADE,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_TEC_ENF,Técnico de Enfermagem,Saude,UNIDADE,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_TEC_ENF,Técnico de Enfermagem,Saude,UNIDADE,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_TEC_ENF,Técnico de Enfermagem,Saude,UNIDADE,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_TEC_ENF,Técnico de Enfermagem,Saude,UNIDADE,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_TEC_ENF,Técnico de Enfermagem,Saude,UNIDADE,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_TEC_ENF,Técnico de Enfermagem,Saude,UNIDADE,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_TEC_ENF,Técnico de Enfermagem,Saude,UNIDADE,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ACS,ACS,Saude,UNIDADE,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ACS,ACS,Saude,UNIDADE,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ACS,ACS,Saude,UNIDADE,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ACS,ACS,Saude,UNIDADE,nee,NEE,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ACS,ACS,Saude,UNIDADE,saude,Saude,SIM,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ACS,ACS,Saude,UNIDADE,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ACS,ACS,Saude,UNIDADE,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ACS,ACS,Saude,UNIDADE,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ACS,ACS,Saude,UNIDADE,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ACS,ACS,Saude,UNIDADE,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ACS,ACS,Saude,UNIDADE,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+SAU_ACS,ACS,Saude,UNIDADE,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+SAU_ACS,ACS,Saude,UNIDADE,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ACS,ACS,Saude,UNIDADE,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ACS,ACS,Saude,UNIDADE,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ACS,ACS,Saude,UNIDADE,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ACS,ACS,Saude,UNIDADE,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ACS,ACS,Saude,UNIDADE,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ACS,ACS,Saude,UNIDADE,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ACS,ACS,Saude,UNIDADE,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ACS,ACS,Saude,UNIDADE,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_ACS,ACS,Saude,UNIDADE,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_RECEPCAO,Recepção de Saúde,Saude,UNIDADE,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_RECEPCAO,Recepção de Saúde,Saude,UNIDADE,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_RECEPCAO,Recepção de Saúde,Saude,UNIDADE,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_RECEPCAO,Recepção de Saúde,Saude,UNIDADE,nee,NEE,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_RECEPCAO,Recepção de Saúde,Saude,UNIDADE,saude,Saude,SIM,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_RECEPCAO,Recepção de Saúde,Saude,UNIDADE,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_RECEPCAO,Recepção de Saúde,Saude,UNIDADE,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_RECEPCAO,Recepção de Saúde,Saude,UNIDADE,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_RECEPCAO,Recepção de Saúde,Saude,UNIDADE,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_RECEPCAO,Recepção de Saúde,Saude,UNIDADE,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_RECEPCAO,Recepção de Saúde,Saude,UNIDADE,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+SAU_RECEPCAO,Recepção de Saúde,Saude,UNIDADE,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+SAU_RECEPCAO,Recepção de Saúde,Saude,UNIDADE,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_RECEPCAO,Recepção de Saúde,Saude,UNIDADE,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_RECEPCAO,Recepção de Saúde,Saude,UNIDADE,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_RECEPCAO,Recepção de Saúde,Saude,UNIDADE,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_RECEPCAO,Recepção de Saúde,Saude,UNIDADE,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_RECEPCAO,Recepção de Saúde,Saude,UNIDADE,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_RECEPCAO,Recepção de Saúde,Saude,UNIDADE,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_RECEPCAO,Recepção de Saúde,Saude,UNIDADE,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_RECEPCAO,Recepção de Saúde,Saude,UNIDADE,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_RECEPCAO,Recepção de Saúde,Saude,UNIDADE,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_REGULACAO,Regulação de Saúde,Saude,UNIDADE,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_REGULACAO,Regulação de Saúde,Saude,UNIDADE,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_REGULACAO,Regulação de Saúde,Saude,UNIDADE,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_REGULACAO,Regulação de Saúde,Saude,UNIDADE,nee,NEE,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_REGULACAO,Regulação de Saúde,Saude,UNIDADE,saude,Saude,SIM,SIM,SIM,SIM,NAO,NAO,NAO,NAO,NAO
+SAU_REGULACAO,Regulação de Saúde,Saude,UNIDADE,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_REGULACAO,Regulação de Saúde,Saude,UNIDADE,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_REGULACAO,Regulação de Saúde,Saude,UNIDADE,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_REGULACAO,Regulação de Saúde,Saude,UNIDADE,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_REGULACAO,Regulação de Saúde,Saude,UNIDADE,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_REGULACAO,Regulação de Saúde,Saude,UNIDADE,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+SAU_REGULACAO,Regulação de Saúde,Saude,UNIDADE,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+SAU_REGULACAO,Regulação de Saúde,Saude,UNIDADE,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_REGULACAO,Regulação de Saúde,Saude,UNIDADE,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_REGULACAO,Regulação de Saúde,Saude,UNIDADE,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_REGULACAO,Regulação de Saúde,Saude,UNIDADE,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_REGULACAO,Regulação de Saúde,Saude,UNIDADE,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_REGULACAO,Regulação de Saúde,Saude,UNIDADE,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_REGULACAO,Regulação de Saúde,Saude,UNIDADE,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_REGULACAO,Regulação de Saúde,Saude,UNIDADE,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_REGULACAO,Regulação de Saúde,Saude,UNIDADE,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_REGULACAO,Regulação de Saúde,Saude,UNIDADE,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_FARMACIA,Farmácia,Saude,UNIDADE,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_FARMACIA,Farmácia,Saude,UNIDADE,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_FARMACIA,Farmácia,Saude,UNIDADE,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_FARMACIA,Farmácia,Saude,UNIDADE,nee,NEE,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_FARMACIA,Farmácia,Saude,UNIDADE,saude,Saude,SIM,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_FARMACIA,Farmácia,Saude,UNIDADE,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_FARMACIA,Farmácia,Saude,UNIDADE,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_FARMACIA,Farmácia,Saude,UNIDADE,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_FARMACIA,Farmácia,Saude,UNIDADE,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_FARMACIA,Farmácia,Saude,UNIDADE,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_FARMACIA,Farmácia,Saude,UNIDADE,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+SAU_FARMACIA,Farmácia,Saude,UNIDADE,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+SAU_FARMACIA,Farmácia,Saude,UNIDADE,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_FARMACIA,Farmácia,Saude,UNIDADE,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_FARMACIA,Farmácia,Saude,UNIDADE,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_FARMACIA,Farmácia,Saude,UNIDADE,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_FARMACIA,Farmácia,Saude,UNIDADE,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_FARMACIA,Farmácia,Saude,UNIDADE,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_FARMACIA,Farmácia,Saude,UNIDADE,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_FARMACIA,Farmácia,Saude,UNIDADE,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_FARMACIA,Farmácia,Saude,UNIDADE,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+SAU_FARMACIA,Farmácia,Saude,UNIDADE,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_SECRETARIO,Secretário de Educação,Educacao,SECRETARIA,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+EDU_SECRETARIO,Secretário de Educação,Educacao,SECRETARIA,educacao,Educacao,SIM,SIM,SIM,SIM,NAO,SIM,NAO,NAO,SIM
+EDU_SECRETARIO,Secretário de Educação,Educacao,SECRETARIA,avaliacoes,Avaliacoes,SIM,SIM,SIM,SIM,NAO,SIM,NAO,NAO,SIM
+EDU_SECRETARIO,Secretário de Educação,Educacao,SECRETARIA,nee,NEE,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+EDU_SECRETARIO,Secretário de Educação,Educacao,SECRETARIA,saude,Saude,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+EDU_SECRETARIO,Secretário de Educação,Educacao,SECRETARIA,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+EDU_SECRETARIO,Secretário de Educação,Educacao,SECRETARIA,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+EDU_SECRETARIO,Secretário de Educação,Educacao,SECRETARIA,compras,Compras,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+EDU_SECRETARIO,Secretário de Educação,Educacao,SECRETARIA,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+EDU_SECRETARIO,Secretário de Educação,Educacao,SECRETARIA,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+EDU_SECRETARIO,Secretário de Educação,Educacao,SECRETARIA,paineis,Paineis / BI,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+EDU_SECRETARIO,Secretário de Educação,Educacao,SECRETARIA,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+EDU_SECRETARIO,Secretário de Educação,Educacao,SECRETARIA,rh,RH,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+EDU_SECRETARIO,Secretário de Educação,Educacao,SECRETARIA,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+EDU_SECRETARIO,Secretário de Educação,Educacao,SECRETARIA,folha,Folha,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+EDU_SECRETARIO,Secretário de Educação,Educacao,SECRETARIA,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+EDU_SECRETARIO,Secretário de Educação,Educacao,SECRETARIA,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+EDU_SECRETARIO,Secretário de Educação,Educacao,SECRETARIA,frota,Frota,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+EDU_SECRETARIO,Secretário de Educação,Educacao,SECRETARIA,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+EDU_SECRETARIO,Secretário de Educação,Educacao,SECRETARIA,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+EDU_SECRETARIO,Secretário de Educação,Educacao,SECRETARIA,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+EDU_SECRETARIO,Secretário de Educação,Educacao,SECRETARIA,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+EDU_DIRETOR,Diretor Escolar,Educacao,UNIDADE,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_DIRETOR,Diretor Escolar,Educacao,UNIDADE,educacao,Educacao,SIM,SIM,SIM,SIM,NAO,NAO,NAO,NAO,NAO
+EDU_DIRETOR,Diretor Escolar,Educacao,UNIDADE,avaliacoes,Avaliacoes,SIM,SIM,SIM,SIM,NAO,NAO,NAO,NAO,NAO
+EDU_DIRETOR,Diretor Escolar,Educacao,UNIDADE,nee,NEE,SIM,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_DIRETOR,Diretor Escolar,Educacao,UNIDADE,saude,Saude,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_DIRETOR,Diretor Escolar,Educacao,UNIDADE,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_DIRETOR,Diretor Escolar,Educacao,UNIDADE,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_DIRETOR,Diretor Escolar,Educacao,UNIDADE,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_DIRETOR,Diretor Escolar,Educacao,UNIDADE,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_DIRETOR,Diretor Escolar,Educacao,UNIDADE,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_DIRETOR,Diretor Escolar,Educacao,UNIDADE,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+EDU_DIRETOR,Diretor Escolar,Educacao,UNIDADE,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+EDU_DIRETOR,Diretor Escolar,Educacao,UNIDADE,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_DIRETOR,Diretor Escolar,Educacao,UNIDADE,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_DIRETOR,Diretor Escolar,Educacao,UNIDADE,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_DIRETOR,Diretor Escolar,Educacao,UNIDADE,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_DIRETOR,Diretor Escolar,Educacao,UNIDADE,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_DIRETOR,Diretor Escolar,Educacao,UNIDADE,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_DIRETOR,Diretor Escolar,Educacao,UNIDADE,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_DIRETOR,Diretor Escolar,Educacao,UNIDADE,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_DIRETOR,Diretor Escolar,Educacao,UNIDADE,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_DIRETOR,Diretor Escolar,Educacao,UNIDADE,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_COORD,Coordenador Pedagógico,Educacao,UNIDADE,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_COORD,Coordenador Pedagógico,Educacao,UNIDADE,educacao,Educacao,SIM,SIM,SIM,SIM,NAO,NAO,NAO,NAO,NAO
+EDU_COORD,Coordenador Pedagógico,Educacao,UNIDADE,avaliacoes,Avaliacoes,SIM,SIM,SIM,SIM,NAO,NAO,NAO,NAO,NAO
+EDU_COORD,Coordenador Pedagógico,Educacao,UNIDADE,nee,NEE,SIM,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_COORD,Coordenador Pedagógico,Educacao,UNIDADE,saude,Saude,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_COORD,Coordenador Pedagógico,Educacao,UNIDADE,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_COORD,Coordenador Pedagógico,Educacao,UNIDADE,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_COORD,Coordenador Pedagógico,Educacao,UNIDADE,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_COORD,Coordenador Pedagógico,Educacao,UNIDADE,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_COORD,Coordenador Pedagógico,Educacao,UNIDADE,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_COORD,Coordenador Pedagógico,Educacao,UNIDADE,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+EDU_COORD,Coordenador Pedagógico,Educacao,UNIDADE,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+EDU_COORD,Coordenador Pedagógico,Educacao,UNIDADE,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_COORD,Coordenador Pedagógico,Educacao,UNIDADE,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_COORD,Coordenador Pedagógico,Educacao,UNIDADE,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_COORD,Coordenador Pedagógico,Educacao,UNIDADE,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_COORD,Coordenador Pedagógico,Educacao,UNIDADE,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_COORD,Coordenador Pedagógico,Educacao,UNIDADE,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_COORD,Coordenador Pedagógico,Educacao,UNIDADE,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_COORD,Coordenador Pedagógico,Educacao,UNIDADE,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_COORD,Coordenador Pedagógico,Educacao,UNIDADE,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_COORD,Coordenador Pedagógico,Educacao,UNIDADE,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_PROF,Professor (Educação),Educacao,PROFESSOR,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_PROF,Professor (Educação),Educacao,PROFESSOR,educacao,Educacao,SIM,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_PROF,Professor (Educação),Educacao,PROFESSOR,avaliacoes,Avaliacoes,SIM,SIM,SIM,SIM,NAO,NAO,NAO,NAO,NAO
+EDU_PROF,Professor (Educação),Educacao,PROFESSOR,nee,NEE,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_PROF,Professor (Educação),Educacao,PROFESSOR,saude,Saude,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_PROF,Professor (Educação),Educacao,PROFESSOR,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_PROF,Professor (Educação),Educacao,PROFESSOR,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_PROF,Professor (Educação),Educacao,PROFESSOR,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_PROF,Professor (Educação),Educacao,PROFESSOR,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_PROF,Professor (Educação),Educacao,PROFESSOR,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_PROF,Professor (Educação),Educacao,PROFESSOR,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+EDU_PROF,Professor (Educação),Educacao,PROFESSOR,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+EDU_PROF,Professor (Educação),Educacao,PROFESSOR,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_PROF,Professor (Educação),Educacao,PROFESSOR,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_PROF,Professor (Educação),Educacao,PROFESSOR,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_PROF,Professor (Educação),Educacao,PROFESSOR,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_PROF,Professor (Educação),Educacao,PROFESSOR,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_PROF,Professor (Educação),Educacao,PROFESSOR,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_PROF,Professor (Educação),Educacao,PROFESSOR,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_PROF,Professor (Educação),Educacao,PROFESSOR,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_PROF,Professor (Educação),Educacao,PROFESSOR,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_PROF,Professor (Educação),Educacao,PROFESSOR,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_SECRETARIA,Secretaria Escolar,Educacao,UNIDADE,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_SECRETARIA,Secretaria Escolar,Educacao,UNIDADE,educacao,Educacao,SIM,SIM,SIM,SIM,NAO,NAO,NAO,NAO,NAO
+EDU_SECRETARIA,Secretaria Escolar,Educacao,UNIDADE,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_SECRETARIA,Secretaria Escolar,Educacao,UNIDADE,nee,NEE,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_SECRETARIA,Secretaria Escolar,Educacao,UNIDADE,saude,Saude,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_SECRETARIA,Secretaria Escolar,Educacao,UNIDADE,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_SECRETARIA,Secretaria Escolar,Educacao,UNIDADE,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_SECRETARIA,Secretaria Escolar,Educacao,UNIDADE,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_SECRETARIA,Secretaria Escolar,Educacao,UNIDADE,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_SECRETARIA,Secretaria Escolar,Educacao,UNIDADE,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_SECRETARIA,Secretaria Escolar,Educacao,UNIDADE,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+EDU_SECRETARIA,Secretaria Escolar,Educacao,UNIDADE,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+EDU_SECRETARIA,Secretaria Escolar,Educacao,UNIDADE,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_SECRETARIA,Secretaria Escolar,Educacao,UNIDADE,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_SECRETARIA,Secretaria Escolar,Educacao,UNIDADE,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_SECRETARIA,Secretaria Escolar,Educacao,UNIDADE,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_SECRETARIA,Secretaria Escolar,Educacao,UNIDADE,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_SECRETARIA,Secretaria Escolar,Educacao,UNIDADE,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_SECRETARIA,Secretaria Escolar,Educacao,UNIDADE,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_SECRETARIA,Secretaria Escolar,Educacao,UNIDADE,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_SECRETARIA,Secretaria Escolar,Educacao,UNIDADE,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_SECRETARIA,Secretaria Escolar,Educacao,UNIDADE,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_TRANSPORTE,Transporte Escolar,Educacao,UNIDADE,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_TRANSPORTE,Transporte Escolar,Educacao,UNIDADE,educacao,Educacao,SIM,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_TRANSPORTE,Transporte Escolar,Educacao,UNIDADE,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_TRANSPORTE,Transporte Escolar,Educacao,UNIDADE,nee,NEE,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_TRANSPORTE,Transporte Escolar,Educacao,UNIDADE,saude,Saude,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_TRANSPORTE,Transporte Escolar,Educacao,UNIDADE,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_TRANSPORTE,Transporte Escolar,Educacao,UNIDADE,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_TRANSPORTE,Transporte Escolar,Educacao,UNIDADE,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_TRANSPORTE,Transporte Escolar,Educacao,UNIDADE,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_TRANSPORTE,Transporte Escolar,Educacao,UNIDADE,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_TRANSPORTE,Transporte Escolar,Educacao,UNIDADE,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+EDU_TRANSPORTE,Transporte Escolar,Educacao,UNIDADE,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+EDU_TRANSPORTE,Transporte Escolar,Educacao,UNIDADE,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_TRANSPORTE,Transporte Escolar,Educacao,UNIDADE,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_TRANSPORTE,Transporte Escolar,Educacao,UNIDADE,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_TRANSPORTE,Transporte Escolar,Educacao,UNIDADE,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_TRANSPORTE,Transporte Escolar,Educacao,UNIDADE,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_TRANSPORTE,Transporte Escolar,Educacao,UNIDADE,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_TRANSPORTE,Transporte Escolar,Educacao,UNIDADE,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_TRANSPORTE,Transporte Escolar,Educacao,UNIDADE,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_TRANSPORTE,Transporte Escolar,Educacao,UNIDADE,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+EDU_TRANSPORTE,Transporte Escolar,Educacao,UNIDADE,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_COORD_MUN,Coordenador Municipal NEE,NEE (Inclusao),MUNICIPAL,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+NEE_COORD_MUN,Coordenador Municipal NEE,NEE (Inclusao),MUNICIPAL,educacao,Educacao,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+NEE_COORD_MUN,Coordenador Municipal NEE,NEE (Inclusao),MUNICIPAL,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+NEE_COORD_MUN,Coordenador Municipal NEE,NEE (Inclusao),MUNICIPAL,nee,NEE,SIM,SIM,SIM,SIM,NAO,SIM,NAO,NAO,SIM
+NEE_COORD_MUN,Coordenador Municipal NEE,NEE (Inclusao),MUNICIPAL,saude,Saude,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+NEE_COORD_MUN,Coordenador Municipal NEE,NEE (Inclusao),MUNICIPAL,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+NEE_COORD_MUN,Coordenador Municipal NEE,NEE (Inclusao),MUNICIPAL,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+NEE_COORD_MUN,Coordenador Municipal NEE,NEE (Inclusao),MUNICIPAL,compras,Compras,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+NEE_COORD_MUN,Coordenador Municipal NEE,NEE (Inclusao),MUNICIPAL,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+NEE_COORD_MUN,Coordenador Municipal NEE,NEE (Inclusao),MUNICIPAL,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+NEE_COORD_MUN,Coordenador Municipal NEE,NEE (Inclusao),MUNICIPAL,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+NEE_COORD_MUN,Coordenador Municipal NEE,NEE (Inclusao),MUNICIPAL,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+NEE_COORD_MUN,Coordenador Municipal NEE,NEE (Inclusao),MUNICIPAL,rh,RH,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+NEE_COORD_MUN,Coordenador Municipal NEE,NEE (Inclusao),MUNICIPAL,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+NEE_COORD_MUN,Coordenador Municipal NEE,NEE (Inclusao),MUNICIPAL,folha,Folha,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+NEE_COORD_MUN,Coordenador Municipal NEE,NEE (Inclusao),MUNICIPAL,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+NEE_COORD_MUN,Coordenador Municipal NEE,NEE (Inclusao),MUNICIPAL,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+NEE_COORD_MUN,Coordenador Municipal NEE,NEE (Inclusao),MUNICIPAL,frota,Frota,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+NEE_COORD_MUN,Coordenador Municipal NEE,NEE (Inclusao),MUNICIPAL,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+NEE_COORD_MUN,Coordenador Municipal NEE,NEE (Inclusao),MUNICIPAL,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+NEE_COORD_MUN,Coordenador Municipal NEE,NEE (Inclusao),MUNICIPAL,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+NEE_COORD_MUN,Coordenador Municipal NEE,NEE (Inclusao),MUNICIPAL,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+NEE_COORD_ESC,Coordenador NEE da Escola,NEE (Inclusao),UNIDADE,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_COORD_ESC,Coordenador NEE da Escola,NEE (Inclusao),UNIDADE,educacao,Educacao,SIM,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_COORD_ESC,Coordenador NEE da Escola,NEE (Inclusao),UNIDADE,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_COORD_ESC,Coordenador NEE da Escola,NEE (Inclusao),UNIDADE,nee,NEE,SIM,SIM,SIM,SIM,NAO,NAO,NAO,NAO,NAO
+NEE_COORD_ESC,Coordenador NEE da Escola,NEE (Inclusao),UNIDADE,saude,Saude,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_COORD_ESC,Coordenador NEE da Escola,NEE (Inclusao),UNIDADE,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_COORD_ESC,Coordenador NEE da Escola,NEE (Inclusao),UNIDADE,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_COORD_ESC,Coordenador NEE da Escola,NEE (Inclusao),UNIDADE,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_COORD_ESC,Coordenador NEE da Escola,NEE (Inclusao),UNIDADE,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_COORD_ESC,Coordenador NEE da Escola,NEE (Inclusao),UNIDADE,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_COORD_ESC,Coordenador NEE da Escola,NEE (Inclusao),UNIDADE,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+NEE_COORD_ESC,Coordenador NEE da Escola,NEE (Inclusao),UNIDADE,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+NEE_COORD_ESC,Coordenador NEE da Escola,NEE (Inclusao),UNIDADE,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_COORD_ESC,Coordenador NEE da Escola,NEE (Inclusao),UNIDADE,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_COORD_ESC,Coordenador NEE da Escola,NEE (Inclusao),UNIDADE,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_COORD_ESC,Coordenador NEE da Escola,NEE (Inclusao),UNIDADE,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_COORD_ESC,Coordenador NEE da Escola,NEE (Inclusao),UNIDADE,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_COORD_ESC,Coordenador NEE da Escola,NEE (Inclusao),UNIDADE,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_COORD_ESC,Coordenador NEE da Escola,NEE (Inclusao),UNIDADE,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_COORD_ESC,Coordenador NEE da Escola,NEE (Inclusao),UNIDADE,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_COORD_ESC,Coordenador NEE da Escola,NEE (Inclusao),UNIDADE,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_COORD_ESC,Coordenador NEE da Escola,NEE (Inclusao),UNIDADE,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_MEDIADOR,Mediador / Apoio NEE,NEE (Inclusao),UNIDADE,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_MEDIADOR,Mediador / Apoio NEE,NEE (Inclusao),UNIDADE,educacao,Educacao,SIM,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_MEDIADOR,Mediador / Apoio NEE,NEE (Inclusao),UNIDADE,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_MEDIADOR,Mediador / Apoio NEE,NEE (Inclusao),UNIDADE,nee,NEE,SIM,SIM,SIM,SIM,NAO,NAO,NAO,NAO,NAO
+NEE_MEDIADOR,Mediador / Apoio NEE,NEE (Inclusao),UNIDADE,saude,Saude,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_MEDIADOR,Mediador / Apoio NEE,NEE (Inclusao),UNIDADE,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_MEDIADOR,Mediador / Apoio NEE,NEE (Inclusao),UNIDADE,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_MEDIADOR,Mediador / Apoio NEE,NEE (Inclusao),UNIDADE,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_MEDIADOR,Mediador / Apoio NEE,NEE (Inclusao),UNIDADE,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_MEDIADOR,Mediador / Apoio NEE,NEE (Inclusao),UNIDADE,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_MEDIADOR,Mediador / Apoio NEE,NEE (Inclusao),UNIDADE,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+NEE_MEDIADOR,Mediador / Apoio NEE,NEE (Inclusao),UNIDADE,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+NEE_MEDIADOR,Mediador / Apoio NEE,NEE (Inclusao),UNIDADE,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_MEDIADOR,Mediador / Apoio NEE,NEE (Inclusao),UNIDADE,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_MEDIADOR,Mediador / Apoio NEE,NEE (Inclusao),UNIDADE,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_MEDIADOR,Mediador / Apoio NEE,NEE (Inclusao),UNIDADE,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_MEDIADOR,Mediador / Apoio NEE,NEE (Inclusao),UNIDADE,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_MEDIADOR,Mediador / Apoio NEE,NEE (Inclusao),UNIDADE,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_MEDIADOR,Mediador / Apoio NEE,NEE (Inclusao),UNIDADE,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_MEDIADOR,Mediador / Apoio NEE,NEE (Inclusao),UNIDADE,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_MEDIADOR,Mediador / Apoio NEE,NEE (Inclusao),UNIDADE,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_MEDIADOR,Mediador / Apoio NEE,NEE (Inclusao),UNIDADE,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_TECNICO,Equipe Técnica NEE,NEE (Inclusao),UNIDADE,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_TECNICO,Equipe Técnica NEE,NEE (Inclusao),UNIDADE,educacao,Educacao,SIM,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_TECNICO,Equipe Técnica NEE,NEE (Inclusao),UNIDADE,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_TECNICO,Equipe Técnica NEE,NEE (Inclusao),UNIDADE,nee,NEE,SIM,SIM,SIM,SIM,NAO,NAO,NAO,NAO,NAO
+NEE_TECNICO,Equipe Técnica NEE,NEE (Inclusao),UNIDADE,saude,Saude,SIM,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_TECNICO,Equipe Técnica NEE,NEE (Inclusao),UNIDADE,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_TECNICO,Equipe Técnica NEE,NEE (Inclusao),UNIDADE,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_TECNICO,Equipe Técnica NEE,NEE (Inclusao),UNIDADE,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_TECNICO,Equipe Técnica NEE,NEE (Inclusao),UNIDADE,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_TECNICO,Equipe Técnica NEE,NEE (Inclusao),UNIDADE,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_TECNICO,Equipe Técnica NEE,NEE (Inclusao),UNIDADE,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+NEE_TECNICO,Equipe Técnica NEE,NEE (Inclusao),UNIDADE,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+NEE_TECNICO,Equipe Técnica NEE,NEE (Inclusao),UNIDADE,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_TECNICO,Equipe Técnica NEE,NEE (Inclusao),UNIDADE,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_TECNICO,Equipe Técnica NEE,NEE (Inclusao),UNIDADE,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_TECNICO,Equipe Técnica NEE,NEE (Inclusao),UNIDADE,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_TECNICO,Equipe Técnica NEE,NEE (Inclusao),UNIDADE,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_TECNICO,Equipe Técnica NEE,NEE (Inclusao),UNIDADE,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_TECNICO,Equipe Técnica NEE,NEE (Inclusao),UNIDADE,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_TECNICO,Equipe Técnica NEE,NEE (Inclusao),UNIDADE,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_TECNICO,Equipe Técnica NEE,NEE (Inclusao),UNIDADE,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+NEE_TECNICO,Equipe Técnica NEE,NEE (Inclusao),UNIDADE,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+DADOS_GESTOR,Gestor de Dados / BI,"Dados, Integracoes e Portal",MUNICIPAL,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_GESTOR,Gestor de Dados / BI,"Dados, Integracoes e Portal",MUNICIPAL,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_GESTOR,Gestor de Dados / BI,"Dados, Integracoes e Portal",MUNICIPAL,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_GESTOR,Gestor de Dados / BI,"Dados, Integracoes e Portal",MUNICIPAL,nee,NEE,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_GESTOR,Gestor de Dados / BI,"Dados, Integracoes e Portal",MUNICIPAL,saude,Saude,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_GESTOR,Gestor de Dados / BI,"Dados, Integracoes e Portal",MUNICIPAL,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_GESTOR,Gestor de Dados / BI,"Dados, Integracoes e Portal",MUNICIPAL,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_GESTOR,Gestor de Dados / BI,"Dados, Integracoes e Portal",MUNICIPAL,compras,Compras,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_GESTOR,Gestor de Dados / BI,"Dados, Integracoes e Portal",MUNICIPAL,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_GESTOR,Gestor de Dados / BI,"Dados, Integracoes e Portal",MUNICIPAL,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_GESTOR,Gestor de Dados / BI,"Dados, Integracoes e Portal",MUNICIPAL,paineis,Paineis / BI,SIM,SIM,SIM,SIM,SIM,SIM,NAO,NAO,SIM
+DADOS_GESTOR,Gestor de Dados / BI,"Dados, Integracoes e Portal",MUNICIPAL,conversor,Conversor de Documentos,SIM,SIM,SIM,SIM,NAO,SIM,NAO,NAO,SIM
+DADOS_GESTOR,Gestor de Dados / BI,"Dados, Integracoes e Portal",MUNICIPAL,rh,RH,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_GESTOR,Gestor de Dados / BI,"Dados, Integracoes e Portal",MUNICIPAL,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_GESTOR,Gestor de Dados / BI,"Dados, Integracoes e Portal",MUNICIPAL,folha,Folha,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_GESTOR,Gestor de Dados / BI,"Dados, Integracoes e Portal",MUNICIPAL,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_GESTOR,Gestor de Dados / BI,"Dados, Integracoes e Portal",MUNICIPAL,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_GESTOR,Gestor de Dados / BI,"Dados, Integracoes e Portal",MUNICIPAL,frota,Frota,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_GESTOR,Gestor de Dados / BI,"Dados, Integracoes e Portal",MUNICIPAL,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_GESTOR,Gestor de Dados / BI,"Dados, Integracoes e Portal",MUNICIPAL,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_GESTOR,Gestor de Dados / BI,"Dados, Integracoes e Portal",MUNICIPAL,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_GESTOR,Gestor de Dados / BI,"Dados, Integracoes e Portal",MUNICIPAL,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_ANALISTA,Analista Setorial,"Dados, Integracoes e Portal",SECRETARIA,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_ANALISTA,Analista Setorial,"Dados, Integracoes e Portal",SECRETARIA,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_ANALISTA,Analista Setorial,"Dados, Integracoes e Portal",SECRETARIA,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_ANALISTA,Analista Setorial,"Dados, Integracoes e Portal",SECRETARIA,nee,NEE,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_ANALISTA,Analista Setorial,"Dados, Integracoes e Portal",SECRETARIA,saude,Saude,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_ANALISTA,Analista Setorial,"Dados, Integracoes e Portal",SECRETARIA,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_ANALISTA,Analista Setorial,"Dados, Integracoes e Portal",SECRETARIA,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_ANALISTA,Analista Setorial,"Dados, Integracoes e Portal",SECRETARIA,compras,Compras,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_ANALISTA,Analista Setorial,"Dados, Integracoes e Portal",SECRETARIA,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_ANALISTA,Analista Setorial,"Dados, Integracoes e Portal",SECRETARIA,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_ANALISTA,Analista Setorial,"Dados, Integracoes e Portal",SECRETARIA,paineis,Paineis / BI,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_ANALISTA,Analista Setorial,"Dados, Integracoes e Portal",SECRETARIA,conversor,Conversor de Documentos,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_ANALISTA,Analista Setorial,"Dados, Integracoes e Portal",SECRETARIA,rh,RH,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_ANALISTA,Analista Setorial,"Dados, Integracoes e Portal",SECRETARIA,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_ANALISTA,Analista Setorial,"Dados, Integracoes e Portal",SECRETARIA,folha,Folha,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_ANALISTA,Analista Setorial,"Dados, Integracoes e Portal",SECRETARIA,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_ANALISTA,Analista Setorial,"Dados, Integracoes e Portal",SECRETARIA,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_ANALISTA,Analista Setorial,"Dados, Integracoes e Portal",SECRETARIA,frota,Frota,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_ANALISTA,Analista Setorial,"Dados, Integracoes e Portal",SECRETARIA,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_ANALISTA,Analista Setorial,"Dados, Integracoes e Portal",SECRETARIA,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_ANALISTA,Analista Setorial,"Dados, Integracoes e Portal",SECRETARIA,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+DADOS_ANALISTA,Analista Setorial,"Dados, Integracoes e Portal",SECRETARIA,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_TI,Admin TI (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_TI,Admin TI (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_TI,Admin TI (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_TI,Admin TI (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,nee,NEE,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_TI,Admin TI (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,saude,Saude,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_TI,Admin TI (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_TI,Admin TI (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_TI,Admin TI (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,compras,Compras,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_TI,Admin TI (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_TI,Admin TI (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,integracoes,Integracoes,SIM,SIM,SIM,SIM,NAO,SIM,NAO,SIM,SIM
+INT_TI,Admin TI (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_TI,Admin TI (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_TI,Admin TI (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,rh,RH,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_TI,Admin TI (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_TI,Admin TI (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,folha,Folha,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_TI,Admin TI (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_TI,Admin TI (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_TI,Admin TI (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,frota,Frota,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_TI,Admin TI (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_TI,Admin TI (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_TI,Admin TI (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_TI,Admin TI (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_GESTAO,Admin Gestão (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_GESTAO,Admin Gestão (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_GESTAO,Admin Gestão (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_GESTAO,Admin Gestão (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,nee,NEE,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_GESTAO,Admin Gestão (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,saude,Saude,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_GESTAO,Admin Gestão (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_GESTAO,Admin Gestão (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_GESTAO,Admin Gestão (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,compras,Compras,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_GESTAO,Admin Gestão (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_GESTAO,Admin Gestão (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,integracoes,Integracoes,SIM,SIM,SIM,SIM,NAO,SIM,NAO,NAO,SIM
+INT_GESTAO,Admin Gestão (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_GESTAO,Admin Gestão (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_GESTAO,Admin Gestão (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,rh,RH,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_GESTAO,Admin Gestão (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_GESTAO,Admin Gestão (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,folha,Folha,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_GESTAO,Admin Gestão (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_GESTAO,Admin Gestão (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_GESTAO,Admin Gestão (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,frota,Frota,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_GESTAO,Admin Gestão (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_GESTAO,Admin Gestão (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_GESTAO,Admin Gestão (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_GESTAO,Admin Gestão (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_LEITOR,Leitor (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_LEITOR,Leitor (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_LEITOR,Leitor (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_LEITOR,Leitor (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,nee,NEE,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_LEITOR,Leitor (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,saude,Saude,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_LEITOR,Leitor (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_LEITOR,Leitor (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_LEITOR,Leitor (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,compras,Compras,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_LEITOR,Leitor (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_LEITOR,Leitor (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,integracoes,Integracoes,SIM,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_LEITOR,Leitor (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_LEITOR,Leitor (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_LEITOR,Leitor (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,rh,RH,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_LEITOR,Leitor (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_LEITOR,Leitor (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,folha,Folha,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_LEITOR,Leitor (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_LEITOR,Leitor (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_LEITOR,Leitor (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,frota,Frota,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_LEITOR,Leitor (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_LEITOR,Leitor (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_LEITOR,Leitor (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+INT_LEITOR,Leitor (Integrações),"Dados, Integracoes e Portal",MUNICIPAL,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,SIM
+PORTAL_ADMIN,Admin Portal,"Dados, Integracoes e Portal",MUNICIPAL,org,Administracao / ORG,SIM,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_ADMIN,Admin Portal,"Dados, Integracoes e Portal",MUNICIPAL,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_ADMIN,Admin Portal,"Dados, Integracoes e Portal",MUNICIPAL,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_ADMIN,Admin Portal,"Dados, Integracoes e Portal",MUNICIPAL,nee,NEE,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_ADMIN,Admin Portal,"Dados, Integracoes e Portal",MUNICIPAL,saude,Saude,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_ADMIN,Admin Portal,"Dados, Integracoes e Portal",MUNICIPAL,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_ADMIN,Admin Portal,"Dados, Integracoes e Portal",MUNICIPAL,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_ADMIN,Admin Portal,"Dados, Integracoes e Portal",MUNICIPAL,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_ADMIN,Admin Portal,"Dados, Integracoes e Portal",MUNICIPAL,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_ADMIN,Admin Portal,"Dados, Integracoes e Portal",MUNICIPAL,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_ADMIN,Admin Portal,"Dados, Integracoes e Portal",MUNICIPAL,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+PORTAL_ADMIN,Admin Portal,"Dados, Integracoes e Portal",MUNICIPAL,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+PORTAL_ADMIN,Admin Portal,"Dados, Integracoes e Portal",MUNICIPAL,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_ADMIN,Admin Portal,"Dados, Integracoes e Portal",MUNICIPAL,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_ADMIN,Admin Portal,"Dados, Integracoes e Portal",MUNICIPAL,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_ADMIN,Admin Portal,"Dados, Integracoes e Portal",MUNICIPAL,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_ADMIN,Admin Portal,"Dados, Integracoes e Portal",MUNICIPAL,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_ADMIN,Admin Portal,"Dados, Integracoes e Portal",MUNICIPAL,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_ADMIN,Admin Portal,"Dados, Integracoes e Portal",MUNICIPAL,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_ADMIN,Admin Portal,"Dados, Integracoes e Portal",MUNICIPAL,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_ADMIN,Admin Portal,"Dados, Integracoes e Portal",MUNICIPAL,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_ADMIN,Admin Portal,"Dados, Integracoes e Portal",MUNICIPAL,portal,Portal da Prefeitura,SIM,SIM,SIM,SIM,SIM,NAO,NAO,SIM,NAO
+PORTAL_EDITOR,Editor de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,org,Administracao / ORG,SIM,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_EDITOR,Editor de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_EDITOR,Editor de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_EDITOR,Editor de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,nee,NEE,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_EDITOR,Editor de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,saude,Saude,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_EDITOR,Editor de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_EDITOR,Editor de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_EDITOR,Editor de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_EDITOR,Editor de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_EDITOR,Editor de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_EDITOR,Editor de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+PORTAL_EDITOR,Editor de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+PORTAL_EDITOR,Editor de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_EDITOR,Editor de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_EDITOR,Editor de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_EDITOR,Editor de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_EDITOR,Editor de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_EDITOR,Editor de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_EDITOR,Editor de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_EDITOR,Editor de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_EDITOR,Editor de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_EDITOR,Editor de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,portal,Portal da Prefeitura,SIM,SIM,SIM,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_APROV,Aprovador de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,org,Administracao / ORG,SIM,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_APROV,Aprovador de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_APROV,Aprovador de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_APROV,Aprovador de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,nee,NEE,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_APROV,Aprovador de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,saude,Saude,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_APROV,Aprovador de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_APROV,Aprovador de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_APROV,Aprovador de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_APROV,Aprovador de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_APROV,Aprovador de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_APROV,Aprovador de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+PORTAL_APROV,Aprovador de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+PORTAL_APROV,Aprovador de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_APROV,Aprovador de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_APROV,Aprovador de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_APROV,Aprovador de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_APROV,Aprovador de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_APROV,Aprovador de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_APROV,Aprovador de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_APROV,Aprovador de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_APROV,Aprovador de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_APROV,Aprovador de Conteúdo,"Dados, Integracoes e Portal",SECRETARIA,portal,Portal da Prefeitura,SIM,SIM,SIM,NAO,SIM,NAO,NAO,NAO,NAO
+PORTAL_DESIGN,Designer / Tema,"Dados, Integracoes e Portal",SECRETARIA,org,Administracao / ORG,SIM,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_DESIGN,Designer / Tema,"Dados, Integracoes e Portal",SECRETARIA,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_DESIGN,Designer / Tema,"Dados, Integracoes e Portal",SECRETARIA,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_DESIGN,Designer / Tema,"Dados, Integracoes e Portal",SECRETARIA,nee,NEE,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_DESIGN,Designer / Tema,"Dados, Integracoes e Portal",SECRETARIA,saude,Saude,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_DESIGN,Designer / Tema,"Dados, Integracoes e Portal",SECRETARIA,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_DESIGN,Designer / Tema,"Dados, Integracoes e Portal",SECRETARIA,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_DESIGN,Designer / Tema,"Dados, Integracoes e Portal",SECRETARIA,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_DESIGN,Designer / Tema,"Dados, Integracoes e Portal",SECRETARIA,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_DESIGN,Designer / Tema,"Dados, Integracoes e Portal",SECRETARIA,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_DESIGN,Designer / Tema,"Dados, Integracoes e Portal",SECRETARIA,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+PORTAL_DESIGN,Designer / Tema,"Dados, Integracoes e Portal",SECRETARIA,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+PORTAL_DESIGN,Designer / Tema,"Dados, Integracoes e Portal",SECRETARIA,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_DESIGN,Designer / Tema,"Dados, Integracoes e Portal",SECRETARIA,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_DESIGN,Designer / Tema,"Dados, Integracoes e Portal",SECRETARIA,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_DESIGN,Designer / Tema,"Dados, Integracoes e Portal",SECRETARIA,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_DESIGN,Designer / Tema,"Dados, Integracoes e Portal",SECRETARIA,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_DESIGN,Designer / Tema,"Dados, Integracoes e Portal",SECRETARIA,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_DESIGN,Designer / Tema,"Dados, Integracoes e Portal",SECRETARIA,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_DESIGN,Designer / Tema,"Dados, Integracoes e Portal",SECRETARIA,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_DESIGN,Designer / Tema,"Dados, Integracoes e Portal",SECRETARIA,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+PORTAL_DESIGN,Designer / Tema,"Dados, Integracoes e Portal",SECRETARIA,portal,Portal da Prefeitura,SIM,SIM,SIM,NAO,NAO,NAO,NAO,SIM,NAO
+CIDADAO,Cidadão (Portal),"Dados, Integracoes e Portal",ALUNO,org,Administracao / ORG,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CIDADAO,Cidadão (Portal),"Dados, Integracoes e Portal",ALUNO,educacao,Educacao,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CIDADAO,Cidadão (Portal),"Dados, Integracoes e Portal",ALUNO,avaliacoes,Avaliacoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CIDADAO,Cidadão (Portal),"Dados, Integracoes e Portal",ALUNO,nee,NEE,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CIDADAO,Cidadão (Portal),"Dados, Integracoes e Portal",ALUNO,saude,Saude,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CIDADAO,Cidadão (Portal),"Dados, Integracoes e Portal",ALUNO,processos,Processos / Protocolo,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CIDADAO,Cidadão (Portal),"Dados, Integracoes e Portal",ALUNO,financeiro,Financeiro,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CIDADAO,Cidadão (Portal),"Dados, Integracoes e Portal",ALUNO,compras,Compras,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CIDADAO,Cidadão (Portal),"Dados, Integracoes e Portal",ALUNO,contratos,Contratos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CIDADAO,Cidadão (Portal),"Dados, Integracoes e Portal",ALUNO,integracoes,Integracoes,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CIDADAO,Cidadão (Portal),"Dados, Integracoes e Portal",ALUNO,paineis,Paineis / BI,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+CIDADAO,Cidadão (Portal),"Dados, Integracoes e Portal",ALUNO,conversor,Conversor de Documentos,NAO,NAO,NAO,NAO,NAO,SIM,NAO,NAO,NAO
+CIDADAO,Cidadão (Portal),"Dados, Integracoes e Portal",ALUNO,rh,RH,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CIDADAO,Cidadão (Portal),"Dados, Integracoes e Portal",ALUNO,ponto,Ponto,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CIDADAO,Cidadão (Portal),"Dados, Integracoes e Portal",ALUNO,folha,Folha,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CIDADAO,Cidadão (Portal),"Dados, Integracoes e Portal",ALUNO,patrimonio,Patrimonio,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CIDADAO,Cidadão (Portal),"Dados, Integracoes e Portal",ALUNO,almoxarifado,Almoxarifado,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CIDADAO,Cidadão (Portal),"Dados, Integracoes e Portal",ALUNO,frota,Frota,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CIDADAO,Cidadão (Portal),"Dados, Integracoes e Portal",ALUNO,ouvidoria,Ouvidoria,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CIDADAO,Cidadão (Portal),"Dados, Integracoes e Portal",ALUNO,tributos,Tributos,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CIDADAO,Cidadão (Portal),"Dados, Integracoes e Portal",ALUNO,billing,Billing / Contrato SaaS,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO
+CIDADAO,Cidadão (Portal),"Dados, Integracoes e Portal",ALUNO,portal,Portal da Prefeitura,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO,NAO

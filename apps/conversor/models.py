@@ -7,8 +7,10 @@ from django.db import models
 class ConversionJob(models.Model):
     class Tipo(models.TextChoices):
         DOCX_TO_PDF = "DOCX_TO_PDF", "DOCX -> PDF"
+        XLSX_TO_PDF = "XLSX_TO_PDF", "Excel -> PDF"
         IMG_TO_PDF = "IMG_TO_PDF", "Imagem -> PDF"
         PDF_TO_IMAGES = "PDF_TO_IMAGES", "PDF -> Imagens"
+        PDF_TO_TEXT = "PDF_TO_TEXT", "PDF -> Texto (TXT)"
         PDF_MERGE = "PDF_MERGE", "Unir PDFs"
         PDF_SPLIT = "PDF_SPLIT", "Separar PDF"
 

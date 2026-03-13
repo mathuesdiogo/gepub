@@ -1,0 +1,212 @@
+.gp-button,
+.btn {
+  --_bg: var(--gp-surface);
+  --_fg: var(--gp-text-primary);
+  --_bd: var(--gp-border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gp-space-2);
+  min-height: 2.5rem;
+  border-radius: var(--gp-radius-sm);
+  border: 1px solid var(--_bd);
+  background: var(--_bg);
+  color: var(--_fg);
+  font-weight: 600;
+  padding: 0 var(--gp-space-3);
+  cursor: pointer;
+  transition: transform var(--gp-transition-fast), background var(--gp-transition-fast), color var(--gp-transition-fast), border-color var(--gp-transition-fast);
+}
+
+.gp-button:hover,
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.gp-button:active,
+.btn:active {
+  transform: translateY(0);
+}
+
+.gp-button:disabled,
+.gp-button[aria-disabled="true"],
+.btn.disabled,
+.btn:disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.gp-button--primary,
+.btn.btn-primary,
+.btn.primary {
+  --_bg: var(--gp-primary);
+  --_fg: var(--gp-on-primary, var(--gp-surface));
+  --_bd: var(--gp-primary);
+}
+
+.gp-button--primary:hover,
+.btn.btn-primary:hover,
+.btn.primary:hover {
+  --_bg: var(--gp-primary-hover);
+  --_bd: var(--gp-primary-hover);
+}
+
+.gp-button--secondary {
+  --_bg: var(--gp-secondary);
+  --_fg: var(--gp-on-secondary, var(--gp-surface));
+  --_bd: var(--gp-secondary);
+}
+
+.gp-button--outline,
+.btn.default {
+  --_bg: transparent;
+  --_fg: var(--gp-primary);
+  --_bd: var(--gp-primary);
+}
+
+.gp-button--ghost,
+.btn--ghost {
+  --_bg: transparent;
+  --_fg: var(--gp-text-primary);
+  --_bd: transparent;
+}
+
+.gp-button--danger,
+.btn.danger {
+  --_bg: var(--gp-danger);
+  --_fg: var(--gp-on-danger, var(--gp-surface));
+  --_bd: var(--gp-danger);
+}
+
+.gp-button--success,
+.btn.success {
+  --_bg: var(--gp-success);
+  --_fg: var(--gp-on-success, var(--gp-surface));
+  --_bd: var(--gp-success);
+}
+
+.gp-button--icon {
+  inline-size: 2.5rem;
+  padding: 0;
+}
+
+.gp-button--sm {
+  min-height: 2rem;
+  padding-inline: var(--gp-space-2);
+  font-size: 0.875rem;
+}
+
+.gp-button--loading,
+.gp-button.is-loading {
+  position: relative;
+  color: transparent;
+}
+
+.gp-button--loading::after,
+.gp-button.is-loading::after {
+  content: "";
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  border: 2px solid var(--gp-surface);
+  border-right-color: transparent;
+  position: absolute;
+  animation: gp-spin 0.8s linear infinite;
+}
+
+.gp-button-group,
+.action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gp-space-2);
+}
+
+.gp-button-dropdown {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.gp-button-dropdown__menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + var(--gp-space-1));
+  min-width: 180px;
+  background: var(--gp-surface);
+  border: 1px solid var(--gp-border);
+  border-radius: var(--gp-radius-sm);
+  box-shadow: var(--gp-shadow-2);
+  z-index: var(--gp-z-dropdown);
+  display: none;
+}
+
+.gp-button-dropdown.is-open .gp-button-dropdown__menu {
+  display: block;
+}
+
+.gp-button-dropdown__menu a {
+  display: block;
+  padding: var(--gp-space-2) var(--gp-space-3);
+}
+
+.gp-button-dropdown__menu a:hover {
+  background: color-mix(in srgb, var(--gp-primary) 8%, var(--gp-surface));
+}
+
+@keyframes gp-spin {
+  to { transform: rotate(360deg); }
+}
+
+.action-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.action-menu__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  min-width: 2rem;
+  border: 1px solid var(--gp-border);
+  border-radius: var(--gp-radius-sm);
+  background: var(--gp-surface);
+  color: var(--gp-text-primary);
+  cursor: pointer;
+}
+
+.action-menu__panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + var(--gp-space-1));
+  min-width: 180px;
+  z-index: var(--gp-z-dropdown);
+  background: var(--gp-surface);
+  border: 1px solid var(--gp-border);
+  border-radius: var(--gp-radius-sm);
+  box-shadow: var(--gp-shadow-2);
+  padding: var(--gp-space-1);
+  display: none;
+}
+
+.action-menu__panel a,
+.action-menu__panel button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: var(--gp-text-primary);
+  border-radius: var(--gp-radius-sm);
+  padding: var(--gp-space-1) var(--gp-space-2);
+}
+
+.action-menu__panel a:hover,
+.action-menu__panel button:hover {
+  background: color-mix(in srgb, var(--gp-primary) 8%, var(--gp-surface));
+}
+
+.action-menu--open .action-menu__panel {
+  display: block;
+}

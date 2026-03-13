@@ -1,0 +1,37 @@
+{% extends "nee/base_modulo.html" %}
+{% block module_title %}NEE • Capacidade{% endblock %}
+
+{% block module_content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title="Relatório — Capacidade de atendimento" subtitle="Alunos NEE ativos por profissional com acompanhamento nos últimos 90 dias." actions=actions %}
+
+  {% if items %}
+    <div class="table-shell">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Município</th>
+            <th>Unidade</th>
+            <th>Alunos NEE ativos</th>
+            <th>Profissionais ativos (90d)</th>
+            <th>Alunos/profissional</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in items %}
+            <tr>
+              <td>{{ i.municipio }}</td>
+              <td><a href="{{ i.url }}">{{ i.unidade }}</a></td>
+              <td>{{ i.total_alunos }}</td>
+              <td>{{ i.profissionais_ativos }}</td>
+              <td>{{ i.alunos_por_profissional }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    {% include "core/partials/components/feedback/empty_state.html" with title="Sem dados" text="Nenhum aluno com necessidade NEE ativa foi encontrado para o escopo atual." %}
+  {% endif %}
+</div></div>
+{% endblock %}

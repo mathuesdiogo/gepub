@@ -1,0 +1,53 @@
+{% extends "core/base_public.html" %}
+{% load static %}
+
+{% block title %}Verificação de login • GEPUB{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/pages/login.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="gepub-login-page">
+  <main class="gepub-login" aria-label="Verificação de segurança GEPUB">
+    <section class="gepub-login__frame">
+      <div class="gepub-login__form-panel">
+        <header class="gepub-auth__head">
+          <p class="gepub-auth__brand">GEPUB Security</p>
+          <h2 class="gepub-auth__title">Confirmação em duas etapas</h2>
+          <p class="gepub-auth__help">Código de acesso: {{ codigo_hint|default:"-" }}</p>
+        </header>
+
+        {% if error %}
+          <div class="gepub-auth__alert" role="alert">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" class="gepub-auth__form">
+          {% csrf_token %}
+          <label for="id_otp_code">Código de verificação</label>
+          <div class="gepub-auth__field">
+            <input
+              id="id_otp_code"
+              type="text"
+              inputmode="numeric"
+              name="otp_code"
+              required
+              maxlength="6"
+              placeholder="Digite o código recebido"
+            >
+          </div>
+          <button type="submit" class="gepub-auth__submit">Validar e entrar</button>
+        </form>
+
+        <form method="post" class="mt-2">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="resend">
+          <button type="submit" class="gepub-auth__secondary">Reenviar código</button>
+        </form>
+
+        <a class="gepub-auth__secondary" href="{% url 'accounts:login' %}">Voltar para login</a>
+      </div>
+    </section>
+  </main>
+</div>
+{% endblock %}

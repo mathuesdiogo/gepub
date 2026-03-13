@@ -89,8 +89,10 @@ def _dataset_turmas(*, turmas_qs):
         "Turno",
         "Modalidade",
         "Etapa",
+        "Série/Ano",
+        "Matriz Curricular",
         "Forma Oferta",
-        "Curso",
+        "Atividade Extra",
         "Classe Especial",
         "Bilíngue Surdos",
         "Unidade",
@@ -113,6 +115,8 @@ def _dataset_turmas(*, turmas_qs):
                 t.get_turno_display() if hasattr(t, "get_turno_display") else (t.turno or ""),
                 t.get_modalidade_display() if hasattr(t, "get_modalidade_display") else (t.modalidade or ""),
                 t.get_etapa_display() if hasattr(t, "get_etapa_display") else (t.etapa or ""),
+                t.get_serie_ano_display() if hasattr(t, "get_serie_ano_display") else (t.serie_ano or ""),
+                getattr(getattr(t, "matriz_curricular", None), "nome", "") or "",
                 t.get_forma_oferta_display() if hasattr(t, "get_forma_oferta_display") else (t.forma_oferta or ""),
                 getattr(getattr(t, "curso", None), "nome", "") or "",
                 "Sim" if getattr(t, "classe_especial", False) else "Não",
@@ -223,7 +227,13 @@ def censo_escolar(request):
 
     turmas_qs = scope_filter_turmas(
         request.user,
-        Turma.objects.select_related("unidade", "unidade__secretaria", "unidade__secretaria__municipio", "curso"),
+        Turma.objects.select_related(
+            "unidade",
+            "unidade__secretaria",
+            "unidade__secretaria__municipio",
+            "curso",
+            "matriz_curricular",
+        ),
     ).filter(ano_letivo=ano)
 
     if unidade_id.isdigit() and unidades_options_qs.filter(pk=int(unidade_id)).exists():

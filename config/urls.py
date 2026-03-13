@@ -19,6 +19,7 @@ urlpatterns = [
     path("compras/", include(("apps.compras.urls", "compras"), namespace="compras")),
     path("contratos/", include(("apps.contratos.urls", "contratos"), namespace="contratos")),
     path("integracoes/", include(("apps.integracoes.urls", "integracoes"), namespace="integracoes")),
+    path("comunicacao/", include(("apps.comunicacao.urls", "comunicacao"), namespace="comunicacao")),
     path("paineis/", include(("apps.paineis.urls", "paineis"), namespace="paineis")),
     path("conversor/", include(("apps.conversor.urls", "conversor"), namespace="conversor")),
     path("rh/", include(("apps.rh.urls", "rh"), namespace="rh")),
@@ -29,6 +30,7 @@ urlpatterns = [
     path("frota/", include(("apps.frota.urls", "frota"), namespace="frota")),
     path("ouvidoria/", include(("apps.ouvidoria.urls", "ouvidoria"), namespace="ouvidoria")),
     path("tributos/", include(("apps.tributos.urls", "tributos"), namespace="tributos")),
+    path("camara-admin/", include(("apps.camara.urls", "camara"), namespace="camara")),
 
     # raiz
     path("", include(("apps.core.urls", "core"), namespace="core")),

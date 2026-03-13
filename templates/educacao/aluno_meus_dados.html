@@ -1,0 +1,152 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Meus dados • {{ aluno.nome }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-data-page">
+  {% include "core/partials/components/layout/page_head.html" with title=aluno.nome subtitle="Meus dados acadêmicos detalhados" actions=actions %}
+
+  <article class="gp-student-data-card gp-student-data-card--identity">
+    <div class="gp-student-data-identity">
+      <div class="gp-student-data-identity__avatar">
+        {% if aluno.foto %}
+          <img src="{{ aluno.foto.url }}" alt="{{ aluno.nome }}">
+        {% else %}
+          <i class="fa-solid fa-user-graduate" aria-hidden="true"></i>
+        {% endif %}
+      </div>
+      <div class="gp-student-data-identity__meta">
+        <div><span>Nome:</span><strong>{{ aluno.nome }}</strong></div>
+        <div><span>Código:</span><strong>{{ code_value|default:aluno.pk }}</strong></div>
+        <div><span>Ingresso:</span><strong>{{ ingresso }}</strong></div>
+        <div><span>Usuário:</span><strong>{{ aluno_username|default:"—" }}</strong></div>
+        <div><span>E-mail acadêmico:</span><strong>{{ aluno_email|default:"—" }}</strong></div>
+        <div><span>CPF:</span><strong>{{ aluno.cpf|default:"—" }}</strong></div>
+        <div><span>I.R.A.:</span><strong>{% if ira is not None %}{{ ira }}{% else %}—{% endif %}</strong></div>
+        <div><span>Situação sistêmica:</span><strong>{{ situacao_sistemica }}</strong></div>
+      </div>
+    </div>
+  </article>
+
+  <nav class="gp-student-data-tabs gp-pills" aria-label="Atalhos de dados">
+    <a class="gp-pills__item" href="#bloco-matriculas">Matrículas em períodos</a>
+    <a class="gp-pills__item" href="#bloco-observacoes">Observações gerais</a>
+    <a class="gp-pills__item" href="#bloco-academico">Dados acadêmicos</a>
+    <a class="gp-pills__item" href="#bloco-base">Base pedagógica</a>
+  </nav>
+
+  <div class="gp-student-data-accordion">
+    <details id="bloco-matriculas" class="gp-student-data-panel" open>
+      <summary>
+        <span>Matrículas em períodos</span>
+        <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+      </summary>
+      <div class="gp-student-data-panel__body">
+        {% if matriculas_extra_count > 0 %}
+          <div class="gp-alert gp-alert--info">
+            Exibindo {{ rows_matriculas_resumo|length }} de {{ matriculas_total }} matrículas.
+            Para ver tudo, use o botão <strong>Histórico completo</strong>.
+          </div>
+        {% endif %}
+        <div class="gp-student-data-filters">
+          <label class="gp-checkbox">
+            <input type="checkbox" disabled>
+            Exibir percentual de frequência e I.R.A nos períodos
+          </label>
+        </div>
+        <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover">
+          <div class="gp-table__body">
+            <table class="gp-table__native">
+              <thead>
+                <tr>
+                  <th>Período</th>
+                  <th>Ano/Período Letivo</th>
+                  <th>Turma</th>
+                  <th>Situação no período</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in rows_matriculas_resumo %}
+                  <tr>
+                    <td>{{ row.periodo }}</td>
+                    <td>{{ row.ano_periodo }}</td>
+                    <td>{{ row.turma }}</td>
+                    <td>{{ row.situacao }}</td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="4">Nenhuma matrícula cadastrada para este aluno.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <details id="bloco-observacoes" class="gp-student-data-panel" open>
+      <summary>
+        <span>Observações gerais</span>
+        <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+      </summary>
+      <div class="gp-student-data-panel__body">
+        {% if observacoes %}
+          <ul class="gp-student-data-list">
+            {% for obs in observacoes_resumo %}
+              <li>{{ obs }}</li>
+            {% endfor %}
+          </ul>
+          {% if observacoes_extra_count > 0 %}
+            <div class="gp-alert gp-alert--info">
+              Exibindo {{ observacoes_resumo|length }} de {{ observacoes_total }} observações.
+            </div>
+          {% endif %}
+        {% else %}
+          <div class="gp-alert gp-alert--warning">
+            Nenhuma observação cadastrada.
+          </div>
+        {% endif %}
+      </div>
+    </details>
+
+    <details id="bloco-academico" class="gp-student-data-panel">
+      <summary>
+        <span>Dados acadêmicos</span>
+        <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+      </summary>
+      <div class="gp-student-data-panel__body">
+        <dl class="gp-student-data-grid">
+          <div><dt>Aluno:</dt><dd>{{ aluno.nome }}</dd></div>
+          <div><dt>Código:</dt><dd>{{ code_value|default:aluno.pk }}</dd></div>
+          <div><dt>Ingresso:</dt><dd>{{ ingresso }}</dd></div>
+          <div><dt>CPF:</dt><dd>{{ aluno.cpf|default:"—" }}</dd></div>
+          <div><dt>E-mail acadêmico:</dt><dd>{{ aluno_email|default:"—" }}</dd></div>
+          <div><dt>I.R.A.:</dt><dd>{% if ira is not None %}{{ ira }}{% else %}—{% endif %}</dd></div>
+          <div><dt>Qtd. períodos:</dt><dd>{{ rows_matriculas|length }}</dd></div>
+          <div><dt>Situação sistêmica:</dt><dd>{{ situacao_sistemica }}</dd></div>
+        </dl>
+      </div>
+    </details>
+
+    <details id="bloco-base" class="gp-student-data-panel">
+      <summary>
+        <span>Base pedagógica</span>
+        <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+      </summary>
+      <div class="gp-student-data-panel__body">
+        <dl class="gp-student-data-grid">
+          <div><dt>Matriz curricular:</dt><dd>{% if matriz_ref %}{{ matriz_ref.nome }}{% else %}—{% endif %}</dd></div>
+          <div><dt>Etapa:</dt><dd>{% if matriz_ref %}{{ matriz_ref.get_etapa_base_display }}{% else %}—{% endif %}</dd></div>
+          <div><dt>Série/Ano:</dt><dd>{% if matriz_ref %}{{ matriz_ref.get_serie_ano_display }}{% else %}—{% endif %}</dd></div>
+          <div><dt>Ano referência:</dt><dd>{% if matriz_ref %}{{ matriz_ref.ano_referencia }}{% else %}—{% endif %}</dd></div>
+          <div><dt>Atividade extra:</dt><dd>{% if curso_ref %}{{ curso_ref.nome }}{% else %}—{% endif %}</dd></div>
+          <div><dt>Modalidade extra:</dt><dd>{% if curso_ref %}{{ curso_ref.get_modalidade_oferta_display }}{% else %}—{% endif %}</dd></div>
+          <div><dt>Documentos:</dt><dd>{{ docs_count }}</dd></div>
+          <div><dt>Certificados:</dt><dd>{{ cert_count }}</dd></div>
+          <div><dt>Atividade ativa:</dt><dd>{% if curso_ref and curso_ref.ativo %}Sim{% else %}Não{% endif %}</dd></div>
+        </dl>
+      </div>
+    </details>
+  </div>
+</section>
+{% endblock %}

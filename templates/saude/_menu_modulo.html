@@ -29,6 +29,11 @@
           <i class="fa-solid fa-people-line" aria-hidden="true"></i><span>Fila de Espera</span>
         </a>
       </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link {% if 'portal_' in route %}is-active{% endif %}" href="{% url 'saude:portal_inscritos_list' %}">
+          <i class="fa-solid fa-file-circle-check" aria-hidden="true"></i><span>Portal Inscritos</span>
+        </a>
+      </li>
     </ul>
   </div>
 

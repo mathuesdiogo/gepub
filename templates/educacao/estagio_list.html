@@ -1,0 +1,10 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Estágios • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="gp-card"><div class="gp-card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Estágios" subtitle="Gestão de estágios obrigatórios e não obrigatórios" actions=actions %}
+{% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Aluno, concedente, CNPJ, matrícula..." action_url=action_url clear_url=clear_url extra_filters=extra_filters has_filters=has_filters %}
+{% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q empty_title="Nenhum estágio encontrado" empty_text="Cadastre ou ajuste os filtros para visualizar estágios." %}
+</div></div>
+{% endblock %}

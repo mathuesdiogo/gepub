@@ -1,0 +1,66 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Turmas de Informática • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+  <div class="gp-card edu-card-highlight u-mb-12">
+    <div class="gp-card__body">
+      {% include "core/partials/components/layout/page_head.html" with title="Turmas de Informática" subtitle="Turmas com 2 encontros semanais e limite de 12 alunos" actions=actions %}
+
+      <section class="edu-kpis">
+        <article class="edu-kpi">
+          <div>
+            <div class="edu-kpi__label">Turmas no filtro</div>
+            <div class="edu-kpi__value">{{ total_turmas }}</div>
+            <div class="edu-kpi__meta">Planejadas e ativas</div>
+          </div>
+          <div class="edu-kpi__icon"><i class="fa-solid fa-people-group"></i></div>
+        </article>
+        <article class="edu-kpi">
+          <div>
+            <div class="edu-kpi__label">Turmas ativas</div>
+            <div class="edu-kpi__value">{{ total_turmas_ativas }}</div>
+            <div class="edu-kpi__meta">Em operação</div>
+          </div>
+          <div class="edu-kpi__icon"><i class="fa-solid fa-play"></i></div>
+        </article>
+        <article class="edu-kpi">
+          <div>
+            <div class="edu-kpi__label">Turmas planejadas</div>
+            <div class="edu-kpi__value">{{ total_turmas_planejadas }}</div>
+            <div class="edu-kpi__meta">Prontas para iniciar</div>
+          </div>
+          <div class="edu-kpi__icon"><i class="fa-solid fa-clipboard-list"></i></div>
+        </article>
+        <article class="edu-kpi">
+          <div>
+            <div class="edu-kpi__label">Vagas disponíveis</div>
+            <div class="edu-kpi__value">{{ vagas_disponiveis }}</div>
+            <div class="edu-kpi__meta">No conjunto filtrado</div>
+          </div>
+          <div class="edu-kpi__icon"><i class="fa-solid fa-chair"></i></div>
+        </article>
+      </section>
+    </div>
+  </div>
+
+  <div class="gp-card">
+    <div class="gp-card__body">
+      <h3 class="section__title u-mb-8">Listagem e filtros</h3>
+      <p class="section__meta u-mb-10">Filtre por código, curso, laboratório, instrutor e status para localizar rapidamente cada turma.</p>
+
+      <form method="get" class="gp-form gp-form--inline filter-bar u-mb-10">
+        <input type="text" class="gp-input" name="q" placeholder="Código, curso, laboratório ou instrutor" value="{{ q }}">
+        <select class="gp-input" name="status">
+          <option value="">Todos os status</option>
+          {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
+        <a class="gp-button gp-button--outline" href="{{ request.path }}">Limpar</a>
+      </form>
+
+      {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q empty_title="Nenhuma turma cadastrada" empty_text="Crie a turma e defina os 2 encontros semanais." %}
+    </div>
+  </div>
+{% endblock %}

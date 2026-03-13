@@ -38,3 +38,20 @@ class ConversionJobFormTests(SimpleTestCase):
             ),
         )
         self.assertTrue(form.is_valid(), form.errors)
+
+    def test_xlsx_to_pdf_requires_excel_file(self):
+        file1 = SimpleUploadedFile("a.pdf", b"%PDF-1.7", content_type="application/pdf")
+        form = ConversionJobForm(
+            data={"tipo": "XLSX_TO_PDF"},
+            files=MultiValueDict({"input_file": [file1]}),
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("input_file", form.errors)
+
+    def test_pdf_to_text_accepts_pdf(self):
+        file1 = SimpleUploadedFile("a.pdf", b"%PDF-1.7", content_type="application/pdf")
+        form = ConversionJobForm(
+            data={"tipo": "PDF_TO_TEXT"},
+            files=MultiValueDict({"input_file": [file1]}),
+        )
+        self.assertTrue(form.is_valid(), form.errors)

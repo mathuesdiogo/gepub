@@ -1,59 +1,100 @@
 {% extends "core/base.html" %}
+{% load static %}
 
 {% block content %}
-<div class="card"><div class="card__body">
+<div class="bi-shell">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <div class="detail-summary" style="margin-top:12px;">
-    <div><strong>Status:</strong> {{ dataset.get_status_display }}</div>
-    <div><strong>Categoria:</strong> {{ dataset.categoria|default:"-" }}</div>
-    <div><strong>Fonte:</strong> {{ dataset.get_fonte_display }}</div>
-    <div><strong>Visibilidade:</strong> {{ dataset.get_visibilidade_display }}</div>
-    {% if version %}
-      <div><strong>Versão atual:</strong> v{{ version.numero }} ({{ version.get_status_display }})</div>
-      <div><strong>Linhas:</strong> {{ profile.row_count|default:0 }}</div>
-      <div><strong>Colunas:</strong> {{ profile.column_count|default:0 }}</div>
-    {% endif %}
-  </div>
+  <section class="bi-kpi-grid">
+    <article class="bi-kpi bi-kpi--neutral">
+      <span class="bi-kpi__label">Status</span>
+      <strong class="bi-kpi__value bi-kpi__value--sm">{{ dataset.get_status_display }}</strong>
+    </article>
+    <article class="bi-kpi bi-kpi--valid">
+      <span class="bi-kpi__label">Versão atual</span>
+      <strong class="bi-kpi__value bi-kpi__value--sm">{% if version %}v{{ version.numero }}{% else %}-{% endif %}</strong>
+    </article>
+    <article class="bi-kpi bi-kpi--public">
+      <span class="bi-kpi__label">Linhas</span>
+      <strong class="bi-kpi__value">{{ profile.row_count|default:0 }}</strong>
+    </article>
+    <article class="bi-kpi bi-kpi--draft">
+      <span class="bi-kpi__label">Colunas</span>
+      <strong class="bi-kpi__value">{{ profile.column_count|default:0 }}</strong>
+    </article>
+    <article class="bi-kpi bi-kpi--archived">
+      <span class="bi-kpi__label">Visibilidade</span>
+      <strong class="bi-kpi__value bi-kpi__value--sm">{{ dataset.get_visibilidade_display }}</strong>
+    </article>
+  </section>
 
   {% if version and version.logs %}
-    <div class="alert alert--warning" style="margin-top:12px;">
-      {{ version.logs|linebreaksbr }}
-    </div>
+    <section class="bi-panel bi-panel--warning">
+      <h3>Observações de processamento</h3>
+      <p>{{ version.logs|linebreaksbr }}</p>
+    </section>
   {% endif %}
 
-  {% if version %}
-    <div class="card" style="margin-top:12px;"><div class="card__body">
-      <h3 style="margin-top:0;">Dicionário de dados</h3>
-      <div class="table-shell"><div class="table-shell__body">
-        <table class="table">
-          <thead><tr><th>Coluna</th><th>Tipo</th><th>Papel</th><th>Sensível</th><th>Amostra</th></tr></thead>
-          <tbody>
-            {% for col in columns %}
-              <tr>
-                <td>{{ col.nome }}</td>
-                <td>{{ col.get_tipo_display }}</td>
-                <td>{{ col.get_papel_display }}</td>
-                <td>{% if col.sensivel %}Sim{% else %}Não{% endif %}</td>
-                <td>{{ col.amostra|default:"-" }}</td>
-              </tr>
-            {% empty %}
-              <tr><td colspan="5">Sem colunas mapeadas.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div></div>
-
+  <section class="bi-panel">
+    <div class="bi-panel__head bi-panel__head--inline">
+      <div>
+        <h3>Dicionário de dados</h3>
+        <p>Mapeamento automático de tipos, papéis analíticos e sensibilidade.</p>
+      </div>
       {% if dataset.status != 'PUBLICADO' %}
-        <form method="post" action="{% url 'paineis:dataset_publish' dataset.id %}" style="margin-top:12px;">
+        <form method="post" action="{% url 'paineis:dataset_publish' dataset.id %}" class="bi-publish-checklist">
           {% csrf_token %}
-          <button class="btn btn-primary" type="submit"><i class="fa-solid fa-globe"></i> Publicar dataset</button>
+          <label class="small">
+            <input type="checkbox" name="check_quality" value="1" required>
+            Qualidade revisada (nulos, duplicidade e amostras conferidas)
+          </label>
+          <label class="small">
+            <input type="checkbox" name="check_lgpd" value="1" required>
+            Checklist LGPD concluído (sem dado sensível indevido)
+          </label>
+          <label class="small">
+            <input type="checkbox" name="check_publication_rules" value="1" required>
+            Regras de publicação/transparência aprovadas
+          </label>
+          <button class="gp-button gp-button--primary gp-button--sm" type="submit">
+            <i class="fa-solid fa-globe"></i>
+            Publicar dataset
+          </button>
         </form>
       {% endif %}
-    </div></div>
+    </div>
 
-    <div class="card" style="margin-top:12px;"><div class="card__body">
-      <h3 style="margin-top:0;">Pré-visualização</h3>
+    <div class="table-shell"><div class="table-shell__body">
+      <table class="table">
+        <thead><tr><th>Coluna</th><th>Tipo</th><th>Papel</th><th>Sensível</th><th>Amostra</th></tr></thead>
+        <tbody>
+          {% for col in columns %}
+            <tr>
+              <td>{{ col.nome }}</td>
+              <td>{{ col.get_tipo_display }}</td>
+              <td>{{ col.get_papel_display }}</td>
+              <td>
+                <span class="bi-badge {% if col.sensivel %}bi-badge--danger{% else %}bi-badge--ok{% endif %}">
+                  {% if col.sensivel %}Sim{% else %}Não{% endif %}
+                </span>
+              </td>
+              <td>{{ col.amostra|default:"-" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5">Sem colunas mapeadas.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </section>
+
+  {% if version %}
+    <section class="bi-panel">
+      <div class="bi-panel__head">
+        <h3>Pré-visualização do dataset</h3>
+        <p>Amostra dos dados já tratados para o dashboard.</p>
+      </div>
+
       <div class="table-shell"><div class="table-shell__body">
         <table class="table">
           <thead>
@@ -76,7 +117,7 @@
           </tbody>
         </table>
       </div></div>
-    </div></div>
+    </section>
   {% endif %}
-</div></div>
+</div>
 {% endblock %}

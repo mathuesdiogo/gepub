@@ -4,7 +4,7 @@ from urllib.parse import urlencode
 
 from django.contrib.auth import get_user_model
 
-from apps.core.rbac import get_profile, is_admin
+from apps.core.rbac import can, get_profile, is_admin
 from apps.org.models import Municipio, Secretaria, Setor, Unidade
 from .models import UserManagementAudit
 
@@ -15,7 +15,7 @@ def can_manage_users(user) -> bool:
     if is_admin(user):
         return True
     p = get_profile(user)
-    return bool(p and p.ativo and p.role in {"MUNICIPAL", "SECRETARIA", "UNIDADE"})
+    return bool(p and p.ativo and can(user, "accounts.manage_users"))
 
 
 def scope_users_queryset(request):

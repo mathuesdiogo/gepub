@@ -1,0 +1,64 @@
+{% extends "educacao/base_modulo.html" %}
+{% load gepub_ui %}
+{% block title %}Pesquisa • {{ aluno.nome }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <article class="gp-student-stage__card">
+    <h3>Editais de pesquisa e inovação</h3>
+    <ul class="gp-student-list">
+      {% for e in editais %}
+        <li class="gp-student-list__item">
+          <strong>{{ e.numero_ano }} • {{ e.titulo }}</strong>
+          <p>{{ e.get_status_display }}{% if e.beneficio %} • {{ e.beneficio.nome }}{% endif %}</p>
+          {% with inscr=inscricoes_map|get_item:e.id %}
+            {% if inscr %}
+              <small>Inscrição: {{ inscr.get_status_display }} • Pontuação {{ inscr.pontuacao }}</small>
+            {% else %}
+              <form method="post" class="gp-inline-form gp-mt-2">
+                {% csrf_token %}
+                <input type="hidden" name="form_kind" value="inscrever_pesquisa">
+                <input type="hidden" name="edital_id" value="{{ e.id }}">
+                <button type="submit" class="gp-button gp-button--outline">Inscrever projeto</button>
+              </form>
+            {% endif %}
+          {% endwith %}
+        </li>
+      {% empty %}
+        <li class="gp-student-empty">Nenhum edital disponível no momento.</li>
+      {% endfor %}
+    </ul>
+  </article>
+
+  <div class="gp-grid-2 gp-student-stage__grid">
+    <article class="gp-student-stage__card">
+      <h3>Projetos</h3>
+      <ul class="gp-student-data-list">
+        {% for i in inscricoes %}
+          <li><strong>{{ i.edital.titulo }}</strong> • Status {{ i.get_status_display }} • {{ i.data_hora|date:"d/m/Y H:i" }}</li>
+        {% empty %}
+          <li>Você ainda não possui projetos/inscrições em pesquisa.</li>
+        {% endfor %}
+      </ul>
+    </article>
+
+    <article class="gp-student-stage__card">
+      <h3>Avaliações</h3>
+      <ul class="gp-student-data-list">
+        {% for a in avaliacoes %}
+          <li>
+            <strong>{{ a.inscricao.edital.numero_ano }}</strong>
+            • {{ a.status }}
+            • Pontuação {{ a.pontuacao }}
+            {% if a.recurso %}• Recurso {{ a.recurso.get_status_display }}{% endif %}
+          </li>
+        {% empty %}
+          <li>Sem avaliações vinculadas até o momento.</li>
+        {% endfor %}
+      </ul>
+    </article>
+  </div>
+</section>
+{% endblock %}

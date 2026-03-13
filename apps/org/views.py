@@ -38,18 +38,17 @@ def index(request):
 
     steps_total = steps_qs.count()
     steps_concluidos = steps_qs.filter(status=OnboardingStep.Status.CONCLUIDO).count()
+    steps_pendentes = max(steps_total - steps_concluidos, 0)
     progress_pct = int((steps_concluidos / steps_total) * 100) if steps_total else 0
 
     actions = [
-        {"label": "Onboarding Inicial", "url": "/org/onboarding/primeiro-acesso/", "icon": "fa-solid fa-wand-magic-sparkles", "variant": "btn-primary"},
-        {"label": "Painel de Onboarding", "url": "/org/onboarding/painel/", "icon": "fa-solid fa-list-check", "variant": "btn--ghost"},
-        {"label": "Municípios", "url": "/org/municipios/", "icon": "fa-solid fa-city", "variant": "btn--ghost"},
-        {"label": "Secretarias", "url": "/org/secretarias/", "icon": "fa-solid fa-building-columns", "variant": "btn--ghost"},
-        {"label": "Unidades", "url": "/org/unidades/", "icon": "fa-solid fa-school", "variant": "btn--ghost"},
-        {"label": "Setores", "url": "/org/setores/", "icon": "fa-solid fa-sitemap", "variant": "btn--ghost"},
+        {
+            "label": "Assistente guiado",
+            "url": "/org/onboarding/",
+            "icon": "fa-solid fa-wand-magic-sparkles",
+            "variant": "btn-primary",
+        }
     ]
-    if can(request.user, "org.manage_secretaria"):
-        actions.insert(2, {"label": "Governança", "url": "/org/secretarias/governanca/", "icon": "fa-solid fa-sliders", "variant": "btn--ghost"})
 
     return render(request, "org/index.html", {
         "stats": {
@@ -60,6 +59,7 @@ def index(request):
             "modulos_ativos": modulos_ativos_qs.count(),
             "onboarding_total": steps_total,
             "onboarding_concluidos": steps_concluidos,
+            "onboarding_pendentes": steps_pendentes,
             "onboarding_progress_pct": progress_pct,
             "provisionamentos_total": provisionamentos_qs.count(),
         },

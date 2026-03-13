@@ -4,8 +4,8 @@ from .models import Profile, UserManagementAudit
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
-    list_display = ("user", "role", "municipio", "secretaria", "unidade", "setor", "ativo", "bloqueado")
-    list_filter = ("role", "ativo", "bloqueado", "municipio", "secretaria", "unidade")
+    list_display = ("user", "role", "municipio", "secretaria", "unidade", "setor", "ui_theme", "ativo", "bloqueado")
+    list_filter = ("role", "ui_theme", "ativo", "bloqueado", "municipio", "secretaria", "unidade")
     search_fields = ("user__username", "user__email", "user__first_name", "user__last_name")
 
 

@@ -84,11 +84,11 @@
       </div>
 
       <div class="form-shell__actions">
-        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Salvar</button>
+        <button type="submit" class="gp-button gp-button--primary"><i class="fa-solid fa-check"></i> Salvar</button>
         {% if mode == "update" and u %}
-          <a class="btn btn--ghost" href="{% url 'accounts:usuario_detail' u.id %}">Detalhes</a>
+          <a class="gp-button gp-button--outline" href="{% url 'accounts:usuario_detail' u.id %}">Detalhes</a>
         {% endif %}
-        <a class="btn btn--ghost" href="{% url 'accounts:usuarios_list' %}">Cancelar</a>
+        <a class="gp-button gp-button--outline" href="{% url 'accounts:usuarios_list' %}">Cancelar</a>
       </div>
     </form>
 
@@ -119,6 +119,114 @@
   }
   roleSelect.addEventListener('change', syncVisibility);
   syncVisibility();
+})();
+
+(function () {
+  const municipioSelect = document.getElementById("id_municipio");
+  const secretariaSelect = document.getElementById("id_secretaria");
+  const unidadeSelect = document.getElementById("id_unidade");
+  const setorSelect = document.getElementById("id_setor");
+  if (!municipioSelect || !secretariaSelect || !unidadeSelect || !setorSelect) return;
+
+  const secretariasData = [
+    {% for secretaria in form.fields.secretaria.queryset %}
+      {id: "{{ secretaria.id }}", nome: "{{ secretaria.nome|escapejs }}", municipioId: "{{ secretaria.municipio_id }}"},
+    {% endfor %}
+  ];
+  const unidadesData = [
+    {% for unidade in form.fields.unidade.queryset %}
+      {id: "{{ unidade.id }}", nome: "{{ unidade.nome|escapejs }}", secretariaId: "{{ unidade.secretaria_id }}", municipioId: "{{ unidade.secretaria.municipio_id }}"},
+    {% endfor %}
+  ];
+  const setoresData = [
+    {% for setor in form.fields.setor.queryset %}
+      {id: "{{ setor.id }}", nome: "{{ setor.nome|escapejs }}", unidadeId: "{{ setor.unidade_id }}", secretariaId: "{{ setor.unidade.secretaria_id }}", municipioId: "{{ setor.unidade.secretaria.municipio_id }}"},
+    {% endfor %}
+  ];
+
+  function repopulateSelect(selectEl, options, selectedValue, placeholderLabel) {
+    const selected = String(selectedValue || "");
+    selectEl.innerHTML = "";
+
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = placeholderLabel;
+    selectEl.appendChild(placeholder);
+
+    for (const item of options) {
+      const option = document.createElement("option");
+      option.value = String(item.id);
+      option.textContent = item.nome;
+      selectEl.appendChild(option);
+    }
+
+    if (selected && options.some((item) => String(item.id) === selected)) {
+      selectEl.value = selected;
+    } else {
+      selectEl.value = "";
+    }
+  }
+
+  function syncScopedOptions() {
+    const municipioId = String(municipioSelect.value || "");
+    const previousSecretaria = secretariaSelect.value;
+    const previousUnidade = unidadeSelect.value;
+    const previousSetor = setorSelect.value;
+
+    const secretariasFiltradas = municipioId
+      ? secretariasData.filter((item) => String(item.municipioId) === municipioId)
+      : [];
+
+    if (!secretariaSelect.disabled) {
+      repopulateSelect(
+        secretariaSelect,
+        secretariasFiltradas,
+        previousSecretaria,
+        municipioId ? "Selecione uma secretaria" : "Selecione um município primeiro"
+      );
+    }
+
+    const secretariaId = String(secretariaSelect.value || "");
+    const unidadesFiltradas = secretariaId
+      ? unidadesData.filter((item) => String(item.secretariaId) === secretariaId)
+      : (municipioId ? unidadesData.filter((item) => String(item.municipioId) === municipioId) : []);
+
+    if (!unidadeSelect.disabled) {
+      repopulateSelect(
+        unidadeSelect,
+        unidadesFiltradas,
+        previousUnidade,
+        secretariaId
+          ? "Selecione uma unidade"
+          : (municipioId ? "Selecione uma secretaria" : "Selecione um município primeiro")
+      );
+    }
+
+    const unidadeId = String(unidadeSelect.value || "");
+    const setoresFiltrados = unidadeId
+      ? setoresData.filter((item) => String(item.unidadeId) === unidadeId)
+      : (secretariaId
+          ? setoresData.filter((item) => String(item.secretariaId) === secretariaId)
+          : (municipioId ? setoresData.filter((item) => String(item.municipioId) === municipioId) : []));
+
+    if (!setorSelect.disabled) {
+      repopulateSelect(
+        setorSelect,
+        setoresFiltrados,
+        previousSetor,
+        unidadeId
+          ? "Selecione um setor"
+          : (secretariaId
+              ? "Selecione uma unidade"
+              : (municipioId ? "Selecione uma secretaria" : "Selecione um município primeiro"))
+      );
+    }
+  }
+
+  municipioSelect.addEventListener("change", syncScopedOptions);
+  secretariaSelect.addEventListener("change", syncScopedOptions);
+  unidadeSelect.addEventListener("change", syncScopedOptions);
+  syncScopedOptions();
 })();
 </script>
 {% endblock %}

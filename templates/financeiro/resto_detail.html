@@ -1,10 +1,10 @@
 {% extends "core/detail_base.html" %}
 
 {% block detail_sections %}
-<div class="card" style="margin-top:12px;"><div class="card__body">
-  <h3 style="margin-top:0;">Pagamentos do resto a pagar</h3>
-  <div class="table-shell"><div class="table-shell__body">
-    <table class="table">
+<div class="gp-card"><div class="gp-card__body">
+  <h3>Pagamentos do resto a pagar</h3>
+  <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__body">
+    <table class="gp-table__native">
       <thead><tr><th>Data</th><th>Ordem</th><th>Conta</th><th>Valor</th><th>Status</th></tr></thead>
       <tbody>
         {% for item in pagamentos %}
@@ -28,4 +28,5 @@
     </table>
   </div></div>
 </div></div>
+{% include "core/partials/components/operacao/registro_extras.html" %}
 {% endblock %}

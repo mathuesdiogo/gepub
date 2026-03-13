@@ -13,10 +13,10 @@ from django.urls import NoReverseMatch, reverse
 from apps.billing.forms import OnboardingPlanoForm
 from apps.billing.models import AssinaturaMunicipio, PlanoMunicipal, SolicitacaoUpgrade
 from apps.billing.services import (
-    MetricaLimite,
+    catalogo_planos_comercial,
     calcular_valor_upgrade,
     get_assinatura_ativa,
-    verificar_limite_municipio,
+    plano_comercial_data,
 )
 from apps.core.decorators import require_perm
 from apps.core.rbac import get_profile, is_admin
@@ -277,7 +277,6 @@ def onboarding_primeiro_acesso(request):
     municipio = _get_municipio_for_user(request.user)
     p = get_profile(request.user)
     assinatura = _get_assinatura_municipio(municipio)
-    limite_secretarias_alert = None
     planos_upgrade = _planos_upgrade(assinatura)
 
     if request.method == "POST":
@@ -322,44 +321,6 @@ def onboarding_primeiro_acesso(request):
                 messages.success(request, "Plano municipal definido com sucesso.")
                 return redirect("org:onboarding_primeiro_acesso")
             messages.error(request, "Corrija os dados do plano para continuar.")
-        elif action == "solicitar_overage_secretarias":
-            form_municipio = OnboardingMunicipioForm(instance=municipio)
-            form_plano = OnboardingPlanoForm(instance=assinatura, prefix="plano")
-            form_ativacao = OnboardingTemplateActivationForm(templates=templates)
-
-            if not municipio:
-                messages.error(request, "Cadastre o município antes de solicitar extras.")
-                return redirect("org:onboarding_primeiro_acesso")
-
-            assinatura = get_assinatura_ativa(municipio, criar_default=True)
-            planos_upgrade = _planos_upgrade(assinatura)
-            if not assinatura:
-                messages.error(request, "Não foi possível identificar assinatura ativa para este município.")
-                return redirect("org:onboarding_primeiro_acesso")
-
-            qtd_raw = (request.POST.get("qtd_excedente") or "").strip()
-            qtd = int(qtd_raw) if qtd_raw.isdigit() else 1
-            qtd = max(1, qtd)
-            valor = calcular_valor_upgrade(
-                assinatura,
-                tipo=SolicitacaoUpgrade.Tipo.SECRETARIAS,
-                quantidade=qtd,
-            )
-            SolicitacaoUpgrade.objects.create(
-                municipio=municipio,
-                assinatura=assinatura,
-                tipo=SolicitacaoUpgrade.Tipo.SECRETARIAS,
-                quantidade=qtd,
-                valor_mensal_calculado=valor,
-                status=SolicitacaoUpgrade.Status.SOLICITADO,
-                solicitado_por=request.user,
-                observacao="Solicitação criada pelo carrinho de secretarias no onboarding.",
-            )
-            messages.success(
-                request,
-                f"Carrinho de extras enviado: +{qtd} secretaria(s) por R$ {_fmt_currency(valor)}/mês.",
-            )
-            return redirect("org:onboarding_primeiro_acesso")
         elif action == "solicitar_troca_plano":
             form_municipio = OnboardingMunicipioForm(instance=municipio)
             form_plano = OnboardingPlanoForm(instance=assinatura, prefix="plano")
@@ -485,89 +446,91 @@ def onboarding_primeiro_acesso(request):
                             "Selecione ao menos um modelo novo para ativação.",
                         )
                     else:
-                        qtd_solicitada = sum(max(1, int(item["qtd"] or 1)) for item in ativacoes)
-                        limite = None
-                        try:
-                            limite = verificar_limite_municipio(
-                                municipio,
-                                MetricaLimite.SECRETARIAS,
-                                incremento=qtd_solicitada,
-                            )
-                        except Exception:
+                        modules_selected: set[str] = set()
+                        for item in ativacoes:
+                            tpl = item["template"]
+                            modules_selected.add((tpl.modulo or "").strip().lower())
+                            for mod in (tpl.modulos_ativos_padrao or []):
+                                modules_selected.add((mod or "").strip().lower())
+
+                        modules_installed = set(
+                            MunicipioModuloAtivo.objects.filter(municipio=municipio, ativo=True)
+                            .values_list("modulo", flat=True)
+                        )
+                        modules_planned = {m for m in modules_selected if m} | {m.strip().lower() for m in modules_installed}
+                        module_dependencies = {
+                            "compras": {"processos", "financeiro", "contratos"},
+                            "contratos": {"processos", "financeiro"},
+                            "folha": {"rh", "ponto", "financeiro"},
+                            "tributos": {"financeiro"},
+                            "frota": {"almoxarifado"},
+                        }
+                        missing_dependency_alerts: list[str] = []
+                        for module, deps in module_dependencies.items():
+                            if module in modules_selected:
+                                missing = sorted(dep for dep in deps if dep not in modules_planned)
+                                if missing:
+                                    missing_dependency_alerts.append(
+                                        f"{module}: recomenda-se ativar junto com {', '.join(missing)}"
+                                    )
+                        if missing_dependency_alerts:
                             messages.warning(
                                 request,
-                                "Não foi possível validar limite de plano neste momento. "
-                                "A instalação seguirá e será validada no faturamento.",
+                                "Integrações recomendadas para melhor funcionamento: "
+                                + " | ".join(missing_dependency_alerts),
                             )
 
-                        if limite is not None and not limite.permitido:
-                            limite_secretarias_alert = {
-                                "atual": limite.atual,
-                                "limite": limite.limite,
-                                "projetado": limite.projetado,
-                                "excedente": limite.excedente,
-                                "valor_unitario": _fmt_currency(limite.valor_unitario),
-                                "valor_sugerido_mensal": _fmt_currency(limite.valor_sugerido_mensal),
-                                "qtd_solicitada": qtd_solicitada,
-                                "assinatura": limite.assinatura,
-                            }
+                        credentials: list[dict] = []
+                        install_errors: list[str] = []
+                        for ativ in ativacoes:
+                            tpl = ativ["template"]
+                            qtd = max(1, int(ativ["qtd"]))
+                            base_nome = ativ["nome"]
+                            sigla = ativ["sigla"]
+                            for i in range(qtd):
+                                if base_nome:
+                                    nome_secretaria = base_nome if qtd == 1 else f"{base_nome} {i + 1}"
+                                else:
+                                    nome_secretaria = tpl.nome if qtd == 1 else f"{tpl.nome} {i + 1}"
+                                try:
+                                    result = provision_secretaria_from_template(
+                                        municipio=municipio,
+                                        template=tpl,
+                                        solicitado_por=request.user,
+                                        nome_secretaria=nome_secretaria,
+                                        sigla=sigla,
+                                    )
+                                except Exception:
+                                    install_errors.append(nome_secretaria)
+                                    continue
+                                credentials.append(
+                                    {
+                                        "secretaria": result.secretaria.nome if result.secretaria else "—",
+                                        "username": result.gestor_username,
+                                        "password": result.gestor_temp_password,
+                                    }
+                                )
+
+                        if install_errors:
                             messages.error(
                                 request,
-                                "Essa instalação excede o limite de secretarias do plano atual. "
-                                "Escolha troca de plano ou carrinho de extras.",
+                                "Algumas secretarias não foram instaladas corretamente: "
+                                + ", ".join(install_errors[:5]),
+                            )
+
+                        if not credentials:
+                            messages.error(
+                                request,
+                                "Nenhuma secretaria foi instalada. Revise nomes/siglas e tente novamente.",
                             )
                         else:
-                            credentials: list[dict] = []
-                            install_errors: list[str] = []
-                            for ativ in ativacoes:
-                                tpl = ativ["template"]
-                                qtd = max(1, int(ativ["qtd"]))
-                                base_nome = ativ["nome"]
-                                sigla = ativ["sigla"]
-                                for i in range(qtd):
-                                    if base_nome:
-                                        nome_secretaria = base_nome if qtd == 1 else f"{base_nome} {i + 1}"
-                                    else:
-                                        nome_secretaria = tpl.nome if qtd == 1 else f"{tpl.nome} {i + 1}"
-                                    try:
-                                        result = provision_secretaria_from_template(
-                                            municipio=municipio,
-                                            template=tpl,
-                                            solicitado_por=request.user,
-                                            nome_secretaria=nome_secretaria,
-                                            sigla=sigla,
-                                        )
-                                    except Exception:
-                                        install_errors.append(nome_secretaria)
-                                        continue
-                                    credentials.append(
-                                        {
-                                            "secretaria": result.secretaria.nome if result.secretaria else "—",
-                                            "username": result.gestor_username,
-                                            "password": result.gestor_temp_password,
-                                        }
-                                    )
-
-                            if install_errors:
-                                messages.error(
-                                    request,
-                                    "Algumas secretarias não foram instaladas corretamente: "
-                                    + ", ".join(install_errors[:5]),
-                                )
-
-                            if not credentials:
-                                messages.error(
-                                    request,
-                                    "Nenhuma secretaria foi instalada. Revise nomes/siglas e tente novamente.",
-                                )
-                            else:
-                                _seed_portais_base(municipio, request)
-                                request.session["org_last_provision_credentials"] = credentials
-                                messages.success(
-                                    request,
-                                    "Templates ativados com sucesso. Confira o painel de onboarding para os próximos passos.",
-                                )
-                                return redirect("org:onboarding_painel")
+                            _seed_portais_base(municipio, request)
+                            request.session["org_last_provision_credentials"] = credentials
+                            messages.success(
+                                request,
+                                "Templates ativados com sucesso. Confira o painel de onboarding para os próximos passos.",
+                            )
+                            return redirect("org:onboarding_painel")
                 except Exception as exc:
                     messages.error(
                         request,
@@ -588,6 +551,8 @@ def onboarding_primeiro_acesso(request):
     activation_counts = _template_activation_counts(municipio, templates)
     template_rows = _build_template_rows(form_ativacao, templates, activation_counts=activation_counts)
     market_categories = _build_market_categories(template_rows)
+    planos_catalogo = catalogo_planos_comercial()
+    plano_atual_info = plano_comercial_data(assinatura.plano) if assinatura else None
 
     context = {
         "title": "Onboarding Inicial",
@@ -600,8 +565,9 @@ def onboarding_primeiro_acesso(request):
         "template_rows": template_rows,
         "market_categories": market_categories,
         "market_installed_total": sum(1 for row in template_rows if row["is_installed"]),
-        "limite_secretarias_alert": limite_secretarias_alert,
         "planos_upgrade": planos_upgrade,
+        "planos_catalogo": planos_catalogo,
+        "plano_atual_info": plano_atual_info,
         "template_choices": templates,
         "summary": {
             "templates_total": len(templates),

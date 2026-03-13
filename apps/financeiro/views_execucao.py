@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from apps.core.exports import export_csv, export_pdf_table
+from apps.core.services_registro_operacao import build_registro_context
+
 from .views_common import *
 from .views_common import _municipios_admin, _resolve_municipio, _selected_exercicio
 
@@ -27,6 +30,34 @@ def resto_list(request):
             | Q(empenho__fornecedor_nome__icontains=q)
         )
 
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-data_inscricao", "-id"):
+            rows.append(
+                [
+                    item.numero_inscricao,
+                    item.empenho.numero,
+                    item.empenho.fornecedor_nome,
+                    item.get_tipo_display(),
+                    item.get_status_display(),
+                    str(item.valor_inscrito),
+                    str(item.saldo_a_pagar),
+                ]
+            )
+        headers = ["Inscricao", "Empenho", "Fornecedor", "Tipo", "Status", "Valor inscrito", "Saldo"]
+        if export == "csv":
+            return export_csv("financeiro_restos_pagar.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="financeiro_restos_pagar.pdf",
+            title="Restos a pagar",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'} | Exercicio={exercicio.ano if exercicio else '-'}",
+        )
+
     return render(
         request,
         "financeiro/resto_list.html",
@@ -45,6 +76,18 @@ def resto_list(request):
                     "url": reverse("financeiro:resto_create") + f"?municipio={municipio.pk}",
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&exercicio={exercicio.pk if exercicio else ''}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&exercicio={exercicio.pk if exercicio else ''}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
                 },
                 {
                     "label": "Voltar",
@@ -148,6 +191,18 @@ def resto_detail(request, pk: int):
         {"label": "Valor pago", "value": resto.valor_pago},
         {"label": "Saldo a pagar", "value": resto.saldo_a_pagar},
     ]
+    checklist = [
+        {"label": "Empenho de origem vinculado", "ok": bool(resto.empenho_id)},
+        {"label": "Valor inscrito maior que zero", "ok": resto.valor_inscrito > 0},
+        {"label": "Tipo de resto informado", "ok": bool(resto.tipo)},
+        {"label": "Status informado", "ok": bool(resto.status)},
+    ]
+    registro = build_registro_context(
+        municipio=municipio,
+        modulo="FINANCEIRO",
+        entidade="DespRestosPagar",
+        entidade_id=resto.pk,
+    )
 
     return render(
         request,
@@ -161,6 +216,8 @@ def resto_detail(request, pk: int):
             "pills": pills,
             "pagamentos": pagamentos,
             "municipio": municipio,
+            "checklist_conformidade": checklist,
+            **registro,
         },
     )
 
@@ -227,6 +284,34 @@ def empenho_list(request):
             | Q(objeto__icontains=q)
         )
 
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-data_empenho", "-id"):
+            rows.append(
+                [
+                    item.numero,
+                    str(item.data_empenho),
+                    item.fornecedor_nome,
+                    item.get_status_display(),
+                    str(item.valor_empenhado),
+                    str(item.valor_liquidado),
+                    str(item.valor_pago),
+                ]
+            )
+        headers = ["Numero", "Data", "Fornecedor", "Status", "Empenhado", "Liquidado", "Pago"]
+        if export == "csv":
+            return export_csv("financeiro_empenhos.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="financeiro_empenhos.pdf",
+            title="Empenhos",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'} | Exercicio={exercicio.ano if exercicio else '-'}",
+        )
+
     return render(
         request,
         "financeiro/empenho_list.html",
@@ -245,6 +330,18 @@ def empenho_list(request):
                     "url": reverse("financeiro:empenho_create") + f"?municipio={municipio.pk}",
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&exercicio={exercicio.pk if exercicio else ''}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&exercicio={exercicio.pk if exercicio else ''}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
                 },
                 {
                     "label": "Voltar",
@@ -353,6 +450,18 @@ def empenho_detail(request, pk: int):
         {"label": "Saldo a liquidar", "value": empenho.saldo_a_liquidar},
         {"label": "Saldo a pagar", "value": empenho.saldo_a_pagar},
     ]
+    checklist = [
+        {"label": "Dotacao vinculada", "ok": bool(empenho.dotacao_id)},
+        {"label": "Fornecedor informado", "ok": bool(empenho.fornecedor_nome)},
+        {"label": "Valor empenhado maior que zero", "ok": empenho.valor_empenhado > 0},
+        {"label": "Numero do empenho informado", "ok": bool(empenho.numero)},
+    ]
+    registro = build_registro_context(
+        municipio=municipio,
+        modulo="FINANCEIRO",
+        entidade="DespEmpenho",
+        entidade_id=empenho.pk,
+    )
 
     return render(
         request,
@@ -367,6 +476,8 @@ def empenho_detail(request, pk: int):
             "liquidacoes": liquidacoes,
             "pagamentos": pagamentos,
             "municipio": municipio,
+            "checklist_conformidade": checklist,
+            **registro,
         },
     )
 
@@ -461,6 +572,32 @@ def receita_list(request):
     if q:
         qs = qs.filter(Q(rubrica_codigo__icontains=q) | Q(rubrica_nome__icontains=q) | Q(origem__icontains=q))
 
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-data_arrecadacao", "-id"):
+            rows.append(
+                [
+                    str(item.data_arrecadacao),
+                    item.rubrica_codigo,
+                    item.rubrica_nome,
+                    item.origem,
+                    str(item.valor),
+                ]
+            )
+        headers = ["Data", "Rubrica", "Descricao", "Origem", "Valor"]
+        if export == "csv":
+            return export_csv("financeiro_receitas.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="financeiro_receitas.pdf",
+            title="Receitas arrecadadas",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'} | Exercicio={exercicio.ano if exercicio else '-'}",
+        )
+
     return render(
         request,
         "financeiro/receita_list.html",
@@ -479,6 +616,18 @@ def receita_list(request):
                     "url": reverse("financeiro:receita_create") + f"?municipio={municipio.pk}",
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&exercicio={exercicio.pk if exercicio else ''}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&exercicio={exercicio.pk if exercicio else ''}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
                 },
                 {
                     "label": "Voltar",
@@ -540,6 +689,33 @@ def log_list(request):
     if q:
         qs = qs.filter(Q(evento__icontains=q) | Q(entidade__icontains=q) | Q(observacao__icontains=q))
 
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-criado_em", "-id")[:500]:
+            rows.append(
+                [
+                    str(item.criado_em),
+                    item.evento,
+                    item.entidade,
+                    item.entidade_id,
+                    item.usuario.username if item.usuario else "-",
+                    item.observacao or "",
+                ]
+            )
+        headers = ["Quando", "Evento", "Entidade", "ID", "Usuario", "Observacao"]
+        if export == "csv":
+            return export_csv("financeiro_logs.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="financeiro_logs.pdf",
+            title="Logs financeiros",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'}",
+        )
+
     return render(
         request,
         "financeiro/log_list.html",
@@ -551,6 +727,18 @@ def log_list(request):
             "items": qs.order_by("-criado_em", "-id")[:500],
             "q": q,
             "actions": [
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
+                },
                 {
                     "label": "Voltar",
                     "url": reverse("financeiro:index") + f"?municipio={municipio.pk}",

@@ -140,6 +140,7 @@ INSTALLED_APPS = [
     "apps.compras",
     "apps.contratos",
     "apps.integracoes",
+    "apps.comunicacao",
     "apps.paineis",
     "apps.conversor",
     "apps.rh",
@@ -150,6 +151,7 @@ INSTALLED_APPS = [
     "apps.frota",
     "apps.ouvidoria",
     "apps.tributos",
+    "apps.camara",
 ]
 
 
@@ -277,10 +279,22 @@ SECURE_SSL_REDIRECT = _env_bool("DJANGO_SECURE_SSL_REDIRECT", default=not DEBUG)
 SECURE_CONTENT_TYPE_NOSNIFF = _env_bool("DJANGO_SECURE_CONTENT_TYPE_NOSNIFF", default=True)
 SECURE_REFERRER_POLICY = os.getenv("DJANGO_SECURE_REFERRER_POLICY", "strict-origin-when-cross-origin").strip()
 X_FRAME_OPTIONS = os.getenv("DJANGO_X_FRAME_OPTIONS", "DENY").strip().upper() or "DENY"
+SECURE_CROSS_ORIGIN_OPENER_POLICY = os.getenv(
+    "DJANGO_SECURE_CROSS_ORIGIN_OPENER_POLICY",
+    "same-origin",
+).strip()
+SECURE_CROSS_ORIGIN_RESOURCE_POLICY = os.getenv(
+    "DJANGO_SECURE_CROSS_ORIGIN_RESOURCE_POLICY",
+    "same-origin",
+).strip()
 
 # Limites de upload para módulos utilitários.
 PAINEIS_MAX_UPLOAD_MB = _env_int("PAINEIS_MAX_UPLOAD_MB", default=50)
 CONVERSOR_MAX_UPLOAD_MB = _env_int("CONVERSOR_MAX_UPLOAD_MB", default=80)
+COMUNICACAO_API_MAX_JSON_BODY_BYTES = _env_int(
+    "COMUNICACAO_API_MAX_JSON_BODY_BYTES",
+    default=256 * 1024,
+)
 
 SECURE_HSTS_SECONDS = _env_int("DJANGO_SECURE_HSTS_SECONDS", default=(31536000 if not DEBUG else 0))
 SECURE_HSTS_INCLUDE_SUBDOMAINS = _env_bool(

@@ -2,113 +2,424 @@
 {% block title %}Organização • GEPUB{% endblock %}
 {% block header %}Organização{% endblock %}
 {% block content %}
-<div class="card org-shell"><div class="card__body">
+<div class="org-page org-shell org-home">
   {% include "core/partials/components/layout/page_head.html" with title="Organização" subtitle="Gestão institucional de municípios, secretarias, unidades e setores" actions=actions %}
   {% include "org/partials/nav_tabs.html" %}
 
-  <section class="org-info-grid">
-    <article class="org-info-card">
-      <p class="org-info-card__label">Municípios</p>
-      <p class="org-info-card__value">{{ stats.municipios }}</p>
-      <p class="org-info-card__meta">Prefeituras no escopo do usuário</p>
-    </article>
-    <article class="org-info-card">
-      <p class="org-info-card__label">Secretarias</p>
-      <p class="org-info-card__value">{{ stats.secretarias }}</p>
-      <p class="org-info-card__meta">Estruturas institucionais ativas</p>
-    </article>
-    <article class="org-info-card">
-      <p class="org-info-card__label">Unidades</p>
-      <p class="org-info-card__value">{{ stats.unidades }}</p>
-      <p class="org-info-card__meta">Escolas, UBS e unidades administrativas</p>
-    </article>
-    <article class="org-info-card">
-      <p class="org-info-card__label">Setores</p>
-      <p class="org-info-card__value">{{ stats.setores }}</p>
-      <p class="org-info-card__meta">Setores operacionais cadastrados</p>
-    </article>
-    <article class="org-info-card">
-      <p class="org-info-card__label">Módulos ativos</p>
-      <p class="org-info-card__value">{{ stats.modulos_ativos }}</p>
-      <p class="org-info-card__meta">Módulos habilitados por município</p>
-    </article>
-    <article class="org-info-card">
-      <p class="org-info-card__label">Onboarding</p>
-      <p class="org-info-card__value">{{ stats.onboarding_progress_pct }}%</p>
-      <p class="org-info-card__meta">{{ stats.onboarding_concluidos }}/{{ stats.onboarding_total }} etapas concluídas</p>
-    </article>
-  </section>
-
-  <section class="org-board">
-    <div class="org-board__head">
-      <h3 class="org-board__title">Acessos principais</h3>
-      <p class="org-board__sub">Fluxo recomendado para implantação institucional</p>
-    </div>
-    <div class="org-board__grid">
-      <a class="org-board-card" href="{% url 'org:onboarding_primeiro_acesso' %}">
-        <span class="org-board-card__icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
-        <span class="org-board-card__title">Onboarding inicial</span>
-        <span class="org-board-card__meta">Configure município e ative templates</span>
-      </a>
-      <a class="org-board-card" href="{% url 'org:onboarding_painel' %}">
-        <span class="org-board-card__icon"><i class="fa-solid fa-list-check"></i></span>
-        <span class="org-board-card__title">Painel de onboarding</span>
-        <span class="org-board-card__meta">Acompanhe progresso por secretaria e módulo</span>
-      </a>
-      <a class="org-board-card" href="{% url 'org:municipio_list' %}">
-        <span class="org-board-card__icon"><i class="fa-solid fa-city"></i></span>
-        <span class="org-board-card__title">Municípios</span>
-        <span class="org-board-card__meta">Cadastro e manutenção das prefeituras</span>
-      </a>
-      <a class="org-board-card" href="{% url 'org:secretaria_list' %}">
-        <span class="org-board-card__icon"><i class="fa-solid fa-building-columns"></i></span>
-        <span class="org-board-card__title">Secretarias</span>
-        <span class="org-board-card__meta">Estrutura por município e gestão de siglas</span>
-      </a>
-      {% if can_manage_secretaria %}
-        <a class="org-board-card" href="{% url 'org:secretaria_governanca_hub' %}">
-          <span class="org-board-card__icon"><i class="fa-solid fa-sliders"></i></span>
-          <span class="org-board-card__title">Governança</span>
-          <span class="org-board-card__meta">Configurações e cadastros-base por secretaria</span>
-        </a>
-      {% endif %}
-      <a class="org-board-card" href="{% url 'org:unidade_list' %}">
-        <span class="org-board-card__icon"><i class="fa-solid fa-school"></i></span>
-        <span class="org-board-card__title">Unidades</span>
-        <span class="org-board-card__meta">Escolas, UBS e unidades administrativas</span>
-      </a>
-      <a class="org-board-card" href="{% url 'org:setor_list' %}">
-        <span class="org-board-card__icon"><i class="fa-solid fa-sitemap"></i></span>
-        <span class="org-board-card__title">Setores</span>
-        <span class="org-board-card__meta">Divisão setorial por unidade</span>
-      </a>
-    </div>
-  </section>
-
-  <section class="org-board">
-    <div class="org-board__head">
-      <h3 class="org-board__title">Últimos provisionamentos</h3>
-      <p class="org-board__sub">Total executado: {{ stats.provisionamentos_total }}</p>
-    </div>
-    {% if recent_provisionamentos %}
-      <ul class="action-list">
-        {% for p in recent_provisionamentos %}
-          <li>
+  <details class="org-collapsible" open>
+    <summary class="org-collapsible__summary">
+      <div>
+        <h3 class="org-collapsible__title">Resumo Institucional</h3>
+        <p class="org-collapsible__meta">Panorama dos cadastros e execução do onboarding</p>
+      </div>
+      <span class="org-collapsible__toggle" aria-hidden="true"></span>
+    </summary>
+    <div class="org-collapsible__content">
+      <section class="org-stats-showcase" aria-label="Estatísticas institucionais">
+        <article class="org-stats-hero">
+          <div class="org-stats-hero__head">
             <div>
-              <div class="item-title">{{ p.secretaria.nome|default:"Secretaria não vinculada" }}</div>
-              <div class="item-subtitle">
-                {{ p.template.nome|default:"Template removido" }} • {{ p.criado_em|date:"d/m/Y H:i" }}
+              <p class="org-stats-hero__label">Resumo institucional</p>
+              <h4 class="org-stats-hero__title">Evolução da estrutura organizacional</h4>
+            </div>
+            <span class="org-stats-hero__pill">{{ stats.onboarding_progress_pct }}% onboarding</span>
+          </div>
+
+          <div class="org-stats-hero__metrics">
+            <div class="org-stats-hero__metric">
+              <span>Municípios</span>
+              <strong>{{ stats.municipios }}</strong>
+            </div>
+            <div class="org-stats-hero__metric">
+              <span>Secretarias</span>
+              <strong>{{ stats.secretarias }}</strong>
+            </div>
+            <div class="org-stats-hero__metric">
+              <span>Unidades</span>
+              <strong>{{ stats.unidades }}</strong>
+            </div>
+            <div class="org-stats-hero__metric">
+              <span>Setores</span>
+              <strong>{{ stats.setores }}</strong>
+            </div>
+          </div>
+
+          <div class="org-sparkline admin-panel">
+            <div class="admin-panel__head org-sparkline__head">
+              <div>
+                <h4 class="admin-panel__title">Evolução de maturidade</h4>
+                <p class="admin-panel__sub">Comparativo mensal entre progresso real e meta recomendada</p>
+              </div>
+              <span class="org-sparkline__badge">{{ stats.onboarding_progress_pct }}%</span>
+            </div>
+            <div class="admin-line-wrap org-line-wrap">
+              <canvas
+                id="orgResumoChart"
+                height="220"
+                data-progress="{{ stats.onboarding_progress_pct|default:0 }}"
+                data-done="{{ stats.onboarding_concluidos|default:0 }}"
+                data-total="{{ stats.onboarding_total|default:0 }}"
+              ></canvas>
+            </div>
+            <div class="org-sparkline__footer">
+              <span class="org-sparkline__chip">
+                <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                {{ stats.onboarding_concluidos }} etapas concluídas
+              </span>
+              <span class="org-sparkline__chip">
+                <i class="fa-solid fa-bullseye" aria-hidden="true"></i>
+                Meta recomendada: 80%
+              </span>
+            </div>
+          </div>
+        </article>
+
+        <div class="org-stats-showcase__bottom">
+          <article class="org-stats-mini org-stats-mini--bars">
+            <div class="org-stats-mini__head">
+              <h4>Cadastros Base</h4>
+              <span class="org-stats-mini__badge">{{ stats.modulos_ativos }}</span>
+            </div>
+            <p class="org-stats-mini__sub">Distribuição por nível organizacional</p>
+            {% with base=stats.setores|default:1 %}
+              {% widthratio stats.municipios base 100 as municipios_pct %}
+              {% widthratio stats.secretarias base 100 as secretarias_pct %}
+              {% widthratio stats.unidades base 100 as unidades_pct %}
+              {% widthratio stats.setores base 100 as setores_pct %}
+              {% widthratio stats.modulos_ativos base 100 as modulos_pct %}
+              <div class="org-bars">
+                <div class="org-bar-item">
+                  <div class="org-bar-item__track"><span style="--v: {{ municipios_pct }};"></span></div>
+                  <small>Mun</small>
+                </div>
+                <div class="org-bar-item">
+                  <div class="org-bar-item__track"><span style="--v: {{ secretarias_pct }};"></span></div>
+                  <small>Sec</small>
+                </div>
+                <div class="org-bar-item">
+                  <div class="org-bar-item__track"><span style="--v: {{ unidades_pct }};"></span></div>
+                  <small>Uni</small>
+                </div>
+                <div class="org-bar-item">
+                  <div class="org-bar-item__track"><span style="--v: {{ setores_pct }};"></span></div>
+                  <small>Set</small>
+                </div>
+                <div class="org-bar-item">
+                  <div class="org-bar-item__track"><span style="--v: {{ modulos_pct }};"></span></div>
+                  <small>Mod</small>
+                </div>
+              </div>
+            {% endwith %}
+          </article>
+
+          <article class="org-stats-mini org-stats-mini--donut">
+            <div class="org-stats-mini__head">
+              <h4>Onboarding</h4>
+              <span class="org-stats-mini__badge">{{ stats.onboarding_progress_pct }}%</span>
+            </div>
+            <div class="org-donut-layout">
+              <div class="org-donut" style="--pct: {{ stats.onboarding_progress_pct|default:0 }};">
+                <span>{{ stats.onboarding_progress_pct }}%</span>
+              </div>
+              <div class="org-donut-legend">
+                <div>
+                  <span>Concluídas</span>
+                  <strong>{{ stats.onboarding_concluidos }}</strong>
+                </div>
+                <div>
+                  <span>Pendentes</span>
+                  <strong>{{ stats.onboarding_pendentes }}</strong>
+                </div>
+                <div>
+                  <span>Módulos ativos</span>
+                  <strong>{{ stats.modulos_ativos }}</strong>
+                </div>
               </div>
             </div>
-            <span class="status {% if p.status == 'CONCLUIDO' %}success{% elif p.status == 'ERRO' %}danger{% elif p.status == 'EM_PROCESSAMENTO' %}warning{% else %}default{% endif %}">
-              {{ p.get_status_display }}
-            </span>
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      {% include "core/partials/components/feedback/empty_state.html" with title="Sem provisionamentos" text="Execute o onboarding inicial para criar secretarias automaticamente." %}
-    {% endif %}
-  </section>
-</div></div>
+            <p class="org-stats-mini__sub">{{ stats.onboarding_concluidos }}/{{ stats.onboarding_total }} etapas concluídas</p>
+          </article>
+        </div>
+      </section>
+    </div>
+  </details>
+
+  <details class="org-collapsible" open>
+    <summary class="org-collapsible__summary">
+      <div>
+        <h3 class="org-collapsible__title">Ações Rápidas</h3>
+        <p class="org-collapsible__meta">Fluxo recomendado para implantação e manutenção da estrutura</p>
+      </div>
+      <span class="org-collapsible__toggle" aria-hidden="true"></span>
+    </summary>
+    <div class="org-collapsible__content">
+      <div class="org-board__grid">
+        <a class="org-board-card org-board-card--accent" href="{% url 'org:onboarding_wizard' %}">
+          <span class="org-board-card__icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+          <span class="org-board-card__title">Assistente guiado</span>
+          <span class="org-board-card__meta">Conduza o onboarding por etapas</span>
+        </a>
+        <a class="org-board-card" href="{% url 'org:onboarding_painel' %}">
+          <span class="org-board-card__icon"><i class="fa-solid fa-list-check"></i></span>
+          <span class="org-board-card__title">Painel de progresso</span>
+          <span class="org-board-card__meta">Acompanhe status por módulo e secretaria</span>
+        </a>
+        {% if can_manage_secretaria %}
+          <a class="org-board-card" href="{% url 'org:secretaria_governanca_hub' %}">
+            <span class="org-board-card__icon"><i class="fa-solid fa-sliders"></i></span>
+            <span class="org-board-card__title">Governança avançada</span>
+            <span class="org-board-card__meta">Configurações e cadastros-base por secretaria</span>
+          </a>
+        {% endif %}
+
+        {% if perms.org.add_municipio %}
+          <a class="org-board-card" href="{% url 'org:municipio_create' %}">
+            <span class="org-board-card__icon"><i class="fa-solid fa-city"></i></span>
+            <span class="org-board-card__title">Novo município</span>
+            <span class="org-board-card__meta">Cadastrar uma nova prefeitura no escopo</span>
+          </a>
+        {% else %}
+          <a class="org-board-card" href="{% url 'org:municipio_list' %}">
+            <span class="org-board-card__icon"><i class="fa-solid fa-city"></i></span>
+            <span class="org-board-card__title">Mapa de municípios</span>
+            <span class="org-board-card__meta">Visualizar municípios cadastrados</span>
+          </a>
+        {% endif %}
+
+        {% if perms.org.add_secretaria %}
+          <a class="org-board-card" href="{% url 'org:secretaria_create' %}">
+            <span class="org-board-card__icon"><i class="fa-solid fa-building-columns"></i></span>
+            <span class="org-board-card__title">Nova secretaria</span>
+            <span class="org-board-card__meta">Adicionar secretaria por município</span>
+          </a>
+        {% else %}
+          <a class="org-board-card" href="{% url 'org:secretaria_list' %}">
+            <span class="org-board-card__icon"><i class="fa-solid fa-building-columns"></i></span>
+            <span class="org-board-card__title">Estrutura de secretarias</span>
+            <span class="org-board-card__meta">Consultar secretarias e vínculos</span>
+          </a>
+        {% endif %}
+
+        {% if perms.org.add_unidade %}
+          <a class="org-board-card" href="{% url 'org:unidade_create' %}">
+            <span class="org-board-card__icon"><i class="fa-solid fa-school"></i></span>
+            <span class="org-board-card__title">Nova unidade</span>
+            <span class="org-board-card__meta">Cadastrar escola, UBS ou unidade administrativa</span>
+          </a>
+        {% else %}
+          <a class="org-board-card" href="{% url 'org:unidade_list' %}">
+            <span class="org-board-card__icon"><i class="fa-solid fa-school"></i></span>
+            <span class="org-board-card__title">Mapa de unidades</span>
+            <span class="org-board-card__meta">Visualizar unidades e tipologias</span>
+          </a>
+        {% endif %}
+
+        {% if perms.org.add_setor %}
+          <a class="org-board-card" href="{% url 'org:setor_create' %}">
+            <span class="org-board-card__icon"><i class="fa-solid fa-sitemap"></i></span>
+            <span class="org-board-card__title">Novo setor</span>
+            <span class="org-board-card__meta">Criar setores vinculados às unidades</span>
+          </a>
+        {% else %}
+          <a class="org-board-card" href="{% url 'org:setor_list' %}">
+            <span class="org-board-card__icon"><i class="fa-solid fa-sitemap"></i></span>
+            <span class="org-board-card__title">Estrutura setorial</span>
+            <span class="org-board-card__meta">Analisar distribuição por unidades</span>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </details>
+
+  <details class="org-collapsible" open>
+    <summary class="org-collapsible__summary">
+      <div>
+        <h3 class="org-collapsible__title">Últimos Provisionamentos</h3>
+        <p class="org-collapsible__meta">Total executado: {{ stats.provisionamentos_total }}</p>
+      </div>
+      <span class="org-collapsible__toggle" aria-hidden="true"></span>
+    </summary>
+    <div class="org-collapsible__content">
+      {% if recent_provisionamentos %}
+        <ul class="action-list org-provision-list">
+          {% for p in recent_provisionamentos %}
+            <li>
+              <div>
+                <div class="item-title">{{ p.secretaria.nome|default:"Secretaria não vinculada" }}</div>
+                <div class="item-subtitle">
+                  {{ p.template.nome|default:"Template removido" }} • {{ p.criado_em|date:"d/m/Y H:i" }}
+                </div>
+              </div>
+              <span class="status {% if p.status == 'CONCLUIDO' %}success{% elif p.status == 'ERRO' %}danger{% elif p.status == 'EM_PROCESSAMENTO' %}warning{% else %}default{% endif %}">
+                {{ p.get_status_display }}
+              </span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        {% include "core/partials/components/feedback/empty_state.html" with title="Sem provisionamentos" text="Execute o onboarding inicial para criar secretarias automaticamente." %}
+      {% endif %}
+    </div>
+  </details>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  {{ block.super }}
+  <script>
+    (function () {
+      function ensureChart(callback) {
+        if (window.Chart) {
+          callback();
+          return;
+        }
+        var script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js";
+        script.onload = callback;
+        document.head.appendChild(script);
+      }
+
+      function withAlpha(color, alpha) {
+        if (!color) return "rgba(47, 93, 168, " + alpha + ")";
+        var c = color.trim();
+        if (c.indexOf("#") === 0) {
+          var hex = c.replace("#", "");
+          if (hex.length === 3) {
+            hex = hex.split("").map(function (ch) { return ch + ch; }).join("");
+          }
+          var n = parseInt(hex, 16);
+          var r = (n >> 16) & 255;
+          var g = (n >> 8) & 255;
+          var b = n & 255;
+          return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
+        }
+        if (c.indexOf("rgb(") === 0) {
+          return c.replace("rgb(", "rgba(").replace(")", ", " + alpha + ")");
+        }
+        return c;
+      }
+
+      function monthLabels(length) {
+        var labels = [];
+        var names = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+        var now = new Date();
+        for (var i = length - 1; i >= 0; i--) {
+          var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          labels.push(names[d.getMonth()]);
+        }
+        return labels;
+      }
+
+      function progressSeries(progress) {
+        if (!progress) return [0, 0, 0, 0, 0, 0];
+        var factors = [0.34, 0.42, 0.53, 0.67, 0.81, 1];
+        return factors.map(function (factor) {
+          return Math.min(100, Math.max(0, Math.round(progress * factor)));
+        });
+      }
+
+      function renderOrgChart() {
+        var canvas = document.getElementById("orgResumoChart");
+        if (!canvas || !window.Chart) return;
+
+        var progress = Number(canvas.dataset.progress || 0);
+        var labels = monthLabels(6);
+        var values = progressSeries(progress);
+        var target = labels.map(function () { return 80; });
+
+        var styles = getComputedStyle(document.documentElement);
+        var primary = (styles.getPropertyValue("--gp-primary") || "#2f5da8").trim();
+        var success = (styles.getPropertyValue("--gp-success") || "#1d8f56").trim();
+        var warning = (styles.getPropertyValue("--gp-warning") || "#b56a08").trim();
+        var border = (styles.getPropertyValue("--gp-border") || "#d9dee7").trim();
+        var text = (styles.getPropertyValue("--gp-text-secondary") || "#5c6f8b").trim();
+
+        var ctx = canvas.getContext("2d");
+        var gradient = ctx.createLinearGradient(0, 0, 0, canvas.height || 220);
+        gradient.addColorStop(0, withAlpha(primary, 0.28));
+        gradient.addColorStop(1, withAlpha(primary, 0.03));
+
+        if (canvas._orgChartInstance) {
+          canvas._orgChartInstance.destroy();
+        }
+
+        canvas._orgChartInstance = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Maturidade",
+                data: values,
+                borderColor: primary,
+                backgroundColor: gradient,
+                fill: true,
+                tension: 0.36,
+                borderWidth: 3,
+                pointRadius: 3.5,
+                pointHoverRadius: 5,
+                pointBackgroundColor: success,
+                pointBorderColor: withAlpha(success, 0.45),
+                pointBorderWidth: 3
+              },
+              {
+                label: "Meta recomendada",
+                data: target,
+                borderColor: warning,
+                borderDash: [6, 5],
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: false,
+                tension: 0
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+              mode: "index",
+              intersect: false
+            },
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: {
+                  boxWidth: 16,
+                  boxHeight: 2,
+                  color: text,
+                  font: { size: 11, weight: "700" }
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function (ctx) {
+                    return ctx.dataset.label + ": " + ctx.parsed.y + "%";
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                grid: { color: withAlpha(border, 0.55) },
+                ticks: { color: text, font: { size: 11, weight: "700" } }
+              },
+              y: {
+                min: 0,
+                max: 100,
+                grid: { color: withAlpha(border, 0.75) },
+                ticks: {
+                  stepSize: 20,
+                  color: text,
+                  font: { size: 11, weight: "700" },
+                  callback: function (value) { return value + "%"; }
+                }
+              }
+            }
+          }
+        });
+      }
+
+      ensureChart(renderOrgChart);
+    })();
+  </script>
 {% endblock %}

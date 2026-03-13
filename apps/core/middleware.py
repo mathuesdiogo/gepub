@@ -10,6 +10,7 @@ from apps.core.module_access import module_enabled_for_user
 from apps.org.models import Municipio
 from .rbac import (
     can,
+    role_scope_base,
     PERM_ORG,
     PERM_EDU,
     PERM_AVALIACOES,
@@ -23,6 +24,7 @@ from .rbac import (
     PERM_COMPRAS,
     PERM_CONTRATOS,
     PERM_INTEGRACOES,
+    PERM_COMUNICACAO,
     PERM_PAINEIS,
     PERM_CONVERSOR,
     PERM_RH,
@@ -33,7 +35,53 @@ from .rbac import (
     PERM_FROTA,
     PERM_OUVIDORIA,
     PERM_TRIBUTOS,
+    PERM_CAMARA,
 )
+
+_ALUNO_EDUCACAO_ALLOWED_VIEW_NAMES = {
+    "educacao:portal_aluno",
+    "educacao:aluno_meus_dados",
+    "educacao:aluno_documentos_processos",
+    "educacao:aluno_ensino",
+    "educacao:aluno_ensino_dados",
+    "educacao:aluno_ensino_justificativa",
+    "educacao:aluno_ensino_boletins",
+    "educacao:aluno_ensino_avaliacoes",
+    "educacao:aluno_ensino_disciplinas",
+    "educacao:aluno_ensino_horarios",
+    "educacao:aluno_ensino_mensagens",
+    "educacao:aluno_ensino_biblioteca",
+    "educacao:aluno_ensino_apoio",
+    "educacao:aluno_ensino_seletivos",
+    "educacao:aluno_pesquisa",
+    "educacao:aluno_central_servicos",
+    "educacao:aluno_atividades",
+    "educacao:aluno_saude",
+    "educacao:aluno_comunicacao",
+    "educacao:historico_aluno",
+    "educacao:portal_aluno_edital_detail",
+    "educacao:declaracao_vinculo_pdf",
+    "educacao:carteira_emitir_pdf",
+}
+_ALUNO_EDUCACAO_ALLOWED_VIEW_NAMES_LEAF = {
+    name.split(":", 1)[-1] for name in _ALUNO_EDUCACAO_ALLOWED_VIEW_NAMES
+}
+
+
+def _is_aluno_profile(user) -> bool:
+    profile = getattr(user, "profile", None)
+    role = getattr(profile, "role", None) if profile else None
+    return role_scope_base(role) == "ALUNO"
+
+
+def _is_aluno_allowed_educacao_view(user, view_name: str) -> bool:
+    if not _is_aluno_profile(user):
+        return False
+    current = (view_name or "").strip()
+    if current in _ALUNO_EDUCACAO_ALLOWED_VIEW_NAMES:
+        return True
+    leaf = current.split(":", 1)[-1] if current else ""
+    return bool(leaf and leaf in _ALUNO_EDUCACAO_ALLOWED_VIEW_NAMES_LEAF)
 
 
 def _normalize_host(raw_host: str) -> str:
@@ -54,6 +102,21 @@ def _resolve_app_host() -> str:
 
 
 def _build_app_url(request, path: str) -> str:
+    if settings.DEBUG:
+        # Em desenvolvimento, preservar o host atual evita redirecionar
+        # para um domínio canônico que não existe em outros dispositivos da rede.
+        try:
+            current_host = (request.get_host() or "").strip()
+        except Exception:
+            current_host = (
+                request.META.get("HTTP_X_FORWARDED_HOST")
+                or request.META.get("HTTP_HOST")
+                or ""
+            ).strip()
+        if current_host:
+            scheme = "https" if request.is_secure() else "http"
+            return f"{scheme}://{current_host}{path}"
+
     app_host = _resolve_app_host()
     if not app_host:
         return path
@@ -93,6 +156,10 @@ class TenantHostMiddleware:
         "/educacao-publica/",
         "/documentacao",
         "/documentacao/",
+        "/validar",
+        "/validar/",
+        "/validar-documento",
+        "/validar-documento/",
         "/transparencia",
         "/transparencia/",
         "/sobre",
@@ -196,6 +263,7 @@ class RBACMiddleware:
         "compras": PERM_COMPRAS,
         "contratos": PERM_CONTRATOS,
         "integracoes": PERM_INTEGRACOES,
+        "comunicacao": PERM_COMUNICACAO,
         "paineis": PERM_PAINEIS,
         "conversor": PERM_CONVERSOR,
         "rh": PERM_RH,
@@ -206,6 +274,7 @@ class RBACMiddleware:
         "frota": PERM_FROTA,
         "ouvidoria": PERM_OUVIDORIA,
         "tributos": PERM_TRIBUTOS,
+        "camara": PERM_CAMARA,
         "accounts": PERM_ACCOUNTS,
         # se você tiver um app "relatorios" separado:
         "relatorios": PERM_REPORTS,
@@ -220,6 +289,7 @@ class RBACMiddleware:
         "compras": "compras",
         "contratos": "contratos",
         "integracoes": "integracoes",
+        "comunicacao": "comunicacao",
         "paineis": "paineis",
         "conversor": "conversor",
         "rh": "rh",
@@ -230,6 +300,7 @@ class RBACMiddleware:
         "frota": "frota",
         "ouvidoria": "ouvidoria",
         "tributos": "tributos",
+        "camara": "camara",
     }
 
     PUBLIC_URL_NAMES = {
@@ -242,6 +313,12 @@ class RBACMiddleware:
     PUBLIC_PATH_PREFIXES = (
         "/accounts/login",
         "/institucional/",
+        "/validar/",
+        "/validar-documento/",
+        "/blog/",
+        "/politica-de-privacidade/",
+        "/politica-de-cookies/",
+        "/termos-de-servico/",
         "/paginas/",
         "/noticias/",
         "/esic-ouvidoria/",
@@ -262,6 +339,12 @@ class RBACMiddleware:
     PUBLIC_EXACT_PATHS = {
         "/",
         "/institucional",
+        "/validar",
+        "/validar-documento",
+        "/blog",
+        "/politica-de-privacidade",
+        "/politica-de-cookies",
+        "/termos-de-servico",
         "/paginas",
         "/noticias",
         "/esic-ouvidoria",
@@ -322,6 +405,8 @@ class RBACMiddleware:
             return self.get_response(request)
 
         if not can(request.user, required):
+            if ns == "educacao" and _is_aluno_allowed_educacao_view(request.user, match.view_name):
+                return self.get_response(request)
             # 403 simples (depois fazemos uma página bonita)
             return HttpResponseForbidden("Você não tem permissão para acessar esta área.")
 

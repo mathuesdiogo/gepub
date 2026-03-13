@@ -2,8 +2,34 @@
 {% block title %}Agenda Clínica • Saúde • GEPUB{% endblock %}
 
 {% block module_content %}
-<div class="card"><div class="card__body">
+<div class="gp-card"><div class="gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title="Agenda Clínica" subtitle="Marcação, remarcação e gestão de fila" actions=actions %}
+
+  <div class="grid grid--4">
+    {% include "core/partials/components/data/kpi_card.html" with label="Total" value=metrics.total %}
+    {% include "core/partials/components/data/kpi_card.html" with label="Pendentes" value=metrics.pendentes %}
+    {% include "core/partials/components/data/kpi_card.html" with label="Faltas" value=metrics.faltas %}
+    {% include "core/partials/components/data/kpi_card.html" with label="Atendidos" value=metrics.atendidos %}
+  </div>
+
+  {% if perms.saude.manage %}
+    <form method="post" action="{% url 'saude:agenda_remarcacao_auto' %}" class="u-mt-16 gp-flex-wrap-row">
+      {% csrf_token %}
+      <div>
+        <label class="small">Buscar faltas (dias)</label>
+        <input type="number" name="dias_busca" min="1" max="90" value="30" class="gp-input">
+      </div>
+      <div>
+        <label class="small">Limite por execução</label>
+        <input type="number" name="limite" min="1" max="200" value="30" class="gp-input">
+      </div>
+      <button class="gp-button gp-button--ghost" type="submit">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        Remarcação automática de faltas
+      </button>
+    </form>
+  {% endif %}
+
   {% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Buscar por paciente, CPF, profissional..." action_url=action_url clear_url=clear_url has_filters=has_filters extra_filters=extra_filters %}
   {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj empty_title="Nenhum agendamento encontrado" empty_text="Cadastre o primeiro agendamento." %}
 </div></div>

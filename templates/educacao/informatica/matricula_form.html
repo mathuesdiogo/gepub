@@ -1,0 +1,65 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Nova Matrícula • Informática • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+  <div class="gp-card">
+    <div class="gp-card__body">
+      {% include "core/partials/components/layout/page_head.html" with title="Nova matrícula" subtitle="Selecione o aluno e o sistema completa a origem automaticamente" actions=actions %}
+
+      <form method="post" class="gp-form form-shell">
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="flash flash--error">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="form-shell__fields">{{ form.as_p }}</div>
+        <div class="form-shell__actions">
+          <button type="submit" class="gp-button gp-button--primary">Salvar matrícula</button>
+          <a class="gp-button gp-button--outline" href="{% url 'educacao:informatica_matricula_list' %}">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const alunoField = document.getElementById("id_aluno");
+      const escolaField = document.getElementById("id_escola_origem");
+      const origemField = document.getElementById("id_origem_indicacao");
+      if (!alunoField || !escolaField || !origemField) return;
+
+      const urlTemplate = "{% url 'educacao:informatica_api_aluno_origem' 999999 %}";
+      const buildUrl = (id) => urlTemplate.replace("999999", String(id));
+
+      function ensureOption(select, value, label) {
+        if (!value) return;
+        const current = Array.from(select.options).find((opt) => String(opt.value) === String(value));
+        if (current) return;
+        const option = document.createElement("option");
+        option.value = String(value);
+        option.textContent = label || `Unidade #${value}`;
+        select.appendChild(option);
+      }
+
+      async function applyAlunoOrigem(alunoId) {
+        if (!alunoId) return;
+        try {
+          const response = await fetch(buildUrl(alunoId), {headers: {"X-Requested-With": "XMLHttpRequest"}});
+          if (!response.ok) return;
+          const data = await response.json();
+          if (data.escola_origem_id) {
+            ensureOption(escolaField, data.escola_origem_id, data.escola_origem_nome);
+            escolaField.value = String(data.escola_origem_id);
+          }
+          if (data.origem_indicacao) {
+            origemField.value = data.origem_indicacao;
+          }
+        } catch (err) {
+          console.debug("Falha ao preencher origem automática do aluno:", err);
+        }
+      }
+
+      alunoField.addEventListener("change", (event) => applyAlunoOrigem(event.target.value));
+      if (alunoField.value) {
+        applyAlunoOrigem(alunoField.value);
+      }
+    })();
+  </script>
+{% endblock %}

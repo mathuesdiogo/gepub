@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from apps.core.exports import export_csv, export_pdf_table
+
 from .views_common import *
 from .views_common import _aplicar_movimento_estoque, _municipios_admin, _q_municipio, _resolve_municipio, _to_dec
 
@@ -16,6 +18,34 @@ def requisicao_list(request):
         qs = qs.filter(status=status)
     if q:
         qs = qs.filter(Q(numero__icontains=q) | Q(item__nome__icontains=q))
+
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-criado_em"):
+            rows.append(
+                [
+                    item.numero,
+                    item.item.codigo,
+                    item.item.nome,
+                    str(item.quantidade),
+                    item.get_status_display(),
+                    str(item.criado_em),
+                    item.secretaria_solicitante.nome if item.secretaria_solicitante else "",
+                ]
+            )
+        headers = ["Numero", "Item", "Descricao", "Quantidade", "Status", "Criado em", "Secretaria"]
+        if export == "csv":
+            return export_csv("almoxarifado_requisicoes.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="almoxarifado_requisicoes.pdf",
+            title="Requisicoes de almoxarifado",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'} | Status={status or '-'}",
+        )
     return render(
         request,
         "almoxarifado/requisicao_list.html",
@@ -34,7 +64,19 @@ def requisicao_list(request):
                     "url": reverse("almoxarifado:requisicao_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
-                }
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
+                },
             ],
         },
     )

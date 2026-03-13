@@ -154,3 +154,96 @@ class AvaliacoesServicesTests(TestCase):
 
         result = suggest_answers_from_omr_image(upload, qtd_questoes=qtd_questoes, opcoes=opcoes)
         self.assertEqual(result["respostas"], {str(idx + 1): val for idx, val in enumerate(escolhas)})
+
+
+class AvaliacoesListEnhancementsTest(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.admin = user_model.objects.create_superuser(
+            username="admin_avaliacoes_list",
+            email="admin_avaliacoes_list@local",
+            password="123456",
+        )
+        profile = getattr(self.admin, "profile", None)
+        if profile:
+            profile.must_change_password = False
+            profile.save(update_fields=["must_change_password"])
+        self.client.force_login(self.admin)
+
+        self.municipio = Municipio.objects.create(nome="Cidade Lista Provas", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="SEMED")
+        self.unidade = Unidade.objects.create(
+            secretaria=self.secretaria,
+            nome="Escola Lista",
+            tipo=Unidade.Tipo.EDUCACAO,
+        )
+        self.turma = Turma.objects.create(unidade=self.unidade, nome="7A", ano_letivo=2026)
+
+        self.alunos = []
+        for idx in range(3):
+            aluno = Aluno.objects.create(nome=f"Aluno Lista {idx}")
+            Matricula.objects.create(aluno=aluno, turma=self.turma, situacao=Matricula.Situacao.ATIVA)
+            self.alunos.append(aluno)
+
+        self.av_pendente = AvaliacaoProva.objects.create(
+            municipio=self.municipio,
+            secretaria=self.secretaria,
+            unidade=self.unidade,
+            turma=self.turma,
+            titulo="Avaliacao Pendente",
+            disciplina="Matematica",
+            qtd_questoes=5,
+            opcoes=4,
+            criado_por=self.admin,
+        )
+        ensure_aplicacoes_da_avaliacao(self.av_pendente, actor=self.admin)
+
+        self.av_parcial = AvaliacaoProva.objects.create(
+            municipio=self.municipio,
+            secretaria=self.secretaria,
+            unidade=self.unidade,
+            turma=self.turma,
+            titulo="Avaliacao Parcial",
+            disciplina="Historia",
+            qtd_questoes=5,
+            opcoes=4,
+            criado_por=self.admin,
+        )
+        ensure_aplicacoes_da_avaliacao(self.av_parcial, actor=self.admin)
+        parcial_apps = list(self.av_parcial.aplicacoes.order_by("id"))
+        parcial_apps[0].status = parcial_apps[0].Status.CORRIGIDA
+        parcial_apps[0].nota = Decimal("7.5")
+        parcial_apps[0].save(update_fields=["status", "nota"])
+
+        self.av_concluida = AvaliacaoProva.objects.create(
+            municipio=self.municipio,
+            secretaria=self.secretaria,
+            unidade=self.unidade,
+            turma=self.turma,
+            titulo="Avaliacao Concluida",
+            disciplina="Geografia",
+            qtd_questoes=5,
+            opcoes=4,
+            criado_por=self.admin,
+        )
+        ensure_aplicacoes_da_avaliacao(self.av_concluida, actor=self.admin)
+        self.av_concluida.aplicacoes.update(status="CORRIGIDA", nota=Decimal("8.0"))
+
+    def test_list_filter_by_status_parcial(self):
+        response = self.client.get(
+            reverse("avaliacoes:avaliacao_list"),
+            {"municipio": self.municipio.pk, "status": "PARCIAL"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Avaliacao Parcial")
+        self.assertNotContains(response, "Avaliacao Pendente")
+        self.assertNotContains(response, "Avaliacao Concluida")
+
+    def test_list_export_csv(self):
+        response = self.client.get(
+            reverse("avaliacoes:avaliacao_list"),
+            {"municipio": self.municipio.pk, "export": "csv"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("text/csv", response["Content-Type"])
+        self.assertIn("avaliacoes.csv", response["Content-Disposition"])

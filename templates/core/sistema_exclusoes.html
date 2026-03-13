@@ -1,0 +1,163 @@
+{% extends "core/base.html" %}
+
+{% block header %}Central de Exclusões{% endblock %}
+
+{% block content %}
+<div class="card gp-card">
+  <div class="card__body gp-card__body">
+    {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+    <div class="alert gp-alert alert--warning" style="margin: 12px 0 16px;">
+      Use esta área com cuidado. A exclusão é permanente e pode ser bloqueada quando houver vínculos.
+    </div>
+
+    <form method="get" style="display:grid; grid-template-columns:minmax(220px,1fr) auto auto; gap:10px; align-items:end; margin-bottom: 14px;">
+      <div class="gp-form-group" style="margin:0;">
+        <label class="gp-form-label" for="id_q">Buscar</label>
+        <input id="id_q" name="q" class="gp-input" type="search" value="{{ q }}" placeholder="Nome, sigla, e-mail, código..." autocomplete="off">
+      </div>
+      <button type="submit" class="gp-button gp-button--primary">Filtrar</button>
+      <a class="gp-button gp-button--outline" href="{% url 'core:sistema_exclusoes' %}">Limpar</a>
+    </form>
+
+    {% if not has_any_section %}
+      <div class="alert gp-alert alert--danger">
+        Você não possui permissão para excluir secretarias, unidades ou usuários.
+      </div>
+    {% endif %}
+
+    {% if can_manage_secretarias %}
+      <section style="margin-top: 14px;">
+        <h2 style="font-size:1.05rem; margin-bottom:8px;">Secretarias</h2>
+        <div class="table-shell gp-table gp-table--responsive gp-table--striped gp-table--hover">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Sigla</th>
+                <th>Município</th>
+                <th>Vínculos</th>
+                <th width="180">Ação</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in secretarias_rows %}
+                <tr>
+                  <td>{{ row.nome }}</td>
+                  <td>{{ row.sigla }}</td>
+                  <td>{{ row.municipio }}</td>
+                  <td>
+                    Unidades: {{ row.qtd_unidades }} |
+                    Setores: {{ row.qtd_setores }} |
+                    Perfis: {{ row.qtd_perfis }} |
+                    Endereços: {{ row.qtd_enderecos }}
+                  </td>
+                  <td>
+                    {% if row.can_delete %}
+                      <a class="gp-button gp-button--danger gp-button--sm" href="{{ row.confirm_url }}?next={{ request.get_full_path|urlencode }}">Excluir</a>
+                    {% else %}
+                      <span class="gp-caption">Remova os vínculos antes</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="5">Nenhuma secretaria encontrada.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    {% endif %}
+
+    {% if can_manage_unidades %}
+      <section style="margin-top: 18px;">
+        <h2 style="font-size:1.05rem; margin-bottom:8px;">Unidades</h2>
+        <div class="table-shell gp-table gp-table--responsive gp-table--striped gp-table--hover">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Secretaria</th>
+                <th>Município</th>
+                <th>Vínculos</th>
+                <th width="180">Ação</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in unidades_rows %}
+                <tr>
+                  <td>{{ row.nome }}</td>
+                  <td>{{ row.secretaria }}</td>
+                  <td>{{ row.municipio }}</td>
+                  <td>
+                    Setores: {{ row.qtd_setores }} |
+                    Perfis: {{ row.qtd_perfis }} |
+                    Endereços: {{ row.qtd_enderecos }}
+                  </td>
+                  <td>
+                    {% if row.can_delete %}
+                      <a class="gp-button gp-button--danger gp-button--sm" href="{{ row.confirm_url }}?next={{ request.get_full_path|urlencode }}">Excluir</a>
+                    {% else %}
+                      <span class="gp-caption">Remova os vínculos antes</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="5">Nenhuma unidade encontrada.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    {% endif %}
+
+    {% if can_manage_usuarios %}
+      <section style="margin-top: 18px;">
+        <h2 style="font-size:1.05rem; margin-bottom:8px;">Usuários</h2>
+        <div class="table-shell gp-table gp-table--responsive gp-table--striped gp-table--hover">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Usuário</th>
+                <th>E-mail</th>
+                <th>Função</th>
+                <th>Escopo</th>
+                <th>Status</th>
+                <th width="210">Ação</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in usuarios_rows %}
+                <tr>
+                  <td>{{ row.nome }}</td>
+                  <td>{{ row.username }}</td>
+                  <td>{{ row.email }}</td>
+                  <td>{{ row.role }}</td>
+                  <td>{{ row.scope }}</td>
+                  <td>{{ row.status }}</td>
+                  <td>
+                    {% if row.can_delete %}
+                      <a class="gp-button gp-button--danger gp-button--sm" href="{{ row.confirm_url }}?next={{ request.get_full_path|urlencode }}">Excluir</a>
+                    {% else %}
+                      <span class="gp-caption">{{ row.block_reason|default:"Exclusão não permitida" }}</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="7">Nenhum usuário encontrado.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

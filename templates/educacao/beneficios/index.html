@@ -1,0 +1,17 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Benefícios e Entregas • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="gp-card"><div class="gp-card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="gp-grid-auto-sm">
+    {% for card in cards %}
+      <article class="kpi">
+        <small>{{ card.label }}</small>
+        <strong>{{ card.value }}</strong>
+      </article>
+    {% endfor %}
+  </div>
+</div></div>
+{% endblock %}

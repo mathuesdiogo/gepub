@@ -1,0 +1,166 @@
+<div class="admin-dash">
+  <div class="dash-actions admin-dash__actions">
+    <a class="gp-button gp-button--primary" href="{% url 'educacao:informatica_turma_list' %}"><i class="fa-solid fa-people-group"></i> Turmas de Informática</a>
+    <a class="gp-button gp-button--primary" href="{% url 'educacao:informatica_grade_list' %}"><i class="fa-solid fa-calendar-week"></i> Grades e Horários</a>
+    <a class="gp-button gp-button--primary" href="{% url 'educacao:informatica_agenda' %}"><i class="fa-solid fa-calendar-days"></i> Agenda dos Laboratórios</a>
+    <a class="gp-button gp-button--primary" href="{% url 'educacao:calendario_index' %}"><i class="fa-solid fa-calendar-check"></i> Calendário da Informática</a>
+    <a class="gp-button gp-button--outline" href="{% url 'educacao:informatica_matricula_list' %}"><i class="fa-solid fa-id-card-clip"></i> Matrículas</a>
+    <a class="gp-button gp-button--outline" href="{% url 'educacao:informatica_relatorios' %}"><i class="fa-solid fa-chart-column"></i> Relatórios</a>
+  </div>
+
+  <div class="gp-alert gp-alert--info u-mb-12">
+    <i class="fa-solid fa-circle-info"></i>
+    <span>Unidade: <strong>{{ unidade_nome|default:"—" }}</strong> • Coordenação focada no Curso de Informática.</span>
+  </div>
+
+  <div class="dash-kpi-grid">
+    <article class="admin-kpi admin-kpi--slate">
+      <div class="admin-kpi__icon"><i class="fa-solid fa-people-group"></i></div>
+      <div class="admin-kpi__content">
+        <div class="admin-kpi__label">Turmas ativas/planejadas</div>
+        <div class="admin-kpi__value">{{ coordenacao_informatica.turmas_ativas_total|default:0 }}</div>
+        <div class="admin-kpi__meta">Total de turmas no laboratório da unidade</div>
+      </div>
+    </article>
+    <article class="admin-kpi admin-kpi--amber">
+      <div class="admin-kpi__icon"><i class="fa-solid fa-user-check"></i></div>
+      <div class="admin-kpi__content">
+        <div class="admin-kpi__label">Alunos matriculados</div>
+        <div class="admin-kpi__value">{{ coordenacao_informatica.matriculados_total|default:0 }}</div>
+        <div class="admin-kpi__meta">Externos: {{ coordenacao_informatica.alunos_externos_total|default:0 }}</div>
+      </div>
+    </article>
+    <article class="admin-kpi admin-kpi--green">
+      <div class="admin-kpi__icon"><i class="fa-solid fa-chair"></i></div>
+      <div class="admin-kpi__content">
+        <div class="admin-kpi__label">Vagas livres</div>
+        <div class="admin-kpi__value">{{ coordenacao_informatica.vagas_livres_total|default:0 }}</div>
+        <div class="admin-kpi__meta">Capacidade: {{ coordenacao_informatica.vagas_total|default:0 }}</div>
+      </div>
+    </article>
+    <article class="admin-kpi admin-kpi--slate">
+      <div class="admin-kpi__icon"><i class="fa-solid fa-calendar-check"></i></div>
+      <div class="admin-kpi__content">
+        <div class="admin-kpi__label">Aulas realizadas</div>
+        <div class="admin-kpi__value">{{ coordenacao_informatica.aulas_realizadas_total|default:0 }}</div>
+        <div class="admin-kpi__meta">Pendentes: {{ coordenacao_informatica.aulas_pendentes_total|default:0 }}</div>
+      </div>
+    </article>
+  </div>
+
+  <div class="dash-panel-grid dash-panel-grid--main">
+    <section class="admin-panel">
+      <div class="admin-panel__head">
+        <div>
+          <h3 class="admin-panel__title">Ocupação por turma</h3>
+          <p class="admin-panel__sub">Controle de vagas e lotação das turmas</p>
+        </div>
+      </div>
+      {% if coordenacao_informatica.turmas_ocupacao_rows %}
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Turma</th>
+                <th>Curso</th>
+                <th>Laboratório</th>
+                <th>Vagas</th>
+                <th>Ocupação</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in coordenacao_informatica.turmas_ocupacao_rows %}
+                <tr>
+                  <td><a href="{% url 'educacao:informatica_turma_detail' row.id %}">{{ row.codigo }}</a></td>
+                  <td>{{ row.curso }}</td>
+                  <td>{{ row.laboratorio }}</td>
+                  <td>{{ row.matriculados }}/{{ row.vagas }}</td>
+                  <td>{{ row.ocupacao_pct }}%</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        {% include "core/partials/components/feedback/empty_state.html" with title="Sem turmas" text="Ainda não há turmas de informática no escopo da coordenação." %}
+      {% endif %}
+    </section>
+
+    <section class="admin-panel">
+      <div class="admin-panel__head">
+        <div>
+          <h3 class="admin-panel__title">Próximas aulas</h3>
+          <p class="admin-panel__sub">Agenda operacional das próximas execuções</p>
+        </div>
+      </div>
+      {% if coordenacao_informatica.proximas_aulas %}
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Turma</th>
+                <th>Horário</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for aula in coordenacao_informatica.proximas_aulas %}
+                <tr>
+                  <td>{{ aula.data_aula|date:"d/m/Y" }}</td>
+                  <td>{{ aula.turma.codigo }}</td>
+                  <td>
+                    {% if aula.encontro %}
+                      {{ aula.encontro.hora_inicio|time:"H:i" }} - {{ aula.encontro.hora_fim|time:"H:i" }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+                  <td>{{ aula.get_status_display }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        {% include "core/partials/components/feedback/empty_state.html" with title="Sem aulas próximas" text="Nenhuma aula agendada para os próximos dias." %}
+      {% endif %}
+    </section>
+  </div>
+
+  <section class="admin-panel">
+    <div class="admin-panel__head">
+      <div>
+        <h3 class="admin-panel__title">Censo do curso por escola de origem</h3>
+        <p class="admin-panel__sub">Distribuição dos alunos atendidos por escola</p>
+      </div>
+      <a class="gp-button gp-button--outline" href="{% url 'educacao:informatica_relatorios' %}">
+        <i class="fa-solid fa-file-arrow-down"></i> Abrir relatórios completos
+      </a>
+    </div>
+    {% if coordenacao_informatica.censo_por_escola %}
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Escola de origem</th>
+              <th>Total</th>
+              <th>Externos ao laboratório</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in coordenacao_informatica.censo_por_escola %}
+              <tr>
+                <td>{{ row.escola_origem__nome }}</td>
+                <td>{{ row.total }}</td>
+                <td>{{ row.externos }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      {% include "core/partials/components/feedback/empty_state.html" with title="Sem dados de censo" text="Ainda não há matrículas suficientes para montar os indicadores." %}
+    {% endif %}
+  </section>
+</div>

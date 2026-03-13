@@ -1,4 +1,8 @@
+import hashlib
+import json
+
 from django.contrib import messages
+from django.core.cache import cache
 from django.db.models import Q
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -138,13 +142,30 @@ def aula_frequencia_impl(request, pk: int, aula_id: int):
 
 def api_alunos_turma_suggest_impl(request, pk: int):
     q = (request.GET.get("q") or "").strip()
+    try:
+        page = max(1, int((request.GET.get("page") or "1").strip()))
+    except Exception:
+        page = 1
+    try:
+        limit = max(1, min(50, int((request.GET.get("limit") or "10").strip())))
+    except Exception:
+        limit = 10
     if len(q) < 2:
-        return JsonResponse({"results": []})
+        return JsonResponse({"results": [], "meta": {"page": page, "limit": limit, "total": 0, "has_more": False}})
 
     turma_qs = scope_filter_turmas(request.user, Turma.objects.all())
     turma = get_object_or_404(turma_qs, pk=pk)
 
-    alunos_qs = (
+    raw_key = json.dumps(
+        {"u": request.user.id, "turma": turma.pk, "q": q.lower(), "page": page, "limit": limit},
+        sort_keys=True,
+    )
+    key = "educacao:api_alunos_turma_suggest:" + hashlib.sha256(raw_key.encode("utf-8")).hexdigest()
+    cached = cache.get(key)
+    if cached:
+        return JsonResponse(cached)
+
+    base_qs = (
         Matricula.objects.filter(turma=turma, situacao="ATIVA")
         .select_related("aluno")
         .filter(
@@ -152,16 +173,31 @@ def api_alunos_turma_suggest_impl(request, pk: int):
             | Q(aluno__cpf__icontains=q)
             | Q(aluno__nis__icontains=q)
         )
-        .order_by("aluno__nome")[:10]
+        .order_by("aluno__nome")
     )
+    total = base_qs.count()
+    start = (page - 1) * limit
+    end = start + limit
+    alunos_qs = base_qs[start:end]
 
     results = []
     for m in alunos_qs:
         a = m.aluno
         results.append({
             "id": a.id,
+            "label": a.nome,
             "text": a.nome,
             "meta": (a.cpf or a.nis or ""),
         })
 
-    return JsonResponse({"results": results})
+    payload = {
+        "results": results,
+        "meta": {
+            "page": page,
+            "limit": limit,
+            "total": int(total),
+            "has_more": (page * limit) < int(total),
+        },
+    }
+    cache.set(key, payload, timeout=90)
+    return JsonResponse(payload)

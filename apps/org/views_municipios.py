@@ -37,7 +37,7 @@ class MunicipioListView(BaseListViewGepub):
         )
 
     def get_actions(self, request, **kwargs):
-        actions = super().get_actions(request, **kwargs)
+        actions = super().get_actions(**kwargs)
         if is_admin(request.user):
             actions.insert(0, {"label": "Novo município", "url": reverse("org:municipio_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
         return actions

@@ -13,6 +13,9 @@ from .models import (
     InstitutionalPageConfig,
     InstitutionalServiceCard,
     InstitutionalSlide,
+    OperacaoRegistroAnexo,
+    OperacaoRegistroComentario,
+    OperacaoRegistroTag,
     PortalBanner,
     PortalMunicipalConfig,
     PortalHomeBloco,
@@ -38,10 +41,10 @@ class AlunoArquivoAdmin(admin.ModelAdmin):
 
 @admin.register(DocumentoEmitido)
 class DocumentoEmitidoAdmin(admin.ModelAdmin):
-    list_display = ("tipo", "titulo", "codigo", "gerado_por", "gerado_em", "ativo")
+    list_display = ("tipo", "titulo", "codigo", "assinatura_emitente", "assinatura_cargo", "gerado_em", "ativo")
     list_filter = ("tipo", "ativo", "gerado_em")
-    search_fields = ("titulo", "tipo", "codigo")
-    readonly_fields = ("codigo", "gerado_em")
+    search_fields = ("titulo", "tipo", "codigo", "assinatura_emitente")
+    readonly_fields = ("codigo", "gerado_em", "assinatura_emitente", "assinatura_cargo")
 
 
 class InstitutionalSlideInline(admin.TabularInline):
@@ -206,3 +209,24 @@ class CamaraSessaoAdmin(admin.ModelAdmin):
     list_display = ("municipio", "titulo", "data_sessao", "publicado")
     list_filter = ("publicado", "municipio", "data_sessao")
     search_fields = ("titulo", "pauta", "municipio__nome")
+
+
+@admin.register(OperacaoRegistroTag)
+class OperacaoRegistroTagAdmin(admin.ModelAdmin):
+    list_display = ("municipio", "modulo", "entidade", "entidade_id", "tag", "criado_por", "criado_em")
+    list_filter = ("municipio", "modulo", "entidade", "criado_em")
+    search_fields = ("tag", "entidade", "entidade_id")
+
+
+@admin.register(OperacaoRegistroComentario)
+class OperacaoRegistroComentarioAdmin(admin.ModelAdmin):
+    list_display = ("municipio", "modulo", "entidade", "entidade_id", "interno", "criado_por", "criado_em")
+    list_filter = ("municipio", "modulo", "entidade", "interno", "criado_em")
+    search_fields = ("comentario", "entidade", "entidade_id")
+
+
+@admin.register(OperacaoRegistroAnexo)
+class OperacaoRegistroAnexoAdmin(admin.ModelAdmin):
+    list_display = ("municipio", "modulo", "entidade", "entidade_id", "tipo", "titulo", "criado_por", "criado_em")
+    list_filter = ("municipio", "modulo", "entidade", "tipo", "criado_em")
+    search_fields = ("tipo", "titulo", "entidade", "entidade_id")

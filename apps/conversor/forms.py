@@ -46,9 +46,6 @@ class ConversionJobForm(forms.ModelForm):
         fields = [
             "tipo",
             "input_file",
-            "secretaria",
-            "unidade",
-            "setor",
         ]
 
     def __init__(self, *args, municipio=None, user=None, **kwargs):
@@ -56,10 +53,20 @@ class ConversionJobForm(forms.ModelForm):
         self.municipio = municipio
         self.user = user
 
-        if municipio is not None:
-            self.fields["secretaria"].queryset = self.fields["secretaria"].queryset.filter(municipio=municipio)
-            self.fields["unidade"].queryset = self.fields["unidade"].queryset.filter(secretaria__municipio=municipio)
-            self.fields["setor"].queryset = self.fields["setor"].queryset.filter(unidade__secretaria__municipio=municipio)
+        self.fields["tipo"].widget.attrs.update({"class": "cv-file-input"})
+        self.fields["input_file"].widget.attrs.update({"class": "cv-file-input", "accept": ".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.bmp,.gif,.webp,.tif,.tiff"})
+        self.fields["arquivos_adicionais"].widget.attrs.update(
+            {
+                "class": "cv-file-input",
+                "accept": ".pdf,.png,.jpg,.jpeg,.bmp,.gif,.webp,.tif,.tiff",
+            }
+        )
+        self.fields["pages"].widget.attrs.update(
+            {
+                "class": "cv-file-input",
+                "placeholder": "Ex.: 1-3,7,10",
+            }
+        )
 
     def _ext(self, filename: str) -> str:
         return os.path.splitext((filename or "").lower())[1]
@@ -82,6 +89,7 @@ class ConversionJobForm(forms.ModelForm):
             self.add_error("input_file", f"Tamanho total excede {max_mb} MB.")
 
         doc_ext = {".docx", ".doc"}
+        xls_ext = {".xlsx", ".xls"}
         img_ext = {".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp", ".tif", ".tiff"}
         pdf_ext = {".pdf"}
 
@@ -91,11 +99,15 @@ class ConversionJobForm(forms.ModelForm):
             if not primary or self._ext(primary.name) not in doc_ext:
                 self.add_error("input_file", "Para DOCX -> PDF, envie .docx ou .doc no arquivo principal.")
 
+        if tipo == ConversionJob.Tipo.XLSX_TO_PDF:
+            if not primary or self._ext(primary.name) not in xls_ext:
+                self.add_error("input_file", "Para Excel -> PDF, envie .xlsx ou .xls no arquivo principal.")
+
         if tipo == ConversionJob.Tipo.IMG_TO_PDF:
             if any(ext not in img_ext for ext in file_exts):
                 self.add_error("input_file", "Para Imagem -> PDF, envie apenas arquivos de imagem.")
 
-        if tipo in {ConversionJob.Tipo.PDF_TO_IMAGES, ConversionJob.Tipo.PDF_SPLIT}:
+        if tipo in {ConversionJob.Tipo.PDF_TO_IMAGES, ConversionJob.Tipo.PDF_SPLIT, ConversionJob.Tipo.PDF_TO_TEXT}:
             if not primary or self._ext(primary.name) not in pdf_ext:
                 self.add_error("input_file", "Para esta conversão, o arquivo principal deve ser PDF.")
 

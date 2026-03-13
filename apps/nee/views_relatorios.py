@@ -3,6 +3,7 @@ from .views_relatorios_summary import (
     relatorios_por_tipo,
     relatorios_por_unidade,
     relatorios_por_municipio,
+    relatorios_capacidade,
 )
 from .views_relatorios_alunos import relatorios_alunos
 
@@ -11,5 +12,6 @@ __all__ = [
     "relatorios_por_tipo",
     "relatorios_por_unidade",
     "relatorios_por_municipio",
+    "relatorios_capacidade",
     "relatorios_alunos",
 ]

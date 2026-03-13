@@ -1,0 +1,48 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Justificativas • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage gp-professor-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <article class="gp-student-stage__card">
+    <form method="get" class="gp-form gp-form--smart gp-professor-filter-row">
+      <div class="gp-form-group">
+        <label class="gp-form-label" for="id_status">Status</label>
+        <select id="id_status" name="status" class="gp-select">
+          <option value="" {% if not status_filter %}selected{% endif %}>Todos</option>
+          <option value="PENDENTE" {% if status_filter == "PENDENTE" %}selected{% endif %}>Pendente</option>
+          <option value="DEFERIDO" {% if status_filter == "DEFERIDO" %}selected{% endif %}>Deferido</option>
+          <option value="INDEFERIDO" {% if status_filter == "INDEFERIDO" %}selected{% endif %}>Indeferido</option>
+        </select>
+      </div>
+      <div class="gp-form-group gp-field--full">
+        <label class="gp-form-label" for="id_q">Busca</label>
+        <input id="id_q" type="text" class="gp-input" name="q" value="{{ q }}" placeholder="Aluno, turma, componente ou motivo" />
+      </div>
+      <div class="gp-form-group">
+        <label class="gp-form-label">&nbsp;</label>
+        <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
+      </div>
+    </form>
+
+    <div class="gp-flex-wrap-row gp-mb-3">
+      <span class="gp-badge gp-badge--warning">Pendentes: {{ counters.pendente }}</span>
+      <span class="gp-badge gp-badge--success">Deferidos: {{ counters.deferido }}</span>
+      <span class="gp-badge gp-badge--danger">Indeferidos: {{ counters.indeferido }}</span>
+    </div>
+
+    {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Sem pedidos" empty_text="Nenhuma justificativa encontrada para o filtro informado." %}
+  </article>
+
+  <article class="gp-student-stage__card">
+    <h3>Justificativas do Curso de Informática</h3>
+    <div class="gp-flex-wrap-row gp-mb-3">
+      <span class="gp-badge gp-badge--primary">Registros: {{ counters_informatica.total }}</span>
+      <span class="gp-badge gp-badge--warning">Faltas: {{ counters_informatica.faltas }}</span>
+      <span class="gp-badge gp-badge--success">Com justificativa: {{ counters_informatica.com_justificativa }}</span>
+    </div>
+    {% include "core/partials/components/data/table_shell.html" with headers=headers_informatica rows=rows_informatica page_obj=None empty_title="Sem justificativas de informática" empty_text="Nenhuma justificativa/falta encontrada nas aulas de informática." %}
+  </article>
+</section>
+{% endblock %}

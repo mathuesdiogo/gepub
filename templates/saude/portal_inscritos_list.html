@@ -1,0 +1,25 @@
+{% extends "saude/base_modulo.html" %}
+{% block title %}Portal de Inscritos • Saúde • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="gp-card"><div class="gp-card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+  {% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Paciente, edital, título ou benefício..." action_url=action_url clear_url=clear_url has_filters=has_filters %}
+
+  <form method="get" class="filter-bar">
+    {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
+    <div>
+      <label class="small">Status inscrição</label>
+      <select name="status" class="gp-select">
+        <option value="">Todos</option>
+        {% for value,label in status_choices %}
+        <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button class="gp-button gp-button--primary" type="submit">Aplicar</button>
+  </form>
+
+  {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj empty_title=empty_title empty_text=empty_text %}
+</div></div>
+{% endblock %}

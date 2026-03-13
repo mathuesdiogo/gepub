@@ -2,7 +2,7 @@
 {% block title %}Relatório Mensal • Saúde • GEPUB{% endblock %}
 
 {% block module_content %}
-<div class="card"><div class="card__body">
+<div class="gp-card"><div class="gp-card__body">
 
 {% include "core/partials/components/layout/page_head.html" with title="Relatório Mensal de Atendimentos" subtitle="Resumo por unidade" actions=actions %}
 
@@ -30,7 +30,7 @@
 
 <hr>
 
-<table class="table">
+<table class="gp-table__native">
   <thead>
     <tr>
       <th>Unidade</th>
@@ -54,7 +54,7 @@
 <hr>
 
 <h3>Produção por profissional (top 10)</h3>
-<table class="table">
+<table class="gp-table__native">
   <thead>
     <tr>
       <th>Profissional</th>
@@ -78,7 +78,7 @@
 <hr>
 
 <h3>Produção por especialidade (top 10)</h3>
-<table class="table">
+<table class="gp-table__native">
   <thead>
     <tr>
       <th>Especialidade</th>
@@ -102,7 +102,7 @@
 <hr>
 
 <h3>CIDs mais frequentes</h3>
-<table class="table">
+<table class="gp-table__native">
   <thead>
     <tr>
       <th>CID</th>
@@ -126,7 +126,7 @@
 <hr>
 
 <h3>Ações de auditoria do prontuário (top 10)</h3>
-<table class="table">
+<table class="gp-table__native">
   <thead>
     <tr>
       <th>Ação</th>

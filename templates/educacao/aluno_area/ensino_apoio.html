@@ -1,0 +1,39 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Ensino • Procedimentos de Apoio • {{ aluno.nome }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <article class="gp-student-stage__card">
+    <h3>Procedimentos de Apoio</h3>
+    <form method="post" class="gp-form gp-form--smart gp-mb-3">
+      {% csrf_token %}
+      <input type="hidden" name="form_kind" value="apoio">
+      {% for field in apoio_form %}
+        <div class="gp-form-group">
+          <label class="gp-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}<small class="gp-form-error">{{ field.errors|striptags }}</small>{% endif %}
+        </div>
+      {% endfor %}
+      <button class="gp-button gp-button--outline" type="submit">Solicitar apoio</button>
+    </form>
+    <ul class="gp-student-data-list">
+      {% for ap in apoios %}
+        <li><strong>{{ ap.get_tipo_display }}</strong> • {{ ap.matricula.turma.nome }} • {{ ap.descricao }}</li>
+      {% empty %}
+        <li>Nenhum apoio cadastrado.</li>
+      {% endfor %}
+    </ul>
+    {% if acompanhamentos_nee %}
+    <h4 class="gp-mt-3">Acompanhamentos NEE</h4>
+    <ul class="gp-student-data-list">
+      {% for ac in acompanhamentos_nee %}
+        <li>{{ ac.data|date:"d/m/Y" }} • {{ ac.get_tipo_evento_display }} • {{ ac.descricao|truncatechars:120 }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </article>
+</section>
+{% endblock %}

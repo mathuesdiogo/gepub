@@ -1,0 +1,23 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Lista de Espera • Informática • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+  <div class="gp-card">
+    <div class="gp-card__body">
+      {% include "core/partials/components/layout/page_head.html" with title="Lista de espera" subtitle="Fila de atendimento por curso e prioridade" actions=None %}
+
+      <form method="get" class="gp-form gp-form--inline u-mb-10">
+        <select class="gp-input" name="curso">
+          <option value="">Todos os cursos</option>
+          {% for c in cursos %}
+            <option value="{{ c.id }}" {% if curso_id == c.id|stringformat:'s' %}selected{% endif %}>{{ c.nome }}</option>
+          {% endfor %}
+        </select>
+        <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
+        <a class="gp-button gp-button--outline" href="{{ request.path }}">Limpar</a>
+      </form>
+
+      {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj q='' empty_title="Sem fila ativa" empty_text="As novas solicitações entram aqui quando não houver vaga." %}
+    </div>
+  </div>
+{% endblock %}

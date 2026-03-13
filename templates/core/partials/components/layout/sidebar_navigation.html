@@ -1,10 +1,255 @@
 {% with ns=rm.namespace|default:'' route=rm.url_name|default:'' %}
 <nav class="menu">
-  <div class="menu-search" aria-hidden="true">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <input type="text" placeholder="Pesquisar menu" tabindex="-1" />
-  </div>
+  {% if role_scope_base == 'ALUNO' %}
+    <div class="menu__section">Aluno</div>
 
+    <a class="menu__item menu__item--primary {% if ns == 'core' and route == 'dashboard' %}is-active{% endif %}" href="{% url 'core:dashboard' %}" title="Início">
+      <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-house"></i></span>
+      <span class="menu__label">Início</span>
+    </a>
+
+    <a class="menu__item {% if ns == 'educacao' and route == 'aluno_documentos_processos' %}is-active{% endif %}" href="{% if aluno_documentos_processos_url %}{{ aluno_documentos_processos_url }}{% else %}{% url 'core:dashboard' %}{% endif %}" title="Documentos e Processos">
+      <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-folder-open"></i></span>
+      <span class="menu__label">Documentos/Processos</span>
+    </a>
+
+    <details class="menu__group" {% if ns == 'educacao' and route == 'aluno_ensino' or ns == 'educacao' and route == 'aluno_ensino_dados' or ns == 'educacao' and route == 'aluno_ensino_justificativa' or ns == 'educacao' and route == 'aluno_ensino_boletins' or ns == 'educacao' and route == 'aluno_ensino_avaliacoes' or ns == 'educacao' and route == 'aluno_ensino_disciplinas' or ns == 'educacao' and route == 'aluno_ensino_horarios' or ns == 'educacao' and route == 'aluno_ensino_mensagens' or ns == 'educacao' and route == 'aluno_ensino_biblioteca' or ns == 'educacao' and route == 'aluno_ensino_apoio' or ns == 'educacao' and route == 'aluno_ensino_seletivos' or ns == 'educacao' and route == 'aluno_meus_dados' %}open{% endif %}>
+      <summary class="menu__group-summary menu__item {% if ns == 'educacao' and route == 'aluno_ensino' or ns == 'educacao' and route == 'aluno_ensino_dados' or ns == 'educacao' and route == 'aluno_ensino_justificativa' or ns == 'educacao' and route == 'aluno_ensino_boletins' or ns == 'educacao' and route == 'aluno_ensino_avaliacoes' or ns == 'educacao' and route == 'aluno_ensino_disciplinas' or ns == 'educacao' and route == 'aluno_ensino_horarios' or ns == 'educacao' and route == 'aluno_ensino_mensagens' or ns == 'educacao' and route == 'aluno_ensino_biblioteca' or ns == 'educacao' and route == 'aluno_ensino_apoio' or ns == 'educacao' and route == 'aluno_ensino_seletivos' or ns == 'educacao' and route == 'aluno_meus_dados' %}is-active{% endif %}">
+        <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-graduation-cap"></i></span>
+        <span class="menu__label">Ensino</span>
+        <span class="menu__caret" aria-hidden="true"><i class="fa-solid fa-chevron-down"></i></span>
+      </summary>
+      <div class="menu__submenu">
+        <a class="menu__subitem {% if ns == 'educacao' and route == 'aluno_ensino' or ns == 'educacao' and route == 'aluno_ensino_dados' or ns == 'educacao' and route == 'aluno_meus_dados' %}is-active{% endif %}" href="{% if meus_dados_url %}{{ meus_dados_url }}{% elif aluno_ensino_dados_url %}{{ aluno_ensino_dados_url }}{% elif aluno_ensino_url %}{{ aluno_ensino_url }}{% else %}{% url 'core:dashboard' %}{% endif %}"><i class="fa-solid fa-id-card"></i><span>Dados do aluno</span></a>
+        <a class="menu__subitem {% if ns == 'educacao' and route == 'aluno_ensino_justificativa' %}is-active{% endif %}" href="{% if aluno_ensino_justificativa_url %}{{ aluno_ensino_justificativa_url }}{% else %}{% url 'core:dashboard' %}{% endif %}"><i class="fa-solid fa-file-circle-check"></i><span>Justificativa de falta</span></a>
+        <a class="menu__subitem {% if ns == 'educacao' and route == 'aluno_ensino_boletins' %}is-active{% endif %}" href="{% if aluno_ensino_boletins_url %}{{ aluno_ensino_boletins_url }}{% else %}{% url 'core:dashboard' %}{% endif %}"><i class="fa-solid fa-table-list"></i><span>Boletim</span></a>
+        <a class="menu__subitem {% if ns == 'educacao' and route == 'aluno_ensino_avaliacoes' %}is-active{% endif %}" href="{% if aluno_ensino_avaliacoes_url %}{{ aluno_ensino_avaliacoes_url }}{% else %}{% url 'core:dashboard' %}{% endif %}"><i class="fa-solid fa-chart-line"></i><span>Avaliações</span></a>
+        <a class="menu__subitem {% if ns == 'educacao' and route == 'aluno_ensino_disciplinas' %}is-active{% endif %}" href="{% if aluno_ensino_disciplinas_url %}{{ aluno_ensino_disciplinas_url }}{% else %}{% url 'core:dashboard' %}{% endif %}"><i class="fa-solid fa-book-open-reader"></i><span>Minhas disciplinas</span></a>
+        <a class="menu__subitem {% if ns == 'educacao' and route == 'aluno_ensino_horarios' %}is-active{% endif %}" href="{% if aluno_ensino_horarios_url %}{{ aluno_ensino_horarios_url }}{% else %}{% url 'core:dashboard' %}{% endif %}"><i class="fa-solid fa-clock"></i><span>Horários de aula</span></a>
+        <a class="menu__subitem {% if ns == 'educacao' and route == 'aluno_ensino_mensagens' %}is-active{% endif %}" href="{% if aluno_ensino_mensagens_url %}{{ aluno_ensino_mensagens_url }}{% else %}{% url 'core:dashboard' %}{% endif %}"><i class="fa-solid fa-envelope"></i><span>Mensagens</span></a>
+        <a class="menu__subitem {% if ns == 'educacao' and route == 'aluno_ensino_biblioteca' %}is-active{% endif %}" href="{% if aluno_ensino_biblioteca_url %}{{ aluno_ensino_biblioteca_url }}{% else %}{% url 'core:dashboard' %}{% endif %}"><i class="fa-solid fa-book"></i><span>Biblioteca e materiais</span></a>
+        <a class="menu__subitem {% if ns == 'educacao' and route == 'aluno_ensino_apoio' %}is-active{% endif %}" href="{% if aluno_ensino_apoio_url %}{{ aluno_ensino_apoio_url }}{% else %}{% url 'core:dashboard' %}{% endif %}"><i class="fa-solid fa-hands-holding-child"></i><span>Procedimentos de apoio</span></a>
+        <a class="menu__subitem {% if ns == 'educacao' and route == 'aluno_ensino_seletivos' %}is-active{% endif %}" href="{% if aluno_ensino_seletivos_url %}{{ aluno_ensino_seletivos_url }}{% else %}{% url 'core:dashboard' %}{% endif %}"><i class="fa-solid fa-list-check"></i><span>Processos seletivos</span></a>
+      </div>
+    </details>
+
+    <a class="menu__item {% if ns == 'educacao' and route == 'aluno_pesquisa' %}is-active{% endif %}" href="{% if aluno_pesquisa_url %}{{ aluno_pesquisa_url }}{% else %}{% url 'core:dashboard' %}{% endif %}" title="Pesquisa">
+      <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-microscope"></i></span>
+      <span class="menu__label">Pesquisa</span>
+    </a>
+
+    <a class="menu__item {% if ns == 'educacao' and route == 'aluno_central_servicos' %}is-active{% endif %}" href="{% if aluno_central_servicos_url %}{{ aluno_central_servicos_url }}{% else %}{% url 'accounts:meu_perfil' %}{% endif %}" title="Central de Serviços">
+      <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-headset"></i></span>
+      <span class="menu__label">Central de Serviços</span>
+    </a>
+
+    <a class="menu__item {% if ns == 'educacao' and route == 'aluno_atividades' %}is-active{% endif %}" href="{% if aluno_atividades_url %}{{ aluno_atividades_url }}{% else %}{% url 'core:dashboard' %}{% endif %}" title="Atividades Estudantis">
+      <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-calendar-days"></i></span>
+      <span class="menu__label">Atividades Estudantis</span>
+    </a>
+
+    <a class="menu__item {% if ns == 'educacao' and route == 'aluno_saude' %}is-active{% endif %}" href="{% if aluno_saude_url %}{{ aluno_saude_url }}{% else %}{% url 'core:dashboard' %}{% endif %}" title="Saúde">
+      <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-heart-pulse"></i></span>
+      <span class="menu__label">Saúde</span>
+    </a>
+
+    <a class="menu__item {% if ns == 'educacao' and route == 'aluno_comunicacao' %}is-active{% endif %}" href="{% if aluno_comunicacao_url %}{{ aluno_comunicacao_url }}{% else %}{% url 'core:dashboard' %}{% endif %}" title="Comunicação Social">
+      <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-bullhorn"></i></span>
+      <span class="menu__label">Comunicação Social</span>
+    </a>
+
+    <a class="menu__item" href="{% url 'accounts:logout' %}" title="Sair">
+      <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-right-from-bracket"></i></span>
+      <span class="menu__label">Sair</span>
+    </a>
+  {% elif role_code == 'EDU_COORD' %}
+  <div class="menu__section">Acessos Rápidos</div>
+
+  <a class="menu__item menu__item--primary {% if ns == 'core' and route == 'dashboard' %}is-active{% endif %}" href="{% url 'core:dashboard' %}" title="Painel">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-gauge"></i></span>
+    <span class="menu__label">Painel</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'educacao' and route == 'informatica_index' %}is-active{% endif %}" href="{% url 'educacao:informatica_index' %}" title="Visão geral">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-laptop-code"></i></span>
+    <span class="menu__label">Visão Geral</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'educacao' and route == 'informatica_turma_list' or ns == 'educacao' and route == 'informatica_turma_detail' or ns == 'educacao' and route == 'informatica_turma_create' or ns == 'educacao' and route == 'informatica_turma_update' %}is-active{% endif %}" href="{% url 'educacao:informatica_turma_list' %}" title="Turmas">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-people-group"></i></span>
+    <span class="menu__label">Turmas</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'educacao' and route == 'informatica_grade_list' or ns == 'educacao' and route == 'informatica_grade_create' or ns == 'educacao' and route == 'informatica_grade_update' %}is-active{% endif %}" href="{% url 'educacao:informatica_grade_list' %}" title="Grades e Horários">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-calendar-week"></i></span>
+    <span class="menu__label">Grades e Horários</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'educacao' and route == 'informatica_agenda' %}is-active{% endif %}" href="{% url 'educacao:informatica_agenda' %}" title="Agenda dos Laboratórios">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-calendar-days"></i></span>
+    <span class="menu__label">Agenda</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'educacao' and route == 'calendario_index' or ns == 'educacao' and route == 'calendario_evento_create' or ns == 'educacao' and route == 'calendario_evento_update' %}is-active{% endif %}" href="{% url 'educacao:calendario_index' %}" title="Calendário da Informática">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-calendar-check"></i></span>
+    <span class="menu__label">Calendário</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'educacao' and route == 'informatica_matricula_list' or ns == 'educacao' and route == 'informatica_matricula_create' or ns == 'educacao' and route == 'informatica_matricula_cancelar' or ns == 'educacao' and route == 'informatica_aluno_create' %}is-active{% endif %}" href="{% url 'educacao:informatica_matricula_list' %}" title="Matrículas">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-id-card-clip"></i></span>
+    <span class="menu__label">Matrículas</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'educacao' and route == 'informatica_solicitacao_list' or ns == 'educacao' and route == 'informatica_solicitacao_create' %}is-active{% endif %}" href="{% url 'educacao:informatica_solicitacao_list' %}" title="Solicitações de Vaga">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-file-signature"></i></span>
+    <span class="menu__label">Solicitações</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'educacao' and route == 'informatica_lista_espera' %}is-active{% endif %}" href="{% url 'educacao:informatica_lista_espera' %}" title="Lista de Espera">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-list-ol"></i></span>
+    <span class="menu__label">Lista de Espera</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'educacao' and route == 'informatica_ocorrencia_list' %}is-active{% endif %}" href="{% url 'educacao:informatica_ocorrencia_list' %}" title="Ocorrências">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-triangle-exclamation"></i></span>
+    <span class="menu__label">Ocorrências</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'educacao' and route == 'informatica_relatorios' %}is-active{% endif %}" href="{% url 'educacao:informatica_relatorios' %}" title="Relatórios">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-chart-column"></i></span>
+    <span class="menu__label">Relatórios</span>
+  </a>
+
+  {% if can_nee %}
+    <a class="menu__item {% if ns == 'nee' and route == 'index' %}is-active{% endif %}" href="{% url 'nee:index' %}" title="Painel NEE">
+      <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-universal-access"></i></span>
+      <span class="menu__label">Painel NEE</span>
+    </a>
+  {% endif %}
+
+  <div class="menu__section">Conta</div>
+
+  <a class="menu__item {% if ns == 'accounts' and route == 'meu_perfil' %}is-active{% endif %}" href="{% url 'accounts:meu_perfil' %}" title="Meu perfil">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-user"></i></span>
+    <span class="menu__label">Meu Perfil</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'accounts' and route == 'alterar_senha' %}is-active{% endif %}" href="{% url 'accounts:alterar_senha' %}" title="Alterar senha">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-key"></i></span>
+    <span class="menu__label">Alterar Senha</span>
+  </a>
+
+  <a class="menu__item" href="{% url 'accounts:logout' %}" title="Sair">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-right-from-bracket"></i></span>
+    <span class="menu__label">Sair</span>
+  </a>
+  {% elif role_code == 'EDU_SECRETARIO' %}
+  <div class="menu__section">Painel Secretaria de Educação</div>
+
+  <a class="menu__item menu__item--primary {% if ns == 'core' and route == 'dashboard' %}is-active{% endif %}" href="{% url 'core:dashboard' %}" title="Início">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-house"></i></span>
+    <span class="menu__label">Início</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'core' and route == 'secretaria_educacao_visao_geral' %}is-active{% endif %}" href="{% url 'core:secretaria_educacao_visao_geral' %}" title="Visão Geral da Rede">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-gauge-high"></i></span>
+    <span class="menu__label">Visão Geral da Rede</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'core' and route == 'secretaria_educacao_escolas' %}is-active{% endif %}" href="{% url 'core:secretaria_educacao_escolas' %}" title="Escolas">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-school"></i></span>
+    <span class="menu__label">Escolas</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'core' and route == 'secretaria_educacao_alunos' %}is-active{% endif %}" href="{% url 'core:secretaria_educacao_alunos' %}" title="Alunos">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-user-graduate"></i></span>
+    <span class="menu__label">Alunos</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'core' and route == 'secretaria_educacao_turmas' %}is-active{% endif %}" href="{% url 'core:secretaria_educacao_turmas' %}" title="Turmas">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-people-group"></i></span>
+    <span class="menu__label">Turmas</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'core' and route == 'secretaria_educacao_cursos' %}is-active{% endif %}" href="{% url 'core:secretaria_educacao_cursos' %}" title="Cursos">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-book"></i></span>
+    <span class="menu__label">Cursos</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'core' and route == 'secretaria_educacao_modalidades' %}is-active{% endif %}" href="{% url 'core:secretaria_educacao_modalidades' %}" title="Modalidades de Ensino">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-layer-group"></i></span>
+    <span class="menu__label">Modalidades de Ensino</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'educacao' and route == 'matriz_list' or ns == 'educacao' and route == 'matriz_modelos' or ns == 'educacao' and route == 'componente_list' %}is-active{% endif %}" href="{% url 'educacao:matriz_list' %}" title="Disciplinas e Grade Curricular">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-table-cells-large"></i></span>
+    <span class="menu__label">Disciplinas e Grade Curricular</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'core' and route == 'secretaria_educacao_frequencia' %}is-active{% endif %}" href="{% url 'core:secretaria_educacao_frequencia' %}" title="Frequência">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-user-check"></i></span>
+    <span class="menu__label">Frequência</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'core' and route == 'secretaria_educacao_desempenho' or ns == 'educacao' and route == 'indicadores_gerenciais' %}is-active{% endif %}" href="{% url 'core:secretaria_educacao_desempenho' %}" title="Desempenho Pedagógico">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-chart-column"></i></span>
+    <span class="menu__label">Desempenho Pedagógico</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'core' and route == 'secretaria_educacao_profissionais' %}is-active{% endif %}" href="{% url 'core:secretaria_educacao_profissionais' %}" title="Profissionais da Educação">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-users-gear"></i></span>
+    <span class="menu__label">Profissionais da Educação</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'educacao' and route == 'calendario_index' %}is-active{% endif %}" href="{% url 'educacao:calendario_index' %}" title="Calendário Letivo">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-calendar-days"></i></span>
+    <span class="menu__label">Calendário Letivo</span>
+  </a>
+
+  {% if can_nee %}
+    <a class="menu__item {% if ns == 'nee' %}is-active{% endif %}" href="{% url 'nee:index' %}" title="Educação Especial / NEE">
+      <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-universal-access"></i></span>
+      <span class="menu__label">Educação Especial / NEE</span>
+    </a>
+  {% endif %}
+
+  <a class="menu__item {% if ns == 'educacao' and route == 'assistencia_index' or ns == 'educacao' and route == 'assist_rota_list' %}is-active{% endif %}" href="{% url 'educacao:assist_rota_list' %}" title="Transporte Escolar">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-bus"></i></span>
+    <span class="menu__label">Transporte Escolar</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'educacao' and route == 'relatorio_mensal' or ns == 'educacao' and route == 'censo_escolar' %}is-active{% endif %}" href="{% url 'educacao:relatorio_mensal' %}" title="Relatórios">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-file-lines"></i></span>
+    <span class="menu__label">Relatórios</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'educacao' and route == 'indicadores_gerenciais' or ns == 'paineis' %}is-active{% endif %}" href="{% url 'educacao:indicadores_gerenciais' %}" title="Indicadores e BI">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-chart-line"></i></span>
+    <span class="menu__label">Indicadores e BI</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'core' and route == 'secretaria_educacao_documentos' %}is-active{% endif %}" href="{% url 'core:secretaria_educacao_documentos' %}" title="Documentos Institucionais">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-folder-open"></i></span>
+    <span class="menu__label">Documentos Institucionais</span>
+  </a>
+
+  <div class="menu__section">Conta</div>
+
+  <a class="menu__item {% if ns == 'accounts' and route == 'meu_perfil' %}is-active{% endif %}" href="{% url 'accounts:meu_perfil' %}" title="Meu perfil">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-user"></i></span>
+    <span class="menu__label">Meu Perfil</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'accounts' and route == 'alterar_senha' %}is-active{% endif %}" href="{% url 'accounts:alterar_senha' %}" title="Alterar senha">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-key"></i></span>
+    <span class="menu__label">Alterar Senha</span>
+  </a>
+
+  <a class="menu__item" href="{% url 'accounts:logout' %}" title="Sair">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-right-from-bracket"></i></span>
+    <span class="menu__label">Sair</span>
+  </a>
+  {% else %}
   <div class="menu__section">Acessos Rápidos</div>
 
   <a class="menu__item menu__item--primary {% if ns == 'core' and route == 'dashboard' %}is-active{% endif %}" href="{% url 'core:dashboard' %}" title="Dashboard">
@@ -12,19 +257,11 @@
     <span class="menu__label">Dashboard</span>
   </a>
 
-  {% if not is_professor_role %}
-    {% url 'portal' as portal_url %}
-    <a class="menu__item menu__item--primary {% if request.path == portal_url %}is-active{% endif %}" href="{{ portal_url }}" title="Módulos">
-      <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-table-cells-large"></i></span>
-      <span class="menu__label">Módulos</span>
-    </a>
-  {% endif %}
-
-  {% if can_org or can_financeiro or can_processos or can_compras or can_contratos or can_rh or can_ponto or can_folha or can_patrimonio or can_almoxarifado or can_frota or can_ouvidoria or can_tributos %}
+  {% if can_org or can_financeiro or can_processos or can_compras or can_contratos or can_rh or can_ponto or can_folha or can_patrimonio or can_almoxarifado or can_frota or can_ouvidoria or can_tributos or can_camara %}
     <div class="menu__section">Gestão Pública</div>
 
-    <details class="menu__group" {% if ns == 'org' or ns == 'financeiro' or ns == 'processos' or ns == 'compras' or ns == 'contratos' or ns == 'rh' or ns == 'ponto' or ns == 'folha' or ns == 'patrimonio' or ns == 'almoxarifado' or ns == 'frota' or ns == 'ouvidoria' or ns == 'tributos' %}open{% endif %}>
-      <summary class="menu__group-summary menu__item {% if ns == 'org' or ns == 'financeiro' or ns == 'processos' or ns == 'compras' or ns == 'contratos' or ns == 'rh' or ns == 'ponto' or ns == 'folha' or ns == 'patrimonio' or ns == 'almoxarifado' or ns == 'frota' or ns == 'ouvidoria' or ns == 'tributos' %}is-active{% endif %}">
+    <details class="menu__group" {% if ns == 'org' or ns == 'financeiro' or ns == 'processos' or ns == 'compras' or ns == 'contratos' or ns == 'rh' or ns == 'ponto' or ns == 'folha' or ns == 'patrimonio' or ns == 'almoxarifado' or ns == 'frota' or ns == 'ouvidoria' or ns == 'tributos' or ns == 'camara' %}open{% endif %}>
+      <summary class="menu__group-summary menu__item {% if ns == 'org' or ns == 'financeiro' or ns == 'processos' or ns == 'compras' or ns == 'contratos' or ns == 'rh' or ns == 'ponto' or ns == 'folha' or ns == 'patrimonio' or ns == 'almoxarifado' or ns == 'frota' or ns == 'ouvidoria' or ns == 'tributos' or ns == 'camara' %}is-active{% endif %}">
         <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-briefcase"></i></span>
         <span class="menu__label">Operação</span>
         <span class="menu__caret" aria-hidden="true"><i class="fa-solid fa-chevron-down"></i></span>
@@ -33,6 +270,9 @@
       <div class="menu__submenu">
         {% if can_org %}
           <a class="menu__subitem {% if ns == 'org' %}is-active{% endif %}" href="{% url 'org:index' %}"><i class="fa-solid fa-sitemap"></i><span>Organização</span></a>
+          {% if request.user.is_superuser or role_code == 'ADMIN' %}
+            <a class="menu__subitem {% if ns == 'org' and route == 'onboarding_painel' or ns == 'org' and route == 'onboarding_wizard' or ns == 'org' and route == 'onboarding_wizard_step' or ns == 'org' and route == 'onboarding_primeiro_acesso' %}is-active{% endif %}" href="{% url 'org:onboarding_painel' %}"><i class="fa-solid fa-cubes-stacked"></i><span>Módulos</span></a>
+          {% endif %}
           {% if can_org_manage_secretaria %}
             <a class="menu__subitem {% if ns == 'org' and 'governanca' in route %}is-active{% endif %}" href="{% url 'org:secretaria_governanca_hub' %}"><i class="fa-solid fa-sliders"></i><span>Governança</span></a>
           {% endif %}
@@ -51,6 +291,9 @@
         {% endif %}
         {% if can_rh %}
           <a class="menu__subitem {% if ns == 'rh' %}is-active{% endif %}" href="{% url 'rh:index' %}"><i class="fa-solid fa-id-badge"></i><span>RH</span></a>
+          <a class="menu__subitem {% if ns == 'rh' and 'remanejamento' in route %}is-active{% endif %}" href="{% url 'rh:remanejamento_edital_list' %}"><i class="fa-solid fa-arrow-right-arrow-left"></i><span>Remanejamento</span></a>
+          <a class="menu__subitem {% if ns == 'rh' and 'substituicao' in route %}is-active{% endif %}" href="{% url 'rh:substituicao_list' %}"><i class="fa-solid fa-user-clock"></i><span>Substituições</span></a>
+          <a class="menu__subitem {% if ns == 'rh' and 'pdp' in route %}is-active{% endif %}" href="{% url 'rh:pdp_plano_list' %}"><i class="fa-solid fa-graduation-cap"></i><span>PDP</span></a>
         {% endif %}
         {% if can_ponto %}
           <a class="menu__subitem {% if ns == 'ponto' %}is-active{% endif %}" href="{% url 'ponto:index' %}"><i class="fa-solid fa-clock"></i><span>Ponto</span></a>
@@ -73,6 +316,9 @@
         {% if can_tributos %}
           <a class="menu__subitem {% if ns == 'tributos' %}is-active{% endif %}" href="{% url 'tributos:index' %}"><i class="fa-solid fa-receipt"></i><span>Tributos</span></a>
         {% endif %}
+        {% if can_camara %}
+          <a class="menu__subitem {% if ns == 'camara' %}is-active{% endif %}" href="{% url 'camara:index' %}"><i class="fa-solid fa-landmark-dome"></i><span>Câmara Municipal</span></a>
+        {% endif %}
       </div>
     </details>
   {% endif %}
@@ -80,46 +326,126 @@
   {% if can_edu or can_nee or can_avaliacoes or can_saude %}
     <div class="menu__section">Educação e Saúde</div>
 
-    <details class="menu__group" {% if ns == 'educacao' or ns == 'nee' or ns == 'avaliacoes' or ns == 'saude' %}open{% endif %}>
-      <summary class="menu__group-summary menu__item {% if ns == 'educacao' or ns == 'nee' or ns == 'avaliacoes' or ns == 'saude' %}is-active{% endif %}">
-        <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-graduation-cap"></i></span>
-        <span class="menu__label">Serviços</span>
-        <span class="menu__caret" aria-hidden="true"><i class="fa-solid fa-chevron-down"></i></span>
-      </summary>
-
-      <div class="menu__submenu">
+    {% if is_professor_role %}
+      {% with prof_codigo=request.user.profile.codigo_acesso|default:request.user.username %}
         {% if can_edu %}
-          {% if is_professor_role %}
-            <a class="menu__subitem {% if ns == 'educacao' and route == 'index' %}is-active{% endif %}" href="{% url 'educacao:index' %}"><i class="fa-solid fa-chalkboard-user"></i><span>Painel Professor</span></a>
-          {% else %}
-            <a class="menu__subitem {% if ns == 'educacao' and route == 'index' %}is-active{% endif %}" href="{% url 'educacao:index' %}"><i class="fa-solid fa-book-open"></i><span>Painel Educação</span></a>
+          <a class="menu__item {% if ns == 'educacao' and route == 'professor_inicio' or ns == 'educacao' and route == 'index' %}is-active{% endif %}" href="{% url 'educacao:professor_inicio' prof_codigo %}">
+            <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-chalkboard-user"></i></span>
+            <span class="menu__label">Início Professor</span>
+          </a>
+          <a class="menu__item {% if ns == 'educacao' and route == 'professor_diarios' or ns == 'educacao' and route == 'meus_diarios' %}is-active{% endif %}" href="{% url 'educacao:professor_diarios' prof_codigo %}">
+            <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-book"></i></span>
+            <span class="menu__label">Meus Diários</span>
+          </a>
+          <a class="menu__item {% if ns == 'educacao' and route == 'professor_aulas' %}is-active{% endif %}" href="{% url 'educacao:professor_aulas' prof_codigo %}">
+            <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-chalkboard"></i></span>
+            <span class="menu__label">Aulas e Conteúdos</span>
+          </a>
+          <a class="menu__item {% if ns == 'educacao' and route == 'professor_frequencias' %}is-active{% endif %}" href="{% url 'educacao:professor_frequencias' prof_codigo %}">
+            <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-user-check"></i></span>
+            <span class="menu__label">Presenças e Faltas</span>
+          </a>
+          <a class="menu__item {% if ns == 'educacao' and route == 'professor_notas' %}is-active{% endif %}" href="{% url 'educacao:professor_notas' prof_codigo %}">
+            <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-clipboard-check"></i></span>
+            <span class="menu__label">Notas e Avaliações</span>
+          </a>
+          <a class="menu__item {% if ns == 'educacao' and route == 'professor_agenda_avaliacoes' %}is-active{% endif %}" href="{% url 'educacao:professor_agenda_avaliacoes' prof_codigo %}">
+            <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-calendar-check"></i></span>
+            <span class="menu__label">Agenda de Avaliações</span>
+          </a>
+          <a class="menu__item {% if ns == 'educacao' and route == 'professor_horarios' %}is-active{% endif %}" href="{% url 'educacao:professor_horarios' prof_codigo %}">
+            <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-clock"></i></span>
+            <span class="menu__label">Locais e Horários</span>
+          </a>
+          <a class="menu__item {% if ns == 'educacao' and route == 'professor_planos_ensino' or ns == 'educacao' and route == 'professor_plano_ensino_editar' %}is-active{% endif %}" href="{% url 'educacao:professor_planos_ensino' prof_codigo %}">
+            <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-book-open"></i></span>
+            <span class="menu__label">Plano de Ensino</span>
+          </a>
+          <a class="menu__item {% if ns == 'educacao' and route == 'professor_materiais' or ns == 'educacao' and route == 'professor_material_novo' or ns == 'educacao' and route == 'professor_material_editar' %}is-active{% endif %}" href="{% url 'educacao:professor_materiais' prof_codigo %}">
+            <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-folder-open"></i></span>
+            <span class="menu__label">Materiais de Aula</span>
+          </a>
+          <a class="menu__item {% if ns == 'educacao' and route == 'professor_justificativas' or ns == 'educacao' and route == 'justificativa_falta_list' or ns == 'educacao' and route == 'justificativa_falta_detail' %}is-active{% endif %}" href="{% url 'educacao:professor_justificativas' prof_codigo %}">
+            <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-file-signature"></i></span>
+            <span class="menu__label">Justificativas</span>
+          </a>
+          <a class="menu__item {% if ns == 'educacao' and route == 'professor_fechamento' or ns == 'educacao' and route == 'fechamento_turma_periodo' %}is-active{% endif %}" href="{% url 'educacao:professor_fechamento' prof_codigo %}">
+            <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-lock"></i></span>
+            <span class="menu__label">Fechamento</span>
+          </a>
+        {% endif %}
+      {% endwith %}
+
+      {% if can_nee %}
+        <a class="menu__item {% if ns == 'nee' and route == 'index' %}is-active{% endif %}" href="{% url 'nee:index' %}">
+          <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-universal-access"></i></span>
+          <span class="menu__label">Painel NEE</span>
+        </a>
+      {% endif %}
+
+      {% if can_saude %}
+        <a class="menu__item {% if ns == 'saude' and route == 'index' %}is-active{% endif %}" href="{% url 'saude:index' %}">
+          <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-heart-pulse"></i></span>
+          <span class="menu__label">Painel Saúde</span>
+        </a>
+        <a class="menu__item {% if ns == 'saude' and route == 'atendimento_list' %}is-active{% endif %}" href="{% url 'saude:atendimento_list' %}">
+          <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-notes-medical"></i></span>
+          <span class="menu__label">Atendimentos</span>
+        </a>
+      {% endif %}
+    {% else %}
+      <details class="menu__group" {% if ns == 'educacao' or ns == 'nee' or ns == 'avaliacoes' or ns == 'saude' %}open{% endif %}>
+        <summary class="menu__group-summary menu__item {% if ns == 'educacao' or ns == 'nee' or ns == 'avaliacoes' or ns == 'saude' %}is-active{% endif %}">
+          <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-graduation-cap"></i></span>
+          <span class="menu__label">Serviços</span>
+          <span class="menu__caret" aria-hidden="true"><i class="fa-solid fa-chevron-down"></i></span>
+        </summary>
+
+        <div class="menu__submenu">
+          {% if can_edu %}
+            {% if role_code == 'EDU_COORD' %}
+              <a class="menu__subitem {% if ns == 'core' and route == 'dashboard' %}is-active{% endif %}" href="{% url 'core:dashboard' %}"><i class="fa-solid fa-gauge"></i><span>Painel Coordenação (Informática)</span></a>
+              <a class="menu__subitem {% if ns == 'educacao' and route == 'informatica_index' %}is-active{% endif %}" href="{% url 'educacao:informatica_index' %}"><i class="fa-solid fa-laptop-code"></i><span>Visão geral do curso</span></a>
+              <a class="menu__subitem {% if ns == 'educacao' and route == 'informatica_turma_list' %}is-active{% endif %}" href="{% url 'educacao:informatica_turma_list' %}"><i class="fa-solid fa-people-group"></i><span>Turmas de informática</span></a>
+              <a class="menu__subitem {% if ns == 'educacao' and route == 'informatica_matricula_list' %}is-active{% endif %}" href="{% url 'educacao:informatica_matricula_list' %}"><i class="fa-solid fa-id-card-clip"></i><span>Matrículas do curso</span></a>
+              <a class="menu__subitem {% if ns == 'educacao' and route == 'informatica_frequencia' %}is-active{% endif %}" href="{% url 'educacao:informatica_frequencia' %}"><i class="fa-solid fa-user-check"></i><span>Aulas e frequência</span></a>
+              <a class="menu__subitem {% if ns == 'educacao' and route == 'informatica_relatorios' %}is-active{% endif %}" href="{% url 'educacao:informatica_relatorios' %}"><i class="fa-solid fa-chart-column"></i><span>Relatórios de informática</span></a>
+            {% elif role_code == 'EDU_SECRETARIO' %}
+              <a class="menu__subitem {% if ns == 'core' and route == 'dashboard' %}is-active{% endif %}" href="{% url 'core:dashboard' %}"><i class="fa-solid fa-gauge"></i><span>Painel Secretaria (Informática)</span></a>
+            {% else %}
+              <a class="menu__subitem {% if ns == 'educacao' and route == 'index' %}is-active{% endif %}" href="{% url 'educacao:index' %}"><i class="fa-solid fa-book-open"></i><span>Painel Educação</span></a>
+              <a class="menu__subitem {% if ns == 'educacao' and route == 'turma_list' %}is-active{% endif %}" href="{% url 'educacao:turma_list' %}"><i class="fa-solid fa-people-group"></i><span>Turmas</span></a>
+              <a class="menu__subitem {% if ns == 'educacao' and route == 'aluno_list' %}is-active{% endif %}" href="{% url 'educacao:aluno_list' %}"><i class="fa-solid fa-user-graduate"></i><span>Alunos</span></a>
+              <a class="menu__subitem {% if ns == 'educacao' and route == 'meus_diarios' %}is-active{% endif %}" href="{% url 'educacao:meus_diarios' %}"><i class="fa-solid fa-clipboard-check"></i><span>Diário</span></a>
+              <a class="menu__subitem {% if ns == 'educacao' and 'informatica_' in route %}is-active{% endif %}" href="{% url 'educacao:informatica_index' %}"><i class="fa-solid fa-laptop-code"></i><span>Curso de Informática</span></a>
+              {% if can_edu_manage %}
+                <a class="menu__subitem {% if ns == 'educacao' and route == 'justificativa_falta_list' or ns == 'educacao' and route == 'justificativa_falta_detail' %}is-active{% endif %}" href="{% url 'educacao:justificativa_falta_list' %}"><i class="fa-solid fa-file-signature"></i><span>Justificativas de Faltas</span></a>
+              {% endif %}
+            {% endif %}
           {% endif %}
-          <a class="menu__subitem {% if ns == 'educacao' and route == 'turma_list' %}is-active{% endif %}" href="{% url 'educacao:turma_list' %}"><i class="fa-solid fa-people-group"></i><span>Turmas</span></a>
-          <a class="menu__subitem {% if ns == 'educacao' and route == 'aluno_list' %}is-active{% endif %}" href="{% url 'educacao:aluno_list' %}"><i class="fa-solid fa-user-graduate"></i><span>Alunos</span></a>
-          <a class="menu__subitem {% if ns == 'educacao' and route == 'meus_diarios' %}is-active{% endif %}" href="{% url 'educacao:meus_diarios' %}"><i class="fa-solid fa-clipboard-check"></i><span>Diário</span></a>
-        {% endif %}
 
-        {% if can_avaliacoes %}
-          <a class="menu__subitem {% if ns == 'avaliacoes' %}is-active{% endif %}" href="{% url 'avaliacoes:avaliacao_list' %}"><i class="fa-solid fa-file-circle-check"></i><span>Avaliações</span></a>
-        {% endif %}
+          {% if can_avaliacoes %}
+            <a class="menu__subitem {% if ns == 'avaliacoes' %}is-active{% endif %}" href="{% url 'avaliacoes:avaliacao_list' %}"><i class="fa-solid fa-file-circle-check"></i><span>Avaliações</span></a>
+          {% endif %}
 
-        {% if can_nee %}
-          <a class="menu__subitem {% if ns == 'nee' and route == 'index' %}is-active{% endif %}" href="{% url 'nee:index' %}"><i class="fa-solid fa-universal-access"></i><span>Painel NEE</span></a>
-        {% endif %}
+          {% if can_nee %}
+            <a class="menu__subitem {% if ns == 'nee' and route == 'index' %}is-active{% endif %}" href="{% url 'nee:index' %}"><i class="fa-solid fa-universal-access"></i><span>Painel NEE</span></a>
+          {% endif %}
 
-        {% if can_saude %}
-          <a class="menu__subitem {% if ns == 'saude' and route == 'index' %}is-active{% endif %}" href="{% url 'saude:index' %}"><i class="fa-solid fa-heart-pulse"></i><span>Painel Saúde</span></a>
-          <a class="menu__subitem {% if ns == 'saude' and route == 'atendimento_list' %}is-active{% endif %}" href="{% url 'saude:atendimento_list' %}"><i class="fa-solid fa-notes-medical"></i><span>Atendimentos</span></a>
-        {% endif %}
-      </div>
-    </details>
+          {% if can_saude %}
+            <a class="menu__subitem {% if ns == 'saude' and route == 'index' %}is-active{% endif %}" href="{% url 'saude:index' %}"><i class="fa-solid fa-heart-pulse"></i><span>Painel Saúde</span></a>
+            <a class="menu__subitem {% if ns == 'saude' and route == 'atendimento_list' %}is-active{% endif %}" href="{% url 'saude:atendimento_list' %}"><i class="fa-solid fa-notes-medical"></i><span>Atendimentos</span></a>
+          {% endif %}
+        </div>
+      </details>
+    {% endif %}
   {% endif %}
 
-  {% if can_conversor or can_paineis or can_integracoes %}
+  {% if can_conversor or can_paineis or can_integracoes or can_comunicacao %}
     <div class="menu__section">Ferramentas</div>
 
-    <details class="menu__group" {% if ns == 'conversor' or ns == 'paineis' or ns == 'integracoes' %}open{% endif %}>
-      <summary class="menu__group-summary menu__item {% if ns == 'conversor' or ns == 'paineis' or ns == 'integracoes' %}is-active{% endif %}">
+    <details class="menu__group" {% if ns == 'conversor' or ns == 'paineis' or ns == 'integracoes' or ns == 'comunicacao' %}open{% endif %}>
+      <summary class="menu__group-summary menu__item {% if ns == 'conversor' or ns == 'paineis' or ns == 'integracoes' or ns == 'comunicacao' %}is-active{% endif %}">
         <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-screwdriver-wrench"></i></span>
         <span class="menu__label">Ferramentas</span>
         <span class="menu__caret" aria-hidden="true"><i class="fa-solid fa-chevron-down"></i></span>
@@ -135,23 +461,35 @@
         {% if can_integracoes %}
           <a class="menu__subitem {% if ns == 'integracoes' %}is-active{% endif %}" href="{% url 'integracoes:index' %}"><i class="fa-solid fa-plug-circle-bolt"></i><span>Integrações</span></a>
         {% endif %}
+        {% if can_comunicacao %}
+          <a class="menu__subitem {% if ns == 'comunicacao' %}is-active{% endif %}" href="{% url 'comunicacao:index' %}"><i class="fa-solid fa-paper-plane"></i><span>Comunicação</span></a>
+        {% endif %}
       </div>
     </details>
   {% endif %}
 
-  {% if can_publicacoes_admin or can_system_admin %}
-    <div class="menu__section">Site Prefeitura</div>
+  {% if can_publicacoes_admin or can_system_admin or can_camara %}
+    <div class="menu__section">Portais Públicos</div>
 
-    <details class="menu__group" {% if ns == 'core' and 'publicacoes' in route or ns == 'core' and 'noticia_' in route or ns == 'core' and 'banner_' in route or ns == 'core' and 'pagina_' in route or ns == 'core' and 'menu_' in route or ns == 'core' and 'home_bloco_' in route or ns == 'core' and route == 'institutional_admin' %}open{% endif %}>
-      <summary class="menu__group-summary menu__item {% if ns == 'core' and 'publicacoes' in route or ns == 'core' and 'noticia_' in route or ns == 'core' and 'banner_' in route or ns == 'core' and 'pagina_' in route or ns == 'core' and 'menu_' in route or ns == 'core' and 'home_bloco_' in route or ns == 'core' and route == 'institutional_admin' %}is-active{% endif %}">
+    <details class="menu__group" {% if ns == 'core' and 'publicacoes' in route or ns == 'core' and 'noticia_' in route or ns == 'core' and 'banner_' in route or ns == 'core' and 'pagina_' in route or ns == 'core' and 'menu_' in route or ns == 'core' and 'home_bloco_' in route or ns == 'core' and route == 'institutional_admin' or ns == 'camara' %}open{% endif %}>
+      <summary class="menu__group-summary menu__item {% if ns == 'core' and 'publicacoes' in route or ns == 'core' and 'noticia_' in route or ns == 'core' and 'banner_' in route or ns == 'core' and 'pagina_' in route or ns == 'core' and 'menu_' in route or ns == 'core' and 'home_bloco_' in route or ns == 'core' and route == 'institutional_admin' or ns == 'camara' %}is-active{% endif %}">
         <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-pen-ruler"></i></span>
-        <span class="menu__label">Editor do Site</span>
+        <span class="menu__label">Editor de Portais</span>
         <span class="menu__caret" aria-hidden="true"><i class="fa-solid fa-chevron-down"></i></span>
       </summary>
 
       <div class="menu__submenu">
         {% if can_publicacoes_admin %}
-          <a class="menu__subitem {% if ns == 'core' and 'publicacoes' in route or ns == 'core' and 'noticia_' in route or ns == 'core' and 'banner_' in route or ns == 'core' and 'pagina_' in route or ns == 'core' and 'menu_' in route or ns == 'core' and 'home_bloco_' in route %}is-active{% endif %}" href="{% url 'core:publicacoes_admin' %}"><i class="fa-solid fa-globe"></i><span>Editar Site Prefeitura</span></a>
+          <a class="menu__subitem {% if ns == 'core' and 'publicacoes' in route and request.GET.portal == 'prefeitura' %}is-active{% endif %}" href="{% url 'core:publicacoes_admin' %}?portal=prefeitura"><i class="fa-solid fa-building"></i><span>Portal da Prefeitura</span></a>
+        {% endif %}
+        {% if can_camara %}
+          <a class="menu__subitem {% if ns == 'camara' %}is-active{% endif %}" href="{% url 'camara:index' %}"><i class="fa-solid fa-landmark-dome"></i><span>Portal da Câmara</span></a>
+        {% endif %}
+        {% if can_publicacoes_admin %}
+          {% if plan_transparencia_enabled %}
+            <a class="menu__subitem {% if ns == 'core' and 'publicacoes' in route and request.GET.portal == 'transparencia' %}is-active{% endif %}" href="{% url 'core:publicacoes_admin' %}?portal=transparencia"><i class="fa-solid fa-scale-balanced"></i><span>Portal da Transparência</span></a>
+          {% endif %}
+          <a class="menu__subitem {% if ns == 'core' and 'publicacoes' in route and request.GET.portal == 'todos' or ns == 'core' and 'publicacoes' in route and not request.GET.portal %}is-active{% endif %}" href="{% url 'core:publicacoes_admin' %}?portal=todos"><i class="fa-solid fa-layer-group"></i><span>Hub de Portais</span></a>
         {% endif %}
         {% if can_system_admin %}
           <a class="menu__subitem {% if ns == 'core' and route == 'publicacoes_theme_editor' %}is-active{% endif %}" href="{% url 'core:publicacoes_theme_editor' %}"><i class="fa-solid fa-palette"></i><span>Editar Tema (Admin)</span></a>
@@ -178,12 +516,20 @@
         {% endif %}
         {% if can_billing_admin %}
           <a class="menu__subitem {% if ns == 'billing' and route == 'assinaturas_admin' or ns == 'billing' and route == 'assinatura_admin_detail' %}is-active{% endif %}" href="{% url 'billing:assinaturas_admin' %}"><i class="fa-solid fa-building-shield"></i><span>Assinaturas (Admin)</span></a>
+          <a class="menu__subitem {% if ns == 'billing' and route == 'planos_admin' or ns == 'billing' and route == 'plano_admin_create' or ns == 'billing' and route == 'plano_admin_detail' %}is-active{% endif %}" href="{% url 'billing:planos_admin' %}"><i class="fa-solid fa-layer-group"></i><span>Planos (Admin)</span></a>
         {% endif %}
       </div>
     </details>
   {% endif %}
 
   <div class="menu__section">Conta</div>
+
+  {% if meus_dados_url %}
+    <a class="menu__item {% if ns == 'educacao' and route == 'aluno_meus_dados' %}is-active{% endif %}" href="{{ meus_dados_url }}" title="Meus dados">
+      <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-id-card"></i></span>
+      <span class="menu__label">Meus Dados</span>
+    </a>
+  {% endif %}
 
   <a class="menu__item {% if ns == 'accounts' and route == 'meu_perfil' %}is-active{% endif %}" href="{% url 'accounts:meu_perfil' %}" title="Meu perfil">
     <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-user"></i></span>
@@ -195,11 +541,29 @@
     <span class="menu__label">Alterar Senha</span>
   </a>
 
+  <a class="menu__item {% if ns == 'core' and route == 'design_system_docs' %}is-active{% endif %}" href="{% url 'core:design_system_docs' %}" title="Design System">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-pen-nib"></i></span>
+    <span class="menu__label">Design System</span>
+  </a>
+
+  <a class="menu__item {% if ns == 'core' and route == 'validar_documento_public' or ns == 'core' and route == 'validar_documento' or ns == 'core' and route == 'validar_documento_codigo' or ns == 'core' and route == 'validar_documento_codigo_public' %}is-active{% endif %}" href="{% url 'core:validar_documento_public' %}" title="Validação de Documento">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-certificate"></i></span>
+    <span class="menu__label">Validar Documento</span>
+  </a>
+
   {% if can_users %}
     <a class="menu__item {% if ns == 'accounts' and route == 'usuarios_list' %}is-active{% endif %}" href="{% url 'accounts:usuarios_list' %}" title="Usuários">
       <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-users"></i></span>
       <span class="menu__label">Usuários</span>
     </a>
+  {% endif %}
+
+  {% if can_exclusoes %}
+    <a class="menu__item {% if ns == 'core' and route == 'sistema_exclusoes' or ns == 'core' and route == 'sistema_exclusoes_confirmar' %}is-active{% endif %}" href="{% url 'core:sistema_exclusoes' %}" title="Central de Exclusões">
+      <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-trash-can"></i></span>
+      <span class="menu__label">Exclusões</span>
+    </a>
+  {% endif %}
   {% endif %}
 </nav>
 {% endwith %}

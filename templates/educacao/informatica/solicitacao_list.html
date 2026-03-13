@@ -1,0 +1,24 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Solicitações de Vaga • Informática • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+  <div class="gp-card">
+    <div class="gp-card__body">
+      {% include "core/partials/components/layout/page_head.html" with title="Solicitações de vaga" subtitle="Entrada de alunos por escola de origem" actions=actions %}
+
+      <form method="get" class="gp-form gp-form--inline u-mb-10">
+        <input type="text" class="gp-input" name="q" placeholder="Aluno, escola ou curso" value="{{ q }}">
+        <select class="gp-input" name="status">
+          <option value="">Todos os status</option>
+          {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
+        <a class="gp-button gp-button--outline" href="{{ request.path }}">Limpar</a>
+      </form>
+
+      {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q empty_title="Nenhuma solicitação" empty_text="Cadastre solicitações de vaga por escola de origem." %}
+    </div>
+  </div>
+{% endblock %}

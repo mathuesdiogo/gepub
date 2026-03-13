@@ -971,7 +971,7 @@ def ensure_secretaria_modulo_ativo(secretaria: Secretaria, modulo: str) -> Secre
 
 
 def _modules_for_template(template: SecretariaTemplate) -> list[str]:
-    raw = [template.modulo, *(template.modulos_ativos_padrao or [])]
+    raw = [template.modulo, *(template.modulos_ativos_padrao or []), "comunicacao"]
     ordered: list[str] = []
     for item in raw:
         mod = (item or "").strip().lower()

@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from apps.core.decorators import require_perm
+from apps.core.exports import export_csv, export_pdf_table
 from apps.core.services_auditoria import registrar_auditoria
 from apps.core.services_transparencia import publicar_evento_transparencia
 from apps.core.rbac import is_admin
@@ -107,6 +108,34 @@ def veiculo_list(request):
         qs = qs.filter(Q(codigo__icontains=q) | Q(placa__icontains=q) | Q(nome__icontains=q) | Q(marca_modelo__icontains=q))
     if situacao:
         qs = qs.filter(situacao=situacao)
+
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("nome"):
+            rows.append(
+                [
+                    item.codigo,
+                    item.placa,
+                    item.nome,
+                    item.marca_modelo,
+                    item.get_situacao_display(),
+                    item.get_status_display(),
+                    str(item.quilometragem_atual),
+                ]
+            )
+        headers = ["Codigo", "Placa", "Nome", "Modelo", "Situacao", "Status", "KM atual"]
+        if export == "csv":
+            return export_csv("frota_veiculos.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="frota_veiculos.pdf",
+            title="Veiculos da frota",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'} | Situacao={situacao or '-'}",
+        )
     return render(
         request,
         "frota/veiculo_list.html",
@@ -125,7 +154,19 @@ def veiculo_list(request):
                     "url": reverse("frota:veiculo_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
-                }
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&situacao={situacao}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&situacao={situacao}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
+                },
             ],
         },
     )
@@ -196,6 +237,34 @@ def abastecimento_list(request):
     qs = FrotaAbastecimento.objects.filter(municipio=municipio).select_related("veiculo")
     if q:
         qs = qs.filter(Q(veiculo__codigo__icontains=q) | Q(veiculo__placa__icontains=q) | Q(posto__icontains=q))
+
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-data_abastecimento", "-id"):
+            rows.append(
+                [
+                    str(item.data_abastecimento),
+                    item.veiculo.codigo,
+                    item.veiculo.placa,
+                    item.posto or "",
+                    str(item.litros),
+                    str(item.valor_total),
+                    str(item.quilometragem or ""),
+                ]
+            )
+        headers = ["Data", "Veiculo", "Placa", "Posto", "Litros", "Valor", "Quilometragem"]
+        if export == "csv":
+            return export_csv("frota_abastecimentos.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="frota_abastecimentos.pdf",
+            title="Abastecimentos da frota",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'}",
+        )
     return render(
         request,
         "frota/abastecimento_list.html",
@@ -212,7 +281,19 @@ def abastecimento_list(request):
                     "url": reverse("frota:abastecimento_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
-                }
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
+                },
             ],
         },
     )
@@ -261,6 +342,34 @@ def manutencao_list(request):
     qs = FrotaManutencao.objects.filter(municipio=municipio).select_related("veiculo")
     if status:
         qs = qs.filter(status=status)
+
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-data_inicio", "-id"):
+            rows.append(
+                [
+                    item.veiculo.codigo,
+                    item.veiculo.placa,
+                    item.get_tipo_display(),
+                    item.get_status_display(),
+                    str(item.data_inicio),
+                    str(item.data_fim or ""),
+                    str(item.valor_total),
+                ]
+            )
+        headers = ["Veiculo", "Placa", "Tipo", "Status", "Inicio", "Fim", "Valor"]
+        if export == "csv":
+            return export_csv("frota_manutencoes.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="frota_manutencoes.pdf",
+            title="Manutencoes da frota",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Status={status or '-'}",
+        )
     return render(
         request,
         "frota/manutencao_list.html",
@@ -278,7 +387,19 @@ def manutencao_list(request):
                     "url": reverse("frota:manutencao_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
-                }
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&status={status}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&status={status}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
+                },
             ],
         },
     )
@@ -343,6 +464,35 @@ def viagem_list(request):
     qs = FrotaViagem.objects.filter(municipio=municipio).select_related("veiculo", "motorista")
     if status:
         qs = qs.filter(status=status)
+
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-data_saida", "-id"):
+            rows.append(
+                [
+                    item.veiculo.codigo,
+                    item.veiculo.placa,
+                    item.destino,
+                    str(item.data_saida),
+                    str(item.data_retorno or ""),
+                    item.get_status_display(),
+                    str(item.km_saida or ""),
+                    str(item.km_retorno or ""),
+                ]
+            )
+        headers = ["Veiculo", "Placa", "Destino", "Saida", "Retorno", "Status", "KM saida", "KM retorno"]
+        if export == "csv":
+            return export_csv("frota_viagens.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="frota_viagens.pdf",
+            title="Viagens da frota",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Status={status or '-'}",
+        )
     return render(
         request,
         "frota/viagem_list.html",
@@ -360,7 +510,19 @@ def viagem_list(request):
                     "url": reverse("frota:viagem_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
-                }
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&status={status}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&status={status}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
+                },
             ],
         },
     )

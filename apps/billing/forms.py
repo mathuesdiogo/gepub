@@ -6,6 +6,7 @@ from .models import (
     AddonCatalogo,
     AssinaturaMunicipio,
     AssinaturaQuotaExtra,
+    PlanoComercialConfig,
     PlanoMunicipal,
     SolicitacaoUpgrade,
 )
@@ -33,7 +34,18 @@ class OnboardingPlanoForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["plano"].queryset = PlanoMunicipal.objects.filter(ativo=True).order_by("preco_base_mensal")
+        qs = PlanoMunicipal.objects.filter(
+            ativo=True,
+            codigo__in=[
+                PlanoMunicipal.Codigo.STARTER,
+                PlanoMunicipal.Codigo.MUNICIPAL,
+                PlanoMunicipal.Codigo.GESTAO_TOTAL,
+                PlanoMunicipal.Codigo.CONSORCIO,
+            ],
+        )
+        if self.instance and getattr(self.instance, "plano_id", None):
+            qs = PlanoMunicipal.objects.filter(pk=self.instance.plano_id) | qs
+        self.fields["plano"].queryset = qs.order_by("preco_base_mensal")
         self.fields["contrato_meses"].initial = self.initial.get("contrato_meses") or 12
         self.fields["indice_reajuste"].initial = self.initial.get("indice_reajuste") or AssinaturaMunicipio.IndiceReajuste.INPC
 
@@ -51,8 +63,21 @@ class SolicitacaoUpgradeForm(forms.ModelForm):
         self.valor_calculado = None
         super().__init__(*args, **kwargs)
 
+        self.fields["tipo"].choices = [
+            (value, label)
+            for value, label in self.fields["tipo"].choices
+            if value != SolicitacaoUpgrade.Tipo.SECRETARIAS
+        ]
         self.fields["addon"].queryset = AddonCatalogo.objects.filter(ativo=True).order_by("nome")
-        self.fields["plano_destino"].queryset = PlanoMunicipal.objects.filter(ativo=True).order_by("preco_base_mensal")
+        self.fields["plano_destino"].queryset = PlanoMunicipal.objects.filter(
+            ativo=True,
+            codigo__in=[
+                PlanoMunicipal.Codigo.STARTER,
+                PlanoMunicipal.Codigo.MUNICIPAL,
+                PlanoMunicipal.Codigo.GESTAO_TOTAL,
+                PlanoMunicipal.Codigo.CONSORCIO,
+            ],
+        ).order_by("preco_base_mensal")
         self.fields["quantidade"].initial = 1
 
     def clean(self):
@@ -128,3 +153,105 @@ class FiltroAssinaturaForm(forms.Form):
         required=False,
         choices=[("", "Todos os status")] + list(AssinaturaMunicipio.Status.choices),
     )
+
+
+def _normalize_text_lines(value: str) -> list[str]:
+    lines: list[str] = []
+    for raw in (value or "").splitlines():
+        item = (raw or "").strip().lstrip("-").strip()
+        if item:
+            lines.append(item)
+    return lines
+
+
+class PlanoMunicipalAdminForm(forms.ModelForm):
+    class Meta:
+        model = PlanoMunicipal
+        fields = [
+            "codigo",
+            "nome",
+            "descricao",
+            "ativo",
+            "preco_base_mensal",
+            "limite_usuarios",
+            "limite_alunos",
+            "limite_atendimentos_ano",
+            "valor_usuario_extra",
+            "valor_aluno_extra",
+            "valor_atendimento_extra",
+        ]
+        widgets = {
+            "descricao": forms.Textarea(attrs={"rows": 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        allowed = {
+            PlanoMunicipal.Codigo.STARTER,
+            PlanoMunicipal.Codigo.MUNICIPAL,
+            PlanoMunicipal.Codigo.GESTAO_TOTAL,
+            PlanoMunicipal.Codigo.CONSORCIO,
+        }
+        current = None
+        if self.instance and getattr(self.instance, "pk", None):
+            current = self.instance.codigo
+        self.fields["codigo"].choices = [
+            (value, label)
+            for value, label in self.fields["codigo"].choices
+            if value in allowed or (current and value == current)
+        ]
+
+
+class PlanoComercialConfigForm(forms.ModelForm):
+    beneficios_text = forms.CharField(
+        required=False,
+        label="Benefícios (1 por linha)",
+        widget=forms.Textarea(attrs={"rows": 5}),
+    )
+    especiais_text = forms.CharField(
+        required=False,
+        label="Acessos especiais (1 por linha)",
+        widget=forms.Textarea(attrs={"rows": 4}),
+    )
+    limitacoes_text = forms.CharField(
+        required=False,
+        label="Limitações (1 por linha)",
+        widget=forms.Textarea(attrs={"rows": 4}),
+    )
+    dependencias_text = forms.CharField(
+        required=False,
+        label="Dependências/recomendações (1 por linha)",
+        widget=forms.Textarea(attrs={"rows": 4}),
+    )
+
+    class Meta:
+        model = PlanoComercialConfig
+        fields = [
+            "nome_comercial",
+            "categoria",
+            "descricao_comercial",
+            "link_documento_contratacao",
+            "link_documento_servicos",
+        ]
+        widgets = {
+            "descricao_comercial": forms.Textarea(attrs={"rows": 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        inst = self.instance
+        if inst and getattr(inst, "pk", None):
+            self.fields["beneficios_text"].initial = "\n".join(inst.beneficios or [])
+            self.fields["especiais_text"].initial = "\n".join(inst.especiais or [])
+            self.fields["limitacoes_text"].initial = "\n".join(inst.limitacoes or [])
+            self.fields["dependencias_text"].initial = "\n".join(inst.dependencias or [])
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.beneficios = _normalize_text_lines(self.cleaned_data.get("beneficios_text", ""))
+        instance.especiais = _normalize_text_lines(self.cleaned_data.get("especiais_text", ""))
+        instance.limitacoes = _normalize_text_lines(self.cleaned_data.get("limitacoes_text", ""))
+        instance.dependencias = _normalize_text_lines(self.cleaned_data.get("dependencias_text", ""))
+        if commit:
+            instance.save()
+        return instance

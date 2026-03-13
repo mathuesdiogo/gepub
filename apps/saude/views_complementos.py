@@ -272,6 +272,14 @@ def paciente_detail(request, pk: int):
     unidades_qs = _scoped_unidades(request.user)
     obj = get_object_or_404(PacienteSaude.objects.select_related("unidade_referencia", "programa").filter(unidade_referencia_id__in=unidades_qs.values_list("id", flat=True)), pk=pk)
     actions = [{"label": "Voltar", "url": reverse("saude:paciente_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+    actions.append(
+        {
+            "label": "Portal Editais",
+            "url": reverse("saude:portal_paciente_inscricoes", args=[obj.pk]),
+            "icon": "fa-solid fa-file-circle-check",
+            "variant": "btn--ghost",
+        }
+    )
     if can(request.user, "saude.manage"):
         actions.append({"label": "Editar", "url": reverse("saude:paciente_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
     fields = [

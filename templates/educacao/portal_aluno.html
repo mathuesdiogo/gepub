@@ -2,8 +2,23 @@
 {% block title %}Portal do Aluno • Educação • GEPUB{% endblock %}
 
 {% block module_content %}
-<div class="card"><div class="card__body">
+<section class="gp-student-stage">
 {% include "core/partials/components/layout/page_head.html" with title="Portal do Aluno" subtitle=aluno.nome actions=actions %}
-{% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Sem registros" empty_text="Não há matrículas no escopo para este aluno." %}
-</div></div>
+
+<div class="grid grid--3">
+{% include "core/partials/components/data/kpi_card.html" with label="Inscrições em Editais" value=inscricoes_total %}
+{% include "core/partials/components/data/kpi_card.html" with label="Em andamento" value=inscricoes_pendentes %}
+{% include "core/partials/components/data/kpi_card.html" with label="Aptas/Deferidas" value=inscricoes_deferidas %}
+</div>
+
+<article class="gp-student-stage__card">
+  <h3 class="gp-mt-0 gp-mb-0">Acompanhamento de Editais</h3>
+  {% include "core/partials/components/data/table_shell.html" with headers=headers_inscricoes rows=rows_inscricoes page_obj=None empty_title="Sem inscrições" empty_text="Este aluno ainda não possui inscrições em editais." %}
+</article>
+
+<article class="gp-student-stage__card">
+  <h3 class="gp-mt-0 gp-mb-0">Histórico Acadêmico</h3>
+  {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Sem registros" empty_text="Não há matrículas no escopo para este aluno." %}
+</article>
+</section>
 {% endblock %}

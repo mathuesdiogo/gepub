@@ -1,11 +1,5 @@
 {% extends "core/base.html" %}
-{% load static %}
 {% block title %}{% block module_title %}NEE • GEPUB{% endblock %}{% endblock %}
-
-{% block extra_css %}
-  {{ block.super }}
-  <link rel="stylesheet" href="{% static 'css/pages/nee-module.css' %}">
-{% endblock %}
 
 {% block content %}
 <div class="module-shell module-shell--single nee-module">

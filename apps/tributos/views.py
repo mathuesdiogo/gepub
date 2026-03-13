@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from apps.core.decorators import require_perm
+from apps.core.exports import export_csv, export_pdf_table
 from apps.core.services_auditoria import registrar_auditoria
 from apps.core.services_transparencia import publicar_evento_transparencia
 from apps.core.rbac import is_admin
@@ -105,6 +106,32 @@ def contribuinte_list(request):
         )
     if status:
         qs = qs.filter(status=status)
+
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("nome"):
+            rows.append(
+                [
+                    item.codigo,
+                    item.nome,
+                    item.documento,
+                    item.inscricao_municipal or "",
+                    item.get_status_display(),
+                ]
+            )
+        headers = ["Codigo", "Nome", "Documento", "Inscricao municipal", "Status"]
+        if export == "csv":
+            return export_csv("tributos_contribuintes.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="tributos_contribuintes.pdf",
+            title="Contribuintes",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'} | Status={status or '-'}",
+        )
     return render(
         request,
         "tributos/contribuinte_list.html",
@@ -123,7 +150,19 @@ def contribuinte_list(request):
                     "url": reverse("tributos:contribuinte_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
-                }
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
+                },
             ],
         },
     )
@@ -200,6 +239,35 @@ def lancamento_list(request):
         qs = qs.filter(tipo_tributo=tipo)
     if q:
         qs = qs.filter(Q(contribuinte__nome__icontains=q) | Q(referencia__icontains=q))
+
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-id"):
+            rows.append(
+                [
+                    item.contribuinte.nome,
+                    item.get_tipo_tributo_display(),
+                    item.referencia or "",
+                    item.exercicio,
+                    item.get_status_display(),
+                    str(item.valor_total),
+                    str(item.data_vencimento),
+                    str(item.data_pagamento or ""),
+                ]
+            )
+        headers = ["Contribuinte", "Tributo", "Referencia", "Exercicio", "Status", "Valor", "Vencimento", "Pagamento"]
+        if export == "csv":
+            return export_csv("tributos_lancamentos.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="tributos_lancamentos.pdf",
+            title="Lancamentos tributarios",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'} | Tipo={tipo or '-'} | Status={status or '-'}",
+        )
     return render(
         request,
         "tributos/lancamento_list.html",
@@ -220,7 +288,19 @@ def lancamento_list(request):
                     "url": reverse("tributos:lancamento_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
-                }
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&tipo={tipo}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&tipo={tipo}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
+                },
             ],
         },
     )

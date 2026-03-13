@@ -1,0 +1,43 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Grades de Horário • Informática • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+  <div class="gp-card">
+    <div class="gp-card__body">
+      {% include "core/partials/components/layout/page_head.html" with title="Horários / Grades" subtitle="Agenda oficial do laboratório para vínculo das turmas" actions=actions %}
+
+      <form method="get" class="gp-form gp-form--inline u-mb-10">
+        <input type="text" class="gp-input" name="q" placeholder="Nome, código ou descrição" value="{{ q }}">
+        <select class="gp-input" name="laboratorio">
+          <option value="">Todos os laboratórios</option>
+          {% for lab in laboratorios %}
+            <option value="{{ lab.id }}" {% if laboratorio_id == lab.id|stringformat:'s' %}selected{% endif %}>{{ lab.nome }}</option>
+          {% endfor %}
+        </select>
+        <select class="gp-input" name="turno">
+          <option value="">Todos os turnos</option>
+          {% for value, label in turno_choices %}
+            <option value="{{ value }}" {% if turno == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <select class="gp-input" name="dia">
+          <option value="">Todos os dias</option>
+          {% for value, label in dia_choices %}
+            <option value="{{ value }}" {% if dia == value|stringformat:'s' %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <select class="gp-input" name="status">
+          <option value="">Todos os status</option>
+          {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <input type="text" class="gp-input" name="periodo" placeholder="Período letivo" value="{{ periodo }}">
+        <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
+        <a class="gp-button gp-button--outline" href="{{ request.path }}">Limpar</a>
+      </form>
+
+      {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q empty_title="Nenhuma grade cadastrada" empty_text="Cadastre as grades para vincular turmas sem editar horários manualmente." %}
+    </div>
+  </div>
+{% endblock %}

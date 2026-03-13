@@ -6,13 +6,13 @@
 {% block extra_head %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
 <link rel="stylesheet" href="{% static 'css/pages/portal-public-pages.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="pp-page" style="--portal-primary: {{ cor_primaria|default:'#0E4A7E' }}; --portal-secondary: {{ cor_secundaria|default:'#2F6EA9' }};">
+<div class="pp-page" style="--portal-primary: {{ cor_primaria|default:'#4F46E5' }}; --portal-secondary: {{ cor_secundaria|default:'#7C3AED' }};">
   <header class="pp-header-shell">
     <div class="pp-accessibility">
       <div class="pp-wrap pp-accessibility__inner">
@@ -33,20 +33,30 @@
       <div class="pp-wrap pp-header-main__inner">
         <a href="{% url 'core:home' %}" class="pp-brand">
           {% if logo_url %}
-            <img src="{{ logo_url }}" alt="Logo {{ municipio.nome|default:titulo_portal }}">
+            <img src="{{ logo_url }}" alt="{% if municipio %}Logo {{ municipio.nome }}{% else %}Logo {{ titulo_portal|default:'Portal Publico' }}{% endif %}">
           {% else %}
             <span class="pp-brand__icon"><i class="fa-solid fa-landmark"></i></span>
           {% endif %}
           <span>
-            <strong>{{ titulo_portal|default:municipio.nome|upper }}</strong>
+            {% if titulo_portal %}
+              <strong>{{ titulo_portal|upper }}</strong>
+            {% elif municipio %}
+              <strong>{{ municipio.nome|upper }}</strong>
+            {% else %}
+              <strong>PORTAL PUBLICO MUNICIPAL</strong>
+            {% endif %}
             <small>{{ subtitulo_portal|default:"PORTAL PÚBLICO MUNICIPAL" }}</small>
           </span>
         </a>
 
         <nav class="pp-quick-links" aria-label="Links rápidos">
           <a href="#conteudo-principal"><i class="fa-solid fa-universal-access"></i> Acessibilidade</a>
-          <a href="{% url 'core:portal_ouvidoria_public' %}"><i class="fa-regular fa-message"></i> Ouvidoria</a>
-          <a href="{% url 'core:transparencia_public' %}"><i class="fa-solid fa-chart-column"></i> Transparência</a>
+          {% if plan_flags.transparencia %}
+            <a href="{% url 'core:portal_ouvidoria_public' %}"><i class="fa-regular fa-message"></i> Ouvidoria</a>
+            <a href="{% url 'core:transparencia_public' %}"><i class="fa-solid fa-chart-column"></i> Transparência</a>
+          {% else %}
+            <a href="{% url 'core:portal_noticias_public' %}"><i class="fa-regular fa-newspaper"></i> Notícias</a>
+          {% endif %}
           <a href="{% url 'core:portal_diario_public' %}"><i class="fa-regular fa-file-lines"></i> Diário Oficial</a>
         </nav>
       </div>
@@ -112,7 +122,11 @@
               <li><a href="{{ item.url }}" {% if item.nova_aba %}target="_blank" rel="noopener"{% endif %}>{{ item.titulo }}</a></li>
             {% empty %}
               <li><a href="{% url 'core:institucional_public' %}">Início</a></li>
-              <li><a href="{% url 'core:transparencia_public' %}">Transparência</a></li>
+              {% if plan_flags.transparencia %}
+                <li><a href="{% url 'core:transparencia_public' %}">Transparência</a></li>
+              {% else %}
+                <li><a href="{% url 'core:portal_noticias_public' %}">Notícias</a></li>
+              {% endif %}
             {% endfor %}
           </ul>
         </div>
@@ -121,26 +135,44 @@
           <ul>
             <li><a href="{% url 'core:portal_noticias_public' %}">Notícias</a></li>
             <li><a href="{% url 'core:portal_diario_public' %}">Diário Oficial</a></li>
-            <li><a href="{% url 'core:portal_licitacoes_public' %}">Licitações</a></li>
-            <li><a href="{% url 'core:portal_contratos_public' %}">Contratos</a></li>
+            {% if plan_flags.transparencia %}
+              <li><a href="{% url 'core:portal_licitacoes_public' %}">Licitações</a></li>
+              <li><a href="{% url 'core:portal_contratos_public' %}">Contratos</a></li>
+            {% endif %}
           </ul>
         </div>
         <div>
           <h4>Atendimento</h4>
           <ul>
-            <li><a href="{% url 'core:portal_ouvidoria_public' %}">e-SIC / Ouvidoria</a></li>
-            <li><a href="{% url 'core:transparencia_public' %}">Portal da Transparência</a></li>
+            {% if plan_flags.transparencia %}
+              <li><a href="{% url 'core:portal_ouvidoria_public' %}">e-SIC / Ouvidoria</a></li>
+              <li><a href="{% url 'core:transparencia_public' %}">Portal da Transparência</a></li>
+            {% else %}
+              <li><a href="{% url 'core:portal_noticias_public' %}">Central de notícias</a></li>
+            {% endif %}
             <li><a href="{{ cta_login }}" target="_blank" rel="noopener">Sistema Interno</a></li>
           </ul>
         </div>
       </div>
 
       <div class="pp-footer__bottom">
-        <p>© {% now "Y" %} {{ titulo_portal|default:municipio.nome|default:"Portal Público" }}</p>
+        <p>© {% now "Y" %}
+          {% if titulo_portal %}
+            {{ titulo_portal }}
+          {% elif municipio %}
+            {{ municipio.nome }}
+          {% else %}
+            Portal Público
+          {% endif %}
+        </p>
         <div>
           <a href="#conteudo-principal">Acessibilidade</a>
-          <a href="{% url 'core:transparencia_public' %}">Transparência</a>
-          <a href="{% url 'core:portal_ouvidoria_public' %}">Ouvidoria</a>
+          {% if plan_flags.transparencia %}
+            <a href="{% url 'core:transparencia_public' %}">Transparência</a>
+            <a href="{% url 'core:portal_ouvidoria_public' %}">Ouvidoria</a>
+          {% else %}
+            <a href="{% url 'core:portal_noticias_public' %}">Notícias</a>
+          {% endif %}
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@
 {% block title %}{% if mode == "update" %}Editar Profissional{% else %}Novo Profissional{% endif %} • Saúde • GEPUB{% endblock %}
 
 {% block module_content %}
-<div class="card"><div class="card__body">
+<div class="gp-card"><div class="gp-card__body">
 
   {% if mode == "update" %}{% include "core/partials/components/layout/page_head.html" with title="Editar Profissional" subtitle="Atualize os dados do profissional" actions=None %}{% else %}{% include "core/partials/components/layout/page_head.html" with title="Novo Profissional" subtitle="Cadastre um novo profissional" actions=None %}{% endif %}
 

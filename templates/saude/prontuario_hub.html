@@ -2,11 +2,11 @@
 {% block title %}Prontuário • {{ atendimento.paciente_nome }} • Saúde • GEPUB{% endblock %}
 
 {% block module_content %}
-<div class="card"><div class="card__body">
+<div class="gp-card"><div class="gp-card__body">
 
   {% include "core/partials/components/layout/page_head.html" with title="Prontuário Clínico" subtitle=atendimento.paciente_nome actions=actions %}
   {% if is_outside_edit_window %}
-    <div class="alert alert-warning">Janela de edição clínica encerrada ({{ edit_window_hours }}h). Apenas novos registros são permitidos.</div>
+    <div class="gp-alert gp-alert--warning">Janela de edição clínica encerrada ({{ edit_window_hours }}h). Apenas novos registros são permitidos.</div>
   {% endif %}
 
   <div class="section">
@@ -16,7 +16,7 @@
       <input type="hidden" name="_action" value="save_triagem">
       {{ triagem_form.as_p }}
       <p><label for="id_justificativa_triagem">Justificativa (ao editar):</label><textarea id="id_justificativa_triagem" name="justificativa_alteracao" rows="2"></textarea></p>
-      <button type="submit" class="btn btn-primary">Salvar triagem</button>
+      <button type="submit" class="gp-button gp-button--primary">Salvar triagem</button>
     </form>
   </div>
 
@@ -37,7 +37,7 @@
       {% csrf_token %}
       <input type="hidden" name="_action" value="add_evolucao">
       {{ evolucao_form.as_p }}
-      <button type="submit" class="btn btn-primary">Adicionar evolução</button>
+      <button type="submit" class="gp-button gp-button--primary">Adicionar evolução</button>
     </form>
   </div>
 
@@ -55,7 +55,7 @@
       {% csrf_token %}
       <input type="hidden" name="_action" value="add_problema">
       {{ problema_form.as_p }}
-      <button type="submit" class="btn btn-primary">Adicionar problema</button>
+      <button type="submit" class="gp-button gp-button--primary">Adicionar problema</button>
     </form>
     {% endif %}
   </div>
@@ -74,7 +74,7 @@
       {% csrf_token %}
       <input type="hidden" name="_action" value="add_alergia">
       {{ alergia_form.as_p }}
-      <button type="submit" class="btn btn-primary">Adicionar alergia</button>
+      <button type="submit" class="gp-button gp-button--primary">Adicionar alergia</button>
     </form>
     {% endif %}
   </div>
@@ -87,7 +87,7 @@
       <div class="mini">
         <strong>{{ an.titulo }}</strong>
         <div class="small">{{ an.criado_em|date:"d/m/Y H:i" }} • {{ an.criado_por.username }}</div>
-        <a class="btn btn--ghost" href="{{ an.arquivo.url }}" target="_blank">Abrir arquivo</a>
+        <a class="gp-button gp-button--ghost" href="{{ an.arquivo.url }}" target="_blank">Abrir arquivo</a>
       </div>
     {% empty %}
       <span class="small">Nenhum anexo.</span>
@@ -96,7 +96,7 @@
       {% csrf_token %}
       <input type="hidden" name="_action" value="add_anexo">
       {{ anexo_form.as_p }}
-      <button type="submit" class="btn btn-primary">Adicionar anexo</button>
+      <button type="submit" class="gp-button gp-button--primary">Adicionar anexo</button>
     </form>
   </div>
 
@@ -121,7 +121,7 @@
       <input type="hidden" name="_action" value="add_prescricao">
       {{ prescricao_form.as_p }}
       {{ prescricao_item_form.as_p }}
-      <button type="submit" class="btn btn-primary">Adicionar prescrição</button>
+      <button type="submit" class="gp-button gp-button--primary">Adicionar prescrição</button>
     </form>
   </div>
 
@@ -142,7 +142,7 @@
           <input type="hidden" name="pedido_id" value="{{ ex.id }}">
           {{ bloco.form_resultado.as_p }}
           <p><label for="id_justificativa_resultado_{{ ex.id }}">Justificativa (ao editar):</label><textarea id="id_justificativa_resultado_{{ ex.id }}" name="justificativa_alteracao" rows="2"></textarea></p>
-          <button type="submit" class="btn btn--ghost">Salvar resultado</button>
+          <button type="submit" class="gp-button gp-button--ghost">Salvar resultado</button>
         </form>
       </div>
       {% endwith %}
@@ -154,7 +154,7 @@
       {% csrf_token %}
       <input type="hidden" name="_action" value="add_exame">
       {{ exame_form.as_p }}
-      <button type="submit" class="btn btn-primary">Solicitar exame</button>
+      <button type="submit" class="gp-button gp-button--primary">Solicitar exame</button>
     </form>
   </div>
 

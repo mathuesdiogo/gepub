@@ -6,26 +6,26 @@
 
   <form method="get" class="filter-bar" style="margin-bottom:12px;">
     {% if municipios and municipios|length %}
-      <select name="municipio" class="input" style="max-width:240px;">
+      <select name="municipio" class="gp-input" style="max-width:240px;">
         {% for m in municipios %}
           <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
         {% endfor %}
       </select>
     {% endif %}
-    <select name="status" class="input" style="max-width:200px;">
+    <select name="status" class="gp-input" style="max-width:200px;">
       <option value="">Todos status</option>
       {% for key,label in status_choices %}
         <option value="{{ key }}" {% if status == key %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
-    <select name="turno" class="input" style="max-width:220px;">
+    <select name="turno" class="gp-input" style="max-width:220px;">
       <option value="">Todos turnos</option>
       {% for key,label in turno_choices %}
         <option value="{{ key }}" {% if turno == key %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
-    <input name="q" value="{{ q }}" class="input" placeholder="Código, nome ou observação" style="max-width:320px;">
-    <button class="btn btn--sm" type="submit">Filtrar</button>
+    <input name="q" value="{{ q }}" class="gp-input" placeholder="Código, nome ou observação" style="max-width:320px;">
+    <button class="gp-button gp-button--outline gp-button--sm" type="submit">Filtrar</button>
   </form>
 
   <div class="table-shell"><div class="table-shell__body">
@@ -47,7 +47,7 @@
             <td>{{ item.dias_semana|default:"-" }}</td>
             <td>{{ item.get_status_display }}</td>
             <td>
-              <a class="btn btn--sm btn--ghost" href="{% url 'ponto:escala_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
+              <a class="gp-button gp-button--outline gp-button--sm" href="{% url 'ponto:escala_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
             </td>
           </tr>
         {% empty %}

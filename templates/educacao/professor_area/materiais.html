@@ -1,0 +1,30 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Materiais de Aula • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage gp-professor-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <article class="gp-student-stage__card">
+    <div class="gp-professor-inline-actions gp-mb-3">
+      <a class="gp-button gp-button--primary" href="{{ novo_material_url }}">
+        <i class="fa-solid fa-plus"></i> Novo material
+      </a>
+      <span class="gp-badge gp-badge--neutral">Total: {{ total_materiais }}</span>
+    </div>
+
+    <form method="get" class="gp-form gp-form--smart gp-professor-filter-row">
+      <div class="gp-form-group gp-field--full">
+        <label class="gp-form-label" for="id_q">Buscar material</label>
+        <input id="id_q" type="text" class="gp-input" name="q" value="{{ q }}" placeholder="Título, descrição ou turma" />
+      </div>
+      <div class="gp-form-group">
+        <label class="gp-form-label">&nbsp;</label>
+        <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
+      </div>
+    </form>
+
+    {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Sem materiais" empty_text="Nenhum material encontrado para os filtros selecionados." %}
+  </article>
+</section>
+{% endblock %}

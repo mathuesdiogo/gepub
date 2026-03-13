@@ -9,6 +9,7 @@ from apps.core.rbac import scope_filter_alunos
 
 from .forms import AlunoCreateComTurmaForm, AlunoForm
 from .models import Aluno, Matricula
+from .services_requisitos import avaliar_requisitos_matricula
 
 
 def aluno_create(request):
@@ -36,6 +37,14 @@ def aluno_create(request):
                         )
                         return redirect("educacao:aluno_list")
                 aluno = form.save()
+                avaliacao_requisitos = avaliar_requisitos_matricula(aluno=aluno, turma=turma)
+                if avaliacao_requisitos.bloqueado:
+                    for pendencia in avaliacao_requisitos.pendencias:
+                        messages.error(request, pendencia)
+                    transaction.set_rollback(True)
+                    return redirect("educacao:aluno_list")
+                for aviso in avaliacao_requisitos.avisos:
+                    messages.warning(request, aviso)
                 Matricula.objects.create(
                     aluno=aluno,
                     turma=turma,

@@ -8,6 +8,10 @@
 <section class="pp-card">
   <form method="get" class="pp-form-inline pp-form-inline--3">
     <div>
+      <label for="id_q">Busca</label>
+      <input id="id_q" class="pp-input" type="search" name="q" value="{{ q }}" placeholder="Proposição, sessão ou tema">
+    </div>
+    <div>
       <label for="id_tipo">Tipo de matéria</label>
       <select id="id_tipo" class="pp-select" name="tipo">
         <option value="">Todos</option>
@@ -37,13 +41,14 @@
 
 <section class="pp-grid pp-grid--2" style="margin-top:10px;">
   <article class="pp-card">
-    <h2>Matérias</h2>
+    <h2>Proposições e Matérias</h2>
     <ul class="pp-list" style="margin-top:8px;">
       {% for item in materias %}
         <li class="pp-list__item">
-          <p class="pp-meta">{{ item.get_tipo_display }} • {{ item.numero }}/{{ item.ano }} • {{ item.get_status_display }}</p>
+          <p class="pp-meta">{{ item.get_tipo_display }} • {{ item.numero }}/{{ item.ano }} • {{ item.situacao|default:item.get_status_display }}</p>
           <h3>{{ item.ementa }}</h3>
           {% if item.descricao %}<p>{{ item.descricao }}</p>{% endif %}
+          {% if item.tramitacao_resumo %}<p>{{ item.tramitacao_resumo }}</p>{% endif %}
           <div class="pp-actions">
             {% if item.arquivo %}<a class="pp-btn pp-btn--soft" href="{{ item.arquivo.url }}" target="_blank" rel="noopener">Documento</a>{% endif %}
           </div>
@@ -59,12 +64,19 @@
     <ul class="pp-list" style="margin-top:8px;">
       {% for sessao in sessoes %}
         <li class="pp-list__item">
-          <p class="pp-meta">{{ sessao.data_sessao|date:"d/m/Y" }}</p>
+          <p class="pp-meta">
+            {% if sessao.data_hora %}
+              {{ sessao.data_hora|date:"d/m/Y H:i" }}
+            {% else %}
+              {{ sessao.data_sessao|date:"d/m/Y" }}
+            {% endif %}
+          </p>
           <h3>{{ sessao.titulo }}</h3>
           {% if sessao.pauta %}<p>{{ sessao.pauta }}</p>{% endif %}
           <div class="pp-actions">
             {% if sessao.ata_arquivo %}<a class="pp-btn pp-btn--soft" href="{{ sessao.ata_arquivo.url }}" target="_blank" rel="noopener">Ata</a>{% endif %}
             {% if sessao.video_url %}<a class="pp-btn pp-btn--soft" href="{{ sessao.video_url }}" target="_blank" rel="noopener">Vídeo</a>{% endif %}
+            {% if sessao.link_transmissao %}<a class="pp-btn pp-btn--soft" href="{{ sessao.link_transmissao }}" target="_blank" rel="noopener">Vídeo</a>{% endif %}
           </div>
         </li>
       {% empty %}
@@ -73,4 +85,53 @@
     </ul>
   </article>
 </section>
+
+<section class="pp-grid pp-grid--2" style="margin-top:10px;">
+  <article class="pp-card">
+    <h2>Vereadores</h2>
+    <ul class="pp-list" style="margin-top:8px;">
+      {% for item in vereadores %}
+        <li class="pp-list__item">
+          <h3>{{ item.nome_parlamentar|default:item.nome_completo }}</h3>
+          <p>{{ item.partido }}</p>
+        </li>
+      {% empty %}
+        <li class="pp-list__item"><p>Cadastro público de vereadores em atualização.</p></li>
+      {% endfor %}
+    </ul>
+  </article>
+
+  <article class="pp-card">
+    <h2>Comissões</h2>
+    <ul class="pp-list" style="margin-top:8px;">
+      {% for item in comissoes %}
+        <li class="pp-list__item">
+          <h3>{{ item.nome }}</h3>
+          <p>{{ item.get_tipo_display }}</p>
+        </li>
+      {% empty %}
+        <li class="pp-list__item"><p>Comissões em atualização.</p></li>
+      {% endfor %}
+    </ul>
+  </article>
+</section>
+
+{% if transmissoes %}
+<section class="pp-card" style="margin-top:10px;">
+  <h2>Transmissões</h2>
+  <ul class="pp-list" style="margin-top:8px;">
+    {% for item in transmissoes %}
+      <li class="pp-list__item">
+        <h3>{{ item.titulo }}</h3>
+        <p>{{ item.get_status_transmissao_display }}</p>
+        <div class="pp-actions">
+          {% if item.live_url %}<a class="pp-btn pp-btn--soft" href="{{ item.live_url }}" target="_blank" rel="noopener">Assistir</a>{% endif %}
+          {% if item.canal_url %}<a class="pp-btn pp-btn--soft" href="{{ item.canal_url }}" target="_blank" rel="noopener">Canal</a>{% endif %}
+          {% if item.playlist_url %}<a class="pp-btn pp-btn--soft" href="{{ item.playlist_url }}" target="_blank" rel="noopener">Gravações</a>{% endif %}
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
 {% endblock %}

@@ -4,6 +4,7 @@ from .models import (
     AddonCatalogo,
     AssinaturaAddon,
     AssinaturaMunicipio,
+    PlanoComercialConfig,
     AssinaturaQuotaExtra,
     FaturaMunicipio,
     PlanoMunicipal,
@@ -17,6 +18,13 @@ class PlanoMunicipalAdmin(admin.ModelAdmin):
     list_display = ("nome", "codigo", "preco_base_mensal", "limite_secretarias", "limite_usuarios", "limite_alunos", "ativo")
     list_filter = ("codigo", "ativo")
     search_fields = ("nome", "codigo")
+
+
+@admin.register(PlanoComercialConfig)
+class PlanoComercialConfigAdmin(admin.ModelAdmin):
+    list_display = ("plano", "nome_comercial", "categoria", "atualizado_em")
+    list_filter = ("categoria",)
+    search_fields = ("plano__nome", "nome_comercial", "categoria")
 
 
 @admin.register(AssinaturaMunicipio)

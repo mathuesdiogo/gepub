@@ -1,0 +1,207 @@
+.gp-table,
+.table,
+table {
+  width: 100%;
+  background: var(--gp-surface);
+  border: 1px solid var(--gp-border);
+  border-radius: var(--gp-radius-sm);
+  overflow: hidden;
+}
+
+.gp-table th,
+.gp-table td,
+table th,
+table td {
+  text-align: left;
+  padding: var(--gp-space-2) var(--gp-space-3);
+  border-bottom: 1px solid var(--gp-border);
+  vertical-align: middle;
+}
+
+.gp-table thead th,
+table thead th {
+  background: color-mix(in srgb, var(--gp-primary) 10%, var(--gp-surface));
+  color: var(--gp-text-primary);
+  font-weight: 700;
+}
+
+.gp-table--striped tbody tr:nth-child(even),
+table tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--gp-background) 70%, var(--gp-surface));
+}
+
+.gp-table--hover tbody tr:hover,
+table tbody tr:hover {
+  background: color-mix(in srgb, var(--gp-primary) 8%, var(--gp-surface));
+}
+
+.gp-table--sortable th[aria-sort],
+.gp-table--sortable th.sortable {
+  cursor: pointer;
+}
+
+.gp-table__actions {
+  display: inline-flex;
+  gap: var(--gp-space-1);
+  align-items: center;
+}
+
+.gp-table__status {
+  font-weight: 600;
+}
+
+.gp-table--selectable input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--gp-primary);
+}
+
+.gp-table__filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--gp-space-2);
+  margin-bottom: var(--gp-space-3);
+}
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gp-space-2);
+  align-items: flex-end;
+  margin-bottom: var(--gp-space-3);
+}
+
+.filter-bar__field {
+  min-width: 220px;
+  flex: 1 1 280px;
+  display: grid;
+  gap: var(--gp-space-1);
+}
+
+.filter-bar__actions {
+  display: flex;
+  gap: var(--gp-space-2);
+  align-items: flex-end;
+  align-self: flex-end;
+}
+
+.filter-bar__actions .gp-button {
+  min-height: 2.5rem;
+}
+
+.filter-bar__autocomplete {
+  position: absolute;
+  z-index: var(--gp-z-dropdown);
+  top: calc(100% + var(--gp-space-1));
+  left: 0;
+  right: 0;
+  border: 1px solid var(--gp-border);
+  background: var(--gp-surface);
+  border-radius: var(--gp-radius-sm);
+  box-shadow: var(--gp-shadow-2);
+  overflow: hidden;
+}
+
+.filter-bar__autocomplete-item {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: var(--gp-text-primary);
+  padding: var(--gp-space-2);
+  cursor: pointer;
+}
+
+.filter-bar__autocomplete-item + .filter-bar__autocomplete-item {
+  border-top: 1px solid var(--gp-border);
+}
+
+.filter-bar__autocomplete-item:hover {
+  background: color-mix(in srgb, var(--gp-primary) 8%, var(--gp-surface));
+}
+
+.filter-bar__autocomplete-title {
+  font-weight: 600;
+}
+
+.filter-bar__autocomplete-meta {
+  font-size: 0.82rem;
+  color: var(--gp-text-secondary);
+}
+
+.gp-table--responsive {
+  overflow-x: auto;
+}
+
+.gp-table--paginated + .gp-pagination,
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--gp-space-1);
+  margin-top: var(--gp-space-2);
+}
+
+.gp-table__head {
+  border-bottom: 1px solid var(--gp-border);
+  padding: var(--gp-space-2) var(--gp-space-3);
+  background: color-mix(in srgb, var(--gp-background) 55%, var(--gp-surface));
+}
+
+.gp-table__body {
+  overflow-x: auto;
+}
+
+.gp-table__native {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.gp-table__native th,
+.gp-table__native td {
+  border-bottom: 1px solid var(--gp-border);
+  padding: var(--gp-space-2) var(--gp-space-3);
+  vertical-align: middle;
+}
+
+.gp-table__native thead th {
+  background: color-mix(in srgb, var(--gp-primary) 10%, var(--gp-surface));
+  font-weight: 700;
+}
+
+.table-shell,
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--gp-radius-md);
+  border: 1px solid var(--gp-border);
+  background: var(--gp-surface);
+}
+
+.table-shell table,
+.table-responsive table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  color: var(--gp-text-primary);
+}
+
+.table-shell thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  text-align: left;
+  font-size: 0.86rem;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--gp-surface) 85%, var(--gp-background));
+  border-bottom: 1px solid var(--gp-border);
+  padding: 12px 14px;
+}
+
+.table-shell tbody td {
+  padding: 12px 14px;
+  border-bottom: 1px solid color-mix(in srgb, var(--gp-border) 70%, transparent);
+}
+
+.table-shell tbody tr:hover td {
+  background: color-mix(in srgb, var(--gp-primary) 6%, transparent);
+}

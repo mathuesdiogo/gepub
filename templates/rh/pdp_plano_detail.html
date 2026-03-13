@@ -1,0 +1,83 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="gp-card"><div class="gp-card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:12px 0 18px;">
+    {% for card in cards %}
+      {% include "core/partials/components/data/kpi_card.html" with label=card.label value=card.value %}
+    {% endfor %}
+  </div>
+
+  <div class="gp-card" style="margin-bottom:14px;"><div class="gp-card__body">
+    <strong>Status do plano:</strong> {{ plano.get_status_display }}
+    {% if is_manager %}
+      <form method="post" action="{% url 'rh:pdp_plano_exportar_sipec' plano.pk %}?municipio={{ municipio.pk }}" style="margin-top:10px;">
+        {% csrf_token %}
+        <button class="gp-button gp-button--primary" type="submit">Marcar como exportado SIPEC</button>
+      </form>
+    {% endif %}
+  </div></div>
+
+  <form method="get" class="gp-table__filters">
+    <input type="hidden" name="municipio" value="{{ municipio.pk }}">
+    <select name="status" class="gp-input">
+      <option value="">Todas as situações</option>
+      {% for key,label in status_choices %}
+        <option value="{{ key }}" {% if status == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <select name="tipo" class="gp-input">
+      <option value="">Todos os tipos</option>
+      {% for key,label in tipo_choices %}
+        <option value="{{ key }}" {% if tipo == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button class="gp-button gp-button--sm" type="submit">Filtrar</button>
+  </form>
+
+  <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__body">
+    <table class="gp-table__native">
+      <thead>
+        <tr>
+          <th>Submissão</th>
+          <th>Área estratégica</th>
+          <th>Necessidade</th>
+          <th>Status</th>
+          <th>Análise</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in necessidades %}
+          <tr>
+            <td>{{ item.get_tipo_submissao_display }}<br><span class="gp-text-muted">{{ item.servidor.username|default:"-" }}</span></td>
+            <td>{{ item.area_estrategica }}</td>
+            <td>
+              <strong>{{ item.titulo_acao|default:"Sem título" }}</strong><br>
+              <span class="gp-text-muted">{{ item.necessidade_a_ser_atendida|truncatechars:180 }}</span>
+            </td>
+            <td>{{ item.get_status_display }}</td>
+            <td>
+              {% if is_manager %}
+                <form method="post" action="{% url 'rh:pdp_necessidade_status' item.pk %}?municipio={{ municipio.pk }}" style="display:flex;gap:6px;flex-wrap:wrap;">
+                  {% csrf_token %}
+                  <input class="gp-input" type="text" name="parecer" placeholder="Parecer">
+                  <button class="gp-button gp-button--sm gp-button--success" name="acao" value="aprovar_local" type="submit">Aprovar local</button>
+                  <button class="gp-button gp-button--sm gp-button--danger" name="acao" value="rejeitar_local" type="submit">Rejeitar local</button>
+                  <button class="gp-button gp-button--sm gp-button--secondary" name="acao" value="consolidar_central" type="submit">Consolidar</button>
+                  <button class="gp-button gp-button--sm gp-button--primary" name="acao" value="aprovar_central" type="submit">Aprovar central</button>
+                </form>
+              {% else %}
+                {{ item.analise_local_parecer|default:item.analise_central_parecer|default:"-" }}
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Nenhuma necessidade cadastrada para este plano.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

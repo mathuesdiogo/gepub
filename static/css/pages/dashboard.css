@@ -458,6 +458,10 @@ a.metric-card:hover {
   align-items: stretch;
 }
 
+.admin-grid--top {
+  align-items: start;
+}
+
 .dash-panel-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -512,6 +516,32 @@ a.metric-card:hover {
   border-collapse: collapse;
 }
 
+.admin-panel--table .admin-table {
+  table-layout: fixed;
+}
+
+.admin-panel--table .admin-table th:nth-child(1),
+.admin-panel--table .admin-table td:nth-child(1) {
+  width: 34%;
+}
+
+.admin-panel--table .admin-table th:nth-child(2),
+.admin-panel--table .admin-table td:nth-child(2),
+.admin-panel--table .admin-table th:nth-child(3),
+.admin-panel--table .admin-table td:nth-child(3) {
+  width: 12%;
+}
+
+.admin-panel--table .admin-table th:nth-child(4),
+.admin-panel--table .admin-table td:nth-child(4) {
+  width: 22%;
+}
+
+.admin-panel--table .admin-table th:nth-child(5),
+.admin-panel--table .admin-table td:nth-child(5) {
+  width: 20%;
+}
+
 .admin-table thead th {
   text-align: left;
   font-size: var(--font-size-xs);
@@ -562,6 +592,10 @@ a.metric-card:hover {
   transition: width .2s ease;
 }
 
+.admin-panel--table .admin-meter {
+  min-width: 72px;
+}
+
 .admin-status {
   display: inline-flex;
   align-items: center;
@@ -602,6 +636,12 @@ a.metric-card:hover {
 .admin-legend {
   display: grid;
   gap: 8px;
+}
+
+.admin-panel--donut .admin-legend {
+  max-height: 280px;
+  overflow: auto;
+  padding-right: 4px;
 }
 
 .admin-legend__row {

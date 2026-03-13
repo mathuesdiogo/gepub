@@ -27,6 +27,11 @@ def gerar_codigo_acesso(nome: str, ano: int | None = None) -> str:
 
 
 class Profile(models.Model):
+    class UITheme(models.TextChoices):
+        KASSYA = "kassya", "Kassya"
+        INCLUSAO = "inclusao", "Inclusão"
+        INSTITUCIONAL = "institucional", "Institucional"
+
     class Role(models.TextChoices):
         ADMIN = "ADMIN", "Admin (Sistema)"
         MUNICIPAL = "MUNICIPAL", "Gestor Municipal"
@@ -36,6 +41,41 @@ class Profile(models.Model):
         ALUNO = "ALUNO", "Aluno"
         NEE = "NEE", "Técnico NEE"
         LEITURA = "LEITURA", "Somente leitura"
+        AUDITORIA = "AUDITORIA", "Controladoria / Auditoria"
+        RH_GESTOR = "RH_GESTOR", "RH / Gestão de Pessoas"
+        PROTOCOLO = "PROTOCOLO", "Protocolo / Atendimento Geral"
+        CAD_GESTOR = "CAD_GESTOR", "Gestor de Cadastros"
+        CAD_OPER = "CAD_OPER", "Operador de Cadastros"
+        SAU_SECRETARIO = "SAU_SECRETARIO", "Secretário de Saúde"
+        SAU_DIRETOR = "SAU_DIRETOR", "Diretor de Unidade de Saúde"
+        SAU_COORD = "SAU_COORD", "Coordenador de Saúde"
+        SAU_MEDICO = "SAU_MEDICO", "Médico"
+        SAU_ENFERMEIRO = "SAU_ENFERMEIRO", "Enfermeiro"
+        SAU_TEC_ENF = "SAU_TEC_ENF", "Técnico de Enfermagem"
+        SAU_ACS = "SAU_ACS", "ACS"
+        SAU_RECEPCAO = "SAU_RECEPCAO", "Recepção de Saúde"
+        SAU_REGULACAO = "SAU_REGULACAO", "Regulação de Saúde"
+        SAU_FARMACIA = "SAU_FARMACIA", "Farmácia"
+        EDU_SECRETARIO = "EDU_SECRETARIO", "Secretário de Educação"
+        EDU_DIRETOR = "EDU_DIRETOR", "Diretor Escolar"
+        EDU_COORD = "EDU_COORD", "Coordenador Pedagógico"
+        EDU_PROF = "EDU_PROF", "Professor (Educação)"
+        EDU_SECRETARIA = "EDU_SECRETARIA", "Secretaria Escolar"
+        EDU_TRANSPORTE = "EDU_TRANSPORTE", "Transporte Escolar"
+        NEE_COORD_MUN = "NEE_COORD_MUN", "Coordenador Municipal NEE"
+        NEE_COORD_ESC = "NEE_COORD_ESC", "Coordenador NEE da Escola"
+        NEE_MEDIADOR = "NEE_MEDIADOR", "Mediador / Apoio NEE"
+        NEE_TECNICO = "NEE_TECNICO", "Equipe Técnica NEE"
+        DADOS_GESTOR = "DADOS_GESTOR", "Gestor de Dados / BI"
+        DADOS_ANALISTA = "DADOS_ANALISTA", "Analista Setorial"
+        INT_TI = "INT_TI", "Admin TI (Integrações)"
+        INT_GESTAO = "INT_GESTAO", "Admin Gestão (Integrações)"
+        INT_LEITOR = "INT_LEITOR", "Leitor (Integrações)"
+        PORTAL_ADMIN = "PORTAL_ADMIN", "Admin Portal"
+        PORTAL_EDITOR = "PORTAL_EDITOR", "Editor de Conteúdo"
+        PORTAL_APROV = "PORTAL_APROV", "Aprovador de Conteúdo"
+        PORTAL_DESIGN = "PORTAL_DESIGN", "Designer / Tema"
+        CIDADAO = "CIDADAO", "Cidadão (Portal)"
 
     foto = models.ImageField(
         upload_to="profiles/",
@@ -102,6 +142,10 @@ class Profile(models.Model):
     cpf_last4 = models.CharField(max_length=4, blank=True, default="")
     codigo_acesso = models.CharField(max_length=60, unique=True, blank=True, default="")
     must_change_password = models.BooleanField(default=True)
+    mfa_enabled = models.BooleanField(default=False)
+    password_changed_at = models.DateTimeField(null=True, blank=True)
+    password_expires_days = models.PositiveSmallIntegerField(default=90)
+    ui_theme = models.CharField(max_length=30, choices=UITheme.choices, blank=True, default="")
 
     class Meta:
         verbose_name = "Perfil"
@@ -227,3 +271,24 @@ class UserManagementAudit(models.Model):
 
     def __str__(self) -> str:
         return f"{self.get_action_display()} • {self.target} • {self.created_at:%d/%m/%Y %H:%M}"
+
+
+class PasswordHistory(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="password_history",
+    )
+    password_hash = models.CharField(max_length=128)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Histórico de senha"
+        verbose_name_plural = "Histórico de senhas"
+        ordering = ["-created_at", "-id"]
+        indexes = [
+            models.Index(fields=["user", "created_at"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.user} • {self.created_at:%d/%m/%Y %H:%M}"

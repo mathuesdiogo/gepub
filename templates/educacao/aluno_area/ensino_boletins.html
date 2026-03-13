@@ -1,0 +1,108 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Ensino • Boletim • {{ aluno.nome }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <article class="gp-student-stage__card gp-boletim-clean">
+    <h3>Boletim por Período/Semestre</h3>
+    {% if periodos_disponiveis %}
+      <form method="get" class="gp-form gp-form--smart gp-boletim-clean__toolbar">
+        <div class="gp-form-group">
+          <label class="gp-form-label" for="periodo_ref">Semestre de referência</label>
+          <select id="periodo_ref" name="periodo" class="gp-select" onchange="this.form.submit()">
+            {% for p in periodos_disponiveis %}
+              <option
+                value="{{ p.id }}"
+                title="{{ p.get_tipo_display }}"
+                {% if periodo_referencia and p.id == periodo_referencia.id %}selected{% endif %}
+              >
+                {{ p.ano_letivo }}/{{ p.numero }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <noscript>
+          <button class="gp-button gp-button--ghost" type="submit">Consultar período</button>
+        </noscript>
+      </form>
+    {% endif %}
+
+    <p class="gp-boletim-clean__summary">
+      <strong>Período:</strong> {{ periodo_referencia_label }}
+      <span>•</span>
+      <strong>Avaliações:</strong> {{ notas_total }}
+      <span>•</span>
+      <strong>Notas lançadas:</strong> {{ notas_lancadas_total }}
+      <span>•</span>
+      <strong>Média:</strong> {% if media_periodo is not None %}{{ media_periodo|floatformat:2 }}{% else %}—{% endif %}
+    </p>
+
+    <div class="gp-table gp-table--responsive gp-boletim-clean__table"><div class="gp-table__body">
+      <table class="gp-table__native">
+        <thead>
+          <tr>
+            <th>Turma</th>
+            <th>Ano/Período</th>
+            <th>Avaliações no período</th>
+            <th>Notas lançadas</th>
+            <th>Média</th>
+            <th>Frequência</th>
+            <th>Situação</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows_boletim %}
+            <tr>
+              <td>{{ row.turma }}</td>
+              <td>{{ row.ano_periodo }}</td>
+              <td>{{ row.avaliacoes_total }}</td>
+              <td>{{ row.notas_lancadas }}</td>
+              <td>{% if row.media is not None %}{{ row.media|floatformat:2 }}{% else %}—{% endif %}</td>
+              <td>{% if row.frequencia is not None %}{{ row.frequencia|floatformat:1 }}%{% else %}—{% endif %}</td>
+              <td>{{ row.situacao }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="7">Sem dados de boletim para o período de referência selecionado.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </article>
+
+  <article class="gp-student-stage__card gp-boletim-clean">
+    <h3>Boletim do Curso de Informática</h3>
+    <div class="gp-table gp-table--responsive gp-boletim-clean__table"><div class="gp-table__body">
+      <table class="gp-table__native">
+        <thead>
+          <tr>
+            <th>Turma</th>
+            <th>Ano/Período</th>
+            <th>Avaliações no período</th>
+            <th>Notas lançadas</th>
+            <th>Média</th>
+            <th>Frequência</th>
+            <th>Situação</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows_boletim_informatica %}
+            <tr>
+              <td>{{ row.turma }}</td>
+              <td>{{ row.ano_periodo }}</td>
+              <td>{{ row.avaliacoes_total }}</td>
+              <td>{{ row.notas_lancadas }}</td>
+              <td>{% if row.media is not None %}{{ row.media|floatformat:2 }}{% else %}—{% endif %}</td>
+              <td>{% if row.frequencia is not None %}{{ row.frequencia|floatformat:1 }}%{% else %}—{% endif %}</td>
+              <td>{{ row.situacao }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="7">Sem dados de boletim para as turmas de Informática no período selecionado.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </article>
+</section>
+{% endblock %}

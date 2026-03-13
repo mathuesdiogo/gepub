@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
 from apps.core.decorators import require_perm
-from apps.core.models import DocumentoEmitido
+from apps.core.services_documentos import registrar_documento_emitido
 from apps.core.rbac import can, scope_filter_unidades
 from apps.org.models import Unidade
 
@@ -53,14 +53,14 @@ def documento_list(request, atendimento_id: int):
     for d in docs:
         valid_url = "—"
         if d.documento_emitido_id:
-            valid_url = reverse("core:guia_telas") + f"?q={d.documento_emitido.codigo}"
+            valid_url = reverse("core:validar_documento_codigo_public", args=[d.documento_emitido.codigo])
         rows.append(
             {
                 "cells": [
                     {"text": d.get_tipo_display(), "url": reverse("saude:documento_detail", args=[d.pk])},
                     {"text": d.titulo, "url": reverse("saude:documento_detail", args=[d.pk])},
                     {"text": d.criado_em.strftime("%d/%m/%Y %H:%M")},
-                    {"text": "Abrir registro" if d.documento_emitido_id else "—", "url": valid_url if d.documento_emitido_id else ""},
+                    {"text": "Validar documento" if d.documento_emitido_id else "—", "url": valid_url if d.documento_emitido_id else ""},
                 ],
                 "can_edit": False,
                 "edit_url": "",
@@ -92,7 +92,7 @@ def documento_create(request, atendimento_id: int):
             obj.atendimento = atendimento
             obj.criado_por = request.user
 
-            documento_emitido = DocumentoEmitido.objects.create(
+            documento_emitido = registrar_documento_emitido(
                 tipo=f"SAUDE.{obj.tipo}",
                 titulo=obj.titulo,
                 gerado_por=request.user,

@@ -2,7 +2,7 @@
 {% block title %}Relatório Mensal • Educação • GEPUB{% endblock %}
 
 {% block module_content %}
-<div class="card"><div class="card__body">
+<div class="gp-card"><div class="gp-card__body">
 
 {% include "core/partials/components/layout/page_head.html" with title="Relatório Mensal (Matrículas)" subtitle="Resumo por unidade e período" actions=actions %}
 {% include "core/partials/components/data/filter_bar.html" with q="" action_url=action_url clear_url=clear_url has_filters=has_filters extra_filters=extra_filters %}
@@ -17,7 +17,7 @@
 
 <hr>
 
-<table class="table">
+<table class="gp-table__native">
   <thead>
     <tr>
       <th>Unidade</th>

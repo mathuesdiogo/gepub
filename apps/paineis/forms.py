@@ -34,6 +34,42 @@ class DatasetCreateForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.municipio = municipio
         self.user = user
+        self.fields["nome"].widget.attrs.update(
+            {
+                "class": "bi-input",
+                "placeholder": "Ex.: Produção da Atenção Básica 2026",
+            }
+        )
+        self.fields["descricao"].widget.attrs.update(
+            {
+                "class": "bi-input",
+                "rows": 3,
+                "placeholder": "Descreva a origem e o objetivo analítico deste dataset.",
+            }
+        )
+        self.fields["categoria"].widget.attrs.update(
+            {
+                "class": "bi-input",
+                "placeholder": "Ex.: Saúde, Educação, Financeiro",
+            }
+        )
+        self.fields["fonte"].widget.attrs.update({"class": "bi-input", "data-bi-fonte": "1"})
+        self.fields["visibilidade"].widget.attrs.update({"class": "bi-input"})
+        self.fields["secretaria"].widget.attrs.update({"class": "bi-input"})
+        self.fields["unidade"].widget.attrs.update({"class": "bi-input"})
+        self.fields["setor"].widget.attrs.update({"class": "bi-input"})
+        self.fields["arquivo"].widget.attrs.update(
+            {
+                "class": "bi-input",
+                "accept": ".csv,.txt,.xlsx",
+            }
+        )
+        self.fields["google_sheet_url"].widget.attrs.update(
+            {
+                "class": "bi-input",
+                "placeholder": "https://docs.google.com/spreadsheets/d/.../edit#gid=0",
+            }
+        )
 
         if municipio is not None:
             self.fields["secretaria"].queryset = self.fields["secretaria"].queryset.filter(municipio=municipio)

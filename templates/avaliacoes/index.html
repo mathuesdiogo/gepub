@@ -1,0 +1,83 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="grid grid--4" style="margin-top:12px;">
+    {% include "core/partials/components/data/kpi_card.html" with label="Avaliações" value=kpis.total %}
+    {% include "core/partials/components/data/kpi_card.html" with label="Aplicações" value=kpis.aplicacoes %}
+    {% include "core/partials/components/data/kpi_card.html" with label="Corrigidas" value=kpis.corrigidas %}
+    {% include "core/partials/components/data/kpi_card.html" with label="Pendentes" value=kpis.pendentes %}
+  </div>
+
+  <div class="grid grid--4 u-mt-12">
+    {% include "core/partials/components/data/kpi_card.html" with label="Objetivas" value=kpis.objetivas %}
+    {% include "core/partials/components/data/kpi_card.html" with label="Discursivas" value=kpis.discursivas %}
+    {% include "core/partials/components/data/kpi_card.html" with label="Mistas" value=kpis.mistas %}
+    {% include "core/partials/components/data/kpi_card.html" with label="Média geral" value=kpis.media|floatformat:2 %}
+  </div>
+
+  <div class="grid grid--2 u-mt-16">
+    <div class="card"><div class="card__body">
+      <h3 style="margin-top:0;">Evolução mensal</h3>
+      <div class="table-shell"><div class="table-shell__body">
+        <table class="table">
+          <thead><tr><th>Mês</th><th>Total</th></tr></thead>
+          <tbody>
+            {% for row in monthly_rows %}
+              <tr><td>{{ row.mes }}</td><td>{{ row.total }}</td></tr>
+            {% empty %}
+              <tr><td colspan="2">Sem dados.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div></div>
+    </div></div>
+
+    <div class="card"><div class="card__body">
+      <h3 style="margin-top:0;">Top turmas</h3>
+      <div class="table-shell"><div class="table-shell__body">
+        <table class="table">
+          <thead><tr><th>Turma</th><th>Avaliações</th></tr></thead>
+          <tbody>
+            {% for row in top_turmas %}
+              <tr><td>{{ row.turma__nome|default:"—" }}</td><td>{{ row.total }}</td></tr>
+            {% empty %}
+              <tr><td colspan="2">Sem dados.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div></div>
+    </div></div>
+  </div>
+
+  <div class="card u-mt-16"><div class="card__body">
+    <h3 style="margin-top:0;">Últimas avaliações</h3>
+    <div class="table-shell"><div class="table-shell__body">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Avaliação</th>
+            <th>Turma</th>
+            <th>Data</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in recentes %}
+            <tr>
+              <td>{{ item.titulo }}</td>
+              <td>{{ item.turma.nome }}</td>
+              <td>{{ item.data_aplicacao|date:"d/m/Y" }}</td>
+              <td><a href="{% url 'avaliacoes:avaliacao_detail' item.pk %}?municipio={{ municipio.pk }}">abrir</a></td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4">Nenhuma avaliação cadastrada.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </div></div>
+</div></div>
+{% endblock %}

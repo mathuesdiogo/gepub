@@ -18,3 +18,128 @@
 {% include dash_template %}
 </div></div>
 {% endblock %}
+
+{% block extra_js %}
+  {{ block.super }}
+  <script>
+    (function () {
+      var storagePrefix = "gepub.dashboard.panel.collapsed:";
+
+      function storageGet(key) {
+        try {
+          return window.localStorage.getItem(storagePrefix + key);
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function storageSet(key, value) {
+        try {
+          window.localStorage.setItem(storagePrefix + key, value);
+        } catch (e) {
+          /* no-op */
+        }
+      }
+
+      function getPanelKey(panel, index) {
+        if (panel.id) {
+          return window.location.pathname + "::" + panel.id;
+        }
+        var title = panel.querySelector(".admin-panel__title");
+        var text = title ? title.textContent.trim().toLowerCase().replace(/\s+/g, "-") : ("painel-" + index);
+        return window.location.pathname + "::" + text + "::" + index;
+      }
+
+      function buildHeadActions(head) {
+        var existing = head.querySelector(".admin-panel__head-actions");
+        if (existing) return existing;
+
+        var actions = document.createElement("div");
+        actions.className = "admin-panel__head-actions";
+        while (head.children.length > 1) {
+          actions.appendChild(head.children[1]);
+        }
+        head.appendChild(actions);
+        return actions;
+      }
+
+      function setupPanel(panel, index) {
+        if (panel.dataset.collapsibleReady === "1") return;
+
+        var children = Array.prototype.slice.call(panel.children);
+        var head = null;
+        for (var i = 0; i < children.length; i += 1) {
+          if (children[i].classList.contains("admin-panel__head")) {
+            head = children[i];
+            break;
+          }
+        }
+        if (!head) return;
+
+        var contentNodes = [];
+        for (var j = 0; j < children.length; j += 1) {
+          if (children[j] !== head) {
+            contentNodes.push(children[j]);
+          }
+        }
+        if (!contentNodes.length) return;
+
+        var actions = buildHeadActions(head);
+        var toggle = document.createElement("button");
+        toggle.type = "button";
+        toggle.className = "admin-panel__toggle";
+        toggle.innerHTML = '<i class="fa-solid fa-chevron-up" aria-hidden="true"></i>';
+        actions.appendChild(toggle);
+
+        var key = getPanelKey(panel, index);
+
+        function setCollapsed(collapsed, persist) {
+          panel.classList.toggle("is-collapsed", collapsed);
+          contentNodes.forEach(function (node) {
+            node.hidden = collapsed;
+          });
+
+          toggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+          toggle.setAttribute("aria-label", collapsed ? "Expandir bloco" : "Recolher bloco");
+          toggle.title = collapsed ? "Expandir bloco" : "Recolher bloco";
+
+          var icon = toggle.querySelector("i");
+          if (icon) {
+            icon.classList.toggle("fa-chevron-down", collapsed);
+            icon.classList.toggle("fa-chevron-up", !collapsed);
+          }
+
+          if (!collapsed) {
+            window.requestAnimationFrame(function () {
+              window.dispatchEvent(new Event("resize"));
+            });
+          }
+
+          if (persist) {
+            storageSet(key, collapsed ? "1" : "0");
+          }
+        }
+
+        toggle.addEventListener("click", function () {
+          setCollapsed(!panel.classList.contains("is-collapsed"), true);
+        });
+
+        setCollapsed(storageGet(key) === "1", false);
+        panel.dataset.collapsibleReady = "1";
+      }
+
+      function initDashboardPanels() {
+        if (window.__dashboardPanelsReady) return;
+        window.__dashboardPanelsReady = true;
+        var panels = document.querySelectorAll(".dashboard-shell .admin-panel");
+        panels.forEach(setupPanel);
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initDashboardPanels);
+      } else {
+        initDashboardPanels();
+      }
+    })();
+  </script>
+{% endblock %}

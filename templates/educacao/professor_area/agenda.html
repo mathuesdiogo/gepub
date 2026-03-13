@@ -1,0 +1,92 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Agenda de Avaliações • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage gp-professor-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <article class="gp-student-stage__card">
+    <form method="get" class="gp-form gp-form--smart gp-professor-filter-row gp-professor-filter-row--wide">
+      <div class="gp-form-group gp-field--full">
+        <label class="gp-form-label" for="id_q">Busca</label>
+        <input id="id_q" type="text" class="gp-input" name="q" value="{{ q }}" placeholder="Avaliação, turma ou período" />
+      </div>
+      <div class="gp-form-group">
+        <label class="gp-form-label" for="id_inicio">De</label>
+        <input id="id_inicio" type="date" class="gp-input" name="inicio" value="{{ inicio }}" />
+      </div>
+      <div class="gp-form-group">
+        <label class="gp-form-label" for="id_fim">Até</label>
+        <input id="id_fim" type="date" class="gp-input" name="fim" value="{{ fim }}" />
+      </div>
+      <div class="gp-form-group gp-form-group--check">
+        <label class="gp-form-label" for="id_pendentes">Somente pendências</label>
+        <input id="id_pendentes" type="checkbox" class="gp-checkbox" name="pendentes" {% if somente_pendentes %}checked{% endif %} />
+      </div>
+      <div class="gp-form-group">
+        <label class="gp-form-label">&nbsp;</label>
+        <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
+      </div>
+    </form>
+
+    <div class="gp-flex-wrap-row gp-mb-3">
+      <span class="gp-badge gp-badge--primary">Hoje: {{ resumo.hoje }}</span>
+      <span class="gp-badge gp-badge--neutral">Próx. 7 dias: {{ resumo.proximos_7_dias }}</span>
+      <span class="gp-badge gp-badge--warning">Pendências: {{ resumo.pendencias_total }}</span>
+    </div>
+
+    {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Sem avaliações" empty_text="Nenhuma avaliação encontrada para os filtros selecionados." %}
+  </article>
+
+  <article class="gp-student-stage__card">
+    <h3>Agenda de Avaliações do Curso de Informática</h3>
+    <div class="gp-flex-wrap-row gp-mb-3">
+      <span class="gp-badge gp-badge--primary">Hoje: {{ resumo_informatica.hoje }}</span>
+      <span class="gp-badge gp-badge--neutral">Próx. 7 dias: {{ resumo_informatica.proximos_7_dias }}</span>
+      <span class="gp-badge gp-badge--warning">Pendências: {{ resumo_informatica.pendencias_total }}</span>
+    </div>
+    {% include "core/partials/components/data/table_shell.html" with headers=headers_informatica rows=rows_informatica page_obj=None empty_title="Sem aulas de informática" empty_text="Nenhuma aula de informática encontrada para os filtros selecionados." %}
+  </article>
+
+  <article class="gp-student-stage__card">
+    <h3>Calendário Letivo da Informática</h3>
+    <p class="gp-text-muted">Eventos letivos e próximas aulas do Curso de Informática no seu escopo.</p>
+
+    <div class="gp-grid-2 gp-student-stage__grid">
+      <div>
+        <h4>Eventos do calendário</h4>
+        <ul class="gp-student-list">
+          {% for ev in eventos_calendario_informatica %}
+            <li class="gp-student-list__item">
+              <strong>{{ ev.titulo }}</strong>
+              <p>{{ ev.get_tipo_display }} • {{ ev.data_inicio|date:"d/m/Y" }}{% if ev.data_fim and ev.data_fim != ev.data_inicio %} até {{ ev.data_fim|date:"d/m/Y" }}{% endif %}</p>
+            </li>
+          {% empty %}
+            <li class="gp-student-empty">Nenhum evento do calendário disponível.</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div>
+        <h4>Próximas aulas da Informática</h4>
+        <ul class="gp-student-list">
+          {% for aula in aulas_calendario_informatica %}
+            <li class="gp-student-list__item">
+              <strong>{{ aula.turma.codigo }} • {{ aula.data_aula|date:"d/m/Y" }}</strong>
+              <p>
+                {% if aula.encontro %}
+                  {{ aula.encontro.hora_inicio|time:"H:i" }}-{{ aula.encontro.hora_fim|time:"H:i" }}
+                {% else %}
+                  Horário não definido
+                {% endif %}
+                • {{ aula.get_status_display }}
+              </p>
+            </li>
+          {% empty %}
+            <li class="gp-student-empty">Sem aulas futuras de Informática.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </article>
+</section>
+{% endblock %}

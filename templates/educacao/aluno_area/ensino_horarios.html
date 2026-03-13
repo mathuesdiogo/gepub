@@ -1,0 +1,78 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Ensino • Horários de Aula • {{ aluno.nome }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <article class="gp-student-stage__card">
+    <h3>Locais e Horários de Aula</h3>
+    <div class="gp-table gp-table--responsive gp-table--striped"><div class="gp-table__body">
+      <table class="gp-table__native">
+        <thead><tr><th>Dia</th><th>Início</th><th>Fim</th><th>Disciplina</th><th>Professor</th><th>Sala</th></tr></thead>
+        <tbody>
+          {% for h in horarios %}
+            <tr>
+              <td>{{ h.get_dia_display }}</td>
+              <td>{{ h.inicio|time:"H:i" }}</td>
+              <td>{{ h.fim|time:"H:i" }}</td>
+              <td>{{ h.disciplina }}</td>
+              <td>{{ h.professor|default:"—" }}</td>
+              <td>{{ h.sala|default:"—" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6">Horários não cadastrados.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </article>
+
+  <article class="gp-student-stage__card">
+    <h3>Curso de Informática • Agenda e Horários</h3>
+    <div class="gp-table gp-table--responsive gp-table--striped"><div class="gp-table__body">
+      <table class="gp-table__native">
+        <thead><tr><th>Dia</th><th>Início</th><th>Fim</th><th>Turma</th><th>Laboratório</th></tr></thead>
+        <tbody>
+          {% for e in encontros_informatica %}
+            <tr>
+              <td>{{ e.get_dia_semana_display }}</td>
+              <td>{{ e.hora_inicio|time:"H:i" }}</td>
+              <td>{{ e.hora_fim|time:"H:i" }}</td>
+              <td>{{ e.turma.codigo }}</td>
+              <td>{{ e.turma.laboratorio.nome|default:"—" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5">Você não possui matrícula ativa no Curso de Informática.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+
+    <h4 class="u-mt-12">Próximas aulas de Informática</h4>
+    <div class="gp-table gp-table--responsive gp-table--striped"><div class="gp-table__body">
+      <table class="gp-table__native">
+        <thead><tr><th>Data</th><th>Turma</th><th>Horário</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for a in proximas_aulas_informatica %}
+            <tr>
+              <td>{{ a.data_aula|date:"d/m/Y" }}</td>
+              <td>{{ a.turma.codigo }}</td>
+              <td>
+                {% if a.encontro %}
+                  {{ a.encontro.hora_inicio|time:"H:i" }}-{{ a.encontro.hora_fim|time:"H:i" }}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+              <td>{{ a.get_status_display }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4">Nenhuma próxima aula de Informática encontrada.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </article>
+</section>
+{% endblock %}

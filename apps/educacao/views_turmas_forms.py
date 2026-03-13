@@ -6,6 +6,7 @@ from apps.core.rbac import scope_filter_turmas
 
 from .forms import TurmaForm
 from .models import Turma
+from .services_turma_setup import inicializar_turma_fluxo_anual
 
 
 def turma_create(request):
@@ -13,7 +14,20 @@ def turma_create(request):
         form = TurmaForm(request.POST, user=request.user)
         if form.is_valid():
             turma = form.save()
+            setup = inicializar_turma_fluxo_anual(turma, gerar_horario=True)
             messages.success(request, "Turma criada com sucesso.")
+            if setup.diarios.criados:
+                messages.info(
+                    request,
+                    f"Diários sincronizados: {setup.diarios.criados} criado(s) para {setup.diarios.total_professores} professor(es).",
+                )
+            if setup.horario.criado:
+                messages.info(
+                    request,
+                    f"Grade inicial gerada: {setup.horario.criado} aula(s) ({setup.horario.fonte}).",
+                )
+            elif setup.horario.ignorado:
+                messages.info(request, "Grade da turma mantida (já existia configuração).")
             return redirect("educacao:turma_detail", pk=turma.pk)
         messages.error(request, "Corrija os erros do formulário.")
     else:
@@ -52,7 +66,13 @@ def turma_update(request, pk: int):
         form = TurmaForm(request.POST, instance=turma, user=request.user)
         if form.is_valid():
             turma = form.save()
+            setup = inicializar_turma_fluxo_anual(turma, gerar_horario=False)
             messages.success(request, "Turma atualizada com sucesso.")
+            if setup.diarios.criados:
+                messages.info(
+                    request,
+                    f"Diários sincronizados: {setup.diarios.criados} novo(s) diário(s) criado(s).",
+                )
             return redirect("educacao:turma_detail", pk=turma.pk)
         messages.error(request, "Corrija os erros do formulário.")
     else:

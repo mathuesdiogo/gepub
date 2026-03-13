@@ -1,0 +1,70 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Aulas e Conteúdos • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage gp-professor-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <div class="gp-student-stage__grid">
+    <article class="gp-student-stage__card">
+      <h3>Novo lançamento por diário</h3>
+      {% if diarios_links %}
+        <ul class="gp-student-list">
+          {% for item in diarios_links %}
+            <li class="gp-student-list__item">
+              <strong>{{ item.turma }} • {{ item.ano }}</strong>
+              <div class="gp-professor-inline-actions">
+                <a class="gp-button gp-button--outline" href="{{ item.url_diario }}"><i class="fa-solid fa-book-open"></i> Abrir diário</a>
+                <a class="gp-button gp-button--primary" href="{{ item.url_nova_aula }}"><i class="fa-solid fa-plus"></i> Nova aula</a>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="gp-student-empty">Nenhum diário disponível.</div>
+      {% endif %}
+    </article>
+
+    <article class="gp-student-stage__card">
+      <h3>Buscar aulas</h3>
+      <form method="get" class="gp-form gp-form--smart">
+        <div class="gp-form-group gp-field--full">
+          <label class="gp-form-label" for="id_q">Busca</label>
+          <input id="id_q" type="text" class="gp-input" name="q" value="{{ q }}" placeholder="Turma, componente ou conteúdo" />
+        </div>
+        <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i> Buscar</button>
+      </form>
+    </article>
+
+    <article class="gp-student-stage__card">
+      <h3>Lançamento no Curso de Informática</h3>
+      {% if informatica_turmas_links %}
+        <ul class="gp-student-list">
+          {% for item in informatica_turmas_links %}
+            <li class="gp-student-list__item">
+              <strong>{{ item.turma }} • {{ item.ano }}</strong>
+              <div class="gp-professor-inline-actions">
+                <a class="gp-button gp-button--outline" href="{{ item.url_diario }}"><i class="fa-solid fa-book-open"></i> Abrir diário</a>
+                <a class="gp-button gp-button--outline" href="{{ item.url_aulas }}"><i class="fa-solid fa-list"></i> Aulas</a>
+                <a class="gp-button gp-button--primary" href="{{ item.url_lancar_aula }}"><i class="fa-solid fa-plus"></i> Lançar aula</a>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="gp-student-empty">Nenhuma turma de informática disponível.</div>
+      {% endif %}
+    </article>
+  </div>
+
+  <article class="gp-student-stage__card">
+    <h3>Histórico recente de aulas</h3>
+    {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Sem aulas" empty_text="Nenhuma aula encontrada para o filtro informado." %}
+  </article>
+
+  <article class="gp-student-stage__card">
+    <h3>Aulas pendentes para lançamento (Informática)</h3>
+    {% include "core/partials/components/data/table_shell.html" with headers=headers_informatica rows=rows_informatica page_obj=None empty_title="Sem aulas pendentes de informática" empty_text="Não há aulas pendentes para lançamento com os filtros informados." %}
+  </article>
+</section>
+{% endblock %}

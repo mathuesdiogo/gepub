@@ -1,10 +1,10 @@
 {% extends "core/detail_base.html" %}
 
 {% block detail_sections %}
-<div class="card" style="margin-top:12px;"><div class="card__body">
-  <h3 style="margin-top:0;">Aditivos</h3>
-  <div class="table-shell"><div class="table-shell__body">
-    <table class="table">
+<div class="gp-card"><div class="gp-card__body">
+  <h3>Aditivos</h3>
+  <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__body">
+    <table class="gp-table__native">
       <thead><tr><th>Numero</th><th>Tipo</th><th>Data</th><th>Valor</th><th>Nova vigencia</th></tr></thead>
       <tbody>
         {% for item in aditivos %}
@@ -23,10 +23,10 @@
   </div></div>
 </div></div>
 
-<div class="card" style="margin-top:12px;"><div class="card__body">
-  <h3 style="margin-top:0;">Medicoes</h3>
-  <div class="table-shell"><div class="table-shell__body">
-    <table class="table">
+<div class="gp-card"><div class="gp-card__body">
+  <h3>Medicoes</h3>
+  <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__body">
+    <table class="gp-table__native">
       <thead><tr><th>Numero</th><th>Competencia</th><th>Data</th><th>Valor</th><th>Status</th><th>Liquidacao</th><th></th></tr></thead>
       <tbody>
         {% for item in medicoes %}
@@ -39,9 +39,9 @@
             <td>{{ item.liquidacao|default:"-" }}</td>
             <td>
               {% if item.status == 'PENDENTE' %}
-                <a class="link" href="{% url 'contratos:medicao_atestar' item.id %}?municipio={{ municipio.id }}">atestar</a>
+                <a class="gp-anchor-link" href="{% url 'contratos:medicao_atestar' item.id %}?municipio={{ municipio.id }}">atestar</a>
               {% elif item.status == 'ATESTADA' %}
-                <a class="link" href="{% url 'contratos:medicao_liquidar' item.id %}?municipio={{ municipio.id }}">liquidar</a>
+                <a class="gp-anchor-link" href="{% url 'contratos:medicao_liquidar' item.id %}?municipio={{ municipio.id }}">liquidar</a>
               {% else %}
                 -
               {% endif %}
@@ -54,4 +54,5 @@
     </table>
   </div></div>
 </div></div>
+{% include "core/partials/components/operacao/registro_extras.html" %}
 {% endblock %}

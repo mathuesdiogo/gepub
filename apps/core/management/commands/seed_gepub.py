@@ -350,7 +350,7 @@ class Command(BaseCommand):
                         m = random.choice(municipios)
                         p.municipio_id = m.id
 
-                if role == "PROFESSOR":
+                if role in {"PROFESSOR", "EDU_PROF"}:
                     # opcional: vincular turmas depois (ManyToMany), se existir
                     if prof_has_uni:
                         u0 = random.choice(unidades)
@@ -379,7 +379,7 @@ class Command(BaseCommand):
         # Se quiser, vincula aleatoriamente cada professor a 2 turmas do seu escopo
         try:
             from apps.accounts.models import Profile as _Profile
-            profs = User.objects.filter(profile__role="PROFESSOR").select_related("profile")
+            profs = User.objects.filter(profile__role__in=["PROFESSOR", "EDU_PROF"]).select_related("profile")
             for u in profs:
                 qs = Turma.objects.all()
                 # tenta escopo por unidade/município do profile

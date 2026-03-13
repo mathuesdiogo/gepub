@@ -3,6 +3,13 @@ from __future__ import annotations
 from .views_common import *
 from .views_common import _metricas_para_tela, _resolve_municipio
 
+from apps.comunicacao.models import NotificationJob
+from apps.educacao.models import Turma
+from apps.nee.models import AlunoNecessidade, PlanoClinicoNEE
+from apps.paineis.models import Dataset
+from apps.saude.models import AgendamentoSaude
+from .services import catalogo_planos_comercial, plano_comercial_data
+
 @login_required
 @require_perm("billing.view")
 def index(request):
@@ -21,9 +28,78 @@ def meu_plano(request):
     assinatura = get_assinatura_ativa(municipio)
     if not assinatura:
         raise Http404("Município sem assinatura ativa e sem plano padrão configurado.")
+    plano_atual = plano_comercial_data(assinatura.plano)
+    planos_catalogo = catalogo_planos_comercial()
+    for item in planos_catalogo:
+        item["is_current"] = item["codigo"] == assinatura.plano.codigo
 
     uso = recalc_uso_municipio(municipio)
     metricas = _metricas_para_tela(assinatura, uso)
+    modulo_usage = [
+        {
+            "modulo": "Educação",
+            "descricao": "Alunos ativos e turmas vinculadas",
+            "principal": uso.alunos_ativos,
+            "secundario": Turma.objects.filter(unidade__secretaria__municipio=municipio, ativo=True).count(),
+            "principal_label": "alunos",
+            "secundario_label": "turmas",
+        },
+        {
+            "modulo": "Saúde",
+            "descricao": "Atendimentos anuais e agenda pendente",
+            "principal": uso.atendimentos_ano,
+            "secundario": AgendamentoSaude.objects.filter(
+                unidade__secretaria__municipio=municipio,
+                status__in=[AgendamentoSaude.Status.MARCADO, AgendamentoSaude.Status.CONFIRMADO],
+            ).count(),
+            "principal_label": "atendimentos/ano",
+            "secundario_label": "agendamentos pendentes",
+        },
+        {
+            "modulo": "NEE",
+            "descricao": "Casos acompanhados e planos clínicos",
+            "principal": AlunoNecessidade.objects.filter(
+                aluno__matriculas__turma__unidade__secretaria__municipio=municipio,
+                ativo=True,
+            )
+            .values("aluno_id")
+            .distinct()
+            .count(),
+            "secundario": PlanoClinicoNEE.objects.filter(
+                aluno__matriculas__turma__unidade__secretaria__municipio=municipio,
+            )
+            .values("aluno_id")
+            .distinct()
+            .count(),
+            "principal_label": "alunos com NEE",
+            "secundario_label": "planos clínicos",
+        },
+        {
+            "modulo": "Paineis BI",
+            "descricao": "Datasets internos e publicados",
+            "principal": Dataset.objects.filter(municipio=municipio).count(),
+            "secundario": Dataset.objects.filter(municipio=municipio, status=Dataset.Status.PUBLICADO).count(),
+            "principal_label": "datasets",
+            "secundario_label": "publicados",
+        },
+        {
+            "modulo": "Comunicação",
+            "descricao": "Envios no mês e falhas",
+            "principal": NotificationJob.objects.filter(
+                municipio=municipio,
+                created_at__year=timezone.localdate().year,
+                created_at__month=timezone.localdate().month,
+            ).count(),
+            "secundario": NotificationJob.objects.filter(
+                municipio=municipio,
+                created_at__year=timezone.localdate().year,
+                created_at__month=timezone.localdate().month,
+                status=NotificationJob.Status.FALHA,
+            ).count(),
+            "principal_label": "jobs no mês",
+            "secundario_label": "falhas no mês",
+        },
+    ]
 
     solicitacoes = SolicitacaoUpgrade.objects.filter(municipio=municipio).select_related(
         "solicitado_por", "aprovado_por", "addon", "plano_destino"
@@ -65,8 +141,11 @@ def meu_plano(request):
             "actions": actions,
             "municipio": municipio,
             "assinatura": assinatura,
+            "plano_atual": plano_atual,
+            "planos_catalogo": planos_catalogo,
             "uso": uso,
             "metricas": metricas,
+            "modulo_usage": modulo_usage,
             "solicitacoes": solicitacoes,
             "faturas": faturas,
             "municipios": Municipio.objects.order_by("nome") if is_admin(request.user) else [],
@@ -90,7 +169,6 @@ def solicitar_upgrade(request):
     tipo_qs = (request.GET.get("tipo") or "").strip().upper()
     qtd_qs = (request.GET.get("qtd") or "").strip()
     if tipo_qs in {
-        SolicitacaoUpgrade.Tipo.SECRETARIAS,
         SolicitacaoUpgrade.Tipo.USUARIOS,
         SolicitacaoUpgrade.Tipo.ALUNOS,
         SolicitacaoUpgrade.Tipo.ATENDIMENTOS,
@@ -151,6 +229,7 @@ def solicitar_upgrade(request):
 def simulador(request):
     form = SimuladorPlanoForm(request.POST or None)
     resultado = None
+    resultado_plano = None
 
     if request.method == "POST" and form.is_valid():
         resultado = simular_plano(
@@ -183,6 +262,7 @@ def simulador(request):
                 rows=rows,
                 subtitle=resultado.justificativa,
             )
+        resultado_plano = plano_comercial_data(resultado.plano)
 
     actions = [
         {
@@ -201,6 +281,7 @@ def simulador(request):
             "actions": actions,
             "form": form,
             "resultado": resultado,
+            "resultado_plano": resultado_plano,
             "cancel_url": reverse("billing:index"),
         },
     )

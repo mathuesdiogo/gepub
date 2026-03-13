@@ -1,76 +1,142 @@
 {% extends "core/base.html" %}
 {% load static %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/pages/billing.css' %}">
-{% endblock %}
-
 {% block content %}
-<div class="card"><div class="card__body">
+<div class="card billing-page billing-page--simulador"><div class="card__body billing-page__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <form method="post" class="form-shell">
-    {% csrf_token %}
-    <div class="form-shell__fields">{{ form.as_p }}</div>
-    <div class="form-shell__actions">
-      <button type="submit" class="btn btn-primary">Simular</button>
-      <a class="link" href="{{ cancel_url }}">Cancelar</a>
+  <section class="billing-hero-grid">
+    <article class="billing-hero-card">
+      <p class="billing-hero-card__kicker">Planejamento comercial</p>
+      <h2 class="billing-hero-card__title">Simule cenário real da prefeitura</h2>
+      <p class="billing-hero-card__desc">Informe volume operacional e receba recomendação de plano com projeção financeira mensal.</p>
+      <div class="billing-hero-card__pills">
+        <span class="billing-pill">Simulação transparente</span>
+        <span class="billing-pill billing-pill--soft">Comparativo automático</span>
+      </div>
+    </article>
+    <article class="billing-status-card">
+      <div class="billing-status-card__row">
+        <p class="billing-status-card__label">Entrada de dados</p>
+        <p class="billing-status-card__value">Preencha secretarias, usuários, alunos e atendimentos anuais.</p>
+      </div>
+      <div class="billing-status-card__row">
+        <p class="billing-status-card__label">Saída da simulação</p>
+        <p class="billing-status-card__value">Plano recomendado, custo base e custo incremental por item.</p>
+      </div>
+    </article>
+  </section>
+
+  <section class="billing-section">
+    <div class="billing-section__head">
+      <h3>Dados para simulação</h3>
+      <p>Use os parâmetros atuais do município para obter proposta mais aderente.</p>
     </div>
-  </form>
+    <form method="post" class="form-shell">
+      {% csrf_token %}
+      <div class="form-shell__fields">{{ form.as_p }}</div>
+      <div class="form-shell__actions">
+        <button type="submit" class="gp-button gp-button--primary">Simular</button>
+        <a class="gp-anchor-link" href="{{ cancel_url }}">Cancelar</a>
+      </div>
+    </form>
+  </section>
 
   {% if resultado %}
-    <div class="billing-summary-grid">
-      <div class="billing-box">
-        <div class="billing-box__label">Plano recomendado</div>
-        <div class="billing-box__value">{{ resultado.plano.nome }}</div>
-        <div class="billing-box__meta">{{ resultado.justificativa }}</div>
+    <section class="billing-section">
+      <div class="billing-section__head">
+        <h3>Resultado da simulação</h3>
+        <p>Resumo financeiro e recomendação para contratação.</p>
       </div>
-      <div class="billing-box">
-        <div class="billing-box__label">Base mensal</div>
-        <div class="billing-box__value">R$ {{ resultado.preco_base }}</div>
-        <div class="billing-box__meta">Sem adicionais</div>
+      <div class="billing-summary-grid">
+        <div class="billing-box">
+          <div class="billing-box__label">Plano recomendado</div>
+          <div class="billing-box__value">{{ resultado.plano.nome }}</div>
+          <div class="billing-box__meta">{{ resultado.justificativa }}</div>
+        </div>
+        <div class="billing-box">
+          <div class="billing-box__label">Base mensal</div>
+          <div class="billing-box__value">R$ {{ resultado.preco_base }}</div>
+          <div class="billing-box__meta">Sem adicionais</div>
+        </div>
+        <div class="billing-box">
+          <div class="billing-box__label">Total mensal estimado</div>
+          <div class="billing-box__value">R$ {{ resultado.total_mensal }}</div>
+          <div class="billing-box__meta">Adicionais: R$ {{ resultado.total_adicionais }}</div>
+        </div>
       </div>
-      <div class="billing-box">
-        <div class="billing-box__label">Total mensal estimado</div>
-        <div class="billing-box__value">R$ {{ resultado.total_mensal }}</div>
-        <div class="billing-box__meta">Adicionais: R$ {{ resultado.total_adicionais }}</div>
-      </div>
-    </div>
+    </section>
 
-    <div class="table-shell">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Item</th>
-            <th>Quantidade</th>
-            <th>Valor unitário</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for a in resultado.adicionais %}
+    {% if resultado_plano %}
+      <section class="billing-section">
+        <div class="billing-section__head">
+          <h3>Pacote comercial sugerido</h3>
+          <p>Benefícios estratégicos e documentos de referência do plano.</p>
+        </div>
+        <div class="billing-summary-grid">
+          <div class="billing-box">
+            <div class="billing-box__label">Plano comercial</div>
+            <div class="billing-box__value">{{ resultado_plano.nome_comercial }}</div>
+            <div class="billing-box__meta">{{ resultado_plano.descricao_comercial }}</div>
+            <div class="billing-box__meta">
+              <a href="{{ resultado_plano.links.contratacao }}" target="_blank" rel="noopener">Documento de contratação</a> •
+              <a href="{{ resultado_plano.links.servicos }}" target="_blank" rel="noopener">Prestação de serviços</a>
+            </div>
+          </div>
+          <div class="billing-box">
+            <div class="billing-box__label">Acessos e benefícios</div>
+            <div class="billing-box__meta">
+              {% for item in resultado_plano.beneficios %}
+                <div>• {{ item }}</div>
+              {% empty %}
+                <div>Sem benefícios cadastrados.</div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </section>
+    {% endif %}
+
+    <section class="billing-section">
+      <div class="billing-section__head">
+        <h3>Composição de custos</h3>
+        <p>Itens adicionais considerados para o cenário informado.</p>
+      </div>
+      <div class="table-shell billing-table-shell">
+        <table class="table">
+          <thead>
             <tr>
-              <td>{{ a.nome }}</td>
-              <td>{{ a.quantidade }}</td>
-              <td>R$ {{ a.valor_unitario }}</td>
-              <td>R$ {{ a.valor_total }}</td>
+              <th>Item</th>
+              <th>Quantidade</th>
+              <th>Valor unitário</th>
+              <th>Total</th>
             </tr>
-          {% empty %}
-            <tr><td colspan="4">Sem adicionais para este cenário.</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {% for a in resultado.adicionais %}
+              <tr>
+                <td>{{ a.nome }}</td>
+                <td>{{ a.quantidade }}</td>
+                <td>R$ {{ a.valor_unitario }}</td>
+                <td>R$ {{ a.valor_total }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4">Sem adicionais para este cenário.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
 
-    <form method="post" style="margin-top: 12px;">
-      {% csrf_token %}
-      {% for field in form %}
-        <input type="hidden" name="{{ field.name }}" value="{{ field.value|default_if_none:'' }}">
-      {% endfor %}
-      <button type="submit" name="export" value="pdf" class="btn btn--ghost">
-        <i class="fa-solid fa-file-pdf"></i> Exportar proposta em PDF
-      </button>
-    </form>
+      <form method="post" style="margin-top: 12px;">
+        {% csrf_token %}
+        {% for field in form %}
+          <input type="hidden" name="{{ field.name }}" value="{{ field.value|default_if_none:'' }}">
+        {% endfor %}
+        <button type="submit" name="export" value="pdf" class="gp-button gp-button--outline">
+          <i class="fa-solid fa-file-pdf"></i> Exportar proposta em PDF
+        </button>
+      </form>
+    </section>
   {% endif %}
 </div></div>
 {% endblock %}

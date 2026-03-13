@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from apps.core.exports import export_csv, export_pdf_table
+
 from .views_common import *
 from .views_common import _municipios_admin, _q_municipio, _recompute_competencia, _resolve_municipio, _to_dec
 
@@ -27,6 +29,35 @@ def lancamento_list(request):
     competencias = list(
         FolhaCompetencia.objects.filter(municipio=municipio).values_list("competencia", flat=True).order_by("-competencia")
     )
+
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-id"):
+            rows.append(
+                [
+                    item.competencia.competencia,
+                    item.servidor.get_full_name() or item.servidor.username,
+                    item.evento.codigo,
+                    item.evento.nome,
+                    item.evento.get_tipo_evento_display(),
+                    str(item.quantidade),
+                    str(item.valor_calculado),
+                    item.get_status_display(),
+                ]
+            )
+        headers = ["Competencia", "Servidor", "Codigo", "Rubrica", "Tipo", "Qtd", "Valor", "Status"]
+        if export == "csv":
+            return export_csv("folha_lancamentos.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="folha_lancamentos.pdf",
+            title="Lancamentos de folha",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'} | Competencia={comp or '-'} | Status={status or '-'}",
+        )
     return render(
         request,
         "folha/lancamento_list.html",
@@ -47,6 +78,18 @@ def lancamento_list(request):
                     "url": reverse("folha:lancamento_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&competencia={comp}&status={status}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&competencia={comp}&status={status}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
                 },
                 {
                     "label": "Competências",

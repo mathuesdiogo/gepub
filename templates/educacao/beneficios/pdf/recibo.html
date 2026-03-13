@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <title>{{ title }}</title>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 12px; color: #111; }
+    .head { border-bottom: 2px solid #1f4f8f; margin-bottom: 14px; padding-bottom: 8px; }
+    .head h1 { margin: 0 0 4px 0; font-size: 18px; }
+    .meta { color: #555; font-size: 11px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th, td { border: 1px solid #bbb; padding: 6px; text-align: left; }
+    th { background: #f3f6fb; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+    .box { border: 1px solid #ddd; padding: 8px; }
+  </style>
+</head>
+<body>
+  <div class="head">
+    <h1>{{ title }}</h1>
+    <div class="meta">{{ subtitle }} | Emitido em {{ printed_at }} por {{ printed_by }}</div>
+  </div>
+
+  <div class="grid">
+    <div class="box">
+      <strong>Aluno:</strong> {{ entrega.aluno.nome }}<br>
+      <strong>Benefício:</strong> {{ entrega.beneficio.nome }}<br>
+      <strong>Status:</strong> {{ entrega.get_status_display }}<br>
+      <strong>Data:</strong> {{ entrega.data_hora|date:"d/m/Y H:i" }}
+    </div>
+    <div class="box">
+      <strong>Recebedor:</strong> {{ entrega.recebedor_nome|default:"—" }}<br>
+      <strong>Documento:</strong> {{ entrega.recebedor_documento|default:"—" }}<br>
+      <strong>Local:</strong> {{ entrega.local_entrega|default:"—" }}<br>
+      <strong>Campanha:</strong> {{ entrega.campanha.nome|default:"—" }}
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Qtd Planejada</th>
+        <th>Qtd Entregue</th>
+        <th>Unidade</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td>{{ item.item_nome }}</td>
+        <td>{{ item.quantidade_planejada }}</td>
+        <td>{{ item.quantidade_entregue }}</td>
+        <td>{{ item.unidade }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4">Sem itens.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <p>
+    <strong>Hash:</strong> {{ report_hash }}<br>
+    {% if qr_data_uri %}<img src="{{ qr_data_uri }}" alt="QR" style="width:90px;height:90px;">{% endif %}
+  </p>
+</body>
+</html>

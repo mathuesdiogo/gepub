@@ -1,103 +1,162 @@
-<div class="admin-dash">
-  <div class="dash-actions admin-dash__actions">
-    <a class="btn btn-primary" href="{% url 'educacao:turma_list' %}"><i class="fa-solid fa-people-group"></i> Minhas turmas</a>
-    <a class="btn btn-primary" href="{% url 'educacao:meus_diarios' %}"><i class="fa-solid fa-clipboard-check"></i> Diário</a>
-    <a class="btn btn-primary" href="{% url 'educacao:portal_professor' %}"><i class="fa-solid fa-chalkboard-user"></i> Portal Professor</a>
-  </div>
+{% with codigo=professor_code|default:request.user.username %}
+  <section class="gp-student-dashboard" aria-label="Painel do professor">
+    <div class="gp-student-dashboard__grid">
+      <details class="gp-student-widget gp-student-widget--summary gp-professor-widget--full" open>
+        <summary class="gp-student-widget__head">
+          <div>
+            <h3 class="gp-student-widget__title">Resumo da rotina</h3>
+            <span class="gp-student-widget__meta">Diários, turmas e acompanhamento</span>
+          </div>
+          <span class="gp-student-widget__toggle" aria-hidden="true"></span>
+        </summary>
+        <div class="gp-student-widget__body">
+          <div class="gp-professor-metrics">
+            <a class="gp-professor-metric gp-professor-metric--link" href="{% url 'educacao:meus_diarios' %}">
+              <span>Meus diários</span>
+              <strong>{{ diarios_total|default:0 }}</strong>
+            </a>
+            <a class="gp-professor-metric gp-professor-metric--link" href="{% url 'educacao:turma_list' %}">
+              <span>Turmas</span>
+              <strong>{{ turmas_total|default:0 }}</strong>
+            </a>
+            <a class="gp-professor-metric gp-professor-metric--link" href="{% url 'educacao:aluno_list' %}">
+              <span>Alunos</span>
+              <strong>{{ alunos_total|default:0 }}</strong>
+            </a>
+            <a class="gp-professor-metric gp-professor-metric--link" href="{% url 'educacao:professor_aulas' codigo %}">
+              <span>Aulas lançadas</span>
+              <strong>{{ aulas_total|default:0 }}</strong>
+            </a>
+            <a class="gp-professor-metric gp-professor-metric--link" href="{% url 'educacao:professor_justificativas' codigo %}">
+              <span>Justificativas pendentes</span>
+              <strong>{{ pendencias_total|default:0 }}</strong>
+            </a>
+          </div>
+        </div>
+      </details>
 
-  <div class="dash-kpi-grid">
-    <div class="admin-kpi admin-kpi--blue">
-      <div class="admin-kpi__icon"><i class="fa-solid fa-people-group"></i></div>
-      <div class="admin-kpi__content">
-        <div class="admin-kpi__label">Minhas turmas</div>
-        <div class="admin-kpi__value">{{ turmas_total|default:0 }}</div>
-        <div class="admin-kpi__meta">Referência do ano {{ ano_atual }}</div>
-      </div>
-    </div>
+      <details class="gp-student-widget gp-student-widget--ensino" open>
+        <summary class="gp-student-widget__head">
+          <div>
+            <h3 class="gp-student-widget__title">Acesso rápido</h3>
+            <span class="gp-student-widget__meta">Fluxo diário do professor</span>
+          </div>
+          <span class="gp-student-widget__toggle" aria-hidden="true"></span>
+        </summary>
+        <div class="gp-student-widget__body">
+          <div class="gp-student-actions gp-student-actions--stacked">
+            <a class="gp-student-pill" href="{% url 'educacao:index' %}">
+              <i class="fa-solid fa-house"></i><span>Painel Educação</span>
+            </a>
+            <a class="gp-student-pill" href="{% url 'educacao:meus_diarios' %}">
+              <i class="fa-solid fa-book"></i><span>Meus diários</span>
+            </a>
+            <a class="gp-student-pill" href="{% url 'educacao:turma_list' %}">
+              <i class="fa-solid fa-people-group"></i><span>Minhas turmas</span>
+            </a>
+            <a class="gp-student-pill" href="{% url 'educacao:aluno_list' %}">
+              <i class="fa-solid fa-user-graduate"></i><span>Meus alunos</span>
+            </a>
+            <a class="gp-student-pill" href="{% url 'educacao:professor_frequencias' codigo %}">
+              <i class="fa-solid fa-user-check"></i><span>Lançar frequência</span>
+            </a>
+            <a class="gp-student-pill" href="{% url 'educacao:professor_notas' codigo %}">
+              <i class="fa-solid fa-clipboard-check"></i><span>Lançar notas</span>
+            </a>
+          </div>
+        </div>
+      </details>
 
-    <div class="admin-kpi admin-kpi--amber">
-      <div class="admin-kpi__icon"><i class="fa-solid fa-user-graduate"></i></div>
-      <div class="admin-kpi__content">
-        <div class="admin-kpi__label">Meus alunos</div>
-        <div class="admin-kpi__value">{{ alunos_total|default:0 }}</div>
-        <div class="admin-kpi__meta">Vínculos em turmas atribuídas</div>
-      </div>
-    </div>
-  </div>
+      <details class="gp-student-widget gp-professor-widget--full" id="bloco-calendario-professor" open>
+        <summary class="gp-student-widget__head">
+          <div>
+            <h3 class="gp-student-widget__title">Calendário escolar</h3>
+            <span class="gp-student-widget__meta">Mês atual e próximos eventos</span>
+          </div>
+          <span class="gp-student-widget__toggle" aria-hidden="true"></span>
+        </summary>
+        <div class="gp-student-widget__body">
+          <section class="gp-student-calendar" aria-label="Calendário escolar do mês">
+            <h4 class="gp-student-calendar__month">{{ student_calendario.mes_label }}</h4>
+            <table class="gp-student-calendar__table">
+              <thead>
+                <tr>
+                  {% for label in student_calendario.semana_labels %}
+                    <th>{{ label }}</th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for week in student_calendario.weeks %}
+                  <tr>
+                    {% for cell in week %}
+                      <td class="{% if not cell.day %}is-empty{% endif %}{% if cell.is_today %} is-today{% endif %}{% if cell.has_event %} has-event{% endif %}{% if cell.event_type %} evento-{{ cell.event_type }}{% endif %}">
+                        {% if cell.day %}{{ cell.day }}{% endif %}
+                      </td>
+                    {% endfor %}
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </section>
 
-  <section class="admin-panel">
-    <div class="admin-panel__head">
-      <div>
-        <h3 class="admin-panel__title">Turmas do ano ({{ ano_atual }})</h3>
-        <p class="admin-panel__sub">Acesso rápido às turmas vinculadas ao seu perfil</p>
-      </div>
-    </div>
-
-    {% if turmas %}
-      <div class="admin-table-wrap">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Turma</th>
-              <th>Unidade</th>
-              <th>Ação</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for t in turmas %}
-              <tr>
-                <td>{{ t.nome }}</td>
-                <td>{{ t.unidade.nome }}</td>
-                <td><a class="btn btn--ghost" href="{% url 'educacao:turma_detail' t.pk %}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir</a></td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      {% include "core/partials/components/feedback/empty_state.html" with title="Sem turmas" text="Nenhuma turma encontrada para este ano." %}
-    {% endif %}
-  </section>
-
-  <section class="admin-panel">
-    <div class="admin-panel__head">
-      <div>
-        <h3 class="admin-panel__title">Calendário educacional</h3>
-        <p class="admin-panel__sub">Eventos e marcos letivos visíveis para seu escopo</p>
-      </div>
-      {% if perms.educacao.view %}
-        <a class="btn btn--ghost" href="{% url 'educacao:calendario_index' %}"><i class="fa-solid fa-calendar-week"></i> Ver calendário</a>
-      {% endif %}
-    </div>
-
-    {% if eventos_calendario %}
-      <div class="admin-table-wrap">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Evento</th>
-              <th>Tipo</th>
-            </tr>
-          </thead>
-          <tbody>
+          <ul class="gp-student-events-list">
             {% for ev in eventos_calendario %}
-              <tr>
-                <td>
-                  {{ ev.data_inicio|date:"d/m/Y" }}
-                  {% if ev.data_fim and ev.data_fim != ev.data_inicio %}
-                    até {{ ev.data_fim|date:"d/m/Y" }}
-                  {% endif %}
-                </td>
-                <td>{{ ev.titulo }}</td>
-                <td>{{ ev.get_tipo_display }}</td>
-              </tr>
+              <li class="gp-student-events-list__item gp-evento--{{ ev.tipo|lower }}">
+                <span class="gp-student-events-list__line">
+                  <span class="gp-student-events-list__title">{{ ev.titulo }}</span>
+                  <span class="gp-student-events-list__meta">{{ ev.get_tipo_display }} • {{ ev.data_inicio|date:"d/m/Y" }}
+                    {% if ev.data_fim and ev.data_fim != ev.data_inicio %}
+                      até {{ ev.data_fim|date:"d/m/Y" }}
+                    {% endif %}
+                  </span>
+                </span>
+              </li>
+            {% empty %}
+              <li class="gp-student-events-list__item is-empty">Nenhum evento escolar disponível para o seu escopo.</li>
             {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      {% include "core/partials/components/feedback/empty_state.html" with title="Sem eventos" text="Não há eventos de calendário visíveis para você." %}
-    {% endif %}
+          </ul>
+
+          <a class="gp-student-pill gp-student-pill--compact gp-student-calendar__cta" href="{% url 'educacao:calendario_index' %}">
+            <i class="fa-solid fa-link"></i><span>Calendário Completo</span>
+          </a>
+        </div>
+      </details>
+
+      <details class="gp-student-widget" open>
+        <summary class="gp-student-widget__head">
+          <div>
+            <h3 class="gp-student-widget__title">Meus diários</h3>
+            <span class="gp-student-widget__meta">Turmas atribuídas no ano {{ ano_atual }}</span>
+          </div>
+          <span class="gp-student-widget__toggle" aria-hidden="true"></span>
+        </summary>
+        <div class="gp-student-widget__body">
+          {% if diarios_preview %}
+            <div class="gp-student-list">
+              {% for d in diarios_preview %}
+                <article class="gp-student-list__item">
+                  <strong>{{ d.turma.nome }} • {{ d.ano_letivo }}</strong>
+                  <p>{{ d.turma.unidade.nome|default:"Unidade não informada" }}</p>
+                  <div class="gp-professor-inline-actions">
+                    <a class="gp-student-pill gp-student-pill--compact" href="{% url 'educacao:diario_detail' d.id %}">
+                      <i class="fa-solid fa-book-open"></i><span>Abrir diário</span>
+                    </a>
+                    <a class="gp-student-pill gp-student-pill--compact" href="{% url 'educacao:aula_create' d.id %}">
+                      <i class="fa-solid fa-plus"></i><span>Nova aula</span>
+                    </a>
+                  </div>
+                </article>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="gp-student-empty">Nenhum diário ativo encontrado para o seu perfil.</div>
+          {% endif %}
+          <a class="gp-student-pill gp-student-pill--compact" href="{% url 'educacao:meus_diarios' %}">
+            <i class="fa-solid fa-arrow-right"></i><span>Ver todos os diários</span>
+          </a>
+        </div>
+      </details>
+    </div>
   </section>
-</div>
+{% endwith %}

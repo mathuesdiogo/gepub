@@ -1,24 +1,24 @@
 {% extends "core/base.html" %}
 
 {% block content %}
-<div class="card"><div class="card__body">
+<div class="gp-card"><div class="gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+  <form method="get" class="gp-table__filters">
     {% if municipios and municipios|length %}
-      <select name="municipio" class="input" style="max-width:240px;">
+      <select name="municipio" class="gp-input">
         {% for m in municipios %}
           <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
         {% endfor %}
       </select>
     {% endif %}
 
-    <input name="q" value="{{ q }}" class="input" placeholder="Processo, objeto, vencedor" style="max-width:320px;">
-    <button class="btn btn--sm" type="submit">Filtrar</button>
+    <input name="q" value="{{ q }}" class="gp-input" placeholder="Processo, objeto, vencedor">
+    <button class="gp-button gp-button--sm" type="submit">Filtrar</button>
   </form>
 
-  <div class="table-shell"><div class="table-shell__body">
-    <table class="table">
+  <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__body">
+    <table class="gp-table__native">
       <thead><tr><th>Processo</th><th>Modalidade</th><th>Objeto</th><th>Status</th><th>Abertura</th><th>Vencedor</th></tr></thead>
       <tbody>
         {% for item in items %}

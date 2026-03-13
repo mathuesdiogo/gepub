@@ -1,0 +1,76 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Agenda do Professor • Informática • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+  <div class="gp-card u-mb-12">
+    <div class="gp-card__body">
+      {% include "core/partials/components/layout/page_head.html" with title="Agenda do Professor" subtitle="Aulas do dia e próximas aulas geradas pela grade" actions=actions %}
+      <p><strong>Hoje:</strong> {{ hoje|date:"d/m/Y" }}</p>
+    </div>
+  </div>
+
+  <div class="gp-card u-mb-12">
+    <div class="gp-card__body">
+      <h3>Aulas de hoje</h3>
+      <table class="table gp-table--striped gp-table--hover">
+        <thead><tr><th>Turma</th><th>Horário</th><th>Status</th><th>Ações</th></tr></thead>
+        <tbody>
+          {% for aula in aulas_hoje %}
+            <tr>
+              <td>{{ aula.turma.codigo }}</td>
+              <td>{% if aula.encontro %}{{ aula.encontro.hora_inicio|time:"H:i" }}-{{ aula.encontro.hora_fim|time:"H:i" }}{% else %}—{% endif %}</td>
+              <td>{{ aula.get_status_display }}</td>
+              <td>
+                <a class="gp-button gp-button--outline" href="{% url 'educacao:informatica_frequencia_aula' aula.pk %}">Abrir chamada</a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4">Sem aulas previstas para hoje.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="gp-card u-mb-12">
+    <div class="gp-card__body">
+      <h3>Próximas aulas</h3>
+      <table class="table gp-table--striped gp-table--hover">
+        <thead><tr><th>Data</th><th>Turma</th><th>Horário</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for aula in proximas_aulas %}
+            <tr>
+              <td>{{ aula.data_aula|date:"d/m/Y" }}</td>
+              <td>{{ aula.turma.codigo }}</td>
+              <td>{% if aula.encontro %}{{ aula.encontro.hora_inicio|time:"H:i" }}-{{ aula.encontro.hora_fim|time:"H:i" }}{% else %}—{% endif %}</td>
+              <td>{{ aula.get_status_display }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4">Sem próximas aulas.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="gp-card">
+    <div class="gp-card__body">
+      <h3>Histórico recente</h3>
+      <table class="table gp-table--striped gp-table--hover">
+        <thead><tr><th>Data</th><th>Turma</th><th>Status</th><th>Ações</th></tr></thead>
+        <tbody>
+          {% for aula in historico_aulas %}
+            <tr>
+              <td>{{ aula.data_aula|date:"d/m/Y" }}</td>
+              <td>{{ aula.turma.codigo }}</td>
+              <td>{{ aula.get_status_display }}</td>
+              <td><a class="gp-button gp-button--ghost" href="{% url 'educacao:informatica_aula_update' aula.pk %}">Detalhar</a></td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4">Sem histórico.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

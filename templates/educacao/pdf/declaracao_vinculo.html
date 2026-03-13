@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <title>{{ title }}</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 14mm 14mm 16mm 14mm;
+      @bottom-left { content: "GEPUB — Gestão Estratégica Pública"; font-size: 9px; color: #334155; }
+      @bottom-right { content: "Página " counter(page) " de " counter(pages); font-size: 9px; color: #334155; }
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; font-family: "DejaVu Sans", Arial, sans-serif; color: #0f172a; }
+
+    .document {
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+
+    .top {
+      display: grid;
+      grid-template-columns: 74px 1fr 74px;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+      border-bottom: 1px solid #cbd5e1;
+    }
+
+    .logo-box {
+      width: 74px;
+      height: 74px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      font-size: 9px;
+      text-align: center;
+      color: #64748b;
+      font-weight: 700;
+      padding: 4px;
+    }
+
+    .logo-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .header-main {
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .header-main .line {
+      margin: 0;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: #1e3a8a;
+      font-weight: 700;
+    }
+
+    .header-main .line strong { color: #0f172a; }
+
+    .title {
+      margin: 8px 0 0 0;
+      font-size: 20px;
+      font-weight: 800;
+      color: #0b2545;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+    }
+
+    .subtitle {
+      margin: 4px 0 0 0;
+      font-size: 11px;
+      color: #475569;
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 12px 16px;
+      border-bottom: 1px solid #e2e8f0;
+      background: #f8fafc;
+      font-size: 10.5px;
+    }
+
+    .meta .chip {
+      border: 1px solid #dbe3ee;
+      border-radius: 8px;
+      padding: 6px 9px;
+      background: #ffffff;
+      color: #1e293b;
+    }
+
+    .content {
+      padding: 18px 20px 16px 20px;
+      font-size: 12.6px;
+      line-height: 1.75;
+      text-align: justify;
+      color: #0f172a;
+    }
+
+    .content p {
+      margin: 0 0 12px 0;
+    }
+
+    .field-grid {
+      margin: 10px 0 6px 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .field {
+      border: 1px solid #dbe3ee;
+      border-radius: 8px;
+      background: #f8fafc;
+      padding: 8px 10px;
+      min-height: 52px;
+    }
+
+    .field .k {
+      display: block;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: #475569;
+      margin-bottom: 3px;
+      font-weight: 700;
+    }
+
+    .field .v {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    .signature {
+      margin-top: 26px;
+      text-align: center;
+      color: #0f172a;
+    }
+
+    .signature .line {
+      margin: 0 auto 8px auto;
+      width: 62%;
+      border-top: 1px solid #334155;
+    }
+
+    .signature .name {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .signature .role {
+      margin: 2px 0 0 0;
+      font-size: 11px;
+      color: #475569;
+    }
+
+    .footer-extra {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      border-top: 1px dashed #cbd5e1;
+      margin: 4px 16px 14px 16px;
+      padding-top: 8px;
+      font-size: 9px;
+      color: #475569;
+    }
+
+    .hash code {
+      border: 1px solid #dbe3ee;
+      border-radius: 6px;
+      padding: 1px 5px;
+      background: #f8fafc;
+      color: #0f172a;
+    }
+
+    .qr {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .qr img {
+      width: 46px;
+      height: 46px;
+      border: 1px solid #dbe3ee;
+      border-radius: 8px;
+      padding: 4px;
+      background: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <article class="document">
+    <header class="top">
+      <div class="logo-box">
+        {% if brasao_url %}
+          <img src="{{ brasao_url }}" alt="Brasão Municipal" />
+        {% elif logo_municipio_url %}
+          <img src="{{ logo_municipio_url }}" alt="Logo Prefeitura" />
+        {% else %}
+          BRASÃO<br>DO<br>MUNICÍPIO
+        {% endif %}
+      </div>
+
+      <div class="header-main">
+        <p class="line">Prefeitura Municipal de <strong>{{ municipio.nome|default:"________________" }}</strong></p>
+        <p class="line">Secretaria Municipal de Educação</p>
+        <p class="line">{{ unidade.nome|default:"Unidade Escolar" }}</p>
+        <h1 class="title">Declaração de Vínculo Escolar</h1>
+        <p class="subtitle">Declaração emitida pelo sistema GEPUB para fins escolares e administrativos.</p>
+      </div>
+
+      <div class="logo-box">
+        {% if logo_url %}
+          <img src="{{ logo_url }}" alt="Logo GEPUB" />
+        {% else %}
+          GEPUB
+        {% endif %}
+      </div>
+    </header>
+
+    <section class="meta">
+      <div class="chip"><strong>Data de emissão:</strong> {{ data_emissao|date:"d/m/Y" }}</div>
+      <div class="chip"><strong>Município/UF:</strong> {{ municipio.nome|default:"—" }}{% if municipio.uf %}/{{ municipio.uf }}{% endif %}</div>
+      <div class="chip"><strong>Unidade:</strong> {{ unidade.nome|default:"—" }}</div>
+      <div class="chip"><strong>Turma:</strong> {{ turma.nome|default:"—" }}{% if turma.ano_letivo %} • {{ turma.ano_letivo }}{% endif %}</div>
+    </section>
+
+    <section class="content">
+      <p>
+        Declaramos, para os devidos fins, que o(a) aluno(a) <strong>{{ aluno.nome }}</strong>,
+        filho(a) de <strong>{{ responsaveis }}</strong>,
+        nascido(a) em <strong>{% if aluno.data_nascimento %}{{ aluno.data_nascimento|date:"d/m/Y" }}{% else %}não informado{% endif %}</strong>,
+        CPF <strong>{{ aluno.cpf|default:"não informado" }}</strong>,
+        está <strong>{{ situacao_texto }}</strong> nesta unidade de ensino.
+      </p>
+
+      <p>
+        O vínculo escolar refere-se à turma <strong>{{ turma.nome|default:"não informada" }}</strong>,
+        turno <strong>{% if turma %}{{ turma.get_turno_display }}{% else %}não informado{% endif %}</strong>,
+        ano letivo <strong>{{ turma.ano_letivo|default:"não informado" }}</strong>,
+        com data de matrícula em
+        <strong>{% if matricula.data_matricula %}{{ matricula.data_matricula|date:"d/m/Y" }}{% else %}não informada{% endif %}</strong>.
+      </p>
+
+      <p>
+        Emitimos a presente declaração em {{ municipio.nome|default:"________________" }}, aos {{ data_emissao_extenso }},
+        para apresentação junto aos órgãos públicos e/ou instituições que a solicitarem.
+      </p>
+
+      <div class="field-grid">
+        <div class="field">
+          <span class="k">Aluno(a)</span>
+          <span class="v">{{ aluno.nome }}</span>
+        </div>
+        <div class="field">
+          <span class="k">Situação da Matrícula</span>
+          <span class="v">{% if matricula.situacao %}{{ matricula.get_situacao_display }}{% else %}Não informada{% endif %}</span>
+        </div>
+        <div class="field">
+          <span class="k">NIS</span>
+          <span class="v">{{ aluno.nis|default:"Não informado" }}</span>
+        </div>
+        <div class="field">
+          <span class="k">Secretaria</span>
+          <span class="v">{{ secretaria.nome|default:"Secretaria Municipal de Educação" }}</span>
+        </div>
+      </div>
+
+      <div class="signature">
+        <div class="line"></div>
+        <p class="name">{{ gestor_nome }}</p>
+        <p class="role">{{ gestor_cargo }} • {{ unidade.nome|default:"Unidade Escolar" }}</p>
+      </div>
+    </section>
+
+    <footer class="footer-extra">
+      <div class="hash">
+        <strong>Identificação do documento:</strong>
+        <code>{{ report_hash }}</code>
+      </div>
+      <div class="qr">
+        {% if qr_data_uri %}
+          <img src="{{ qr_data_uri }}" alt="QR Code da declaração" />
+          <span>Validação interna GEPUB</span>
+        {% else %}
+          <span>QR indisponível</span>
+        {% endif %}
+      </div>
+    </footer>
+  </article>
+</body>
+</html>

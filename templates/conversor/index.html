@@ -1,89 +1,365 @@
 {% extends "core/base.html" %}
+{% load static %}
+{% block title %}Conversor • GEPUB{% endblock %}
+{% block header %}Conversor{% endblock %}
 
 {% block content %}
-<div class="card"><div class="card__body">
+<div class="cv-shell">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <div class="card" style="margin-top:12px;"><div class="card__body">
-    <h3 style="margin-top:0;">Nova conversão</h3>
-    <form method="post" enctype="multipart/form-data" class="form-grid" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;">
-      {% csrf_token %}
-      {% for field in form %}
-        <div style="grid-column: span 1;">
-          <label class="small" for="{{ field.id_for_label }}">{{ field.label }}</label>
-          {{ field }}
-          {% if field.help_text %}<small class="muted" style="display:block;">{{ field.help_text }}</small>{% endif %}
-          {% for err in field.errors %}<div class="small" style="color:#c0392b;">{{ err }}</div>{% endfor %}
-        </div>
+  <section class="tool-hero cv-hero">
+    <article>
+      <p class="tool-hero__kicker">Ferramenta operacional</p>
+      <h2>Conversão, padronização e distribuição de arquivos</h2>
+      <p>Pipeline único para PDF, Word, Excel e imagens com fila assíncrona e monitoramento de execução.</p>
+    </article>
+    <div class="tool-hero__chips">
+      <span class="tool-chip"><i class="fa-solid fa-file-pdf"></i> Saída A4</span>
+      <span class="tool-chip"><i class="fa-solid fa-clock-rotate-left"></i> Histórico auditável</span>
+      <span class="tool-chip"><i class="fa-solid fa-gears"></i> Processamento automático</span>
+      <span class="tool-chip"><i class="fa-solid fa-download"></i> Download seguro</span>
+    </div>
+  </section>
+
+  <section class="cv-kpi-grid">
+    <article class="cv-kpi cv-kpi--neutral">
+      <span class="cv-kpi__label">Total de jobs</span>
+      <strong class="cv-kpi__value">{{ counts.total }}</strong>
+    </article>
+    <article class="cv-kpi cv-kpi--pending">
+      <span class="cv-kpi__label">Pendentes</span>
+      <strong class="cv-kpi__value">{{ counts.pendente }}</strong>
+    </article>
+    <article class="cv-kpi cv-kpi--progress">
+      <span class="cv-kpi__label">Processando</span>
+      <strong class="cv-kpi__value">{{ counts.processando }}</strong>
+    </article>
+    <article class="cv-kpi cv-kpi--ok">
+      <span class="cv-kpi__label">Concluídos</span>
+      <strong class="cv-kpi__value">{{ counts.concluido }}</strong>
+    </article>
+    <article class="cv-kpi cv-kpi--error">
+      <span class="cv-kpi__label">Com erro</span>
+      <strong class="cv-kpi__value">{{ counts.erro }}</strong>
+    </article>
+  </section>
+
+  <section class="cv-tools">
+    <div class="cv-tools__head">
+      <h3>Funções do Conversor</h3>
+      <p>Selecione uma função para preencher automaticamente o tipo de conversão.</p>
+    </div>
+    <div class="cv-tools__grid">
+      {% for tool in tool_cards %}
+        <button type="button" class="cv-tool-card cv-tool-card--{{ tool.tone }}" data-set-tipo="{{ tool.tipo }}">
+          <span class="cv-tool-card__icon"><i class="{{ tool.icon }}"></i></span>
+          <span class="cv-tool-card__title">{{ tool.titulo }}</span>
+          <span class="cv-tool-card__desc">{{ tool.descricao }}</span>
+          <span class="cv-tool-card__ext">{{ tool.ext }}</span>
+        </button>
       {% endfor %}
-      <div style="grid-column:1 / -1;">
-        <button class="btn btn-primary" type="submit"><i class="fa-solid fa-gear"></i> Processar conversão</button>
+    </div>
+  </section>
+
+  <section class="cv-workbench">
+    <article class="cv-panel cv-panel--form">
+      <div class="cv-panel__head">
+        <h3>Nova conversão</h3>
+        <p>Ferramenta única do conversor, sem vínculo com secretaria, unidade ou setor.</p>
+        <p class="cv-panel__a4">Padrão de saída adotado: formato A4.</p>
       </div>
-    </form>
-  </div></div>
 
-  <form method="get" class="filter-bar" style="margin:12px 0;">
-    {% if municipios and municipios|length %}
-      <select name="municipio" class="input" style="max-width:240px;">
-        {% for m in municipios %}
-          <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
-        {% endfor %}
-      </select>
-    {% endif %}
+      <form method="post" enctype="multipart/form-data" class="cv-form">
+        {% csrf_token %}
 
-    <select name="tipo" class="input" style="max-width:220px;">
-      <option value="">Todos os tipos</option>
-      {% for key,label in tipo_choices %}
-        <option value="{{ key }}" {% if tipo == key %}selected{% endif %}>{{ label }}</option>
-      {% endfor %}
-    </select>
+        <label class="cv-field" for="{{ form.tipo.id_for_label }}">
+          <span>Tipo de conversão</span>
+          {{ form.tipo }}
+          {% for err in form.tipo.errors %}<small class="cv-field__error">{{ err }}</small>{% endfor %}
+        </label>
 
-    <select name="status" class="input" style="max-width:220px;">
-      <option value="">Todos os status</option>
-      {% for key,label in status_choices %}
-        <option value="{{ key }}" {% if status == key %}selected{% endif %}>{{ label }}</option>
-      {% endfor %}
-    </select>
+        <label class="cv-field" for="{{ form.input_file.id_for_label }}">
+          <span>Arquivo principal</span>
+          {{ form.input_file }}
+          <small class="cv-field__hint">Aceita PDF, Word, Excel e imagens, conforme o tipo selecionado.</small>
+          {% for err in form.input_file.errors %}<small class="cv-field__error">{{ err }}</small>{% endfor %}
+        </label>
 
-    <input name="q" value="{{ q }}" class="input" placeholder="Buscar por log">
-    <button class="btn btn--sm" type="submit">Filtrar</button>
-  </form>
+        <label class="cv-field" data-field-extra for="{{ form.arquivos_adicionais.id_for_label }}">
+          <span>Arquivos adicionais (opcional)</span>
+          {{ form.arquivos_adicionais }}
+          <small class="cv-field__hint">Use para unir PDFs ou montar PDF com múltiplas imagens.</small>
+          {% for err in form.arquivos_adicionais.errors %}<small class="cv-field__error">{{ err }}</small>{% endfor %}
+        </label>
 
-  <div class="table-shell"><div class="table-shell__body">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Tipo</th>
-          <th>Status</th>
-          <th>Entrada</th>
-          <th>Duração</th>
-          <th>Criado em</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in items %}
+        <label class="cv-field" data-field-pages for="{{ form.pages.id_for_label }}">
+          <span>Páginas para split (opcional)</span>
+          {{ form.pages }}
+          <small class="cv-field__hint">Formato: 1-3,7,10.</small>
+          {% for err in form.pages.errors %}<small class="cv-field__error">{{ err }}</small>{% endfor %}
+        </label>
+
+        {% if form.non_field_errors %}
+          <div class="cv-form__error-box">
+            {% for err in form.non_field_errors %}<p>{{ err }}</p>{% endfor %}
+          </div>
+        {% endif %}
+
+        <div class="cv-form__actions">
+          <button class="gp-button gp-button--primary" type="submit">
+            <i class="fa-solid fa-arrows-rotate"></i>
+            Processar conversão
+          </button>
+        </div>
+      </form>
+
+      {% if latest_job %}
+        <div
+          class="cv-latest-job"
+          data-job-monitor
+          data-status="{{ latest_job.status }}"
+          data-has-output="{% if latest_job.output_file %}1{% else %}0{% endif %}"
+          data-status-url="{% url 'conversor:job_status' latest_job.id %}"
+        >
+          <div class="cv-latest-job__head">
+            <strong>Última conversão: Job #{{ latest_job.id }}</strong>
+            <span class="cv-status cv-status--{{ latest_job.status|lower }}" data-job-status>{{ latest_job.get_status_display }}</span>
+          </div>
+          <p class="cv-latest-job__log" data-job-log>
+            {% if latest_job.logs %}{{ latest_job.logs|truncatechars:120 }}{% else %}Aguardando processamento...{% endif %}
+          </p>
+          <a
+            class="gp-button gp-button--primary gp-button--sm"
+            data-job-download
+            href="{% if latest_job.output_file %}{{ latest_job_download_url }}{% endif %}"
+            {% if not latest_job.output_file %}hidden{% endif %}
+          >
+            <i class="fa-solid fa-download"></i>
+            Baixar arquivo convertido
+          </a>
+          <small class="small" data-job-eta></small>
+        </div>
+      {% endif %}
+    </article>
+
+    <article class="cv-panel cv-panel--folders">
+      <div class="cv-panel__head">
+        <h3>Pastas rápidas</h3>
+        <p>Acesso rápido ao histórico por categoria de arquivo.</p>
+      </div>
+      <div class="cv-folder-grid">
+        <div class="cv-folder-card cv-folder-card--pdf">
+          <i class="fa-solid fa-folder"></i>
+          <div>
+            <strong>PDFs</strong>
+            <small>Merge, split, extração e download</small>
+          </div>
+        </div>
+        <div class="cv-folder-card cv-folder-card--word">
+          <i class="fa-solid fa-folder"></i>
+          <div>
+            <strong>Word</strong>
+            <small>DOC/DOCX para PDF</small>
+          </div>
+        </div>
+        <div class="cv-folder-card cv-folder-card--excel">
+          <i class="fa-solid fa-folder"></i>
+          <div>
+            <strong>Excel</strong>
+            <small>XLS/XLSX para PDF</small>
+          </div>
+        </div>
+        <div class="cv-folder-card cv-folder-card--image">
+          <i class="fa-solid fa-folder"></i>
+          <div>
+            <strong>Imagens</strong>
+            <small>Imagem para PDF e PDF para imagens</small>
+          </div>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="cv-panel cv-panel--table">
+    <div class="cv-panel__head cv-panel__head--inline">
+      <div>
+        <h3>Histórico de conversões</h3>
+        <p>Lista dos últimos processamentos com download direto.</p>
+      </div>
+
+      <form method="get" class="cv-filters">
+        <select name="tipo" class="cv-file-input">
+          <option value="">Todos os tipos</option>
+          {% for key,label in tipo_choices %}
+            <option value="{{ key }}" {% if tipo == key %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+
+        <select name="status" class="cv-file-input">
+          <option value="">Todos os status</option>
+          {% for key,label in status_choices %}
+            <option value="{{ key }}" {% if status == key %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+
+        <input name="q" value="{{ q }}" class="cv-file-input" placeholder="Buscar por log">
+        <button class="gp-button gp-button--outline gp-button--sm" type="submit">Filtrar</button>
+      </form>
+    </div>
+
+    <div class="table-shell"><div class="table-shell__body">
+      <table class="table cv-table">
+        <thead>
           <tr>
-            <td>#{{ item.id }}</td>
-            <td>{{ item.get_tipo_display }}</td>
-            <td>{{ item.get_status_display }}</td>
-            <td>{{ item.tamanho_entrada }} bytes</td>
-            <td>{{ item.duracao_ms }} ms</td>
-            <td>{{ item.criado_em|date:"d/m/Y H:i" }}</td>
-            <td>
-              {% if item.output_file %}
-                <a class="link" href="{% url 'conversor:download' item.id %}">download</a>
-              {% else %}
-                -
-              {% endif %}
-            </td>
+            <th>Arquivo</th>
+            <th>Tipo</th>
+            <th>Status</th>
+            <th>Tamanho</th>
+            <th>Duração</th>
+            <th>Criado em</th>
+            <th>Ação</th>
           </tr>
-        {% empty %}
-          <tr><td colspan="7">Nenhum job encontrado.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div></div>
-</div></div>
+        </thead>
+        <tbody>
+          {% for item in items %}
+            <tr>
+              <td>
+                <div class="cv-file-cell">
+                  {% if item.tipo == "DOCX_TO_PDF" %}
+                    <i class="fa-solid fa-file-word cv-file-icon cv-file-icon--word"></i>
+                  {% elif item.tipo == "XLSX_TO_PDF" %}
+                    <i class="fa-solid fa-file-excel cv-file-icon cv-file-icon--excel"></i>
+                  {% elif item.tipo == "IMG_TO_PDF" or item.tipo == "PDF_TO_IMAGES" %}
+                    <i class="fa-solid fa-file-image cv-file-icon cv-file-icon--image"></i>
+                  {% elif item.tipo == "PDF_TO_TEXT" %}
+                    <i class="fa-solid fa-file-lines cv-file-icon cv-file-icon--txt"></i>
+                  {% else %}
+                    <i class="fa-solid fa-file-pdf cv-file-icon cv-file-icon--pdf"></i>
+                  {% endif %}
+                  <div>
+                    <strong>Job #{{ item.id }}</strong>
+                    <small>{{ item.logs|default:"Sem observações"|truncatechars:55 }}</small>
+                  </div>
+                </div>
+              </td>
+              <td>{{ item.get_tipo_display }}</td>
+              <td>
+                <span class="cv-status cv-status--{{ item.status|lower }}">{{ item.get_status_display }}</span>
+              </td>
+              <td>{{ item.tamanho_entrada }} bytes</td>
+              <td>{{ item.duracao_ms }} ms</td>
+              <td>{{ item.criado_em|date:"d/m/Y H:i" }}</td>
+              <td>
+                {% if item.output_file %}
+                  <a class="gp-button gp-button--outline gp-button--sm" href="{{ item.download_url }}">
+                    <i class="fa-solid fa-download"></i>
+                    Download
+                  </a>
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="7">Nenhum job encontrado.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const tipoSelect = document.getElementById("id_tipo");
+  const cards = document.querySelectorAll("[data-set-tipo]");
+  const fieldExtra = document.querySelector("[data-field-extra]");
+  const fieldPages = document.querySelector("[data-field-pages]");
+  const monitor = document.querySelector("[data-job-monitor]");
+
+  function syncFields() {
+    if (!tipoSelect) return;
+    const tipo = tipoSelect.value || "";
+    const showExtra = tipo === "PDF_MERGE" || tipo === "IMG_TO_PDF";
+    const showPages = tipo === "PDF_SPLIT";
+    if (fieldExtra) fieldExtra.style.display = showExtra ? "grid" : "none";
+    if (fieldPages) fieldPages.style.display = showPages ? "grid" : "none";
+  }
+
+  cards.forEach(function (card) {
+    card.addEventListener("click", function () {
+      if (!tipoSelect) return;
+      tipoSelect.value = card.getAttribute("data-set-tipo") || "";
+      tipoSelect.dispatchEvent(new Event("change"));
+      tipoSelect.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  });
+
+  if (tipoSelect) {
+    tipoSelect.addEventListener("change", syncFields);
+    syncFields();
+  }
+
+  async function pollJob() {
+    if (!monitor) return;
+    const statusUrl = monitor.getAttribute("data-status-url");
+    if (!statusUrl) return;
+
+    const statusEl = monitor.querySelector("[data-job-status]");
+    const logEl = monitor.querySelector("[data-job-log]");
+    const downloadEl = monitor.querySelector("[data-job-download]");
+    const etaEl = monitor.querySelector("[data-job-eta]");
+
+    const terminal = new Set(["CONCLUIDO", "ERRO"]);
+    let currentStatus = (monitor.getAttribute("data-status") || "").toUpperCase();
+    let hasOutput = monitor.getAttribute("data-has-output") === "1";
+
+    if (hasOutput || terminal.has(currentStatus)) return;
+
+    const timer = setInterval(async function () {
+      try {
+        const response = await fetch(statusUrl, { headers: { "Accept": "application/json" } });
+        if (!response.ok) return;
+        const payload = await response.json();
+        if (!payload || !payload.ok) return;
+
+        currentStatus = (payload.status || "").toUpperCase();
+        hasOutput = Boolean(payload.has_output);
+
+        if (statusEl) {
+          statusEl.textContent = payload.status_label || currentStatus || "Status";
+          statusEl.className = "cv-status cv-status--" + (payload.status || "").toLowerCase();
+        }
+
+        if (logEl && payload.logs) {
+          logEl.textContent = payload.logs;
+        }
+
+        if (etaEl) {
+          if (payload.eta_seconds === null || payload.eta_seconds === undefined) {
+            etaEl.textContent = "";
+          } else {
+            etaEl.textContent = "ETA aproximado: " + payload.eta_seconds + "s";
+          }
+        }
+
+        if (downloadEl && hasOutput && payload.download_url) {
+          downloadEl.hidden = false;
+          downloadEl.setAttribute("href", payload.download_url);
+        }
+
+        if (hasOutput || terminal.has(currentStatus)) {
+          clearInterval(timer);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }, 3500);
+  }
+
+  pollJob();
+})();
+</script>
 {% endblock %}

@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.core.decorators import require_perm
-from apps.core.models import DocumentoEmitido
+from apps.core.services_documentos import registrar_documento_emitido
 from apps.core.rbac import can, scope_filter_unidades
 from apps.org.models import Unidade
 
@@ -182,7 +182,7 @@ def prontuario_hub(request, pk: int):
                 item.save()
 
                 # Integração com documento emitido (receita)
-                documento_emitido = DocumentoEmitido.objects.create(
+                documento_emitido = registrar_documento_emitido(
                     tipo="SAUDE.RECEITA",
                     titulo=f"Receita {atendimento.paciente_nome} v{versao}",
                     gerado_por=request.user,

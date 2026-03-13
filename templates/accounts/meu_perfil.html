@@ -4,7 +4,7 @@
 {% block header %}Meu perfil{% endblock %}
 
 {% block breadcrumbs %}
-<div class="breadcrumbs">
+<div class="breadcrumbs gp-breadcrumb">
   <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
   <span class="breadcrumbs__sep">/</span>
   <span class="breadcrumbs__current">Meu perfil</span>
@@ -12,66 +12,350 @@
 {% endblock %}
 
 {% block content %}
-<div class="card"><div class="card__body">
+<section class="gp-profile-page">
+  {% include "core/partials/components/layout/page_head.html" with title="Meu perfil" subtitle="Minha conta, preferências e histórico de acesso" actions=None %}
 
-{% include "core/partials/components/layout/page_head.html" with title="Meu perfil" subtitle="Gerencie suas informações pessoais" actions=None %}
-
-<div class="profile-grid">
-
-  <div class="profile-photo">
-    {% if p.foto %}
-      <img src="{{ p.foto.url }}" class="profile-photo__img">
-    {% else %}
-      <div class="profile-photo__placeholder">Sem foto</div>
-    {% endif %}
-  </div>
-
-  <form method="post" enctype="multipart/form-data" class="profile-form">
+  <form id="meu-perfil-form" method="post" enctype="multipart/form-data" class="gp-profile-dashboard gp-form">
     {% csrf_token %}
+    <input id="foto-perfil-input" class="profile-photo__input" type="file" name="foto" accept="image/*" aria-label="Selecionar foto de perfil">
 
-    <div class="form-field">
-      <label class="small">Nome</label>
-      <input value="{{ request.user.first_name }}" readonly>
+    <div class="gp-profile-quick-grid">
+      <a class="gp-profile-quick-card" href="{{ quick_actions_url }}">
+        <i class="fa-solid fa-bolt"></i>
+        <strong>Minhas ações</strong>
+        <span>{{ actions_total }} registro(s)</span>
+      </a>
+      {% if meus_dados_url %}
+        <a class="gp-profile-quick-card" href="{{ meus_dados_url }}">
+          <i class="fa-solid fa-id-card"></i>
+          <strong>Meus dados</strong>
+          <span>Acesso acadêmico detalhado</span>
+        </a>
+      {% else %}
+        <a class="gp-profile-quick-card" href="{{ quick_documents_url }}">
+          <i class="fa-solid fa-folder-open"></i>
+          <strong>Meus documentos</strong>
+          <span>{{ documentos_total }} item(ns)</span>
+        </a>
+      {% endif %}
+      <a class="gp-profile-quick-card" href="#card-sessoes">
+        <i class="fa-solid fa-shield-halved"></i>
+        <strong>Minhas sessões</strong>
+        <span>1 sessão atual</span>
+      </a>
     </div>
 
-    <div class="form-field">
-      <label class="small">Sobrenome</label>
-      <input value="{{ request.user.last_name }}" readonly>
-    </div>
+    <article class="gp-profile-card gp-profile-card--identity">
+      <header class="gp-profile-card__head">
+        <h3>Dados da conta</h3>
+        <small>{{ p.get_role_display }}</small>
+      </header>
 
-    <div class="form-field full">
-      <label class="small">CPF</label>
-      <input value="{{ p.cpf|default:'' }}" readonly>
-    </div>
+      <div class="gp-profile-identity">
+        <div class="profile-photo">
+          <div class="profile-photo__selector" id="profile-photo-selector" role="button" tabindex="0" aria-label="Selecionar ou trocar foto de perfil">
+            <img
+              id="profile-photo-preview"
+              src="{% if p.foto %}{{ p.foto.url }}{% endif %}"
+              class="profile-photo__img"
+              alt="Foto de perfil de {{ request.user.get_full_name|default:request.user.username }}"
+              {% if not p.foto %}hidden{% endif %}
+            >
+            <div id="profile-photo-placeholder" class="profile-photo__placeholder" {% if p.foto %}hidden{% endif %}>
+              <i class="fa-solid fa-user" aria-hidden="true"></i>
+              <span>Sem foto</span>
+            </div>
+            <div class="profile-photo__controls" role="group" aria-label="Ações da foto de perfil">
+              <button class="profile-photo__control profile-photo__control--upload" id="profile-photo-upload-btn" type="button" title="Selecionar ou trocar foto">
+                <i class="fa-solid fa-image" aria-hidden="true"></i>
+              </button>
+              {% if p.foto %}
+                <button class="profile-photo__control profile-photo__control--remove" type="submit" name="remove_foto" value="1" title="Apagar foto">
+                  <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                </button>
+              {% endif %}
+            </div>
+          </div>
+        </div>
 
-    <div class="form-field full">
-      <label class="small">E-mail</label>
-      <input name="email" value="{{ request.user.email|default:'' }}">
-    </div>
+        <div class="profile-form gp-profile-form">
+          <div class="form-field">
+            <label class="small gp-form-label">Nome</label>
+            <input value="{{ request.user.first_name }}" readonly>
+          </div>
 
-    <div class="form-field full">
-      <label class="small">Telefone</label>
-      <input name="telefone" value="{{ p.telefone|default:'' }}">
-    </div>
+          <div class="form-field">
+            <label class="small gp-form-label">Sobrenome</label>
+            <input value="{{ request.user.last_name }}" readonly>
+          </div>
 
-    <div class="form-field full">
-      <label class="small">Endereço</label>
-      <textarea name="endereco" rows="3">{{ p.endereco|default:'' }}</textarea>
-    </div>
+          <div class="form-field">
+            <label class="small gp-form-label">CPF</label>
+            <input value="{{ p.cpf|default:'' }}" readonly>
+          </div>
 
-    <div class="form-field full">
-      <label class="small">Foto de perfil</label>
-      <input type="file" name="foto" accept="image/*">
-    </div>
+          <div class="form-field">
+            <label class="small gp-form-label">E-mail</label>
+            <input name="email" value="{{ request.user.email|default:'' }}">
+          </div>
 
-    <div class="form-actions full">
-      <button class="btn btn-primary" type="submit">Salvar</button>
-      <a class="btn btn--ghost" href="{% url 'accounts:alterar_senha' %}">Alterar senha</a>
-    </div>
+          <div class="form-field">
+            <label class="small gp-form-label">Telefone</label>
+            <input name="telefone" value="{{ p.telefone|default:'' }}">
+          </div>
 
+          <div class="form-field">
+            <label class="small gp-form-label">Expiração da senha (dias)</label>
+            <input type="number" min="0" max="365" name="password_expires_days" value="{{ p.password_expires_days|default:90 }}">
+          </div>
+
+          <div class="form-field full">
+            <label class="small gp-form-label">Endereço</label>
+            <textarea name="endereco" rows="2">{{ p.endereco|default:'' }}</textarea>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="gp-profile-card gp-profile-card--sessions" id="card-sessoes">
+      <header class="gp-profile-card__head">
+        <h3>Minhas sessões</h3>
+      </header>
+      <div class="gp-profile-stack">
+        <p><strong>Último login:</strong> {% if request.user.last_login %}{{ request.user.last_login|date:"d/m/Y H:i" }}{% else %}Primeiro acesso{% endif %}</p>
+        <p><strong>IP atual:</strong> {{ current_session_ip|default:"—" }}</p>
+        <p><strong>Navegador:</strong> {{ current_user_agent|default:"Não identificado"|truncatechars:70 }}</p>
+      </div>
+    </article>
+
+    <article class="gp-profile-card gp-profile-card--prefs">
+      <header class="gp-profile-card__head">
+        <h3>Preferências de recebimento de notificações</h3>
+      </header>
+      <p class="gp-profile-muted">Define qual a sua preferência padrão de recebimento de notificações de atividades relacionadas ao seu trabalho no GEPUB.</p>
+
+      {% if pref %}
+      <div class="gp-profile-notify-grid">
+        <label class="gp-profile-switch">
+          <span>Via GEPUB:</span>
+          <input type="checkbox" name="allow_sms" {% if pref.allow_sms %}checked{% endif %}>
+        </label>
+        <label class="gp-profile-switch">
+          <span>Via E-mail:</span>
+          <input type="checkbox" name="allow_email" {% if pref.allow_email %}checked{% endif %}>
+        </label>
+        <label class="gp-profile-switch">
+          <span>Padrão via Mobile:</span>
+          <input type="checkbox" name="allow_whatsapp" {% if pref.allow_whatsapp %}checked{% endif %}>
+        </label>
+      </div>
+      <div class="gp-profile-mini-grid">
+        <div class="form-field">
+          <label class="small gp-form-label">Telefone de aviso</label>
+          <input name="pref_telefone" value="{{ pref.telefone|default:'' }}">
+        </div>
+        <div class="form-field">
+          <label class="small gp-form-label">WhatsApp de aviso</label>
+          <input name="pref_whatsapp" value="{{ pref.whatsapp|default:'' }}">
+        </div>
+        <div class="form-field">
+          <label class="small gp-form-label">Início de envio</label>
+          <input type="time" name="horario_inicio" value="{% if pref.horario_inicio %}{{ pref.horario_inicio|time:'H:i' }}{% endif %}">
+        </div>
+        <div class="form-field">
+          <label class="small gp-form-label">Fim de envio</label>
+          <input type="time" name="horario_fim" value="{% if pref.horario_fim %}{{ pref.horario_fim|time:'H:i' }}{% endif %}">
+        </div>
+      </div>
+      {% endif %}
+    </article>
+
+    <article class="gp-profile-card gp-profile-card--system">
+      <header class="gp-profile-card__head">
+        <h3>Personalizações do sistema</h3>
+      </header>
+      <div class="gp-profile-theme-row">
+        <span>Tema utilizado:</span>
+        <span class="gp-theme-chip gp-theme-chip--{{ selected_theme }}">{{ selected_theme_label }}</span>
+      </div>
+
+      <div class="form-field">
+        {% if can_choose_theme %}
+          <label class="small gp-form-label">Tema da administração interna</label>
+          <select name="ui_theme">
+            <option value="">Usar padrão do município ({{ theme_config.get_default_theme_display|default:'Kassya' }})</option>
+            {% for value, label in ui_theme_choices %}
+              <option value="{{ value }}" {% if p.ui_theme == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        {% else %}
+          <label class="small gp-form-label">Tema da administração interna</label>
+          <input value="{{ theme_config.get_default_theme_display|default:'Kassya' }} (definido pelo município)" readonly>
+        {% endif %}
+      </div>
+
+      <div class="form-field">
+        <label class="small gp-checkbox">
+          <input type="checkbox" name="mfa_enabled" {% if p.mfa_enabled %}checked{% endif %}>
+          Exigir MFA no login
+        </label>
+      </div>
+      <div class="form-field">
+        <label class="small gp-checkbox">
+          <input type="checkbox" name="opt_out" {% if pref and pref.opt_out %}checked{% endif %}>
+          Pausar todas as notificações
+        </label>
+      </div>
+      <div class="form-field">
+        <label class="small gp-form-label">Senha expira em</label>
+        <input value="{% if password_expires_at %}{{ password_expires_at|date:'d/m/Y H:i' }}{% else %}Não definido{% endif %}" readonly>
+      </div>
+    </article>
+
+    <article class="gp-profile-card gp-profile-card--actionslog">
+      <header class="gp-profile-card__head">
+        <h3>Minhas ações</h3>
+      </header>
+      <ul class="gp-profile-timeline">
+        {% for action in recent_actions %}
+          <li>
+            <strong>{{ action.get_action_display }}</strong>
+            <span>{{ action.details|default:"Atualização de conta"|truncatechars:80 }}</span>
+            <small>{{ action.created_at|date:"d/m/Y H:i" }}</small>
+          </li>
+        {% empty %}
+          <li>
+            <strong>Sem ações registradas</strong>
+            <span>Nenhum evento foi registrado para esta conta.</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </article>
+
+    <article class="gp-profile-card gp-profile-card--history">
+      <header class="gp-profile-card__head">
+        <h3>Histórico em grupos</h3>
+      </header>
+      <ul class="gp-profile-timeline">
+        {% for item in groups_history %}
+          <li>
+            <strong>{{ item.title }}</strong>
+            <span>{{ item.meta }}</span>
+            {% if item.created_at %}<small>{{ item.created_at|date:"d/m/Y H:i" }}</small>{% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </article>
+
+    <article class="gp-profile-card gp-profile-card--moves">
+      <header class="gp-profile-card__head">
+        <h3>Transferências e manejos</h3>
+      </header>
+      <ul class="gp-profile-timeline">
+        {% for item in transfer_history %}
+          <li>
+            <strong>{{ item.title }}</strong>
+            <span>{{ item.meta }}</span>
+            {% if item.created_at %}<small>{{ item.created_at|date:"d/m/Y H:i" }}</small>{% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </article>
+
+    <div class="gp-profile-actions">
+      <button class="gp-button gp-button--primary" type="submit">Salvar ajustes</button>
+      <a class="gp-button gp-button--secondary" href="{% url 'accounts:alterar_senha' %}">Alterar senha</a>
+    </div>
   </form>
+</section>
+{% endblock %}
 
-</div>
+{% block extra_js %}
+<script>
+  (function () {
+    const input = document.getElementById("foto-perfil-input");
+    const preview = document.getElementById("profile-photo-preview");
+    const placeholder = document.getElementById("profile-photo-placeholder");
+    const selector = document.getElementById("profile-photo-selector");
+    const uploadBtn = document.getElementById("profile-photo-upload-btn");
+    if (!input || !preview || !placeholder || !selector) return;
 
-</div></div>
+    let tempUrl = null;
+    function showPlaceholder() {
+      preview.hidden = true;
+      placeholder.hidden = false;
+    }
+
+    function showPreview() {
+      preview.hidden = false;
+      placeholder.hidden = true;
+    }
+
+    preview.addEventListener("error", showPlaceholder);
+    preview.addEventListener("load", function () {
+      if ((preview.naturalWidth || 0) > 0) {
+        showPreview();
+      }
+    });
+
+    const initialSrc = String(preview.getAttribute("src") || "").trim();
+    if (!initialSrc) {
+      showPlaceholder();
+    } else if (preview.complete) {
+      if ((preview.naturalWidth || 0) > 0) {
+        showPreview();
+      } else {
+        showPlaceholder();
+      }
+    }
+
+    function openPicker() {
+      input.click();
+    }
+
+    selector.addEventListener("click", function (event) {
+      if (event.target.closest(".profile-photo__control--remove")) {
+        return;
+      }
+      if (event.target.closest(".profile-photo__control--upload")) {
+        return;
+      }
+      openPicker();
+    });
+
+    selector.addEventListener("keydown", function (event) {
+      const key = event.key;
+      if (key === "Enter" || key === " ") {
+        event.preventDefault();
+        openPicker();
+      }
+    });
+
+    if (uploadBtn) {
+      uploadBtn.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        openPicker();
+      });
+    }
+
+    input.addEventListener("change", function () {
+      const file = input.files && input.files[0];
+      if (!file || !String(file.type || "").startsWith("image/")) return;
+
+      if (tempUrl) {
+        URL.revokeObjectURL(tempUrl);
+      }
+      tempUrl = URL.createObjectURL(file);
+      preview.src = tempUrl;
+      showPreview();
+    });
+
+    window.addEventListener("beforeunload", function () {
+      if (tempUrl) {
+        URL.revokeObjectURL(tempUrl);
+      }
+    });
+  })();
+</script>
 {% endblock %}

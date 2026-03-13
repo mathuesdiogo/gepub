@@ -1,6 +1,8 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.text import slugify
+from urllib.parse import quote_plus
 
 
 class Municipio(models.Model):
@@ -139,6 +141,16 @@ class Unidade(models.Model):
         ASSISTENCIA = "ASSISTENCIA", "Assistência Social"
         OUTROS = "OUTROS", "Outros"
 
+    class TipoEducacional(models.TextChoices):
+        NAO_APLICA = "NAO_APLICA", "Não se aplica"
+        ESCOLA = "ESCOLA", "Escola"
+        CRECHE = "CRECHE", "Creche"
+        CMEI = "CMEI", "CMEI"
+        LABORATORIO = "LABORATORIO", "Sala/Laboratório"
+        BIBLIOTECA = "BIBLIOTECA", "Biblioteca Escolar"
+        POLO = "POLO", "Polo educacional"
+        OUTRA = "OUTRA", "Outra unidade educacional"
+
     secretaria = models.ForeignKey(
         Secretaria,
         on_delete=models.PROTECT,
@@ -149,6 +161,13 @@ class Unidade(models.Model):
 
     nome = models.CharField(max_length=180, default="", blank=True)
     tipo = models.CharField(max_length=20, choices=Tipo.choices, default=Tipo.EDUCACAO)
+    tipo_educacional = models.CharField(
+        "Identificação educacional",
+        max_length=20,
+        choices=TipoEducacional.choices,
+        default=TipoEducacional.NAO_APLICA,
+        db_index=True,
+    )
 
     # Identificadores / registros (opcionais)
     codigo_inep = models.CharField("Código INEP", max_length=32, blank=True, default="")
@@ -180,6 +199,183 @@ class Unidade(models.Model):
 
     def __str__(self) -> str:
         return self.nome or f"Unidade #{self.pk}"
+
+
+class Address(models.Model):
+    class EntityType(models.TextChoices):
+        SECRETARIA = "SECRETARIA", "Secretaria"
+        UNIDADE = "UNIDADE", "Unidade"
+        SETOR = "SETOR", "Setor"
+        GARAGEM = "GARAGEM", "Garagem"
+        ESCOLA = "ESCOLA", "Escola"
+        UBS = "UBS", "UBS"
+        ALMOXARIFADO = "ALMOXARIFADO", "Almoxarifado"
+        OUTROS = "OUTROS", "Outros"
+
+    class GeocodeProvider(models.TextChoices):
+        GOOGLE = "google", "Google"
+        OSM = "osm", "OpenStreetMap"
+        MANUAL = "manual", "Manual"
+        NONE = "none", "Não definido"
+
+    class GeocodeStatus(models.TextChoices):
+        PENDING = "pending", "Pendente"
+        OK = "ok", "OK"
+        FAILED = "failed", "Falhou"
+        MANUAL = "manual", "Manual"
+
+    entity_type = models.CharField(max_length=30, choices=EntityType.choices)
+    entity_id = models.PositiveIntegerField()
+    label = models.CharField(max_length=80, blank=True, default="Principal")
+    is_primary = models.BooleanField(default=False)
+    is_public = models.BooleanField(default=True)
+
+    cep = models.CharField(max_length=9, blank=True, default="")
+    logradouro = models.CharField(max_length=180, blank=True, default="")
+    numero = models.CharField(max_length=30, blank=True, default="")
+    complemento = models.CharField(max_length=120, blank=True, default="")
+    bairro = models.CharField(max_length=120, blank=True, default="")
+    cidade = models.CharField(max_length=120, blank=True, default="")
+    estado = models.CharField(max_length=2, blank=True, default="")
+    pais = models.CharField(max_length=2, blank=True, default="BR")
+    reference_point = models.CharField(max_length=220, blank=True, default="")
+    coverage_area = models.CharField(max_length=220, blank=True, default="")
+    opening_hours = models.CharField(max_length=120, blank=True, default="")
+
+    latitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    geocode_provider = models.CharField(
+        max_length=20,
+        choices=GeocodeProvider.choices,
+        default=GeocodeProvider.NONE,
+    )
+    geocode_status = models.CharField(
+        max_length=20,
+        choices=GeocodeStatus.choices,
+        default=GeocodeStatus.PENDING,
+    )
+    maps_url = models.URLField(max_length=520, blank=True, default="")
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="org_addresses_created",
+    )
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="org_addresses_updated",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "Endereço"
+        verbose_name_plural = "Endereços"
+        ordering = ["entity_type", "entity_id", "-is_primary", "id"]
+        indexes = [
+            models.Index(fields=["entity_type", "entity_id", "is_active"]),
+            models.Index(fields=["entity_type", "entity_id", "is_primary"]),
+            models.Index(fields=["is_public", "is_active"]),
+            models.Index(fields=["geocode_status"]),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["entity_type", "entity_id", "is_primary"],
+                condition=models.Q(is_active=True, is_primary=True),
+                name="uniq_primary_active_address_per_entity",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.entity_type}#{self.entity_id} • {self.label or 'Principal'}"
+
+    def clean(self):
+        self.label = (self.label or "").strip() or "Principal"
+        self.cep = (self.cep or "").strip()
+        self.logradouro = (self.logradouro or "").strip()
+        self.numero = (self.numero or "").strip() or "S/N"
+        self.complemento = (self.complemento or "").strip()
+        self.bairro = (self.bairro or "").strip()
+        self.cidade = (self.cidade or "").strip()
+        self.estado = (self.estado or "").strip().upper()
+        self.pais = (self.pais or "BR").strip().upper()[:2] or "BR"
+        self.reference_point = (self.reference_point or "").strip()
+        self.coverage_area = (self.coverage_area or "").strip()
+        self.opening_hours = (self.opening_hours or "").strip()
+
+        required_fields = {
+            "logradouro": self.logradouro,
+            "bairro": self.bairro,
+            "cidade": self.cidade,
+            "estado": self.estado,
+        }
+        errors: dict[str, str] = {}
+        for field, value in required_fields.items():
+            if not value:
+                errors[field] = "Campo obrigatório."
+
+        if self.cep:
+            digits = "".join(ch for ch in self.cep if ch.isdigit())
+            if len(digits) != 8:
+                errors["cep"] = "CEP inválido. Use o formato NNNNN-NNN."
+            else:
+                self.cep = f"{digits[:5]}-{digits[5:]}"
+
+        has_lat = self.latitude is not None
+        has_lng = self.longitude is not None
+        if has_lat != has_lng:
+            errors["latitude"] = "Latitude e longitude devem ser preenchidas juntas."
+            errors["longitude"] = "Latitude e longitude devem ser preenchidas juntas."
+
+        if self.latitude is not None and not (-90 <= float(self.latitude) <= 90):
+            errors["latitude"] = "Latitude fora do intervalo válido."
+        if self.longitude is not None and not (-180 <= float(self.longitude) <= 180):
+            errors["longitude"] = "Longitude fora do intervalo válido."
+
+        if errors:
+            raise ValidationError(errors)
+
+    def compose_query(self) -> str:
+        parts = [
+            self.logradouro,
+            self.numero,
+            self.bairro,
+            self.cidade,
+            self.estado,
+            self.cep,
+            "Brasil" if (self.pais or "BR") == "BR" else self.pais,
+        ]
+        return ", ".join(part for part in parts if part)
+
+    def formatted_address(self) -> str:
+        line1 = " ".join(part for part in [self.logradouro, self.numero] if part)
+        line2_parts = [self.complemento, self.bairro, f"{self.cidade}/{self.estado}".strip("/"), self.cep]
+        line2 = " • ".join(part for part in line2_parts if part)
+        return "\n".join(part for part in [line1, line2] if part)
+
+    def _build_maps_url(self) -> str:
+        if self.latitude is not None and self.longitude is not None:
+            return f"https://www.google.com/maps?q={self.latitude},{self.longitude}"
+        query = quote_plus(self.compose_query())
+        return f"https://www.google.com/maps/search/?api=1&query={query}" if query else ""
+
+    @property
+    def directions_url(self) -> str:
+        if self.latitude is not None and self.longitude is not None:
+            return f"https://www.google.com/maps/dir/?api=1&destination={self.latitude},{self.longitude}"
+        query = quote_plus(self.compose_query())
+        return f"https://www.google.com/maps/dir/?api=1&destination={query}" if query else ""
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        self.maps_url = self._build_maps_url()
+        super().save(*args, **kwargs)
 
 
 class Setor(models.Model):
@@ -521,3 +717,76 @@ class OnboardingStep(models.Model):
 
     def __str__(self) -> str:
         return f"{self.municipio} • {self.modulo} • {self.titulo}"
+
+
+class MunicipioOnboardingWizard(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="onboarding_wizard",
+    )
+    municipio = models.ForeignKey(
+        Municipio,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="onboarding_wizards",
+    )
+    current_step = models.PositiveSmallIntegerField(default=1)
+    total_steps = models.PositiveSmallIntegerField(default=9)
+    draft_data = models.JSONField(default=dict, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Sessão de onboarding municipal"
+        verbose_name_plural = "Sessões de onboarding municipal"
+        indexes = [
+            models.Index(fields=["municipio", "completed_at"]),
+            models.Index(fields=["current_step"]),
+        ]
+
+    def __str__(self) -> str:
+        who = getattr(self.user, "username", None) or f"user#{self.user_id}"
+        return f"{who} • etapa {self.current_step}/{self.total_steps}"
+
+    @property
+    def is_completed(self) -> bool:
+        return bool(self.completed_at)
+
+
+class MunicipioThemeConfig(models.Model):
+    class ThemeChoice(models.TextChoices):
+        KASSYA = "kassya", "Kassya"
+        INCLUSAO = "inclusao", "Inclusão"
+        INSTITUCIONAL = "institucional", "Institucional"
+
+    municipio = models.OneToOneField(
+        Municipio,
+        on_delete=models.CASCADE,
+        related_name="theme_config",
+    )
+    default_theme = models.CharField(
+        max_length=30,
+        choices=ThemeChoice.choices,
+        default=ThemeChoice.KASSYA,
+    )
+    lock_theme_for_users = models.BooleanField(default=False)
+    allow_user_theme_override = models.BooleanField(default=True)
+    token_overrides = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Override de tokens CSS por tenant. Ex.: {'--gp-primary': '#0055aa'}",
+    )
+    ds_version = models.CharField(max_length=20, default="GEPUB DS v2.0")
+    atualizado_em = models.DateTimeField(auto_now=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Configuração de tema do município"
+        verbose_name_plural = "Configurações de tema dos municípios"
+        ordering = ["municipio__nome"]
+
+    def __str__(self) -> str:
+        return f"{self.municipio} • {self.default_theme}"

@@ -1,0 +1,115 @@
+{% extends "core/base.html" %}
+{% load gepub_design_system %}
+
+{% block title %}GEPUB DS • Componentes{% endblock %}
+{% block header %}Componentes GEPUB{% endblock %}
+
+{% block content %}
+<section class="gp-card gp-mb-4">
+  <div class="gp-card__body gp-action-bar gp-justify-between">
+    <h2>Catálogo oficial</h2>
+    <a class="gp-button gp-button--outline" href="{% url 'core:design_system_docs' %}">Voltar</a>
+  </div>
+</section>
+
+<section class="gp-card gp-mb-4">
+  <header class="gp-card__header"><h3>Botões</h3></header>
+  <div class="gp-card__body">
+    <div class="gp-button-group">
+      {% gp_button "Primário" "#" "primary" %}
+      {% gp_button "Secundário" "#" "secondary" %}
+      {% gp_button "Outline" "#" "outline" %}
+      {% gp_button "Ghost" "#" "ghost" %}
+      {% gp_button "Sucesso" "#" "success" %}
+      {% gp_button "Perigo" "#" "danger" %}
+      <button class="gp-button gp-button--icon" aria-label="Configurações"><i class="fa-solid fa-gear"></i></button>
+      <button class="gp-button gp-button--primary gp-button--loading" aria-label="Carregando">Carregando</button>
+    </div>
+  </div>
+</section>
+
+<section class="gp-card gp-mb-4">
+  <header class="gp-card__header"><h3>Formulários</h3></header>
+  <div class="gp-card__body">
+    <form class="gp-form">
+      <div class="gp-grid">
+        <div class="gp-col-6 gp-form-group"><label class="gp-form-label">Input</label><input class="gp-input" placeholder="Digite..."></div>
+        <div class="gp-col-6 gp-form-group"><label class="gp-form-label">Select</label><select class="gp-select"><option>Opção A</option><option>Opção B</option></select></div>
+        <div class="gp-col-12 gp-form-group"><label class="gp-form-label">Textarea</label><textarea class="gp-textarea" rows="3"></textarea><span class="gp-form-help">Ajuda contextual</span></div>
+      </div>
+      <div class="gp-action-bar">
+        <label class="gp-checkbox"><input type="checkbox"> Checkbox</label>
+        <label class="gp-radio"><input type="radio" name="r"> Radio</label>
+        <label class="gp-switch"><input type="checkbox"> Switch</label>
+      </div>
+    </form>
+    <hr class="gp-mt-2 gp-mb-2">
+    <h4>Smart Form Grid (novo padrão)</h4>
+    <form class="gp-form gp-form-grid gp-form-grid--smart">
+      <div class="gp-form-group">
+        <label class="gp-form-label">Nome</label>
+        <input class="gp-input" placeholder="Nome completo">
+      </div>
+      <div class="gp-form-group">
+        <label class="gp-form-label">CPF</label>
+        <input class="gp-input" placeholder="000.000.000-00">
+      </div>
+      <div class="gp-form-group gp-field--third">
+        <label class="gp-form-label">Data Nasc.</label>
+        <input class="gp-input" type="date">
+      </div>
+      <div class="gp-form-group gp-field--third">
+        <label class="gp-form-label">Sexo</label>
+        <select class="gp-select"><option>Selecione</option></select>
+      </div>
+      <div class="gp-form-group gp-field--third">
+        <label class="gp-form-label">UF</label>
+        <select class="gp-select"><option>SP</option><option>MG</option></select>
+      </div>
+      <div class="gp-form-group gp-field--full">
+        <label class="gp-form-label">Observações</label>
+        <textarea class="gp-textarea"></textarea>
+      </div>
+    </form>
+  </div>
+</section>
+
+<section class="gp-card gp-mb-4">
+  <header class="gp-card__header"><h3>Tabelas</h3></header>
+  <div class="gp-card__body">
+    <div class="gp-table__filters">
+      <input class="gp-input" placeholder="Busca integrada" data-gp-table-search="table-demo">
+      <button class="gp-button gp-button--outline" type="button">Exportar</button>
+    </div>
+    <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover gp-table--sortable gp-table--paginated gp-table--selectable">
+      <table id="table-demo">
+        <thead>
+          <tr>
+            <th><input type="checkbox" data-gp-select-all="rows"></th>
+            <th>Nome</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><input type="checkbox" data-gp-select="rows"></td><td>Secretaria de Educação</td><td><span class="gp-badge gp-badge--success">Ativo</span></td><td><div class="gp-table__actions"><button class="gp-button gp-button--icon"><i class="fa-solid fa-eye"></i></button></div></td></tr>
+          <tr><td><input type="checkbox" data-gp-select="rows"></td><td>Secretaria de Saúde</td><td><span class="gp-badge gp-badge--warning">Pendente</span></td><td><div class="gp-table__actions"><button class="gp-button gp-button--icon"><i class="fa-solid fa-eye"></i></button></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="gp-grid gp-mb-4">
+  <article class="gp-card gp-col-6"><div class="gp-card__body"><h3>Feedback</h3>{% gp_alert "Operação concluída" "success" True %}<div class="gp-mt-2">{% gp_alert "Atenção ao prazo" "warning" True %}</div></div></article>
+  <article class="gp-card gp-col-6"><div class="gp-card__body"><h3>Indicadores</h3>{% gp_progress 72 100 False %}<div class="gp-mt-2">{% gp_progress 0 100 True %}</div></div></article>
+</section>
+
+<section class="gp-card">
+  <header class="gp-card__header"><h3>Charts wrapper</h3></header>
+  <div class="gp-card__body gp-grid">
+    <div class="gp-col-6">{% gp_chart "chart-line-demo" "line" "Evolução de protocolos" %}</div>
+    <div class="gp-col-6">{% gp_chart "chart-bar-demo" "bar" "Receitas por secretaria" %}</div>
+  </div>
+</section>
+{% endblock %}

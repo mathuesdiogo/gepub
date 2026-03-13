@@ -1,157 +1,127 @@
 {% extends "core/base.html" %}
+{% load static %}
 
 {% block title %}Editor Institucional • GEPUB{% endblock %}
 
-{% block content %}
-<div class="card"><div class="card__body">
-  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages/institutional-admin.css' %}">
+{% endblock %}
 
-  <div class="dash-actions" style="margin-bottom:12px;">
-    <a class="btn btn-primary" href="{% url 'core:institutional_slide_create' %}"><i class="fa-solid fa-images"></i> Novo slide</a>
-    <a class="btn btn-primary" href="{% url 'core:institutional_method_step_create' %}"><i class="fa-solid fa-list-check"></i> Novo passo</a>
-    <a class="btn btn-primary" href="{% url 'core:institutional_service_card_create' %}"><i class="fa-solid fa-table-cells-large"></i> Novo serviço</a>
+{% block content %}
+<section class="ia-shell">
+  <div class="ia-head">
+    {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+    <div class="ia-metrics" aria-label="Resumo do editor">
+      <article class="ia-metric-card">
+        <p class="ia-metric-card__label">Campos editáveis</p>
+        <p class="ia-metric-card__value">3</p>
+      </article>
+      <article class="ia-metric-card">
+        <p class="ia-metric-card__label">Tema atual</p>
+        <p class="ia-metric-card__value ia-metric-card__value--small">Institucional 2026</p>
+      </article>
+      <article class="ia-metric-card">
+        <p class="ia-metric-card__label">Publicação</p>
+        <p class="ia-metric-card__value ia-metric-card__value--small">{{ page.ativo|yesno:"Ativa,Inativa" }}</p>
+      </article>
+      <article class="ia-metric-card">
+        <p class="ia-metric-card__label">Atualizado em</p>
+        <p class="ia-metric-card__value ia-metric-card__value--small">{{ page.atualizado_em|date:"d/m/Y H:i" }}</p>
+      </article>
+    </div>
   </div>
 
-  <section class="dash-card" style="margin-bottom:14px;">
-    <div class="dash-card__head">
-      <div>
-        <div class="dash-card__title">Configuração Principal</div>
-        <div class="dash-card__sub">Logo, títulos, textos, CTAs e navegação da home pública</div>
+  <div class="ia-editor-layout">
+    <aside class="ia-nav" aria-label="Navegação do editor">
+      <div class="ia-nav__window">
+        <div class="ia-nav__bar">
+          <span class="ia-dot ia-dot--red"></span>
+          <span class="ia-dot ia-dot--amber"></span>
+          <span class="ia-dot ia-dot--green"></span>
+          <span class="ia-nav__title">Editor</span>
+        </div>
+        <nav class="ia-nav__links">
+          <a href="#ia-identidade">Identidade da marca</a>
+          <a href="#ia-preview">Prévia rápida</a>
+        </nav>
       </div>
-    </div>
-    <div class="dash-card__body">
-      {% include "core/partials/components/forms/form_shell.html" with form=form cancel_url=cancel_url submit_label=submit_label enctype=enctype %}
-    </div>
-  </section>
+    </aside>
 
-  <section class="dash-card" style="margin-bottom:14px;">
-    <div class="dash-card__head">
-      <div>
-        <div class="dash-card__title">Slides (Hero)</div>
-        <div class="dash-card__sub">Adicione/edite os cards rotativos da parte direita do hero</div>
-      </div>
-    </div>
-    <div class="dash-card__body">
-      <div class="table-shell">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Ordem</th>
-              <th>Título</th>
-              <th>Subtítulo</th>
-              <th>Ativo</th>
-              <th width="220px">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for s in slides %}
-              <tr>
-                <td>{{ s.ordem }}</td>
-                <td>{{ s.titulo }}</td>
-                <td>{{ s.subtitulo|default:"—" }}</td>
-                <td>{{ s.ativo|yesno:"Sim,Não" }}</td>
-                <td>
-                  <a class="btn btn--ghost" href="{% url 'core:institutional_slide_update' s.pk %}"><i class="fa-solid fa-pen"></i> Editar</a>
-                  <form method="post" action="{% url 'core:institutional_slide_delete' s.pk %}" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn--ghost"><i class="fa-solid fa-trash"></i> Remover</button>
-                  </form>
-                </td>
-              </tr>
-            {% empty %}
-              <tr><td colspan="5">Nenhum slide cadastrado.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
+    <form method="post" enctype="{{ enctype }}" class="ia-editor-form">
+      {% csrf_token %}
 
-  <section class="dash-card" style="margin-bottom:14px;">
-    <div class="dash-card__head">
-      <div>
-        <div class="dash-card__title">Passos do Método</div>
-        <div class="dash-card__sub">Etapas exibidas na seção de método</div>
-      </div>
-    </div>
-    <div class="dash-card__body">
-      <div class="table-shell">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Ordem</th>
-              <th>Título</th>
-              <th>Ícone</th>
-              <th>Ativo</th>
-              <th width="220px">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for step in method_steps %}
-              <tr>
-                <td>{{ step.ordem }}</td>
-                <td>{{ step.titulo }}</td>
-                <td><code>{{ step.icone }}</code></td>
-                <td>{{ step.ativo|yesno:"Sim,Não" }}</td>
-                <td>
-                  <a class="btn btn--ghost" href="{% url 'core:institutional_method_step_update' step.pk %}"><i class="fa-solid fa-pen"></i> Editar</a>
-                  <form method="post" action="{% url 'core:institutional_method_step_delete' step.pk %}" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn--ghost"><i class="fa-solid fa-trash"></i> Remover</button>
-                  </form>
-                </td>
-              </tr>
-            {% empty %}
-              <tr><td colspan="5">Nenhum passo cadastrado.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
+      {% if form.non_field_errors %}
+        <div class="ia-alert ia-alert--error">
+          {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
 
-  <section class="dash-card">
-    <div class="dash-card__head">
-      <div>
-        <div class="dash-card__title">Cards de Serviços</div>
-        <div class="dash-card__sub">Conteúdos da grade de serviços</div>
-      </div>
-    </div>
-    <div class="dash-card__body">
-      <div class="table-shell">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Ordem</th>
-              <th>Título</th>
-              <th>Ícone</th>
-              <th>Ativo</th>
-              <th width="220px">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for service in service_cards %}
-              <tr>
-                <td>{{ service.ordem }}</td>
-                <td>{{ service.titulo }}</td>
-                <td><code>{{ service.icone }}</code></td>
-                <td>{{ service.ativo|yesno:"Sim,Não" }}</td>
-                <td>
-                  <a class="btn btn--ghost" href="{% url 'core:institutional_service_card_update' service.pk %}"><i class="fa-solid fa-pen"></i> Editar</a>
-                  <form method="post" action="{% url 'core:institutional_service_card_delete' service.pk %}" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn--ghost"><i class="fa-solid fa-trash"></i> Remover</button>
-                  </form>
-                </td>
-              </tr>
-            {% empty %}
-              <tr><td colspan="5">Nenhum card cadastrado.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
+      <article class="ia-window" id="ia-identidade">
+        <header class="ia-window__bar">
+          <span class="ia-dot ia-dot--red"></span>
+          <span class="ia-dot ia-dot--amber"></span>
+          <span class="ia-dot ia-dot--green"></span>
+          <strong>Identidade da Marca</strong>
+        </header>
+        <div class="ia-window__body ia-grid ia-grid--3">
+          <div class="ia-field ia-field--checkbox{% if form.ativo.errors %} has-error{% endif %}">
+            <label for="{{ form.ativo.id_for_label }}">Publicação ativa</label>
+            {{ form.ativo }}
+            {% for error in form.ativo.errors %}<p class="ia-error">{{ error }}</p>{% endfor %}
+          </div>
 
-</div></div>
+          <div class="ia-field{% if form.marca_nome.errors %} has-error{% endif %}">
+            {{ form.marca_nome.label_tag }}
+            {{ form.marca_nome }}
+            {% for error in form.marca_nome.errors %}<p class="ia-error">{{ error }}</p>{% endfor %}
+          </div>
+
+          <div class="ia-field{% if form.marca_logo.errors %} has-error{% endif %}">
+            {{ form.marca_logo.label_tag }}
+            {{ form.marca_logo }}
+            {% if page.marca_logo %}
+              <p class="ia-hint">Logo atual: {{ page.marca_logo.name }}</p>
+            {% endif %}
+            {% for error in form.marca_logo.errors %}<p class="ia-error">{{ error }}</p>{% endfor %}
+          </div>
+        </div>
+      </article>
+
+      <article class="ia-window" id="ia-preview">
+        <header class="ia-window__bar">
+          <span class="ia-dot ia-dot--red"></span>
+          <span class="ia-dot ia-dot--amber"></span>
+          <span class="ia-dot ia-dot--green"></span>
+          <strong>Prévia do Cabeçalho Público</strong>
+        </header>
+        <div class="ia-window__body">
+          <div class="ia-preview">
+            <div class="ia-preview__mark">
+              {% if page.marca_logo %}
+                <img src="{{ page.marca_logo.url }}" alt="{{ page.marca_nome|default:'GEPUB' }}">
+              {% else %}
+                <i class="fa-solid fa-building-columns"></i>
+              {% endif %}
+            </div>
+            <div class="ia-preview__brand">
+              <p class="ia-preview__name">{{ page.marca_nome|default:"GEPUB" }}</p>
+              <p class="ia-preview__sub">Gestão Estratégica Pública</p>
+            </div>
+          </div>
+          <p class="ia-hint">
+            Este editor foi simplificado para o novo tema institucional. Blocos de conteúdo agora são definidos no template oficial da página pública.
+          </p>
+        </div>
+      </article>
+
+      <div class="ia-form-actions">
+        <button type="submit" class="gp-button gp-button--primary">{{ submit_label }}</button>
+        <a class="gp-button gp-button--outline" href="{{ cancel_url }}">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</section>
 {% endblock %}

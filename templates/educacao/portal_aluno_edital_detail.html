@@ -1,0 +1,82 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Acompanhamento de Edital • {{ aluno.nome }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage">
+{% include "core/partials/components/layout/page_head.html" with title="Acompanhamento da Inscrição" subtitle=aluno.nome actions=actions %}
+
+<article class="gp-student-stage__card">
+  <div class="gp-pills">
+    <span class="gp-pills__item">Edital: {{ edital.numero_ano }}</span>
+    <span class="gp-pills__item">Benefício: {{ edital.beneficio.nome }}</span>
+    <span class="gp-pills__item">Status inscrição: {{ inscricao.get_status_display }}</span>
+    <span class="gp-pills__item">Pontuação: {{ inscricao.pontuacao }}</span>
+  </div>
+</article>
+
+<div class="gp-grid-2 gp-student-stage__grid">
+  <article class="gp-card"><div class="gp-card__body">
+    <h4>Etapas do edital</h4>
+    <ul>
+      {% for e in timeline_etapas %}
+      <li>
+        {% if e.concluida %}<strong>[Concluída]</strong>{% elif e.atual %}<strong>[Atual]</strong>{% else %}[Pendente]{% endif %}
+        {{ e.nome }}
+        {% if e.data %} - {{ e.data|date:"d/m/Y" }}{% endif %}
+      </li>
+      {% empty %}
+      <li>Sem etapas configuradas.</li>
+      {% endfor %}
+    </ul>
+  </div></article>
+
+  <article class="gp-card"><div class="gp-card__body">
+    <h4>Andamento da inscrição</h4>
+    <ul>
+      <li><strong>Status:</strong> {{ inscricao.get_status_display }}</li>
+      <li><strong>Última atualização:</strong> {{ inscricao.atualizado_em|date:"d/m/Y H:i" }}</li>
+      <li><strong>Andamento do edital:</strong> {{ edital.get_status_display }}</li>
+      {% if avaliacao.calculado_em %}
+      <li><strong>Último cálculo automático:</strong> {{ avaliacao.calculado_em }}</li>
+      {% endif %}
+    </ul>
+
+    {% if pendencias_documentos %}
+    <h5 class="gp-mt-3 gp-mb-2">Pendências documentais</h5>
+    <ul>
+      {% for p in pendencias_documentos %}
+      <li>{{ p }}</li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>Sem pendências documentais no momento.</p>
+    {% endif %}
+  </div></article>
+</div>
+
+<article class="gp-student-stage__card">
+  <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__body">
+    <table class="gp-table__native">
+      <thead><tr><th>Documento</th><th>Requisito</th><th>Situação</th><th>Arquivo</th></tr></thead>
+      <tbody>
+        {% for d in inscricao.documentos.all %}
+        <tr>
+          <td>{{ d.descricao|default:"—" }}</td>
+          <td>{{ d.requisito.nome|default:"Comprovação de critério" }}</td>
+          <td>
+            {% if d.aprovado %}Aprovado
+            {% elif d.aprovado == False %}Reprovado
+            {% else %}Em análise
+            {% endif %}
+          </td>
+          <td>{% if d.arquivo %}<a href="{{ d.arquivo.url }}" target="_blank" rel="noopener">Abrir</a>{% else %}—{% endif %}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">Nenhum documento anexado na inscrição.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</article>
+</section>
+{% endblock %}

@@ -5,8 +5,11 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.utils import timezone
+from django.views.decorators.http import require_POST
 
 from apps.core.decorators import require_perm
+from apps.core.exports import export_csv, export_pdf_table
 from apps.core.rbac import is_admin
 from apps.core.services_auditoria import registrar_auditoria
 from apps.core.services_transparencia import publicar_evento_transparencia
@@ -52,6 +55,92 @@ def index(request):
         conectores = conectores.filter(Q(nome__icontains=q) | Q(dominio__icontains=q) | Q(endpoint__icontains=q))
         execucoes = execucoes.filter(Q(referencia__icontains=q) | Q(conector__nome__icontains=q))
 
+    latest_exec_by_conector = {}
+    for item in execucoes.order_by("conector_id", "-executado_em", "-id"):
+        if item.conector_id not in latest_exec_by_conector:
+            latest_exec_by_conector[item.conector_id] = item
+    now = timezone.now()
+    conector_rows = []
+    for item in conectores.order_by("nome"):
+        latest = latest_exec_by_conector.get(item.id)
+        health = "SEM_EXECUCAO"
+        if latest:
+            delta = now - latest.executado_em
+            if latest.status == IntegracaoExecucao.Status.FALHA:
+                health = "ERRO"
+            elif delta.total_seconds() > 72 * 3600:
+                health = "ATRASADO"
+            else:
+                health = "OK"
+        conector_rows.append((item, latest, health))
+
+    export = (request.GET.get("export") or "").strip().lower()
+    export_scope = (request.GET.get("scope") or "conectores").strip().lower()
+    if export in {"csv", "pdf"}:
+        if export_scope == "execucoes":
+            rows = []
+            for item in execucoes.order_by("-executado_em", "-id")[:1000]:
+                rows.append(
+                    [
+                        str(item.executado_em),
+                        item.conector.nome,
+                        item.get_direcao_display(),
+                        item.get_status_display(),
+                        str(item.quantidade_registros),
+                        item.referencia or "",
+                    ]
+                )
+            headers = ["Executado em", "Conector", "Direcao", "Status", "Registros", "Referencia"]
+            if export == "csv":
+                return export_csv("integracoes_execucoes.csv", headers, rows)
+            return export_pdf_table(
+                request,
+                filename="integracoes_execucoes.pdf",
+                title="Execucoes de integracao",
+                subtitle=f"{municipio.nome}/{municipio.uf}",
+                headers=headers,
+                rows=rows,
+                filtros=f"Busca={q or '-'}",
+            )
+
+        rows = []
+        for item, latest, health in conector_rows:
+            rows.append(
+                [
+                    item.nome,
+                    item.get_dominio_display(),
+                    item.get_tipo_display(),
+                    item.endpoint or "",
+                    "SIM" if item.ativo else "NAO",
+                    health,
+                    str(latest.executado_em) if latest else "",
+                    latest.get_status_display() if latest else "",
+                ]
+            )
+        headers = ["Nome", "Dominio", "Tipo", "Endpoint", "Ativo", "Saude", "Ultima execucao", "Status ultima execucao"]
+        if export == "csv":
+            return export_csv("integracoes_conectores.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="integracoes_conectores.pdf",
+            title="Conectores de integracao",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'}",
+        )
+
+    health_counts = {"ok": 0, "erro": 0, "atrasado": 0, "sem_execucao": 0}
+    for _item, _latest, health in conector_rows:
+        if health == "OK":
+            health_counts["ok"] += 1
+        elif health == "ERRO":
+            health_counts["erro"] += 1
+        elif health == "ATRASADO":
+            health_counts["atrasado"] += 1
+        else:
+            health_counts["sem_execucao"] += 1
+
     return render(
         request,
         "integracoes/index.html",
@@ -61,8 +150,9 @@ def index(request):
             "municipio": municipio,
             "municipios": _municipios_admin(request),
             "q": q,
-            "conectores": conectores.order_by("nome"),
+            "conectores": conector_rows,
             "execucoes": execucoes.order_by("-executado_em", "-id")[:100],
+            "health_counts": health_counts,
             "actions": [
                 {
                     "label": "Novo conector",
@@ -74,6 +164,30 @@ def index(request):
                     "label": "Registrar execucao",
                     "url": reverse("integracoes:execucao_create") + f"?municipio={municipio.pk}",
                     "icon": "fa-solid fa-cloud-arrow-up",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "CSV conectores",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&scope=conectores&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "CSV execucoes",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&scope=execucoes&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF conectores",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&scope=conectores&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF execucoes",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&scope=execucoes&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
                     "variant": "btn--ghost",
                 },
             ],
@@ -193,3 +307,43 @@ def execucao_create(request):
             "submit_label": "Salvar execucao",
         },
     )
+
+
+@login_required
+@require_perm("integracoes.manage")
+@require_POST
+def execucao_reprocessar(request, pk: int):
+    municipio = _resolve_municipio(request)
+    if not municipio:
+        return redirect("core:dashboard")
+
+    origem = IntegracaoExecucao.objects.select_related("conector").filter(pk=pk, municipio=municipio).first()
+    if not origem:
+        messages.error(request, "Execucao de origem nao encontrada.")
+        return redirect(reverse("integracoes:index") + f"?municipio={municipio.pk}")
+
+    nova = IntegracaoExecucao.objects.create(
+        municipio=municipio,
+        conector=origem.conector,
+        direcao=origem.direcao,
+        status=IntegracaoExecucao.Status.SUCESSO,
+        referencia=f"REPROCESSO-{origem.pk}",
+        quantidade_registros=origem.quantidade_registros,
+        detalhes=(origem.detalhes or "")[:3500],
+        executado_por=request.user,
+    )
+    registrar_auditoria(
+        municipio=municipio,
+        modulo="INTEGRACOES",
+        evento="EXECUCAO_REPROCESSADA",
+        entidade="IntegracaoExecucao",
+        entidade_id=nova.pk,
+        usuario=request.user,
+        depois={
+            "origem_id": origem.pk,
+            "conector": origem.conector.nome,
+            "referencia": nova.referencia,
+        },
+    )
+    messages.success(request, f"Reprocessamento registrado a partir da execução #{origem.pk}.")
+    return redirect(reverse("integracoes:index") + f"?municipio={municipio.pk}")

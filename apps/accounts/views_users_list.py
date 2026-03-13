@@ -19,19 +19,12 @@ from .views_users_common import (
     User,
     build_filter_scopes,
     build_querystring,
+    is_admin,
     scope_users_queryset,
 )
+from .models import Profile
 
-ROLE_LABELS = {
-    "ADMIN": "Admin",
-    "MUNICIPAL": "Gestor Municipal",
-    "SECRETARIA": "Gestor de Secretaria",
-    "UNIDADE": "Gestor de Unidade",
-    "PROFESSOR": "Professor",
-    "ALUNO": "Aluno",
-    "NEE": "Técnico NEE",
-    "LEITURA": "Leitura",
-}
+ROLE_LABELS = {value: label for value, label in Profile.Role.choices}
 
 GROUP_MODE_OPTIONS = [
     ("lista", "Lista"),
@@ -260,7 +253,7 @@ def usuarios_list(request):
             return export_csv("usuarios.csv", headers=headers, rows=rows_export)
         return _export_users_xlsx(rows=rows_export)
 
-    can_manage = can(request.user, "accounts.manage_users") or request.user.is_staff or request.user.is_superuser
+    can_manage = can(request.user, "accounts.manage_users") or is_admin(request.user)
     base_qs = build_querystring(filter_params)
     qs_prefix = f"?{base_qs}" if base_qs else ""
 
@@ -274,6 +267,15 @@ def usuarios_list(request):
                 "variant": "btn-primary",
             }
         )
+        if is_admin(request.user):
+            actions.append(
+                {
+                    "label": "Gerar usuário prefeitura",
+                    "url": reverse("accounts:usuario_prefeitura_onboarding_create"),
+                    "icon": "fa-solid fa-building-user",
+                    "variant": "btn--ghost",
+                }
+            )
     actions.extend(
         [
             {

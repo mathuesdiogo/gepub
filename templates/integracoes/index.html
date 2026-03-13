@@ -1,59 +1,197 @@
 {% extends "core/base.html" %}
+{% load static %}
+{% block title %}Integrações • GEPUB{% endblock %}
+{% block header %}Integrações{% endblock %}
 
 {% block content %}
-<div class="card"><div class="card__body">
+<div class="ig-shell">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <form method="get" class="filter-bar" style="margin-bottom:12px;">
-    {% if municipios and municipios|length %}
-      <select name="municipio" class="input" style="max-width:240px;">
-        {% for m in municipios %}
-          <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
-        {% endfor %}
-      </select>
-    {% endif %}
+  <section class="tool-hero ig-hero">
+    <article>
+      <p class="tool-hero__kicker">Ferramenta de conectividade</p>
+      <h2>Hub de integrações com monitoramento contínuo por conector</h2>
+      <p>Padronize fluxos API, arquivo e ETL para manter integração entre módulos internos, transparência e serviços externos.</p>
+    </article>
+    <div class="tool-hero__chips">
+      <span class="tool-chip"><i class="fa-solid fa-plug-circle-check"></i> Conectores auditáveis</span>
+      <span class="tool-chip"><i class="fa-solid fa-shield"></i> Execuções rastreadas</span>
+      <span class="tool-chip"><i class="fa-solid fa-rotate"></i> Reprocessamento seguro</span>
+      <span class="tool-chip"><i class="fa-solid fa-file-export"></i> Exportação CSV/PDF</span>
+    </div>
+  </section>
 
-    <input name="q" value="{{ q }}" class="input" placeholder="Conector, dominio, referencia" style="max-width:320px;">
-    <button class="btn btn--sm" type="submit">Filtrar</button>
-  </form>
+  <section class="ig-kpi-grid">
+    <article class="ig-kpi ig-kpi--ok">
+      <span class="ig-kpi__label">Conectores OK</span>
+      <strong class="ig-kpi__value">{{ health_counts.ok }}</strong>
+    </article>
+    <article class="ig-kpi ig-kpi--error">
+      <span class="ig-kpi__label">Com erro</span>
+      <strong class="ig-kpi__value">{{ health_counts.erro }}</strong>
+    </article>
+    <article class="ig-kpi ig-kpi--warning">
+      <span class="ig-kpi__label">Atrasados</span>
+      <strong class="ig-kpi__value">{{ health_counts.atrasado }}</strong>
+    </article>
+    <article class="ig-kpi ig-kpi--neutral">
+      <span class="ig-kpi__label">Sem execução</span>
+      <strong class="ig-kpi__value">{{ health_counts.sem_execucao }}</strong>
+    </article>
+  </section>
 
-  <div class="table-shell" style="margin-bottom:12px;"><div class="table-shell__head"><h3 style="margin:0;">Conectores</h3></div><div class="table-shell__body">
-    <table class="table">
-      <thead><tr><th>Nome</th><th>Dominio</th><th>Tipo</th><th>Endpoint</th><th>Ativo</th></tr></thead>
-      <tbody>
-        {% for item in conectores %}
-          <tr>
-            <td>{{ item.nome }}</td>
-            <td>{{ item.get_dominio_display }}</td>
-            <td>{{ item.get_tipo_display }}</td>
-            <td>{{ item.endpoint|default:"-" }}</td>
-            <td>{% if item.ativo %}Sim{% else %}Nao{% endif %}</td>
-          </tr>
-        {% empty %}
-          <tr><td colspan="5">Nenhum conector cadastrado.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div></div>
+  <section class="ig-panel">
+    <div class="ig-panel__head">
+      <div>
+        <h3>Filtro operacional</h3>
+        <p>Busque conectores e execuções por município, domínio, endpoint ou referência.</p>
+      </div>
+    </div>
 
-  <div class="table-shell"><div class="table-shell__head"><h3 style="margin:0;">Ultimas execucoes</h3></div><div class="table-shell__body">
-    <table class="table">
-      <thead><tr><th>Data/Hora</th><th>Conector</th><th>Direcao</th><th>Status</th><th>Registros</th><th>Referencia</th></tr></thead>
-      <tbody>
-        {% for item in execucoes %}
-          <tr>
-            <td>{{ item.executado_em|date:"d/m/Y H:i" }}</td>
-            <td>{{ item.conector.nome }}</td>
-            <td>{{ item.get_direcao_display }}</td>
-            <td>{{ item.get_status_display }}</td>
-            <td>{{ item.quantidade_registros }}</td>
-            <td>{{ item.referencia|default:"-" }}</td>
-          </tr>
-        {% empty %}
-          <tr><td colspan="6">Nenhuma execucao registrada.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div></div>
-</div></div>
+    <form method="get" class="ig-filter-grid">
+      {% if municipios and municipios|length %}
+        <label class="gp-form-group">
+          <span class="gp-form-label">Município</span>
+          <select name="municipio" class="gp-select">
+            {% for m in municipios %}
+              <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+            {% endfor %}
+          </select>
+        </label>
+      {% endif %}
+
+      <label class="gp-form-group">
+        <span class="gp-form-label">Busca textual</span>
+        <input name="q" value="{{ q }}" class="gp-input" placeholder="Conector, domínio, endpoint ou referência">
+      </label>
+
+      <div class="ig-filter-grid__actions">
+        <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
+        <a class="gp-button gp-button--outline" href="{% url 'integracoes:index' %}{% if municipio %}?municipio={{ municipio.id }}{% endif %}"><i class="fa-solid fa-eraser"></i> Limpar</a>
+      </div>
+    </form>
+  </section>
+
+  <section class="ig-grid">
+    <article class="ig-panel">
+      <div class="ig-panel__head">
+        <div>
+          <h3>Conectores</h3>
+          <p>Visão da saúde de cada integração por domínio, tipo e última execução.</p>
+        </div>
+      </div>
+
+      <div class="table-shell">
+        <div class="table-shell__body">
+          <table class="table ig-table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Domínio</th>
+                <th>Tipo</th>
+                <th>Endpoint</th>
+                <th>Ativo</th>
+                <th>Saúde</th>
+                <th>Última execução</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item, latest, health in conectores %}
+                <tr>
+                  <td>{{ item.nome }}</td>
+                  <td>{{ item.get_dominio_display }}</td>
+                  <td>{{ item.get_tipo_display }}</td>
+                  <td><code class="ig-code">{{ item.endpoint|default:"-" }}</code></td>
+                  <td>
+                    {% if item.ativo %}
+                      <span class="ig-bool ig-bool--true">Ativo</span>
+                    {% else %}
+                      <span class="ig-bool ig-bool--false">Inativo</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <span class="ig-health ig-health--{{ health|lower }}">
+                      {% if health == "SEM_EXECUCAO" %}
+                        Sem execução
+                      {% elif health == "ATRASADO" %}
+                        Atrasado
+                      {% elif health == "ERRO" %}
+                        Erro
+                      {% else %}
+                        OK
+                      {% endif %}
+                    </span>
+                  </td>
+                  <td>
+                    {% if latest %}
+                      <div class="ig-last-run">
+                        <span>{{ latest.executado_em|date:"d/m/Y H:i" }}</span>
+                        <span class="ig-exec-status ig-exec-status--{{ latest.status|lower }}">{{ latest.get_status_display }}</span>
+                      </div>
+                    {% else %}
+                      -
+                    {% endif %}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="7">Nenhum conector cadastrado.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <article class="ig-panel">
+      <div class="ig-panel__head">
+        <div>
+          <h3>Últimas execuções</h3>
+          <p>Histórico com status e opção de reprocessamento para falhas.</p>
+        </div>
+      </div>
+
+      <div class="table-shell">
+        <div class="table-shell__body">
+          <table class="table ig-table">
+            <thead>
+              <tr>
+                <th>Data/Hora</th>
+                <th>Conector</th>
+                <th>Direção</th>
+                <th>Status</th>
+                <th>Registros</th>
+                <th>Referência</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in execucoes %}
+                <tr>
+                  <td>{{ item.executado_em|date:"d/m/Y H:i" }}</td>
+                  <td>{{ item.conector.nome }}</td>
+                  <td><span class="ig-direction ig-direction--{{ item.direcao|lower }}">{{ item.get_direcao_display }}</span></td>
+                  <td><span class="ig-exec-status ig-exec-status--{{ item.status|lower }}">{{ item.get_status_display }}</span></td>
+                  <td>{{ item.quantidade_registros }}</td>
+                  <td><code class="ig-code">{{ item.referencia|default:"-" }}</code></td>
+                  <td>
+                    {% if item.status == "FALHA" %}
+                      <form method="post" action="{% url 'integracoes:execucao_reprocessar' item.id %}?municipio={{ municipio.id }}">
+                        {% csrf_token %}
+                        <button type="submit" class="gp-button gp-button--outline gp-button--sm">Reprocessar</button>
+                      </form>
+                    {% else %}
+                      -
+                    {% endif %}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="7">Nenhuma execução registrada.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+  </section>
+</div>
 {% endblock %}

@@ -1,0 +1,26 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Avaliações de Informática • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage gp-professor-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <article class="gp-student-stage__card">
+    <div class="gp-professor-inline-actions gp-mb-3">
+      <a class="gp-button gp-button--outline" href="{% url 'educacao:professor_notas' code_value %}">
+        <i class="fa-solid fa-arrow-left"></i> Voltar para Notas
+      </a>
+      {% if can_edit_notas %}
+        <a class="gp-button gp-button--primary" href="{{ nova_avaliacao_url }}">
+          <i class="fa-solid fa-plus"></i> Nova avaliação
+        </a>
+      {% else %}
+        <span class="gp-badge gp-badge--neutral">Acompanhamento sem edição de notas</span>
+      {% endif %}
+      <span class="gp-badge gp-badge--primary">Turma: {{ turma_informatica.codigo }}</span>
+    </div>
+
+    {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Sem avaliações" empty_text="Nenhuma avaliação cadastrada para esta turma de informática." %}
+  </article>
+</section>
+{% endblock %}

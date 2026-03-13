@@ -9,8 +9,10 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 
+from apps.core.exports import export_csv, export_pdf_table
 from apps.core.decorators import require_perm
 from apps.core.rbac import is_admin
+from apps.core.services_registro_operacao import build_registro_context
 from apps.core.services_auditoria import registrar_auditoria
 from apps.core.services_transparencia import publicar_evento_transparencia
 from apps.financeiro.models import DespEmpenho
@@ -68,6 +70,33 @@ def requisicao_list(request):
     if status:
         qs = qs.filter(status=status)
 
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-criado_em"):
+            rows.append(
+                [
+                    item.numero,
+                    item.objeto,
+                    item.get_status_display(),
+                    item.setor.nome if item.setor else "-",
+                    str(item.valor_estimado or item.valor_itens),
+                    str(item.data_necessidade or ""),
+                ]
+            )
+        headers = ["Numero", "Objeto", "Status", "Setor", "Valor", "Necessidade"]
+        if export == "csv":
+            return export_csv("compras_requisicoes.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="compras_requisicoes.pdf",
+            title="Requisicoes de compra",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'} | Status={status or '-'}",
+        )
+
     return render(
         request,
         "compras/requisicao_list.html",
@@ -91,6 +120,18 @@ def requisicao_list(request):
                     "label": "Licitacoes",
                     "url": reverse("compras:licitacao_list") + f"?municipio={municipio.pk}",
                     "icon": "fa-solid fa-gavel",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
                     "variant": "btn--ghost",
                 },
             ],
@@ -225,6 +266,20 @@ def requisicao_detail(request, pk: int):
         {"label": "Valor base", "value": valor_base},
     ]
 
+    checklist = [
+        {"label": "Objeto informado", "ok": bool(obj.objeto)},
+        {"label": "Justificativa registrada", "ok": bool(obj.justificativa)},
+        {"label": "Dotacao definida", "ok": bool(obj.dotacao_id)},
+        {"label": "Pelo menos 1 item", "ok": obj.itens.exists()},
+        {"label": "Valor base maior que zero", "ok": valor_base > 0},
+    ]
+    registro = build_registro_context(
+        municipio=municipio,
+        modulo="COMPRAS",
+        entidade="RequisicaoCompra",
+        entidade_id=obj.pk,
+    )
+
     return render(
         request,
         "compras/requisicao_detail.html",
@@ -237,6 +292,8 @@ def requisicao_detail(request, pk: int):
             "pills": pills,
             "itens": obj.itens.order_by("id"),
             "municipio": municipio,
+            "checklist_conformidade": checklist,
+            **registro,
         },
     )
 
@@ -279,31 +336,59 @@ def aprovar(request, pk: int):
         return redirect("core:dashboard")
 
     req = get_object_or_404(RequisicaoCompra, pk=pk, municipio=municipio)
+    acao = (request.POST.get("acao") or request.GET.get("acao") or "aprovar").strip().lower()
+    motivo = (request.POST.get("motivo") or request.GET.get("motivo") or "").strip()
+
+    if acao not in {"aprovar", "recusar", "devolver"}:
+        messages.error(request, "Ação de aprovação inválida.")
+        return redirect(reverse("compras:requisicao_detail", args=[req.pk]) + f"?municipio={municipio.pk}")
+    if acao in {"recusar", "devolver"} and not motivo:
+        messages.error(request, "Informe o motivo para recusar/devolver a requisição.")
+        return redirect(reverse("compras:requisicao_detail", args=[req.pk]) + f"?municipio={municipio.pk}")
+
     status_antes = req.status
-    req.status = RequisicaoCompra.Status.APROVADA
-    req.aprovado_por = request.user
-    req.aprovado_em = timezone.now()
+    evento = "REQUISICAO_APROVADA"
+    tipo_evento = "REQUISICAO_APROVADA"
+    if acao == "aprovar":
+        req.status = RequisicaoCompra.Status.APROVADA
+        req.aprovado_por = request.user
+        req.aprovado_em = timezone.now()
+        msg = "Requisicao aprovada."
+    elif acao == "recusar":
+        req.status = RequisicaoCompra.Status.REPROVADA
+        req.aprovado_por = request.user
+        req.aprovado_em = timezone.now()
+        evento = "REQUISICAO_REPROVADA"
+        tipo_evento = "REQUISICAO_REPROVADA"
+        msg = "Requisicao recusada."
+    else:
+        req.status = RequisicaoCompra.Status.EM_APROVACAO
+        evento = "REQUISICAO_DEVOLVIDA"
+        tipo_evento = "REQUISICAO_DEVOLVIDA"
+        msg = "Requisicao devolvida para ajustes."
+
     req.save(update_fields=["status", "aprovado_por", "aprovado_em", "atualizado_em"])
     registrar_auditoria(
         municipio=municipio,
         modulo="COMPRAS",
-        evento="REQUISICAO_APROVADA",
+        evento=evento,
         entidade="RequisicaoCompra",
         entidade_id=req.pk,
         usuario=request.user,
         antes={"status": status_antes},
-        depois={"status": req.status, "numero": req.numero},
+        depois={"status": req.status, "numero": req.numero, "motivo": motivo},
+        observacao=motivo,
     )
     publicar_evento_transparencia(
         municipio=municipio,
         modulo="COMPRAS",
-        tipo_evento="REQUISICAO_APROVADA",
-        titulo=f"Requisicao {req.numero} aprovada",
+        tipo_evento=tipo_evento,
+        titulo=f"Requisicao {req.numero} - {req.get_status_display()}",
         referencia=req.numero,
         valor=req.valor_estimado if req.valor_estimado > 0 else req.valor_itens,
-        dados={"status": req.status},
+        dados={"status": req.status, "motivo": motivo},
     )
-    messages.success(request, "Requisicao aprovada.")
+    messages.success(request, msg)
     return redirect(reverse("compras:requisicao_detail", args=[req.pk]) + f"?municipio={municipio.pk}")
 
 

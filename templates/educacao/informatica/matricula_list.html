@@ -1,0 +1,24 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Matrículas • Informática • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+  <div class="gp-card">
+    <div class="gp-card__body">
+      {% include "core/partials/components/layout/page_head.html" with title="Matrículas" subtitle="Controle de vagas por turma e origem dos alunos" actions=actions %}
+
+      <form method="get" class="gp-form gp-form--inline u-mb-10">
+        <input type="text" class="gp-input" name="q" placeholder="Aluno, curso, turma ou escola" value="{{ q }}">
+        <select class="gp-input" name="status">
+          <option value="">Todos os status</option>
+          {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
+        <a class="gp-button gp-button--outline" href="{{ request.path }}">Limpar</a>
+      </form>
+
+      {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q empty_title="Nenhuma matrícula" empty_text="Registre matrículas para iniciar as aulas." %}
+    </div>
+  </div>
+{% endblock %}

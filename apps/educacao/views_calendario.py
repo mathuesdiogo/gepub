@@ -17,6 +17,8 @@ from apps.core.rbac import (
     can,
     get_profile,
     is_admin,
+    is_professor_profile_role,
+    role_scope_base,
     scope_filter_secretarias,
     scope_filter_turmas,
     scope_filter_unidades,
@@ -177,8 +179,13 @@ def _calendar_manage_allowed(user) -> bool:
         return True
     if not can(user, "educacao.manage"):
         return False
-    role = (getattr(get_profile(user), "role", "") or "").upper()
-    return role in {"SECRETARIA", "MUNICIPAL", "ADMIN"}
+    profile = get_profile(user)
+    role = getattr(profile, "role", "")
+    role_code = ((role or "") + "").strip().upper()
+    # Coordenação de informática pode editar o calendário do seu escopo de unidade.
+    if role_code == "EDU_COORD":
+        return True
+    return role_scope_base(role) in {"SECRETARIA", "MUNICIPAL", "ADMIN"}
 
 
 def _scope_eventos_usuario(user, qs):
@@ -190,8 +197,9 @@ def _scope_eventos_usuario(user, qs):
         return qs.none()
 
     role = (p.role or "").upper()
+    role_base = role_scope_base(role)
 
-    if role == "ALUNO" and getattr(p, "aluno_id", None):
+    if role_base == "ALUNO" and getattr(p, "aluno_id", None):
         matriculas = Matricula.objects.select_related(
             "turma__unidade__secretaria"
         ).filter(aluno_id=p.aluno_id)
@@ -207,7 +215,7 @@ def _scope_eventos_usuario(user, qs):
             Q(unidade__isnull=True) | Q(unidade_id__in=unidades_ids)
         )
 
-    if role == "PROFESSOR":
+    if is_professor_profile_role(role):
         turmas_qs = scope_filter_turmas(
             user, Turma.objects.select_related("unidade__secretaria").all()
         )
@@ -403,7 +411,7 @@ def calendario_index(request):
 @require_perm("educacao.manage")
 def calendario_evento_create(request):
     if not _calendar_manage_allowed(request.user):
-        return HttpResponseForbidden("403 — Apenas a secretaria de educação pode editar o calendário.")
+        return HttpResponseForbidden("403 — Perfil sem permissão para editar o calendário educacional.")
 
     if request.method == "POST":
         form = CalendarioEducacionalEventoForm(request.POST, user=request.user)
@@ -435,7 +443,7 @@ def calendario_evento_create(request):
 @require_perm("educacao.manage")
 def calendario_evento_update(request, pk: int):
     if not _calendar_manage_allowed(request.user):
-        return HttpResponseForbidden("403 — Apenas a secretaria de educação pode editar o calendário.")
+        return HttpResponseForbidden("403 — Perfil sem permissão para editar o calendário educacional.")
 
     evento = get_object_or_404(
         _scope_eventos_usuario(request.user, CalendarioEducacionalEvento.objects.all()),
@@ -472,7 +480,7 @@ def calendario_evento_update(request, pk: int):
 @require_perm("educacao.manage")
 def calendario_evento_delete(request, pk: int):
     if not _calendar_manage_allowed(request.user):
-        return HttpResponseForbidden("403 — Apenas a secretaria de educação pode editar o calendário.")
+        return HttpResponseForbidden("403 — Perfil sem permissão para editar o calendário educacional.")
 
     evento = get_object_or_404(
         _scope_eventos_usuario(request.user, CalendarioEducacionalEvento.objects.all()),

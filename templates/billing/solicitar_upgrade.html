@@ -1,33 +1,46 @@
 {% extends "core/base.html" %}
 {% load static %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/pages/billing.css' %}">
-{% endblock %}
-
 {% block content %}
-<div class="card"><div class="card__body">
+<div class="card billing-page billing-page--upgrade"><div class="card__body billing-page__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <div class="billing-summary-grid">
-    <div class="billing-box">
-      <div class="billing-box__label">Plano</div>
-      <div class="billing-box__value">{{ assinatura.plano.nome }}</div>
-      <div class="billing-box__meta">R$ {{ assinatura.valor_base_mensal }} / mês</div>
-    </div>
-    <div class="billing-box">
-      <div class="billing-box__label">Município</div>
-      <div class="billing-box__value">{{ municipio.nome }}/{{ municipio.uf }}</div>
-      <div class="billing-box__meta">Contrato ativo</div>
-    </div>
-  </div>
+  <section class="billing-hero-grid">
+    <article class="billing-hero-card">
+      <p class="billing-hero-card__kicker">Upgrade contratual</p>
+      <h2 class="billing-hero-card__title">{{ assinatura.plano.nome }}</h2>
+      <p class="billing-hero-card__desc">Solicite expansão de capacidade, addons ou migração para plano superior com rastreabilidade.</p>
+      <div class="billing-hero-card__pills">
+        <span class="billing-pill">R$ {{ assinatura.valor_base_mensal }} / mês</span>
+        <span class="billing-pill billing-pill--soft">{{ municipio.nome }}/{{ municipio.uf }}</span>
+      </div>
+    </article>
+    <article class="billing-status-card">
+      <div class="billing-status-card__row">
+        <p class="billing-status-card__label">Status do contrato</p>
+        <p class="billing-status-card__value">{{ assinatura.get_status_display }}</p>
+      </div>
+      <div class="billing-status-card__row">
+        <p class="billing-status-card__label">Plano atual</p>
+        <p class="billing-status-card__value">{{ assinatura.plano.nome }}</p>
+      </div>
+    </article>
+  </section>
 
-  {% include "core/partials/components/forms/form_shell.html" with form=form cancel_url=cancel_url submit_label="Enviar solicitação" %}
+  <section class="billing-section">
+    <div class="billing-section__head">
+      <h3>Solicitação de upgrade</h3>
+      <p>Preencha o tipo e a quantidade desejada para gerar a proposta incremental.</p>
+    </div>
+    {% include "core/partials/components/forms/form_shell.html" with form=form cancel_url=cancel_url submit_label="Enviar solicitação" %}
+  </section>
 
   {% if preview_valor is not None %}
-    <div class="billing-note">
-      Valor incremental estimado: <strong>R$ {{ preview_valor }} / mês</strong>
-    </div>
+    <section class="billing-section">
+      <div class="billing-note">
+        Valor incremental estimado: <strong>R$ {{ preview_valor }} / mês</strong>
+      </div>
+    </section>
   {% endif %}
 </div></div>
 {% endblock %}

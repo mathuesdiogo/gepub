@@ -1,0 +1,62 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}{{ obj.nome }} • Campanha • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="gp-card"><div class="gp-card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="gp-pills">
+    <span class="gp-pills__item">{{ obj.beneficio.nome }}</span>
+    <span class="gp-pills__item">{{ obj.get_status_display }}</span>
+    <span class="gp-pills__item">{{ obj.get_origem_display }}</span>
+  </div>
+
+  <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__head"><h3>Alunos da campanha</h3></div><div class="gp-table__body">
+    <table class="gp-table__native">
+      <thead><tr><th>Aluno</th><th>Turma</th><th>Status</th><th>Justificativa</th></tr></thead>
+      <tbody>
+      {% for item in items_alunos %}
+      <tr>
+        <td><a href="{% url 'educacao:aluno_detail' item.aluno_id %}">{{ item.aluno.nome }}</a></td>
+        <td>{{ item.turma.nome|default:"—" }}</td>
+        <td>{{ item.get_status_display }}</td>
+        <td>{{ item.justificativa|default:"—" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4">Nenhum aluno vinculado ainda.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+
+  {% if can_manage %}
+  <div class="gp-grid-2">
+    <details class="aluno-form-panel" open>
+      <summary><i class="fa-solid fa-user-plus"></i>Adicionar aluno manualmente</summary>
+      <form class="gp-form" method="post" action="{% url 'educacao:beneficio_campanha_aluno_add' obj.pk %}?municipio={{ municipio.id }}">
+        {% csrf_token %}
+        {{ form_aluno.as_p }}
+        <button class="gp-button gp-button--primary" type="submit">Adicionar aluno</button>
+      </form>
+    </details>
+
+    <details class="aluno-form-panel" open>
+      <summary><i class="fa-solid fa-people-group"></i>Gerar lista por turma</summary>
+      <form class="gp-form" method="post" action="{% url 'educacao:beneficio_campanha_gerar_alunos_turma' obj.pk %}?municipio={{ municipio.id }}">
+        {% csrf_token %}
+        <p>
+          <label>Turma</label>
+          <select class="gp-select" name="turma_id" required>
+            <option value="">Selecione</option>
+            {% for t in turmas_qs %}
+              <option value="{{ t.id }}">{{ t.nome }} ({{ t.unidade.nome }})</option>
+            {% endfor %}
+          </select>
+        </p>
+        <button class="gp-button gp-button--primary" type="submit">Gerar lista da turma</button>
+      </form>
+    </details>
+  </div>
+  {% endif %}
+</div></div>
+{% endblock %}

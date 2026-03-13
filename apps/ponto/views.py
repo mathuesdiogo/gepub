@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from apps.core.decorators import require_perm
+from apps.core.exports import export_csv, export_pdf_table
 from apps.core.rbac import is_admin
 from apps.org.models import Municipio
 
@@ -210,6 +211,32 @@ def escala_list(request):
     if turno:
         qs = qs.filter(tipo_turno=turno)
 
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("nome"):
+            rows.append(
+                [
+                    item.codigo,
+                    item.nome,
+                    item.get_tipo_turno_display(),
+                    item.get_status_display(),
+                    item.carga_horaria_semanal,
+                ]
+            )
+        headers = ["Codigo", "Nome", "Turno", "Status", "Carga semanal"]
+        if export == "csv":
+            return export_csv("ponto_escalas.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="ponto_escalas.pdf",
+            title="Escalas e turnos",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'} | Status={status or '-'} | Turno={turno or '-'}",
+        )
+
     return render(
         request,
         "ponto/escala_list.html",
@@ -230,6 +257,18 @@ def escala_list(request):
                     "url": reverse("ponto:escala_create") + _qs_municipio_suffix(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&turno={turno}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&turno={turno}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
                 },
                 {
                     "label": "Voltar ao painel",
@@ -264,6 +303,33 @@ def vinculo_list(request):
     if ativo in {"0", "1"}:
         qs = qs.filter(ativo=(ativo == "1"))
 
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-ativo", "servidor__first_name", "servidor__username"):
+            rows.append(
+                [
+                    item.servidor.get_full_name() or item.servidor.username,
+                    item.escala.codigo,
+                    item.escala.nome,
+                    str(item.data_inicio),
+                    str(item.data_fim or ""),
+                    "ATIVO" if item.ativo else "INATIVO",
+                ]
+            )
+        headers = ["Servidor", "Escala", "Descricao escala", "Inicio", "Fim", "Status"]
+        if export == "csv":
+            return export_csv("ponto_vinculos.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="ponto_vinculos.pdf",
+            title="Vinculos de escala",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'} | Ativo={ativo or '-'}",
+        )
+
     return render(
         request,
         "ponto/vinculo_list.html",
@@ -281,6 +347,18 @@ def vinculo_list(request):
                     "url": reverse("ponto:vinculo_create") + _qs_municipio_suffix(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&ativo={ativo}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&ativo={ativo}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
                 },
                 {
                     "label": "Escalas",
@@ -376,6 +454,33 @@ def ocorrencia_list(request):
         .order_by("-competencia")
     )
 
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-data_ocorrencia", "-id"):
+            rows.append(
+                [
+                    item.servidor.get_full_name() or item.servidor.username,
+                    item.get_tipo_display(),
+                    str(item.data_ocorrencia),
+                    item.competencia,
+                    item.get_status_display(),
+                    item.descricao or "",
+                ]
+            )
+        headers = ["Servidor", "Tipo", "Data", "Competencia", "Status", "Descricao"]
+        if export == "csv":
+            return export_csv("ponto_ocorrencias.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="ponto_ocorrencias.pdf",
+            title="Ocorrencias de ponto",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'} | Tipo={tipo or '-'} | Status={status or '-'} | Competencia={competencia or '-'}",
+        )
+
     return render(
         request,
         "ponto/ocorrencia_list.html",
@@ -398,6 +503,18 @@ def ocorrencia_list(request):
                     "url": reverse("ponto:ocorrencia_create") + _qs_municipio_suffix(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&tipo={tipo}&competencia={competencia}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&tipo={tipo}&competencia={competencia}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
                 },
                 {
                     "label": "Competências",
@@ -488,6 +605,32 @@ def competencia_list(request):
     if status:
         qs = qs.filter(status=status)
 
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-competencia"):
+            rows.append(
+                [
+                    item.competencia,
+                    item.get_status_display(),
+                    item.total_servidores,
+                    item.total_ocorrencias,
+                    item.total_pendentes,
+                ]
+            )
+        headers = ["Competencia", "Status", "Servidores", "Ocorrencias", "Pendentes"]
+        if export == "csv":
+            return export_csv("ponto_competencias.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="ponto_competencias.pdf",
+            title="Competencias de ponto",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Status={status or '-'}",
+        )
+
     return render(
         request,
         "ponto/competencia_list.html",
@@ -505,6 +648,18 @@ def competencia_list(request):
                     "url": reverse("ponto:competencia_create") + _qs_municipio_suffix(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&status={status}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&status={status}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
                 },
                 {
                     "label": "Ocorrências",

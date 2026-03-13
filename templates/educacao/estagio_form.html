@@ -1,0 +1,9 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}{% if mode == "update" %}Editar Estágio{% else %}Novo Estágio{% endif %} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="gp-card"><div class="gp-card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Estágio" subtitle="Cadastro e acompanhamento de estágio obrigatório e não obrigatório" actions=None %}
+{% include "core/partials/components/forms/form_shell.html" with form=form cancel_url=cancel_url submit_label=submit_label action_url=action_url enctype="multipart/form-data" %}
+</div></div>
+{% endblock %}

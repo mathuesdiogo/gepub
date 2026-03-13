@@ -3,140 +3,239 @@
     {% include "core/partials/components/feedback/empty_state.html" with title="Sem vínculo de aluno" text="Seu perfil ainda não está associado a um aluno. Fale com a administração." %}
   </section>
 {% else %}
-  <div class="admin-dash">
-    <div class="dash-kpi-grid">
-      <div class="admin-kpi admin-kpi--blue">
-        <div class="admin-kpi__icon"><i class="fa-solid fa-bullhorn"></i></div>
-        <div class="admin-kpi__content">
-          <div class="admin-kpi__label">Avisos</div>
-          <div class="admin-kpi__value">{{ avisos|length }}</div>
-          <div class="admin-kpi__meta">Comunicados recentes para você</div>
-        </div>
-      </div>
+  {% with aviso_destaque=avisos|first %}
+    <section class="gp-student-dashboard" aria-label="Painel do aluno">
+      <div class="gp-student-dashboard__grid">
+        <details class="gp-student-widget gp-student-widget--attention" id="bloco-avisos" open>
+          <summary class="gp-student-widget__head">
+            <div>
+              <h3 class="gp-student-widget__title">Fique atento</h3>
+              <span class="gp-student-widget__meta">Comunicados prioritários</span>
+            </div>
+            <span class="gp-student-widget__toggle" aria-hidden="true"></span>
+          </summary>
+          <div class="gp-student-widget__body">
+            {% if aviso_destaque %}
+              <div class="gp-student-highlight">
+                <strong>{{ aviso_destaque.titulo|default:"Comunicado importante" }}</strong>
+                <p>{{ aviso_destaque.texto|default:aviso_destaque.descricao|default:"Confira os detalhes no seu painel."|truncatechars:170 }}</p>
+                <small>{{ aviso_destaque.criado_em|date:"d/m/Y H:i" }}</small>
+              </div>
+            {% else %}
+              <div class="gp-student-empty">Nenhum aviso prioritário no momento.</div>
+            {% endif %}
+          </div>
+        </details>
 
-      <div class="admin-kpi admin-kpi--green">
-        <div class="admin-kpi__icon"><i class="fa-solid fa-file-arrow-down"></i></div>
-        <div class="admin-kpi__content">
-          <div class="admin-kpi__label">Arquivos</div>
-          <div class="admin-kpi__value">{{ arquivos|length }}</div>
-          <div class="admin-kpi__meta">Materiais e anexos publicados</div>
-        </div>
-      </div>
-
-      <div class="admin-kpi admin-kpi--amber">
-        <div class="admin-kpi__icon"><i class="fa-solid fa-calendar-days"></i></div>
-        <div class="admin-kpi__content">
-          <div class="admin-kpi__label">Eventos</div>
-          <div class="admin-kpi__value">{{ eventos_calendario|length }}</div>
-          <div class="admin-kpi__meta">Compromissos no calendário escolar</div>
-        </div>
-      </div>
-    </div>
-
-    <section class="admin-panel">
-      <div class="admin-panel__head">
-        <div>
-          <h3 class="admin-panel__title">Avisos recentes</h3>
-          <p class="admin-panel__sub">Comunicados direcionados ao seu perfil</p>
-        </div>
-      </div>
-
-      {% if avisos %}
-        <div class="admin-table-wrap">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>Título</th>
-                <th>Data</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for a in avisos %}
-                <tr>
-                  <td>{{ a.titulo|default:"Aviso" }}</td>
-                  <td>{{ a.criado_em|date:"d/m/Y H:i" }}</td>
-                </tr>
+        <details class="gp-student-widget" open>
+          <summary class="gp-student-widget__head">
+            <div>
+              <h3 class="gp-student-widget__title">Novidades GEPUB</h3>
+              <span class="gp-student-widget__meta">Últimas publicações</span>
+            </div>
+            <span class="gp-student-widget__toggle" aria-hidden="true"></span>
+          </summary>
+          <div class="gp-student-widget__body">
+            <div class="gp-student-list">
+              {% for a in avisos|slice:":6" %}
+                <article class="gp-student-list__item">
+                  <strong>{{ a.titulo|default:"Aviso" }}</strong>
+                  <p>{{ a.texto|default:a.descricao|default:"Comunicado disponível no sistema."|truncatechars:140 }}</p>
+                  <small>{{ a.criado_em|date:"d/m/Y H:i" }}</small>
+                </article>
+              {% empty %}
+                <div class="gp-student-empty">Nenhuma novidade cadastrada para seu perfil.</div>
               {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% else %}
-        {% include "core/partials/components/feedback/empty_state.html" with title="Sem avisos" text="Nenhum aviso encontrado para seu perfil." %}
-      {% endif %}
-    </section>
+            </div>
+          </div>
+        </details>
 
-    <section class="admin-panel">
-      <div class="admin-panel__head">
-        <div>
-          <h3 class="admin-panel__title">Arquivos recentes</h3>
-          <p class="admin-panel__sub">Materiais disponibilizados para seu escopo</p>
-        </div>
-      </div>
+        <details class="gp-student-widget gp-student-widget--ensino" open>
+          <summary class="gp-student-widget__head">
+            <div>
+              <h3 class="gp-student-widget__title">Ensino</h3>
+              <span class="gp-student-widget__meta">Acesso rápido</span>
+            </div>
+            <span class="gp-student-widget__toggle" aria-hidden="true"></span>
+          </summary>
+          <div class="gp-student-widget__body">
+            <div class="gp-student-actions">
+              <a class="gp-student-pill" href="{% if meus_dados_url %}{{ meus_dados_url }}{% else %}{% url 'accounts:meu_perfil' %}{% endif %}">
+                <i class="fa-solid fa-user"></i><span>Meus Dados</span>
+              </a>
+              <a class="gp-student-pill" href="{% if aluno_documentos_processos_url %}{{ aluno_documentos_processos_url }}{% else %}{% url 'core:dashboard' %}{% endif %}">
+                <i class="fa-solid fa-folder-open"></i><span>Documentos e Processos</span>
+              </a>
+              <a class="gp-student-pill" href="{% if aluno_ensino_url %}{{ aluno_ensino_url }}{% elif meus_dados_url %}{{ meus_dados_url }}{% else %}{% url 'core:dashboard' %}{% endif %}">
+                <i class="fa-solid fa-graduation-cap"></i><span>Ensino</span>
+              </a>
+              <a class="gp-student-pill" href="#bloco-calendario">
+                <i class="fa-solid fa-calendar-days"></i><span>Agenda Acadêmica</span>
+              </a>
+              <a class="gp-student-pill" href="#bloco-arquivos">
+                <i class="fa-solid fa-file-arrow-down"></i><span>Meus Arquivos</span>
+              </a>
+              <a class="gp-student-pill" href="#bloco-avisos">
+                <i class="fa-solid fa-bullhorn"></i><span>Meus Avisos</span>
+              </a>
+              <a class="gp-student-pill" href="{% url 'accounts:alterar_senha' %}">
+                <i class="fa-solid fa-key"></i><span>Segurança da Conta</span>
+              </a>
+              <a class="gp-student-pill" href="{% url 'core:dashboard' %}">
+                <i class="fa-solid fa-rotate-right"></i><span>Atualizar Painel</span>
+              </a>
+            </div>
+          </div>
+        </details>
 
-      {% if arquivos %}
-        <div class="admin-table-wrap">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>Arquivo</th>
-                <th>Data</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for arq in arquivos %}
-                <tr>
-                  <td>{{ arq.titulo|default:"Arquivo" }}</td>
-                  <td>{{ arq.criado_em|date:"d/m/Y H:i" }}</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% else %}
-        {% include "core/partials/components/feedback/empty_state.html" with title="Sem arquivos" text="Nenhum arquivo encontrado para seu perfil." %}
-      {% endif %}
-    </section>
+        {% if informatica_matriculas %}
+          <details class="gp-student-widget gp-student-widget--ensino" open>
+            <summary class="gp-student-widget__head">
+              <div>
+                <h3 class="gp-student-widget__title">Curso de Informática</h3>
+                <span class="gp-student-widget__meta">Turmas, próximas aulas e frequência</span>
+              </div>
+              <span class="gp-student-widget__toggle" aria-hidden="true"></span>
+            </summary>
+            <div class="gp-student-widget__body">
+              <div class="gp-professor-metrics">
+                <div class="gp-professor-metric">
+                  <span>Turmas ativas</span>
+                  <strong>{{ informatica_matriculas|length }}</strong>
+                </div>
+                <div class="gp-professor-metric">
+                  <span>Próximas aulas</span>
+                  <strong>{{ informatica_proximas_aulas|length }}</strong>
+                </div>
+                <div class="gp-professor-metric">
+                  <span>Faltas para justificar</span>
+                  <strong>{{ informatica_faltas_abertas|default:0 }}</strong>
+                </div>
+                <div class="gp-professor-metric">
+                  <span>Alertas de frequência</span>
+                  <strong>{{ informatica_alertas|default:0 }}</strong>
+                </div>
+              </div>
 
-    <section class="admin-panel">
-      <div class="admin-panel__head">
-        <div>
-          <h3 class="admin-panel__title">Calendário educacional</h3>
-          <p class="admin-panel__sub">Eventos vigentes no seu calendário escolar</p>
-        </div>
-        {% if perms.educacao.view %}
-          <a class="btn btn--ghost" href="{% url 'educacao:calendario_index' %}"><i class="fa-solid fa-calendar-week"></i> Ver calendário</a>
+              <div class="gp-student-list u-mt-10">
+                {% for aula in informatica_proximas_aulas|slice:":6" %}
+                  <article class="gp-student-list__item">
+                    <strong>{{ aula.turma.codigo }} • {{ aula.data_aula|date:"d/m/Y" }}</strong>
+                    <p>
+                      {% if aula.encontro %}
+                        {{ aula.encontro.hora_inicio|time:"H:i" }}-{{ aula.encontro.hora_fim|time:"H:i" }}
+                      {% else %}
+                        Horário não definido
+                      {% endif %}
+                    </p>
+                  </article>
+                {% empty %}
+                  <div class="gp-student-empty">Sem próximas aulas de Informática no momento.</div>
+                {% endfor %}
+              </div>
+
+              <div class="gp-student-actions u-mt-10">
+                <a class="gp-student-pill" href="{{ aluno_ensino_horarios_url }}">
+                  <i class="fa-solid fa-clock"></i><span>Horários da Informática</span>
+                </a>
+                <a class="gp-student-pill" href="{{ aluno_ensino_justificativa_url }}">
+                  <i class="fa-solid fa-file-signature"></i><span>Justificar falta</span>
+                </a>
+                <a class="gp-student-pill" href="{{ aluno_ensino_mensagens_url }}">
+                  <i class="fa-solid fa-bell"></i><span>Avisos da Informática</span>
+                </a>
+              </div>
+            </div>
+          </details>
         {% endif %}
-      </div>
 
-      {% if eventos_calendario %}
-        <div class="admin-table-wrap">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>Data</th>
-                <th>Evento</th>
-                <th>Tipo</th>
-              </tr>
-            </thead>
-            <tbody>
+        <details class="gp-student-widget gp-student-widget--wide" id="bloco-calendario" open>
+          <summary class="gp-student-widget__head">
+            <div>
+              <h3 class="gp-student-widget__title">Calendário acadêmico</h3>
+              <span class="gp-student-widget__meta">Mês atual e próximos eventos</span>
+            </div>
+            <span class="gp-student-widget__toggle" aria-hidden="true"></span>
+          </summary>
+          <div class="gp-student-widget__body">
+            <section class="gp-student-calendar" aria-label="Calendário do mês">
+              <h4 class="gp-student-calendar__month">{{ student_calendario.mes_label }}</h4>
+              <table class="gp-student-calendar__table">
+                <thead>
+                  <tr>
+                    {% for label in student_calendario.semana_labels %}
+                      <th>{{ label }}</th>
+                    {% endfor %}
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for week in student_calendario.weeks %}
+                    <tr>
+                      {% for cell in week %}
+                        <td class="{% if not cell.day %}is-empty{% endif %}{% if cell.is_today %} is-today{% endif %}{% if cell.has_event %} has-event{% endif %}{% if cell.event_type %} evento-{{ cell.event_type }}{% endif %}">
+                          {% if cell.day %}{{ cell.day }}{% endif %}
+                        </td>
+                      {% endfor %}
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </section>
+
+            <ul class="gp-student-events-list">
               {% for ev in eventos_calendario %}
-                <tr>
-                  <td>
-                    {{ ev.data_inicio|date:"d/m/Y" }}
+                <li class="gp-student-events-list__item gp-evento--{{ ev.tipo|lower }}">
+                  <span class="gp-student-events-list__line">
+                    <span class="gp-student-events-list__title">{{ ev.titulo }}</span>
+                    <span class="gp-student-events-list__meta">{{ ev.get_tipo_display }} • {{ ev.data_inicio|date:"d/m/Y" }}
                     {% if ev.data_fim and ev.data_fim != ev.data_inicio %}
                       até {{ ev.data_fim|date:"d/m/Y" }}
                     {% endif %}
-                  </td>
-                  <td>{{ ev.titulo }}</td>
-                  <td>{{ ev.get_tipo_display }}</td>
-                </tr>
+                  </span>
+                  </span>
+                </li>
+              {% empty %}
+                <li class="gp-student-events-list__item is-empty">Nenhum evento de calendário disponível.</li>
               {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% else %}
-        {% include "core/partials/components/feedback/empty_state.html" with title="Sem eventos" text="Ainda não há eventos de calendário para você." %}
-      {% endif %}
+            </ul>
+
+            <a class="gp-student-pill gp-student-pill--compact gp-student-calendar__cta" href="{% url 'educacao:calendario_index' %}">
+              <i class="fa-solid fa-link"></i><span>Calendário Completo</span>
+            </a>
+          </div>
+        </details>
+
+        <details class="gp-student-widget" id="bloco-arquivos" open>
+          <summary class="gp-student-widget__head">
+            <div>
+              <h3 class="gp-student-widget__title">Arquivos e materiais</h3>
+              <span class="gp-student-widget__meta">Últimos envios</span>
+            </div>
+            <span class="gp-student-widget__toggle" aria-hidden="true"></span>
+          </summary>
+          <div class="gp-student-widget__body">
+            <div class="gp-student-list">
+              {% for arq in arquivos|slice:":8" %}
+                <article class="gp-student-list__item">
+                  <strong>
+                    {% if arq.arquivo %}
+                      <a class="gp-student-link" href="{{ arq.arquivo.url }}" target="_blank" rel="noopener">
+                        {{ arq.titulo|default:"Arquivo" }}
+                      </a>
+                    {% else %}
+                      {{ arq.titulo|default:"Arquivo" }}
+                    {% endif %}
+                  </strong>
+                  <small>{{ arq.criado_em|date:"d/m/Y H:i" }}</small>
+                </article>
+              {% empty %}
+                <div class="gp-student-empty">Nenhum arquivo publicado para seu vínculo.</div>
+              {% endfor %}
+            </div>
+          </div>
+        </details>
+
+      </div>
     </section>
-  </div>
+  {% endwith %}
 {% endif %}

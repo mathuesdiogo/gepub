@@ -1,0 +1,160 @@
+{% extends "educacao/base_modulo.html" %}
+{% load gepub_ui %}
+{% block title %}{{ obj.numero_ano }} • Edital • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="gp-card"><div class="gp-card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="gp-pills">
+    <span class="gp-pills__item">{{ obj.get_status_display }}</span>
+    <span class="gp-pills__item">{{ obj.beneficio.nome }}</span>
+    <span class="gp-pills__item">{{ obj.get_abrangencia_display }}</span>
+    <span class="gp-pills__item">{{ obj.get_publico_alvo_display }}</span>
+  </div>
+
+  {% if can_manage and obj.status == 'RASCUNHO' %}
+  <form class="gp-form" method="post" action="{% url 'educacao:beneficio_edital_publicar' obj.pk %}?municipio={{ municipio.id }}">
+    {% csrf_token %}
+    <button class="gp-button gp-button--primary" type="submit">Publicar edital</button>
+  </form>
+  {% endif %}
+
+  <div class="gp-grid-2">
+    <div class="gp-card"><div class="gp-card__body">
+      <h4>Critérios</h4>
+      <ul>
+        {% for c in obj.criterios.all %}
+          <li>
+            {{ c.nome }} ({{ c.get_tipo_display }})
+            {% if c.peso %} — peso {{ c.peso }}{% endif %}
+            {% if c.fonte_dado %} — fonte: {{ c.fonte_dado }}{% endif %}
+            {% if c.regra %} — regra: <code>{{ c.regra }}</code>{% endif %}
+            {% if c.exige_comprovacao %} — exige comprovação{% endif %}
+          </li>
+        {% empty %}
+          <li>Sem critérios cadastrados.</li>
+        {% endfor %}
+      </ul>
+      {% if can_manage %}
+      <details class="aluno-form-panel">
+        <summary>Adicionar critério</summary>
+        <form class="gp-form" method="post" action="{% url 'educacao:beneficio_edital_criterio_add' obj.pk %}?municipio={{ municipio.id }}">
+          {% csrf_token %}
+          {{ form_criterio.as_p }}
+          <button class="gp-button gp-button--primary" type="submit">Adicionar</button>
+        </form>
+      </details>
+      {% endif %}
+    </div></div>
+
+    <div class="gp-card"><div class="gp-card__body">
+      <h4>Documentação</h4>
+      <ul>
+        {% for d in obj.documentos.all %}
+          <li>{{ d.nome }} {% if d.obrigatorio %}(obrigatório){% endif %}</li>
+        {% empty %}
+          <li>Sem documentos cadastrados.</li>
+        {% endfor %}
+      </ul>
+      {% if can_manage %}
+      <details class="aluno-form-panel">
+        <summary>Adicionar documento</summary>
+        <form class="gp-form" method="post" action="{% url 'educacao:beneficio_edital_documento_add' obj.pk %}?municipio={{ municipio.id }}">
+          {% csrf_token %}
+          {{ form_documento.as_p }}
+          <button class="gp-button gp-button--primary" type="submit">Adicionar</button>
+        </form>
+      </details>
+      {% endif %}
+    </div></div>
+  </div>
+
+  <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__head"><h3>Inscrições</h3></div><div class="gp-table__body">
+    <table class="gp-table__native">
+      <thead><tr><th>Aluno</th><th>Escola</th><th>Turma</th><th>Status</th><th>Pontuação</th><th>Docs</th><th>Data</th><th>Ações</th></tr></thead>
+      <tbody>
+      {% for i in inscricoes %}
+      <tr>
+        <td><a href="{% url 'educacao:aluno_detail' i.aluno_id %}">{{ i.aluno.nome }}</a></td>
+        <td>{{ i.escola.nome|default:"—" }}</td>
+        <td>{{ i.turma.nome|default:"—" }}</td>
+        <td>{{ i.get_status_display }}</td>
+        <td>{{ i.pontuacao }}</td>
+        <td>{{ i.documentos.count }}</td>
+        <td>{{ i.data_hora|date:"d/m/Y H:i" }}</td>
+        <td>
+          <a href="{% url 'educacao:beneficio_edital_inscricao_detail' obj.pk i.pk %}?municipio={{ municipio.id }}">Detalhes</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="8">Sem inscrições.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+
+  {% if can_manage %}
+  <details class="aluno-form-panel">
+    <summary><i class="fa-solid fa-user-plus"></i>Adicionar inscrição</summary>
+    <form class="gp-form" method="post" enctype="multipart/form-data" action="{% url 'educacao:beneficio_edital_inscricao_add' obj.pk %}?municipio={{ municipio.id }}">
+      {% csrf_token %}
+      {% for hidden in form_inscricao.hidden_fields %}{{ hidden }}{% endfor %}
+      {{ form_inscricao.non_field_errors }}
+
+      <div class="gp-grid-2">
+        <div>{{ form_inscricao.aluno.label_tag }} {{ form_inscricao.aluno }}{{ form_inscricao.aluno.errors }}</div>
+        <div>{{ form_inscricao.escola.label_tag }} {{ form_inscricao.escola }}{{ form_inscricao.escola.errors }}</div>
+        <div>{{ form_inscricao.turma.label_tag }} {{ form_inscricao.turma }}{{ form_inscricao.turma.errors }}</div>
+        <div>{{ form_inscricao.usar_documentos_cadastro.label_tag }} {{ form_inscricao.usar_documentos_cadastro }}{{ form_inscricao.usar_documentos_cadastro.errors }}</div>
+      </div>
+
+      {% if form_inscricao.criterios_meta %}
+      <h4>Critérios para inscrição</h4>
+      <div class="gp-grid-1">
+        {% for meta in form_inscricao.criterios_meta %}
+        <div class="gp-card"><div class="gp-card__body gp-p-10">
+          <strong>{{ meta.obj.nome }}</strong>
+          <div class="text-muted gp-fs-sm">
+            Tipo: {{ meta.obj.get_tipo_display }} |
+            Fonte: {{ meta.obj.fonte_dado|default:"declaracao" }}
+            {% if meta.obj.peso %}| Peso: {{ meta.obj.peso }}{% endif %}
+            {% if meta.obj.regra %}| Regra: <code>{{ meta.obj.regra }}</code>{% endif %}
+          </div>
+          {% if meta.check_name %}
+          <div class="gp-mt-8">{{ form_inscricao|get_item:meta.check_name }}</div>
+          {% endif %}
+          {% if meta.value_name %}
+          <div class="gp-mt-8">
+            {{ form_inscricao|get_item:meta.value_name|default:"" }}
+          </div>
+          {% endif %}
+          {% if meta.file_name %}
+          <div class="gp-mt-8">
+            {{ form_inscricao|get_item:meta.file_name }}
+          </div>
+          {% endif %}
+        </div></div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if form_inscricao.documentos_meta %}
+      <h4>Documentos do edital</h4>
+      <div class="gp-grid-2">
+        {% for meta in form_inscricao.documentos_meta %}
+        <div>
+          <label>{{ meta.obj.nome }}{% if meta.obj.obrigatorio %} (obrigatório){% endif %}</label>
+          {{ form_inscricao|get_item:meta.file_name }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div>{{ form_inscricao.justificativa.label_tag }} {{ form_inscricao.justificativa }}{{ form_inscricao.justificativa.errors }}</div>
+      <button class="gp-button gp-button--primary" type="submit">Salvar inscrição</button>
+    </form>
+  </details>
+  {% endif %}
+</div></div>
+{% endblock %}

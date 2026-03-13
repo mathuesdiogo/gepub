@@ -1,21 +1,23 @@
 {% extends "core/base.html" %}
-{% load static %}
 
-{% block header %}Educação{% endblock %}
-
-{% block extra_css %}
-  {{ block.super }}
-  <link rel="stylesheet" href="{% static 'css/pages/educacao-module.css' %}">
+{% block header %}
+  {% with route=request.resolver_match.url_name|default:'' %}
+    {% if role_code == 'EDU_COORD' and 'informatica_' in route or role_code == 'EDU_COORD' and 'calendario_' in route %}Informática{% else %}Educação{% endif %}
+  {% endwith %}
 {% endblock %}
 
 {% block content %}
-  <div class="module-shell educacao-module">
-    <aside class="module-shell__aside">
-      {% include "educacao/_menu_modulo.html" %}
-    </aside>
+  {% with route=request.resolver_match.url_name|default:'' %}
+    <div class="gp-module-shell educacao-module{% if hide_module_menu or is_professor_role or role_code == 'EDU_COORD' or role_code == 'EDU_SECRETARIO' or 'informatica_' in route or 'calendario_' in route %} gp-module-shell--single{% endif %}">
+      {% if not hide_module_menu and not is_professor_role and role_code != 'EDU_COORD' and role_code != 'EDU_SECRETARIO' and 'informatica_' not in route and 'calendario_' not in route %}
+      <aside class="gp-module-shell__aside">
+        {% include "educacao/_menu_modulo.html" %}
+      </aside>
+      {% endif %}
 
-    <main class="module-shell__main">
-      {% block module_content %}{% endblock %}
-    </main>
-  </div>
+      <main class="gp-module-shell__main">
+        {% block module_content %}{% endblock %}
+      </main>
+    </div>
+  {% endwith %}
 {% endblock %}

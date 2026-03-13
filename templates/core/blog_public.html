@@ -1,0 +1,39 @@
+{% extends "core/public_site_base.html" %}
+
+{% block public_page_content %}
+<section class="ps-hero">
+  <p class="ps-kicker">Conteúdo institucional</p>
+  <h1>{{ page_title }}</h1>
+  <p>{{ page_subtitle }}</p>
+</section>
+
+<section class="ps-section">
+  <header class="ps-section__head">
+    <h2>Publicações recentes</h2>
+    <p>Insights aplicáveis para secretarias, equipes técnicas e gestores municipais.</p>
+  </header>
+
+  <div class="ps-post-grid">
+    {% for post in posts %}
+      <article class="ps-card ps-post-card">
+        <div class="ps-post-card__meta">
+          <span>{{ post.categoria }}</span>
+          <small>{{ post.tempo_leitura }} • {{ post.data }}</small>
+        </div>
+        <h3>{{ post.titulo }}</h3>
+        <p>{{ post.resumo }}</p>
+        <a href="{{ cta_documentacao }}">Ler artigo completo</a>
+      </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="ps-cta">
+  <h2>Quer aprofundar a visão técnica da plataforma?</h2>
+  <p>Acesse documentação completa de módulos, fluxos e integrações.</p>
+  <div class="ps-cta__actions">
+    <a class="ps-btn ps-btn--dark" href="{{ cta_documentacao }}">Abrir documentação</a>
+    <a class="ps-btn ps-btn--light" href="{{ cta_home }}#contato">Falar com especialista</a>
+  </div>
+</section>
+{% endblock %}

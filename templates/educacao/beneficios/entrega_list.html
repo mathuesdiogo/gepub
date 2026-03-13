@@ -1,0 +1,39 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Entregas • Benefícios • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="gp-card"><div class="gp-card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <form method="get" class="gp-form gp-table__filters">
+    <input class="gp-input" name="q" value="{{ q }}" placeholder="Aluno/benefício/local">
+    <select class="gp-input" name="status">
+      <option value="">Status</option>
+      {% for value,label in status_choices %}
+      <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button class="gp-button gp-button--primary gp-button--sm" type="submit">Filtrar</button>
+  </form>
+
+  <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__body">
+    <table class="gp-table__native">
+      <thead><tr><th>Data</th><th>Aluno</th><th>Benefício</th><th>Campanha</th><th>Status</th><th>Local</th></tr></thead>
+      <tbody>
+      {% for i in items %}
+        <tr>
+          <td>{{ i.data_hora|date:"d/m/Y H:i" }}</td>
+          <td><a href="{% url 'educacao:beneficio_entrega_detail' i.pk %}?municipio={{ i.municipio_id }}">{{ i.aluno.nome }}</a></td>
+          <td>{{ i.beneficio.nome }}</td>
+          <td>{{ i.campanha.nome|default:"—" }}</td>
+          <td>{{ i.get_status_display }}</td>
+          <td>{{ i.local_entrega|default:"—" }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6">Nenhuma entrega encontrada.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

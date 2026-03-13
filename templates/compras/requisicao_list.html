@@ -1,31 +1,31 @@
 {% extends "core/base.html" %}
 
 {% block content %}
-<div class="card"><div class="card__body">
+<div class="gp-card"><div class="gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+  <form method="get" class="gp-table__filters">
     {% if municipios and municipios|length %}
-      <select name="municipio" class="input" style="max-width:240px;">
+      <select name="municipio" class="gp-input">
         {% for m in municipios %}
           <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
         {% endfor %}
       </select>
     {% endif %}
 
-    <select name="status" class="input" style="max-width:220px;">
+    <select name="status" class="gp-input">
       <option value="">Todos os status</option>
       {% for key,label in status_choices %}
         <option value="{{ key }}" {% if status == key %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
 
-    <input name="q" value="{{ q }}" class="input" placeholder="Numero, objeto, fornecedor" style="max-width:280px;">
-    <button class="btn btn--sm" type="submit">Filtrar</button>
+    <input name="q" value="{{ q }}" class="gp-input" placeholder="Numero, objeto, fornecedor">
+    <button class="gp-button gp-button--sm" type="submit">Filtrar</button>
   </form>
 
-  <div class="table-shell"><div class="table-shell__body">
-    <table class="table">
+  <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__body">
+    <table class="gp-table__native">
       <thead><tr><th>Numero</th><th>Objeto</th><th>Status</th><th>Valor</th><th>Empenho</th><th></th></tr></thead>
       <tbody>
         {% for item in items %}
@@ -35,7 +35,7 @@
             <td>{{ item.get_status_display }}</td>
             <td>R$ {{ item.valor_estimado }}</td>
             <td>{{ item.empenho|default:"-" }}</td>
-            <td><a class="link" href="{% url 'compras:requisicao_detail' item.id %}?municipio={{ municipio.id }}">ver</a></td>
+            <td><a class="gp-anchor-link" href="{% url 'compras:requisicao_detail' item.id %}?municipio={{ municipio.id }}">ver</a></td>
           </tr>
         {% empty %}
           <tr><td colspan="6">Nenhuma requisicao encontrada.</td></tr>

@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from apps.core.exports import export_csv, export_pdf_table
+from apps.core.services_registro_operacao import build_registro_context
+
 from .views_common import *
 from .views_common import _municipios_admin, _resolve_municipio, _selected_exercicio
 
@@ -27,6 +30,34 @@ def extrato_list(request):
             | Q(conta_bancaria__conta__icontains=q)
         )
 
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-criado_em", "-id"):
+            rows.append(
+                [
+                    str(item.criado_em),
+                    str(item.exercicio.ano),
+                    f"{item.conta_bancaria.banco_nome} {item.conta_bancaria.agencia}/{item.conta_bancaria.conta}",
+                    item.formato,
+                    str(item.total_itens),
+                    str(item.total_creditos),
+                    str(item.total_debitos),
+                ]
+            )
+        headers = ["Importado em", "Exercicio", "Conta", "Formato", "Itens", "Creditos", "Debitos"]
+        if export == "csv":
+            return export_csv("financeiro_extratos.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="financeiro_extratos.pdf",
+            title="Importacoes de extrato bancario",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'} | Exercicio={exercicio.ano if exercicio else '-'}",
+        )
+
     return render(
         request,
         "financeiro/extrato_list.html",
@@ -45,6 +76,18 @@ def extrato_list(request):
                     "url": reverse("financeiro:extrato_create") + f"?municipio={municipio.pk}",
                     "icon": "fa-solid fa-file-import",
                     "variant": "btn-primary",
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&exercicio={exercicio.pk if exercicio else ''}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&exercicio={exercicio.pk if exercicio else ''}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
                 },
                 {
                     "label": "Voltar",
@@ -134,6 +177,18 @@ def extrato_detail(request, pk: int):
 
     total_conciliados = RecConciliacaoItem.objects.filter(extrato_item__importacao=importacao).count()
     total_pendentes = max(importacao.total_itens - total_conciliados, 0)
+    checklist = [
+        {"label": "Conta bancaria vinculada", "ok": bool(importacao.conta_bancaria_id)},
+        {"label": "Exercicio vinculado", "ok": bool(importacao.exercicio_id)},
+        {"label": "Importacao com itens", "ok": importacao.total_itens > 0},
+        {"label": "Formato de importacao informado", "ok": bool(importacao.formato)},
+    ]
+    registro = build_registro_context(
+        municipio=municipio,
+        modulo="FINANCEIRO",
+        entidade="TesExtratoImportacao",
+        entidade_id=importacao.pk,
+    )
 
     return render(
         request,
@@ -147,6 +202,8 @@ def extrato_detail(request, pk: int):
             "q": q,
             "total_conciliados": total_conciliados,
             "total_pendentes": total_pendentes,
+            "checklist_conformidade": checklist,
+            **registro,
             "actions": [
                 {
                     "label": "Conciliação automática",

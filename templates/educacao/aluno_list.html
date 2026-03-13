@@ -2,18 +2,18 @@
 {% block title %}Alunos • Educação • GEPUB{% endblock %}
 
 {% block breadcrumbs %}
-  <div class="breadcrumbs">
-    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
-    <span class="breadcrumbs__sep">/</span>
-    <a class="breadcrumbs__link" href="{% url 'educacao:index' %}">Educação</a>
-    <span class="breadcrumbs__sep">/</span>
-    <span class="breadcrumbs__current">Alunos</span>
+  <div class="gp-breadcrumb">
+    <a class="gp-breadcrumb__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="gp-breadcrumb__sep">/</span>
+    <a class="gp-breadcrumb__link" href="{% url 'educacao:index' %}">Educação</a>
+    <span class="gp-breadcrumb__sep">/</span>
+    <span class="gp-breadcrumb__current">Alunos</span>
   </div>
 {% endblock %}
 
 {% block module_content %}
-  <div class="card">
-    <div class="card__body">
+  <div class="gp-card">
+    <div class="gp-card__body">
 
       {% include "core/partials/components/layout/page_head.html" with title="Alunos" subtitle="Gerencie os alunos por escola e situação" actions=actions %}
 

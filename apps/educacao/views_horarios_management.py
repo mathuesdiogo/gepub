@@ -8,47 +8,22 @@ from apps.core.rbac import scope_filter_turmas
 
 from .models import Turma
 from .models_horarios import GradeHorario, AulaHorario
-from .views_horarios_core import parse_hhmm
+from .services_turma_setup import gerar_grade_horario_padrao_turma
 
 
 def horario_gerar_padrao_impl(request, turma_id: int):
-    turma_qs = scope_filter_turmas(request.user, Turma.objects.all())
+    turma_qs = scope_filter_turmas(
+        request.user,
+        Turma.objects.select_related("matriz_curricular", "curso"),
+    )
     turma = get_object_or_404(turma_qs, pk=turma_id)
 
     grade, _ = GradeHorario.objects.get_or_create(turma=turma)
-
     if grade.aulas.exists():
         messages.warning(request, "Essa turma já possui aulas no horário. Apague/limpe antes de gerar novamente.")
         return redirect("educacao:horario_turma", turma_id=turma.pk)
-
-    turnos = {
-        "MANHA": [("07:30", "08:20"), ("08:20", "09:10"), ("09:20", "10:10"), ("10:10", "11:00"), ("11:00", "11:50")],
-        "TARDE": [("13:30", "14:20"), ("14:20", "15:10"), ("15:20", "16:10"), ("16:10", "17:00"), ("17:00", "17:50")],
-        "NOITE": [("18:30", "19:20"), ("19:20", "20:10"), ("20:20", "21:10"), ("21:10", "22:00")],
-    }
-
-    turno = str(getattr(turma, "turno", None) or "MANHA").upper()
-    blocos = turnos.get(turno, turnos["MANHA"])
-
-    dias = [c[0] for c in AulaHorario.Dia.choices]
-    dias_uteis = [d for d in dias if d in {"SEG", "TER", "QUA", "QUI", "SEX"}]
-    if not dias_uteis:
-        dias_uteis = dias[:5]
-
-    created = 0
-    for dia in dias_uteis:
-        for idx, (ini_s, fim_s) in enumerate(blocos, start=1):
-            AulaHorario.objects.create(
-                grade=grade,
-                dia=dia,
-                inicio=parse_hhmm(ini_s),
-                fim=parse_hhmm(fim_s),
-                disciplina=f"Aula {idx}",
-                sala="",
-            )
-            created += 1
-
-    messages.success(request, f"Grade padrão gerada com sucesso ({created} aulas).")
+    result = gerar_grade_horario_padrao_turma(turma, overwrite=False, preencher_professor=True)
+    messages.success(request, f"Grade padrão gerada com sucesso ({result.criado} aulas) usando {result.fonte}.")
     return redirect("educacao:horario_turma", turma_id=turma.pk)
 
 

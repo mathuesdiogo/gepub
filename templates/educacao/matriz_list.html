@@ -1,0 +1,13 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Matrizes Curriculares • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+  <div class="gp-card">
+    <div class="gp-card__body">
+      {% include "core/partials/components/layout/page_head.html" with title="Matrizes Curriculares" subtitle="Base pedagógica da educação infantil e ensino fundamental" actions=actions %}
+      {% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Matriz, unidade ou secretaria..." action_url=action_url clear_url=clear_url extra_filters=extra_filters has_filters=has_filters %}
+      {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q empty_title="Nenhuma matriz encontrada" empty_text="Cadastre matrizes por etapa e série/ano para estruturar turmas." %}
+    </div>
+  </div>
+{% endblock %}
+

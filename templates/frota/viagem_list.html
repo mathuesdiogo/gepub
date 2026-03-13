@@ -5,19 +5,19 @@
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
   <form method="get" class="filter-bar" style="margin-bottom:12px;">
     {% if municipios and municipios|length %}
-      <select name="municipio" class="input" style="max-width:240px;">
+      <select name="municipio" class="gp-input" style="max-width:240px;">
         {% for m in municipios %}
           <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
         {% endfor %}
       </select>
     {% endif %}
-    <select name="status" class="input" style="max-width:220px;">
+    <select name="status" class="gp-input" style="max-width:220px;">
       <option value="">Todos status</option>
       {% for key,label in status_choices %}
         <option value="{{ key }}" {% if status == key %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
-    <button class="btn btn--sm" type="submit">Filtrar</button>
+    <button class="gp-button gp-button--outline gp-button--sm" type="submit">Filtrar</button>
   </form>
   <div class="table-shell"><div class="table-shell__body">
     <table class="table">
@@ -34,7 +34,7 @@
               {% if item.status == "ABERTA" %}
                 <form method="post" action="{% url 'frota:viagem_concluir' item.pk %}?municipio={{ municipio.pk }}" style="display:inline;">
                   {% csrf_token %}
-                  <button class="btn btn--sm btn-primary" type="submit">Concluir</button>
+                  <button class="gp-button gp-button--primary gp-button--sm" type="submit">Concluir</button>
                 </form>
               {% else %}
                 -

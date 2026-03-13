@@ -1,0 +1,110 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Equivalências da Matriz • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+  <div class="gp-card">
+    <div class="gp-card__body">
+      {% include "core/partials/components/layout/page_head.html" with title="Grupos de Equivalência" subtitle=matriz.nome actions=actions %}
+
+      <div class="u-grid-2">
+        <div class="section">
+          <div class="section__title">Novo grupo</div>
+          <div class="small">Cadastre grupos para validar componentes equivalentes na mesma matriz.</div>
+          <form method="post" class="gp-form u-mt-10">
+            {% csrf_token %}
+            <input type="hidden" name="_action" value="add_grupo">
+            {{ grupo_form.as_p }}
+            <button type="submit" class="gp-button gp-button--primary">Adicionar grupo</button>
+          </form>
+        </div>
+
+        <div class="section">
+          <div class="section__title">Vincular componente ao grupo</div>
+          <div class="small">Selecione o grupo e o componente da matriz para montar a equivalência.</div>
+          <form method="post" class="gp-form u-mt-10">
+            {% csrf_token %}
+            <input type="hidden" name="_action" value="add_item">
+            <p>
+              <label for="id_grupo_id">Grupo</label>
+              <select id="id_grupo_id" name="grupo_id" class="gp-select" required>
+                <option value="">Selecione...</option>
+                {% for grupo in grupos %}
+                  <option value="{{ grupo.pk }}" {% if selected_grupo_id|stringformat:'s' == grupo.pk|stringformat:'s' %}selected{% endif %}>
+                    {{ grupo.nome }}
+                  </option>
+                {% endfor %}
+              </select>
+            </p>
+            {{ item_form.as_p }}
+            <button type="submit" class="gp-button gp-button--primary">Adicionar componente</button>
+          </form>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="section">
+        <div class="section__title">Grupos cadastrados</div>
+        <table class="gp-table__native u-mt-10">
+          <thead>
+            <tr>
+              <th>Grupo</th>
+              <th class="u-w-140">Mínimo</th>
+              <th class="u-w-140">Ativo</th>
+              <th>Componentes</th>
+              <th class="u-w-120">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for grupo in grupos %}
+              <tr>
+                <td>
+                  <strong>{{ grupo.nome }}</strong>
+                  {% if grupo.observacao %}
+                    <div class="small">{{ grupo.observacao }}</div>
+                  {% endif %}
+                </td>
+                <td>{{ grupo.minimo_componentes }}</td>
+                <td>{% if grupo.ativo %}Sim{% else %}Não{% endif %}</td>
+                <td>
+                  {% with itens=grupo.itens.all %}
+                    {% if itens %}
+                      <ul style="margin:0; padding-left: 18px;">
+                        {% for item in itens %}
+                          <li class="u-mb-6">
+                            {{ item.ordem }} • {{ item.componente.componente.nome }}
+                            {% if not item.ativo %}(inativo){% endif %}
+                            <form method="post" class="gp-form gp-inline-form" style="display:inline; margin-left:8px;">
+                              {% csrf_token %}
+                              <input type="hidden" name="_action" value="remove_item">
+                              <input type="hidden" name="item_id" value="{{ item.pk }}">
+                              <button type="submit" class="gp-button gp-button--ghost">Remover</button>
+                            </form>
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    {% else %}
+                      <span class="small">Sem componentes no grupo.</span>
+                    {% endif %}
+                  {% endwith %}
+                </td>
+                <td>
+                  <form method="post" class="gp-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="_action" value="remove_grupo">
+                    <input type="hidden" name="grupo_id" value="{{ grupo.pk }}">
+                    <button type="submit" class="gp-button gp-button--danger">Excluir</button>
+                  </form>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5">Nenhum grupo de equivalência cadastrado.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

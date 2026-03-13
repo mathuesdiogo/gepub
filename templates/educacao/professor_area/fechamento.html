@@ -1,0 +1,23 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Fechamento de Diário • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage gp-professor-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <article class="gp-student-stage__card">
+    {% if not can_close %}
+      <div class="gp-alert gp-alert--info">
+        Você tem acesso de leitura ao fechamento. Para consolidar resultados, solicite permissão de gestão educacional.
+      </div>
+    {% endif %}
+
+    {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Sem turmas" empty_text="Nenhuma turma disponível para fechamento." %}
+  </article>
+
+  <article class="gp-student-stage__card">
+    <h3>Fechamento do Curso de Informática</h3>
+    {% include "core/partials/components/data/table_shell.html" with headers=headers_informatica rows=rows_informatica page_obj=None empty_title="Sem turmas de informática" empty_text="Nenhuma turma de informática disponível para fechamento." %}
+  </article>
+</section>
+{% endblock %}

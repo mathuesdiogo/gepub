@@ -3,7 +3,7 @@
 {% block title %}Painel de Onboarding • ORG • GEPUB{% endblock %}
 
 {% block content %}
-<div class="card"><div class="card__body">
+<div class="card org-page"><div class="card__body">
 {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 {% include "org/partials/nav_tabs.html" %}
 
@@ -97,7 +97,7 @@
                 </div>
                 {% if step_row.obj.descricao %}<div class="onboard-step__desc">{{ step_row.obj.descricao }}</div>{% endif %}
                 {% if step_row.url %}
-                  <div class="u-mt-4"><a class="btn btn--ghost" href="{{ step_row.url }}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir etapa</a></div>
+                  <div class="u-mt-4"><a class="gp-button gp-button--outline" href="{{ step_row.url }}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir etapa</a></div>
                 {% endif %}
               </div>
             {% endfor %}

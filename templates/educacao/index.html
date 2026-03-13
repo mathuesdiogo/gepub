@@ -2,199 +2,362 @@
 {% block title %}Educação • GEPUB{% endblock %}
 
 {% block breadcrumbs %}
-  <div class="breadcrumbs">
-    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
-    <span class="breadcrumbs__sep">/</span>
-    <span class="breadcrumbs__current">Educação</span>
+  <div class="gp-breadcrumb">
+    <a class="gp-breadcrumb__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="gp-breadcrumb__sep">/</span>
+    <span class="gp-breadcrumb__current">Educação</span>
   </div>
 {% endblock %}
 
 {% block module_content %}
-  <div class="card edu-dashboard"><div class="card__body">
-    {% include "core/partials/components/layout/page_head.html" with title="Educação" subtitle="Gestão escolar integrada" actions=None %}
+  {% if is_professor_role %}
+    {% with codigo=professor_code|default:request.user.username %}
+      <section class="gp-student-stage gp-professor-stage">
+        {% include "core/partials/components/layout/page_head.html" with title="Painel do Professor" subtitle="Visão clean da rotina docente com calendário, diários e acompanhamento de turmas." actions=None %}
 
-    <section class="edu-hero">
-      <div class="edu-hero__content">
-        <div class="edu-hero__eyebrow">School Management</div>
-        <h2 class="edu-hero__title">Painel acadêmico com foco em operação diária</h2>
-        <p class="edu-hero__text">
-          Acompanhe turmas, alunos, matrículas e rotinas pedagógicas em um fluxo único,
-          com atalhos rápidos para as tarefas mais frequentes.
-        </p>
-        <div class="edu-hero__chips">
-          <span class="edu-chip"><i class="fa-solid fa-school"></i>{{ unidades_total }} unidades</span>
-          <span class="edu-chip"><i class="fa-solid fa-people-group"></i>{{ turmas_total }} turmas</span>
-          <span class="edu-chip"><i class="fa-solid fa-user-graduate"></i>{{ alunos_total }} alunos</span>
-          <span class="edu-chip"><i class="fa-solid fa-id-card"></i>{{ matriculas_total }} matrículas</span>
+        <section class="gp-student-dashboard" aria-label="Painel docente">
+          <div class="gp-student-dashboard__grid">
+            <details class="gp-student-widget gp-student-widget--summary gp-professor-widget--full" open>
+              <summary class="gp-student-widget__head">
+                <div>
+                  <h3 class="gp-student-widget__title">Resumo da rotina</h3>
+                  <span class="gp-student-widget__meta">Indicadores principais do professor</span>
+                </div>
+                <span class="gp-student-widget__toggle" aria-hidden="true"></span>
+              </summary>
+              <div class="gp-student-widget__body">
+                <div class="gp-professor-metrics">
+                  <a class="gp-professor-metric gp-professor-metric--link" href="{% url 'educacao:professor_diarios' codigo %}">
+                    <span>Meus diários</span>
+                    <strong>{{ diarios_total|default:0 }}</strong>
+                  </a>
+                  <a class="gp-professor-metric gp-professor-metric--link" href="{% url 'educacao:turma_list' %}">
+                    <span>Turmas</span>
+                    <strong>{{ turmas_total|default:0 }}</strong>
+                  </a>
+                  <a class="gp-professor-metric gp-professor-metric--link" href="{% url 'educacao:aluno_list' %}">
+                    <span>Alunos</span>
+                    <strong>{{ alunos_total|default:0 }}</strong>
+                  </a>
+                  <a class="gp-professor-metric gp-professor-metric--link" href="{% url 'educacao:professor_aulas' codigo %}">
+                    <span>Aulas lançadas</span>
+                    <strong>{{ aulas_total|default:0 }}</strong>
+                  </a>
+                  <a class="gp-professor-metric gp-professor-metric--link" href="{% url 'educacao:professor_justificativas' codigo %}">
+                    <span>Justificativas pendentes</span>
+                    <strong>{{ pendencias_total|default:0 }}</strong>
+                  </a>
+                </div>
+              </div>
+            </details>
+
+            <details class="gp-student-widget gp-student-widget--ensino" open>
+              <summary class="gp-student-widget__head">
+                <div>
+                  <h3 class="gp-student-widget__title">Ações rápidas</h3>
+                  <span class="gp-student-widget__meta">Turmas, diário, frequência e notas</span>
+                </div>
+                <span class="gp-student-widget__toggle" aria-hidden="true"></span>
+              </summary>
+              <div class="gp-student-widget__body">
+                <div class="gp-student-actions gp-student-actions--stacked">
+                  <a class="gp-student-pill" href="{% url 'educacao:professor_diarios' codigo %}">
+                    <i class="fa-solid fa-book"></i><span>Meus diários</span>
+                  </a>
+                  <a class="gp-student-pill" href="{% url 'educacao:turma_list' %}">
+                    <i class="fa-solid fa-people-group"></i><span>Minhas turmas</span>
+                  </a>
+                  <a class="gp-student-pill" href="{% url 'educacao:aluno_list' %}">
+                    <i class="fa-solid fa-user-graduate"></i><span>Meus alunos</span>
+                  </a>
+                  <a class="gp-student-pill" href="{% url 'educacao:professor_frequencias' codigo %}">
+                    <i class="fa-solid fa-user-check"></i><span>Lançar frequência</span>
+                  </a>
+                  <a class="gp-student-pill" href="{% url 'educacao:professor_notas' codigo %}">
+                    <i class="fa-solid fa-clipboard-check"></i><span>Lançar notas</span>
+                  </a>
+                  <a class="gp-student-pill" href="{% url 'educacao:professor_fechamento' codigo %}">
+                    <i class="fa-solid fa-lock"></i><span>Fechamento de diário</span>
+                  </a>
+                </div>
+              </div>
+            </details>
+
+            <details class="gp-student-widget gp-professor-widget--full" id="bloco-calendario-professor" open>
+              <summary class="gp-student-widget__head">
+                <div>
+                  <h3 class="gp-student-widget__title">Calendário escolar</h3>
+                  <span class="gp-student-widget__meta">Mês atual e próximos eventos</span>
+                </div>
+                <span class="gp-student-widget__toggle" aria-hidden="true"></span>
+              </summary>
+              <div class="gp-student-widget__body">
+                <section class="gp-student-calendar" aria-label="Calendário escolar do mês">
+                  <h4 class="gp-student-calendar__month">{{ professor_calendario.mes_label }}</h4>
+                  <table class="gp-student-calendar__table">
+                    <thead>
+                      <tr>
+                        {% for label in professor_calendario.semana_labels %}
+                          <th>{{ label }}</th>
+                        {% endfor %}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for week in professor_calendario.weeks %}
+                        <tr>
+                          {% for cell in week %}
+                            <td class="{% if not cell.day %}is-empty{% endif %}{% if cell.is_today %} is-today{% endif %}{% if cell.has_event %} has-event{% endif %}{% if cell.event_type %} evento-{{ cell.event_type }}{% endif %}">
+                              {% if cell.day %}{{ cell.day }}{% endif %}
+                            </td>
+                          {% endfor %}
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </section>
+
+                <ul class="gp-student-events-list">
+                  {% for ev in eventos_calendario %}
+                    <li class="gp-student-events-list__item gp-evento--{{ ev.tipo|lower }}">
+                      <span class="gp-student-events-list__line">
+                        <span class="gp-student-events-list__title">{{ ev.titulo }}</span>
+                        <span class="gp-student-events-list__meta">{{ ev.get_tipo_display }} • {{ ev.data_inicio|date:"d/m/Y" }}
+                          {% if ev.data_fim and ev.data_fim != ev.data_inicio %}
+                            até {{ ev.data_fim|date:"d/m/Y" }}
+                          {% endif %}
+                        </span>
+                      </span>
+                    </li>
+                  {% empty %}
+                    <li class="gp-student-events-list__item is-empty">Nenhum evento escolar disponível para o seu escopo.</li>
+                  {% endfor %}
+                </ul>
+
+                <a class="gp-student-pill gp-student-pill--compact gp-student-calendar__cta" href="{% url 'educacao:calendario_index' %}">
+                  <i class="fa-solid fa-link"></i><span>Calendário Completo</span>
+                </a>
+              </div>
+            </details>
+
+            <details class="gp-student-widget" id="bloco-diarios-professor" open>
+              <summary class="gp-student-widget__head">
+                <div>
+                  <h3 class="gp-student-widget__title">Meus diários</h3>
+                  <span class="gp-student-widget__meta">Turmas com diário ativo no seu vínculo</span>
+                </div>
+                <span class="gp-student-widget__toggle" aria-hidden="true"></span>
+              </summary>
+              <div class="gp-student-widget__body">
+                {% if diarios_preview %}
+                  <div class="gp-student-list">
+                    {% for diario in diarios_preview %}
+                      <article class="gp-student-list__item">
+                        <strong>{{ diario.turma.nome }} • {{ diario.ano_letivo }}</strong>
+                        <p>{{ diario.turma.unidade.nome|default:"Unidade não informada" }}</p>
+                        <div class="gp-professor-inline-actions">
+                          <a class="gp-student-pill gp-student-pill--compact" href="{% url 'educacao:diario_detail' diario.id %}">
+                            <i class="fa-solid fa-book-open"></i><span>Abrir diário</span>
+                          </a>
+                          <a class="gp-student-pill gp-student-pill--compact" href="{% url 'educacao:aula_create' diario.id %}">
+                            <i class="fa-solid fa-plus"></i><span>Nova aula</span>
+                          </a>
+                        </div>
+                      </article>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <div class="gp-student-empty">Nenhum diário ativo encontrado para o seu perfil.</div>
+                {% endif %}
+                <a class="gp-student-pill gp-student-pill--compact" href="{% url 'educacao:professor_diarios' codigo %}">
+                  <i class="fa-solid fa-arrow-right"></i><span>Ver todos os diários</span>
+                </a>
+              </div>
+            </details>
+          </div>
+        </section>
+      </section>
+    {% endwith %}
+  {% else %}
+    <div class="gp-card edu-dashboard"><div class="gp-card__body">
+      {% include "core/partials/components/layout/page_head.html" with title="Educação" subtitle="Educação infantil e ensino fundamental com base curricular unificada" actions=None %}
+
+      <section class="edu-hero">
+        <div class="edu-hero__content">
+          <div class="edu-hero__eyebrow">Gestão Escolar</div>
+          <h2 class="edu-hero__title">Painel acadêmico com foco em matriz, série/ano e operação diária</h2>
+          <p class="edu-hero__text">
+            Acompanhe turmas, alunos, matrículas e rotinas pedagógicas em um fluxo único.
+            As matrizes curriculares são a base da oferta regular; cursos ficam como atividades extras.
+          </p>
+          <div class="edu-hero__chips">
+            <span class="edu-chip"><i class="fa-solid fa-school"></i>{{ unidades_total }} unidades</span>
+            <span class="edu-chip"><i class="fa-solid fa-people-group"></i>{{ turmas_total }} turmas</span>
+            <span class="edu-chip"><i class="fa-solid fa-user-graduate"></i>{{ alunos_total }} alunos</span>
+            <span class="edu-chip"><i class="fa-solid fa-id-card"></i>{{ matriculas_total }} matrículas</span>
+          </div>
         </div>
-      </div>
-      <div class="edu-hero__actions">
-        {% if is_professor_role %}
-          <a class="btn btn-primary" href="{% url 'educacao:turma_list' %}">
-            <i class="fa-solid fa-people-group"></i><span>Minhas Turmas</span>
-          </a>
-          <a class="btn btn--ghost" href="{% url 'educacao:aluno_list' %}">
-            <i class="fa-solid fa-user-graduate"></i><span>Meus Alunos</span>
-          </a>
-          <a class="btn btn--ghost" href="{% url 'educacao:meus_diarios' %}">
-            <i class="fa-solid fa-book"></i><span>Diário de Classe</span>
-          </a>
-        {% else %}
-          <a class="btn btn-primary" href="{% url 'educacao:turma_create' %}">
+        <div class="edu-hero__actions">
+          <a class="gp-button gp-button--primary" href="{% url 'educacao:turma_create' %}">
             <i class="fa-solid fa-plus"></i><span>Criar Turma</span>
           </a>
-          <a class="btn btn--ghost" href="{% url 'educacao:aluno_create' %}">
+          <a class="gp-button gp-button--outline" href="{% url 'educacao:aluno_create' %}">
             <i class="fa-solid fa-user-plus"></i><span>Cadastrar Aluno</span>
           </a>
-          <a class="btn btn--ghost" href="{% url 'educacao:censo_escolar' %}">
+          <a class="gp-button gp-button--outline" href="{% url 'educacao:censo_escolar' %}">
             <i class="fa-solid fa-database"></i><span>Censo Escolar</span>
           </a>
-        {% endif %}
+        </div>
+      </section>
+
+      <div class="edu-kpis">
+        <a class="edu-kpi" href="{% url 'org:unidade_list' %}?tipo=EDUCACAO">
+          <div>
+            <div class="edu-kpi__label">Unidades</div>
+            <div class="edu-kpi__value">{{ unidades_total }}</div>
+            <div class="edu-kpi__meta">Escolas e creches</div>
+          </div>
+          <div class="edu-kpi__icon"><i class="fa-solid fa-school"></i></div>
+        </a>
+
+        <a class="edu-kpi" href="{% url 'educacao:turma_list' %}">
+          <div>
+            <div class="edu-kpi__label">Turmas</div>
+            <div class="edu-kpi__value">{{ turmas_total }}</div>
+            <div class="edu-kpi__meta">Organização por unidade e etapa</div>
+          </div>
+          <div class="edu-kpi__icon"><i class="fa-solid fa-people-group"></i></div>
+        </a>
+
+        <a class="edu-kpi" href="{% url 'educacao:aluno_list' %}">
+          <div>
+            <div class="edu-kpi__label">Alunos</div>
+            <div class="edu-kpi__value">{{ alunos_total }}</div>
+            <div class="edu-kpi__meta">Acompanhamento e documentação</div>
+          </div>
+          <div class="edu-kpi__icon"><i class="fa-solid fa-user-graduate"></i></div>
+        </a>
+
+        <a class="edu-kpi" href="{% url 'educacao:matricula_create' %}">
+          <div>
+            <div class="edu-kpi__label">Matrículas</div>
+            <div class="edu-kpi__value">{{ matriculas_total }}</div>
+            <div class="edu-kpi__meta">Movimentação acadêmica</div>
+          </div>
+          <div class="edu-kpi__icon"><i class="fa-solid fa-book"></i></div>
+        </a>
+
+        <a class="edu-kpi" href="{% url 'educacao:matriz_list' %}">
+          <div>
+            <div class="edu-kpi__label">Matrizes</div>
+            <div class="edu-kpi__value">{{ matrizes_total|default:0 }}</div>
+            <div class="edu-kpi__meta">Base curricular ativa por etapa e série/ano</div>
+          </div>
+          <div class="edu-kpi__icon"><i class="fa-solid fa-layer-group"></i></div>
+        </a>
       </div>
-    </section>
 
-    <div class="edu-kpis">
-      <a class="edu-kpi" href="{% if is_professor_role %}{% url 'educacao:turma_list' %}{% else %}{% url 'org:unidade_list' %}{% endif %}">
-        <div>
-          <div class="edu-kpi__label">{% if is_professor_role %}Minhas Unidades{% else %}Unidades{% endif %}</div>
-          <div class="edu-kpi__value">{{ unidades_total }}</div>
-          <div class="edu-kpi__meta">{% if is_professor_role %}Unidades das suas turmas{% else %}Escolas e creches{% endif %}</div>
+      <section class="section edu-quick">
+        <div class="section__header">
+          <div class="section__title">Ações rápidas</div>
+          <div class="section__meta">Gestão educacional</div>
         </div>
-        <div class="edu-kpi__icon"><i class="fa-solid fa-school"></i></div>
-      </a>
 
-      <a class="edu-kpi" href="{% url 'educacao:turma_list' %}">
-        <div>
-          <div class="edu-kpi__label">Turmas</div>
-          <div class="edu-kpi__value">{{ turmas_total }}</div>
-          <div class="edu-kpi__meta">Organização por unidade e etapa</div>
-        </div>
-        <div class="edu-kpi__icon"><i class="fa-solid fa-people-group"></i></div>
-      </a>
-
-      <a class="edu-kpi" href="{% url 'educacao:aluno_list' %}">
-        <div>
-          <div class="edu-kpi__label">Alunos</div>
-          <div class="edu-kpi__value">{{ alunos_total }}</div>
-          <div class="edu-kpi__meta">Acompanhamento e documentação</div>
-        </div>
-        <div class="edu-kpi__icon"><i class="fa-solid fa-user-graduate"></i></div>
-      </a>
-
-      <a class="edu-kpi" href="{% if is_professor_role %}{% url 'educacao:meus_diarios' %}{% else %}{% url 'educacao:matricula_create' %}{% endif %}">
-        <div>
-          <div class="edu-kpi__label">{% if is_professor_role %}Diários{% else %}Matrículas{% endif %}</div>
-          <div class="edu-kpi__value">{{ matriculas_total }}</div>
-          <div class="edu-kpi__meta">{% if is_professor_role %}Aulas, frequência e notas{% else %}Movimentação acadêmica{% endif %}</div>
-        </div>
-        <div class="edu-kpi__icon"><i class="fa-solid fa-book"></i></div>
-      </a>
-    </div>
-
-    <section class="section edu-quick">
-      <div class="section__header">
-        <div class="section__title">Ações rápidas</div>
-        <div class="section__meta">{% if is_professor_role %}Rotina docente{% else %}Gestão educacional{% endif %}</div>
-      </div>
-
-      <div class="link-list">
-        {% if is_professor_role %}
-          <a class="link-card edu-link-card" href="{% url 'educacao:turma_list' %}">
+        <div class="gp-link-list">
+          <a class="gp-link-box edu-link-card" href="{% url 'educacao:turma_create' %}">
             <div>
-              <div class="link-card__title">Minhas Turmas</div>
-              <div class="link-card__meta">Visualizar turmas vinculadas ao seu perfil</div>
+              <div class="gp-link-box__title">Criar Turma</div>
+              <div class="gp-link-box__meta">Cadastrar turma regular vinculada à matriz curricular</div>
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
-          <a class="link-card edu-link-card" href="{% url 'educacao:aluno_list' %}">
+          <a class="gp-link-box edu-link-card" href="{% url 'educacao:aluno_create' %}">
             <div>
-              <div class="link-card__title">Meus Alunos</div>
-              <div class="link-card__meta">Acompanhar estudantes matriculados nas suas turmas</div>
+              <div class="gp-link-box__title">Cadastrar Aluno</div>
+              <div class="gp-link-box__meta">Novo aluno com vínculo de matrícula</div>
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
-          <a class="link-card edu-link-card" href="{% url 'educacao:meus_diarios' %}">
+          <a class="gp-link-box edu-link-card" href="{% url 'educacao:censo_escolar' %}">
             <div>
-              <div class="link-card__title">Diário de Classe</div>
-              <div class="link-card__meta">Lançamento de aulas, frequência e avaliações</div>
+              <div class="gp-link-box__title">Censo Escolar</div>
+              <div class="gp-link-box__meta">Conferência e exportação INEP</div>
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
-          <a class="link-card edu-link-card" href="{% url 'educacao:portal_professor' %}">
+          <a class="gp-link-box edu-link-card" href="{% url 'educacao:componente_list' %}">
             <div>
-              <div class="link-card__title">Portal do Professor</div>
-              <div class="link-card__meta">Pendências e gestão de turmas</div>
+              <div class="gp-link-box__title">Componentes Curriculares</div>
+              <div class="gp-link-box__meta">Disciplinas e componentes por etapa</div>
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
-        {% else %}
-          <a class="link-card edu-link-card" href="{% url 'educacao:turma_create' %}">
+          <a class="gp-link-box edu-link-card" href="{% url 'educacao:matriz_list' %}">
             <div>
-              <div class="link-card__title">Criar Turma</div>
-              <div class="link-card__meta">Cadastrar nova turma vinculada à unidade</div>
+              <div class="gp-link-box__title">Matrizes Curriculares</div>
+              <div class="gp-link-box__meta">Estrutura por etapa e série/ano da rede</div>
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
-          <a class="link-card edu-link-card" href="{% url 'educacao:aluno_create' %}">
+          <a class="gp-link-box edu-link-card" href="{% url 'educacao:calendario_index' %}">
             <div>
-              <div class="link-card__title">Cadastrar Aluno</div>
-              <div class="link-card__meta">Novo aluno com vínculo de matrícula</div>
+              <div class="gp-link-box__title">Calendário Educacional</div>
+              <div class="gp-link-box__meta">Dias letivos, feriados e bimestres</div>
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
-          <a class="link-card edu-link-card" href="{% url 'educacao:censo_escolar' %}">
+          <a class="gp-link-box edu-link-card" href="{% url 'educacao:portal_professor' %}">
             <div>
-              <div class="link-card__title">Censo Escolar</div>
-              <div class="link-card__meta">Conferência e exportação INEP</div>
+              <div class="gp-link-box__title">Portal do Professor</div>
+              <div class="gp-link-box__meta">Diários, avaliações e pendências</div>
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
-          <a class="link-card edu-link-card" href="{% url 'educacao:componente_list' %}">
+          <a class="gp-link-box edu-link-card" href="{% url 'educacao:assistencia_index' %}">
             <div>
-              <div class="link-card__title">Componentes Curriculares</div>
-              <div class="link-card__meta">Disciplinas e componentes por etapa</div>
+              <div class="gp-link-box__title">Assistência Escolar</div>
+              <div class="gp-link-box__meta">Merenda e transporte escolar</div>
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
-          <a class="link-card edu-link-card" href="{% url 'educacao:calendario_index' %}">
+          <a class="gp-link-box edu-link-card" href="{% url 'educacao:beneficios_index' %}">
             <div>
-              <div class="link-card__title">Calendário Educacional</div>
-              <div class="link-card__meta">Dias letivos, feriados e bimestres</div>
+              <div class="gp-link-box__title">Benefícios e Entregas</div>
+              <div class="gp-link-box__meta">Kits, editais, campanhas, recorrências e histórico por aluno</div>
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
-          <a class="link-card edu-link-card" href="{% url 'educacao:portal_professor' %}">
+          <a class="gp-link-box edu-link-card" href="{% url 'educacao:curso_list' %}">
             <div>
-              <div class="link-card__title">Portal do Professor</div>
-              <div class="link-card__meta">Diários, avaliações e pendências</div>
+              <div class="gp-link-box__title">Atividades Extras</div>
+              <div class="gp-link-box__meta">Cursos e trilhas extracurriculares complementares</div>
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
-          <a class="link-card edu-link-card" href="{% url 'educacao:assistencia_index' %}">
+          <a class="gp-link-box edu-link-card" href="{% url 'educacao:informatica_index' %}">
             <div>
-              <div class="link-card__title">Assistência Escolar</div>
-              <div class="link-card__meta">Merenda e transporte escolar</div>
+              <div class="gp-link-box__title">Curso de Informática</div>
+              <div class="gp-link-box__meta">Laboratórios, turmas, matrículas e frequência</div>
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
-          <a class="link-card edu-link-card" href="{% url 'educacao:indicadores_gerenciais' %}">
+          <a class="gp-link-box edu-link-card" href="{% url 'educacao:indicadores_gerenciais' %}">
             <div>
-              <div class="link-card__title">Indicadores Gerenciais</div>
-              <div class="link-card__meta">Rendimento, evasão e produtividade</div>
+              <div class="gp-link-box__title">Indicadores Gerenciais</div>
+              <div class="gp-link-box__meta">Rendimento, evasão e produtividade</div>
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
           {% if can_nee_view %}
-            <a class="link-card edu-link-card" href="{% url 'nee:relatorios_index' %}">
+            <a class="gp-link-box edu-link-card" href="{% url 'nee:relatorios_index' %}">
               <div>
-                <div class="link-card__title">Relatórios NEE</div>
-                <div class="link-card__meta">Necessidades educacionais especiais</div>
+                <div class="gp-link-box__title">Relatórios NEE</div>
+                <div class="gp-link-box__meta">Necessidades educacionais especiais</div>
               </div>
               <i class="fa-solid fa-arrow-right"></i>
             </a>
           {% endif %}
-        {% endif %}
-      </div>
-    </section>
-  </div></div>
+        </div>
+      </section>
+    </div></div>
+  {% endif %}
 {% endblock %}

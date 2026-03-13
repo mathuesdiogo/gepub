@@ -5,15 +5,17 @@ from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
 from django.db.models import Avg, Count, Q
-from django.http import HttpResponseNotAllowed
+from django.db.models.functions import TruncMonth
+from django.http import HttpResponse, HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.text import slugify
 
 from apps.core.decorators import require_perm
 from apps.core.exports import _try_make_qr_data_uri, export_csv, export_pdf_template
-from apps.core.rbac import is_admin
+from apps.core.rbac import is_admin, is_professor_profile_role, role_scope_base
 from apps.core.services_auditoria import registrar_auditoria
 from apps.org.models import Municipio
 
@@ -38,6 +40,8 @@ from .services import (
     versoes_da_avaliacao,
 )
 
+FOLHA_VALIDAR_RATE_LIMIT_PER_MINUTE = 60
+
 
 def _resolve_municipio(request, *, require_selected: bool = False):
     user = request.user
@@ -53,6 +57,13 @@ def _resolve_municipio(request, *, require_selected: bool = False):
     if profile and profile.municipio_id:
         return Municipio.objects.filter(pk=profile.municipio_id, ativo=True).first()
     return None
+
+
+def _client_ip(request) -> str:
+    forwarded = (request.META.get("HTTP_X_FORWARDED_FOR") or "").strip()
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return (request.META.get("REMOTE_ADDR") or "0.0.0.0").strip()
 
 
 def _municipios_admin(request):
@@ -84,21 +95,111 @@ def _avaliacoes_queryset(request):
 
     qs = qs.filter(municipio_id=profile.municipio_id)
     role = (getattr(profile, "role", "") or "").upper()
+    role_base = role_scope_base(role)
 
-    if role == "SECRETARIA" and profile.secretaria_id:
+    if role_base == "SECRETARIA" and profile.secretaria_id:
         qs = qs.filter(turma__unidade__secretaria_id=profile.secretaria_id)
-    elif role == "UNIDADE" and profile.unidade_id:
+    elif role_base == "UNIDADE" and profile.unidade_id:
         qs = qs.filter(turma__unidade_id=profile.unidade_id)
-    elif role == "PROFESSOR":
+    elif is_professor_profile_role(role):
         qs = qs.filter(turma__professores=user).distinct()
 
     return qs
 
 
+def _progress_status(total_aplicacoes: int, total_corrigidas: int) -> str:
+    total = int(total_aplicacoes or 0)
+    corrigidas = int(total_corrigidas or 0)
+    if total <= 0:
+        return "SEM_APLICACOES"
+    if corrigidas <= 0:
+        return "PENDENTE"
+    if corrigidas < total:
+        return "PARCIAL"
+    return "CONCLUIDA"
+
+
 @login_required
 @require_perm("avaliacoes.view")
 def index(request):
-    return redirect("avaliacoes:avaliacao_list")
+    municipio = _resolve_municipio(request)
+    if not municipio:
+        messages.error(request, "Selecione um município para acessar Avaliações.")
+        return redirect("core:dashboard")
+
+    qs = _avaliacoes_queryset(request).filter(municipio=municipio)
+    totals = qs.aggregate(
+        total=Count("id"),
+        objetivas=Count("id", filter=Q(tipo=AvaliacaoProva.Tipo.OBJETIVA)),
+        discursivas=Count("id", filter=Q(tipo=AvaliacaoProva.Tipo.DISCURSIVA)),
+        mistas=Count("id", filter=Q(tipo=AvaliacaoProva.Tipo.MISTA)),
+        media=Avg("aplicacoes__nota"),
+    )
+    corrigidas = AplicacaoAvaliacao.objects.filter(
+        avaliacao__in=qs,
+        status=AplicacaoAvaliacao.Status.CORRIGIDA,
+    ).count()
+    aplicacoes = AplicacaoAvaliacao.objects.filter(avaliacao__in=qs).count()
+    pendentes = max(aplicacoes - corrigidas, 0)
+
+    by_month = (
+        qs.annotate(ref_month=TruncMonth("data_aplicacao"))
+        .values("ref_month")
+        .annotate(total=Count("id"))
+        .order_by("-ref_month")[:6]
+    )
+    by_month = list(reversed(list(by_month)))
+    monthly_rows = [
+        {
+            "mes": row["ref_month"].strftime("%m/%Y") if row["ref_month"] else "-",
+            "total": row["total"],
+        }
+        for row in by_month
+    ]
+
+    top_turmas = (
+        qs.values("turma__nome")
+        .annotate(total=Count("id"))
+        .order_by("-total", "turma__nome")[:8]
+    )
+    recentes = qs.select_related("turma").order_by("-data_aplicacao", "-id")[:10]
+
+    return render(
+        request,
+        "avaliacoes/index.html",
+        {
+            "title": "Painel de Avaliações",
+            "subtitle": f"{municipio.nome}/{municipio.uf}",
+            "municipio": municipio,
+            "kpis": {
+                "total": totals.get("total") or 0,
+                "objetivas": totals.get("objetivas") or 0,
+                "discursivas": totals.get("discursivas") or 0,
+                "mistas": totals.get("mistas") or 0,
+                "media": totals.get("media"),
+                "aplicacoes": aplicacoes,
+                "corrigidas": corrigidas,
+                "pendentes": pendentes,
+            },
+            "monthly_rows": monthly_rows,
+            "top_turmas": list(top_turmas),
+            "recentes": list(recentes),
+            "actions": [
+                {
+                    "label": "Lista de avaliações",
+                    "url": reverse("avaliacoes:avaliacao_list") + f"?municipio={municipio.pk}",
+                    "icon": "fa-solid fa-list",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "Nova avaliação",
+                    "url": reverse("avaliacoes:avaliacao_create") + f"?municipio={municipio.pk}",
+                    "icon": "fa-solid fa-plus",
+                    "variant": "btn-primary",
+                },
+            ],
+        },
+    )
 
 
 @login_required
@@ -112,6 +213,7 @@ def avaliacao_list(request):
     q = (request.GET.get("q") or "").strip()
     tipo = (request.GET.get("tipo") or "").strip()
     turma_id = (request.GET.get("turma") or "").strip()
+    status = (request.GET.get("status") or "").strip().upper()
 
     qs = _avaliacoes_queryset(request).filter(municipio=municipio)
     if q:
@@ -132,12 +234,68 @@ def avaliacao_list(request):
             media=Avg("aplicacoes__nota"),
         ).order_by("-data_aplicacao", "-id")
     )
+    filtered_items = []
+    for item in items:
+        item.progress_status = _progress_status(item.total_aplicacoes, item.total_corrigidas)
+        if status and item.progress_status != status:
+            continue
+        filtered_items.append(item)
+
+    total_avaliacoes = len(filtered_items)
+    total_pendentes = sum(1 for item in filtered_items if item.progress_status == "PENDENTE")
+    total_parciais = sum(1 for item in filtered_items if item.progress_status == "PARCIAL")
+    total_concluidas = sum(1 for item in filtered_items if item.progress_status == "CONCLUIDA")
+    medias = [Decimal(str(item.media)) for item in filtered_items if item.media is not None]
+    media_geral = (sum(medias) / Decimal(len(medias))) if medias else None
 
     turmas = (
         qs.values("turma_id", "turma__nome", "turma__ano_letivo")
         .order_by("-turma__ano_letivo", "turma__nome")
         .distinct()
     )
+
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        headers = [
+            "Avaliacao",
+            "Disciplina",
+            "Turma",
+            "Data",
+            "Questoes",
+            "Aplicacoes",
+            "Corrigidas",
+            "Media",
+            "Status",
+        ]
+        rows = []
+        for item in filtered_items[:5000]:
+            rows.append(
+                [
+                    item.titulo,
+                    item.disciplina or "",
+                    item.turma.nome,
+                    str(item.data_aplicacao),
+                    str(item.qtd_questoes),
+                    str(item.total_aplicacoes),
+                    str(item.total_corrigidas),
+                    f"{item.media:.2f}" if item.media is not None else "",
+                    item.progress_status,
+                ]
+            )
+        if export == "csv":
+            return export_csv("avaliacoes.csv", headers, rows)
+        return export_pdf_template(
+            request,
+            filename="avaliacoes.pdf",
+            title="Relatorio de Avaliacoes",
+            template_name="core/relatorios/pdf/table.html",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            filtros=(
+                f"Busca={q or '-'} | Tipo={tipo or '-'} | Turma={turma_id or '-'} | "
+                f"Status={status or '-'}"
+            ),
+            context={"headers": headers, "rows": rows},
+        )
 
     return render(
         request,
@@ -147,18 +305,50 @@ def avaliacao_list(request):
             "subtitle": f"{municipio.nome}/{municipio.uf}",
             "municipio": municipio,
             "municipios": _municipios_admin(request),
-            "items": items,
+            "items": filtered_items,
             "q": q,
             "tipo": tipo,
             "turma_id": turma_id,
+            "status": status,
             "turmas": turmas,
             "tipo_choices": AvaliacaoProva.Tipo.choices,
+            "status_choices": [
+                ("PENDENTE", "Pendente"),
+                ("PARCIAL", "Parcial"),
+                ("CONCLUIDA", "Concluída"),
+                ("SEM_APLICACOES", "Sem aplicações"),
+            ],
+            "kpis": {
+                "total": total_avaliacoes,
+                "pendentes": total_pendentes,
+                "parciais": total_parciais,
+                "concluidas": total_concluidas,
+                "media_geral": media_geral,
+            },
             "actions": [
                 {
                     "label": "Nova avaliação",
                     "url": reverse("avaliacoes:avaliacao_create") + f"?municipio={municipio.pk}",
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
+                },
+                {
+                    "label": "CSV",
+                    "url": (
+                        reverse("avaliacoes:avaliacao_list")
+                        + f"?municipio={municipio.pk}&q={q}&tipo={tipo}&turma={turma_id}&status={status}&export=csv"
+                    ),
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": (
+                        reverse("avaliacoes:avaliacao_list")
+                        + f"?municipio={municipio.pk}&q={q}&tipo={tipo}&turma={turma_id}&status={status}&export=pdf"
+                    ),
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
                 },
                 {
                     "label": "Portal",
@@ -760,6 +950,17 @@ def prova_pdf(request, avaliacao_pk: int):
 
 
 def folha_validar(request, token):
+    ip = _client_ip(request)
+    rate_key = f"avaliacoes:folha_validar:{token}:{ip}"
+    attempts = int(cache.get(rate_key) or 0) + 1
+    cache.set(rate_key, attempts, timeout=60)
+    if attempts > FOLHA_VALIDAR_RATE_LIMIT_PER_MINUTE:
+        return HttpResponse(
+            "Muitas tentativas de validação. Aguarde 1 minuto e tente novamente.",
+            status=429,
+            content_type="text/plain; charset=utf-8",
+        )
+
     folha = get_object_or_404(
         FolhaResposta.objects.select_related(
             "aplicacao",
@@ -775,6 +976,7 @@ def folha_validar(request, token):
         {
             "title": "Validação de folha de prova",
             "busca_token": str(token),
+            "attempts_window_1m": attempts,
         }
     )
     return render(request, "avaliacoes/validacao_publica.html", context)

@@ -1,15 +1,15 @@
 {% extends "core/detail_base.html" %}
 
 {% block detail_sections %}
-<div class="card" style="margin-top:12px;"><div class="card__body">
-  <h3 style="margin-top:0;">Justificativa</h3>
-  <p style="margin:0;">{{ obj.justificativa|default:"-" }}</p>
+<div class="gp-card"><div class="gp-card__body">
+  <h3>Justificativa</h3>
+  <p>{{ obj.justificativa|default:"-" }}</p>
 </div></div>
 
-<div class="card" style="margin-top:12px;"><div class="card__body">
-  <h3 style="margin-top:0;">Itens da requisicao</h3>
-  <div class="table-shell"><div class="table-shell__body">
-    <table class="table">
+<div class="gp-card"><div class="gp-card__body">
+  <h3>Itens da requisicao</h3>
+  <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__body">
+    <table class="gp-table__native">
       <thead><tr><th>Descricao</th><th>Unidade</th><th>Qtd</th><th>Vlr Unit</th><th>Vlr Total</th></tr></thead>
       <tbody>
         {% for item in itens %}
@@ -27,4 +27,22 @@
     </table>
   </div></div>
 </div></div>
+
+<div class="gp-card"><div class="gp-card__body">
+  <h3>Ação de status</h3>
+  <form method="post" action="{% url 'compras:aprovar' obj.id %}?municipio={{ municipio.id }}">
+    {% csrf_token %}
+    <div style="display:grid; gap:8px; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));">
+      <select class="gp-input" name="acao" required>
+        <option value="aprovar">Aprovar</option>
+        <option value="devolver">Devolver para ajustes</option>
+        <option value="recusar">Recusar</option>
+      </select>
+      <input class="gp-input" type="text" name="motivo" maxlength="200" placeholder="Motivo (obrigatório para devolver/recusar)">
+      <button type="submit" class="gp-button gp-button--ghost">Aplicar status</button>
+    </div>
+  </form>
+</div></div>
+
+{% include "core/partials/components/operacao/registro_extras.html" %}
 {% endblock %}

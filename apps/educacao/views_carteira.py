@@ -4,6 +4,7 @@ from datetime import date
 from uuid import UUID
 
 from django.contrib.auth.decorators import login_required
+from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
@@ -13,7 +14,7 @@ from apps.core.decorators import require_perm
 from apps.core.exports import _try_make_qr_data_uri, export_pdf_template
 from apps.core.rbac import scope_filter_alunos
 
-from .models import Aluno, CarteiraEstudantil, Matricula, MatriculaCurso
+from .models import Aluno, AlunoDocumento, CarteiraEstudantil, Matricula, MatriculaCurso
 
 try:
     from apps.nee.models import AlunoNecessidade
@@ -92,7 +93,7 @@ def _montar_snapshot(aluno: Aluno, matricula: Matricula | None) -> dict:
 
 
 @login_required
-@require_perm("educacao.manage")
+@require_perm("educacao.view")
 def carteira_emitir_pdf(request, aluno_id: int):
     aluno_qs = scope_filter_alunos(request.user, Aluno.objects.all())
     aluno = get_object_or_404(aluno_qs, pk=aluno_id)
@@ -148,7 +149,7 @@ def carteira_emitir_pdf(request, aluno_id: int):
     nee_labels = snapshot.get("necessidades_especiais") or []
 
     filename = f"carteira_estudantil_{slugify(aluno.nome) or aluno.id}.pdf"
-    return export_pdf_template(
+    response = export_pdf_template(
         request,
         filename=filename,
         title="Carteira Estudantil",
@@ -168,6 +169,20 @@ def carteira_emitir_pdf(request, aluno_id: int):
             "data_emissao": timezone.localdate(),
         },
     )
+    timestamp = timezone.localtime().strftime("%d/%m/%Y %H:%M")
+    documento = AlunoDocumento(
+        aluno=aluno,
+        tipo=AlunoDocumento.Tipo.CERTIFICADO,
+        titulo=f"Carteira estudantil ({timestamp})",
+        numero_documento=f"CART-{carteira.codigo_estudante or carteira.codigo_verificacao}",
+        data_emissao=timezone.localdate(),
+        enviado_por=request.user,
+        observacao="Gerado automaticamente na emissão da carteira estudantil.",
+        ativo=True,
+    )
+    documento.arquivo.save(filename, ContentFile(response.content), save=False)
+    documento.save()
+    return response
 
 
 def carteira_verificar_public(request, codigo=None):

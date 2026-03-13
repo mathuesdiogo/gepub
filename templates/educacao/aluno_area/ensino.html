@@ -1,0 +1,200 @@
+{% extends "educacao/base_modulo.html" %}
+{% load gepub_ui %}
+{% block title %}Ensino • {{ aluno.nome }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <div class="gp-grid-2 gp-student-stage__grid">
+    <article class="gp-student-stage__card">
+      <h3>Dados do Aluno</h3>
+      <form method="post" class="gp-form gp-form--smart">
+        {% csrf_token %}
+        <input type="hidden" name="form_kind" value="dados">
+        {% for field in dados_form %}
+          <div class="gp-form-group">
+            <label class="gp-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}<small class="gp-form-error">{{ field.errors|striptags }}</small>{% endif %}
+          </div>
+        {% endfor %}
+        <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-floppy-disk"></i> Atualizar dados</button>
+      </form>
+    </article>
+
+    <article class="gp-student-stage__card">
+      <h3>Solicitação de Justificativa de Falta</h3>
+      <form method="post" enctype="multipart/form-data" class="gp-form gp-form--smart">
+        {% csrf_token %}
+        <input type="hidden" name="form_kind" value="justificativa">
+        {% for field in falta_form %}
+          <div class="gp-form-group">
+            <label class="gp-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}<small class="gp-form-error">{{ field.errors|striptags }}</small>{% endif %}
+          </div>
+        {% endfor %}
+        <button class="gp-button gp-button--secondary" type="submit"><i class="fa-solid fa-file-circle-check"></i> Enviar justificativa</button>
+      </form>
+    </article>
+  </div>
+
+  <article class="gp-student-stage__card">
+    <h3>Boletins e Avaliações</h3>
+    <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__body">
+      <table class="gp-table__native">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Disciplina/Avaliação</th>
+            <th>Turma</th>
+            <th>Nota</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for n in notas %}
+            <tr>
+              <td>{{ n.avaliacao.data|date:"d/m/Y" }}</td>
+              <td>{{ n.avaliacao.titulo }}</td>
+              <td>{{ n.avaliacao.diario.turma.nome }}</td>
+              <td>{% if n.valor is not None %}{{ n.valor }}{% else %}—{% endif %}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4">Sem avaliações lançadas até o momento.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </article>
+
+  <div class="gp-grid-2 gp-student-stage__grid">
+    <article class="gp-student-stage__card">
+      <h3>Minhas Disciplinas</h3>
+      <ul class="gp-student-data-list">
+        {% for d in disciplinas %}
+          <li><strong>{{ d.nome }}</strong> • {{ d.get_tipo_aula_display }} • {{ d.carga_horaria }}h</li>
+        {% empty %}
+          <li>Nenhuma disciplina vinculada.</li>
+        {% endfor %}
+      </ul>
+    </article>
+
+    <article class="gp-student-stage__card">
+      <h3>Locais e Horários de Aula</h3>
+      <div class="gp-table gp-table--responsive gp-table--striped"><div class="gp-table__body">
+        <table class="gp-table__native">
+          <thead><tr><th>Dia</th><th>Início</th><th>Fim</th><th>Disciplina</th><th>Professor</th><th>Sala</th></tr></thead>
+          <tbody>
+            {% for h in horarios %}
+              <tr>
+                <td>{{ h.get_dia_display }}</td>
+                <td>{{ h.inicio|time:"H:i" }}</td>
+                <td>{{ h.fim|time:"H:i" }}</td>
+                <td>{{ h.disciplina }}</td>
+                <td>{{ h.professor|default:"—" }}</td>
+                <td>{{ h.sala|default:"—" }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="6">Horários não cadastrados.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div></div>
+    </article>
+  </div>
+
+  <div class="gp-grid-2 gp-student-stage__grid">
+    <article class="gp-student-stage__card">
+      <h3>Caixa de Mensagens</h3>
+      <ul class="gp-student-list">
+        {% for a in avisos %}
+          <li class="gp-student-list__item">
+            <strong>{{ a.titulo }}</strong>
+            <p>{{ a.texto|default:"Comunicado interno." }}</p>
+            <small>{{ a.criado_em|date:"d/m/Y H:i" }}</small>
+          </li>
+        {% empty %}
+          <li class="gp-student-empty">Sem mensagens no momento.</li>
+        {% endfor %}
+      </ul>
+    </article>
+
+    <article class="gp-student-stage__card">
+      <h3>Biblioteca / Materiais</h3>
+      <ul class="gp-student-list">
+        {% for arq in arquivos %}
+          <li class="gp-student-list__item">
+            <strong>{% if arq.arquivo %}<a class="gp-student-link" href="{{ arq.arquivo.url }}" target="_blank" rel="noopener">{{ arq.titulo }}</a>{% else %}{{ arq.titulo }}{% endif %}</strong>
+            <p>{{ arq.descricao|default:"Material educacional" }}</p>
+            <small>{{ arq.criado_em|date:"d/m/Y H:i" }}</small>
+          </li>
+        {% empty %}
+          <li class="gp-student-empty">Sem materiais publicados.</li>
+        {% endfor %}
+      </ul>
+    </article>
+  </div>
+
+  <div class="gp-grid-2 gp-student-stage__grid">
+    <article class="gp-student-stage__card">
+      <h3>Procedimentos de Apoio</h3>
+      <form method="post" class="gp-form gp-form--smart gp-mb-3">
+        {% csrf_token %}
+        <input type="hidden" name="form_kind" value="apoio">
+        {% for field in apoio_form %}
+          <div class="gp-form-group">
+            <label class="gp-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+          </div>
+        {% endfor %}
+        <button class="gp-button gp-button--outline" type="submit">Solicitar apoio</button>
+      </form>
+      <ul class="gp-student-data-list">
+        {% for ap in apoios %}
+          <li><strong>{{ ap.get_tipo_display }}</strong> • {{ ap.matricula.turma.nome }} • {{ ap.descricao }}</li>
+        {% empty %}
+          <li>Nenhum apoio cadastrado.</li>
+        {% endfor %}
+      </ul>
+      {% if acompanhamentos_nee %}
+      <h4 class="gp-mt-3">Acompanhamentos NEE</h4>
+      <ul class="gp-student-data-list">
+        {% for ac in acompanhamentos_nee %}
+          <li>{{ ac.data|date:"d/m/Y" }} • {{ ac.get_tipo_evento_display }} • {{ ac.descricao|truncatechars:120 }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </article>
+
+    <article class="gp-student-stage__card">
+      <h3>Processos Seletivos</h3>
+      <ul class="gp-student-list">
+        {% for e in editais_educacao %}
+          <li class="gp-student-list__item">
+            <strong>{{ e.numero_ano }} • {{ e.titulo }}</strong>
+            <p>{{ e.beneficio.nome }} • {{ e.get_status_display }}</p>
+            {% with inscr=inscricoes_map|get_item:e.id %}
+              {% if inscr %}
+                <small>Inscrição: {{ inscr.get_status_display }}</small>
+              {% else %}
+                <form method="post" class="gp-inline-form gp-mt-2">
+                  {% csrf_token %}
+                  <input type="hidden" name="form_kind" value="inscrever_edital">
+                  <input type="hidden" name="edital_id" value="{{ e.id }}">
+                  <button class="gp-button gp-button--outline" type="submit">Inscrever-se</button>
+                </form>
+              {% endif %}
+            {% endwith %}
+          </li>
+        {% empty %}
+          <li class="gp-student-empty">Nenhum edital ativo para inscrição.</li>
+        {% endfor %}
+      </ul>
+
+      <h4 class="gp-mt-3">Estágios e Projetos</h4>
+      <p class="gp-text-muted">As inscrições em estágios e projetos são acompanhadas pelos editais e processos seletivos desta seção.</p>
+    </article>
+  </div>
+</section>
+{% endblock %}

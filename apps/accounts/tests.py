@@ -4,11 +4,13 @@ from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.urls import reverse
+from django.utils import timezone
 
-from apps.accounts.models import Profile, UserManagementAudit
+from apps.accounts.forms import UsuarioCreateForm
+from apps.accounts.models import PasswordHistory, Profile, UserManagementAudit
 from apps.accounts import security as login_security
 from apps.core.security import decrypt_cpf
-from apps.org.models import Municipio, Secretaria, Unidade, Setor
+from apps.org.models import Municipio, MunicipioOnboardingWizard, Secretaria, Unidade, Setor
 
 
 User = get_user_model()
@@ -66,6 +68,10 @@ class UsersListViewTestCase(TestCase):
         manager_profile.ativo = True
         manager_profile.must_change_password = False
         manager_profile.save()
+        MunicipioOnboardingWizard.objects.update_or_create(
+            user=manager,
+            defaults={"municipio": municipio, "current_step": 9, "total_steps": 9, "completed_at": timezone.now()},
+        )
 
         target = User.objects.create_user(username="target_user", password="123")
         target_profile = target.profile
@@ -94,6 +100,10 @@ class UsersListViewTestCase(TestCase):
         manager_profile.ativo = True
         manager_profile.must_change_password = False
         manager_profile.save()
+        MunicipioOnboardingWizard.objects.update_or_create(
+            user=manager,
+            defaults={"municipio": municipio, "current_step": 9, "total_steps": 9, "completed_at": timezone.now()},
+        )
 
         target = User.objects.create_user(username="target_b", password="123")
         target_profile = target.profile
@@ -115,6 +125,47 @@ class UsersListViewTestCase(TestCase):
                 action=UserManagementAudit.Action.BLOCK,
             ).exists()
         )
+
+
+class UsuarioCreateFormScopeTestCase(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_superuser(
+            username="admin_form_scope",
+            email="admin.form.scope@example.com",
+            password="123456",
+        )
+        self.municipio_a = Municipio.objects.create(nome="Cidade A", uf="MA")
+        self.municipio_b = Municipio.objects.create(nome="Cidade B", uf="MA")
+        self.secretaria_a1 = Secretaria.objects.create(nome="Edu A", municipio=self.municipio_a, ativo=True)
+        self.secretaria_b1 = Secretaria.objects.create(nome="Edu B", municipio=self.municipio_b, ativo=True)
+
+    def test_secretaria_queryset_filtra_por_municipio_selecionado(self):
+        form = UsuarioCreateForm(
+            user=self.admin,
+            data={"municipio": str(self.municipio_a.id)},
+        )
+        secretarias_ids = set(form.fields["secretaria"].queryset.values_list("id", flat=True))
+        self.assertEqual(secretarias_ids, {self.secretaria_a1.id})
+
+    def test_clean_rejeita_secretaria_de_outro_municipio(self):
+        form = UsuarioCreateForm(
+            user=self.admin,
+            data={
+                "first_name": "Teste",
+                "last_name": "Usuário",
+                "email": "teste@example.com",
+                "cpf": "123.456.789-01",
+                "role": "LEITURA",
+                "municipio": str(self.municipio_a.id),
+                "secretaria": str(self.secretaria_b1.id),
+                "unidade": "",
+                "setor": "",
+                "turmas": [],
+                "ativo": "on",
+            },
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("secretaria", form.errors)
 
 
 class LoginSecurityViewTestCase(TestCase):
@@ -156,3 +207,46 @@ class LoginSecurityViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Muitas tentativas. Aguarde alguns minutos e tente novamente.")
+
+    @patch("apps.accounts.views.send_mail")
+    def test_login_with_mfa_redirects_to_second_factor(self, _send_mail):
+        self.profile.mfa_enabled = True
+        self.profile.save(update_fields=["mfa_enabled"])
+
+        response = self.client.post(
+            reverse("accounts:login"),
+            {"codigo_acesso": self.profile.codigo_acesso, "password": "Senha@123"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("accounts:login_mfa"), response.url)
+
+        mfa_page = self.client.get(reverse("accounts:login_mfa"))
+        self.assertEqual(mfa_page.status_code, 200)
+        self.assertContains(mfa_page, "Confirmação em duas etapas")
+
+        cache_payload = cache.get(f"accounts:mfa_code:{self.user.id}")
+        self.assertIsNotNone(cache_payload)
+        otp = cache_payload["code"]
+
+        ok = self.client.post(reverse("accounts:login_mfa"), {"otp_code": otp})
+        self.assertEqual(ok.status_code, 302)
+        self.assertIn(reverse("core:dashboard"), ok.url)
+
+
+class PasswordHistoryTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="senha_hist", password="Senha@123")
+        self.profile = self.user.profile
+        self.profile.must_change_password = False
+        self.profile.save(update_fields=["must_change_password"])
+        PasswordHistory.objects.create(user=self.user, password_hash=self.user.password)
+
+    def test_alterar_senha_blocks_recent_password_reuse(self):
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            reverse("accounts:alterar_senha"),
+            {"password1": "Senha@123", "password2": "Senha@123"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "já foi utilizada recentemente")

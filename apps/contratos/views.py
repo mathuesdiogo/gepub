@@ -9,8 +9,10 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 
+from apps.core.exports import export_csv, export_pdf_table
 from apps.core.decorators import require_perm
 from apps.core.rbac import is_admin
+from apps.core.services_registro_operacao import build_registro_context
 from apps.core.services_auditoria import registrar_auditoria
 from apps.core.services_transparencia import publicar_evento_transparencia
 from apps.financeiro.models import DespLiquidacao
@@ -68,6 +70,34 @@ def contrato_list(request):
     if status:
         qs = qs.filter(status=status)
 
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-vigencia_inicio", "-id"):
+            rows.append(
+                [
+                    item.numero,
+                    item.objeto,
+                    item.fornecedor_nome,
+                    item.get_status_display(),
+                    str(item.valor_total),
+                    str(item.vigencia_inicio or ""),
+                    str(item.vigencia_fim or ""),
+                ]
+            )
+        headers = ["Numero", "Objeto", "Fornecedor", "Status", "Valor", "Inicio", "Fim"]
+        if export == "csv":
+            return export_csv("contratos.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="contratos.pdf",
+            title="Contratos administrativos",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'} | Status={status or '-'}",
+        )
+
     return render(
         request,
         "contratos/list.html",
@@ -91,6 +121,18 @@ def contrato_list(request):
                     "label": "Compras",
                     "url": reverse("compras:requisicao_list") + f"?municipio={municipio.pk}",
                     "icon": "fa-solid fa-arrow-left",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
                     "variant": "btn--ghost",
                 },
             ],
@@ -193,6 +235,20 @@ def contrato_detail(request, pk: int):
         {"label": "Fim", "value": obj.vigencia_fim},
     ]
 
+    checklist = [
+        {"label": "Numero informado", "ok": bool(obj.numero)},
+        {"label": "Objeto informado", "ok": bool(obj.objeto)},
+        {"label": "Fornecedor informado", "ok": bool(obj.fornecedor_nome)},
+        {"label": "Vigencia fim informada", "ok": bool(obj.vigencia_fim)},
+        {"label": "Empenho vinculado", "ok": bool(obj.empenho_id)},
+    ]
+    registro = build_registro_context(
+        municipio=municipio,
+        modulo="CONTRATOS",
+        entidade="ContratoAdministrativo",
+        entidade_id=obj.pk,
+    )
+
     return render(
         request,
         "contratos/detail.html",
@@ -225,6 +281,8 @@ def contrato_detail(request, pk: int):
             "aditivos": obj.aditivos.order_by("-data_ato", "-id"),
             "medicoes": obj.medicoes.order_by("-data_medicao", "-id"),
             "municipio": municipio,
+            "checklist_conformidade": checklist,
+            **registro,
         },
     )
 

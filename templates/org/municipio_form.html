@@ -19,7 +19,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="card card--form">
+<div class="card card--form org-page">
   <div class="card__body">
 
 {% if mode == "update" %}{% include "core/partials/components/layout/page_head.html" with title="Editar Município" subtitle="Atualize as informações do município" actions=None %}{% else %}{% include "core/partials/components/layout/page_head.html" with title="Novo Município" subtitle="Preencha as informações do município" actions=None %}{% endif %}
@@ -107,12 +107,12 @@
 
       <!-- Botões -->
       <div class="form-actions form-field--full">
-        <button type="submit" class="btn btn-primary">
+        <button type="submit" class="gp-button gp-button--primary">
           <i class="fa-solid fa-check"></i>
           Salvar
         </button>
 
-        <a href="{% url 'org:municipio_list' %}" class="btn btn-ghost">
+        <a href="{% url 'org:municipio_list' %}" class="gp-button gp-button--outline">
           Cancelar
         </a>
       </div>

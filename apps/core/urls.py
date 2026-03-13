@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from . import views_codes
+from . import views_operacao
 
 app_name = "core"
 
@@ -21,10 +22,68 @@ urlpatterns = [
     path("sobre/", views.sobre_public, name="sobre_public"),
     path("funcionalidades/", views.funcionalidades_public, name="funcionalidades_public"),
     path("por-que-usar/", views.por_que_usar_public, name="por_que_usar_public"),
+    path("blog/", views.blog_public, name="blog_public"),
     path("documentacao/", views.documentacao_public, name="documentacao_public"),
+    path("validar-documento/", views.validar_documento_public, name="validar_documento_public"),
+    path("validar-documento/<uuid:codigo>/", views.validar_documento_public, name="validar_documento_codigo_public"),
+    path("validar/", views.validar_documento_public, name="validar_documento"),
+    path("validar/<uuid:codigo>/", views.validar_documento_public, name="validar_documento_codigo"),
+    path("politica-de-privacidade/", views.politica_privacidade_public, name="politica_privacidade_public"),
+    path("politica-de-cookies/", views.politica_cookies_public, name="politica_cookies_public"),
+    path("termos-de-servico/", views.termos_servico_public, name="termos_servico_public"),
     path("transparencia/", views.transparencia_public, name="transparencia_public"),
     path("", views.institucional_public, name="home"),
     path("dashboard/", views.dashboard_view, name="dashboard"),
+    path(
+        "dashboard/educacao/secretaria/visao-geral/",
+        views.secretaria_educacao_visao_geral,
+        name="secretaria_educacao_visao_geral",
+    ),
+    path(
+        "dashboard/educacao/secretaria/escolas/",
+        views.secretaria_educacao_escolas,
+        name="secretaria_educacao_escolas",
+    ),
+    path(
+        "dashboard/educacao/secretaria/alunos/",
+        views.secretaria_educacao_alunos,
+        name="secretaria_educacao_alunos",
+    ),
+    path(
+        "dashboard/educacao/secretaria/turmas/",
+        views.secretaria_educacao_turmas,
+        name="secretaria_educacao_turmas",
+    ),
+    path(
+        "dashboard/educacao/secretaria/cursos/",
+        views.secretaria_educacao_cursos,
+        name="secretaria_educacao_cursos",
+    ),
+    path(
+        "dashboard/educacao/secretaria/modalidades/",
+        views.secretaria_educacao_modalidades,
+        name="secretaria_educacao_modalidades",
+    ),
+    path(
+        "dashboard/educacao/secretaria/frequencia/",
+        views.secretaria_educacao_frequencia,
+        name="secretaria_educacao_frequencia",
+    ),
+    path(
+        "dashboard/educacao/secretaria/desempenho/",
+        views.secretaria_educacao_desempenho,
+        name="secretaria_educacao_desempenho",
+    ),
+    path(
+        "dashboard/educacao/secretaria/profissionais/",
+        views.secretaria_educacao_profissionais,
+        name="secretaria_educacao_profissionais",
+    ),
+    path(
+        "dashboard/educacao/secretaria/documentos/",
+        views.secretaria_educacao_documentos,
+        name="secretaria_educacao_documentos",
+    ),
     path("sistema/institucional/", views.institutional_admin, name="institutional_admin"),
     path("sistema/institucional/slides/novo/", views.institutional_slide_create, name="institutional_slide_create"),
     path("sistema/institucional/slides/<int:pk>/editar/", views.institutional_slide_update, name="institutional_slide_update"),
@@ -82,7 +141,17 @@ urlpatterns = [
     path("go/", views_codes.go_code, name="go_code"),
     path("go/<str:codigo>/", views_codes.go_code, name="go_code_path"),
     path("guia/", views_codes.guia_telas, name="guia_telas"),
-
-
-    # path("validar/<uuid:codigo>/", views.validar_documento, name="validar_documento"),
+    path("sistema/design-system/", views.design_system_docs, name="design_system_docs"),
+    path("sistema/design-system/componentes/", views.design_system_components, name="design_system_components"),
+    path("sistema/design-system/temas/", views.design_system_themes, name="design_system_themes"),
+    path("sistema/design-system/tokens.json", views.design_system_tokens_api, name="design_system_tokens_api"),
+    path("sistema/exclusoes/", views.sistema_exclusoes, name="sistema_exclusoes"),
+    path(
+        "sistema/exclusoes/<str:entity_type>/<int:pk>/",
+        views.sistema_exclusoes_confirmar,
+        name="sistema_exclusoes_confirmar",
+    ),
+    path("sistema/registro/tags/adicionar/", views_operacao.registro_tag_create, name="registro_tag_create"),
+    path("sistema/registro/comentarios/adicionar/", views_operacao.registro_comentario_create, name="registro_comentario_create"),
+    path("sistema/registro/anexos/adicionar/", views_operacao.registro_anexo_create, name="registro_anexo_create"),
 ]

@@ -4,23 +4,31 @@
 <div class="card"><div class="card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
+  <div class="grid grid--5" style="margin-top:12px;">
+    {% include "core/partials/components/data/kpi_card.html" with label="Avaliações" value=kpis.total %}
+    {% include "core/partials/components/data/kpi_card.html" with label="Pendentes" value=kpis.pendentes %}
+    {% include "core/partials/components/data/kpi_card.html" with label="Parciais" value=kpis.parciais %}
+    {% include "core/partials/components/data/kpi_card.html" with label="Concluídas" value=kpis.concluidas %}
+    {% include "core/partials/components/data/kpi_card.html" with label="Média geral" value=kpis.media_geral|floatformat:2 %}
+  </div>
+
   <form method="get" class="filter-bar" style="margin:12px 0;">
     {% if municipios and municipios|length %}
-      <select name="municipio" class="input" style="max-width:240px;">
+      <select name="municipio" class="gp-input" style="max-width:240px;">
         {% for m in municipios %}
           <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
         {% endfor %}
       </select>
     {% endif %}
 
-    <select name="tipo" class="input" style="max-width:220px;">
+    <select name="tipo" class="gp-input" style="max-width:220px;">
       <option value="">Todos os tipos</option>
       {% for key,label in tipo_choices %}
         <option value="{{ key }}" {% if tipo == key %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
 
-    <select name="turma" class="input" style="max-width:260px;">
+    <select name="turma" class="gp-input" style="max-width:260px;">
       <option value="">Todas as turmas</option>
       {% for item in turmas %}
         <option value="{{ item.turma_id }}" {% if turma_id == item.turma_id|stringformat:'s' %}selected{% endif %}>
@@ -29,8 +37,15 @@
       {% endfor %}
     </select>
 
-    <input name="q" value="{{ q }}" class="input" placeholder="Título, disciplina ou turma" style="max-width:300px;">
-    <button class="btn btn--sm" type="submit">Filtrar</button>
+    <select name="status" class="gp-input" style="max-width:220px;">
+      <option value="">Todos os status</option>
+      {% for key,label in status_choices %}
+        <option value="{{ key }}" {% if status == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <input name="q" value="{{ q }}" class="gp-input" placeholder="Título, disciplina ou turma" style="max-width:300px;">
+    <button class="gp-button gp-button--outline gp-button--sm" type="submit">Filtrar</button>
   </form>
 
   <div class="table-shell"><div class="table-shell__body">
@@ -44,6 +59,7 @@
           <th>Aplicações</th>
           <th>Corrigidas</th>
           <th>Média</th>
+          <th>Status</th>
           <th></th>
         </tr>
       </thead>
@@ -60,10 +76,17 @@
             <td>{{ item.total_aplicacoes }}</td>
             <td>{{ item.total_corrigidas }}</td>
             <td>{% if item.media %}{{ item.media|floatformat:2 }}{% else %}-{% endif %}</td>
-            <td><a class="link" href="{% url 'avaliacoes:avaliacao_detail' item.id %}?municipio={{ municipio.id }}">abrir</a></td>
+            <td>
+              {% if item.progress_status == "CONCLUIDA" %}Concluída
+              {% elif item.progress_status == "PARCIAL" %}Parcial
+              {% elif item.progress_status == "PENDENTE" %}Pendente
+              {% else %}Sem aplicações
+              {% endif %}
+            </td>
+            <td><a class="gp-anchor-link" href="{% url 'avaliacoes:avaliacao_detail' item.id %}?municipio={{ municipio.id }}">abrir</a></td>
           </tr>
         {% empty %}
-          <tr><td colspan="8">Nenhuma avaliação encontrada.</td></tr>
+          <tr><td colspan="9">Nenhuma avaliação encontrada.</td></tr>
         {% endfor %}
       </tbody>
     </table>

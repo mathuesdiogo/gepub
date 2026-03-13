@@ -1,0 +1,157 @@
+:root {
+  --gp-primary: #0b5fff;
+  --gp-primary-hover: #084bcc;
+  --gp-secondary: #2f3b52;
+  --gp-background: #f4f6fb;
+  --gp-surface: #ffffff;
+  --gp-border: #dce3ef;
+  --gp-text-primary: #152238;
+  --gp-text-secondary: #4c5d79;
+  --gp-success: #1d8f56;
+  --gp-warning: #b56a08;
+  --gp-danger: #be123c;
+  --gp-info: #0b5fff;
+  --gp-radius: 12px;
+  --gp-spacing-unit: 8px;
+  --gp-shadow-1: 0 1px 2px rgb(19 34 56 / 0.08);
+  --gp-shadow-2: 0 8px 24px rgb(19 34 56 / 0.12);
+  --gp-shadow-3: 0 18px 36px rgb(19 34 56 / 0.16);
+
+  --gp-font-family: "Inter", "Segoe UI", sans-serif;
+  --gp-font-size-base: 15px;
+  --gp-line-height-base: 1.5;
+
+  --gp-radius-sm: calc(var(--gp-radius) - 6px);
+  --gp-radius-md: var(--gp-radius);
+  --gp-radius-lg: calc(var(--gp-radius) + 8px);
+
+  --gp-space-1: calc(var(--gp-spacing-unit) * 0.5);
+  --gp-space-2: calc(var(--gp-spacing-unit) * 1);
+  --gp-space-3: calc(var(--gp-spacing-unit) * 1.5);
+  --gp-space-4: calc(var(--gp-spacing-unit) * 2);
+  --gp-space-5: calc(var(--gp-spacing-unit) * 3);
+  --gp-space-6: calc(var(--gp-spacing-unit) * 4);
+
+  --gp-border-focus: 0 0 0 3px color-mix(in srgb, var(--gp-primary) 35%, transparent);
+  --gp-transition-fast: 150ms ease;
+  --gp-transition-base: 220ms ease;
+
+  --gp-z-dropdown: 150;
+  --gp-z-sticky: 200;
+  --gp-z-overlay: 900;
+  --gp-z-modal: 950;
+
+  /* Compatibility aliases used by internal legacy templates during migration */
+  --color-primary-50: color-mix(in srgb, var(--gp-primary) 8%, white);
+  --color-primary-100: color-mix(in srgb, var(--gp-primary) 16%, white);
+  --color-primary-200: color-mix(in srgb, var(--gp-primary) 28%, white);
+  --color-primary-300: color-mix(in srgb, var(--gp-primary) 44%, white);
+  --color-primary-400: color-mix(in srgb, var(--gp-primary) 64%, white);
+  --color-primary-500: var(--gp-primary);
+  --color-primary-600: var(--gp-primary-hover);
+  --color-primary-700: color-mix(in srgb, var(--gp-primary) 84%, black);
+  --color-primary-800: color-mix(in srgb, var(--gp-primary) 72%, black);
+  --color-primary-900: color-mix(in srgb, var(--gp-primary) 58%, black);
+
+  --color-neutral-50: color-mix(in srgb, var(--gp-background) 95%, white);
+  --color-neutral-100: color-mix(in srgb, var(--gp-background) 88%, white);
+  --color-neutral-200: color-mix(in srgb, var(--gp-border) 82%, white);
+  --color-neutral-300: var(--gp-border);
+  --color-neutral-400: color-mix(in srgb, var(--gp-text-secondary) 46%, white);
+  --color-neutral-500: var(--gp-text-secondary);
+  --color-neutral-600: color-mix(in srgb, var(--gp-text-primary) 74%, var(--gp-text-secondary));
+  --color-neutral-700: color-mix(in srgb, var(--gp-text-primary) 86%, black);
+  --color-neutral-800: var(--gp-text-primary);
+  --color-neutral-900: color-mix(in srgb, var(--gp-text-primary) 92%, black);
+
+  --color-success-500: var(--gp-success);
+  --color-warning-500: var(--gp-warning);
+  --color-danger-500: var(--gp-danger);
+  --color-info-500: var(--gp-info);
+
+  --color-bg-body: var(--gp-background);
+  --color-bg-card: var(--gp-surface);
+  --color-text-primary: var(--gp-text-primary);
+  --color-text-secondary: var(--gp-text-secondary);
+  --color-text-muted: color-mix(in srgb, var(--gp-text-secondary) 82%, var(--gp-surface));
+  --color-border-light: var(--gp-border);
+  --color-border-default: color-mix(in srgb, var(--gp-border) 86%, var(--gp-text-secondary));
+
+  --font-family-base: var(--gp-font-family);
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  --radius-sm: var(--gp-radius-sm);
+  --radius-md: var(--gp-radius-md);
+  --radius-lg: var(--gp-radius-lg);
+  --radius-pill: 9999px;
+  --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.04);
+  --shadow-sm: var(--gp-shadow-1);
+  --shadow-md: var(--gp-shadow-2);
+  --shadow-lg: var(--gp-shadow-3);
+  --focus-ring: var(--gp-border-focus);
+
+  --primary: var(--gp-primary);
+  --primary-700: var(--color-primary-700);
+  --primary-900: var(--color-primary-900);
+  --primary-100: var(--color-primary-100);
+  --bg: var(--gp-background);
+  --surface: var(--gp-surface);
+  --surface-2: color-mix(in srgb, var(--gp-background) 50%, var(--gp-surface));
+  --surface-3: color-mix(in srgb, var(--gp-background) 75%, var(--gp-surface));
+  --border: var(--gp-border);
+  --text: var(--gp-text-primary);
+  --muted: var(--gp-text-secondary);
+  --muted-2: color-mix(in srgb, var(--gp-text-secondary) 85%, var(--gp-surface));
+  --success: var(--gp-success);
+  --warning: var(--gp-warning);
+  --danger: var(--gp-danger);
+  --radius: var(--gp-radius);
+  --shadow: var(--gp-shadow-3);
+  --shadow-soft: var(--gp-shadow-2);
+  --shadow-card: var(--gp-shadow-1);
+  --sidebar-w: 288px;
+  --sidebar-w-collapsed: 92px;
+  --topbar-h: 72px;
+  --pad: 18px;
+  --gap: 16px;
+  --focus: var(--gp-border-focus);
+
+  --sidebar-bg-start: var(--gp-sidebar-bg-start, color-mix(in srgb, var(--gp-surface) 94%, var(--gp-primary) 6%));
+  --sidebar-bg-end: var(--gp-sidebar-bg-end, color-mix(in srgb, var(--gp-surface) 88%, var(--gp-secondary) 12%));
+  --sidebar-overlay-1: var(--gp-sidebar-overlay-1, color-mix(in srgb, var(--gp-primary) 16%, transparent));
+  --sidebar-overlay-2: var(--gp-sidebar-overlay-2, color-mix(in srgb, var(--gp-info) 12%, transparent));
+  --sidebar-bg: linear-gradient(180deg, var(--sidebar-bg-start) 0%, var(--sidebar-bg-end) 100%);
+  --sidebar-surface: var(--gp-sidebar-surface, color-mix(in srgb, var(--gp-primary) 10%, var(--gp-surface)));
+  --sidebar-surface-2: var(--gp-sidebar-surface-2, color-mix(in srgb, var(--gp-primary) 16%, var(--gp-surface)));
+  --sidebar-border: var(--gp-sidebar-border, color-mix(in srgb, var(--gp-border) 70%, transparent));
+  --sidebar-text: var(--gp-sidebar-text, var(--gp-text-primary));
+  --sidebar-muted: var(--gp-sidebar-muted, var(--gp-text-secondary));
+}
+
+body.sidebar-collapsed {
+  --sidebar-w: var(--sidebar-w-collapsed);
+}

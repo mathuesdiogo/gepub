@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 import uuid
@@ -97,6 +98,229 @@ class CursoDisciplina(models.Model):
         return f"{self.curso.nome} • {self.nome}"
 
 
+class MatrizCurricular(models.Model):
+    class EtapaBase(models.TextChoices):
+        EDUCACAO_INFANTIL = "EDUCACAO_INFANTIL", "Educação Infantil"
+        FUNDAMENTAL_ANOS_INICIAIS = "FUNDAMENTAL_ANOS_INICIAIS", "Ensino Fundamental (Anos Iniciais)"
+        FUNDAMENTAL_ANOS_FINAIS = "FUNDAMENTAL_ANOS_FINAIS", "Ensino Fundamental (Anos Finais)"
+
+    class SerieAno(models.TextChoices):
+        INFANTIL_BERCARIO = "INFANTIL_BERCARIO", "Berçário"
+        INFANTIL_MATERNAL_I = "INFANTIL_MATERNAL_I", "Maternal I"
+        INFANTIL_MATERNAL_II = "INFANTIL_MATERNAL_II", "Maternal II"
+        INFANTIL_JARDIM_I = "INFANTIL_JARDIM_I", "Jardim I"
+        INFANTIL_JARDIM_II = "INFANTIL_JARDIM_II", "Jardim II"
+        FUNDAMENTAL_1 = "FUNDAMENTAL_1", "1º ano"
+        FUNDAMENTAL_2 = "FUNDAMENTAL_2", "2º ano"
+        FUNDAMENTAL_3 = "FUNDAMENTAL_3", "3º ano"
+        FUNDAMENTAL_4 = "FUNDAMENTAL_4", "4º ano"
+        FUNDAMENTAL_5 = "FUNDAMENTAL_5", "5º ano"
+        FUNDAMENTAL_6 = "FUNDAMENTAL_6", "6º ano"
+        FUNDAMENTAL_7 = "FUNDAMENTAL_7", "7º ano"
+        FUNDAMENTAL_8 = "FUNDAMENTAL_8", "8º ano"
+        FUNDAMENTAL_9 = "FUNDAMENTAL_9", "9º ano"
+
+    nome = models.CharField(max_length=180)
+    unidade = models.ForeignKey(
+        "org.Unidade",
+        on_delete=models.PROTECT,
+        related_name="matrizes_curriculares",
+    )
+    etapa_base = models.CharField(max_length=40, choices=EtapaBase.choices, db_index=True)
+    serie_ano = models.CharField(max_length=40, choices=SerieAno.choices, db_index=True)
+    ano_referencia = models.PositiveIntegerField(default=timezone.localdate().year, db_index=True)
+    carga_horaria_anual = models.PositiveIntegerField(default=800)
+    dias_letivos_previstos = models.PositiveSmallIntegerField(default=200)
+    ativo = models.BooleanField(default=True)
+    observacao = models.TextField(blank=True, default="")
+
+    class Meta:
+        verbose_name = "Matriz curricular"
+        verbose_name_plural = "Matrizes curriculares"
+        ordering = ["-ano_referencia", "etapa_base", "serie_ano", "nome"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["unidade", "etapa_base", "serie_ano", "ano_referencia", "nome"],
+                name="uniq_matriz_unidade_etapa_serie_ano_nome",
+            )
+        ]
+        indexes = [
+            models.Index(fields=["unidade", "ativo"]),
+            models.Index(fields=["etapa_base", "serie_ano"]),
+            models.Index(fields=["ano_referencia"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.nome} • {self.get_serie_ano_display()} • {self.ano_referencia}"
+
+
+class MatrizComponente(models.Model):
+    matriz = models.ForeignKey(
+        "educacao.MatrizCurricular",
+        on_delete=models.CASCADE,
+        related_name="componentes",
+    )
+    componente = models.ForeignKey(
+        "educacao.ComponenteCurricular",
+        on_delete=models.PROTECT,
+        related_name="matrizes",
+    )
+    ordem = models.PositiveSmallIntegerField(default=1)
+    carga_horaria_anual = models.PositiveIntegerField(default=0)
+    aulas_semanais = models.PositiveSmallIntegerField(default=0)
+    obrigatoria = models.BooleanField(default=True)
+    ativo = models.BooleanField(default=True)
+    observacao = models.TextField(blank=True, default="")
+
+    class Meta:
+        verbose_name = "Componente da matriz"
+        verbose_name_plural = "Componentes da matriz"
+        ordering = ["matriz", "ordem", "componente__nome"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["matriz", "componente"],
+                name="uniq_matriz_componente",
+            )
+        ]
+        indexes = [
+            models.Index(fields=["matriz", "ordem"]),
+            models.Index(fields=["matriz", "ativo"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.matriz} • {self.componente}"
+
+
+class MatrizComponenteRelacao(models.Model):
+    class Tipo(models.TextChoices):
+        PRE_REQUISITO = "PRE_REQUISITO", "Pré-requisito"
+        CO_REQUISITO = "CO_REQUISITO", "Co-requisito"
+        EQUIVALENCIA = "EQUIVALENCIA", "Equivalência"
+
+    origem = models.ForeignKey(
+        "educacao.MatrizComponente",
+        on_delete=models.CASCADE,
+        related_name="relacoes_origem",
+    )
+    destino = models.ForeignKey(
+        "educacao.MatrizComponente",
+        on_delete=models.CASCADE,
+        related_name="relacoes_destino",
+    )
+    tipo = models.CharField(max_length=20, choices=Tipo.choices, db_index=True)
+    ativo = models.BooleanField(default=True)
+    observacao = models.TextField(blank=True, default="")
+
+    class Meta:
+        verbose_name = "Relação entre componentes da matriz"
+        verbose_name_plural = "Relações entre componentes da matriz"
+        ordering = ["tipo", "origem__ordem", "destino__ordem", "id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["origem", "destino", "tipo"],
+                name="uniq_matriz_comp_relacao",
+            )
+        ]
+        indexes = [
+            models.Index(fields=["origem", "tipo"]),
+            models.Index(fields=["destino", "tipo"]),
+            models.Index(fields=["ativo"]),
+        ]
+
+    def clean(self):
+        errors = {}
+        if self.origem_id and self.destino_id:
+            if self.origem_id == self.destino_id:
+                errors["destino"] = "O componente de destino não pode ser o mesmo da origem."
+            if self.origem.matriz_id != self.destino.matriz_id:
+                errors["destino"] = "Origem e destino devem pertencer à mesma matriz curricular."
+        if errors:
+            raise ValidationError(errors)
+
+    def __str__(self) -> str:
+        return f"{self.get_tipo_display()}: {self.origem} -> {self.destino}"
+
+
+class MatrizComponenteEquivalenciaGrupo(models.Model):
+    matriz = models.ForeignKey(
+        "educacao.MatrizCurricular",
+        on_delete=models.CASCADE,
+        related_name="grupos_equivalencia",
+    )
+    nome = models.CharField(max_length=120)
+    minimo_componentes = models.PositiveSmallIntegerField(
+        default=1,
+        help_text="Quantidade mínima de componentes equivalentes aceitos para validação.",
+    )
+    ativo = models.BooleanField(default=True)
+    observacao = models.TextField(blank=True, default="")
+
+    class Meta:
+        verbose_name = "Grupo de equivalência da matriz"
+        verbose_name_plural = "Grupos de equivalência da matriz"
+        ordering = ["nome", "id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["matriz", "nome"],
+                name="uniq_matriz_equiv_grupo_nome",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["matriz", "ativo"]),
+        ]
+
+    def clean(self):
+        errors = {}
+        if self.minimo_componentes < 1:
+            errors["minimo_componentes"] = "Informe pelo menos 1 componente mínimo."
+        if errors:
+            raise ValidationError(errors)
+
+    def __str__(self) -> str:
+        return f"{self.matriz} • {self.nome}"
+
+
+class MatrizComponenteEquivalenciaItem(models.Model):
+    grupo = models.ForeignKey(
+        "educacao.MatrizComponenteEquivalenciaGrupo",
+        on_delete=models.CASCADE,
+        related_name="itens",
+    )
+    componente = models.ForeignKey(
+        "educacao.MatrizComponente",
+        on_delete=models.CASCADE,
+        related_name="equivalencias",
+    )
+    ordem = models.PositiveSmallIntegerField(default=1)
+    ativo = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "Item de equivalência da matriz"
+        verbose_name_plural = "Itens de equivalência da matriz"
+        ordering = ["grupo", "ordem", "componente__ordem", "componente__componente__nome"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["grupo", "componente"],
+                name="uniq_grupo_equiv_componente",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["grupo", "ordem"]),
+            models.Index(fields=["grupo", "ativo"]),
+        ]
+
+    def clean(self):
+        errors = {}
+        if self.grupo_id and self.componente_id:
+            if self.grupo.matriz_id != self.componente.matriz_id:
+                errors["componente"] = "O componente deve pertencer à mesma matriz do grupo de equivalência."
+        if errors:
+            raise ValidationError(errors)
+
+    def __str__(self) -> str:
+        return f"{self.grupo.nome} • {self.componente.componente.nome}"
+
+
 class Turma(models.Model):
     unidade = models.ForeignKey(
         "org.Unidade",
@@ -141,10 +365,112 @@ class Turma(models.Model):
         HIBRIDO = "HIBRIDO", "Híbrido"
         EAD = "EAD", "Educação a Distância"
 
+    class SerieAno(models.TextChoices):
+        INFANTIL_BERCARIO = "INFANTIL_BERCARIO", "Berçário"
+        INFANTIL_MATERNAL_I = "INFANTIL_MATERNAL_I", "Maternal I"
+        INFANTIL_MATERNAL_II = "INFANTIL_MATERNAL_II", "Maternal II"
+        INFANTIL_JARDIM_I = "INFANTIL_JARDIM_I", "Jardim I"
+        INFANTIL_JARDIM_II = "INFANTIL_JARDIM_II", "Jardim II"
+        FUNDAMENTAL_1 = "FUNDAMENTAL_1", "1º ano"
+        FUNDAMENTAL_2 = "FUNDAMENTAL_2", "2º ano"
+        FUNDAMENTAL_3 = "FUNDAMENTAL_3", "3º ano"
+        FUNDAMENTAL_4 = "FUNDAMENTAL_4", "4º ano"
+        FUNDAMENTAL_5 = "FUNDAMENTAL_5", "5º ano"
+        FUNDAMENTAL_6 = "FUNDAMENTAL_6", "6º ano"
+        FUNDAMENTAL_7 = "FUNDAMENTAL_7", "7º ano"
+        FUNDAMENTAL_8 = "FUNDAMENTAL_8", "8º ano"
+        FUNDAMENTAL_9 = "FUNDAMENTAL_9", "9º ano"
+        NAO_APLICA = "NAO_APLICA", "Não se aplica"
+
+    SERIES_INFANTIL_CRECHE = {
+        SerieAno.INFANTIL_BERCARIO,
+        SerieAno.INFANTIL_MATERNAL_I,
+        SerieAno.INFANTIL_MATERNAL_II,
+    }
+    SERIES_INFANTIL_PRE_ESCOLA = {
+        SerieAno.INFANTIL_JARDIM_I,
+        SerieAno.INFANTIL_JARDIM_II,
+    }
+    SERIES_FUNDAMENTAL_INICIAIS = {
+        SerieAno.FUNDAMENTAL_1,
+        SerieAno.FUNDAMENTAL_2,
+        SerieAno.FUNDAMENTAL_3,
+        SerieAno.FUNDAMENTAL_4,
+        SerieAno.FUNDAMENTAL_5,
+    }
+    SERIES_FUNDAMENTAL_FINAIS = {
+        SerieAno.FUNDAMENTAL_6,
+        SerieAno.FUNDAMENTAL_7,
+        SerieAno.FUNDAMENTAL_8,
+        SerieAno.FUNDAMENTAL_9,
+    }
+
     class Turno(models.TextChoices):
         MANHA = "MANHA", "Manhã"
         TARDE = "TARDE", "Tarde"
         NOITE = "NOITE", "Noite"
+
+    @classmethod
+    def modalidades_motor_principal_choices(cls):
+        return [
+            (cls.Modalidade.EDUCACAO_INFANTIL, dict(cls.Modalidade.choices)[cls.Modalidade.EDUCACAO_INFANTIL]),
+            (cls.Modalidade.REGULAR, dict(cls.Modalidade.choices)[cls.Modalidade.REGULAR]),
+            (cls.Modalidade.ATIVIDADE_COMPLEMENTAR, dict(cls.Modalidade.choices)[cls.Modalidade.ATIVIDADE_COMPLEMENTAR]),
+        ]
+
+    @classmethod
+    def etapas_motor_principal_choices(cls):
+        return [
+            (cls.Etapa.CRECHE, dict(cls.Etapa.choices)[cls.Etapa.CRECHE]),
+            (cls.Etapa.PRE_ESCOLA, dict(cls.Etapa.choices)[cls.Etapa.PRE_ESCOLA]),
+            (
+                cls.Etapa.FUNDAMENTAL_ANOS_INICIAIS,
+                dict(cls.Etapa.choices)[cls.Etapa.FUNDAMENTAL_ANOS_INICIAIS],
+            ),
+            (
+                cls.Etapa.FUNDAMENTAL_ANOS_FINAIS,
+                dict(cls.Etapa.choices)[cls.Etapa.FUNDAMENTAL_ANOS_FINAIS],
+            ),
+            (cls.Etapa.AEE, dict(cls.Etapa.choices)[cls.Etapa.AEE]),
+        ]
+
+    @classmethod
+    def series_motor_principal_choices(cls):
+        allowed = set(cls.SERIES_INFANTIL_CRECHE | cls.SERIES_INFANTIL_PRE_ESCOLA | cls.SERIES_FUNDAMENTAL_INICIAIS | cls.SERIES_FUNDAMENTAL_FINAIS | {cls.SerieAno.NAO_APLICA})
+        return [(value, label) for value, label in cls.SerieAno.choices if value in allowed]
+
+    @classmethod
+    def expected_serie_from_matriz(cls, matriz):
+        serie_map = {
+            MatrizCurricular.SerieAno.INFANTIL_BERCARIO: cls.SerieAno.INFANTIL_BERCARIO,
+            MatrizCurricular.SerieAno.INFANTIL_MATERNAL_I: cls.SerieAno.INFANTIL_MATERNAL_I,
+            MatrizCurricular.SerieAno.INFANTIL_MATERNAL_II: cls.SerieAno.INFANTIL_MATERNAL_II,
+            MatrizCurricular.SerieAno.INFANTIL_JARDIM_I: cls.SerieAno.INFANTIL_JARDIM_I,
+            MatrizCurricular.SerieAno.INFANTIL_JARDIM_II: cls.SerieAno.INFANTIL_JARDIM_II,
+            MatrizCurricular.SerieAno.FUNDAMENTAL_1: cls.SerieAno.FUNDAMENTAL_1,
+            MatrizCurricular.SerieAno.FUNDAMENTAL_2: cls.SerieAno.FUNDAMENTAL_2,
+            MatrizCurricular.SerieAno.FUNDAMENTAL_3: cls.SerieAno.FUNDAMENTAL_3,
+            MatrizCurricular.SerieAno.FUNDAMENTAL_4: cls.SerieAno.FUNDAMENTAL_4,
+            MatrizCurricular.SerieAno.FUNDAMENTAL_5: cls.SerieAno.FUNDAMENTAL_5,
+            MatrizCurricular.SerieAno.FUNDAMENTAL_6: cls.SerieAno.FUNDAMENTAL_6,
+            MatrizCurricular.SerieAno.FUNDAMENTAL_7: cls.SerieAno.FUNDAMENTAL_7,
+            MatrizCurricular.SerieAno.FUNDAMENTAL_8: cls.SerieAno.FUNDAMENTAL_8,
+            MatrizCurricular.SerieAno.FUNDAMENTAL_9: cls.SerieAno.FUNDAMENTAL_9,
+        }
+        return serie_map.get(getattr(matriz, "serie_ano", None))
+
+    @classmethod
+    def expected_etapa_from_matriz(cls, matriz):
+        if getattr(matriz, "etapa_base", None) == MatrizCurricular.EtapaBase.EDUCACAO_INFANTIL:
+            serie = cls.expected_serie_from_matriz(matriz)
+            if serie in cls.SERIES_INFANTIL_CRECHE:
+                return cls.Etapa.CRECHE
+            return cls.Etapa.PRE_ESCOLA
+        if getattr(matriz, "etapa_base", None) == MatrizCurricular.EtapaBase.FUNDAMENTAL_ANOS_INICIAIS:
+            return cls.Etapa.FUNDAMENTAL_ANOS_INICIAIS
+        if getattr(matriz, "etapa_base", None) == MatrizCurricular.EtapaBase.FUNDAMENTAL_ANOS_FINAIS:
+            return cls.Etapa.FUNDAMENTAL_ANOS_FINAIS
+        return None
 
     turno = models.CharField(max_length=20, choices=Turno.choices, default=Turno.MANHA)
     modalidade = models.CharField(
@@ -163,6 +489,19 @@ class Turma(models.Model):
         max_length=20,
         choices=FormaOferta.choices,
         default=FormaOferta.PRESENCIAL,
+    )
+    serie_ano = models.CharField(
+        max_length=40,
+        choices=SerieAno.choices,
+        default=SerieAno.FUNDAMENTAL_1,
+        db_index=True,
+    )
+    matriz_curricular = models.ForeignKey(
+        "educacao.MatrizCurricular",
+        on_delete=models.SET_NULL,
+        related_name="turmas",
+        null=True,
+        blank=True,
     )
     curso = models.ForeignKey(
         "educacao.Curso",
@@ -190,11 +529,43 @@ class Turma(models.Model):
             models.Index(fields=["ano_letivo"]),
             models.Index(fields=["modalidade"]),
             models.Index(fields=["etapa"]),
+            models.Index(fields=["serie_ano"]),
             models.Index(fields=["ativo"]),
         ]
 
     def __str__(self) -> str:
         return f"{self.nome} ({self.ano_letivo})"
+
+    def clean(self):
+        errors = {}
+
+        if self.modalidade == self.Modalidade.ATIVIDADE_COMPLEMENTAR:
+            if not self.curso_id:
+                errors["curso"] = "Para atividade complementar, selecione o curso/atividade extracurricular."
+            if self.matriz_curricular_id:
+                errors["matriz_curricular"] = "Atividade complementar não usa matriz curricular principal."
+            self.serie_ano = self.SerieAno.NAO_APLICA
+        else:
+            if not self.matriz_curricular_id:
+                errors["matriz_curricular"] = "Selecione a matriz curricular da turma."
+            if self.curso_id:
+                errors["curso"] = "Turma regular não deve usar curso extracurricular."
+
+        if self.matriz_curricular_id:
+            matriz = self.matriz_curricular
+            if self.unidade_id and matriz.unidade_id != self.unidade_id:
+                errors["matriz_curricular"] = "A matriz selecionada pertence a outra unidade."
+
+            expected_serie = self.expected_serie_from_matriz(matriz)
+            if expected_serie and self.serie_ano not in {expected_serie, self.SerieAno.NAO_APLICA}:
+                errors["serie_ano"] = "A série/ano não corresponde à matriz curricular selecionada."
+
+            expected_etapa = self.expected_etapa_from_matriz(matriz)
+            if expected_etapa and self.etapa != expected_etapa:
+                errors["etapa"] = "A etapa da turma não corresponde à etapa da matriz curricular."
+
+        if errors:
+            raise ValidationError(errors)
 
 
 class Aluno(models.Model):
@@ -390,6 +761,134 @@ class MatriculaMovimentacao(models.Model):
 
     def __str__(self) -> str:
         return f"{self.aluno} • {self.get_tipo_display()} • {self.criado_em:%d/%m/%Y %H:%M}"
+
+
+class Estagio(models.Model):
+    class Tipo(models.TextChoices):
+        OBRIGATORIO = "OBRIGATORIO", "Obrigatório"
+        NAO_OBRIGATORIO = "NAO_OBRIGATORIO", "Não obrigatório"
+
+    class Situacao(models.TextChoices):
+        RASCUNHO = "RASCUNHO", "Rascunho"
+        EM_ANALISE = "EM_ANALISE", "Em análise"
+        APROVADO = "APROVADO", "Aprovado"
+        EM_ANDAMENTO = "EM_ANDAMENTO", "Em andamento"
+        CONCLUIDO = "CONCLUIDO", "Concluído"
+        INDEFERIDO = "INDEFERIDO", "Indeferido"
+        CANCELADO = "CANCELADO", "Cancelado"
+
+    aluno = models.ForeignKey(
+        "educacao.Aluno",
+        on_delete=models.PROTECT,
+        related_name="estagios",
+    )
+    matricula = models.ForeignKey(
+        "educacao.Matricula",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="estagios",
+    )
+    turma = models.ForeignKey(
+        "educacao.Turma",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="estagios",
+    )
+    unidade = models.ForeignKey(
+        "org.Unidade",
+        on_delete=models.PROTECT,
+        related_name="estagios_educacao",
+    )
+    tipo = models.CharField(max_length=20, choices=Tipo.choices, default=Tipo.OBRIGATORIO, db_index=True)
+    situacao = models.CharField(max_length=20, choices=Situacao.choices, default=Situacao.RASCUNHO, db_index=True)
+    concedente_nome = models.CharField(max_length=180)
+    concedente_cnpj = models.CharField(max_length=18, blank=True, default="")
+    supervisor_nome = models.CharField(max_length=140, blank=True, default="")
+    orientador = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="estagios_orientados",
+    )
+    data_inicio_prevista = models.DateField(null=True, blank=True)
+    data_fim_prevista = models.DateField(null=True, blank=True)
+    data_inicio_real = models.DateField(null=True, blank=True)
+    data_fim_real = models.DateField(null=True, blank=True)
+    carga_horaria_total = models.PositiveIntegerField(default=0)
+    carga_horaria_cumprida = models.PositiveIntegerField(default=0)
+    equivalencia_solicitada = models.BooleanField(default=False)
+    equivalencia_aprovada = models.BooleanField(default=False)
+    termo_compromisso = models.FileField(upload_to="educacao/estagios/termos/%Y/%m/", blank=True, null=True)
+    relatorio_final = models.FileField(upload_to="educacao/estagios/relatorios/%Y/%m/", blank=True, null=True)
+    observacao = models.TextField(blank=True, default="")
+    cadastrado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="estagios_cadastrados",
+    )
+    atualizado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="estagios_atualizados",
+    )
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+    ativo = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "Estágio"
+        verbose_name_plural = "Estágios"
+        ordering = ["-criado_em", "-id"]
+        indexes = [
+            models.Index(fields=["unidade", "situacao"]),
+            models.Index(fields=["aluno", "tipo"]),
+            models.Index(fields=["matricula"]),
+            models.Index(fields=["turma"]),
+            models.Index(fields=["criado_em"]),
+            models.Index(fields=["ativo"]),
+        ]
+
+    def clean(self):
+        errors = {}
+
+        if self.matricula_id and self.aluno_id and self.matricula.aluno_id != self.aluno_id:
+            errors["matricula"] = "A matrícula selecionada não pertence ao aluno informado."
+
+        if self.turma_id and self.matricula_id and self.matricula.turma_id != self.turma_id:
+            errors["turma"] = "A turma deve ser a mesma da matrícula vinculada."
+
+        if self.turma_id and self.unidade_id and self.turma.unidade_id != self.unidade_id:
+            errors["unidade"] = "A unidade deve ser a mesma da turma selecionada."
+
+        if self.matricula_id and self.unidade_id:
+            turma_matricula = getattr(self.matricula, "turma", None)
+            if turma_matricula and turma_matricula.unidade_id != self.unidade_id:
+                errors["unidade"] = "A unidade deve ser a mesma da matrícula vinculada."
+
+        if self.data_inicio_prevista and self.data_fim_prevista and self.data_fim_prevista < self.data_inicio_prevista:
+            errors["data_fim_prevista"] = "A data final prevista não pode ser anterior à data inicial prevista."
+
+        if self.data_inicio_real and self.data_fim_real and self.data_fim_real < self.data_inicio_real:
+            errors["data_fim_real"] = "A data final real não pode ser anterior à data inicial real."
+
+        if self.carga_horaria_total and self.carga_horaria_cumprida > self.carga_horaria_total:
+            errors["carga_horaria_cumprida"] = "A carga horária cumprida não pode ultrapassar a carga horária total."
+
+        if self.equivalencia_aprovada and not self.equivalencia_solicitada:
+            errors["equivalencia_aprovada"] = "Não é possível aprovar equivalência sem solicitação prévia."
+
+        if errors:
+            raise ValidationError(errors)
+
+    def __str__(self) -> str:
+        return f"{self.aluno} • {self.get_tipo_display()} • {self.get_situacao_display()}"
 
 
 class MatriculaCurso(models.Model):
@@ -663,3 +1162,5 @@ from . import models_periodos  # noqa: F401
 from . import models_notas  # noqa: F401
 from . import models_assistencia  # noqa: F401
 from . import models_calendario  # noqa: F401
+from . import models_beneficios  # noqa: F401
+from . import models_informatica  # noqa: F401

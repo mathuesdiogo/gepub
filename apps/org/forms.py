@@ -100,6 +100,7 @@ class UnidadeForm(forms.ModelForm):
             "secretaria",
             "nome",
             "tipo",
+            "tipo_educacional",
             "codigo_inep",
             "cnpj",
             "endereco",
@@ -115,6 +116,45 @@ class UnidadeForm(forms.ModelForm):
             "telefone": forms.TextInput(attrs={"placeholder": "(00) 0000-0000"}),
             "email": forms.EmailInput(attrs={"placeholder": "contato@..."}),
         }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+
+        if not user or not getattr(user, "is_authenticated", False):
+            return
+
+        from apps.core.rbac import get_profile, is_admin
+
+        profile = get_profile(user)
+        if (not is_admin(user)) and profile and getattr(profile, "municipio_id", None):
+            self.fields["secretaria"].queryset = Secretaria.objects.filter(
+                municipio_id=profile.municipio_id,
+                ativo=True,
+            ).order_by("nome")
+        if "tipo_educacional" in self.fields:
+            self.fields["tipo_educacional"].help_text = (
+                "Use para identificar se a unidade é escola, creche, laboratório etc. "
+                "Este campo é obrigatório ao criar unidade do tipo Educação."
+            )
+
+    def clean(self):
+        cleaned = super().clean()
+        tipo = cleaned.get("tipo")
+        tipo_educacional = cleaned.get("tipo_educacional") or Unidade.TipoEducacional.NAO_APLICA
+
+        if tipo == Unidade.Tipo.EDUCACAO and not self.instance.pk and tipo_educacional == Unidade.TipoEducacional.NAO_APLICA:
+            self.add_error(
+                "tipo_educacional",
+                "Selecione a identificação da unidade educacional (escola, creche, laboratório etc.).",
+            )
+
+        if tipo != Unidade.Tipo.EDUCACAO:
+            cleaned["tipo_educacional"] = Unidade.TipoEducacional.NAO_APLICA
+
+        return cleaned
+
+
 class SetorForm(forms.ModelForm):
     class Meta:
         model = Setor

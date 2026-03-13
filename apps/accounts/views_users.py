@@ -1,6 +1,7 @@
 from .views_users_list import usuarios_list, users_autocomplete
 from .views_users_crud import (
     usuario_create,
+    usuario_prefeitura_onboarding_create,
     usuario_update,
     usuario_detail,
     usuario_toggle_ativo,
@@ -13,6 +14,7 @@ __all__ = [
     "usuarios_list",
     "users_autocomplete",
     "usuario_create",
+    "usuario_prefeitura_onboarding_create",
     "usuario_update",
     "usuario_detail",
     "usuario_toggle_ativo",

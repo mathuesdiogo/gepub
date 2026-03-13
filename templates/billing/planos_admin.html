@@ -1,0 +1,100 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="card billing-page billing-page--admin-planos"><div class="card__body billing-page__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <section class="billing-section billing-section--compact">
+    <form method="get" class="billing-filter-form">
+      <label class="small" for="id_q">Buscar plano</label>
+      <input id="id_q" type="search" name="q" value="{{ q }}" class="gp-input" placeholder="Nome ou código">
+      <button type="submit" class="gp-button gp-button--outline">Filtrar</button>
+    </form>
+  </section>
+
+  <section class="billing-section">
+    <div class="billing-section__head">
+      <h3>Visão executiva dos planos</h3>
+      <p>Indicadores consolidados para gestão comercial e contratual.</p>
+    </div>
+    <div class="billing-summary-grid">
+      <div class="billing-box">
+        <div class="billing-box__label">Planos cadastrados</div>
+        <div class="billing-box__value">{{ kpis.planos_total }}</div>
+        <div class="billing-box__meta">Ativos: {{ kpis.planos_ativos }}</div>
+      </div>
+      <div class="billing-box">
+        <div class="billing-box__label">Assinaturas ativas</div>
+        <div class="billing-box__value">{{ kpis.assinaturas_ativas }}</div>
+        <div class="billing-box__meta">Trial + ativo + suspenso</div>
+      </div>
+      <div class="billing-box">
+        <div class="billing-box__label">Receita mensal estimada</div>
+        <div class="billing-box__value">R$ {{ kpis.receita_mensal_estimada }}</div>
+        <div class="billing-box__meta">Base mensal consolidada</div>
+      </div>
+      <div class="billing-box">
+        <div class="billing-box__label">Documentação pendente</div>
+        <div class="billing-box__value">{{ kpis.docs_pendentes }}</div>
+        <div class="billing-box__meta">Planos sem ambos os links obrigatórios</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="billing-section">
+    <div class="billing-section__head">
+      <h3>Catálogo de planos</h3>
+      <p>Lista de planos com status, adoção e documentação.</p>
+    </div>
+    <div class="table-shell billing-table-shell">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Plano</th>
+            <th>Preço base</th>
+            <th>Status</th>
+            <th>Assinaturas ativas</th>
+            <th>Recursos</th>
+            <th>Documentos</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in planos_cards %}
+            <tr>
+              <td>
+                <strong>{{ row.comercial.nome_comercial|default:row.plano.nome }}</strong><br>
+                <span class="small">{{ row.plano.codigo }} • {{ row.comercial.categoria|default:"Sem categoria" }}</span>
+              </td>
+              <td>R$ {{ row.plano.preco_base_mensal }}</td>
+              <td>{% if row.plano.ativo %}Ativo{% else %}Inativo{% endif %}</td>
+              <td>
+                <strong>{{ row.assinaturas_ativas }}</strong><br>
+                <span class="small">R$ {{ row.receita_mensal_estimada }}/mês</span>
+              </td>
+              <td>
+                {% for item in row.comercial.features_habilitadas %}
+                  <div class="small">• {{ item }}</div>
+                {% empty %}
+                  <span class="small">Sem features premium</span>
+                {% endfor %}
+              </td>
+              <td>
+                {% if row.has_docs %}
+                  <span class="gp-badge gp-badge--success">OK</span>
+                {% else %}
+                  <span class="gp-badge gp-badge--warning">Pendente</span>
+                {% endif %}
+              </td>
+              <td><a class="gp-button gp-button--outline gp-button--sm" href="{% url 'billing:plano_admin_detail' row.plano.pk %}">Gerenciar</a></td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="7">Nenhum plano encontrado.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div></div>
+{% endblock %}

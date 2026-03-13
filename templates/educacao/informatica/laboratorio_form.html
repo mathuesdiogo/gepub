@@ -1,0 +1,24 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}{% if mode == 'create' %}Novo Laboratório{% else %}Editar Laboratório{% endif %} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+  <div class="gp-card">
+    <div class="gp-card__body">
+      {% if mode == 'create' %}
+        {% include "core/partials/components/layout/page_head.html" with title="Novo Laboratório" subtitle="Vincule à unidade educacional e capacidade" actions=actions %}
+      {% else %}
+        {% include "core/partials/components/layout/page_head.html" with title="Editar Laboratório" subtitle=laboratorio.nome actions=actions %}
+      {% endif %}
+
+      <form method="post" class="gp-form form-shell">
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="flash flash--error">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="form-shell__fields">{{ form.as_p }}</div>
+        <div class="form-shell__actions">
+          <button type="submit" class="gp-button gp-button--primary">Salvar</button>
+          <a class="gp-button gp-button--outline" href="{% url 'educacao:informatica_laboratorio_list' %}">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

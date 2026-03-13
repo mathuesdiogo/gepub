@@ -1,10 +1,10 @@
 {% extends "core/detail_base.html" %}
 
 {% block detail_sections %}
-<div class="card" style="margin-top:12px;"><div class="card__body">
-  <h3 style="margin-top:0;">Liquidações</h3>
-  <div class="table-shell"><div class="table-shell__body">
-    <table class="table">
+<div class="gp-card"><div class="gp-card__body">
+  <h3>Liquidações</h3>
+  <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__body">
+    <table class="gp-table__native">
       <thead><tr><th>Número</th><th>Data</th><th>Documento</th><th>Valor</th><th></th></tr></thead>
       <tbody>
         {% for item in liquidacoes %}
@@ -13,7 +13,7 @@
             <td>{{ item.data_liquidacao|date:"d/m/Y" }}</td>
             <td>{{ item.documento_fiscal|default:"—" }}</td>
             <td>R$ {{ item.valor_liquidado }}</td>
-            <td><a class="link" href="{% url 'financeiro:pagamento_create' item.id %}?municipio={{ municipio.id }}">pagar</a></td>
+            <td><a class="gp-anchor-link" href="{% url 'financeiro:pagamento_create' item.id %}?municipio={{ municipio.id }}">pagar</a></td>
           </tr>
         {% empty %}
           <tr><td colspan="5">Nenhuma liquidação registrada.</td></tr>
@@ -23,10 +23,10 @@
   </div></div>
 </div></div>
 
-<div class="card" style="margin-top:12px;"><div class="card__body">
-  <h3 style="margin-top:0;">Pagamentos</h3>
-  <div class="table-shell"><div class="table-shell__body">
-    <table class="table">
+<div class="gp-card"><div class="gp-card__body">
+  <h3>Pagamentos</h3>
+  <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__body">
+    <table class="gp-table__native">
       <thead><tr><th>Liquidação</th><th>Data</th><th>Ordem</th><th>Valor</th><th>Status</th></tr></thead>
       <tbody>
         {% for item in pagamentos %}
@@ -44,4 +44,5 @@
     </table>
   </div></div>
 </div></div>
+{% include "core/partials/components/operacao/registro_extras.html" %}
 {% endblock %}

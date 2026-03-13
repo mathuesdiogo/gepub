@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
 from apps.core.exports import export_pdf_table
-from apps.core.rbac import can, scope_filter_turmas
+from apps.core.rbac import can, is_professor_profile_role, scope_filter_turmas
 
 from .forms_horarios import AulaHorarioForm
 from .models import Turma
@@ -35,7 +35,7 @@ def can_edit_horario(user, turma: Turma) -> bool:
         return True
 
     prof = getattr(user, "profile", None)
-    if prof and getattr(prof, "role", None) == "PROFESSOR":
+    if prof and is_professor_profile_role(getattr(prof, "role", None)):
         if hasattr(prof, "unidade_id") and prof.unidade_id == turma.unidade_id:
             return True
 
@@ -49,6 +49,7 @@ def horario_turma_impl(request, turma_id: int):
             "unidade",
             "unidade__secretaria",
             "unidade__secretaria__municipio",
+            "matriz_curricular",
         ),
     )
     turma = get_object_or_404(turma_qs, pk=turma_id)

@@ -1,0 +1,63 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Justificativas de Falta • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="gp-card"><div class="gp-card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Justificativas de Falta" subtitle="Painel do professor para análise de pedidos de falta" actions=actions %}
+
+<form method="get" class="gp-form gp-form--smart gp-mb-3">
+  <div class="gp-form-group">
+    <label class="gp-form-label" for="id_status">Status</label>
+    <select id="id_status" name="status" class="gp-select">
+      <option value="" {% if not status_filter %}selected{% endif %}>Todos</option>
+      <option value="PENDENTE" {% if status_filter == "PENDENTE" %}selected{% endif %}>Pendente</option>
+      <option value="DEFERIDO" {% if status_filter == "DEFERIDO" %}selected{% endif %}>Deferido</option>
+      <option value="INDEFERIDO" {% if status_filter == "INDEFERIDO" %}selected{% endif %}>Indeferido</option>
+    </select>
+  </div>
+  <div class="gp-form-group">
+    <label class="gp-form-label" for="id_q">Busca</label>
+    <input id="id_q" class="gp-input" type="text" name="q" value="{{ q }}" placeholder="Aluno, turma, componente..." />
+  </div>
+  <div class="gp-form-group">
+    <label class="gp-form-label">&nbsp;</label>
+    <button type="submit" class="gp-button gp-button--primary"><i class="fa-solid fa-filter"></i> Filtrar</button>
+  </div>
+</form>
+
+<div class="gp-flex-wrap-row gp-mb-3">
+  <span class="gp-badge gp-badge--warning">Pendentes: {{ counters.pendente }}</span>
+  <span class="gp-badge gp-badge--success">Deferidos: {{ counters.deferido }}</span>
+  <span class="gp-badge gp-badge--danger">Indeferidos: {{ counters.indeferido }}</span>
+</div>
+
+<div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__body">
+  <table class="gp-table__native">
+    <thead>
+      <tr>
+        <th>Aluno</th>
+        <th>Turma</th>
+        <th>Aula</th>
+        <th>Status</th>
+        <th>Solicitado em</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+        <tr>
+          <td>{{ item.aluno.nome }}</td>
+          <td>{{ item.aula.diario.turma.nome }}</td>
+          <td>{{ item.aula.data|date:"d/m/Y" }}{% if item.aula.componente %} • {{ item.aula.componente }}{% endif %}</td>
+          <td>{{ item.get_status_display }}</td>
+          <td>{{ item.criado_em|date:"d/m/Y H:i" }}</td>
+          <td><a class="gp-button gp-button--outline" href="{% url 'educacao:justificativa_falta_detail' item.pk %}">Analisar</a></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6">Nenhum pedido encontrado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div></div>
+</div></div>
+{% endblock %}

@@ -1,21 +1,34 @@
 from decimal import Decimal
 from datetime import datetime
+from uuid import UUID
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Max, Q, Sum
+from django.http import Http404
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
 from apps.billing.forms import SimuladorPlanoForm
 from apps.billing.models import PlanoMunicipal
-from apps.billing.services import simular_plano
+from apps.billing.services import (
+    PlanoApp,
+    PLANO_COMERCIAL_SPECS,
+    PLANO_DOC_LINKS,
+    catalogo_planos_comercial,
+    get_assinatura_ativa,
+    municipio_has_plan_app,
+    plano_comercial_data,
+    resolver_municipio_usuario,
+    simular_plano,
+)
 from apps.compras.models import ProcessoLicitatorio
 from apps.contratos.models import AditivoContrato, ContratoAdministrativo
 from apps.core.module_access import module_enabled_for_user
 from apps.core.models import (
     ConcursoPublico,
     DiarioOficialEdicao,
+    DocumentoEmitido,
     InstitutionalMethodStep,
     InstitutionalPageConfig,
     InstitutionalServiceCard,
@@ -29,6 +42,21 @@ from apps.core.models import (
     TransparenciaEventoPublico,
 )
 from apps.core.portal_public_utils import build_menu_items
+from apps.core.portal_specs import (
+    DEFAULT_INSTITUTIONAL_SERVICES,
+    DEFAULT_INSTITUTIONAL_SLIDES,
+    DEFAULT_INSTITUTIONAL_STEPS,
+    DOCUMENTATION_ARQUITETURA,
+    DOCUMENTATION_FLUXOS,
+    DOCUMENTATION_FUNCIONALIDADES,
+    DOCUMENTATION_INTEGRACOES,
+    DOCUMENTATION_KPIS,
+    DOCUMENTATION_MODULES,
+    DOCUMENTATION_PILARES,
+    INSTITUTIONAL_DEFAULT_CONTENT,
+    TRANSPARENCIA_SECTION_SPECS,
+)
+from apps.core.rbac_documentation import build_operational_matrix_rows, build_site_role_sections
 from apps.core.rbac import can
 from apps.financeiro.models import DespEmpenho
 from apps.folha.models import FolhaCompetencia
@@ -40,6 +68,8 @@ from apps.tributos.models import TributoLancamento
 @login_required
 def portal(request):
     u = request.user
+    municipio = resolver_municipio_usuario(u)
+    plan_camara_enabled = municipio_has_plan_app(municipio, PlanoApp.CAMARA) if municipio else False
     modules = [
         {
             "key": "educacao",
@@ -186,6 +216,15 @@ def portal(request):
             "color": "kpi-green",
         },
         {
+            "key": "camara",
+            "title": "Câmara Municipal",
+            "desc": "Sessões, proposições, transparência legislativa e comunicação da Câmara.",
+            "icon": "fa-solid fa-landmark-dome",
+            "url": "camara:index",
+            "enabled": can(u, "camara.view") and module_enabled_for_user(u, "camara") and plan_camara_enabled,
+            "color": "kpi-blue",
+        },
+        {
             "key": "paineis",
             "title": "Painéis BI",
             "desc": "Ingestão de dados, dashboards, filtros e exportações executivas.",
@@ -212,10 +251,30 @@ def portal(request):
             "enabled": can(u, "integracoes.view") and module_enabled_for_user(u, "integracoes"),
             "color": "kpi-blue",
         },
+        {
+            "key": "comunicacao",
+            "title": "Comunicação",
+            "desc": "E-mail, SMS e WhatsApp oficial com templates, fila e auditoria.",
+            "icon": "fa-solid fa-paper-plane",
+            "url": "comunicacao:index",
+            "enabled": can(u, "comunicacao.view") and module_enabled_for_user(u, "comunicacao"),
+            "color": "kpi-purple",
+        },
     ]
 
     modules = [m for m in modules if m["enabled"]]
-    return render(request, "core/portal.html", {"modules": modules})
+    assinatura = get_assinatura_ativa(municipio, criar_default=False) if municipio else None
+    plano_atual = plano_comercial_data(assinatura.plano if assinatura else None)
+
+    return render(
+        request,
+        "core/portal.html",
+        {
+            "modules": modules,
+            "plano_atual": plano_atual,
+            "assinatura": assinatura,
+        },
+    )
 
 
 def _format_money(value: Decimal | None) -> str:
@@ -234,66 +293,81 @@ def _format_currency_br(value: Decimal | None) -> str:
 
 
 def _planos_para_site() -> list[dict]:
-    planos = list(PlanoMunicipal.objects.filter(ativo=True).order_by("preco_base_mensal", "nome"))
-    if not planos:
-        return [
-            {
-                "id": 0,
-                "codigo": "STARTER",
-                "nome": "Starter",
-                "descricao": "Plano de entrada para prefeituras pequenas.",
-                "preco": "R$ 2.990,00",
-                "destaque": "Entrada",
-                "features": ["Educação, Saúde e NEE", "Onboarding automático", "Relatórios operacionais"],
-                "limits": ["Secretarias: até 4", "Usuários: até 60", "Alunos: até 2.000", "Atendimentos/ano: até 10.000"],
-                "overages": ["Secretaria extra: R$ 250/mês", "Usuário extra: R$ 8/mês", "Aluno extra: R$ 0,60/mês"],
-            },
-            {
-                "id": 1,
-                "codigo": "MUNICIPAL",
-                "nome": "Municipal",
-                "descricao": "Plano recomendado por equilíbrio entre escala e custo.",
-                "preco": "R$ 6.990,00",
-                "destaque": "Recomendado",
-                "features": ["BI de gestão municipal", "Importação assistida", "Auditoria de ações críticas"],
-                "limits": ["Secretarias: até 8", "Usuários: até 200", "Alunos: até 8.000", "Atendimentos/ano: até 50.000"],
-                "overages": ["Secretaria extra: R$ 220/mês", "Usuário extra: R$ 6/mês", "Aluno extra: R$ 0,45/mês"],
-            },
-            {
-                "id": 2,
-                "codigo": "GESTAO_TOTAL",
-                "nome": "Gestão Total",
-                "descricao": "Plano para operação municipal de maior porte.",
-                "preco": "R$ 14.900,00",
-                "destaque": "Escala",
-                "features": ["BI avançado executivo", "SLA prioritário", "Treinamento contínuo"],
-                "limits": ["Secretarias: ilimitadas", "Usuários: ilimitados (fair use)", "Alunos: ilimitados (fair use)", "Atendimentos/ano: ilimitados (fair use)"],
-                "overages": ["Integrações especiais: sob proposta", "Ambiente extra: sob proposta", "Migração avançada: sob proposta"],
-            },
-        ]
+    faixa_por_porte = {
+        PlanoMunicipal.Codigo.STARTER: "P: R$ 1.490 | M: R$ 2.490 | G: R$ 3.490",
+        PlanoMunicipal.Codigo.MUNICIPAL: "P: R$ 2.490 | M: R$ 3.990 | G: R$ 5.990",
+        PlanoMunicipal.Codigo.GESTAO_TOTAL: "P: R$ 3.990 | M: R$ 6.990 | G: R$ 9.990",
+        PlanoMunicipal.Codigo.CONSORCIO: "P: R$ 5.990 | M: R$ 9.990 | G: R$ 14.990",
+    }
 
+    setup_por_plano = {
+        PlanoMunicipal.Codigo.STARTER: "Implantação sugerida: R$ 6.000 a R$ 12.000",
+        PlanoMunicipal.Codigo.MUNICIPAL: "Implantação sugerida: R$ 10.000 a R$ 20.000",
+        PlanoMunicipal.Codigo.GESTAO_TOTAL: "Implantação sugerida: R$ 18.000 a R$ 35.000",
+        PlanoMunicipal.Codigo.CONSORCIO: "Implantação sugerida: R$ 25.000 a R$ 60.000",
+    }
+
+    planos = list(
+        PlanoMunicipal.objects.filter(ativo=True).select_related("comercial_config").order_by("preco_base_mensal", "nome")
+    )
+    if not planos:
+        fallback_codes = [
+            PlanoMunicipal.Codigo.STARTER,
+            PlanoMunicipal.Codigo.MUNICIPAL,
+            PlanoMunicipal.Codigo.GESTAO_TOTAL,
+            PlanoMunicipal.Codigo.CONSORCIO,
+        ]
+        cards: list[dict] = []
+        for codigo in fallback_codes:
+            spec = PLANO_COMERCIAL_SPECS.get(codigo, {})
+            docs = PLANO_DOC_LINKS.get(codigo, {})
+            destaque = ""
+            if codigo == PlanoMunicipal.Codigo.STARTER:
+                destaque = "Entrada"
+            elif codigo == PlanoMunicipal.Codigo.MUNICIPAL:
+                destaque = "Recomendado"
+            elif codigo == PlanoMunicipal.Codigo.GESTAO_TOTAL:
+                destaque = "Governança"
+            elif codigo == PlanoMunicipal.Codigo.CONSORCIO:
+                destaque = "Município 100% Digital"
+            cards.append(
+                {
+                    "id": codigo,
+                    "codigo": codigo,
+                    "nome": spec.get("nome_comercial", codigo),
+                    "descricao": spec.get("descricao_comercial", ""),
+                    "preco": "Sob proposta",
+                    "destaque": destaque,
+                    "features": list(spec.get("beneficios", [])),
+                    "special_access": list(spec.get("especiais", [])),
+                    "restricoes": list(spec.get("limitacoes", [])),
+                    "dependencies": list(spec.get("dependencias", [])),
+                    "limits": [
+                        "Apps habilitados por plano (Gestão, Portal, Transparência, Câmara)",
+                        "Todas as secretarias operam nos quatro planos",
+                    ],
+                    "overages": [
+                        f"Mensalidade por porte: {faixa_por_porte.get(codigo, 'Sob proposta')}",
+                        setup_por_plano.get(codigo, "Implantação sob proposta"),
+                    ],
+                    "doc_links": docs,
+                }
+            )
+        return cards
+
+    comercial = {item["codigo"]: item for item in catalogo_planos_comercial(planos)}
     cards: list[dict] = []
     for plano in planos:
+        comercial_item = comercial.get(plano.codigo, {})
         limits = [
-            f"Secretarias: {plano.limite_secretarias if plano.limite_secretarias is not None else 'ilimitadas (fair use)'}",
-            f"Usuários: {plano.limite_usuarios if plano.limite_usuarios is not None else 'ilimitados (fair use)'}",
-            f"Alunos: {plano.limite_alunos if plano.limite_alunos is not None else 'ilimitados (fair use)'}",
-            f"Atendimentos/ano: {plano.limite_atendimentos_ano if plano.limite_atendimentos_ano is not None else 'ilimitados (fair use)'}",
+            "Secretarias: ilimitadas",
+            "Núcleo de Gestão Interna ativo em todos os planos",
+            "Diferença por plano: Portal da Prefeitura, Transparência e Câmara",
         ]
-        features = [
-            "Onboarding automático por secretaria",
-            "Implantação, suporte e manutenção inclusos",
-        ]
-        if plano.feature_importacao_assistida:
-            features.append("Importação assistida de dados")
-        if plano.feature_bi_municipal:
-            features.append("BI municipal de gestão")
-        if plano.feature_bi_avancado:
-            features.append("BI executivo com metas")
-        if plano.feature_sla_prioritario:
-            features.append("SLA prioritário")
-        if plano.feature_treinamento_continuo:
-            features.append("Treinamento contínuo")
+        features = list(comercial_item.get("beneficios", []))
+        special_access = list(comercial_item.get("especiais", []))
+        restricoes = list(comercial_item.get("limitacoes", []))
+        dependencies = list(comercial_item.get("dependencias", []))
 
         destaque = ""
         if plano.codigo == PlanoMunicipal.Codigo.MUNICIPAL:
@@ -301,77 +375,35 @@ def _planos_para_site() -> list[dict]:
         elif plano.codigo == PlanoMunicipal.Codigo.STARTER:
             destaque = "Entrada"
         elif plano.codigo == PlanoMunicipal.Codigo.GESTAO_TOTAL:
-            destaque = "Escala"
+            destaque = "Governança"
+        elif plano.codigo == PlanoMunicipal.Codigo.CONSORCIO:
+            destaque = "Município 100% Digital"
 
         cards.append(
             {
                 "id": plano.pk,
                 "codigo": plano.codigo,
-                "nome": plano.nome,
-                "descricao": plano.descricao,
+                "nome": comercial_item.get("nome_comercial") or plano.nome,
+                "descricao": comercial_item.get("descricao_comercial") or plano.descricao,
                 "preco": _format_money(plano.preco_base_mensal),
                 "destaque": destaque,
                 "features": features,
+                "special_access": special_access,
+                "restricoes": restricoes,
+                "dependencies": dependencies,
                 "limits": limits,
                 "overages": [
-                    f"Secretaria extra: {_format_money(plano.valor_secretaria_extra)}/mês",
-                    f"Usuário extra: {_format_money(plano.valor_usuario_extra)}/mês",
-                    f"Aluno extra: {_format_money(plano.valor_aluno_extra)}/mês",
+                    f"Mensalidade por porte: {faixa_por_porte.get(plano.codigo, 'Sob proposta')}",
+                    setup_por_plano.get(plano.codigo, "Implantação sob proposta"),
                 ],
+                "doc_links": comercial_item.get("links", {}),
             }
         )
     return cards
 
 
 def _default_institutional_content() -> dict:
-    return {
-        "marca_nome": "GEPUB",
-        "marca_logo_url": "",
-        "nav_metodo_label": "Método",
-        "nav_planos_label": "Planos",
-        "nav_servicos_label": "Serviços",
-        "nav_simulador_label": "Simulador",
-        "botao_login_label": "Entrar",
-        "hero_kicker": "UM SISTEMA SOB MEDIDA PARA PREFEITURAS",
-        "hero_titulo": (
-            "Elaboramos a estratégia digital da sua gestão para integrar secretarias, "
-            "acelerar resultados e ampliar controle público."
-        ),
-        "hero_descricao": (
-            "O GEPUB conecta Educação, Saúde, NEE e estrutura administrativa em uma única "
-            "plataforma SaaS, com onboarding automático, auditoria e gestão de planos por município."
-        ),
-        "hero_cta_primario_label": "SIMULAR PLANO",
-        "hero_cta_primario_link": "#simulador",
-        "hero_cta_secundario_label": "VER PLANOS",
-        "hero_cta_secundario_link": "#planos",
-        "oferta_tag": "ESTRUTURA PRONTA PARA LICITAÇÃO",
-        "oferta_titulo": (
-            "Essa pode ser a virada da sua gestão: um SaaS único para substituir contratos "
-            "fragmentados e reduzir retrabalho entre secretarias."
-        ),
-        "oferta_descricao": (
-            "Contratação em formato público com licença SaaS, implantação, migração, treinamento, "
-            "suporte e manutenção, com vigência mínima de 12 meses e reajuste anual INPC/IPCA."
-        ),
-        "metodo_kicker": "MÉTODO GEPUB",
-        "metodo_titulo": "Um único fluxo para implantar com governança e escalar com previsibilidade.",
-        "metodo_cta_label": "QUERO AVALIAR MEU MUNICÍPIO",
-        "metodo_cta_link": "#simulador",
-        "planos_kicker": "PLANOS MUNICIPAIS",
-        "planos_titulo": "O GEPUB respeita o porte do município e cresce conforme a operação.",
-        "planos_descricao": (
-            "Você contrata uma base mensal com limites objetivos e adicionais transparentes. "
-            "Sem contrato confuso, sem variação imprevisível de custo."
-        ),
-        "planos_cta_label": "SIMULAR AGORA",
-        "planos_cta_link": "#simulador",
-        "servicos_kicker": "NOSSOS SERVIÇOS",
-        "servicos_titulo": "Tudo que entregamos para operação municipal de ponta a ponta.",
-        "servicos_cta_label": "FALE COM O TIME GEPUB",
-        "servicos_cta_link": "#simulador",
-        "rodape_texto": "© GEPUB • Gestão Estratégica Pública. Todos os direitos reservados.",
-    }
+    return dict(INSTITUTIONAL_DEFAULT_CONTENT)
 
 
 def _get_institutional_content() -> tuple[dict, list[dict], list[dict], list[dict]]:
@@ -429,93 +461,13 @@ def _get_institutional_content() -> tuple[dict, list[dict], list[dict], list[dic
         ]
 
     if not slides:
-        slides = [
-            {
-                "titulo": "Time GEPUB",
-                "subtitulo": "Especialistas em operação municipal digital",
-                "descricao": "Consultoria de implantação e acompanhamento contínuo.",
-                "icone": "fa-solid fa-user-tie",
-                "imagem_url": "",
-                "cta_label": "",
-                "cta_link": "",
-            },
-            {
-                "titulo": "Onboarding por secretaria",
-                "subtitulo": "Educação, Saúde, NEE e mais",
-                "descricao": "Ative módulos com templates e perfis padronizados.",
-                "icone": "fa-solid fa-wand-magic-sparkles",
-                "imagem_url": "",
-                "cta_label": "",
-                "cta_link": "",
-            },
-            {
-                "titulo": "Cobrança previsível",
-                "subtitulo": "Plano base + limites + overage",
-                "descricao": "Fatura mensal por competência e gestão de upgrades.",
-                "icone": "fa-solid fa-file-invoice-dollar",
-                "imagem_url": "",
-                "cta_label": "",
-                "cta_link": "",
-            },
-        ]
+        slides = [dict(item) for item in DEFAULT_INSTITUTIONAL_SLIDES]
 
     if not steps:
-        steps = [
-            {
-                "titulo": "1. Diagnóstico municipal",
-                "descricao": "Mapeamos secretarias, unidades e metas da prefeitura.",
-                "icone": "fa-solid fa-map-location-dot",
-            },
-            {
-                "titulo": "2. Configuração do plano",
-                "descricao": "Definimos limites, módulos e política de crescimento.",
-                "icone": "fa-solid fa-sliders",
-            },
-            {
-                "titulo": "3. Onboarding assistido",
-                "descricao": "Ativamos secretarias, perfis e trilhas de onboarding.",
-                "icone": "fa-solid fa-rocket",
-            },
-            {
-                "titulo": "4. Gestão e expansão",
-                "descricao": "Monitoramos consumo, BI e upgrades com cálculo claro.",
-                "icone": "fa-solid fa-chart-pie",
-            },
-        ]
+        steps = [dict(item) for item in DEFAULT_INSTITUTIONAL_STEPS]
 
     if not services:
-        services = [
-            {
-                "titulo": "Organização",
-                "descricao": "Municípios, secretarias, unidades e setores com governança.",
-                "icone": "fa-solid fa-sitemap",
-            },
-            {
-                "titulo": "Educação",
-                "descricao": "Matrícula, turmas, diário, indicadores e relatórios.",
-                "icone": "fa-solid fa-school",
-            },
-            {
-                "titulo": "Saúde",
-                "descricao": "Unidades, profissionais, agenda e atendimentos clínicos.",
-                "icone": "fa-solid fa-notes-medical",
-            },
-            {
-                "titulo": "NEE",
-                "descricao": "Planos de acompanhamento e relatórios institucionais.",
-                "icone": "fa-solid fa-universal-access",
-            },
-            {
-                "titulo": "Planos e cobrança",
-                "descricao": "Assinatura municipal, overage e fatura por competência.",
-                "icone": "fa-solid fa-file-invoice-dollar",
-            },
-            {
-                "titulo": "Auditoria e LGPD",
-                "descricao": "Controle de acesso, trilhas críticas e rastreabilidade.",
-                "icone": "fa-solid fa-shield-halved",
-            },
-        ]
+        services = [dict(item) for item in DEFAULT_INSTITUTIONAL_SERVICES]
 
     return content, slides, steps, services
 
@@ -527,7 +479,48 @@ def _resolve_public_municipio(request):
     return None
 
 
+def _municipio_public_plan_flags(municipio: Municipio) -> dict[str, bool]:
+    return {
+        "portal": municipio_has_plan_app(municipio, PlanoApp.PORTAL),
+        "transparencia": municipio_has_plan_app(municipio, PlanoApp.TRANSPARENCIA),
+        "camara": municipio_has_plan_app(municipio, PlanoApp.CAMARA),
+    }
+
+
+def _allowed_internal_routes_for_public(flags: dict[str, bool]) -> set[str]:
+    from apps.core.models import PortalMenuPublico
+
+    routes = {PortalMenuPublico.RotaInterna.HOME}
+    if flags.get("portal"):
+        routes.update(
+            {
+                PortalMenuPublico.RotaInterna.NOTICIAS,
+                PortalMenuPublico.RotaInterna.DIARIO,
+                PortalMenuPublico.RotaInterna.CONCURSOS,
+                PortalMenuPublico.RotaInterna.SAUDE,
+                PortalMenuPublico.RotaInterna.EDUCACAO,
+            }
+        )
+    if flags.get("transparencia"):
+        routes.update(
+            {
+                PortalMenuPublico.RotaInterna.LICITACOES,
+                PortalMenuPublico.RotaInterna.CONTRATOS,
+                PortalMenuPublico.RotaInterna.TRANSPARENCIA,
+                PortalMenuPublico.RotaInterna.OUVIDORIA,
+            }
+        )
+    if flags.get("camara"):
+        routes.add(PortalMenuPublico.RotaInterna.CAMARA)
+    return routes
+
+
 def _app_login_url(request) -> str:
+    # Prefer middleware-provided URL (handles tenants + dev ports consistently).
+    from_mw = (getattr(request, "public_login_url", "") or "").strip()
+    if from_mw:
+        return from_mw
+
     explicit = (getattr(settings, "GEPUB_APP_CANONICAL_HOST", "") or "").strip().lower()
     app_hosts = list(getattr(settings, "GEPUB_APP_HOSTS", []) or [])
     host = explicit or ((app_hosts[0] if app_hosts else "") or "").strip().lower()
@@ -538,9 +531,50 @@ def _app_login_url(request) -> str:
 
 
 def _render_municipio_public_home(request, municipio: Municipio):
+    plan_flags = _municipio_public_plan_flags(municipio)
+    if not plan_flags["portal"]:
+        raise Http404("Portal da Prefeitura indisponível para este município.")
+
+    allowed_internal_routes = _allowed_internal_routes_for_public(plan_flags)
     portal_cfg = PortalMunicipalConfig.objects.filter(municipio=municipio).first()
-    menu_items_header = build_menu_items(municipio, posicao="HEADER")
-    menu_items_footer = build_menu_items(municipio, posicao="FOOTER")
+
+    def _to_bool(value, default: bool) -> bool:
+        if isinstance(value, bool):
+            return value
+        if value is None:
+            return default
+        raw = str(value).strip().lower()
+        if raw in {"1", "true", "on", "sim", "yes"}:
+            return True
+        if raw in {"0", "false", "off", "nao", "não", "no"}:
+            return False
+        return default
+
+    theme_builder_raw = {}
+    if portal_cfg and isinstance(portal_cfg.redes_sociais, dict):
+        theme_builder_raw = dict(portal_cfg.redes_sociais.get("theme_builder") or {})
+    interval_raw = theme_builder_raw.get("slider_interval_ms")
+    try:
+        interval_ms = int(interval_raw)
+    except (TypeError, ValueError):
+        interval_ms = 5500
+    interval_ms = max(1500, min(interval_ms, 20000))
+    theme_builder = {
+        "slider_interval_ms": interval_ms,
+        "slider_autoplay": _to_bool(theme_builder_raw.get("slider_autoplay"), True),
+        "slider_show_arrows": _to_bool(theme_builder_raw.get("slider_show_arrows"), True),
+        "slider_show_dots": _to_bool(theme_builder_raw.get("slider_show_dots"), True),
+    }
+    menu_items_header = build_menu_items(
+        municipio,
+        posicao="HEADER",
+        allowed_internal_routes=allowed_internal_routes,
+    )
+    menu_items_footer = build_menu_items(
+        municipio,
+        posicao="FOOTER",
+        allowed_internal_routes=allowed_internal_routes,
+    )
 
     secretarias = (
         municipio.secretarias.filter(ativo=True)
@@ -551,19 +585,17 @@ def _render_municipio_public_home(request, municipio: Municipio):
     summary = {
         "secretarias": municipio.secretarias.filter(ativo=True).count(),
         "unidades": Unidade.objects.filter(secretaria__municipio=municipio, ativo=True).count(),
-        "eventos_publicos": TransparenciaEventoPublico.objects.filter(
-            municipio=municipio,
-            publico=True,
-        ).count(),
+        "eventos_publicos": (
+            TransparenciaEventoPublico.objects.filter(
+                municipio=municipio,
+                publico=True,
+            ).count()
+            if plan_flags["transparencia"]
+            else 0
+        ),
     }
 
     links_rapidos_default = [
-        {
-            "titulo": "Portal da Transparência",
-            "descricao": "Consulte receitas, despesas e eventos publicados.",
-            "url": reverse("core:transparencia_public"),
-            "icon": "fa-solid fa-scale-balanced",
-        },
         {
             "titulo": "Diário Oficial",
             "descricao": "Edições e publicações oficiais do município.",
@@ -583,24 +615,53 @@ def _render_municipio_public_home(request, municipio: Municipio):
             "icon": "fa-solid fa-heart-pulse",
         },
         {
-            "titulo": "Assistência Social",
-            "descricao": "Canais de atendimento e políticas públicas ao cidadão.",
-            "url": reverse("core:portal_ouvidoria_public"),
-            "icon": "fa-solid fa-hand-holding-heart",
-        },
-        {
-            "titulo": "e-SIC / Ouvidoria",
-            "descricao": "Acesso a solicitações e atendimento ao cidadão.",
-            "url": reverse("core:portal_ouvidoria_public"),
-            "icon": "fa-solid fa-comments",
-        },
-        {
-            "titulo": "Licitações e Contratos",
-            "descricao": "Publicações oficiais de compras e contratos.",
-            "url": reverse("core:portal_licitacoes_public"),
-            "icon": "fa-solid fa-file-contract",
+            "titulo": "Serviços Digitais",
+            "descricao": "Acesso aos principais serviços públicos do município.",
+            "url": reverse("core:portal_noticias_public"),
+            "icon": "fa-solid fa-circle-nodes",
         },
     ]
+    if plan_flags["transparencia"]:
+        links_rapidos_default.extend(
+            [
+                {
+                    "titulo": "Assistência Social",
+                    "descricao": "Canais de atendimento e políticas públicas ao cidadão.",
+                    "url": reverse("core:portal_ouvidoria_public"),
+                    "icon": "fa-solid fa-hand-holding-heart",
+                },
+                {
+                    "titulo": "e-SIC / Ouvidoria",
+                    "descricao": "Acesso a solicitações e atendimento ao cidadão.",
+                    "url": reverse("core:portal_ouvidoria_public"),
+                    "icon": "fa-solid fa-comments",
+                },
+                {
+                    "titulo": "Licitações e Contratos",
+                    "descricao": "Publicações oficiais de compras e contratos.",
+                    "url": reverse("core:portal_licitacoes_public"),
+                    "icon": "fa-solid fa-file-contract",
+                },
+            ]
+        )
+        links_rapidos_default.insert(
+            0,
+            {
+                "titulo": "Portal da Transparência",
+                "descricao": "Consulte receitas, despesas e eventos publicados.",
+                "url": reverse("core:transparencia_public"),
+                "icon": "fa-solid fa-scale-balanced",
+            },
+        )
+    if plan_flags["camara"]:
+        links_rapidos_default.append(
+            {
+                "titulo": "Portal da Câmara",
+                "descricao": "Sessões, pautas, matérias legislativas e transparência.",
+                "url": reverse("core:portal_camara_public"),
+                "icon": "fa-solid fa-landmark-dome",
+            }
+        )
 
     blocks_qs = PortalHomeBloco.objects.filter(municipio=municipio, ativo=True).order_by("ordem", "id")
     links_rapidos = list(blocks_qs.values("titulo", "descricao", "link", "icone"))
@@ -751,19 +812,33 @@ def _render_municipio_public_home(request, municipio: Municipio):
         "transparencia_cards": transparencia_cards,
         "servicos_destaque": servicos_cards[:5],
         "cta_login": _app_login_url(request),
-        "cta_transparencia": reverse("core:transparencia_public"),
-        "cta_servicos_online": reverse("core:portal_ouvidoria_public"),
-        "top_links": [
-            {"titulo": "Acessibilidade", "url": "#conteudo-principal", "icon": "fa-solid fa-universal-access"},
-            {"titulo": "Ouvidoria", "url": reverse("core:portal_ouvidoria_public"), "icon": "fa-regular fa-message"},
-            {"titulo": "Portal da Transparência", "url": reverse("core:transparencia_public"), "icon": "fa-solid fa-chart-column"},
-            {"titulo": "Diário Oficial", "url": reverse("core:portal_diario_public"), "icon": "fa-regular fa-file-lines"},
-            {"titulo": "Sistema Interno", "url": _app_login_url(request), "icon": "fa-solid fa-arrow-right-to-bracket"},
-        ],
+        "cta_transparencia": reverse("core:transparencia_public") if plan_flags["transparencia"] else reverse("core:portal_noticias_public"),
+        "cta_servicos_online": reverse("core:portal_ouvidoria_public") if plan_flags["transparencia"] else reverse("core:portal_noticias_public"),
+        "top_links": (
+            [
+                {"titulo": "Acessibilidade", "url": "#conteudo-principal", "icon": "fa-solid fa-universal-access"},
+            ]
+            + (
+                [{"titulo": "Ouvidoria", "url": reverse("core:portal_ouvidoria_public"), "icon": "fa-regular fa-message"}]
+                if plan_flags["transparencia"]
+                else [{"titulo": "Notícias", "url": reverse("core:portal_noticias_public"), "icon": "fa-regular fa-newspaper"}]
+            )
+            + (
+                [{"titulo": "Portal da Transparência", "url": reverse("core:transparencia_public"), "icon": "fa-solid fa-chart-column"}]
+                if plan_flags["transparencia"]
+                else []
+            )
+            + [
+                {"titulo": "Diário Oficial", "url": reverse("core:portal_diario_public"), "icon": "fa-regular fa-file-lines"},
+                {"titulo": "Sistema Interno", "url": _app_login_url(request), "icon": "fa-solid fa-arrow-right-to-bracket"},
+            ]
+        ),
+        "plan_flags": plan_flags,
         "portal_cfg": portal_cfg,
         "menu_items_header": menu_items_header,
         "menu_items_footer": menu_items_footer,
         "paginas_publicas": paginas_publicas,
+        "theme_builder": theme_builder,
         "cor_primaria": portal_cfg.cor_primaria if portal_cfg else "#0E4A7E",
         "cor_secundaria": portal_cfg.cor_secundaria if portal_cfg else "#2F6EA9",
     }
@@ -811,7 +886,7 @@ def institucional_public(request):
     faq_items = [
         {
             "pergunta": "O GEPUB mostra preços públicos dos planos no site?",
-            "resposta": "Não. A página institucional apresenta escopo e capacidades. Valores são informados somente por contato comercial.",
+            "resposta": "Sim, com faixas de referência por porte municipal (P, M e G). O valor final considera escopo, implantação e integrações contratadas.",
         },
         {
             "pergunta": "Como funciona o primeiro acesso da prefeitura?",
@@ -855,6 +930,278 @@ def funcionalidades_public(request):
 
 def por_que_usar_public(request):
     return redirect("core:institucional_public")
+
+
+def _public_site_context(request, content: dict | None = None) -> dict:
+    base = content or {}
+    marca_nome = base.get("marca_nome") or "GEPUB"
+    return {
+        "marca_nome": marca_nome,
+        "marca_logo_url": base.get("marca_logo_url", ""),
+        "cta_home": reverse("core:institucional_public"),
+        "cta_login": _app_login_url(request),
+        "cta_blog": reverse("core:blog_public"),
+        "cta_documentacao": reverse("core:documentacao_public"),
+        "cta_validacao_documentos": reverse("core:validar_documento_public"),
+        "cta_privacidade": reverse("core:politica_privacidade_public"),
+        "cta_cookies": reverse("core:politica_cookies_public"),
+        "cta_termos": reverse("core:termos_servico_public"),
+        "cta_transparencia": reverse("core:transparencia_public"),
+    }
+
+
+def _render_public_site_page(request, template_name: str, extra_context: dict):
+    if getattr(request, "tenant_lookup_failed", False):
+        return render(
+            request,
+            "core/tenant_not_found.html",
+            {
+                "slug": getattr(request, "current_municipio_slug", ""),
+                "cta_home": reverse("core:institucional_public"),
+                "cta_login": _app_login_url(request),
+            },
+            status=404,
+        )
+
+    municipio_publico = _resolve_public_municipio(request)
+    if municipio_publico:
+        return redirect("core:institucional_public")
+
+    content, _, _, _ = _get_institutional_content()
+    context = {
+        **_public_site_context(request, content),
+        **extra_context,
+    }
+    return render(request, template_name, context)
+
+
+def blog_public(request):
+    blog_posts = [
+        {
+            "categoria": "Gestão Municipal",
+            "titulo": "Como integrar secretarias e reduzir retrabalho em 90 dias",
+            "resumo": "Estratégia prática para conectar operação, dados e equipes usando uma base única de gestão pública.",
+            "tempo_leitura": "6 min",
+            "data": "12 mar 2026",
+        },
+        {
+            "categoria": "Educação",
+            "titulo": "Diário digital e indicadores: o que muda no acompanhamento pedagógico",
+            "resumo": "Veja como frequência, notas e desempenho viram decisões objetivas para coordenação e secretaria.",
+            "tempo_leitura": "5 min",
+            "data": "10 mar 2026",
+        },
+        {
+            "categoria": "Saúde",
+            "titulo": "Fluxo de atendimento municipal com rastreabilidade ponta a ponta",
+            "resumo": "Da fila ao prontuário, uma visão estruturada para reduzir gargalos e ampliar previsibilidade da rede.",
+            "tempo_leitura": "7 min",
+            "data": "08 mar 2026",
+        },
+        {
+            "categoria": "Transparência",
+            "titulo": "Portal público organizado: o que publicar e como manter rotina",
+            "resumo": "Guia rápido para padronizar publicações oficiais e fortalecer governança de dados públicos.",
+            "tempo_leitura": "4 min",
+            "data": "05 mar 2026",
+        },
+        {
+            "categoria": "Tecnologia",
+            "titulo": "Arquitetura escalável para prefeituras em crescimento",
+            "resumo": "Boas práticas para suportar aumento de usuários, integrações e novos módulos sem perda de desempenho.",
+            "tempo_leitura": "6 min",
+            "data": "03 mar 2026",
+        },
+        {
+            "categoria": "Operação",
+            "titulo": "Implantação orientada por valor: primeiros entregáveis por secretaria",
+            "resumo": "Checklist objetivo para iniciar operação com metas por área e governança de execução.",
+            "tempo_leitura": "5 min",
+            "data": "01 mar 2026",
+        },
+    ]
+
+    return _render_public_site_page(
+        request,
+        "core/blog_public.html",
+        {
+            "page_title": "Blog GEPUB",
+            "page_subtitle": "Conteúdos práticos sobre transformação digital na gestão municipal.",
+            "posts": blog_posts,
+        },
+    )
+
+
+def politica_privacidade_public(request):
+    return _render_public_site_page(
+        request,
+        "core/legal_public.html",
+        {
+            "page_title": "Política de Privacidade",
+            "page_subtitle": "Diretrizes sobre coleta, uso, armazenamento e proteção de dados na plataforma GEPUB.",
+            "last_update": "12 de março de 2026",
+            "sections": [
+                {
+                    "title": "1. Dados coletados",
+                    "paragraphs": [
+                        "Coletamos dados cadastrais e operacionais necessários para autenticação, suporte técnico e execução dos serviços contratados.",
+                        "Os dados tratados variam conforme os módulos habilitados, sempre respeitando finalidade e minimização.",
+                    ],
+                    "items": [
+                        "Dados de identificação institucional e de usuários autorizados",
+                        "Registros de acesso, trilhas de auditoria e logs operacionais",
+                        "Dados transacionais vinculados às rotinas administrativas",
+                    ],
+                },
+                {
+                    "title": "2. Finalidade e base legal",
+                    "paragraphs": [
+                        "O tratamento ocorre para prestação do serviço, segurança da informação, cumprimento contratual e atendimento a obrigações legais.",
+                    ],
+                    "items": [
+                        "Execução de contrato com o ente público contratante",
+                        "Legítimo interesse em segurança, continuidade e melhoria do serviço",
+                        "Cumprimento de deveres legais e regulatórios",
+                    ],
+                },
+                {
+                    "title": "3. Direitos dos titulares",
+                    "paragraphs": [
+                        "A prefeitura e os usuários autorizados podem solicitar informações sobre tratamento, correção, atualização e outros direitos aplicáveis pela LGPD.",
+                    ],
+                    "items": [
+                        "Confirmação e acesso aos dados",
+                        "Correção de dados incompletos ou desatualizados",
+                        "Revisão de tratamento e solicitações ao encarregado",
+                    ],
+                },
+            ],
+        },
+    )
+
+
+def politica_cookies_public(request):
+    return _render_public_site_page(
+        request,
+        "core/legal_public.html",
+        {
+            "page_title": "Política de Cookies",
+            "page_subtitle": "Uso de cookies e tecnologias similares para autenticação, desempenho e experiência de navegação.",
+            "last_update": "12 de março de 2026",
+            "sections": [
+                {
+                    "title": "1. O que são cookies",
+                    "paragraphs": [
+                        "Cookies são arquivos de texto armazenados no navegador para manter sessão, preferências e segurança da aplicação.",
+                    ],
+                    "items": [
+                        "Cookies essenciais de autenticação e segurança",
+                        "Cookies funcionais para preferências de interface",
+                        "Cookies analíticos para métricas agregadas de uso",
+                    ],
+                },
+                {
+                    "title": "2. Como utilizamos",
+                    "paragraphs": [
+                        "Utilizamos cookies para manter login, prevenir uso indevido, melhorar desempenho e aprimorar a usabilidade do sistema.",
+                    ],
+                    "items": [
+                        "Persistência de sessão e controle de acesso",
+                        "Prevenção de fraude e monitoramento técnico",
+                        "Análise de estabilidade e performance da plataforma",
+                    ],
+                },
+                {
+                    "title": "3. Controle pelo usuário",
+                    "paragraphs": [
+                        "O usuário pode configurar o navegador para bloquear cookies não essenciais, ciente de que partes do sistema podem ter funcionalidade reduzida.",
+                    ],
+                    "items": [
+                        "Gerenciamento no navegador (Chrome, Firefox, Edge, Safari)",
+                        "Remoção de cookies salvos anteriormente",
+                        "Ajuste de consentimento conforme política vigente",
+                    ],
+                },
+            ],
+        },
+    )
+
+
+def termos_servico_public(request):
+    return _render_public_site_page(
+        request,
+        "core/legal_public.html",
+        {
+            "page_title": "Termos de Serviço",
+            "page_subtitle": "Condições de uso da plataforma GEPUB para órgãos municipais, secretarias e usuários autorizados.",
+            "last_update": "12 de março de 2026",
+            "sections": [
+                {
+                    "title": "1. Objeto",
+                    "paragraphs": [
+                        "A plataforma GEPUB fornece recursos de gestão pública digital, conforme módulos contratados e regras de acesso definidas pelo ente municipal.",
+                    ],
+                    "items": [
+                        "Disponibilização em modelo SaaS",
+                        "Configuração por município, secretaria e unidade",
+                        "Suporte, manutenção e evolução contínua",
+                    ],
+                },
+                {
+                    "title": "2. Responsabilidades",
+                    "paragraphs": [
+                        "O contratante é responsável pela governança de perfis, qualidade dos dados inseridos e conformidade dos processos administrativos.",
+                    ],
+                    "items": [
+                        "Gerenciar credenciais e permissões de usuários",
+                        "Garantir legitimidade das informações registradas",
+                        "Cumprir normas internas e legislação aplicável",
+                    ],
+                },
+                {
+                    "title": "3. Segurança e disponibilidade",
+                    "paragraphs": [
+                        "Adotamos controles técnicos e organizacionais para proteção de dados, continuidade da operação e rastreabilidade de eventos críticos.",
+                    ],
+                    "items": [
+                        "Logs de auditoria e trilhas de acesso",
+                        "Rotinas de backup e monitoramento",
+                        "Políticas de atualização e resposta a incidentes",
+                    ],
+                },
+            ],
+        },
+    )
+
+
+def validar_documento_public(request, codigo=None):
+    code_input = (request.GET.get("codigo") or "").strip()
+    documento = None
+    status = "pendente"
+    search_code = code_input
+
+    if codigo:
+        documento = DocumentoEmitido.objects.select_related("gerado_por").filter(codigo=codigo).first()
+        status = "valido" if documento and documento.ativo else ("revogado" if documento else "nao_encontrado")
+        search_code = str(codigo)
+    elif code_input:
+        try:
+            parsed = UUID(code_input)
+            documento = DocumentoEmitido.objects.select_related("gerado_por").filter(codigo=parsed).first()
+            status = "valido" if documento and documento.ativo else ("revogado" if documento else "nao_encontrado")
+        except Exception:
+            status = "codigo_invalido"
+
+    content, _, _, _ = _get_institutional_content()
+    context = {
+        **_public_site_context(request, content),
+        "page_title": "Validação de Documento",
+        "page_subtitle": "Confirme autenticidade, emissor e status de documentos emitidos pelo GEPUB.",
+        "code_input": search_code,
+        "documento": documento,
+        "status": status,
+    }
+    return render(request, "core/validacao_documento_public.html", context)
 
 
 def _parse_iso_date(value: str):
@@ -1025,342 +1372,53 @@ def _build_transparencia_secoes(municipio: Municipio | None):
         "atualizado_em",
     )
 
-    secoes = [
-        {
-            "titulo": "INFORMAÇÕES INSTITUCIONAIS",
-            "descricao": "Normas próprias e publicações oficiais do município.",
-            "itens": [
+    auto_stats = {
+        "diarios": (diarios_total, diarios_ultima),
+        "exec_2025": (exec_2025_total, exec_2025_ultima),
+        "exec_2024": (exec_2024_total, exec_2024_ultima),
+        "divida_ativa": (divida_ativa_total, divida_ativa_ultima),
+        "folha": (folha_total, folha_ultima),
+        "servidores": (servidores_total, servidores_ultima),
+        "cargos": (cargos_total, cargos_ultima),
+        "estagiarios": (estagiarios_total, estagiarios_ultima),
+        "terceirizados": (terceirizados_total, terceirizados_ultima),
+        "concursos": (concursos_total, concursos_ultima),
+        "licitacoes": (licitacoes_total, licitacoes_ultima),
+        "contratos": (contratos_total, contratos_ultima),
+        "aditivos": (aditivos_total, aditivos_ultima),
+        "fiscal": (fiscal_total, fiscal_ultima),
+    }
+
+    secoes = []
+    for secao_spec in TRANSPARENCIA_SECTION_SPECS:
+        itens = []
+        for item_spec in secao_spec.get("itens", []):
+            auto_total, auto_ultima = auto_stats.get(item_spec.get("auto_key"), (0, None))
+            categorias = [
+                getattr(PortalTransparenciaArquivo.Categoria, categoria_nome)
+                for categoria_nome in item_spec.get("categorias", [])
+                if hasattr(PortalTransparenciaArquivo.Categoria, categoria_nome)
+            ]
+            itens.append(
                 _build_transparencia_item(
-                    titulo="Atos Normativos Próprios",
-                    descricao="Leis, decretos, portarias e atos institucionais.",
-                    capacidade_origem="MANUAL",
+                    titulo=item_spec.get("titulo", ""),
+                    descricao=item_spec.get("descricao", ""),
+                    capacidade_origem=item_spec.get("capacidade_origem", "MANUAL"),
+                    auto_total=auto_total,
+                    auto_ultima=auto_ultima,
                     arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.ATOS_NORMATIVOS],
-                ),
-                _build_transparencia_item(
-                    titulo="Diário Oficial",
-                    descricao="Edições oficiais publicadas pelo município.",
-                    capacidade_origem="MISTA",
-                    auto_total=diarios_total,
-                    auto_ultima=diarios_ultima,
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.DIARIO_OFICIAL],
-                    url_publica=reverse("core:portal_diario_public"),
-                ),
-            ],
-        },
-        {
-            "titulo": "EXECUÇÃO ORÇAMENTÁRIA",
-            "descricao": "Execução de despesas e informações de dívida ativa.",
-            "itens": [
-                _build_transparencia_item(
-                    titulo="Execução Orçamentária Geral 2025",
-                    descricao="Movimentações de empenho/liquidação/pagamento do exercício de 2025.",
-                    capacidade_origem="MISTA",
-                    auto_total=exec_2025_total,
-                    auto_ultima=exec_2025_ultima,
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.EXEC_ORC_GERAL_2025],
-                ),
-                _build_transparencia_item(
-                    titulo="Execução Orçamentária 2024",
-                    descricao="Histórico da execução orçamentária do exercício de 2024.",
-                    capacidade_origem="MISTA",
-                    auto_total=exec_2024_total,
-                    auto_ultima=exec_2024_ultima,
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.EXEC_ORC_2024],
-                ),
-                _build_transparencia_item(
-                    titulo="Empresas Com Dívida Ativa",
-                    descricao="Contribuintes com lançamentos tributários pendentes.",
-                    capacidade_origem="MISTA",
-                    auto_total=divida_ativa_total,
-                    auto_ultima=divida_ativa_ultima,
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.EMPRESAS_DIVIDA_ATIVA],
-                ),
-            ],
-        },
-        {
-            "titulo": "CONVÊNIOS, TRANSFERÊNCIAS E EMENDAS",
-            "descricao": "Publicações sobre recursos recebidos, repassados e acordos firmados.",
-            "itens": [
-                _build_transparencia_item(
-                    titulo="Emendas Parlamentares",
-                    descricao="Emendas cadastradas e sua aplicação.",
-                    capacidade_origem="MANUAL",
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.EMENDAS_PARLAMENTARES],
-                ),
-                _build_transparencia_item(
-                    titulo="Convênios E Transferências Recebidas",
-                    descricao="Termos e repasses recebidos de outros entes.",
-                    capacidade_origem="MANUAL",
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.CONVENIOS_RECEBIDOS],
-                ),
-                _build_transparencia_item(
-                    titulo="Convênios E Transferências Realizadas",
-                    descricao="Transferências e convênios concedidos pelo município.",
-                    capacidade_origem="MANUAL",
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.CONVENIOS_REALIZADOS],
-                ),
-                _build_transparencia_item(
-                    titulo="Acordos Firmados Sem Transferências De Recursos",
-                    descricao="Instrumentos de cooperação sem repasse financeiro.",
-                    capacidade_origem="MANUAL",
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.ACORDOS_SEM_TRANSFERENCIA],
-                ),
-            ],
-        },
-        {
-            "titulo": "RECURSOS HUMANOS",
-            "descricao": "Quadro de pessoal e informações de folha e vínculos.",
-            "itens": [
-                _build_transparencia_item(
-                    titulo="Folha De Pagamento",
-                    descricao="Competências processadas no módulo de Folha.",
-                    capacidade_origem="MISTA",
-                    auto_total=folha_total,
-                    auto_ultima=folha_ultima,
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.RH_FOLHA_PAGAMENTO],
-                ),
-                _build_transparencia_item(
-                    titulo="Cargos",
-                    descricao="Estrutura de cargos em uso no quadro funcional.",
-                    capacidade_origem="MISTA",
-                    auto_total=cargos_total,
-                    auto_ultima=cargos_ultima,
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.RH_CARGOS],
-                ),
-                _build_transparencia_item(
-                    titulo="Estagiários",
-                    descricao="Registros de estagiários identificados no cadastro funcional.",
-                    capacidade_origem="MISTA",
-                    auto_total=estagiarios_total,
-                    auto_ultima=estagiarios_ultima,
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.RH_ESTAGIARIOS],
-                ),
-                _build_transparencia_item(
-                    titulo="Terceirizados",
-                    descricao="Vínculos com regime CLT/terceirização registrados.",
-                    capacidade_origem="MISTA",
-                    auto_total=terceirizados_total,
-                    auto_ultima=terceirizados_ultima,
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.RH_TERCEIRIZADOS],
-                ),
-                _build_transparencia_item(
-                    titulo="Concursos",
-                    descricao="Concursos e seletivos publicados no portal.",
-                    capacidade_origem="MISTA",
-                    auto_total=concursos_total,
-                    auto_ultima=concursos_ultima,
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.RH_CONCURSOS],
-                    url_publica=reverse("core:portal_concursos_public"),
-                ),
-                _build_transparencia_item(
-                    titulo="Servidores",
-                    descricao="Servidores cadastrados no módulo de RH.",
-                    capacidade_origem="MISTA",
-                    auto_total=servidores_total,
-                    auto_ultima=servidores_ultima,
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.RH_SERVIDORES],
-                ),
-            ],
-        },
-        {
-            "titulo": "DIÁRIAS",
-            "descricao": "Pagamentos de diárias e tabela de referência vigente.",
-            "itens": [
-                _build_transparencia_item(
-                    titulo="Diárias",
-                    descricao="Relação de concessões e pagamentos de diárias.",
-                    capacidade_origem="MANUAL",
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.DIARIAS],
-                ),
-                _build_transparencia_item(
-                    titulo="Tabelas De Valores Da Diária",
-                    descricao="Tabela oficial de valores e regras de concessão.",
-                    capacidade_origem="MANUAL",
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.DIARIAS_TABELA_VALORES],
-                ),
-            ],
-        },
-        {
-            "titulo": "LICITAÇÕES E CONTRATOS",
-            "descricao": "Contratações públicas, aditivos, fiscalização e sanções.",
-            "itens": [
-                _build_transparencia_item(
-                    titulo="Licitações",
-                    descricao="Processos licitatórios do módulo de Compras.",
-                    capacidade_origem="MISTA",
-                    auto_total=licitacoes_total,
-                    auto_ultima=licitacoes_ultima,
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.LICITACOES],
-                    url_publica=reverse("core:portal_licitacoes_public"),
-                ),
-                _build_transparencia_item(
-                    titulo="Contratos",
-                    descricao="Contratos administrativos vinculados ao município.",
-                    capacidade_origem="MISTA",
-                    auto_total=contratos_total,
-                    auto_ultima=contratos_ultima,
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.CONTRATOS],
-                    url_publica=reverse("core:portal_contratos_public"),
-                ),
-                _build_transparencia_item(
-                    titulo="Aditivos De Contratos",
-                    descricao="Aditivos de prazo, valor e escopo.",
-                    capacidade_origem="MISTA",
-                    auto_total=aditivos_total,
-                    auto_ultima=aditivos_ultima,
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.ADITIVOS_CONTRATOS],
-                    url_publica=reverse("core:portal_contratos_public"),
-                ),
-                _build_transparencia_item(
-                    titulo="Licitantes E/ou Contratados Sancionados",
-                    descricao="Registros de sanções administrativas aplicadas.",
-                    capacidade_origem="MANUAL",
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.LICITANTES_SANCIONADOS],
-                ),
-                _build_transparencia_item(
-                    titulo="Fiscal De Contratos",
-                    descricao="Designações de fiscais vinculadas aos contratos.",
-                    capacidade_origem="MISTA",
-                    auto_total=fiscal_total,
-                    auto_ultima=fiscal_ultima,
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.FISCAL_CONTRATOS],
-                    url_publica=reverse("core:portal_contratos_public"),
-                ),
-                _build_transparencia_item(
-                    titulo="Empresas Inidôneas E Suspensas",
-                    descricao="Cadastro de empresas impedidas de contratar.",
-                    capacidade_origem="MANUAL",
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.EMPRESAS_INIDONEAS],
-                ),
-            ],
-        },
-        {
-            "titulo": "OBRAS PÚBLICAS",
-            "descricao": "Execução de obras, andamento e paralisações.",
-            "itens": [
-                _build_transparencia_item(
-                    titulo="Obras Públicas",
-                    descricao="Publicações de obras em execução e concluídas.",
-                    capacidade_origem="MANUAL",
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.OBRAS_PUBLICAS],
-                ),
-                _build_transparencia_item(
-                    titulo="Obras Paralisadas",
-                    descricao="Relatórios de obras interrompidas e seus motivos.",
-                    capacidade_origem="MANUAL",
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.OBRAS_PARALISADAS],
-                ),
-            ],
-        },
-        {
-            "titulo": "PLANEJAMENTO E PRESTAÇÃO DE CONTAS",
-            "descricao": "Instrumentos de planejamento e relatórios oficiais de controle.",
-            "itens": [
-                _build_transparencia_item(
-                    titulo="Prestação De Contas Anos Anteriores",
-                    descricao="Acervo de prestações de contas de exercícios anteriores.",
-                    capacidade_origem="MANUAL",
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.PRESTACAO_CONTAS_ANTERIORES],
-                ),
-                _build_transparencia_item(
-                    titulo="Balanço Geral",
-                    descricao="Balanço geral anual do município.",
-                    capacidade_origem="MANUAL",
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.BALANCO_GERAL],
-                ),
-                _build_transparencia_item(
-                    titulo="Relatório De Gestão Ou Atividade",
-                    descricao="Relatórios de atividades e resultados da gestão.",
-                    capacidade_origem="MANUAL",
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.RELATORIO_GESTAO_ATIVIDADE],
-                ),
-                _build_transparencia_item(
-                    titulo="Julgamento Das Contas Pelo TCE Parecer Prévio",
-                    descricao="Parecer prévio emitido pelo Tribunal de Contas.",
-                    capacidade_origem="MANUAL",
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.PARECER_PREVIO_TCE],
-                ),
-                _build_transparencia_item(
-                    titulo="Resultado De Julgamento Das Contas Legislativo",
-                    descricao="Resultado do julgamento das contas pelo Legislativo.",
-                    capacidade_origem="MANUAL",
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.RESULTADO_JULGAMENTO_LEGISLATIVO],
-                ),
-                _build_transparencia_item(
-                    titulo="Relatório De Gestão Fiscal RGF",
-                    descricao="Relatórios fiscais oficiais da gestão municipal.",
-                    capacidade_origem="MANUAL",
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.RGF],
-                ),
-                _build_transparencia_item(
-                    titulo="Rel. Res. De Execução Orçamentária RREO",
-                    descricao="Relatórios resumidos de execução orçamentária.",
-                    capacidade_origem="MANUAL",
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.RREO],
-                ),
-                _build_transparencia_item(
-                    titulo="Plano Estratégico Institucional PEI",
-                    descricao="Planejamento estratégico institucional vigente.",
-                    capacidade_origem="MANUAL",
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.PEI],
-                ),
-                _build_transparencia_item(
-                    titulo="Plano Plurianual PPA",
-                    descricao="Plano plurianual em vigor.",
-                    capacidade_origem="MANUAL",
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.PPA],
-                ),
-                _build_transparencia_item(
-                    titulo="Lei De Diretrizes Orçamentárias LDO",
-                    descricao="Lei de diretrizes orçamentárias vigente.",
-                    capacidade_origem="MANUAL",
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.LDO],
-                ),
-                _build_transparencia_item(
-                    titulo="Lei Orçamentária Anual LOA",
-                    descricao="Lei orçamentária anual vigente.",
-                    capacidade_origem="MANUAL",
-                    arquivo_stats=arquivo_stats,
-                    categorias_arquivo=[PortalTransparenciaArquivo.Categoria.LOA],
-                ),
-            ],
-        },
-    ]
+                    categorias_arquivo=categorias,
+                    url_publica=reverse(item_spec["url_name"]) if item_spec.get("url_name") else "",
+                )
+            )
+
+        secoes.append(
+            {
+                "titulo": secao_spec.get("titulo", ""),
+                "descricao": secao_spec.get("descricao", ""),
+                "itens": itens,
+            }
+        )
 
     for secao in secoes:
         itens = secao["itens"]
@@ -1385,6 +1443,10 @@ def transparencia_public(request):
 
     content, _, _, _ = _get_institutional_content()
     municipio_publico = _resolve_public_municipio(request)
+    if municipio_publico:
+        tenant_flags = _municipio_public_plan_flags(municipio_publico)
+        if not tenant_flags["transparencia"]:
+            raise Http404("Portal da Transparência indisponível para este município.")
     municipio_id_raw = (request.GET.get("municipio") or "").strip()
     modulo = (request.GET.get("modulo") or "").strip().upper()
     categoria = (request.GET.get("categoria") or "").strip().upper()
@@ -1405,6 +1467,14 @@ def transparencia_public(request):
     municipio_contexto = municipio_publico
     if not municipio_contexto and municipio_id:
         municipio_contexto = Municipio.objects.filter(pk=municipio_id).first()
+    if municipio_contexto:
+        ctx_flags = _municipio_public_plan_flags(municipio_contexto)
+        if not ctx_flags["transparencia"]:
+            raise Http404("Portal da Transparência indisponível para este município.")
+        allowed_internal_routes = _allowed_internal_routes_for_public(ctx_flags)
+    else:
+        ctx_flags = None
+        allowed_internal_routes = None
 
     modulos_validos = {code for code, _label in TransparenciaEventoPublico.Modulo.choices}
     if modulo in modulos_validos:
@@ -1447,16 +1517,25 @@ def transparencia_public(request):
     secoes_transparencia = _build_transparencia_secoes(municipio_contexto)
     portal_cfg = PortalMunicipalConfig.objects.filter(municipio=municipio_contexto).first() if municipio_contexto else None
     menu_items_header = (
-        build_menu_items(municipio_contexto, posicao="HEADER")
+        build_menu_items(
+            municipio_contexto,
+            posicao="HEADER",
+            allowed_internal_routes=allowed_internal_routes,
+        )
         if municipio_contexto
         else [
             {"titulo": "Início", "url": reverse("core:institucional_public"), "nova_aba": False},
             {"titulo": "Transparência", "url": reverse("core:transparencia_public"), "nova_aba": False},
             {"titulo": "Documentação", "url": reverse("core:documentacao_public"), "nova_aba": False},
+            {"titulo": "Validação", "url": reverse("core:validar_documento_public"), "nova_aba": False},
         ]
     )
     menu_items_footer = (
-        build_menu_items(municipio_contexto, posicao="FOOTER")
+        build_menu_items(
+            municipio_contexto,
+            posicao="FOOTER",
+            allowed_internal_routes=allowed_internal_routes,
+        )
         if municipio_contexto
         else []
     )
@@ -1521,6 +1600,7 @@ def transparencia_public(request):
         "horario_atendimento": portal_cfg.horario_atendimento if portal_cfg else "",
         "menu_items_header": menu_items_header,
         "menu_items_footer": menu_items_footer,
+        "plan_flags": ctx_flags or {"portal": True, "transparencia": True, "camara": False},
     }
     return render(request, "core/transparencia_public.html", context)
 
@@ -1544,171 +1624,39 @@ def documentacao_public(request):
 
     content, _, _, _ = _get_institutional_content()
 
-    modulos = [
-        {
-            "nome": "Organização (ORG)",
-            "icone": "fa-solid fa-sitemap",
-            "descricao": "Base estrutural da prefeitura com município, secretarias, unidades, setores e onboarding.",
-            "features": [
-                "Cadastro completo de município e estrutura administrativa",
-                "Templates de secretaria com provisionamento automático",
-                "Painel de onboarding por etapas",
-                "Escopo por município/secretaria/unidade",
-            ],
-        },
-        {
-            "nome": "Accounts / Acesso",
-            "icone": "fa-solid fa-user-shield",
-            "descricao": "Gestão de usuários, perfis, permissões e segurança operacional.",
-            "features": [
-                "RBAC por função (ADMIN, MUNICIPAL, SECRETARIA, UNIDADE, etc.)",
-                "Código de acesso e troca obrigatória de senha no primeiro login",
-                "Auditoria de ações de usuários",
-                "Bloqueio/ativação com controle de limite contratual",
-            ],
-        },
-        {
-            "nome": "Educação",
-            "icone": "fa-solid fa-school",
-            "descricao": "Gestão educacional completa: alunos, matrículas, turmas, diário, calendário e relatórios.",
-            "features": [
-                "Cadastro e ciclo de vida de alunos e matrículas",
-                "Turmas, diário, frequência, notas e boletins",
-                "Calendário educacional e indicadores gerenciais",
-                "Relatórios operacionais com exportação CSV/PDF",
-            ],
-        },
-        {
-            "nome": "Saúde",
-            "icone": "fa-solid fa-notes-medical",
-            "descricao": "Operação clínica municipal com unidades, profissionais, agenda e atendimentos.",
-            "features": [
-                "Gestão de profissionais e especialidades",
-                "Agendamento e registro de atendimentos",
-                "Documentos clínicos e auditoria de prontuário",
-                "Relatórios mensais e exports institucionais",
-            ],
-        },
-        {
-            "nome": "NEE",
-            "icone": "fa-solid fa-universal-access",
-            "descricao": "Necessidades Educacionais Especiais com acompanhamento técnico e relatórios.",
-            "features": [
-                "Planos e objetivos por aluno",
-                "Acompanhamentos, laudos e apoios",
-                "Timeline unificada",
-                "Relatórios por tipo, unidade e município",
-            ],
-        },
-        {
-            "nome": "Financeiro Público",
-            "icone": "fa-solid fa-landmark",
-            "descricao": "Execução orçamentária municipal com dotação, empenho, liquidação, pagamento e arrecadação.",
-            "features": [
-                "Exercício financeiro, UGs, contas bancárias e fontes de recurso",
-                "Fluxo de despesa: empenho → liquidação → pagamento",
-                "Receita por rubrica com reflexo em conta bancária",
-                "Trilha de auditoria e logs por evento financeiro",
-            ],
-        },
-        {
-            "nome": "Billing / Planos SaaS",
-            "icone": "fa-solid fa-file-invoice-dollar",
-            "descricao": "Gestão comercial/contratual por município com limites, upgrades e fatura.",
-            "features": [
-                "Planos (Starter, Municipal, Gestão Total, Consórcio)",
-                "Assinatura por município com preço base congelado",
-                "Overage por secretarias, usuários, alunos e addons",
-                "Solicitação/aprovação de upgrade e fatura por competência",
-            ],
-        },
-    ]
+    modulos = [dict(item) for item in DOCUMENTATION_MODULES]
+    funcionalidades = [dict(item) for item in DOCUMENTATION_FUNCIONALIDADES]
+    integracoes = [dict(item) for item in DOCUMENTATION_INTEGRACOES]
+    arquitetura = list(DOCUMENTATION_ARQUITETURA)
+    fluxos = list(DOCUMENTATION_FLUXOS)
+    pilares = list(DOCUMENTATION_PILARES)
+    kpis = [dict(item) for item in DOCUMENTATION_KPIS]
 
-    funcionalidades = [
-        {
-            "grupo": "Onboarding e implantação",
-            "itens": [
-                "Primeiro acesso com troca obrigatória de senha",
-                "Onboarding com seleção de plano e ativação de secretarias",
-                "Templates por secretaria para acelerar configuração inicial",
-            ],
-        },
-        {
-            "grupo": "Governança e segurança",
-            "itens": [
-                "RBAC por papel com escopo municipal",
-                "Trilhas de auditoria para ações críticas",
-                "Controle de limites por assinatura e fair use nos planos altos",
-            ],
-        },
-        {
-            "grupo": "Operação e performance",
-            "itens": [
-                "Relatórios operacionais e executivos por módulo",
-                "Simulador de plano para proposta/licitação",
-                "Faturamento por competência com adicionais aprovados",
-            ],
-        },
-    ]
-
-    integracoes = [
-        {
-            "titulo": "Importação de dados",
-            "texto": "Importação inicial assistida (CSV/XLSX) para acelerar entrada em produção.",
-            "status": "Disponível",
-        },
-        {
-            "titulo": "Exports institucionais",
-            "texto": "Exportação padronizada de relatórios em CSV e PDF em diversos módulos.",
-            "status": "Disponível",
-        },
-        {
-            "titulo": "Validação de documentos",
-            "texto": "Registro e rastreio de documentos emitidos com mecanismo de validação pública.",
-            "status": "Disponível",
-        },
-        {
-            "titulo": "Integrações especiais",
-            "texto": "Conectores específicos (ex.: e-SUS e outros legados) sob proposta técnica/comercial.",
-            "status": "Sob proposta",
-        },
-    ]
-
-    arquitetura = [
-        "Apps especializados por domínio: ORG, Accounts, Educação, Saúde, NEE e Billing.",
-        "Base única por município com segregação por secretaria/unidade.",
-        "Camada de permissão centralizada (RBAC) aplicada em middleware e views.",
-        "Admin operacional próprio no dashboard (sem depender do admin padrão do Django).",
-    ]
-
-    fluxos = [
-        "1. Contratação SaaS municipal com vigência mínima e regra de reajuste.",
-        "2. Primeiro acesso com troca de senha obrigatória e onboarding inicial.",
-        "3. Definição do plano municipal e ativação de secretarias por template.",
-        "4. Operação diária por módulo com auditoria, indicadores e relatórios.",
-        "5. Controle de consumo, upgrades e faturamento mensal por competência.",
-    ]
-
-    pilares = [
-        "Segurança e LGPD: campos sensíveis protegidos, controle de acesso e trilha de auditoria.",
-        "Escalabilidade municipal: base única multi-secretaria com crescimento por limites e addons.",
-        "Governança pública: linguagem e estrutura aderentes ao cenário de licitação e contrato.",
-        "Operação orientada a dados: indicadores, relatórios e histórico para tomada de decisão.",
-    ]
-
-    kpis = [
-        {"label": "Módulos principais", "value": "7"},
-        {"label": "Planos SaaS", "value": "4"},
-        {"label": "Formato de cobrança", "value": "Mensal + overage"},
-        {"label": "Modelo contratual", "value": "SaaS municipal"},
-    ]
+    rbac_sections = build_site_role_sections()
+    rbac_matrix = build_operational_matrix_rows()
+    rbac_roles_count = len({row["role_code"] for row in rbac_matrix})
+    rbac_modules_count = len({row["module_key"] for row in rbac_matrix})
+    rbac_yes_cells = len(
+        [
+            row
+            for row in rbac_matrix
+            if row["view"] == "SIM"
+            or row["create"] == "SIM"
+            or row["edit"] == "SIM"
+            or row["delete"] == "SIM"
+            or row["approve"] == "SIM"
+            or row["export"] == "SIM"
+            or row["configure_module"] == "SIM"
+        ]
+    )
 
     context = {
+        **_public_site_context(request, content),
+        "page_title": "Documentação",
         "titulo": f"Documentação {content.get('marca_nome', 'GEPUB')}",
         "subtitulo": "Visão completa de arquitetura, apps, integrações e funcionalidades operacionais",
         "marca_nome": content.get("marca_nome") or "GEPUB",
         "marca_logo_url": content.get("marca_logo_url", ""),
-        "planos": _planos_para_site(),
         "funcionalidades": funcionalidades,
         "arquitetura": arquitetura,
         "modulos": modulos,
@@ -1720,5 +1668,24 @@ def documentacao_public(request):
         "cta_home": reverse("core:institucional_public"),
         "cta_transparencia": reverse("core:transparencia_public"),
         "cta_simulador": reverse("core:institucional_public") + "#simulador",
+        "rbac_principios": [
+            "Mesmo dashboard por modulo; o que muda e o escopo de visibilidade e acao.",
+            "Permissoes por papel com filtro por municipio, secretaria, unidade e atribuicao.",
+            "Perfis de auditoria/leitura sem alteracao operacional.",
+            "Logs e rastreabilidade para acoes sensiveis e acessos criticos.",
+        ],
+        "rbac_sections": rbac_sections,
+        "rbac_kpis": [
+            {"label": "Perfis catalogados", "value": str(rbac_roles_count)},
+            {"label": "Modulos no mapa", "value": str(rbac_modules_count)},
+            {"label": "Linhas da matriz", "value": str(len(rbac_matrix))},
+            {"label": "Celulas com permissao", "value": str(rbac_yes_cells)},
+        ],
+        "rbac_docs_files": [
+            "docs/rbac_relatorio_usuarios_gepub.md",
+            "docs/rbac_matriz_operacional_gepub.json",
+            "docs/rbac_matriz_operacional_gepub.csv",
+            "docs/enderecos_localizacao_maps.md",
+        ],
     }
     return render(request, "core/documentacao_public.html", context)

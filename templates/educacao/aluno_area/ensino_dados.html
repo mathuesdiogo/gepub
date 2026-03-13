@@ -1,0 +1,24 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Ensino • Dados do Aluno • {{ aluno.nome }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <article class="gp-student-stage__card">
+    <h3>Dados do Aluno</h3>
+    <form method="post" class="gp-form gp-form--smart">
+      {% csrf_token %}
+      <input type="hidden" name="form_kind" value="dados">
+      {% for field in dados_form %}
+        <div class="gp-form-group">
+          <label class="gp-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}<small class="gp-form-error">{{ field.errors|striptags }}</small>{% endif %}
+        </div>
+      {% endfor %}
+      <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-floppy-disk"></i> Atualizar dados</button>
+    </form>
+  </article>
+</section>
+{% endblock %}

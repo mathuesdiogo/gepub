@@ -13,6 +13,7 @@ from . import views_regulacao
 from . import views_expansao
 from . import views_auditoria
 from . import views_complementos
+from . import views_portal
 
 app_name = "saude"
 
@@ -35,6 +36,7 @@ urlpatterns = [
     path("especialidades/<int:pk>/editar/", views_especialidades.especialidade_update, name="especialidade_update"),
 
     path("agenda/", views_agenda.agenda_list, name="agenda_list"),
+    path("agenda/remarcacao-automatica/", views_agenda.agenda_remarcacao_auto, name="agenda_remarcacao_auto"),
     path("agenda/nova/", views_agenda.agenda_create, name="agenda_create"),
     path("agenda/<int:pk>/", views_agenda.agenda_detail, name="agenda_detail"),
     path("agenda/<int:pk>/editar/", views_agenda.agenda_update, name="agenda_update"),
@@ -104,6 +106,13 @@ urlpatterns = [
     path("internacoes/nova/", views_complementos.internacao_create, name="internacao_create"),
     path("internacoes/<int:pk>/", views_complementos.internacao_detail, name="internacao_detail"),
     path("internacoes/<int:pk>/editar/", views_complementos.internacao_update, name="internacao_update"),
+    path("portal/inscritos/", views_portal.portal_inscritos_list, name="portal_inscritos_list"),
+    path("portal/pacientes/<int:pk>/", views_portal.portal_paciente_inscricoes, name="portal_paciente_inscricoes"),
+    path(
+        "portal/pacientes/<int:pk>/inscricoes/<int:inscricao_id>/",
+        views_portal.portal_paciente_inscricao_detail,
+        name="portal_paciente_inscricao_detail",
+    ),
 
     # API (UX)
     path("api/profissionais-por-unidade/", views_api.api_profissionais_por_unidade, name="api_profissionais_por_unidade"),

@@ -1,33 +1,33 @@
 from __future__ import annotations
 
 import secrets
+from datetime import datetime
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
 from apps.billing.services import MetricaLimite, verificar_limite_municipio
 from apps.core.decorators import require_perm
-from apps.core.rbac import get_profile, is_admin
+from apps.core.rbac import (
+    allowed_roles_for_manager_role,
+    get_profile,
+    is_admin,
+    is_professor_profile_role,
+)
 
-from .forms import UsuarioCreateForm, UsuarioUpdateForm
-from .models import Profile, UserManagementAudit
+from .forms import UsuarioCreateForm, UsuarioPrefeituraOnboardingForm, UsuarioUpdateForm
+from .models import PasswordHistory, Profile, UserManagementAudit
 from .views_users_common import (
     User,
     can_manage_users,
     log_user_action,
     scope_users_queryset,
 )
-
-_ROLE_ALLOWED_BY_MANAGER = {
-    "MUNICIPAL": {"SECRETARIA", "UNIDADE", "PROFESSOR", "ALUNO", "NEE", "LEITURA"},
-    "SECRETARIA": {"UNIDADE", "PROFESSOR", "ALUNO", "NEE", "LEITURA"},
-    "UNIDADE": {"PROFESSOR", "ALUNO", "NEE", "LEITURA"},
-}
-
 
 def _sync_user_active(user, profile: Profile):
     user.is_active = bool(profile.ativo and not profile.bloqueado)
@@ -49,6 +49,20 @@ def _assign_scope_by_actor_or_form(*, actor, profile: Profile, form_cleaned: dic
     profile.setor = form_cleaned.get("setor")
 
 
+def _build_onboarding_codigo(seed_name: str) -> str:
+    base = "".join(ch.lower() if ch.isalnum() else "." for ch in (seed_name or "").strip())
+    base = ".".join(part for part in base.split(".") if part)
+    if not base:
+        base = "prefeitura"
+    year = datetime.now().year
+    candidate = f"{base}-{year}"
+    i = 2
+    while Profile.objects.filter(codigo_acesso__iexact=candidate).exists():
+        candidate = f"{base}-{year}-{i}"
+        i += 1
+    return candidate[:60]
+
+
 @login_required
 @require_perm("accounts.manage_users")
 @require_http_methods(["GET", "POST"])
@@ -63,7 +77,7 @@ def usuario_create(request):
         p_me = get_profile(request.user)
         role_me = (getattr(p_me, "role", None) or "").upper()
 
-        if not is_admin(request.user) and role_new not in _ROLE_ALLOWED_BY_MANAGER.get(role_me, set()):
+        if not is_admin(request.user) and role_new not in allowed_roles_for_manager_role(role_me):
             messages.error(request, "Você não pode criar esse tipo de usuário.")
             return redirect("accounts:usuarios_list")
 
@@ -101,6 +115,7 @@ def usuario_create(request):
         user.set_password(cpf_digits)
         user.is_active = True
         user.save()
+        PasswordHistory.objects.create(user=user, password_hash=user.password)
 
         prof, _ = Profile.objects.get_or_create(user=user, defaults={"ativo": True})
         prof.cpf = form.cleaned_data["cpf"]
@@ -109,10 +124,11 @@ def usuario_create(request):
         prof.bloqueado = False
         _assign_scope_by_actor_or_form(actor=request.user, profile=prof, form_cleaned=form.cleaned_data)
         prof.must_change_password = True
+        prof.password_changed_at = timezone.now()
         prof.save()
         _sync_user_active(user, prof)
 
-        if prof.role == "PROFESSOR":
+        if is_professor_profile_role(prof.role):
             user.turmas_ministradas.set(form.cleaned_data.get("turmas") or [])
         else:
             user.turmas_ministradas.clear()
@@ -138,6 +154,93 @@ def usuario_create(request):
             "mode": "create",
             "title": "Novo usuário",
             "subtitle": "Cadastro de conta e lotação organizacional",
+            "actions": [
+                {"label": "Voltar", "url": reverse("accounts:usuarios_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+            ],
+        },
+    )
+
+
+@login_required
+@require_perm("accounts.manage_users")
+@require_http_methods(["GET", "POST"])
+def usuario_prefeitura_onboarding_create(request):
+    if not is_admin(request.user):
+        messages.error(request, "Somente admin geral pode gerar usuário de onboarding da prefeitura.")
+        return redirect("accounts:usuarios_list")
+
+    generated = None
+    form = UsuarioPrefeituraOnboardingForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        nome_responsavel = (form.cleaned_data["nome_responsavel"] or "").strip()
+        email = (form.cleaned_data.get("email") or "").strip().lower()
+        codigo = (form.cleaned_data.get("codigo_acesso") or "").strip().lower() or _build_onboarding_codigo(nome_responsavel)
+        senha = (form.cleaned_data.get("senha_inicial") or "").strip() or secrets.token_urlsafe(8)
+
+        if Profile.objects.filter(codigo_acesso__iexact=codigo).exists():
+            form.add_error("codigo_acesso", "Código de acesso já está em uso.")
+        else:
+            first_name, *rest = nome_responsavel.split()
+            last_name = " ".join(rest)
+            username = f"pref-{secrets.token_hex(10)}"
+            user = User.objects.create(
+                username=username,
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                is_active=True,
+            )
+            user.set_password(senha)
+            user.save(update_fields=["password"])
+            PasswordHistory.objects.create(user=user, password_hash=user.password)
+
+            profile, _ = Profile.objects.get_or_create(user=user, defaults={"ativo": True})
+            profile.role = Profile.Role.MUNICIPAL
+            profile.municipio = None
+            profile.secretaria = None
+            profile.unidade = None
+            profile.setor = None
+            profile.ativo = True
+            profile.bloqueado = False
+            profile.must_change_password = True
+            profile.password_changed_at = None
+            profile.codigo_acesso = codigo
+            profile.save()
+            _sync_user_active(user, profile)
+
+            log_user_action(
+                actor=request.user,
+                target=user,
+                action=UserManagementAudit.Action.CREATE,
+                details=(
+                    "seed_onboarding_prefeitura=true;"
+                    "municipio=none;"
+                    f"codigo_acesso={profile.codigo_acesso};"
+                    f"role={profile.role}"
+                ),
+            )
+
+            generated = {
+                "nome": user.get_full_name() or user.username,
+                "email": user.email or "—",
+                "codigo_acesso": profile.codigo_acesso,
+                "senha_inicial": senha,
+                "onboarding_url": "/org/onboarding/",
+            }
+            messages.success(
+                request,
+                "Usuário de onboarding criado com sucesso. Entregue código e senha ao responsável da prefeitura.",
+            )
+            form = UsuarioPrefeituraOnboardingForm()
+
+    return render(
+        request,
+        "accounts/user_prefeitura_onboarding_form.html",
+        {
+            "form": form,
+            "generated": generated,
+            "title": "Gerar usuário de onboarding da prefeitura",
+            "subtitle": "Cria conta municipal exclusiva para primeiro acesso e implantação guiada",
             "actions": [
                 {"label": "Voltar", "url": reverse("accounts:usuarios_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
             ],
@@ -184,7 +287,7 @@ def usuario_update(request, pk: int):
         role_new = form.cleaned_data["role"]
         p_me = get_profile(request.user)
         role_me = (getattr(p_me, "role", None) or "").upper()
-        if not is_admin(request.user) and role_new not in _ROLE_ALLOWED_BY_MANAGER.get(role_me, set()):
+        if not is_admin(request.user) and role_new not in allowed_roles_for_manager_role(role_me):
             messages.error(request, "Você não pode alterar para esse tipo de função.")
             return redirect("accounts:usuarios_list")
 
@@ -222,7 +325,7 @@ def usuario_update(request, pk: int):
         prof.save()
         _sync_user_active(user, prof)
 
-        if prof.role == "PROFESSOR":
+        if is_professor_profile_role(prof.role):
             user.turmas_ministradas.set(form.cleaned_data.get("turmas") or [])
         else:
             user.turmas_ministradas.clear()
@@ -283,6 +386,7 @@ def usuario_detail(request, pk: int):
         {"label": "Ativo", "value": "Sim" if prof.ativo else "Não"},
         {"label": "Bloqueado", "value": "Sim" if prof.bloqueado else "Não"},
         {"label": "Troca de senha pendente", "value": "Sim" if prof.must_change_password else "Não"},
+        {"label": "MFA", "value": "Ativado" if prof.mfa_enabled else "Desativado"},
     ]
 
     return render(
@@ -417,9 +521,11 @@ def usuario_reset_senha(request, pk: int):
 
     user.set_password(cpf_digits)
     user.save(update_fields=["password"])
+    PasswordHistory.objects.create(user=user, password_hash=user.password)
 
     prof.must_change_password = True
-    prof.save(update_fields=["must_change_password"])
+    prof.password_changed_at = timezone.now()
+    prof.save(update_fields=["must_change_password", "password_changed_at"])
 
     if user.email:
         try:

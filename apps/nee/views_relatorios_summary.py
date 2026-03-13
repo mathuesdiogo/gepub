@@ -6,12 +6,13 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.core.exports import export_csv, export_pdf_table
 from apps.core.rbac import scope_filter_alunos, scope_filter_matriculas
 from apps.educacao.models import Aluno, Matricula
 
-from .models import AlunoNecessidade
+from .models import AcompanhamentoNEE, AlunoNecessidade
 from .views_relatorios_common import get_municipio_from_unidade
 
 
@@ -22,6 +23,12 @@ def relatorios_index(request):
         {"title": "Por tipo", "description": "Distribuição de alunos por tipo de necessidade.", "icon": "fa-solid fa-tags", "url": reverse("nee:relatorios_por_tipo")},
         {"title": "Por município", "description": "Distribuição por município (com base nas unidades/turmas).", "icon": "fa-solid fa-city", "url": reverse("nee:relatorios_por_municipio")},
         {"title": "Por unidade", "description": "Distribuição por unidade escolar.", "icon": "fa-solid fa-school", "url": reverse("nee:relatorios_por_unidade")},
+        {
+            "title": "Capacidade de atendimento",
+            "description": "Alunos ativos por profissional (janela de 90 dias).",
+            "icon": "fa-solid fa-users-gear",
+            "url": reverse("nee:relatorios_capacidade"),
+        },
     ]
     return render(request, "nee/relatorios/index_enterprise.html", {"actions": actions, "cards": cards})
 
@@ -248,3 +255,113 @@ def relatorios_por_municipio(request):
         {"label": "Exportar PDF", "url": reverse("nee:relatorios_por_municipio") + "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
     ]
     return render(request, "nee/relatorios/por_municipio_enterprise.html", {"items": items, "actions": actions})
+
+
+@login_required
+def relatorios_capacidade(request):
+    alunos_qs = scope_filter_alunos(request.user, Aluno.objects.all())
+    matriculas = scope_filter_matriculas(
+        request.user,
+        Matricula.objects.select_related("turma", "turma__unidade").filter(aluno__in=alunos_qs),
+    )
+    necessidade_aluno_ids = set(
+        AlunoNecessidade.objects.filter(aluno__in=alunos_qs, ativo=True).values_list("aluno_id", flat=True).distinct()
+    )
+    if not necessidade_aluno_ids:
+        return render(
+            request,
+            "nee/relatorios/capacidade_enterprise.html",
+            {
+                "items": [],
+                "actions": [
+                    {
+                        "label": "Voltar",
+                        "url": reverse("nee:relatorios_index"),
+                        "icon": "fa-solid fa-arrow-left",
+                        "variant": "btn--ghost",
+                    }
+                ],
+            },
+        )
+
+    alunos_por_unidade = defaultdict(set)
+    unidade_nome = {}
+    unidade_municipio = {}
+    aluno_unidade_ids = defaultdict(set)
+    for m in matriculas:
+        if m.aluno_id not in necessidade_aluno_ids:
+            continue
+        unidade = getattr(m.turma, "unidade", None)
+        if not unidade:
+            continue
+        uid = unidade.id
+        alunos_por_unidade[uid].add(m.aluno_id)
+        aluno_unidade_ids[m.aluno_id].add(uid)
+        unidade_nome[uid] = unidade.nome
+        unidade_municipio[uid] = get_municipio_from_unidade(unidade) or "—"
+
+    janela_dias = 90
+    corte = timezone.localdate() - timezone.timedelta(days=janela_dias)
+    acompanhamentos = (
+        AcompanhamentoNEE.objects.filter(aluno_id__in=necessidade_aluno_ids, data__gte=corte)
+        .values("aluno_id", "autor_id")
+    )
+    profissionais_por_unidade = defaultdict(set)
+    for row in acompanhamentos:
+        aluno_id = row["aluno_id"]
+        autor_id = row["autor_id"]
+        if not autor_id:
+            continue
+        for uid in aluno_unidade_ids.get(aluno_id, set()):
+            profissionais_por_unidade[uid].add(autor_id)
+
+    items = []
+    for uid, alunos_ids in alunos_por_unidade.items():
+        total_alunos = len(alunos_ids)
+        total_profissionais = len(profissionais_por_unidade.get(uid, set()))
+        razao = 0.0
+        if total_profissionais > 0:
+            razao = round(total_alunos / total_profissionais, 2)
+        items.append(
+            {
+                "municipio": unidade_municipio.get(uid, "—"),
+                "unidade": unidade_nome.get(uid, f"Unidade #{uid}"),
+                "total_alunos": total_alunos,
+                "profissionais_ativos": total_profissionais,
+                "alunos_por_profissional": razao,
+                "janela_dias": janela_dias,
+                "url": reverse("nee:relatorios_alunos") + f"?unidade={uid}",
+            }
+        )
+    items.sort(key=lambda i: (-i["total_alunos"], i["unidade"]))
+
+    if request.GET.get("export") in ("csv", "pdf"):
+        headers = ["Município", "Unidade", "Alunos NEE ativos", "Profissionais ativos (90d)", "Razão alunos/profissional"]
+        rows = [
+            [
+                i["municipio"],
+                i["unidade"],
+                i["total_alunos"],
+                i["profissionais_ativos"],
+                i["alunos_por_profissional"],
+            ]
+            for i in items
+        ]
+        if request.GET.get("export") == "csv":
+            return export_csv("nee_relatorio_capacidade.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="nee_relatorio_capacidade.pdf",
+            title="NEE — Capacidade de Atendimento",
+            headers=headers,
+            rows=rows,
+            subtitle="Alunos ativos por profissional (janela 90 dias)",
+            filtros="Somente alunos com necessidade ativa",
+        )
+
+    actions = [
+        {"label": "Voltar", "url": reverse("nee:relatorios_index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+        {"label": "Exportar CSV", "url": reverse("nee:relatorios_capacidade") + "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
+        {"label": "Exportar PDF", "url": reverse("nee:relatorios_capacidade") + "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
+    ]
+    return render(request, "nee/relatorios/capacidade_enterprise.html", {"items": items, "actions": actions})

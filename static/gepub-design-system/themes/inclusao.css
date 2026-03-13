@@ -1,0 +1,47 @@
+html[data-theme="inclusao"] {
+  --gp-primary: #ffd600;
+  --gp-primary-hover: #e5c100;
+  --gp-secondary: #2979ff;
+  --gp-background: #000000;
+  --gp-surface: #121212;
+  --gp-border: #2979ff;
+  --gp-text-primary: #ffffff;
+  --gp-text-secondary: #d9d9d9;
+  --gp-success: #00e676;
+  --gp-warning: #ffd600;
+  --gp-danger: #ff1744;
+  --gp-info: #2979ff;
+  --gp-on-primary: #000000;
+  --gp-on-secondary: #ffffff;
+  --gp-on-success: #000000;
+  --gp-on-danger: #ffffff;
+  --gp-shadow-1: none;
+  --gp-shadow-2: none;
+  --gp-shadow-3: none;
+  --gp-font-size-base: 16px;
+  --gp-radius: 8px;
+  --gp-sidebar-bg-start: #000000;
+  --gp-sidebar-bg-end: #121212;
+  --gp-sidebar-overlay-1: color-mix(in srgb, #2979ff 28%, transparent);
+  --gp-sidebar-overlay-2: color-mix(in srgb, #ffd600 22%, transparent);
+  --gp-sidebar-border: #2979ff;
+  --gp-sidebar-text: #ffffff;
+  --gp-sidebar-muted: #d9d9d9;
+  --gp-sidebar-surface: #1a1a1a;
+  --gp-sidebar-surface-2: #232323;
+}
+
+html[data-theme="inclusao"] :focus-visible {
+  outline: 3px solid #ffd600;
+  outline-offset: 2px;
+}
+
+html[data-theme="inclusao"] * {
+  text-decoration-thickness: 2px;
+}
+
+html[data-theme="inclusao"] a,
+html[data-theme="inclusao"] .gp-anchor-link {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

@@ -22,7 +22,17 @@
   text-decoration:none;
 }
 
+.gp-breadcrumb__link{
+  color:var(--muted);
+  text-decoration:none;
+}
+
 .breadcrumbs__link:hover{
+  color:var(--text);
+  text-decoration:underline;
+}
+
+.gp-breadcrumb__link:hover{
   color:var(--text);
   text-decoration:underline;
 }
@@ -32,6 +42,15 @@
   font-weight:600;
 }
 
+.gp-breadcrumb__current{
+  color:var(--text);
+  font-weight:600;
+}
+
 .breadcrumbs__sep{
+  opacity:.6;
+}
+
+.gp-breadcrumb__sep{
   opacity:.6;
 }

@@ -1,0 +1,38 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Ensino • Mensagens • {{ aluno.nome }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <article class="gp-student-stage__card">
+    <h3>Caixa de Mensagens</h3>
+    <ul class="gp-student-list">
+      {% for a in avisos %}
+        <li class="gp-student-list__item">
+          <strong>{{ a.titulo }}</strong>
+          <p>{{ a.texto|default:"Comunicado interno." }}</p>
+          <small>{{ a.criado_em|date:"d/m/Y H:i" }}</small>
+        </li>
+      {% empty %}
+        <li class="gp-student-empty">Sem mensagens no momento.</li>
+      {% endfor %}
+    </ul>
+  </article>
+
+  <article class="gp-student-stage__card">
+    <h3>Alertas e Próximas Aulas (Curso de Informática)</h3>
+    <ul class="gp-student-list">
+      {% for a in avisos_informatica %}
+        <li class="gp-student-list__item">
+          <strong>{{ a.titulo }}</strong>
+          <p>{{ a.texto }}</p>
+          {% if a.meta %}<small>{{ a.meta }}</small>{% endif %}
+        </li>
+      {% empty %}
+        <li class="gp-student-empty">Sem alertas de Informática no momento.</li>
+      {% endfor %}
+    </ul>
+  </article>
+</section>
+{% endblock %}

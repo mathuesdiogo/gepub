@@ -1,0 +1,30 @@
+html[data-theme="institucional"] {
+  --gp-primary: #2f5da8;
+  --gp-primary-hover: #274c77;
+  --gp-secondary: #4a7bd0;
+  --gp-background: #f4f6f9;
+  --gp-surface: #ffffff;
+  --gp-border: #d9dee7;
+  --gp-text-primary: #1c2e4a;
+  --gp-text-secondary: #274c77;
+  --gp-success: #2e7d32;
+  --gp-warning: #fbc02d;
+  --gp-danger: #d32f2f;
+  --gp-info: #4a7bd0;
+  --gp-on-primary: #ffffff;
+  --gp-on-secondary: #ffffff;
+  --gp-on-success: #ffffff;
+  --gp-on-danger: #ffffff;
+  --gp-shadow-1: 0 1px 2px rgb(28 46 74 / 0.08);
+  --gp-shadow-2: 0 10px 26px rgb(28 46 74 / 0.14);
+  --gp-shadow-3: 0 22px 44px rgb(28 46 74 / 0.2);
+  --gp-sidebar-bg-start: #ffffff;
+  --gp-sidebar-bg-end: #f4f6f9;
+  --gp-sidebar-overlay-1: color-mix(in srgb, #4a7bd0 10%, transparent);
+  --gp-sidebar-overlay-2: color-mix(in srgb, #2f5da8 8%, transparent);
+  --gp-sidebar-border: #d9dee7;
+  --gp-sidebar-text: #1c2e4a;
+  --gp-sidebar-muted: #5c6f8b;
+  --gp-sidebar-surface: #edf2fb;
+  --gp-sidebar-surface-2: #dde8f8;
+}

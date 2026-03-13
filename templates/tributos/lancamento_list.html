@@ -6,26 +6,26 @@
 
   <form method="get" class="filter-bar" style="margin-bottom:12px;">
     {% if municipios and municipios|length %}
-      <select name="municipio" class="input" style="max-width:240px;">
+      <select name="municipio" class="gp-input" style="max-width:240px;">
         {% for m in municipios %}
           <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
         {% endfor %}
       </select>
     {% endif %}
-    <select name="tipo" class="input" style="max-width:180px;">
+    <select name="tipo" class="gp-input" style="max-width:180px;">
       <option value="">Todos os tributos</option>
       {% for key,label in tipo_choices %}
         <option value="{{ key }}" {% if tipo == key %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
-    <select name="status" class="input" style="max-width:180px;">
+    <select name="status" class="gp-input" style="max-width:180px;">
       <option value="">Todos os status</option>
       {% for key,label in status_choices %}
         <option value="{{ key }}" {% if status == key %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
-    <input name="q" value="{{ q }}" class="input" placeholder="Contribuinte ou referência" style="max-width:320px;">
-    <button class="btn btn--sm" type="submit">Filtrar</button>
+    <input name="q" value="{{ q }}" class="gp-input" placeholder="Contribuinte ou referência" style="max-width:320px;">
+    <button class="gp-button gp-button--outline gp-button--sm" type="submit">Filtrar</button>
   </form>
 
   <div class="table-shell"><div class="table-shell__body">
@@ -54,10 +54,10 @@
               {% if item.status != "PAGO" and item.status != "CANCELADO" %}
                 <form method="post" action="{% url 'tributos:lancamento_baixar' item.pk %}?municipio={{ municipio.pk }}">
                   {% csrf_token %}
-                  <button type="submit" class="btn btn--sm btn-primary">Baixar pagamento</button>
+                  <button type="submit" class="gp-button gp-button--primary gp-button--sm">Baixar pagamento</button>
                 </form>
               {% else %}
-                <span style="color:#64748b;">Sem ação</span>
+                <span class="small">Sem ação</span>
               {% endif %}
             </td>
           </tr>

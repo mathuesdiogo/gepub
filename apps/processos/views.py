@@ -6,8 +6,10 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
+from apps.core.exports import export_csv, export_pdf_table
 from apps.core.decorators import require_perm
 from apps.core.rbac import is_admin
+from apps.core.services_registro_operacao import build_registro_context
 from apps.core.services_auditoria import registrar_auditoria
 from apps.core.services_transparencia import publicar_evento_transparencia
 from apps.org.models import Municipio
@@ -74,6 +76,34 @@ def processo_list(request):
     if tipo:
         qs = qs.filter(tipo__icontains=tipo)
 
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-criado_em"):
+            rows.append(
+                [
+                    item.numero,
+                    item.tipo,
+                    item.assunto,
+                    item.get_status_display(),
+                    item.solicitante_nome or "-",
+                    str(item.data_abertura or ""),
+                    str(item.prazo_final or ""),
+                ]
+            )
+        headers = ["Numero", "Tipo", "Assunto", "Status", "Solicitante", "Abertura", "Prazo"]
+        if export == "csv":
+            return export_csv("processos.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="processos.pdf",
+            title="Processos administrativos",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'} | Status={status or '-'} | Tipo={tipo or '-'}",
+        )
+
     return render(
         request,
         "processos/list.html",
@@ -98,6 +128,18 @@ def processo_list(request):
                     "label": "Portal",
                     "url": reverse("portal"),
                     "icon": "fa-solid fa-arrow-left",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&tipo={tipo}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&tipo={tipo}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
                     "variant": "btn--ghost",
                 },
             ],
@@ -192,6 +234,20 @@ def processo_detail(request, pk: int):
         {"label": "Prazo", "value": processo.prazo_final or "-"},
     ]
 
+    checklist = [
+        {"label": "Numero informado", "ok": bool(processo.numero)},
+        {"label": "Tipo informado", "ok": bool(processo.tipo)},
+        {"label": "Assunto informado", "ok": bool(processo.assunto)},
+        {"label": "Setor de origem definido", "ok": bool(processo.setor_id)},
+        {"label": "Responsavel atual definido", "ok": bool(processo.responsavel_atual_id)},
+    ]
+    registro = build_registro_context(
+        municipio=municipio,
+        modulo="PROCESSOS",
+        entidade="ProcessoAdministrativo",
+        entidade_id=processo.pk,
+    )
+
     return render(
         request,
         "processos/detail.html",
@@ -217,6 +273,8 @@ def processo_detail(request, pk: int):
             "pills": pills,
             "andamentos": processo.andamentos.select_related("setor_origem", "setor_destino", "criado_por").order_by("-data_evento", "-id"),
             "municipio": municipio,
+            "checklist_conformidade": checklist,
+            **registro,
         },
     )
 

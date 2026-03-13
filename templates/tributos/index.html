@@ -6,7 +6,7 @@
 
   <form method="get" class="filter-bar" style="margin-bottom:12px;">
     {% if municipios and municipios|length %}
-      <select name="municipio" class="input" style="max-width:240px;" onchange="this.form.submit()">
+      <select name="municipio" class="gp-input" style="max-width:240px;" onchange="this.form.submit()">
         {% for m in municipios %}
           <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
         {% endfor %}

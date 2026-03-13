@@ -69,7 +69,7 @@ class SetorListView(BaseListViewGepub):
         return _unidade_select_html(unidades_scope, unidade_id)
 
     def get_actions(self, request, **kwargs):
-        actions = super().get_actions(request, **kwargs)
+        actions = super().get_actions(**kwargs)
         if is_admin(request.user):
             actions.insert(0, {"label": "Novo setor", "url": reverse("org:setor_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
         # export

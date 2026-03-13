@@ -145,7 +145,7 @@
               <strong>{{ item.titulo }}</strong>
               {% if item.descricao %}<p>{{ item.descricao }}</p>{% endif %}
             </td>
-            <td>{{ item.municipio.nome }}</td>
+            <td>{% if item.municipio %}{{ item.municipio.nome }}{% else %}&mdash;{% endif %}</td>
             <td>{{ item.get_formato_display }}</td>
             <td>{{ item.competencia|default:"—" }}</td>
             <td>
@@ -195,7 +195,7 @@
               <strong>{{ item.titulo }}</strong>
               {% if item.descricao %}<p>{{ item.descricao }}</p>{% endif %}
             </td>
-            <td>{{ item.municipio.nome }}</td>
+            <td>{% if item.municipio %}{{ item.municipio.nome }}{% else %}&mdash;{% endif %}</td>
             <td>{{ item.referencia|default:"-" }}</td>
             <td>{% if item.valor is not None %}R$ {{ item.valor|floatformat:2 }}{% else %}-{% endif %}</td>
           </tr>

@@ -27,6 +27,18 @@ from .models import (
     Turma,
 )
 from .services_matricula import registrar_movimentacao
+from .services_requisitos import (
+    avaliar_requisitos_matricula,
+    registrar_override_requisitos_matricula,
+)
+
+
+def _municipio_id_from_turma(turma: Turma | None) -> int | None:
+    if turma is None:
+        return None
+    unidade = getattr(turma, "unidade", None)
+    secretaria = getattr(unidade, "secretaria", None)
+    return getattr(secretaria, "municipio_id", None)
 
 
 class MatriculaMovimentacaoForm(forms.Form):
@@ -50,6 +62,15 @@ class MatriculaMovimentacaoForm(forms.Form):
         required=False,
         widget=forms.Textarea(attrs={"rows": 3}),
     )
+    override_requisitos = forms.BooleanField(
+        label="Forçar movimentação ignorando pré-requisitos",
+        required=False,
+    )
+    override_justificativa = forms.CharField(
+        label="Justificativa do override",
+        required=False,
+        widget=forms.Textarea(attrs={"rows": 2}),
+    )
 
     def __init__(self, aluno: Aluno, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -67,12 +88,18 @@ class MatriculaMovimentacaoForm(forms.Form):
             Turma.objects.select_related("unidade", "unidade__secretaria").filter(ativo=True),
         ).order_by("-ano_letivo", "nome")
         self.fields["turma_destino"].queryset = turma_qs
+        can_override = bool(can(user, "educacao.manage"))
+        if not can_override:
+            self.fields["override_requisitos"].widget = forms.HiddenInput()
+            self.fields["override_justificativa"].widget = forms.HiddenInput()
 
     def clean(self):
         cleaned = super().clean()
         matricula = cleaned.get("matricula")
         tipo = cleaned.get("tipo")
         turma_destino = cleaned.get("turma_destino")
+        wants_override = bool(cleaned.get("override_requisitos"))
+        justificativa = (cleaned.get("override_justificativa") or "").strip()
 
         if not matricula:
             return cleaned
@@ -85,6 +112,19 @@ class MatriculaMovimentacaoForm(forms.Form):
                 self.add_error("turma_destino", "Selecione a turma de destino.")
             elif turma_destino == matricula.turma:
                 self.add_error("turma_destino", "A turma de destino deve ser diferente da turma atual.")
+            else:
+                municipio_origem = _municipio_id_from_turma(matricula.turma)
+                municipio_destino = _municipio_id_from_turma(turma_destino)
+                if municipio_origem and municipio_destino and municipio_origem != municipio_destino:
+                    self.add_error(
+                        "turma_destino",
+                        "Transferências/remanejamentos internos exigem turma no mesmo município.",
+                    )
+
+        if wants_override and not justificativa:
+            self.add_error("override_justificativa", "Informe a justificativa para registrar o override.")
+        if not wants_override:
+            cleaned["override_justificativa"] = ""
 
         return cleaned
 
@@ -240,6 +280,8 @@ def aluno_detail(request, pk: int):
 
     atendimentos_saude = []
     agendamentos_saude = []
+    beneficios_entregas = []
+    beneficios_inscricoes = []
     try:
         from apps.saude.models import AtendimentoSaude, AgendamentoSaude
 
@@ -256,6 +298,23 @@ def aluno_detail(request, pk: int):
     except Exception:
         atendimentos_saude = []
         agendamentos_saude = []
+
+    try:
+        from .models_beneficios import BeneficioEntrega, BeneficioEditalInscricao
+
+        beneficios_entregas = list(
+            BeneficioEntrega.objects.select_related("beneficio", "campanha")
+            .filter(aluno=aluno)
+            .order_by("-data_hora", "-id")[:12]
+        )
+        beneficios_inscricoes = list(
+            BeneficioEditalInscricao.objects.select_related("edital")
+            .filter(aluno=aluno)
+            .order_by("-data_hora", "-id")[:10]
+        )
+    except Exception:
+        beneficios_entregas = []
+        beneficios_inscricoes = []
 
     form_matricula = MatriculaForm(user=request.user)
     form_nee = AlunoNecessidadeForm(aluno=aluno)
@@ -295,6 +354,27 @@ def aluno_detail(request, pk: int):
                 turma_ok = scope_filter_turmas(request.user, Turma.objects.filter(pk=m.turma_id)).exists()
                 if not turma_ok:
                     return HttpResponseForbidden("403 — Turma fora do seu escopo.")
+
+                avaliacao_requisitos = avaliar_requisitos_matricula(aluno=aluno, turma=m.turma)
+                if avaliacao_requisitos.bloqueado:
+                    wants_override = bool(form_matricula.cleaned_data.get("override_requisitos"))
+                    justificativa = (form_matricula.cleaned_data.get("override_justificativa") or "").strip()
+                    if wants_override and justificativa:
+                        registrar_override_requisitos_matricula(
+                            usuario=request.user,
+                            aluno=aluno,
+                            turma=m.turma,
+                            justificativa=justificativa,
+                            pendencias=avaliacao_requisitos.pendencias,
+                            origem="ALUNO_DETAIL_MATRICULA",
+                        )
+                        messages.warning(request, "Matrícula liberada por override com auditoria.")
+                    else:
+                        for pendencia in avaliacao_requisitos.pendencias:
+                            messages.error(request, pendencia)
+                        return redirect("educacao:aluno_detail", pk=aluno.pk)
+                for aviso in avaliacao_requisitos.avisos:
+                    messages.warning(request, aviso)
 
                 if not m.data_matricula:
                     m.data_matricula = timezone.localdate()
@@ -378,6 +458,29 @@ def aluno_detail(request, pk: int):
                     if Matricula.objects.filter(aluno=aluno, turma=turma_destino).exclude(pk=matricula.pk).exists():
                         form_movimentacao.add_error("turma_destino", "Já existe matrícula deste aluno na turma de destino.")
                     else:
+                        avaliacao_requisitos = avaliar_requisitos_matricula(aluno=aluno, turma=turma_destino)
+                        wants_override = bool(form_movimentacao.cleaned_data.get("override_requisitos"))
+                        justificativa = (form_movimentacao.cleaned_data.get("override_justificativa") or "").strip()
+                        if avaliacao_requisitos.bloqueado:
+                            if wants_override and justificativa:
+                                registrar_override_requisitos_matricula(
+                                    usuario=request.user,
+                                    aluno=aluno,
+                                    turma=turma_destino,
+                                    justificativa=justificativa,
+                                    pendencias=avaliacao_requisitos.pendencias,
+                                    origem="ALUNO_DETAIL_REMANEJAMENTO",
+                                )
+                                messages.warning(request, "Remanejamento liberado por override com auditoria.")
+                            else:
+                                for pendencia in avaliacao_requisitos.pendencias:
+                                    form_movimentacao.add_error("turma_destino", pendencia)
+                                messages.error(request, "Remanejamento bloqueado por pré-requisito.")
+                                turma_destino = None
+                        else:
+                            for aviso in avaliacao_requisitos.avisos:
+                                messages.warning(request, aviso)
+                    if turma_destino:
                         matricula.turma = turma_destino
                         matricula.situacao = Matricula.Situacao.ATIVA
                         matricula.save(update_fields=["turma", "situacao"])
@@ -398,6 +501,29 @@ def aluno_detail(request, pk: int):
                     if Matricula.objects.filter(aluno=aluno, turma=turma_destino).exists():
                         form_movimentacao.add_error("turma_destino", "Já existe matrícula deste aluno na turma de destino.")
                     else:
+                        avaliacao_requisitos = avaliar_requisitos_matricula(aluno=aluno, turma=turma_destino)
+                        wants_override = bool(form_movimentacao.cleaned_data.get("override_requisitos"))
+                        justificativa = (form_movimentacao.cleaned_data.get("override_justificativa") or "").strip()
+                        if avaliacao_requisitos.bloqueado:
+                            if wants_override and justificativa:
+                                registrar_override_requisitos_matricula(
+                                    usuario=request.user,
+                                    aluno=aluno,
+                                    turma=turma_destino,
+                                    justificativa=justificativa,
+                                    pendencias=avaliacao_requisitos.pendencias,
+                                    origem="ALUNO_DETAIL_TRANSFERENCIA",
+                                )
+                                messages.warning(request, "Transferência liberada por override com auditoria.")
+                            else:
+                                for pendencia in avaliacao_requisitos.pendencias:
+                                    form_movimentacao.add_error("turma_destino", pendencia)
+                                messages.error(request, "Transferência bloqueada por pré-requisito.")
+                                turma_destino = None
+                        else:
+                            for aviso in avaliacao_requisitos.avisos:
+                                messages.warning(request, aviso)
+                    if turma_destino:
                         matricula.situacao = Matricula.Situacao.TRANSFERIDO
                         matricula.save(update_fields=["situacao"])
                         registrar_movimentacao(
@@ -525,10 +651,10 @@ def aluno_detail(request, pk: int):
                 matricula_curso.aluno = aluno
                 matricula_curso.cadastrado_por = request.user
                 matricula_curso.save()
-                messages.success(request, "Aluno matriculado no curso com sucesso.")
+                messages.success(request, "Aluno matriculado na atividade extracurricular com sucesso.")
                 return redirect("educacao:aluno_detail", pk=aluno.pk)
 
-            messages.error(request, "Corrija os erros da matrícula em curso.")
+            messages.error(request, "Corrija os erros da matrícula em atividade extracurricular.")
 
     else:
         pass
@@ -548,7 +674,8 @@ def aluno_detail(request, pk: int):
     pills.append({"label": "Documentos", "value": str(documentos.count())})
     pills.append({"label": "Certificados", "value": str(certificados.count())})
     pills.append({"label": "Carteiras", "value": str(carteiras_estudantis.count())})
-    pills.append({"label": "Cursos", "value": str(matriculas_cursos.count())})
+    pills.append({"label": "Atividades extras", "value": str(matriculas_cursos.count())})
+    pills.append({"label": "Benefícios", "value": str(len(beneficios_entregas))})
 
     headers_matriculas = [
         {"label": "Turma"},
@@ -605,8 +732,14 @@ def aluno_detail(request, pk: int):
 
     actions = [
         {"label": "Voltar", "url": reverse("educacao:aluno_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-        {"label": "Portal do Aluno", "url": reverse("educacao:portal_aluno", args=[aluno.pk]), "icon": "fa-solid fa-user-graduate", "variant": "btn--ghost"},
+        {"label": "Meus dados do aluno", "url": reverse("educacao:aluno_meus_dados", args=[aluno.pk]), "icon": "fa-solid fa-user-graduate", "variant": "btn--ghost"},
         {"label": "Histórico Escolar", "url": reverse("educacao:historico_aluno", args=[aluno.pk]), "icon": "fa-solid fa-scroll", "variant": "btn--ghost"},
+        {
+            "label": "Declaração de Vínculo",
+            "url": reverse("educacao:declaracao_vinculo_pdf", args=[aluno.pk]),
+            "icon": "fa-solid fa-file-signature",
+            "variant": "btn--ghost",
+        },
     ]
     if can_edu_manage:
         actions.append(
@@ -649,7 +782,10 @@ def aluno_detail(request, pk: int):
             "allowed_matriculas": list(allowed_matriculas),
             "can_edu_manage": can_edu_manage,
             "can_nee_manage": can_nee_manage,
+            "can_emitir_declaracao": can(request.user, "educacao.view"),
             "atendimentos_saude": atendimentos_saude,
             "agendamentos_saude": agendamentos_saude,
+            "beneficios_entregas": beneficios_entregas,
+            "beneficios_inscricoes": beneficios_inscricoes,
         },
     )

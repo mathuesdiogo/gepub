@@ -1,0 +1,115 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="gp-card"><div class="gp-card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:12px 0 18px;">
+    {% for card in cards %}
+      {% include "core/partials/components/data/kpi_card.html" with label=card.label value=card.value %}
+    {% endfor %}
+  </div>
+
+  <div class="gp-card" style="margin-bottom:14px;"><div class="gp-card__body">
+    <strong>Status atual:</strong> {{ edital.get_status_display }}<br>
+    <span class="gp-text-muted">Inscrição aberta: {{ edital.inscricao_aberta|yesno:"Sim,Não" }} • Recurso aberto: {{ edital.recurso_aberto|yesno:"Sim,Não" }}</span>
+
+    {% if is_manager %}
+      <form method="post" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+        {% csrf_token %}
+        <button class="gp-button gp-button--ghost gp-button--sm" name="_action" value="RASCUNHO" type="submit">Rascunho</button>
+        <button class="gp-button gp-button--primary gp-button--sm" name="_action" value="ABERTO" type="submit">Abrir</button>
+        <button class="gp-button gp-button--secondary gp-button--sm" name="_action" value="ENCERRADO" type="submit">Encerrar</button>
+        <button class="gp-button gp-button--danger gp-button--sm" name="_action" value="ARQUIVADO" type="submit">Arquivar</button>
+      </form>
+    {% endif %}
+  </div></div>
+
+  <div class="gp-card" style="margin-bottom:14px;"><div class="gp-card__body">
+    <h3 style="margin-top:0;">Inscrições</h3>
+    <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__body">
+      <table class="gp-table__native">
+        <thead>
+          <tr>
+            <th>Servidor</th>
+            <th>Disciplina</th>
+            <th>Unidades interesse</th>
+            <th>Protocolo</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in inscricoes %}
+            <tr>
+              <td>{{ item.servidor.nome }}</td>
+              <td>{{ item.disciplina_interesse|default:"-" }}</td>
+              <td>
+                {% for u in item.unidades_interesse.all %}
+                  <span class="gp-badge gp-badge--neutral">{{ u.nome }}</span>
+                {% empty %}
+                  -
+                {% endfor %}
+              </td>
+              <td>{{ item.protocolo|default:"-" }}</td>
+              <td>{{ item.get_status_display }}</td>
+              <td>
+                <a class="gp-button gp-button--sm gp-button--ghost" href="{% url 'rh:remanejamento_recurso_create' item.pk %}?municipio={{ municipio.pk }}">Recurso</a>
+                {% if item.status == "VALIDA" %}
+                  <form method="post" action="{% url 'rh:remanejamento_inscricao_cancelar' item.pk %}?municipio={{ municipio.pk }}" style="display:inline;">
+                    {% csrf_token %}
+                    <button class="gp-button gp-button--sm gp-button--danger" type="submit">Cancelar</button>
+                  </form>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6">Nenhuma inscrição para este edital.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </div></div>
+
+  <div class="gp-card"><div class="gp-card__body">
+    <h3 style="margin-top:0;">Recursos</h3>
+    <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__body">
+      <table class="gp-table__native">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Servidor</th>
+            <th>Status</th>
+            <th>Texto</th>
+            <th>Análise</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in recursos %}
+            <tr>
+              <td>{{ r.criado_em|date:"d/m/Y H:i" }}</td>
+              <td>{{ r.inscricao.servidor.nome }}</td>
+              <td>{{ r.get_status_display }}</td>
+              <td>{{ r.texto }}</td>
+              <td>
+                {% if is_manager and r.status == "PENDENTE" %}
+                  <form method="post" action="{% url 'rh:remanejamento_recurso_decidir' r.pk %}?municipio={{ municipio.pk }}" style="display:flex;gap:6px;flex-wrap:wrap;">
+                    {% csrf_token %}
+                    <input class="gp-input" type="text" name="resposta" placeholder="Resposta do recurso">
+                    <button class="gp-button gp-button--sm gp-button--success" type="submit" name="decisao" value="DEFERIDO">Deferir</button>
+                    <button class="gp-button gp-button--sm gp-button--danger" type="submit" name="decisao" value="INDEFERIDO">Indeferir</button>
+                  </form>
+                {% else %}
+                  {{ r.resposta|default:"-" }}
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5">Nenhum recurso registrado.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </div></div>
+</div></div>
+{% endblock %}

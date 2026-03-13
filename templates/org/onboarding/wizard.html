@@ -1,0 +1,404 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-br" data-theme="{{ gepub_active_theme|default:'kassya' }}">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Onboarding • Etapa {{ wizard_step }} de {{ wizard_total_steps }} • GEPUB</title>
+  <link rel="stylesheet" href="{% static 'gepub-design-system/gepub-design-system.css' %}">
+  <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
+  {% if gepub_theme_tokens_style %}
+  <style id="gepub-tenant-theme-overrides">
+{{ gepub_theme_tokens_style }}
+  </style>
+  {% endif %}
+</head>
+<body>
+  <div class="onboarding-shell">
+    <aside class="onboarding-aside">
+      <div class="onboarding-brand">GEPUB</div>
+      <p class="onboarding-sub">Configuração inicial da Prefeitura</p>
+
+      <div class="ob-progress" aria-label="Progresso do onboarding">
+        <div class="ob-progress__meta">
+          <span>Etapa {{ wizard_step }} de {{ wizard_total_steps }}</span>
+          <span>{{ wizard_progress_pct }}%</span>
+        </div>
+        <div class="ob-progress__bar">
+          <div class="ob-progress__fill" style="width: {{ wizard_progress_pct }}%"></div>
+        </div>
+      </div>
+
+      <ol class="ob-steps">
+        {% for item in wizard_steps %}
+          <li class="ob-step {% if item.status == 'current' %}is-current{% elif item.status == 'done' %}is-done{% endif %}">
+            <span class="ob-step__index">{{ item.index }}</span>
+            <p class="ob-step__title">{{ item.title }}</p>
+          </li>
+        {% endfor %}
+      </ol>
+    </aside>
+
+    <main class="onboarding-main">
+      <section class="onboarding-card">
+        <div class="onboarding-card__head">
+          <p class="onboarding-card__kicker">Implantação Guiada</p>
+          <h1 class="onboarding-card__title">{{ step_title }}</h1>
+          <p class="onboarding-card__desc">{{ step_description }}</p>
+        </div>
+
+        <form method="post" class="onboarding-form" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="onboarding-card__body">
+            {% if messages %}
+              {% for message in messages %}
+                <div class="onboarding-note">{{ message }}</div>
+              {% endfor %}
+            {% endif %}
+
+            {% if form.non_field_errors %}
+              <div class="onboarding-note onboarding-note--error">
+                {{ form.non_field_errors }}
+              </div>
+            {% endif %}
+
+            {% if wizard_step == 1 %}
+              <div class="onboarding-note">Essa etapa é obrigatória por segurança. A senha atual é a senha usada no login.</div>
+              <div class="onboarding-grid">
+                <div class="onboarding-field">
+                  <label for="{{ form.old_password.id_for_label }}">Senha atual</label>
+                  {{ form.old_password }}
+                  {{ form.old_password.errors }}
+                </div>
+                <div></div>
+                <div class="onboarding-field">
+                  <label for="{{ form.new_password1.id_for_label }}">Nova senha</label>
+                  {{ form.new_password1 }}
+                  {{ form.new_password1.errors }}
+                </div>
+                <div class="onboarding-field">
+                  <label for="{{ form.new_password2.id_for_label }}">Confirmar nova senha</label>
+                  {{ form.new_password2 }}
+                  {{ form.new_password2.errors }}
+                </div>
+              </div>
+            {% elif wizard_step == 2 %}
+              <div class="onboarding-grid">
+                <div class="onboarding-field">
+                  <label for="{{ form.nome_completo.id_for_label }}">Nome completo</label>
+                  {{ form.nome_completo }}
+                  {{ form.nome_completo.errors }}
+                </div>
+                <div class="onboarding-field">
+                  <label for="{{ form.codigo_acesso.id_for_label }}">Código de acesso</label>
+                  {{ form.codigo_acesso }}
+                  {{ form.codigo_acesso.errors }}
+                </div>
+                <div class="onboarding-field">
+                  <label for="{{ form.cpf.id_for_label }}">CPF</label>
+                  {{ form.cpf }}
+                  {{ form.cpf.errors }}
+                </div>
+                <div class="onboarding-field">
+                  <label for="{{ form.cargo_funcao.id_for_label }}">Cargo/Função</label>
+                  {{ form.cargo_funcao }}
+                  {{ form.cargo_funcao.errors }}
+                </div>
+                <div class="onboarding-field">
+                  <label for="{{ form.telefone_whatsapp.id_for_label }}">Telefone/WhatsApp</label>
+                  {{ form.telefone_whatsapp }}
+                  {{ form.telefone_whatsapp.errors }}
+                </div>
+                <div class="onboarding-field">
+                  <label for="{{ form.email.id_for_label }}">E-mail</label>
+                  {{ form.email }}
+                  {{ form.email.errors }}
+                </div>
+              </div>
+            {% elif wizard_step == 3 %}
+              <div class="onboarding-grid">
+                <div class="onboarding-field">
+                  <label for="{{ form.municipio_nome.id_for_label }}">Município</label>
+                  {{ form.municipio_nome }}
+                  {{ form.municipio_nome.errors }}
+                </div>
+                <div class="onboarding-field">
+                  <label for="{{ form.uf.id_for_label }}">UF</label>
+                  {{ form.uf }}
+                  {{ form.uf.errors }}
+                </div>
+                <div class="onboarding-field">
+                  <label for="{{ form.razao_social_prefeitura.id_for_label }}">Razão social</label>
+                  {{ form.razao_social_prefeitura }}
+                  {{ form.razao_social_prefeitura.errors }}
+                </div>
+                <div class="onboarding-field">
+                  <label for="{{ form.nome_fantasia_prefeitura.id_for_label }}">Nome fantasia</label>
+                  {{ form.nome_fantasia_prefeitura }}
+                  {{ form.nome_fantasia_prefeitura.errors }}
+                </div>
+                <div class="onboarding-field">
+                  <label for="{{ form.cnpj_prefeitura.id_for_label }}">CNPJ</label>
+                  {{ form.cnpj_prefeitura }}
+                  {{ form.cnpj_prefeitura.errors }}
+                </div>
+                <div class="onboarding-field">
+                  <label for="{{ form.email_prefeitura.id_for_label }}">E-mail institucional</label>
+                  {{ form.email_prefeitura }}
+                  {{ form.email_prefeitura.errors }}
+                </div>
+                <div class="onboarding-field">
+                  <label for="{{ form.telefone_prefeitura.id_for_label }}">Telefone geral</label>
+                  {{ form.telefone_prefeitura }}
+                  {{ form.telefone_prefeitura.errors }}
+                </div>
+                <div class="onboarding-field">
+                  <label for="{{ form.site_prefeitura.id_for_label }}">Site</label>
+                  {{ form.site_prefeitura }}
+                  {{ form.site_prefeitura.errors }}
+                </div>
+              </div>
+            {% elif wizard_step == 4 %}
+              <div class="onboarding-grid onboarding-grid--3">
+                <div class="onboarding-field">
+                  <label for="{{ form.cep.id_for_label }}">CEP</label>
+                  {{ form.cep }}
+                  {{ form.cep.errors }}
+                </div>
+                <div class="onboarding-field">
+                  <label for="{{ form.logradouro.id_for_label }}">Rua/Avenida</label>
+                  {{ form.logradouro }}
+                  {{ form.logradouro.errors }}
+                </div>
+                <div class="onboarding-field">
+                  <label for="{{ form.numero.id_for_label }}">Número</label>
+                  {{ form.numero }}
+                  {{ form.numero.errors }}
+                </div>
+                <div class="onboarding-field">
+                  <label for="{{ form.complemento.id_for_label }}">Complemento</label>
+                  {{ form.complemento }}
+                  {{ form.complemento.errors }}
+                </div>
+                <div class="onboarding-field">
+                  <label for="{{ form.bairro.id_for_label }}">Bairro</label>
+                  {{ form.bairro }}
+                  {{ form.bairro.errors }}
+                </div>
+                <div class="onboarding-field">
+                  <label for="{{ form.cidade.id_for_label }}">Cidade</label>
+                  {{ form.cidade }}
+                  {{ form.cidade.errors }}
+                </div>
+                <div class="onboarding-field">
+                  <label for="{{ form.uf.id_for_label }}">UF</label>
+                  {{ form.uf }}
+                  {{ form.uf.errors }}
+                </div>
+                <div class="onboarding-field">
+                  <label for="{{ form.latitude.id_for_label }}">Latitude (opcional)</label>
+                  {{ form.latitude }}
+                  {{ form.latitude.errors }}
+                </div>
+                <div class="onboarding-field">
+                  <label for="{{ form.longitude.id_for_label }}">Longitude (opcional)</label>
+                  {{ form.longitude }}
+                  {{ form.longitude.errors }}
+                </div>
+              </div>
+            {% elif wizard_step == 5 %}
+              <div class="onboarding-note">Gestão, Educação e Saúde são obrigatórias e já serão ativadas automaticamente.</div>
+              <div class="onboarding-checkboxes">
+                <label class="onboarding-checkbox"><input type="checkbox" checked disabled><span>Secretaria de Gestão Municipal (obrigatória)</span></label>
+                <label class="onboarding-checkbox"><input type="checkbox" checked disabled><span>Secretaria de Educação (obrigatória)</span></label>
+                <label class="onboarding-checkbox"><input type="checkbox" checked disabled><span>Secretaria de Saúde (obrigatória)</span></label>
+                <label class="onboarding-checkbox">{{ form.secretaria_assistencia_social }}<span>Assistência Social</span></label>
+                <label class="onboarding-checkbox">{{ form.secretaria_financas }}<span>Finanças</span></label>
+                <label class="onboarding-checkbox">{{ form.secretaria_obras }}<span>Obras</span></label>
+                <label class="onboarding-checkbox">{{ form.secretaria_agricultura }}<span>Agricultura</span></label>
+                <label class="onboarding-checkbox">{{ form.secretaria_cultura }}<span>Cultura</span></label>
+                <label class="onboarding-checkbox">{{ form.secretaria_esporte }}<span>Esporte</span></label>
+                <label class="onboarding-checkbox">{{ form.secretaria_meio_ambiente }}<span>Meio Ambiente</span></label>
+                <label class="onboarding-checkbox">{{ form.secretaria_transporte }}<span>Transporte</span></label>
+              </div>
+              <div class="onboarding-field gp-mt-2">
+                <label for="{{ form.secretarias_personalizadas.id_for_label }}">Outras secretarias</label>
+                {{ form.secretarias_personalizadas }}
+                {{ form.secretarias_personalizadas.errors }}
+                <span class="helptext">Informe uma secretaria personalizada por linha.</span>
+              </div>
+            {% elif wizard_step == 6 %}
+              <div class="onboarding-note">
+                Não é necessário cadastrar unidades por secretaria nesta etapa.
+                Cadastre apenas escolas, unidades de saúde e setores de gestão.
+                Use 1 linha por item no formato <strong>Nome</strong>, <strong>Nome | Endereço</strong> ou <strong>Nome | TIPO | Endereço</strong>.
+              </div>
+              <div class="onboarding-field">
+                <label for="{{ form.escolas.id_for_label }}">Escolas (obrigatório)</label>
+                {{ form.escolas }}
+                {{ form.escolas.errors }}
+              </div>
+              <div class="onboarding-field gp-mt-2">
+                <label for="{{ form.unidades_saude.id_for_label }}">Unidades de Saúde (obrigatório)</label>
+                {{ form.unidades_saude }}
+                {{ form.unidades_saude.errors }}
+              </div>
+              <div class="onboarding-field gp-mt-2">
+                <label for="{{ form.setores_gestao.id_for_label }}">Setores iniciais da Gestão (obrigatório)</label>
+                {{ form.setores_gestao }}
+                {{ form.setores_gestao.errors }}
+              </div>
+            {% elif wizard_step == 7 %}
+              <div class="onboarding-grid">
+                <div class="onboarding-field"><label for="{{ form.gestao_nome.id_for_label }}">Gestão - Nome</label>{{ form.gestao_nome }}{{ form.gestao_nome.errors }}</div>
+                <div class="onboarding-field"><label for="{{ form.gestao_cpf.id_for_label }}">Gestão - CPF</label>{{ form.gestao_cpf }}{{ form.gestao_cpf.errors }}</div>
+                <div class="onboarding-field"><label for="{{ form.gestao_email.id_for_label }}">Gestão - E-mail</label>{{ form.gestao_email }}{{ form.gestao_email.errors }}</div>
+                <div class="onboarding-field"><label for="{{ form.gestao_telefone.id_for_label }}">Gestão - Telefone</label>{{ form.gestao_telefone }}{{ form.gestao_telefone.errors }}</div>
+
+                <div class="onboarding-field"><label for="{{ form.educacao_nome.id_for_label }}">Educação - Nome</label>{{ form.educacao_nome }}{{ form.educacao_nome.errors }}</div>
+                <div class="onboarding-field"><label for="{{ form.educacao_cpf.id_for_label }}">Educação - CPF</label>{{ form.educacao_cpf }}{{ form.educacao_cpf.errors }}</div>
+                <div class="onboarding-field"><label for="{{ form.educacao_email.id_for_label }}">Educação - E-mail</label>{{ form.educacao_email }}{{ form.educacao_email.errors }}</div>
+                <div class="onboarding-field"><label for="{{ form.educacao_telefone.id_for_label }}">Educação - Telefone</label>{{ form.educacao_telefone }}{{ form.educacao_telefone.errors }}</div>
+
+                <div class="onboarding-field"><label for="{{ form.saude_nome.id_for_label }}">Saúde - Nome</label>{{ form.saude_nome }}{{ form.saude_nome.errors }}</div>
+                <div class="onboarding-field"><label for="{{ form.saude_cpf.id_for_label }}">Saúde - CPF</label>{{ form.saude_cpf }}{{ form.saude_cpf.errors }}</div>
+                <div class="onboarding-field"><label for="{{ form.saude_email.id_for_label }}">Saúde - E-mail</label>{{ form.saude_email }}{{ form.saude_email.errors }}</div>
+                <div class="onboarding-field"><label for="{{ form.saude_telefone.id_for_label }}">Saúde - Telefone</label>{{ form.saude_telefone }}{{ form.saude_telefone.errors }}</div>
+              </div>
+            {% elif wizard_step == 8 %}
+              <div class="onboarding-note">
+                Alguns recursos funcionam em conjunto: <strong>NEE</strong> depende dos fluxos de
+                Educação e Saúde para acompanhamento integrado.
+              </div>
+              <div class="onboarding-checkboxes">
+                <label class="onboarding-checkbox"><input type="checkbox" checked disabled><span>Ativar módulo Educação (obrigatório)</span></label>
+                <label class="onboarding-checkbox"><input type="checkbox" checked disabled><span>Ativar módulo Saúde (obrigatório)</span></label>
+                <label class="onboarding-checkbox">{{ form.ativar_nee }}<span>Ativar módulo NEE (recomendado)</span></label>
+                <label class="onboarding-checkbox">{{ form.configurar_smtp }}<span>Configurar SMTP agora</span></label>
+                <label class="onboarding-checkbox">{{ form.configurar_whatsapp }}<span>Configurar WhatsApp agora</span></label>
+                <label class="onboarding-checkbox">{{ form.configurar_sms }}<span>Configurar SMS agora</span></label>
+              </div>
+              <div class="onboarding-field gp-mt-2">
+                <label for="{{ form.ano_letivo_atual.id_for_label }}">Ano letivo atual</label>
+                {{ form.ano_letivo_atual }}
+                {{ form.ano_letivo_atual.errors }}
+              </div>
+            {% else %}
+              <div class="onboarding-summary">
+                <div class="onboarding-summary__card">
+                  <p class="onboarding-summary__title">Prefeitura</p>
+                  <p class="onboarding-summary__item">{{ resumo_steps.municipio.municipio_nome|default:"-" }} / {{ resumo_steps.municipio.uf|default:"-" }}</p>
+                  <p class="onboarding-summary__item">CNPJ: {{ resumo_steps.municipio.cnpj_prefeitura|default:"-" }}</p>
+                  <p class="onboarding-summary__item">E-mail: {{ resumo_steps.municipio.email_prefeitura|default:"-" }}</p>
+                </div>
+                <div class="onboarding-summary__card">
+                  <p class="onboarding-summary__title">Secretarias e módulos</p>
+                  <p class="onboarding-summary__item">Ativas: {{ resumo_steps.secretarias.secretarias_ativas|length|default:3 }}</p>
+                  <p class="onboarding-summary__item">NEE: {% if resumo_steps.modulos.ativar_nee %}Ativo{% else %}Inativo{% endif %}</p>
+                  <p class="onboarding-summary__item">Ano letivo: {{ resumo_steps.modulos.ano_letivo_atual|default:"-" }}</p>
+                </div>
+                <div class="onboarding-summary__card">
+                  <p class="onboarding-summary__title">Credenciais iniciais</p>
+                  {% if credenciais_iniciais %}
+                    <table class="credentials-table">
+                      <thead>
+                        <tr>
+                          <th>Nome</th>
+                          <th>Código</th>
+                          <th>Usuário</th>
+                          <th>Senha temporária</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for c in credenciais_iniciais %}
+                          <tr>
+                            <td>{{ c.nome }}</td>
+                            <td>{{ c.codigo_acesso|default:"-" }}</td>
+                            <td>{{ c.username }}</td>
+                            <td>{% if c.senha_temporaria %}{{ c.senha_temporaria }}{% else %}usuário existente{% endif %}</td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  {% else %}
+                    <p class="onboarding-summary__item">Nenhuma credencial gerada nesta sessão.</p>
+                  {% endif %}
+                </div>
+                <div class="onboarding-field">
+                  <label for="{{ form.confirmar.id_for_label }}">{{ form.confirmar }} Confirmo que os dados estão corretos.</label>
+                  {{ form.confirmar.errors }}
+                </div>
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="onboarding-actions">
+            <div class="onboarding-actions__left">
+              {% if can_go_back %}
+                <a class="gp-button gp-button--outline gp-button--back" href="{% url 'org:onboarding_wizard_step' back_step %}">Voltar</a>
+              {% endif %}
+            </div>
+            <div class="onboarding-actions__right">
+              <button type="submit" name="action" value="save_exit" class="gp-button gp-button--outline">Salvar e sair</button>
+              <button type="submit" name="action" value="continue" class="gp-button gp-button--primary">
+                {% if wizard_step == wizard_total_steps %}Concluir implantação e entrar{% else %}Salvar e continuar{% endif %}
+              </button>
+            </div>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      function getCookie(name) {
+        const cookieValue = document.cookie
+          .split(';')
+          .map((v) => v.trim())
+          .find((v) => v.startsWith(name + '='));
+        return cookieValue ? decodeURIComponent(cookieValue.split('=')[1]) : '';
+      }
+
+      const form = document.querySelector('.onboarding-form');
+      if (!form) return;
+
+      let timer = null;
+      const step = "{{ wizard_step }}";
+      const endpoint = "{% url 'org:onboarding_wizard_autosave' %}";
+      const csrftoken = getCookie('csrftoken');
+
+      const skipNames = new Set(['csrfmiddlewaretoken', 'action']);
+
+      function scheduleAutosave() {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(runAutosave, 900);
+      }
+
+      function runAutosave() {
+        const data = new FormData();
+        data.append('step', step);
+
+        Array.from(form.elements).forEach((el) => {
+          if (!el.name || skipNames.has(el.name) || el.disabled) return;
+          if (el.type === 'checkbox' || el.type === 'radio') {
+            data.append(el.name, el.checked ? '1' : '0');
+            return;
+          }
+          data.append(el.name, el.value || '');
+        });
+
+        fetch(endpoint, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': csrftoken },
+          body: data,
+          credentials: 'same-origin',
+        }).catch(function () {});
+      }
+
+      form.addEventListener('input', scheduleAutosave, { passive: true });
+      form.addEventListener('change', scheduleAutosave, { passive: true });
+    })();
+  </script>
+</body>
+</html>

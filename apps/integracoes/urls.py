@@ -8,4 +8,5 @@ urlpatterns = [
     path("", views.index, name="index"),
     path("conectores/novo/", views.conector_create, name="conector_create"),
     path("execucoes/nova/", views.execucao_create, name="execucao_create"),
+    path("execucoes/<int:pk>/reprocessar/", views.execucao_reprocessar, name="execucao_reprocessar"),
 ]

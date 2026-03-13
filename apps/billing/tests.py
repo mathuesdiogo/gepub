@@ -17,7 +17,7 @@ class BillingServicesTests(TestCase):
         self.assertIsNotNone(assinatura)
         self.assertEqual(assinatura.plano.codigo, PlanoMunicipal.Codigo.STARTER)
 
-    def test_verificar_limite_secretarias_excedido(self):
+    def test_verificar_limite_secretarias_sem_teto_por_plano(self):
         assinatura = get_assinatura_ativa(self.municipio)
         self.assertIsNotNone(assinatura)
 
@@ -25,10 +25,11 @@ class BillingServicesTests(TestCase):
             Secretaria.objects.create(municipio=self.municipio, nome=f"Secretaria {i+1}", sigla=f"S{i+1}")
 
         resultado = verificar_limite_municipio(self.municipio, MetricaLimite.SECRETARIAS, incremento=1)
-        self.assertFalse(resultado.permitido)
-        self.assertEqual(resultado.excedente, 1)
+        self.assertTrue(resultado.permitido)
+        self.assertEqual(resultado.limite, None)
+        self.assertEqual(resultado.excedente, 0)
 
-    def test_verificar_limite_usuarios_excedido(self):
+    def test_verificar_limite_usuarios_sem_teto_no_modelo_atual(self):
         assinatura = get_assinatura_ativa(self.municipio)
         self.assertIsNotNone(assinatura)
 
@@ -43,8 +44,9 @@ class BillingServicesTests(TestCase):
             profile.save()
 
         resultado = verificar_limite_municipio(self.municipio, MetricaLimite.USUARIOS, incremento=1)
-        self.assertFalse(resultado.permitido)
-        self.assertEqual(resultado.excedente, 1)
+        self.assertTrue(resultado.permitido)
+        self.assertIsNone(resultado.limite)
+        self.assertEqual(resultado.excedente, 0)
 
     def test_simulador_recomenda_municipal(self):
         resultado = simular_plano(secretarias=7, usuarios=120, alunos=4500, atendimentos=25000)

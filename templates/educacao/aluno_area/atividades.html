@@ -1,0 +1,52 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Atividades Estudantis • {{ aluno.nome }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <article class="gp-student-stage__card">
+    <h3>Eventos</h3>
+    <ul class="gp-student-list">
+      {% for ev in eventos %}
+        <li class="gp-student-list__item">
+          <strong>{{ ev.titulo }}</strong>
+          <p>{{ ev.get_tipo_display }} • {{ ev.data_inicio|date:"d/m/Y" }}{% if ev.data_fim and ev.data_fim != ev.data_inicio %} até {{ ev.data_fim|date:"d/m/Y" }}{% endif %}</p>
+          <form method="post" class="gp-inline-form gp-mt-2">
+            {% csrf_token %}
+            <input type="hidden" name="form_kind" value="evento_inscricao">
+            <input type="hidden" name="evento_titulo" value="{{ ev.titulo }}">
+            <button type="submit" class="gp-button gp-button--outline">Inscrever-se / confirmar presença</button>
+          </form>
+        </li>
+      {% empty %}
+        <li class="gp-student-empty">Nenhum evento disponível.</li>
+      {% endfor %}
+    </ul>
+  </article>
+
+  <div class="gp-grid-2 gp-student-stage__grid">
+    <article class="gp-student-stage__card">
+      <h3>Programas e Benefícios</h3>
+      <ul class="gp-student-data-list">
+        {% for p in programas %}
+          <li><strong>{{ p.campanha.nome }}</strong> • {{ p.campanha.beneficio.nome }} • {{ p.get_status_display }}</li>
+        {% empty %}
+          <li>Sem programas vinculados.</li>
+        {% endfor %}
+      </ul>
+    </article>
+
+    <article class="gp-student-stage__card">
+      <h3>Doações / Entregas</h3>
+      <ul class="gp-student-data-list">
+        {% for e in entregas %}
+          <li><strong>{{ e.beneficio.nome }}</strong> • {{ e.get_status_display }} • {{ e.data_hora|date:"d/m/Y H:i" }}</li>
+        {% empty %}
+          <li>Nenhuma entrega registrada.</li>
+        {% endfor %}
+      </ul>
+    </article>
+  </div>
+</section>
+{% endblock %}

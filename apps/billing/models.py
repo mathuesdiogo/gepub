@@ -12,7 +12,7 @@ class PlanoMunicipal(models.Model):
         STARTER = "STARTER", "Starter"
         MUNICIPAL = "MUNICIPAL", "Municipal"
         GESTAO_TOTAL = "GESTAO_TOTAL", "Gestão Total"
-        CONSORCIO = "CONSORCIO", "Consórcio/Estado"
+        CONSORCIO = "CONSORCIO", "Governo Completo"
 
     codigo = models.CharField(max_length=30, choices=Codigo.choices, unique=True)
     nome = models.CharField(max_length=120)
@@ -48,6 +48,33 @@ class PlanoMunicipal(models.Model):
 
     def __str__(self) -> str:
         return f"{self.nome} (R$ {self.preco_base_mensal})"
+
+
+class PlanoComercialConfig(models.Model):
+    plano = models.OneToOneField(
+        PlanoMunicipal,
+        on_delete=models.CASCADE,
+        related_name="comercial_config",
+    )
+    nome_comercial = models.CharField(max_length=120, blank=True, default="")
+    categoria = models.CharField(max_length=60, blank=True, default="")
+    descricao_comercial = models.TextField(blank=True, default="")
+    beneficios = models.JSONField(default=list, blank=True)
+    especiais = models.JSONField(default=list, blank=True)
+    limitacoes = models.JSONField(default=list, blank=True)
+    dependencias = models.JSONField(default=list, blank=True)
+    link_documento_contratacao = models.CharField(max_length=240, blank=True, default="")
+    link_documento_servicos = models.CharField(max_length=240, blank=True, default="")
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Configuração comercial do plano"
+        verbose_name_plural = "Configurações comerciais dos planos"
+        ordering = ["plano__preco_base_mensal", "plano__nome"]
+
+    def __str__(self) -> str:
+        return self.nome_comercial or f"Comercial • {self.plano.nome}"
 
 
 class AddonCatalogo(models.Model):

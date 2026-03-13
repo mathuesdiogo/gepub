@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 
 from apps.core.exports import export_pdf_table
-from apps.core.rbac import can, scope_filter_turmas
+from apps.core.rbac import can, is_professor_profile_role, scope_filter_turmas
 from apps.core.views_gepub import BaseListViewGepub
 
 from .models import Turma
@@ -13,7 +13,7 @@ from .models_diario import DiarioTurma, Avaliacao
 
 
 def _is_professor(user) -> bool:
-    return getattr(getattr(user, "profile", None), "role", "") == "PROFESSOR"
+    return is_professor_profile_role(getattr(getattr(user, "profile", None), "role", None))
 
 
 def _can_edit_diario(user, diario: DiarioTurma) -> bool:
@@ -144,4 +144,3 @@ class AvaliacaoListView(BaseListViewGepub):
                 "edit_url": "",
             })
         return rows
-

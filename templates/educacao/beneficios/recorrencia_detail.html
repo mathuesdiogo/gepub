@@ -1,0 +1,49 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Recorrência #{{ obj.pk }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="gp-card"><div class="gp-card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="gp-pills">
+    <span class="gp-pills__item">Aluno: {{ obj.aluno.nome }}</span>
+    <span class="gp-pills__item">{{ obj.beneficio.nome }}</span>
+    <span class="gp-pills__item">{{ obj.get_frequencia_display }}</span>
+    <span class="gp-pills__item">{{ obj.get_status_display }}</span>
+  </div>
+
+  {% if can_manage %}
+  <form class="gp-form" method="post" action="{% url 'educacao:beneficio_recorrencia_gerar_ciclos' obj.pk %}?municipio={{ municipio.id }}">
+    {% csrf_token %}
+    <button class="gp-button gp-button--primary" type="submit">Gerar ciclos</button>
+    <button class="gp-button gp-button--outline" type="submit" name="force" value="1">Regenerar ciclos</button>
+  </form>
+  {% endif %}
+
+  <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__body">
+    <table class="gp-table__native">
+      <thead><tr><th>Ciclo</th><th>Data prevista</th><th>Status</th><th>Entrega</th><th></th></tr></thead>
+      <tbody>
+      {% for c in ciclos %}
+      <tr>
+        <td>{{ c.numero }}</td>
+        <td>{{ c.data_prevista|date:"d/m/Y" }}</td>
+        <td>{{ c.get_status_display }}</td>
+        <td>{% if c.entrega_id %}<a href="{% url 'educacao:beneficio_entrega_detail' c.entrega_id %}?municipio={{ municipio.id }}">#{{ c.entrega_id }}</a>{% else %}—{% endif %}</td>
+        <td>
+          {% if can_manage and not c.entrega_id %}
+          <form class="gp-form" method="post" action="{% url 'educacao:beneficio_recorrencia_executar_ciclo' obj.pk c.pk %}?municipio={{ municipio.id }}">
+            {% csrf_token %}
+            <button class="gp-button gp-button--primary gp-button--sm" type="submit">Gerar entrega</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5">Sem ciclos gerados.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

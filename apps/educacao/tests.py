@@ -4,10 +4,13 @@ from django.urls import reverse
 from datetime import date, time, timedelta
 from decimal import Decimal
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.exceptions import ValidationError
 
 from django.contrib.auth import get_user_model
 
 from apps.accounts.models import Profile
+from apps.almoxarifado.models import AlmoxarifadoCadastro
+from apps.core.models import AuditoriaEvento
 from apps.educacao.forms_horarios import AulaHorarioForm
 from apps.educacao.forms_diario import AulaForm
 from apps.educacao.models import (
@@ -17,19 +20,63 @@ from apps.educacao.models import (
     CoordenacaoEnsino,
     Curso,
     CursoDisciplina,
+    MatrizComponente,
+    MatrizComponenteEquivalenciaGrupo,
+    MatrizComponenteEquivalenciaItem,
+    MatrizComponenteRelacao,
+    MatrizCurricular,
     Matricula,
     MatriculaCurso,
     MatriculaMovimentacao,
+    Estagio,
     Turma,
 )
 from apps.educacao.models_horarios import GradeHorario, AulaHorario
 from apps.educacao.models_notas import BNCCCodigo, ComponenteCurricular
-from apps.educacao.models_diario import Aula, Avaliacao, DiarioTurma, Frequencia, Nota
+from apps.educacao.models_diario import (
+    Aula,
+    Avaliacao,
+    DiarioTurma,
+    Frequencia,
+    JustificativaFaltaPedido,
+    MaterialAulaProfessor,
+    Nota,
+    PlanoEnsinoProfessor,
+)
 from apps.educacao.models_periodos import FechamentoPeriodoTurma, PeriodoLetivo
 from apps.educacao.models_assistencia import CardapioEscolar, RegistroRefeicaoEscolar, RegistroTransporteEscolar, RotaTransporteEscolar
 from apps.educacao.models_calendario import CalendarioEducacionalEvento
+from apps.educacao.models_beneficios import (
+    BeneficioEdital,
+    BeneficioEditalCriterio,
+    BeneficioEditalDocumento,
+    BeneficioEditalInscricao,
+    BeneficioEntrega,
+    BeneficioEntregaItem,
+    BeneficioTipo,
+    BeneficioTipoItem,
+)
+from apps.educacao.models_informatica import (
+    InformaticaCurso,
+    InformaticaEncontroSemanal,
+    InformaticaGradeHorario,
+    InformaticaLaboratorio,
+    InformaticaMatricula,
+    InformaticaMatriculaMovimentacao,
+    InformaticaTurma,
+)
 from apps.educacao.services_matricula import registrar_movimentacao
+from apps.educacao.services_requisitos import (
+    avaliar_requisitos_matricula,
+    registrar_override_requisitos_matricula,
+)
+from apps.educacao.services_turma_setup import (
+    clonar_matriz_para_ano,
+    preencher_componentes_base_matriz,
+)
 from apps.org.models import Municipio, Secretaria, Unidade
+from apps.processos.models import ProcessoAdministrativo
+from apps.ouvidoria.models import OuvidoriaCadastro
 
 
 class AlunoCPFSecurityTestCase(TestCase):
@@ -56,6 +103,484 @@ class EducacaoRoutesSmokeTestCase(TestCase):
         self.assertIn("/diario/1/frequencia/2/", reverse("educacao:aula_frequencia", args=[1, 2]))
         self.assertIn("/horarios/turma/1/", reverse("educacao:horario_turma", args=[1]))
         self.assertIn("/api/turmas/1/alunos-suggest/", reverse("educacao:api_alunos_turma_suggest", args=[1]))
+        self.assertIn("/professor/prof1/agenda-avaliacoes/", reverse("educacao:professor_agenda_avaliacoes", args=["prof1"]))
+        self.assertIn("/professor/prof1/planos-ensino/", reverse("educacao:professor_planos_ensino", args=["prof1"]))
+        self.assertIn("/professor/prof1/materiais/", reverse("educacao:professor_materiais", args=["prof1"]))
+        self.assertIn("/informatica/grades/", reverse("educacao:informatica_grade_list"))
+        self.assertIn("/informatica/professor/agenda/", reverse("educacao:informatica_professor_agenda"))
+        self.assertIn("/informatica/alunos/novo/", reverse("educacao:informatica_aluno_create"))
+        self.assertIn("/informatica/api/aluno/1/origem/", reverse("educacao:informatica_api_aluno_origem", args=[1]))
+        self.assertIn("/informatica/matriculas/1/remanejar/", reverse("educacao:informatica_matricula_remanejar", args=[1]))
+
+
+class InformaticaGradeTurmaRulesTestCase(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.prof = User.objects.create_user(username="prof_informatica", password="123456")
+        self.municipio = Municipio.objects.create(nome="Cidade Info", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="SME")
+        self.unidade = Unidade.objects.create(secretaria=self.secretaria, nome="Escola Lab", tipo=Unidade.Tipo.EDUCACAO)
+        self.curso = InformaticaCurso.objects.create(
+            municipio=self.municipio,
+            nome="Informática Básica",
+            aulas_por_semana=2,
+            duracao_bloco_minutos=60,
+            minutos_aula_efetiva=45,
+            minutos_intervalo_tecnico=15,
+            max_alunos_por_turma=12,
+        )
+        self.lab = InformaticaLaboratorio.objects.create(
+            nome="Lab 01",
+            unidade=self.unidade,
+            quantidade_computadores=12,
+            capacidade_operacional=12,
+            status=InformaticaLaboratorio.Status.ATIVO,
+        )
+
+    def test_grade_especial_deve_ser_sexta(self):
+        grade = InformaticaGradeHorario(
+            nome="Sexta Especial",
+            codigo="SEXTA-01",
+            tipo_grade=InformaticaGradeHorario.TipoGrade.ESPECIAL_SEXTA,
+            laboratorio=self.lab,
+            turno=InformaticaGradeHorario.Turno.MANHA,
+            dia_semana_1=InformaticaGradeHorario.DiaSemana.QUARTA,
+            dia_semana_2=None,
+            hora_inicio=time(8, 0),
+            hora_fim=time(10, 0),
+            duracao_total_minutos=120,
+            duracao_aula_minutos=90,
+            duracao_intervalo_minutos=30,
+            capacidade_maxima=12,
+            status=InformaticaGradeHorario.Status.ATIVA,
+        )
+        with self.assertRaises(ValidationError):
+            grade.full_clean()
+
+    def test_nao_permite_conflito_grade_mesmo_laboratorio(self):
+        InformaticaGradeHorario.objects.create(
+            nome="Grade Base",
+            codigo="BASE-01",
+            tipo_grade=InformaticaGradeHorario.TipoGrade.PADRAO_SEMANAL,
+            laboratorio=self.lab,
+            turno=InformaticaGradeHorario.Turno.MANHA,
+            dia_semana_1=InformaticaGradeHorario.DiaSemana.SEGUNDA,
+            dia_semana_2=InformaticaGradeHorario.DiaSemana.QUARTA,
+            hora_inicio=time(8, 0),
+            hora_fim=time(9, 0),
+            duracao_total_minutos=60,
+            duracao_aula_minutos=45,
+            duracao_intervalo_minutos=15,
+            capacidade_maxima=12,
+            status=InformaticaGradeHorario.Status.ATIVA,
+        )
+
+        grade_conflito = InformaticaGradeHorario(
+            nome="Grade Conflito",
+            codigo="BASE-02",
+            tipo_grade=InformaticaGradeHorario.TipoGrade.PADRAO_SEMANAL,
+            laboratorio=self.lab,
+            turno=InformaticaGradeHorario.Turno.MANHA,
+            dia_semana_1=InformaticaGradeHorario.DiaSemana.SEGUNDA,
+            dia_semana_2=InformaticaGradeHorario.DiaSemana.QUINTA,
+            hora_inicio=time(8, 30),
+            hora_fim=time(9, 30),
+            duracao_total_minutos=60,
+            duracao_aula_minutos=45,
+            duracao_intervalo_minutos=15,
+            capacidade_maxima=12,
+            status=InformaticaGradeHorario.Status.ATIVA,
+        )
+        with self.assertRaises(ValidationError):
+            grade_conflito.full_clean()
+
+    def test_turma_herda_modalidade_e_carga_da_grade(self):
+        grade_sexta = InformaticaGradeHorario.objects.create(
+            nome="Sexta Especial",
+            codigo="SEXTA-02",
+            tipo_grade=InformaticaGradeHorario.TipoGrade.ESPECIAL_SEXTA,
+            laboratorio=self.lab,
+            turno=InformaticaGradeHorario.Turno.TARDE,
+            dia_semana_1=InformaticaGradeHorario.DiaSemana.SEXTA,
+            dia_semana_2=None,
+            hora_inicio=time(14, 0),
+            hora_fim=time(16, 0),
+            duracao_total_minutos=120,
+            duracao_aula_minutos=90,
+            duracao_intervalo_minutos=30,
+            capacidade_maxima=12,
+            status=InformaticaGradeHorario.Status.ATIVA,
+            professor_principal=self.prof,
+        )
+
+        turma = InformaticaTurma(
+            curso=self.curso,
+            grade_horario=grade_sexta,
+            laboratorio=self.lab,
+            codigo="INF-SEXTA-A",
+            instrutor=self.prof,
+            ano_letivo=2026,
+            max_vagas=12,
+            status=InformaticaTurma.Status.ATIVA,
+        )
+        turma.full_clean()
+        turma.save()
+        turma.refresh_from_db()
+
+        self.assertEqual(turma.turno, grade_sexta.turno)
+        self.assertEqual(turma.modalidade_oferta, InformaticaGradeHorario.TipoGrade.ESPECIAL_SEXTA)
+        self.assertTrue(turma.encontro_unico_semana)
+        self.assertEqual(turma.carga_horaria_semanal_minutos, 120)
+
+
+class InformaticaMatriculaProfessorFlowTestCase(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.admin = User.objects.create_superuser(
+            username="admin_info_flow",
+            email="admin.info.flow@example.com",
+            password="123456",
+        )
+        self.prof = User.objects.create_user(username="prof_info_flow", password="123456")
+        prof_profile, _ = Profile.objects.get_or_create(user=self.prof, defaults={"ativo": True})
+        prof_profile.role = Profile.Role.EDU_PROF
+        prof_profile.must_change_password = False
+        prof_profile.save(update_fields=["role", "must_change_password"])
+        self.prof_sem_turma = User.objects.create_user(username="prof_sem_turma_flow", password="123456")
+        prof_sem_turma_profile, _ = Profile.objects.get_or_create(user=self.prof_sem_turma, defaults={"ativo": True})
+        prof_sem_turma_profile.role = Profile.Role.EDU_PROF
+        prof_sem_turma_profile.must_change_password = False
+        prof_sem_turma_profile.save(update_fields=["role", "must_change_password"])
+
+        self.municipio = Municipio.objects.create(nome="Cidade Fluxo", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="SME Fluxo")
+        self.unidade_origem = Unidade.objects.create(
+            secretaria=self.secretaria,
+            nome="Escola Origem Fluxo",
+            tipo=Unidade.Tipo.EDUCACAO,
+        )
+        self.unidade_lab = Unidade.objects.create(
+            secretaria=self.secretaria,
+            nome="Escola Lab Fluxo",
+            tipo=Unidade.Tipo.EDUCACAO,
+        )
+
+        self.aluno = Aluno.objects.create(nome="Aluno Fluxo")
+        turma_regular = Turma.objects.create(
+            unidade=self.unidade_origem,
+            nome="5A Fluxo",
+            ano_letivo=2026,
+            turno=Turma.Turno.MANHA,
+        )
+        Matricula.objects.create(
+            aluno=self.aluno,
+            turma=turma_regular,
+            data_matricula=date(2026, 3, 10),
+            situacao=Matricula.Situacao.ATIVA,
+        )
+
+        self.curso = InformaticaCurso.objects.create(
+            municipio=self.municipio,
+            nome="Informática Fluxo",
+            aulas_por_semana=2,
+            duracao_bloco_minutos=60,
+            minutos_aula_efetiva=45,
+            minutos_intervalo_tecnico=15,
+            max_alunos_por_turma=12,
+        )
+        self.laboratorio = InformaticaLaboratorio.objects.create(
+            nome="Lab Fluxo",
+            unidade=self.unidade_lab,
+            quantidade_computadores=12,
+            capacidade_operacional=12,
+            status=InformaticaLaboratorio.Status.ATIVO,
+        )
+        self.grade = InformaticaGradeHorario.objects.create(
+            nome="Grade Fluxo",
+            codigo="GRD-FLX-01",
+            tipo_grade=InformaticaGradeHorario.TipoGrade.PADRAO_SEMANAL,
+            laboratorio=self.laboratorio,
+            turno=InformaticaGradeHorario.Turno.MANHA,
+            dia_semana_1=InformaticaGradeHorario.DiaSemana.SEGUNDA,
+            dia_semana_2=InformaticaGradeHorario.DiaSemana.QUARTA,
+            hora_inicio=time(8, 0),
+            hora_fim=time(9, 0),
+            duracao_total_minutos=60,
+            duracao_aula_minutos=45,
+            duracao_intervalo_minutos=15,
+            capacidade_maxima=12,
+            status=InformaticaGradeHorario.Status.ATIVA,
+            professor_principal=self.prof,
+        )
+        self.turma_info = InformaticaTurma.objects.create(
+            curso=self.curso,
+            grade_horario=self.grade,
+            laboratorio=self.laboratorio,
+            codigo="INF-FLX-01",
+            instrutor=self.prof,
+            ano_letivo=2026,
+            max_vagas=12,
+            status=InformaticaTurma.Status.ATIVA,
+        )
+        InformaticaEncontroSemanal.objects.create(
+            turma=self.turma_info,
+            grade_horario=self.grade,
+            dia_semana=InformaticaEncontroSemanal.DiaSemana.SEGUNDA,
+            hora_inicio=time(8, 0),
+            hora_fim=time(9, 0),
+            minutos_aula_efetiva=45,
+            minutos_intervalo_tecnico=15,
+            ativo=True,
+        )
+        InformaticaEncontroSemanal.objects.create(
+            turma=self.turma_info,
+            grade_horario=self.grade,
+            dia_semana=InformaticaEncontroSemanal.DiaSemana.QUARTA,
+            hora_inicio=time(8, 0),
+            hora_fim=time(9, 0),
+            minutos_aula_efetiva=45,
+            minutos_intervalo_tecnico=15,
+            ativo=True,
+        )
+
+    def test_matricula_autopreenche_origem_pelo_aluno(self):
+        from apps.educacao.forms_informatica import InformaticaMatriculaForm
+
+        form = InformaticaMatriculaForm(
+            data={
+                "aluno": str(self.aluno.id),
+                "escola_origem": "",
+                "turma": str(self.turma_info.id),
+                "status": InformaticaMatricula.Status.MATRICULADO,
+                "origem_indicacao": "",
+                "prioridade": "0",
+                "observacoes": "",
+            },
+            user=self.admin,
+        )
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["escola_origem"].id, self.unidade_origem.id)
+        self.assertIn("Escola de origem:", form.cleaned_data["origem_indicacao"])
+
+        matricula_info = form.save(commit=False)
+        matricula_info.curso = self.turma_info.curso
+        matricula_info.criado_por = self.admin
+        matricula_info.full_clean()
+        matricula_info.save()
+
+        self.assertEqual(matricula_info.escola_origem_id, self.unidade_origem.id)
+        self.assertIn("Escola de origem:", matricula_info.origem_indicacao)
+
+    def test_professor_consegue_abrir_fluxo_de_cadastro_e_matricula(self):
+        self.client.force_login(self.prof)
+        response_matricula = self.client.get(reverse("educacao:informatica_matricula_create"))
+        self.assertEqual(response_matricula.status_code, 200)
+
+        response_aluno = self.client.get(reverse("educacao:informatica_aluno_create"))
+        self.assertEqual(response_aluno.status_code, 200)
+
+    def test_professor_sem_turma_nao_acessa_fluxo_de_matricula(self):
+        self.client.force_login(self.prof_sem_turma)
+        response_matricula = self.client.get(reverse("educacao:informatica_matricula_create"))
+        self.assertEqual(response_matricula.status_code, 403)
+
+        response_aluno = self.client.get(reverse("educacao:informatica_aluno_create"))
+        self.assertEqual(response_aluno.status_code, 403)
+
+
+class InformaticaMatriculaRemanejamentoTestCase(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.coord = User.objects.create_user(username="coord_info_rem", password="123456")
+        coord_profile, _ = Profile.objects.get_or_create(user=self.coord, defaults={"ativo": True})
+        coord_profile.role = Profile.Role.EDU_COORD
+        coord_profile.must_change_password = False
+        coord_profile.save(update_fields=["role", "must_change_password"])
+
+        self.prof = User.objects.create_user(username="prof_info_rem", password="123456")
+        prof_profile, _ = Profile.objects.get_or_create(user=self.prof, defaults={"ativo": True})
+        prof_profile.role = Profile.Role.EDU_PROF
+        prof_profile.must_change_password = False
+        prof_profile.save(update_fields=["role", "must_change_password"])
+
+        self.municipio = Municipio.objects.create(nome="Cidade Remanejamento", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="SME Remanejamento")
+        self.unidade_origem = Unidade.objects.create(
+            secretaria=self.secretaria,
+            nome="Escola Origem Remanejamento",
+            tipo=Unidade.Tipo.EDUCACAO,
+        )
+        self.unidade_lab = Unidade.objects.create(
+            secretaria=self.secretaria,
+            nome="Escola Lab Remanejamento",
+            tipo=Unidade.Tipo.EDUCACAO,
+        )
+
+        coord_profile.unidade = self.unidade_lab
+        coord_profile.save(update_fields=["unidade"])
+
+        self.aluno = Aluno.objects.create(nome="Aluno Remanejamento")
+        turma_regular = Turma.objects.create(
+            unidade=self.unidade_origem,
+            nome="7A Rem",
+            ano_letivo=2026,
+            turno=Turma.Turno.MANHA,
+        )
+        Matricula.objects.create(
+            aluno=self.aluno,
+            turma=turma_regular,
+            data_matricula=date(2026, 3, 10),
+            situacao=Matricula.Situacao.ATIVA,
+        )
+
+        self.curso = InformaticaCurso.objects.create(
+            municipio=self.municipio,
+            nome="Informática Remanejamento",
+            aulas_por_semana=2,
+            duracao_bloco_minutos=60,
+            minutos_aula_efetiva=45,
+            minutos_intervalo_tecnico=15,
+            max_alunos_por_turma=12,
+        )
+        self.laboratorio = InformaticaLaboratorio.objects.create(
+            nome="Lab Rem",
+            unidade=self.unidade_lab,
+            quantidade_computadores=12,
+            capacidade_operacional=12,
+            status=InformaticaLaboratorio.Status.ATIVO,
+        )
+        self.grade_origem = InformaticaGradeHorario.objects.create(
+            nome="Grade Origem Rem",
+            codigo="GRD-REM-01",
+            tipo_grade=InformaticaGradeHorario.TipoGrade.PADRAO_SEMANAL,
+            laboratorio=self.laboratorio,
+            turno=InformaticaGradeHorario.Turno.MANHA,
+            dia_semana_1=InformaticaGradeHorario.DiaSemana.SEGUNDA,
+            dia_semana_2=InformaticaGradeHorario.DiaSemana.QUARTA,
+            hora_inicio=time(8, 0),
+            hora_fim=time(9, 0),
+            duracao_total_minutos=60,
+            duracao_aula_minutos=45,
+            duracao_intervalo_minutos=15,
+            capacidade_maxima=12,
+            status=InformaticaGradeHorario.Status.ATIVA,
+            professor_principal=self.prof,
+        )
+        self.grade_destino = InformaticaGradeHorario.objects.create(
+            nome="Grade Destino Rem",
+            codigo="GRD-REM-02",
+            tipo_grade=InformaticaGradeHorario.TipoGrade.PADRAO_SEMANAL,
+            laboratorio=self.laboratorio,
+            turno=InformaticaGradeHorario.Turno.TARDE,
+            dia_semana_1=InformaticaGradeHorario.DiaSemana.TERCA,
+            dia_semana_2=InformaticaGradeHorario.DiaSemana.QUINTA,
+            hora_inicio=time(14, 0),
+            hora_fim=time(15, 0),
+            duracao_total_minutos=60,
+            duracao_aula_minutos=45,
+            duracao_intervalo_minutos=15,
+            capacidade_maxima=12,
+            status=InformaticaGradeHorario.Status.ATIVA,
+            professor_principal=self.prof,
+        )
+        self.turma_origem = InformaticaTurma.objects.create(
+            curso=self.curso,
+            grade_horario=self.grade_origem,
+            laboratorio=self.laboratorio,
+            codigo="INF-REM-01",
+            instrutor=self.prof,
+            ano_letivo=2026,
+            max_vagas=12,
+            status=InformaticaTurma.Status.ATIVA,
+        )
+        self.turma_destino = InformaticaTurma.objects.create(
+            curso=self.curso,
+            grade_horario=self.grade_destino,
+            laboratorio=self.laboratorio,
+            codigo="INF-REM-02",
+            instrutor=self.prof,
+            ano_letivo=2026,
+            max_vagas=12,
+            status=InformaticaTurma.Status.ATIVA,
+        )
+
+        InformaticaEncontroSemanal.objects.create(
+            turma=self.turma_origem,
+            grade_horario=self.grade_origem,
+            dia_semana=InformaticaEncontroSemanal.DiaSemana.SEGUNDA,
+            hora_inicio=time(8, 0),
+            hora_fim=time(9, 0),
+            minutos_aula_efetiva=45,
+            minutos_intervalo_tecnico=15,
+            ativo=True,
+        )
+        InformaticaEncontroSemanal.objects.create(
+            turma=self.turma_origem,
+            grade_horario=self.grade_origem,
+            dia_semana=InformaticaEncontroSemanal.DiaSemana.QUARTA,
+            hora_inicio=time(8, 0),
+            hora_fim=time(9, 0),
+            minutos_aula_efetiva=45,
+            minutos_intervalo_tecnico=15,
+            ativo=True,
+        )
+        InformaticaEncontroSemanal.objects.create(
+            turma=self.turma_destino,
+            grade_horario=self.grade_destino,
+            dia_semana=InformaticaEncontroSemanal.DiaSemana.TERCA,
+            hora_inicio=time(14, 0),
+            hora_fim=time(15, 0),
+            minutos_aula_efetiva=45,
+            minutos_intervalo_tecnico=15,
+            ativo=True,
+        )
+        InformaticaEncontroSemanal.objects.create(
+            turma=self.turma_destino,
+            grade_horario=self.grade_destino,
+            dia_semana=InformaticaEncontroSemanal.DiaSemana.QUINTA,
+            hora_inicio=time(14, 0),
+            hora_fim=time(15, 0),
+            minutos_aula_efetiva=45,
+            minutos_intervalo_tecnico=15,
+            ativo=True,
+        )
+
+        self.matricula_info = InformaticaMatricula.objects.create(
+            aluno=self.aluno,
+            escola_origem=self.unidade_origem,
+            curso=self.curso,
+            turma=self.turma_origem,
+            status=InformaticaMatricula.Status.MATRICULADO,
+            origem_indicacao="Escola",
+            criado_por=self.coord,
+        )
+
+    def test_coordenador_remaneja_matricula_com_movimentacao(self):
+        self.client.force_login(self.coord)
+        response = self.client.post(
+            reverse("educacao:informatica_matricula_remanejar", args=[self.matricula_info.pk]),
+            {
+                "turma_destino": str(self.turma_destino.pk),
+                "motivo": "Ajuste pedagógico da turma.",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("educacao:informatica_matricula_list"))
+
+        self.matricula_info.refresh_from_db()
+        self.assertEqual(self.matricula_info.turma_id, self.turma_destino.id)
+
+        mov = InformaticaMatriculaMovimentacao.objects.get(matricula=self.matricula_info)
+        self.assertEqual(mov.tipo, InformaticaMatriculaMovimentacao.Tipo.REMANEJAMENTO)
+        self.assertEqual(mov.turma_origem_id, self.turma_origem.id)
+        self.assertEqual(mov.turma_destino_id, self.turma_destino.id)
+        self.assertEqual(mov.usuario_id, self.coord.id)
+        self.assertEqual(mov.status_novo, InformaticaMatricula.Status.MATRICULADO)
+
+    def test_professor_nao_pode_remanejar_matricula(self):
+        self.client.force_login(self.prof)
+        response = self.client.get(reverse("educacao:informatica_matricula_remanejar", args=[self.matricula_info.pk]))
+        self.assertEqual(response.status_code, 403)
 
 
 class MatriculaMovimentacaoTestCase(TestCase):
@@ -304,8 +829,462 @@ class FechamentoHistoricoTestCase(TestCase):
 
     def test_portal_aluno_get(self):
         resp = self.client.get(reverse("educacao:portal_aluno", args=[self.aluno.pk]))
+        self.assertEqual(resp.status_code, 302)
+        self.assertRedirects(resp, reverse("educacao:aluno_meus_dados", args=[self.aluno.pk]))
+        resp_follow = self.client.get(reverse("educacao:portal_aluno", args=[self.aluno.pk]), follow=True)
+        self.assertEqual(resp_follow.status_code, 200)
+        self.assertContains(resp_follow, "Meus dados acadêmicos detalhados")
+
+    def _create_aluno_profile_user(self, username: str = "aluno.santa2026"):
+        User = get_user_model()
+        aluno_user = User.objects.create_user(username=username, password="123456")
+        profile, _ = Profile.objects.get_or_create(user=aluno_user, defaults={"ativo": True})
+        profile.role = Profile.Role.ALUNO
+        profile.aluno = self.aluno
+        profile.municipio = self.turma.unidade.secretaria.municipio
+        profile.must_change_password = False
+        if not profile.codigo_acesso:
+            profile.codigo_acesso = username
+        profile.save()
+        return aluno_user, profile
+
+    def _create_professor_profile_user(self, username: str = "prof.area"):
+        User = get_user_model()
+        prof_user = User.objects.create_user(username=username, password="123456")
+        profile, _ = Profile.objects.get_or_create(user=prof_user, defaults={"ativo": True})
+        profile.role = Profile.Role.EDU_PROF
+        profile.municipio = self.turma.unidade.secretaria.municipio
+        profile.secretaria = self.turma.unidade.secretaria
+        profile.unidade = self.turma.unidade
+        profile.must_change_password = False
+        profile.codigo_acesso = username
+        profile.save()
+        return prof_user, profile
+
+    def test_aluno_role_can_access_meus_dados(self):
+        aluno_user, profile = self._create_aluno_profile_user("aluno.santa2026")
+
+        self.client.force_login(aluno_user)
+        resp = self.client.get(reverse("educacao:aluno_meus_dados", args=[profile.codigo_acesso]))
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, "Portal do Aluno")
+        self.assertContains(resp, self.aluno.nome)
+        self.assertContains(resp, self.turma.nome)
+
+    def test_aluno_role_can_access_area_routes(self):
+        aluno_user, profile = self._create_aluno_profile_user("aluno.rotas")
+        self.client.force_login(aluno_user)
+        routes = [
+            "aluno_documentos_processos",
+            "aluno_ensino",
+            "aluno_ensino_dados",
+            "aluno_ensino_justificativa",
+            "aluno_ensino_boletins",
+            "aluno_ensino_avaliacoes",
+            "aluno_ensino_disciplinas",
+            "aluno_ensino_horarios",
+            "aluno_ensino_mensagens",
+            "aluno_ensino_biblioteca",
+            "aluno_ensino_apoio",
+            "aluno_ensino_seletivos",
+            "aluno_pesquisa",
+            "aluno_central_servicos",
+            "aluno_atividades",
+            "aluno_saude",
+            "aluno_comunicacao",
+        ]
+        for route_name in routes:
+            with self.subTest(route=route_name):
+                resp = self.client.get(reverse(f"educacao:{route_name}", args=[profile.codigo_acesso]), follow=True)
+                self.assertEqual(resp.status_code, 200)
+
+    def test_professor_area_routes_get(self):
+        prof_user, profile = self._create_professor_profile_user("prof.rotas")
+        self.diario.professor = prof_user
+        self.diario.save(update_fields=["professor"])
+        self.turma.professores.add(prof_user)
+
+        self.client.force_login(prof_user)
+        routes = [
+            "professor_inicio",
+            "professor_diarios",
+            "professor_aulas",
+            "professor_frequencias",
+            "professor_notas",
+            "professor_agenda_avaliacoes",
+            "professor_horarios",
+            "professor_planos_ensino",
+            "professor_materiais",
+            "professor_justificativas",
+            "professor_fechamento",
+        ]
+        for route_name in routes:
+            with self.subTest(route=route_name):
+                resp = self.client.get(reverse(f"educacao:{route_name}", args=[profile.codigo_acesso]))
+                self.assertEqual(resp.status_code, 200)
+
+    def test_professor_plano_ensino_submit_and_cancel(self):
+        prof_user, profile = self._create_professor_profile_user("prof.plano")
+        self.diario.professor = prof_user
+        self.diario.save(update_fields=["professor"])
+        self.turma.professores.add(prof_user)
+
+        self.client.force_login(prof_user)
+        url = reverse("educacao:professor_plano_ensino_editar", args=[profile.codigo_acesso, self.diario.pk])
+
+        resp_submit = self.client.post(
+            url,
+            data={
+                "titulo": "Plano anual 5A",
+                "ementa": "Conteúdo anual",
+                "objetivos": "Objetivos pedagógicos",
+                "metodologia": "Metodologias ativas",
+                "criterios_avaliacao": "Provas e atividades",
+                "cronograma": "Março a dezembro",
+                "referencias": "BNCC e diretrizes municipais",
+                "action": "submit",
+            },
+            follow=True,
+        )
+        self.assertEqual(resp_submit.status_code, 200)
+        plano = PlanoEnsinoProfessor.objects.get(diario=self.diario, professor=prof_user)
+        self.assertEqual(plano.status, PlanoEnsinoProfessor.Status.SUBMETIDO)
+        self.assertIsNotNone(plano.submetido_em)
+
+        resp_cancel = self.client.post(
+            url,
+            data={
+                "titulo": plano.titulo,
+                "ementa": plano.ementa,
+                "objetivos": plano.objetivos,
+                "metodologia": plano.metodologia,
+                "criterios_avaliacao": plano.criterios_avaliacao,
+                "cronograma": plano.cronograma,
+                "referencias": plano.referencias,
+                "action": "cancel_submit",
+            },
+            follow=True,
+        )
+        self.assertEqual(resp_cancel.status_code, 200)
+        plano.refresh_from_db()
+        self.assertEqual(plano.status, PlanoEnsinoProfessor.Status.RASCUNHO)
+        self.assertIsNone(plano.submetido_em)
+
+    def test_professor_material_create(self):
+        prof_user, profile = self._create_professor_profile_user("prof.material")
+        self.diario.professor = prof_user
+        self.diario.save(update_fields=["professor"])
+        self.turma.professores.add(prof_user)
+
+        self.client.force_login(prof_user)
+        url = reverse("educacao:professor_material_novo", args=[profile.codigo_acesso])
+        arquivo = SimpleUploadedFile("plano.txt", b"conteudo teste", content_type="text/plain")
+        resp = self.client.post(
+            url,
+            data={
+                "titulo": "Material de apoio",
+                "descricao": "Roteiro de aula",
+                "diario": str(self.diario.pk),
+                "aula": "",
+                "arquivo": arquivo,
+                "link_externo": "",
+                "publico_alunos": "on",
+                "ativo": "on",
+            },
+            follow=True,
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(
+            MaterialAulaProfessor.objects.filter(
+                professor=prof_user,
+                diario=self.diario,
+                titulo="Material de apoio",
+            ).exists()
+        )
+
+    def test_professor_nao_pode_acessar_area_de_outro_professor(self):
+        prof_a, profile_a = self._create_professor_profile_user("prof.area.a")
+        _prof_b, profile_b = self._create_professor_profile_user("prof.area.b")
+        self.diario.professor = prof_a
+        self.diario.save(update_fields=["professor"])
+        self.turma.professores.add(prof_a)
+
+        self.client.force_login(prof_a)
+        resp = self.client.get(reverse("educacao:professor_inicio", args=[profile_b.codigo_acesso]))
+        self.assertEqual(resp.status_code, 404)
+
+    def test_professor_pode_abrir_fechamento_da_propria_turma(self):
+        prof_user, _profile = self._create_professor_profile_user("prof.fechamento")
+        self.diario.professor = prof_user
+        self.diario.save(update_fields=["professor"])
+        self.turma.professores.add(prof_user)
+
+        self.client.force_login(prof_user)
+        resp = self.client.get(
+            reverse("educacao:fechamento_turma_periodo", args=[self.turma.pk]),
+            {"periodo": self.periodo.pk},
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Fechamento do Período")
+
+    def test_aluno_boletim_default_mostra_periodo_referencia_da_matricula(self):
+        aluno_user, profile = self._create_aluno_profile_user("aluno.boletim.default")
+        periodo_2 = PeriodoLetivo.objects.create(
+            ano_letivo=2026,
+            tipo=PeriodoLetivo.Tipo.BIMESTRE,
+            numero=2,
+            inicio="2026-05-01",
+            fim="2026-07-31",
+            ativo=True,
+        )
+        avaliacao_2 = Avaliacao.objects.create(
+            diario=self.diario,
+            periodo=periodo_2,
+            titulo="Prova 2",
+            peso=Decimal("1.00"),
+            nota_maxima=Decimal("10.00"),
+            data="2026-06-10",
+        )
+        Nota.objects.create(avaliacao=avaliacao_2, aluno=self.aluno, valor=Decimal("7.50"))
+
+        self.client.force_login(aluno_user)
+        url = reverse("educacao:aluno_ensino_boletins", args=[profile.codigo_acesso])
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Boletim por Período/Semestre")
+        self.assertContains(resp, "2026/1")
+        self.assertEqual(resp.context["periodo_referencia"].pk, self.periodo.pk)
+
+    def test_aluno_boletim_permite_consultar_outro_periodo(self):
+        aluno_user, profile = self._create_aluno_profile_user("aluno.boletim.filtro")
+        periodo_2 = PeriodoLetivo.objects.create(
+            ano_letivo=2026,
+            tipo=PeriodoLetivo.Tipo.BIMESTRE,
+            numero=2,
+            inicio="2026-05-01",
+            fim="2026-07-31",
+            ativo=True,
+        )
+        avaliacao_2 = Avaliacao.objects.create(
+            diario=self.diario,
+            periodo=periodo_2,
+            titulo="Prova 2",
+            peso=Decimal("1.00"),
+            nota_maxima=Decimal("10.00"),
+            data="2026-06-10",
+        )
+        Nota.objects.create(avaliacao=avaliacao_2, aluno=self.aluno, valor=Decimal("7.50"))
+
+        self.client.force_login(aluno_user)
+        url = reverse("educacao:aluno_ensino_boletins", args=[profile.codigo_acesso])
+        resp = self.client.get(url, {"periodo": str(periodo_2.pk)})
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "2026/2")
+        self.assertEqual(resp.context["periodo_referencia"].pk, periodo_2.pk)
+
+    def test_aluno_avaliacoes_filtra_por_periodo(self):
+        aluno_user, profile = self._create_aluno_profile_user("aluno.avaliacoes.filtro")
+        periodo_2 = PeriodoLetivo.objects.create(
+            ano_letivo=2026,
+            tipo=PeriodoLetivo.Tipo.BIMESTRE,
+            numero=2,
+            inicio="2026-05-01",
+            fim="2026-07-31",
+            ativo=True,
+        )
+        avaliacao_2 = Avaliacao.objects.create(
+            diario=self.diario,
+            periodo=periodo_2,
+            titulo="Prova 2",
+            peso=Decimal("1.00"),
+            nota_maxima=Decimal("10.00"),
+            data="2026-06-10",
+        )
+        Nota.objects.create(avaliacao=avaliacao_2, aluno=self.aluno, valor=Decimal("7.50"))
+
+        self.client.force_login(aluno_user)
+        url = reverse("educacao:aluno_ensino_avaliacoes", args=[profile.codigo_acesso])
+
+        resp_default = self.client.get(url)
+        self.assertEqual(resp_default.status_code, 200)
+        self.assertContains(resp_default, "Prova 1")
+        self.assertNotContains(resp_default, "Prova 2")
+
+        resp_periodo_2 = self.client.get(url, {"periodo": str(periodo_2.pk)})
+        self.assertEqual(resp_periodo_2.status_code, 200)
+        self.assertContains(resp_periodo_2, "Prova 2")
+        self.assertNotContains(resp_periodo_2, "Prova 1")
+
+    def test_aluno_documentos_processos_post_cria_processo(self):
+        aluno_user, profile = self._create_aluno_profile_user("aluno.docs")
+        self.client.force_login(aluno_user)
+        url = reverse("educacao:aluno_documentos_processos", args=[profile.codigo_acesso])
+        resp = self.client.post(
+            url,
+            {
+                "form_kind": "documento",
+                "doc-tipo": "DECLARACAO_MATRICULA",
+                "doc-descricao": "Documento para bolsa municipal",
+            },
+            follow=True,
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(
+            ProcessoAdministrativo.objects.filter(
+                criado_por=aluno_user,
+                tipo__icontains="DOCUMENTO",
+                solicitante_nome=self.aluno.nome,
+            ).exists()
+        )
+
+    def test_aluno_role_can_emitir_carteira_pdf(self):
+        aluno_user, _profile = self._create_aluno_profile_user("aluno.carteira")
+        self.client.force_login(aluno_user)
+        resp = self.client.get(reverse("educacao:carteira_emitir_pdf", args=[self.aluno.pk]))
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("application/pdf", resp["Content-Type"])
+
+    def test_aluno_central_servicos_post_cria_chamado(self):
+        aluno_user, profile = self._create_aluno_profile_user("aluno.chamado")
+        self.client.force_login(aluno_user)
+        url = reverse("educacao:aluno_central_servicos", args=[profile.codigo_acesso])
+        resp = self.client.post(
+            url,
+            {
+                "form_kind": "abrir_chamado",
+                "ch-categoria": "ACADEMICO",
+                "ch-assunto": "Dúvida sobre avaliação",
+                "ch-descricao": "Solicito verificação da nota do último bimestre.",
+            },
+            follow=True,
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(
+            OuvidoriaCadastro.objects.filter(
+                criado_por=aluno_user,
+                solicitante_nome=self.aluno.nome,
+                assunto__icontains="Dúvida sobre avaliação",
+            ).exists()
+        )
+
+    def test_aluno_justificativa_falta_post_cria_pedido_vinculado_aula(self):
+        aluno_user, profile = self._create_aluno_profile_user("aluno.justificativa")
+        self.client.force_login(aluno_user)
+
+        aula_falta = Aula.objects.create(diario=self.diario, data="2026-03-20", conteudo="Aula com ausência")
+        Frequencia.objects.update_or_create(
+            aula=aula_falta,
+            aluno=self.aluno,
+            defaults={"status": Frequencia.Status.FALTA},
+        )
+
+        resp = self.client.post(
+            reverse("educacao:aluno_ensino_justificativa", args=[profile.codigo_acesso]),
+            {
+                "form_kind": "justificativa",
+                "falta-turma": str(self.turma.pk),
+                "falta-aula": str(aula_falta.pk),
+                "falta-motivo": "Apresentei atestado médico.",
+            },
+            follow=True,
+        )
+        self.assertEqual(resp.status_code, 200)
+        pedido = JustificativaFaltaPedido.objects.filter(aluno=self.aluno, aula=aula_falta).first()
+        self.assertIsNotNone(pedido)
+        self.assertEqual(pedido.status, JustificativaFaltaPedido.Status.PENDENTE)
+
+    def test_professor_pode_deferir_pedido_e_frequencia_vira_justificada(self):
+        aula_falta = Aula.objects.create(diario=self.diario, data="2026-03-21", conteudo="Aula para decisão")
+        Frequencia.objects.update_or_create(
+            aula=aula_falta,
+            aluno=self.aluno,
+            defaults={"status": Frequencia.Status.FALTA},
+        )
+        pedido = JustificativaFaltaPedido.objects.create(
+            aula=aula_falta,
+            aluno=self.aluno,
+            motivo="Atestado anexado.",
+            status=JustificativaFaltaPedido.Status.PENDENTE,
+        )
+
+        self.client.force_login(self.admin)
+        resp = self.client.post(
+            reverse("educacao:justificativa_falta_detail", args=[pedido.pk]),
+            {"decisao": "DEFERIDO", "parecer": "Documento válido. Pedido deferido."},
+            follow=True,
+        )
+        self.assertEqual(resp.status_code, 200)
+
+        pedido.refresh_from_db()
+        self.assertEqual(pedido.status, JustificativaFaltaPedido.Status.DEFERIDO)
+        freq = Frequencia.objects.get(aula=aula_falta, aluno=self.aluno)
+        self.assertEqual(freq.status, Frequencia.Status.JUSTIFICADA)
+
+    def test_aluno_nao_pode_acessar_dados_de_outro_aluno(self):
+        User = get_user_model()
+        outro_aluno = Aluno.objects.create(nome="Outro Aluno")
+        Matricula.objects.create(aluno=outro_aluno, turma=self.turma, situacao=Matricula.Situacao.ATIVA)
+
+        aluno_user = User.objects.create_user(username="aluno.own", password="123456")
+        profile, _ = Profile.objects.get_or_create(user=aluno_user, defaults={"ativo": True})
+        profile.role = Profile.Role.ALUNO
+        profile.aluno = self.aluno
+        profile.municipio = self.turma.unidade.secretaria.municipio
+        profile.must_change_password = False
+        profile.codigo_acesso = "aluno.own"
+        profile.save()
+
+        outro_user = User.objects.create_user(username="aluno.other", password="123456")
+        profile_outro, _ = Profile.objects.get_or_create(user=outro_user, defaults={"ativo": True})
+        profile_outro.role = Profile.Role.ALUNO
+        profile_outro.aluno = outro_aluno
+        profile_outro.municipio = self.turma.unidade.secretaria.municipio
+        profile_outro.must_change_password = False
+        profile_outro.codigo_acesso = "aluno.other"
+        profile_outro.save()
+
+        self.client.force_login(aluno_user)
+        resp_meus_dados = self.client.get(reverse("educacao:aluno_meus_dados", args=[profile_outro.codigo_acesso]))
+        self.assertEqual(resp_meus_dados.status_code, 404)
+
+        resp_historico = self.client.get(reverse("educacao:historico_aluno", args=[outro_aluno.pk]))
+        self.assertEqual(resp_historico.status_code, 404)
+
+    def test_portal_aluno_edital_detail_get(self):
+        beneficio = BeneficioTipo.objects.create(
+            municipio=self.turma.unidade.secretaria.municipio,
+            secretaria=self.turma.unidade.secretaria,
+            area=BeneficioTipo.Area.EDUCACAO,
+            nome="Kit Portal Aluno",
+            categoria=BeneficioTipo.Categoria.KIT_ESCOLAR,
+            periodicidade=BeneficioTipo.Periodicidade.ANUAL,
+            status=BeneficioTipo.Status.ATIVO,
+            criado_por=self.admin,
+        )
+        edital = BeneficioEdital.objects.create(
+            municipio=self.turma.unidade.secretaria.municipio,
+            secretaria=self.turma.unidade.secretaria,
+            area=BeneficioTipo.Area.EDUCACAO,
+            titulo="Edital Portal Aluno",
+            numero_ano="77/2026-PORTAL",
+            beneficio=beneficio,
+            publico_alvo=BeneficioTipo.PublicoAlvo.TODOS,
+            status=BeneficioEdital.Status.EM_ANALISE,
+        )
+        inscricao = BeneficioEditalInscricao.objects.create(
+            edital=edital,
+            aluno=self.aluno,
+            escola=self.turma.unidade,
+            turma=self.turma,
+            status=BeneficioEditalInscricao.Status.EM_ANALISE,
+            pontuacao=Decimal("12"),
+            criado_por=self.admin,
+            atualizado_por=self.admin,
+            dados_json={"avaliacao": {"pendencias_documentos": ["Documento X"]}},
+        )
+        resp = self.client.get(reverse("educacao:portal_aluno_edital_detail", args=[self.aluno.pk, inscricao.pk]))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Acompanhamento da Inscrição")
+        self.assertContains(resp, "Etapas do edital")
 
 
 class ComponenteCurricularCrudTestCase(TestCase):
@@ -454,6 +1433,15 @@ class CalendarioEducacionalTestCase(TestCase):
         )
         self.assertEqual(resp.status_code, 200)
         self.assertIn("application/pdf", resp["Content-Type"])
+
+    def test_professor_pode_emitir_declaracao_vinculo_do_aluno_da_turma(self):
+        self.client.force_login(self.prof)
+        resp = self.client.get(reverse("educacao:declaracao_vinculo_pdf", args=[self.aluno.pk]))
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("application/pdf", resp["Content-Type"])
+        doc = AlunoDocumento.objects.filter(aluno=self.aluno, tipo=AlunoDocumento.Tipo.DECLARACAO).order_by("-id").first()
+        self.assertIsNotNone(doc)
+        self.assertTrue(bool(getattr(doc, "arquivo", None)))
 
 
 class AssistenciaEscolarTestCase(TestCase):
@@ -678,6 +1666,30 @@ class EducacaoCatalogoDocumentacaoTestCase(TestCase):
         cert = AlunoCertificado.objects.get(aluno=self.aluno, titulo="Certificado de conclusão")
         self.assertTrue(cert.codigo_verificacao)
 
+    def test_declaracao_vinculo_pdf(self):
+        resp = self.client.get(reverse("educacao:declaracao_vinculo_pdf", args=[self.aluno.pk]))
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("application/pdf", resp["Content-Type"])
+        self.assertIn("declaracao_vinculo", resp["Content-Disposition"])
+        self.assertTrue(
+            AlunoDocumento.objects.filter(
+                aluno=self.aluno,
+                tipo=AlunoDocumento.Tipo.DECLARACAO,
+            ).exists()
+        )
+
+    def test_carteira_emitir_pdf_salva_documento(self):
+        resp = self.client.get(reverse("educacao:carteira_emitir_pdf", args=[self.aluno.pk]))
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("application/pdf", resp["Content-Type"])
+        self.assertTrue(
+            AlunoDocumento.objects.filter(
+                aluno=self.aluno,
+                tipo=AlunoDocumento.Tipo.CERTIFICADO,
+                titulo__icontains="Carteira estudantil",
+            ).exists()
+        )
+
 
 class AulaBNCCIntegracaoTestCase(TestCase):
     def setUp(self):
@@ -781,3 +1793,1328 @@ class AulaBNCCIntegracaoTestCase(TestCase):
         )
         self.assertFalse(form.is_valid())
         self.assertIn("não letiva", " ".join(form.errors.get("data", [])))
+
+
+class EducacaoSuggestApiTestCase(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.admin = user_model.objects.create_superuser(
+            username="admin_api_edu",
+            password="123456",
+            email="admin_api_edu@local",
+        )
+        profile = getattr(self.admin, "profile", None)
+        if profile:
+            profile.must_change_password = False
+            profile.save(update_fields=["must_change_password"])
+        self.client.force_login(self.admin)
+
+        self.municipio = Municipio.objects.create(nome="Cidade API Edu", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="SEMED API")
+        self.unidade = Unidade.objects.create(
+            secretaria=self.secretaria,
+            nome="Escola API",
+            tipo=Unidade.Tipo.EDUCACAO,
+        )
+        self.turma = Turma.objects.create(unidade=self.unidade, nome="Turma API 1", ano_letivo=2026)
+
+        for idx in range(12):
+            aluno = Aluno.objects.create(nome=f"Aluno API {idx:02d}", cpf=f"000000000{idx:02d}")
+            Matricula.objects.create(aluno=aluno, turma=self.turma, situacao=Matricula.Situacao.ATIVA)
+
+        for idx in range(4):
+            Turma.objects.create(unidade=self.unidade, nome=f"Turma API Extra {idx}", ano_letivo=2026)
+
+    def test_api_alunos_suggest_returns_meta_with_pagination(self):
+        response = self.client.get(
+            reverse("educacao:api_alunos_suggest"),
+            {"q": "Aluno API", "page": 2, "limit": 5},
+        )
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertIn("results", payload)
+        self.assertIn("meta", payload)
+        self.assertEqual(payload["meta"]["page"], 2)
+        self.assertEqual(payload["meta"]["limit"], 5)
+        self.assertGreaterEqual(payload["meta"]["total"], 12)
+        self.assertEqual(len(payload["results"]), 5)
+
+    def test_api_turmas_suggest_returns_meta_and_label(self):
+        response = self.client.get(
+            reverse("educacao:api_turmas_suggest"),
+            {"q": "Turma API", "limit": 3},
+        )
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertIn("meta", payload)
+        self.assertEqual(payload["meta"]["limit"], 3)
+        self.assertTrue(payload["results"])
+        self.assertIn("label", payload["results"][0])
+
+    def test_api_alunos_turma_suggest_returns_meta(self):
+        response = self.client.get(
+            reverse("educacao:api_alunos_turma_suggest", args=[self.turma.pk]),
+            {"q": "Aluno API", "page": 1, "limit": 4},
+        )
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertIn("meta", payload)
+        self.assertEqual(payload["meta"]["limit"], 4)
+        self.assertEqual(len(payload["results"]), 4)
+
+
+class BeneficiosEntregasFlowTestCase(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.admin = user_model.objects.create_superuser(
+            username="admin_beneficios",
+            password="123456",
+            email="admin_beneficios@local",
+        )
+        profile = getattr(self.admin, "profile", None)
+        if profile:
+            profile.must_change_password = False
+            profile.municipio = None
+            profile.save(update_fields=["must_change_password", "municipio"])
+        self.client.force_login(self.admin)
+
+        self.municipio = Municipio.objects.create(nome="Cidade Benefícios", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="SEMED Benefícios")
+        self.unidade = Unidade.objects.create(
+            secretaria=self.secretaria,
+            nome="Escola Benefícios",
+            tipo=Unidade.Tipo.EDUCACAO,
+            ativo=True,
+        )
+        self.turma = Turma.objects.create(unidade=self.unidade, nome="Turma 5B", ano_letivo=2026)
+        self.aluno = Aluno.objects.create(nome="Aluno Benefício")
+        Matricula.objects.create(aluno=self.aluno, turma=self.turma, situacao=Matricula.Situacao.ATIVA)
+
+        self.item_estoque = AlmoxarifadoCadastro.objects.create(
+            municipio=self.municipio,
+            secretaria=self.secretaria,
+            unidade=self.unidade,
+            codigo="KIT-CAD-001",
+            nome="Caderno 96 folhas",
+            saldo_atual=Decimal("10"),
+            estoque_minimo=Decimal("1"),
+            valor_medio=Decimal("5.5"),
+            status=AlmoxarifadoCadastro.Status.ATIVO,
+            criado_por=self.admin,
+        )
+        self.beneficio = BeneficioTipo.objects.create(
+            municipio=self.municipio,
+            secretaria=self.secretaria,
+            area=BeneficioTipo.Area.EDUCACAO,
+            nome="Kit Escolar 2026",
+            categoria=BeneficioTipo.Categoria.KIT_ESCOLAR,
+            periodicidade=BeneficioTipo.Periodicidade.ANUAL,
+            status=BeneficioTipo.Status.ATIVO,
+            criado_por=self.admin,
+        )
+        self.comp = BeneficioTipoItem.objects.create(
+            beneficio=self.beneficio,
+            item_estoque=self.item_estoque,
+            quantidade=Decimal("1"),
+            unidade="UN",
+            ordem=1,
+        )
+
+    def _nova_entrega(self):
+        entrega = BeneficioEntrega.objects.create(
+            municipio=self.municipio,
+            secretaria=self.secretaria,
+            unidade=self.unidade,
+            area=BeneficioTipo.Area.EDUCACAO,
+            aluno=self.aluno,
+            beneficio=self.beneficio,
+            status=BeneficioEntrega.Status.PENDENTE,
+            responsavel_entrega=self.admin,
+        )
+        BeneficioEntregaItem.objects.create(
+            entrega=entrega,
+            composicao_item=self.comp,
+            item_estoque=self.item_estoque,
+            item_nome=self.item_estoque.nome,
+            quantidade_planejada=Decimal("1"),
+            quantidade_entregue=Decimal("1"),
+            unidade="UN",
+        )
+        return entrega
+
+    def test_confirmar_entrega_baixa_estoque(self):
+        entrega = self._nova_entrega()
+        resp = self.client.post(
+            reverse("educacao:beneficio_entrega_confirmar", args=[entrega.pk]) + f"?municipio={self.municipio.pk}",
+            follow=True,
+        )
+        self.assertEqual(resp.status_code, 200)
+        entrega.refresh_from_db()
+        self.item_estoque.refresh_from_db()
+        self.assertEqual(entrega.status, BeneficioEntrega.Status.ENTREGUE)
+        self.assertEqual(self.item_estoque.saldo_atual, Decimal("9"))
+
+    def test_estorno_de_entrega_retorna_estoque(self):
+        entrega = self._nova_entrega()
+        self.client.post(
+            reverse("educacao:beneficio_entrega_confirmar", args=[entrega.pk]) + f"?municipio={self.municipio.pk}",
+            follow=True,
+        )
+        resp = self.client.post(
+            reverse("educacao:beneficio_entrega_estornar", args=[entrega.pk]) + f"?municipio={self.municipio.pk}",
+            {"motivo": "Entrega em duplicidade"},
+            follow=True,
+        )
+        self.assertEqual(resp.status_code, 200)
+        entrega.refresh_from_db()
+        self.item_estoque.refresh_from_db()
+        self.assertEqual(entrega.status, BeneficioEntrega.Status.ESTORNADO)
+        self.assertEqual(self.item_estoque.saldo_atual, Decimal("10"))
+
+    def test_bloqueia_duplicidade_no_mesmo_periodo(self):
+        entrega1 = self._nova_entrega()
+        self.client.post(
+            reverse("educacao:beneficio_entrega_confirmar", args=[entrega1.pk]) + f"?municipio={self.municipio.pk}",
+            follow=True,
+        )
+        entrega2 = self._nova_entrega()
+        self.client.post(
+            reverse("educacao:beneficio_entrega_confirmar", args=[entrega2.pk]) + f"?municipio={self.municipio.pk}",
+            follow=True,
+        )
+        entrega2.refresh_from_db()
+        self.assertEqual(entrega2.status, BeneficioEntrega.Status.PENDENTE)
+
+
+class BeneficiosEditalInscricaoAutomaticaTestCase(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.admin = user_model.objects.create_superuser(
+            username="admin_beneficios_inscricao",
+            password="123456",
+            email="admin_beneficios_inscricao@local",
+        )
+        profile = getattr(self.admin, "profile", None)
+        if profile:
+            profile.must_change_password = False
+            profile.save(update_fields=["must_change_password"])
+        self.client.force_login(self.admin)
+
+        self.municipio = Municipio.objects.create(nome="Cidade Edital Benefício", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="SEMED")
+        self.unidade = Unidade.objects.create(
+            secretaria=self.secretaria,
+            nome="Escola Integrada",
+            tipo=Unidade.Tipo.EDUCACAO,
+            ativo=True,
+        )
+        self.turma = Turma.objects.create(unidade=self.unidade, nome="Turma 8A", ano_letivo=2026)
+        self.aluno = Aluno.objects.create(nome="Aluno Inscrição", ativo=True)
+        Matricula.objects.create(aluno=self.aluno, turma=self.turma, situacao=Matricula.Situacao.ATIVA)
+
+        self.beneficio = BeneficioTipo.objects.create(
+            municipio=self.municipio,
+            secretaria=self.secretaria,
+            area=BeneficioTipo.Area.EDUCACAO,
+            nome="Cesta Edital 2026",
+            categoria=BeneficioTipo.Categoria.CESTA_BASICA,
+            periodicidade=BeneficioTipo.Periodicidade.MENSAL,
+            status=BeneficioTipo.Status.ATIVO,
+            criado_por=self.admin,
+        )
+        self.edital = BeneficioEdital.objects.create(
+            municipio=self.municipio,
+            secretaria=self.secretaria,
+            area=BeneficioTipo.Area.EDUCACAO,
+            titulo="Edital Benefício Integrado",
+            numero_ano="01/2026-TEST",
+            beneficio=self.beneficio,
+            publico_alvo=BeneficioTipo.PublicoAlvo.TODOS,
+            status=BeneficioEdital.Status.PUBLICADO,
+        )
+
+    def test_calcula_pontuacao_automaticamente_no_envio(self):
+        c1 = BeneficioEditalCriterio.objects.create(
+            edital=self.edital,
+            nome="Recebe Bolsa Família",
+            tipo=BeneficioEditalCriterio.Tipo.PONTUACAO,
+            fonte_dado="declaracao",
+            peso=10,
+            exige_comprovacao=False,
+            ordem=1,
+            ativo=True,
+        )
+        BeneficioEditalCriterio.objects.create(
+            edital=self.edital,
+            nome="Aluno ativo no cadastro",
+            tipo=BeneficioEditalCriterio.Tipo.ELIMINATORIO,
+            fonte_dado="cadastro",
+            regra="aluno.ativo == true",
+            exige_comprovacao=False,
+            ordem=2,
+            ativo=True,
+        )
+        req = BeneficioEditalDocumento.objects.create(
+            edital=self.edital,
+            nome="Declaração obrigatória",
+            obrigatorio=True,
+            formatos_aceitos="pdf,jpg,png",
+            ordem=1,
+        )
+
+        upload = SimpleUploadedFile("declaracao.pdf", b"%PDF-1.4 demo", content_type="application/pdf")
+        resp = self.client.post(
+            reverse("educacao:beneficio_edital_inscricao_add", args=[self.edital.pk]) + f"?municipio={self.municipio.pk}",
+            data={
+                "edital": str(self.edital.pk),
+                "aluno": str(self.aluno.pk),
+                "escola": str(self.unidade.pk),
+                "turma": str(self.turma.pk),
+                "criterio_%s_marcado" % c1.pk: "on",
+                "documento_%s_arquivo" % req.pk: upload,
+                "usar_documentos_cadastro": "on",
+                "justificativa": "",
+            },
+            follow=True,
+        )
+        self.assertEqual(resp.status_code, 200)
+
+        inscricao = BeneficioEditalInscricao.objects.get(edital=self.edital, aluno=self.aluno)
+        self.assertEqual(inscricao.pontuacao, Decimal("10"))
+        self.assertEqual(inscricao.status, BeneficioEditalInscricao.Status.APTO)
+        self.assertEqual(inscricao.documentos.count(), 1)
+
+    def test_reaproveita_documentacao_do_cadastro_do_aluno(self):
+        criterio = BeneficioEditalCriterio.objects.create(
+            edital=self.edital,
+            nome="Recebe Bolsa Família",
+            tipo=BeneficioEditalCriterio.Tipo.PONTUACAO,
+            fonte_dado="declaracao",
+            peso=7,
+            exige_comprovacao=True,
+            ordem=1,
+            ativo=True,
+        )
+        doc_aluno = AlunoDocumento.objects.create(
+            aluno=self.aluno,
+            tipo=AlunoDocumento.Tipo.DECLARACAO,
+            titulo="Declaração de vínculo escolar",
+            numero_documento="DECL-123",
+            enviado_por=self.admin,
+            ativo=True,
+        )
+        doc_aluno.arquivo.save(
+            "declaracao_vinculo.pdf",
+            SimpleUploadedFile("declaracao_vinculo.pdf", b"%PDF-1.4 vinculo", content_type="application/pdf"),
+            save=True,
+        )
+
+        resp = self.client.post(
+            reverse("educacao:beneficio_edital_inscricao_add", args=[self.edital.pk]) + f"?municipio={self.municipio.pk}",
+            data={
+                "edital": str(self.edital.pk),
+                "aluno": str(self.aluno.pk),
+                "escola": str(self.unidade.pk),
+                "turma": str(self.turma.pk),
+                "criterio_%s_marcado" % criterio.pk: "on",
+                "usar_documentos_cadastro": "on",
+                "justificativa": "",
+            },
+            follow=True,
+        )
+        self.assertEqual(resp.status_code, 200)
+
+        inscricao = BeneficioEditalInscricao.objects.get(edital=self.edital, aluno=self.aluno)
+        self.assertEqual(inscricao.pontuacao, Decimal("7"))
+        self.assertEqual(inscricao.status, BeneficioEditalInscricao.Status.APTO)
+        self.assertGreaterEqual(inscricao.documentos.count(), 1)
+
+    def test_inscricao_detail_e_reprocessamento(self):
+        criterio = BeneficioEditalCriterio.objects.create(
+            edital=self.edital,
+            nome="Aluno ativo no cadastro",
+            tipo=BeneficioEditalCriterio.Tipo.ELIMINATORIO,
+            fonte_dado="cadastro",
+            regra="aluno.ativo == true",
+            ordem=1,
+            ativo=True,
+        )
+        self.client.post(
+            reverse("educacao:beneficio_edital_inscricao_add", args=[self.edital.pk]) + f"?municipio={self.municipio.pk}",
+            data={
+                "edital": str(self.edital.pk),
+                "aluno": str(self.aluno.pk),
+                "escola": str(self.unidade.pk),
+                "turma": str(self.turma.pk),
+                "criterio_%s_marcado" % criterio.pk: "on",
+                "usar_documentos_cadastro": "on",
+                "justificativa": "",
+            },
+            follow=True,
+        )
+        inscricao = BeneficioEditalInscricao.objects.get(edital=self.edital, aluno=self.aluno)
+
+        resp_detail = self.client.get(
+            reverse("educacao:beneficio_edital_inscricao_detail", args=[self.edital.pk, inscricao.pk]) + f"?municipio={self.municipio.pk}"
+        )
+        self.assertEqual(resp_detail.status_code, 200)
+        self.assertContains(resp_detail, "Avaliação por critério")
+
+        resp_reprocess = self.client.post(
+            reverse("educacao:beneficio_edital_inscricao_reprocessar", args=[self.edital.pk, inscricao.pk]) + f"?municipio={self.municipio.pk}",
+            follow=True,
+        )
+        self.assertEqual(resp_reprocess.status_code, 200)
+        inscricao.refresh_from_db()
+        self.assertEqual(inscricao.status, BeneficioEditalInscricao.Status.ENVIADA)
+
+
+class TurmaMatrizMotorPrincipalTestCase(TestCase):
+    def setUp(self):
+        self.municipio = Municipio.objects.create(nome="Cidade Matriz", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="SEMED Matriz")
+        self.unidade = Unidade.objects.create(
+            secretaria=self.secretaria,
+            nome="Escola Base",
+            tipo=Unidade.Tipo.EDUCACAO,
+        )
+
+    def test_expected_etapa_from_matriz_by_serie(self):
+        matriz_creche = MatrizCurricular.objects.create(
+            unidade=self.unidade,
+            nome="Matriz Maternal I 2026",
+            etapa_base=MatrizCurricular.EtapaBase.EDUCACAO_INFANTIL,
+            serie_ano=MatrizCurricular.SerieAno.INFANTIL_MATERNAL_I,
+            ano_referencia=2026,
+            carga_horaria_anual=800,
+            dias_letivos_previstos=200,
+            ativo=True,
+        )
+        matriz_pre = MatrizCurricular.objects.create(
+            unidade=self.unidade,
+            nome="Matriz Jardim II 2026",
+            etapa_base=MatrizCurricular.EtapaBase.EDUCACAO_INFANTIL,
+            serie_ano=MatrizCurricular.SerieAno.INFANTIL_JARDIM_II,
+            ano_referencia=2026,
+            carga_horaria_anual=800,
+            dias_letivos_previstos=200,
+            ativo=True,
+        )
+        matriz_finais = MatrizCurricular.objects.create(
+            unidade=self.unidade,
+            nome="Matriz 7º ano 2026",
+            etapa_base=MatrizCurricular.EtapaBase.FUNDAMENTAL_ANOS_FINAIS,
+            serie_ano=MatrizCurricular.SerieAno.FUNDAMENTAL_7,
+            ano_referencia=2026,
+            carga_horaria_anual=800,
+            dias_letivos_previstos=200,
+            ativo=True,
+        )
+
+        self.assertEqual(Turma.expected_etapa_from_matriz(matriz_creche), Turma.Etapa.CRECHE)
+        self.assertEqual(Turma.expected_etapa_from_matriz(matriz_pre), Turma.Etapa.PRE_ESCOLA)
+        self.assertEqual(Turma.expected_etapa_from_matriz(matriz_finais), Turma.Etapa.FUNDAMENTAL_ANOS_FINAIS)
+
+    def test_turma_form_auto_aligns_etapa_e_serie_from_matriz(self):
+        from apps.educacao.forms import TurmaForm
+
+        matriz = MatrizCurricular.objects.create(
+            unidade=self.unidade,
+            nome="Matriz 4º ano 2026",
+            etapa_base=MatrizCurricular.EtapaBase.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=MatrizCurricular.SerieAno.FUNDAMENTAL_4,
+            ano_referencia=2026,
+            carga_horaria_anual=800,
+            dias_letivos_previstos=200,
+            ativo=True,
+        )
+        form = TurmaForm(
+            data={
+                "unidade": self.unidade.pk,
+                "nome": "4A",
+                "ano_letivo": 2026,
+                "turno": Turma.Turno.MANHA,
+                "modalidade": Turma.Modalidade.REGULAR,
+                "etapa": Turma.Etapa.CRECHE,
+                "serie_ano": Turma.SerieAno.INFANTIL_BERCARIO,
+                "forma_oferta": Turma.FormaOferta.PRESENCIAL,
+                "matriz_curricular": matriz.pk,
+                "curso": "",
+                "classe_especial": "",
+                "bilingue_surdos": "",
+                "ativo": "on",
+            }
+        )
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["serie_ano"], Turma.SerieAno.FUNDAMENTAL_4)
+        self.assertEqual(form.cleaned_data["etapa"], Turma.Etapa.FUNDAMENTAL_ANOS_INICIAIS)
+
+
+class MatrizRelacoesEHorarioGeracaoTestCase(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.admin = user_model.objects.create_superuser(
+            username="admin_horario_matriz",
+            password="123456",
+            email="admin_horario_matriz@local",
+        )
+        profile = getattr(self.admin, "profile", None)
+        if profile:
+            profile.must_change_password = False
+            profile.save(update_fields=["must_change_password"])
+        self.client.force_login(self.admin)
+
+        self.municipio = Municipio.objects.create(nome="Cidade Horário Matriz", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="SEMED Horário")
+        self.unidade = Unidade.objects.create(
+            secretaria=self.secretaria,
+            nome="Escola Horário Matriz",
+            tipo=Unidade.Tipo.EDUCACAO,
+        )
+
+        self.componente_lp = ComponenteCurricular.objects.create(nome="Língua Portuguesa", sigla="LP")
+        self.componente_ma = ComponenteCurricular.objects.create(nome="Matemática", sigla="MAT")
+
+    def test_relacao_matriz_bloqueia_componentes_de_matrizes_diferentes(self):
+        matriz_a = MatrizCurricular.objects.create(
+            unidade=self.unidade,
+            nome="Matriz A",
+            etapa_base=MatrizCurricular.EtapaBase.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=MatrizCurricular.SerieAno.FUNDAMENTAL_5,
+            ano_referencia=2026,
+            carga_horaria_anual=800,
+            dias_letivos_previstos=200,
+            ativo=True,
+        )
+        matriz_b = MatrizCurricular.objects.create(
+            unidade=self.unidade,
+            nome="Matriz B",
+            etapa_base=MatrizCurricular.EtapaBase.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=MatrizCurricular.SerieAno.FUNDAMENTAL_4,
+            ano_referencia=2026,
+            carga_horaria_anual=800,
+            dias_letivos_previstos=200,
+            ativo=True,
+        )
+        comp_a = MatrizComponente.objects.create(matriz=matriz_a, componente=self.componente_lp, ordem=1, ativo=True)
+        comp_b = MatrizComponente.objects.create(matriz=matriz_b, componente=self.componente_ma, ordem=1, ativo=True)
+
+        rel = MatrizComponenteRelacao(
+            origem=comp_a,
+            destino=comp_b,
+            tipo=MatrizComponenteRelacao.Tipo.PRE_REQUISITO,
+            ativo=True,
+        )
+        with self.assertRaises(ValidationError):
+            rel.full_clean()
+
+    def test_horario_gerar_padrao_usa_componentes_da_matriz(self):
+        matriz = MatrizCurricular.objects.create(
+            unidade=self.unidade,
+            nome="Matriz 5º ano 2026",
+            etapa_base=MatrizCurricular.EtapaBase.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=MatrizCurricular.SerieAno.FUNDAMENTAL_5,
+            ano_referencia=2026,
+            carga_horaria_anual=800,
+            dias_letivos_previstos=200,
+            ativo=True,
+        )
+        MatrizComponente.objects.create(
+            matriz=matriz,
+            componente=self.componente_lp,
+            ordem=1,
+            aulas_semanais=3,
+            ativo=True,
+        )
+        MatrizComponente.objects.create(
+            matriz=matriz,
+            componente=self.componente_ma,
+            ordem=2,
+            aulas_semanais=2,
+            ativo=True,
+        )
+        turma = Turma.objects.create(
+            unidade=self.unidade,
+            nome="5A",
+            ano_letivo=2026,
+            turno=Turma.Turno.MANHA,
+            modalidade=Turma.Modalidade.REGULAR,
+            etapa=Turma.Etapa.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=Turma.SerieAno.FUNDAMENTAL_5,
+            matriz_curricular=matriz,
+            ativo=True,
+        )
+
+        resp = self.client.get(reverse("educacao:horario_gerar_padrao", args=[turma.pk]), follow=True)
+        self.assertEqual(resp.status_code, 200)
+
+        disciplinas = list(
+            AulaHorario.objects.filter(grade__turma=turma)
+            .order_by("dia", "inicio")
+            .values_list("disciplina", flat=True)
+        )
+        self.assertEqual(len(disciplinas), 25)
+        self.assertTrue(set(disciplinas).issubset({"Língua Portuguesa", "Matemática"}))
+        self.assertIn("Língua Portuguesa", disciplinas)
+        self.assertIn("Matemática", disciplinas)
+
+
+class RequisitosMatrizFluxoTestCase(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.admin = user_model.objects.create_superuser(
+            username="admin_requisitos_edu",
+            password="123456",
+            email="admin_requisitos_edu@local",
+        )
+        profile = getattr(self.admin, "profile", None)
+        if profile:
+            profile.must_change_password = False
+            profile.save(update_fields=["must_change_password"])
+        self.client.force_login(self.admin)
+
+        self.municipio = Municipio.objects.create(nome="Cidade Requisitos", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="SEMED Requisitos")
+        self.unidade = Unidade.objects.create(
+            secretaria=self.secretaria,
+            nome="Escola Requisitos",
+            tipo=Unidade.Tipo.EDUCACAO,
+        )
+
+        self.componente_base = ComponenteCurricular.objects.create(nome="Leitura", sigla="LEI", ativo=True)
+        self.componente_equivalente = ComponenteCurricular.objects.create(nome="Letramento", sigla="LET", ativo=True)
+        self.componente_destino = ComponenteCurricular.objects.create(nome="Produção Textual", sigla="PTX", ativo=True)
+
+        self.matriz_alvo = MatrizCurricular.objects.create(
+            unidade=self.unidade,
+            nome="Matriz Alvo 2026",
+            etapa_base=MatrizCurricular.EtapaBase.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=MatrizCurricular.SerieAno.FUNDAMENTAL_4,
+            ano_referencia=2026,
+            carga_horaria_anual=800,
+            dias_letivos_previstos=200,
+            ativo=True,
+        )
+        self.matriz_alvo_comp_base = MatrizComponente.objects.create(
+            matriz=self.matriz_alvo,
+            componente=self.componente_base,
+            ordem=1,
+            ativo=True,
+        )
+        self.matriz_alvo_comp_equiv = MatrizComponente.objects.create(
+            matriz=self.matriz_alvo,
+            componente=self.componente_equivalente,
+            ordem=2,
+            ativo=True,
+        )
+        self.matriz_alvo_comp_destino = MatrizComponente.objects.create(
+            matriz=self.matriz_alvo,
+            componente=self.componente_destino,
+            ordem=3,
+            ativo=True,
+        )
+        MatrizComponenteRelacao.objects.create(
+            origem=self.matriz_alvo_comp_base,
+            destino=self.matriz_alvo_comp_destino,
+            tipo=MatrizComponenteRelacao.Tipo.PRE_REQUISITO,
+            ativo=True,
+        )
+
+        self.turma_alvo = Turma.objects.create(
+            unidade=self.unidade,
+            nome="4A",
+            ano_letivo=2026,
+            turno=Turma.Turno.MANHA,
+            modalidade=Turma.Modalidade.REGULAR,
+            etapa=Turma.Etapa.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=Turma.SerieAno.FUNDAMENTAL_4,
+            matriz_curricular=self.matriz_alvo,
+            ativo=True,
+        )
+
+    def test_matricula_create_bloqueia_quando_pre_requisito_nao_cumprido(self):
+        matriz_historico = MatrizCurricular.objects.create(
+            unidade=self.unidade,
+            nome="Matriz Histórico Reprovação",
+            etapa_base=MatrizCurricular.EtapaBase.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=MatrizCurricular.SerieAno.FUNDAMENTAL_3,
+            ano_referencia=2025,
+            carga_horaria_anual=800,
+            dias_letivos_previstos=200,
+            ativo=True,
+        )
+        MatrizComponente.objects.create(
+            matriz=matriz_historico,
+            componente=self.componente_equivalente,
+            ordem=1,
+            ativo=True,
+        )
+        turma_historico = Turma.objects.create(
+            unidade=self.unidade,
+            nome="3A",
+            ano_letivo=2025,
+            turno=Turma.Turno.MANHA,
+            modalidade=Turma.Modalidade.REGULAR,
+            etapa=Turma.Etapa.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=Turma.SerieAno.FUNDAMENTAL_3,
+            matriz_curricular=matriz_historico,
+            ativo=True,
+        )
+        aluno = Aluno.objects.create(nome="Aluno Sem Pré")
+        Matricula.objects.create(
+            aluno=aluno,
+            turma=turma_historico,
+            situacao=Matricula.Situacao.CONCLUIDO,
+            resultado_final="Reprovado",
+        )
+
+        avaliacao = avaliar_requisitos_matricula(aluno=aluno, turma=self.turma_alvo)
+        self.assertTrue(avaliacao.bloqueado)
+        self.assertTrue(any("Pré-requisitos pendentes" in msg for msg in avaliacao.pendencias))
+
+    def test_matricula_create_aceita_equivalencia_por_grupo(self):
+        grupo = MatrizComponenteEquivalenciaGrupo.objects.create(
+            matriz=self.matriz_alvo,
+            nome="Base Linguagens",
+            minimo_componentes=1,
+            ativo=True,
+        )
+        MatrizComponenteEquivalenciaItem.objects.create(
+            grupo=grupo,
+            componente=self.matriz_alvo_comp_base,
+            ordem=1,
+            ativo=True,
+        )
+        MatrizComponenteEquivalenciaItem.objects.create(
+            grupo=grupo,
+            componente=self.matriz_alvo_comp_equiv,
+            ordem=2,
+            ativo=True,
+        )
+
+        matriz_historico = MatrizCurricular.objects.create(
+            unidade=self.unidade,
+            nome="Matriz Histórico Equivalência",
+            etapa_base=MatrizCurricular.EtapaBase.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=MatrizCurricular.SerieAno.FUNDAMENTAL_3,
+            ano_referencia=2025,
+            carga_horaria_anual=800,
+            dias_letivos_previstos=200,
+            ativo=True,
+        )
+        MatrizComponente.objects.create(
+            matriz=matriz_historico,
+            componente=self.componente_equivalente,
+            ordem=1,
+            ativo=True,
+        )
+        turma_historico = Turma.objects.create(
+            unidade=self.unidade,
+            nome="3B",
+            ano_letivo=2025,
+            turno=Turma.Turno.MANHA,
+            modalidade=Turma.Modalidade.REGULAR,
+            etapa=Turma.Etapa.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=Turma.SerieAno.FUNDAMENTAL_3,
+            matriz_curricular=matriz_historico,
+            ativo=True,
+        )
+        aluno = Aluno.objects.create(nome="Aluno Com Equivalência")
+        Matricula.objects.create(
+            aluno=aluno,
+            turma=turma_historico,
+            situacao=Matricula.Situacao.CONCLUIDO,
+            resultado_final="Aprovado",
+        )
+
+        avaliacao = avaliar_requisitos_matricula(aluno=aluno, turma=self.turma_alvo)
+        self.assertFalse(avaliacao.bloqueado, avaliacao.pendencias)
+
+    def test_aula_form_bloqueia_lancamento_por_pre_requisito(self):
+        professor = get_user_model().objects.create_user(username="prof_requisito", password="123456")
+        diario = DiarioTurma.objects.create(
+            turma=self.turma_alvo,
+            professor=professor,
+            ano_letivo=2026,
+        )
+        periodo = PeriodoLetivo.objects.create(
+            ano_letivo=2026,
+            tipo=PeriodoLetivo.Tipo.BIMESTRE,
+            numero=1,
+            inicio="2026-02-01",
+            fim="2026-04-30",
+            ativo=True,
+        )
+
+        matriz_historico = MatrizCurricular.objects.create(
+            unidade=self.unidade,
+            nome="Matriz Histórico para Aula",
+            etapa_base=MatrizCurricular.EtapaBase.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=MatrizCurricular.SerieAno.FUNDAMENTAL_3,
+            ano_referencia=2025,
+            carga_horaria_anual=800,
+            dias_letivos_previstos=200,
+            ativo=True,
+        )
+        MatrizComponente.objects.create(
+            matriz=matriz_historico,
+            componente=self.componente_equivalente,
+            ordem=1,
+            ativo=True,
+        )
+        turma_historico = Turma.objects.create(
+            unidade=self.unidade,
+            nome="3C",
+            ano_letivo=2025,
+            turno=Turma.Turno.MANHA,
+            modalidade=Turma.Modalidade.REGULAR,
+            etapa=Turma.Etapa.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=Turma.SerieAno.FUNDAMENTAL_3,
+            matriz_curricular=matriz_historico,
+            ativo=True,
+        )
+        aluno = Aluno.objects.create(nome="Aluno Pendência Aula")
+        Matricula.objects.create(
+            aluno=aluno,
+            turma=turma_historico,
+            situacao=Matricula.Situacao.CONCLUIDO,
+            resultado_final="Reprovado",
+        )
+        Matricula.objects.create(
+            aluno=aluno,
+            turma=self.turma_alvo,
+            situacao=Matricula.Situacao.ATIVA,
+        )
+
+        form = AulaForm(
+            data={
+                "data": "2026-03-10",
+                "periodo": periodo.pk,
+                "componente": self.componente_destino.pk,
+                "bncc_codigos": [],
+                "conteudo": "Aula com bloqueio de requisito",
+                "observacoes": "",
+            },
+            diario=diario,
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("Lançamento bloqueado por pré-requisito", " ".join(form.errors.get("componente", [])))
+
+    def test_matriz_consistencia_view_exibe_metricas(self):
+        response = self.client.get(reverse("educacao:matriz_consistencia", args=[self.matriz_alvo.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Relatório de Consistência da Matriz")
+        self.assertContains(response, "Cobertura")
+
+    def test_matricula_form_override_exige_justificativa(self):
+        from apps.educacao.forms import MatriculaForm
+
+        form = MatriculaForm(
+            data={
+                "turma": self.turma_alvo.pk,
+                "data_matricula": "2026-02-10",
+                "situacao": Matricula.Situacao.ATIVA,
+                "resultado_final": "",
+                "concluinte": "",
+                "observacao": "",
+                "override_requisitos": "on",
+                "override_justificativa": "",
+            },
+            user=self.admin,
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("justificativa", " ".join(form.errors.get("override_justificativa", [])).lower())
+
+    def test_aula_form_permite_override_com_justificativa_para_gestor(self):
+        professor = get_user_model().objects.create_user(username="prof_override", password="123456")
+        diario = DiarioTurma.objects.create(
+            turma=self.turma_alvo,
+            professor=professor,
+            ano_letivo=2026,
+        )
+        periodo = PeriodoLetivo.objects.create(
+            ano_letivo=2026,
+            tipo=PeriodoLetivo.Tipo.BIMESTRE,
+            numero=1,
+            inicio="2026-02-01",
+            fim="2026-04-30",
+            ativo=True,
+        )
+        matriz_historico = MatrizCurricular.objects.create(
+            unidade=self.unidade,
+            nome="Matriz Histórico Override Aula",
+            etapa_base=MatrizCurricular.EtapaBase.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=MatrizCurricular.SerieAno.FUNDAMENTAL_3,
+            ano_referencia=2025,
+            carga_horaria_anual=800,
+            dias_letivos_previstos=200,
+            ativo=True,
+        )
+        MatrizComponente.objects.create(
+            matriz=matriz_historico,
+            componente=self.componente_equivalente,
+            ordem=1,
+            ativo=True,
+        )
+        turma_historico = Turma.objects.create(
+            unidade=self.unidade,
+            nome="3D",
+            ano_letivo=2025,
+            turno=Turma.Turno.MANHA,
+            modalidade=Turma.Modalidade.REGULAR,
+            etapa=Turma.Etapa.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=Turma.SerieAno.FUNDAMENTAL_3,
+            matriz_curricular=matriz_historico,
+            ativo=True,
+        )
+        aluno = Aluno.objects.create(nome="Aluno Override Aula")
+        Matricula.objects.create(
+            aluno=aluno,
+            turma=turma_historico,
+            situacao=Matricula.Situacao.CONCLUIDO,
+            resultado_final="Reprovado",
+        )
+        Matricula.objects.create(aluno=aluno, turma=self.turma_alvo, situacao=Matricula.Situacao.ATIVA)
+
+        form = AulaForm(
+            data={
+                "data": "2026-03-20",
+                "periodo": periodo.pk,
+                "componente": self.componente_destino.pk,
+                "bncc_codigos": [],
+                "conteudo": "Aula com override pedagógico",
+                "observacoes": "",
+                "override_requisitos": "on",
+                "override_justificativa": "Coordenação autorizou transição assistida.",
+            },
+            diario=diario,
+            user=self.admin,
+        )
+        self.assertTrue(form.is_valid(), form.errors)
+        payload = getattr(form, "override_requisitos_payload", {})
+        self.assertTrue(payload)
+        self.assertIn("justificativa", payload)
+
+    def test_registra_auditoria_override_matricula(self):
+        aluno = Aluno.objects.create(nome="Aluno Auditoria Override")
+        registro = registrar_override_requisitos_matricula(
+            usuario=self.admin,
+            aluno=aluno,
+            turma=self.turma_alvo,
+            justificativa="Matrícula excepcional por decisão pedagógica.",
+            pendencias=["Pré-requisito pendente: Leitura"],
+            origem="TESTE",
+        )
+        self.assertIsNotNone(registro)
+        self.assertTrue(
+            AuditoriaEvento.objects.filter(
+                id=registro.id,
+                modulo="EDUCACAO",
+                evento="OVERRIDE_REQUISITOS_MATRICULA",
+            ).exists()
+        )
+
+
+class TurmaProvisionamentoAutomaticoTestCase(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.admin = user_model.objects.create_superuser(
+            username="admin_provisionamento_turma",
+            password="123456",
+            email="admin_provisionamento_turma@local",
+        )
+        profile = getattr(self.admin, "profile", None)
+        if profile:
+            profile.must_change_password = False
+            profile.save(update_fields=["must_change_password"])
+        self.client.force_login(self.admin)
+
+        self.prof = user_model.objects.create_user(username="prof_auto", password="123456", email="prof_auto@local")
+
+        self.municipio = Municipio.objects.create(nome="Cidade Provisionamento", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="SEMED Provisionamento")
+        self.unidade = Unidade.objects.create(
+            secretaria=self.secretaria,
+            nome="Escola Provisionamento",
+            tipo=Unidade.Tipo.EDUCACAO,
+        )
+
+        prof_profile = getattr(self.prof, "profile", None)
+        if prof_profile is None:
+            prof_profile = Profile.objects.create(user=self.prof)
+        prof_profile.role = Profile.Role.EDU_PROF
+        prof_profile.municipio = self.municipio
+        prof_profile.secretaria = self.secretaria
+        prof_profile.unidade = self.unidade
+        prof_profile.ativo = True
+        prof_profile.bloqueado = False
+        prof_profile.must_change_password = False
+        prof_profile.save()
+
+        self.componente_lp = ComponenteCurricular.objects.create(nome="Língua Portuguesa", sigla="LP")
+        self.componente_mat = ComponenteCurricular.objects.create(nome="Matemática", sigla="MAT")
+
+        self.matriz = MatrizCurricular.objects.create(
+            unidade=self.unidade,
+            nome="Matriz 5º ano 2026",
+            etapa_base=MatrizCurricular.EtapaBase.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=MatrizCurricular.SerieAno.FUNDAMENTAL_5,
+            ano_referencia=2026,
+            carga_horaria_anual=800,
+            dias_letivos_previstos=200,
+            ativo=True,
+        )
+        MatrizComponente.objects.create(
+            matriz=self.matriz,
+            componente=self.componente_lp,
+            ordem=1,
+            aulas_semanais=3,
+            ativo=True,
+        )
+        MatrizComponente.objects.create(
+            matriz=self.matriz,
+            componente=self.componente_mat,
+            ordem=2,
+            aulas_semanais=2,
+            ativo=True,
+        )
+
+    def test_turma_create_gera_diarios_e_horario_automaticamente(self):
+        resp = self.client.post(
+            reverse("educacao:turma_create"),
+            data={
+                "unidade": self.unidade.pk,
+                "nome": "5A",
+                "ano_letivo": 2026,
+                "turno": Turma.Turno.MANHA,
+                "modalidade": Turma.Modalidade.REGULAR,
+                "etapa": Turma.Etapa.FUNDAMENTAL_ANOS_INICIAIS,
+                "serie_ano": Turma.SerieAno.FUNDAMENTAL_5,
+                "forma_oferta": Turma.FormaOferta.PRESENCIAL,
+                "matriz_curricular": self.matriz.pk,
+                "professores": [self.prof.pk],
+                "curso": "",
+                "classe_especial": "",
+                "bilingue_surdos": "",
+                "ativo": "on",
+            },
+            follow=True,
+        )
+        self.assertEqual(resp.status_code, 200)
+
+        turma = Turma.objects.get(nome="5A", unidade=self.unidade)
+        self.assertTrue(turma.professores.filter(pk=self.prof.pk).exists())
+
+        diario = DiarioTurma.objects.filter(turma=turma, professor=self.prof, ano_letivo=2026).first()
+        self.assertIsNotNone(diario)
+
+        grade = GradeHorario.objects.filter(turma=turma).first()
+        self.assertIsNotNone(grade)
+        aulas = list(grade.aulas.all())
+        self.assertEqual(len(aulas), 25)
+        self.assertTrue(any(a.professor_id == self.prof.pk for a in aulas))
+
+
+class MatrizServicoAnualTestCase(TestCase):
+    def setUp(self):
+        self.municipio = Municipio.objects.create(nome="Cidade Matriz Anual", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="SEMED Matriz Anual")
+        self.unidade = Unidade.objects.create(
+            secretaria=self.secretaria,
+            nome="Escola Matriz Anual",
+            tipo=Unidade.Tipo.EDUCACAO,
+        )
+
+    def test_preencher_componentes_base_e_clonar_para_proximo_ano(self):
+        matriz = MatrizCurricular.objects.create(
+            unidade=self.unidade,
+            nome="Matriz 9º ano",
+            etapa_base=MatrizCurricular.EtapaBase.FUNDAMENTAL_ANOS_FINAIS,
+            serie_ano=MatrizCurricular.SerieAno.FUNDAMENTAL_9,
+            ano_referencia=2026,
+            carga_horaria_anual=800,
+            dias_letivos_previstos=200,
+            ativo=True,
+        )
+
+        created, skipped = preencher_componentes_base_matriz(matriz)
+        self.assertGreater(created, 0)
+        self.assertEqual(skipped, 0)
+        self.assertTrue(matriz.componentes.filter(componente__nome="Língua Portuguesa").exists())
+        self.assertTrue(matriz.componentes.filter(componente__nome="Língua Inglesa").exists())
+
+        copia = clonar_matriz_para_ano(matriz, ano_destino=2027)
+        self.assertEqual(copia.ano_referencia, 2027)
+        self.assertEqual(copia.componentes.count(), matriz.componentes.count())
+
+
+class MatriculaRapidaViewTestCase(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.admin = user_model.objects.create_superuser(
+            username="admin_matricula_rapida",
+            password="123456",
+            email="admin_matricula_rapida@local",
+        )
+        profile = getattr(self.admin, "profile", None)
+        if profile:
+            profile.must_change_password = False
+            profile.save(update_fields=["must_change_password"])
+        self.client.force_login(self.admin)
+
+        self.municipio = Municipio.objects.create(nome="Cidade Matrícula", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="SEMED Matrícula")
+        self.unidade = Unidade.objects.create(secretaria=self.secretaria, nome="Escola Matrícula", tipo=Unidade.Tipo.EDUCACAO)
+
+        self.matriz = MatrizCurricular.objects.create(
+            unidade=self.unidade,
+            nome="Matriz 4º ano 2026",
+            etapa_base=MatrizCurricular.EtapaBase.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=MatrizCurricular.SerieAno.FUNDAMENTAL_4,
+            ano_referencia=2026,
+            carga_horaria_anual=800,
+            dias_letivos_previstos=200,
+            ativo=True,
+        )
+        self.turma = Turma.objects.create(
+            unidade=self.unidade,
+            nome="4A",
+            ano_letivo=2026,
+            turno=Turma.Turno.MANHA,
+            modalidade=Turma.Modalidade.REGULAR,
+            etapa=Turma.Etapa.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=Turma.SerieAno.FUNDAMENTAL_4,
+            matriz_curricular=self.matriz,
+            ativo=True,
+        )
+        self.aluno = Aluno.objects.create(nome="Aluno Matrícula Rápida")
+
+    def test_fluxo_matricula_rapida_cria_matricula(self):
+        resp = self.client.post(
+            reverse("educacao:matricula_create") + f"?aluno={self.aluno.pk}",
+            data={
+                "aluno": str(self.aluno.pk),
+                "turma": str(self.turma.pk),
+                "data_matricula": "2026-03-04",
+                "situacao": Matricula.Situacao.ATIVA,
+                "resultado_final": "",
+                "concluinte": "",
+                "observacao": "Matrícula inicial",
+            },
+            follow=True,
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(Matricula.objects.filter(aluno=self.aluno, turma=self.turma).exists())
+
+
+class MatrizModelosOficiaisViewTestCase(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.admin = user_model.objects.create_superuser(
+            username="admin_modelos_matriz",
+            password="123456",
+            email="admin_modelos_matriz@local",
+        )
+        profile = getattr(self.admin, "profile", None)
+        if profile:
+            profile.must_change_password = False
+            profile.save(update_fields=["must_change_password"])
+        self.client.force_login(self.admin)
+
+        self.municipio = Municipio.objects.create(nome="Cidade Modelos", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="SEMED Modelos")
+        self.unidade_a = Unidade.objects.create(
+            secretaria=self.secretaria,
+            nome="Escola Modelo A",
+            tipo=Unidade.Tipo.EDUCACAO,
+        )
+        self.unidade_b = Unidade.objects.create(
+            secretaria=self.secretaria,
+            nome="Escola Modelo B",
+            tipo=Unidade.Tipo.EDUCACAO,
+        )
+
+    def test_aplicar_modelo_oficial_em_lote(self):
+        resp = self.client.post(
+            reverse("educacao:matriz_modelos"),
+            data={
+                "_action": "aplicar_oficial",
+                "oficial-rede_modelo": "MUNICIPAL",
+                "oficial-ano_referencia": "2026",
+                "oficial-secretaria": str(self.secretaria.pk),
+                "oficial-sobrescrever_existentes": "",
+            },
+            follow=True,
+        )
+        self.assertEqual(resp.status_code, 200)
+
+        total_a = MatrizCurricular.objects.filter(unidade=self.unidade_a, ano_referencia=2026).count()
+        total_b = MatrizCurricular.objects.filter(unidade=self.unidade_b, ano_referencia=2026).count()
+        self.assertGreaterEqual(total_a, 14)
+        self.assertGreaterEqual(total_b, 14)
+
+        matriz_1ano = MatrizCurricular.objects.filter(
+            unidade=self.unidade_a,
+            ano_referencia=2026,
+            etapa_base=MatrizCurricular.EtapaBase.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=MatrizCurricular.SerieAno.FUNDAMENTAL_1,
+        ).first()
+        self.assertIsNotNone(matriz_1ano)
+        self.assertTrue(matriz_1ano.componentes.filter(componente__nome="Língua Portuguesa").exists())
+
+    def test_importar_csv_modelo_aplica_em_unidade(self):
+        csv_data = "\n".join(
+            [
+                "etapa_base,serie_ano,matriz_nome,componente_nome,componente_sigla,aulas_semanais,carga_horaria_anual,ordem,area_codigo_bncc",
+                "FUNDAMENTAL_ANOS_INICIAIS,FUNDAMENTAL_4,Matriz CSV 4º Ano,Língua Portuguesa,LP,7,280,1,LP",
+                "FUNDAMENTAL_ANOS_INICIAIS,FUNDAMENTAL_4,Matriz CSV 4º Ano,Matemática,MAT,6,240,2,MA",
+            ]
+        )
+        arquivo = SimpleUploadedFile(
+            "modelo_matriz.csv",
+            csv_data.encode("utf-8"),
+            content_type="text/csv",
+        )
+
+        resp = self.client.post(
+            reverse("educacao:matriz_modelos"),
+            data={
+                "_action": "importar_csv",
+                "import-ano_referencia": "2027",
+                "import-secretaria": str(self.secretaria.pk),
+                "import-unidades": [str(self.unidade_a.pk)],
+                "import-sobrescrever_existentes": "on",
+                "import-arquivo_csv": arquivo,
+            },
+            follow=True,
+        )
+        self.assertEqual(resp.status_code, 200)
+
+        matriz = MatrizCurricular.objects.filter(
+            unidade=self.unidade_a,
+            ano_referencia=2027,
+            etapa_base=MatrizCurricular.EtapaBase.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=MatrizCurricular.SerieAno.FUNDAMENTAL_4,
+        ).first()
+        self.assertIsNotNone(matriz)
+        self.assertEqual(matriz.componentes.count(), 2)
+        self.assertTrue(matriz.componentes.filter(componente__sigla="LP").exists())
+        self.assertTrue(matriz.componentes.filter(componente__sigla="MAT").exists())
+
+
+class EstagioCrudViewTestCase(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.admin = user_model.objects.create_superuser(
+            username="admin_estagio",
+            password="123456",
+            email="admin_estagio@local",
+        )
+        profile = getattr(self.admin, "profile", None)
+        if profile:
+            profile.must_change_password = False
+            profile.save(update_fields=["must_change_password"])
+        self.client.force_login(self.admin)
+
+        self.municipio = Municipio.objects.create(nome="Cidade Estágio", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="SEMED Estágio")
+        self.unidade = Unidade.objects.create(
+            secretaria=self.secretaria,
+            nome="Escola Estágio",
+            tipo=Unidade.Tipo.EDUCACAO,
+        )
+        self.turma = Turma.objects.create(
+            unidade=self.unidade,
+            nome="9A",
+            ano_letivo=2026,
+            turno=Turma.Turno.MANHA,
+            modalidade=Turma.Modalidade.REGULAR,
+            etapa=Turma.Etapa.FUNDAMENTAL_ANOS_FINAIS,
+            serie_ano=Turma.SerieAno.FUNDAMENTAL_9,
+            ativo=True,
+        )
+        self.aluno = Aluno.objects.create(nome="Aluno Estágio")
+        self.matricula = Matricula.objects.create(aluno=self.aluno, turma=self.turma, situacao=Matricula.Situacao.ATIVA)
+
+    def test_fluxo_create_list_update_estagio(self):
+        resp_create = self.client.post(
+            reverse("educacao:estagio_create"),
+            data={
+                "aluno": str(self.aluno.pk),
+                "matricula": str(self.matricula.pk),
+                "turma": str(self.turma.pk),
+                "unidade": str(self.unidade.pk),
+                "tipo": Estagio.Tipo.OBRIGATORIO,
+                "situacao": Estagio.Situacao.EM_ANALISE,
+                "concedente_nome": "Hospital Municipal",
+                "concedente_cnpj": "12.345.678/0001-90",
+                "supervisor_nome": "Maria Supervisora",
+                "orientador": str(self.admin.pk),
+                "data_inicio_prevista": "2026-03-10",
+                "data_fim_prevista": "2026-06-30",
+                "carga_horaria_total": "160",
+                "carga_horaria_cumprida": "0",
+                "equivalencia_solicitada": "",
+                "equivalencia_aprovada": "",
+                "observacao": "Primeiro registro de estágio.",
+                "ativo": "on",
+            },
+            follow=True,
+        )
+        self.assertEqual(resp_create.status_code, 200)
+        self.assertEqual(Estagio.objects.count(), 1)
+        estagio = Estagio.objects.first()
+        self.assertEqual(estagio.concedente_nome, "Hospital Municipal")
+
+        resp_list = self.client.get(reverse("educacao:estagio_list"))
+        self.assertEqual(resp_list.status_code, 200)
+        self.assertContains(resp_list, "Hospital Municipal")
+
+        resp_update = self.client.post(
+            reverse("educacao:estagio_update", args=[estagio.pk]),
+            data={
+                "aluno": str(self.aluno.pk),
+                "matricula": str(self.matricula.pk),
+                "turma": str(self.turma.pk),
+                "unidade": str(self.unidade.pk),
+                "tipo": Estagio.Tipo.NAO_OBRIGATORIO,
+                "situacao": Estagio.Situacao.APROVADO,
+                "concedente_nome": "Hospital Municipal",
+                "concedente_cnpj": "12.345.678/0001-90",
+                "supervisor_nome": "Maria Supervisora",
+                "orientador": str(self.admin.pk),
+                "data_inicio_prevista": "2026-03-10",
+                "data_fim_prevista": "2026-06-30",
+                "data_inicio_real": "2026-03-12",
+                "data_fim_real": "",
+                "carga_horaria_total": "160",
+                "carga_horaria_cumprida": "20",
+                "equivalencia_solicitada": "on",
+                "equivalencia_aprovada": "",
+                "observacao": "Aprovado para início.",
+                "ativo": "on",
+            },
+            follow=True,
+        )
+        self.assertEqual(resp_update.status_code, 200)
+        estagio.refresh_from_db()
+        self.assertEqual(estagio.tipo, Estagio.Tipo.NAO_OBRIGATORIO)
+        self.assertEqual(estagio.situacao, Estagio.Situacao.APROVADO)
+        self.assertEqual(estagio.carga_horaria_cumprida, 20)
+
+    def test_model_rejeita_equivalencia_aprovada_sem_solicitacao(self):
+        estagio = Estagio(
+            aluno=self.aluno,
+            matricula=self.matricula,
+            turma=self.turma,
+            unidade=self.unidade,
+            tipo=Estagio.Tipo.OBRIGATORIO,
+            situacao=Estagio.Situacao.EM_ANALISE,
+            concedente_nome="Empresa XPTO",
+            carga_horaria_total=120,
+            carga_horaria_cumprida=10,
+            equivalencia_solicitada=False,
+            equivalencia_aprovada=True,
+        )
+        with self.assertRaises(ValidationError):
+            estagio.full_clean()

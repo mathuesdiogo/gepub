@@ -1,117 +1,242 @@
 {% extends "core/base.html" %}
 {% load static %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/pages/billing.css' %}">
-{% endblock %}
-
 {% block content %}
-<div class="card"><div class="card__body">
+<div class="card billing-page billing-page--meu-plano"><div class="card__body billing-page__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
   {% if municipios %}
-    <form method="get" class="billing-filter-form">
-      <label class="small" for="id_municipio">Município</label>
-      <select id="id_municipio" name="municipio" onchange="this.form.submit()">
-        {% for m in municipios %}
-          <option value="{{ m.pk }}" {% if m.pk == municipio.pk %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
-        {% endfor %}
-      </select>
-    </form>
+    <section class="billing-section billing-section--compact">
+      <form method="get" class="billing-filter-form">
+        <label class="small" for="id_municipio">Município</label>
+        <select id="id_municipio" name="municipio" class="gp-select" onchange="this.form.submit()">
+          {% for m in municipios %}
+            <option value="{{ m.pk }}" {% if m.pk == municipio.pk %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+          {% endfor %}
+        </select>
+      </form>
+    </section>
   {% endif %}
 
-  <div class="billing-summary-grid">
-    <div class="billing-box">
-      <div class="billing-box__label">Plano atual</div>
-      <div class="billing-box__value">{{ assinatura.plano.nome }}</div>
-      <div class="billing-box__meta">R$ {{ assinatura.valor_base_mensal }} / mês</div>
-    </div>
-    <div class="billing-box">
-      <div class="billing-box__label">Vigência</div>
-      <div class="billing-box__value">{{ assinatura.inicio_vigencia|date:"d/m/Y" }} {% if assinatura.fim_vigencia %}até {{ assinatura.fim_vigencia|date:"d/m/Y" }}{% else %}• sem data final{% endif %}</div>
-      <div class="billing-box__meta">Reajuste: {{ assinatura.indice_reajuste }}</div>
-    </div>
-    <div class="billing-box">
-      <div class="billing-box__label">Status</div>
-      <div class="billing-box__value">{{ assinatura.get_status_display }}</div>
-      <div class="billing-box__meta">Atualizado em {{ assinatura.atualizado_em|date:"d/m/Y H:i" }}</div>
-    </div>
-  </div>
-
-  <h3>Limites e consumo</h3>
-  <div class="billing-metrics-grid">
-    {% for item in metricas %}
-      <div class="billing-metric-card">
-        <div class="billing-metric-card__head">
-          <strong>{{ item.label }}</strong>
-          <span>{{ item.usado }}{% if item.limite is not None %} / {{ item.limite }}{% else %} / ilimitado{% endif %}</span>
-        </div>
-        {% if item.percentual is not None %}
-          <div class="billing-progress billing-progress--{{ item.classe }}">
-            <span style="width: {{ item.percentual }}%"></span>
-          </div>
-          <div class="small">{{ item.percentual }}% utilizado{% if item.disponivel is not None %} • disponível: {{ item.disponivel }}{% endif %}</div>
-        {% else %}
-          <div class="small">Uso monitorado sem teto contratual.</div>
-        {% endif %}
+  <section class="billing-hero-grid">
+    <article class="billing-hero-card">
+      <p class="billing-hero-card__kicker">Plano contratado</p>
+      <h2 class="billing-hero-card__title">{{ plano_atual.nome_comercial|default:assinatura.plano.nome }}</h2>
+      <p class="billing-hero-card__desc">{{ plano_atual.descricao_comercial }}</p>
+      <div class="billing-hero-card__pills">
+        <span class="billing-pill">R$ {{ assinatura.valor_base_mensal }} / mês</span>
+        <span class="billing-pill billing-pill--soft">{{ assinatura.get_status_display }}</span>
+        <span class="billing-pill billing-pill--soft">Reajuste {{ assinatura.indice_reajuste }}</span>
       </div>
-    {% endfor %}
-  </div>
+    </article>
+    <article class="billing-status-card">
+      <div class="billing-status-card__row">
+        <div>
+          <p class="billing-status-card__label">Vigência</p>
+          <p class="billing-status-card__value">{{ assinatura.inicio_vigencia|date:"d/m/Y" }} {% if assinatura.fim_vigencia %}até {{ assinatura.fim_vigencia|date:"d/m/Y" }}{% else %}• sem data final{% endif %}</p>
+        </div>
+      </div>
+      <div class="billing-status-card__row">
+        <div>
+          <p class="billing-status-card__label">Última atualização</p>
+          <p class="billing-status-card__value">{{ assinatura.atualizado_em|date:"d/m/Y H:i" }}</p>
+        </div>
+      </div>
+      <div class="billing-status-card__row billing-status-card__row--links">
+        <a href="{{ plano_atual.links.contratacao }}" target="_blank" rel="noopener">Documento de contratação</a>
+        <a href="{{ plano_atual.links.servicos }}" target="_blank" rel="noopener">Prestação de serviços</a>
+      </div>
+    </article>
+  </section>
 
-  <h3>Solicitações de upgrade</h3>
-  <div class="table-shell">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Data</th>
-          <th>Tipo</th>
-          <th>Quantidade</th>
-          <th>Valor mensal</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for s in solicitacoes %}
-          <tr>
-            <td>{{ s.solicitado_em|date:"d/m/Y H:i" }}</td>
-            <td>{{ s.get_tipo_display }}</td>
-            <td>{{ s.quantidade }}</td>
-            <td>R$ {{ s.valor_mensal_calculado }}</td>
-            <td>{{ s.get_status_display }}</td>
-          </tr>
-        {% empty %}
-          <tr><td colspan="5">Nenhuma solicitação registrada.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+  <section class="billing-section billing-section--dense">
+    <div class="billing-section__head">
+      <h3>Resumo do contrato</h3>
+      <p>Benefícios, limites e cobertura atual concentrados em uma leitura única.</p>
+    </div>
+    <div class="billing-overview-grid">
+      <article class="billing-box billing-box--feature billing-box--stack">
+        <div class="billing-box__label">Benefícios habilitados</div>
+        <div class="billing-list">
+          {% for item in plano_atual.beneficios %}
+            <div class="billing-list__item"><i class="fa-solid fa-circle-check"></i> {{ item }}</div>
+          {% empty %}
+            <div class="billing-list__item">Sem benefícios configurados.</div>
+          {% endfor %}
+        </div>
+      </article>
+      <article class="billing-box billing-box--feature billing-box--stack">
+        <div class="billing-box__label">Limites e documentos</div>
+        <dl class="billing-kv-list">
+          <div><dt>Secretarias</dt><dd>{{ plano_atual.limites.secretarias }}</dd></div>
+          <div><dt>Usuários</dt><dd>{{ plano_atual.limites.usuarios }}</dd></div>
+          <div><dt>Alunos</dt><dd>{{ plano_atual.limites.alunos }}</dd></div>
+          <div><dt>Atendimentos/ano</dt><dd>{{ plano_atual.limites.atendimentos_ano }}</dd></div>
+        </dl>
+        <div class="billing-inline-links">
+          <a class="gp-anchor-link" href="{{ plano_atual.links.contratacao }}" target="_blank" rel="noopener">Documento de contratação</a>
+          <a class="gp-anchor-link" href="{{ plano_atual.links.servicos }}" target="_blank" rel="noopener">Prestação de serviços</a>
+        </div>
+      </article>
+    </div>
+  </section>
 
-  <h3>Faturas</h3>
-  <div class="table-shell">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Competência</th>
-          <th>Valor</th>
-          <th>Status</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for f in faturas %}
+  <section class="billing-section billing-section--dense">
+    <div class="billing-section__head">
+      <h3>Uso e capacidade operacional</h3>
+      <p>Consumo contratual e medidores por módulo em um único painel.</p>
+    </div>
+    <div class="billing-usage-grid">
+      <article class="billing-box billing-box--stack">
+        <h4 class="billing-subtitle">Limites e consumo</h4>
+        <div class="billing-metrics-grid billing-metrics-grid--compact">
+          {% for item in metricas %}
+            <article class="billing-metric-card">
+              <div class="billing-metric-card__head">
+                <strong>{{ item.label }}</strong>
+                <span>{{ item.usado }}{% if item.limite is not None %} / {{ item.limite }}{% else %} / ilimitado{% endif %}</span>
+              </div>
+              {% if item.percentual is not None %}
+                <div class="billing-progress billing-progress--{{ item.classe }}">
+                  <span style="width: {{ item.percentual }}%"></span>
+                </div>
+                <div class="small">{{ item.percentual }}% utilizado{% if item.disponivel is not None %} • disponível: {{ item.disponivel }}{% endif %}</div>
+              {% else %}
+                <div class="small">Uso monitorado sem teto contratual.</div>
+              {% endif %}
+            </article>
+          {% endfor %}
+        </div>
+      </article>
+      <article class="billing-box billing-box--stack">
+        <h4 class="billing-subtitle">Medidores por módulo</h4>
+        <div class="billing-module-list">
+          {% for item in modulo_usage %}
+            <div class="billing-module-item">
+              <div class="billing-module-item__head">
+                <strong>{{ item.modulo }}</strong>
+                <span>{{ item.principal }} {{ item.principal_label }}</span>
+              </div>
+              <p class="small">{{ item.descricao }}</p>
+              <p class="small">{{ item.secundario }} {{ item.secundario_label }}</p>
+            </div>
+          {% endfor %}
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="billing-section billing-section--dense">
+    <div class="billing-section__head">
+      <h3>Comparativo e operação financeira</h3>
+      <p>Comparação dos planos disponíveis e histórico financeiro sem fragmentação em múltiplos blocos.</p>
+    </div>
+    <div class="billing-table-shell billing-compare-shell">
+      <table class="table billing-compare-table">
+        <thead>
           <tr>
-            <td>{{ f.competencia|date:"m/Y" }}</td>
-            <td>R$ {{ f.valor_total }}</td>
-            <td>{{ f.get_status_display }}</td>
-            <td>
-              <a href="{% url 'billing:fatura_pdf' f.pk %}">PDF</a>
-            </td>
+            <th>Plano</th>
+            <th>Cobertura</th>
+            <th>Destaques</th>
+            <th>Documentos</th>
           </tr>
-        {% empty %}
-          <tr><td colspan="4">Nenhuma fatura gerada.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+        </thead>
+        <tbody>
+          {% for item in planos_catalogo %}
+            <tr class="{% if item.is_current %}billing-compare-table__row--current{% endif %}">
+              <td>
+                <strong>{{ item.nome_comercial }}</strong>
+                <div class="small">{{ item.descricao_comercial }}</div>
+                {% if item.is_current %}
+                  <span class="billing-plan-badge">Plano atual</span>
+                {% endif %}
+              </td>
+              <td>
+                {% for f in item.features_habilitadas %}
+                  <span class="billing-pill billing-pill--soft">{{ f }}</span>
+                {% empty %}
+                  <span class="small">Sem cobertura extra</span>
+                {% endfor %}
+              </td>
+              <td>
+                {% for b in item.especiais %}
+                  <div class="small">• {{ b }}</div>
+                {% empty %}
+                  <span class="small">Sem destaque adicional.</span>
+                {% endfor %}
+              </td>
+              <td>
+                <a class="gp-anchor-link" href="{{ item.links.contratacao }}" target="_blank" rel="noopener">Contratação</a><br>
+                <a class="gp-anchor-link" href="{{ item.links.servicos }}" target="_blank" rel="noopener">Serviços</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="billing-data-grid">
+      <article class="billing-box billing-box--stack">
+        <h4 class="billing-subtitle">Solicitações de upgrade</h4>
+        <div class="billing-table-shell">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Tipo</th>
+                <th>Quantidade</th>
+                <th>Valor mensal</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for s in solicitacoes %}
+                <tr>
+                  <td>{{ s.solicitado_em|date:"d/m/Y H:i" }}</td>
+                  <td>{{ s.get_tipo_display }}</td>
+                  <td>{{ s.quantidade }}</td>
+                  <td>R$ {{ s.valor_mensal_calculado }}</td>
+                  <td>{{ s.get_status_display }}</td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="5">Nenhuma solicitação registrada.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </article>
+      <article class="billing-box billing-box--stack">
+        <h4 class="billing-subtitle">Faturas</h4>
+        <div class="billing-table-shell">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Competência</th>
+                <th>Valor</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for f in faturas %}
+                <tr>
+                  <td>{{ f.competencia|date:"m/Y" }}</td>
+                  <td>R$ {{ f.valor_total }}</td>
+                  <td>{{ f.get_status_display }}</td>
+                  <td>
+                    <a class="gp-button gp-button--outline gp-button--sm" href="{% url 'billing:fatura_pdf' f.pk %}">
+                      <i class="fa-solid fa-file-pdf"></i> PDF
+                    </a>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="4">Nenhuma fatura gerada.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </article>
+    </div>
+  </section>
 </div></div>
 {% endblock %}

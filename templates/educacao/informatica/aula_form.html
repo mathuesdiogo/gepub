@@ -1,0 +1,24 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}{% if mode == 'create' %}Nova Aula{% else %}Editar Aula{% endif %} • Informática • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+  <div class="gp-card">
+    <div class="gp-card__body">
+      {% if mode == 'create' %}
+        {% include "core/partials/components/layout/page_head.html" with title="Nova aula" subtitle="Registro de conteúdo e abertura da frequência" actions=actions %}
+      {% else %}
+        {% include "core/partials/components/layout/page_head.html" with title="Editar aula" subtitle=aula.turma.codigo actions=actions %}
+      {% endif %}
+
+      <form method="post" enctype="multipart/form-data" class="gp-form form-shell">
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="flash flash--error">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="form-shell__fields">{{ form.as_p }}</div>
+        <div class="form-shell__actions">
+          <button type="submit" class="gp-button gp-button--primary">Salvar aula</button>
+          <a class="gp-button gp-button--outline" href="{% url 'educacao:informatica_frequencia' %}">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

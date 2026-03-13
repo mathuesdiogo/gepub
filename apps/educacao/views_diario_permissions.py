@@ -1,9 +1,9 @@
-from apps.core.rbac import scope_filter_turmas
+from apps.core.rbac import is_professor_profile_role, scope_filter_turmas
 from .models import Turma
 
 
 def is_professor(user) -> bool:
-    return getattr(getattr(user, "profile", None), "role", "") == "PROFESSOR"
+    return is_professor_profile_role(getattr(getattr(user, "profile", None), "role", None))
 
 
 def can_edit_diario(user, diario) -> bool:

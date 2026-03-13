@@ -1,0 +1,98 @@
+/* Overrides finais do tema Inclusão para superfícies do módulo Educação */
+html[data-theme="inclusao"] .educacao-module .module-menu {
+  background: var(--gp-surface);
+  border-color: var(--gp-border);
+  box-shadow: none;
+  color: var(--gp-text-primary);
+}
+
+html[data-theme="inclusao"] .educacao-module .module-menu__title {
+  background: color-mix(in srgb, var(--gp-primary) 10%, var(--gp-surface));
+  border-color: var(--gp-border);
+  color: var(--gp-text-primary);
+}
+
+html[data-theme="inclusao"] .educacao-module .module-menu__title i {
+  background: color-mix(in srgb, var(--gp-primary) 16%, var(--gp-surface));
+  color: var(--gp-primary);
+}
+
+html[data-theme="inclusao"] .educacao-module .module-menu__subtitle,
+html[data-theme="inclusao"] .educacao-module .module-menu__group-title {
+  color: var(--gp-text-secondary);
+}
+
+html[data-theme="inclusao"] .educacao-module .module-menu__link {
+  color: var(--gp-text-primary);
+}
+
+html[data-theme="inclusao"] .educacao-module .module-menu__link:hover {
+  background: color-mix(in srgb, var(--gp-primary) 10%, var(--gp-surface));
+  border-color: var(--gp-border);
+}
+
+html[data-theme="inclusao"] .educacao-module .module-menu__link.is-active {
+  background: var(--gp-primary);
+  border-color: var(--gp-primary);
+  color: #000;
+}
+
+html[data-theme="inclusao"] .educacao-module .module-menu__link.is-active i {
+  color: #000;
+}
+
+html[data-theme="inclusao"] .educacao-module .gp-card {
+  background: var(--gp-surface);
+  border-color: var(--gp-border);
+  box-shadow: none;
+}
+
+html[data-theme="inclusao"] .educacao-module .page-head {
+  border-bottom-color: var(--gp-border);
+}
+
+html[data-theme="inclusao"] .educacao-module .page-head__title,
+html[data-theme="inclusao"] .educacao-module .page-head__subtitle,
+html[data-theme="inclusao"] .educacao-module .section__title,
+html[data-theme="inclusao"] .educacao-module .section__meta {
+  color: var(--gp-text-primary);
+}
+
+html[data-theme="inclusao"] .educacao-module .gp-table__filters,
+html[data-theme="inclusao"] .educacao-module .filter-bar {
+  background: color-mix(in srgb, var(--gp-primary) 6%, var(--gp-surface));
+  border-color: var(--gp-border);
+}
+
+html[data-theme="inclusao"] .educacao-module .gp-table__filters input,
+html[data-theme="inclusao"] .educacao-module .gp-table__filters select,
+html[data-theme="inclusao"] .educacao-module .filter-bar input,
+html[data-theme="inclusao"] .educacao-module .filter-bar select {
+  background: var(--gp-surface);
+  border-color: var(--gp-border);
+  color: var(--gp-text-primary);
+}
+
+html[data-theme="inclusao"] .educacao-module .gp-table {
+  background: var(--gp-surface);
+  border-color: var(--gp-border);
+}
+
+html[data-theme="inclusao"] .educacao-module .gp-table thead th {
+  background: color-mix(in srgb, var(--gp-primary) 10%, var(--gp-surface));
+  color: var(--gp-text-primary);
+  border-bottom-color: var(--gp-border);
+}
+
+html[data-theme="inclusao"] .educacao-module .gp-table tbody td {
+  color: var(--gp-text-primary);
+  border-bottom-color: var(--gp-border);
+}
+
+html[data-theme="inclusao"] .educacao-module .gp-table tbody tr:hover td {
+  background: color-mix(in srgb, var(--gp-primary) 12%, var(--gp-surface));
+}
+
+html[data-theme="inclusao"] .educacao-module .gp-table tbody td a {
+  color: var(--gp-primary);
+}

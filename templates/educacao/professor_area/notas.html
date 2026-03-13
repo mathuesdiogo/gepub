@@ -1,0 +1,29 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Notas e Avaliações • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage gp-professor-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <article class="gp-student-stage__card">
+    <form method="get" class="gp-form gp-form--smart gp-professor-filter-row">
+      <div class="gp-form-group gp-field--full">
+        <label class="gp-form-label" for="id_q">Buscar avaliação</label>
+        <input id="id_q" type="text" class="gp-input" name="q" value="{{ q }}" placeholder="Título, turma ou período" />
+      </div>
+      <div class="gp-form-group">
+        <label class="gp-form-label">&nbsp;</label>
+        <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
+      </div>
+    </form>
+
+    {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Sem avaliações" empty_text="Nenhuma avaliação cadastrada para esse filtro." %}
+  </article>
+
+  <article class="gp-student-stage__card">
+    <h3>Turmas de Informática</h3>
+    <p class="gp-text-muted">Gerencie avaliações, lançamento de notas e frequência das turmas de informática no mesmo menu do professor.</p>
+    {% include "core/partials/components/data/table_shell.html" with headers=headers_informatica rows=rows_informatica page_obj=None empty_title="Sem turmas de informática" empty_text="Nenhuma turma de informática vinculada ao professor." %}
+  </article>
+</section>
+{% endblock %}

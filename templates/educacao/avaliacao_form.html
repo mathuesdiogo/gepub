@@ -1,16 +1,16 @@
 {% extends "educacao/base_modulo.html" %}
 {% block title %}Nova Avaliação • Educação • GEPUB{% endblock %}
 {% block module_content %}
-<div class="card"><div class="card__body">
+<div class="gp-card"><div class="gp-card__body">
 {% include "core/partials/components/layout/page_head.html" with title="Nova Avaliação" subtitle="Vincule turma, período e componente" actions=actions %}
 
-<form method="post" action="{{ action_url }}" class="form" id="avaliacao-form">
+<form method="post" action="{{ action_url }}" class="gp-form" id="avaliacao-form">
   {% csrf_token %}
 
   <div class="form__grid">
     <div class="form__field">
       <label>Turma</label>
-      <select name="turma" required>
+      <select class="gp-select" name="turma" required>
         <option value="">—</option>
         {% for t in turmas %}
           <option value="{{ t.id }}">{{ t.nome }} • {{ t.ano_letivo }} • {{ t.unidade.nome }}</option>
@@ -20,7 +20,7 @@
 
     <div class="form__field">
       <label>Período</label>
-      <select name="periodo" required>
+      <select class="gp-select" name="periodo" required>
         <option value="">—</option>
         {% for p in periodos %}
           <option value="{{ p.id }}">{{ p }}</option>
@@ -30,7 +30,7 @@
 
     <div class="form__field">
       <label>Componente</label>
-      <select name="componente" required>
+      <select class="gp-select" name="componente" required>
         <option value="">—</option>
         {% for c in componentes %}
           <option value="{{ c.id }}">{{ c.nome }}</option>
@@ -40,23 +40,23 @@
 
     <div class="form__field">
       <label>Título</label>
-      <input name="titulo" required placeholder="Ex.: Prova 1" />
+      <input class="gp-input" name="titulo" required placeholder="Ex.: Prova 1" />
     </div>
 
     <div class="form__field">
       <label>Peso</label>
-      <input name="peso" value="1" />
+      <input class="gp-input" name="peso" value="1" />
     </div>
 
     <div class="form__field">
       <label>Valor máximo</label>
-      <input name="valor_maximo" value="10" />
+      <input class="gp-input" name="valor_maximo" value="10" />
     </div>
   </div>
 
   <div class="form__actions">
-    <a class="btn btn--ghost" href="{{ cancel_url }}">Cancelar</a>
-    <button class="btn btn-primary" type="submit">{{ submit_label }}</button>
+    <a class="gp-button gp-button--outline" href="{{ cancel_url }}">Cancelar</a>
+    <button class="gp-button gp-button--primary" type="submit">{{ submit_label }}</button>
   </div>
 </form>
 

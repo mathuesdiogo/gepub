@@ -1,0 +1,12 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Cursos de Informática • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+  <div class="gp-card">
+    <div class="gp-card__body">
+      {% include "core/partials/components/layout/page_head.html" with title="Cursos de Informática" subtitle="Configuração da oferta e das regras gerais" actions=actions %}
+      {% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Buscar curso..." action_url=request.path clear_url=request.path has_filters=False %}
+      {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q empty_title="Nenhum curso cadastrado" empty_text="Cadastre o curso de informática para iniciar a operação." %}
+    </div>
+  </div>
+{% endblock %}

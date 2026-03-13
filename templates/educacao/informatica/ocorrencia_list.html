@@ -1,0 +1,29 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Ocorrências • Informática • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+  <div class="gp-card">
+    <div class="gp-card__body">
+      {% include "core/partials/components/layout/page_head.html" with title="Ocorrências" subtitle="Registros operacionais e pedagógicos" actions=None %}
+
+      <table class="table gp-table--striped gp-table--hover">
+        <thead><tr><th>Data</th><th>Turma</th><th>Tipo</th><th>Aluno</th><th>Descrição</th></tr></thead>
+        <tbody>
+          {% for item in page_obj %}
+            <tr>
+              <td>{{ item.criado_em|date:"d/m/Y H:i" }}</td>
+              <td>{{ item.turma.codigo }}</td>
+              <td>{{ item.get_tipo_display }}</td>
+              <td>{% if item.aluno %}{{ item.aluno.nome }}{% else %}—{% endif %}</td>
+              <td>{{ item.descricao|truncatechars:120 }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5">Sem ocorrências registradas.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      {% include "core/partials/components/data/pagination.html" with page_obj=page_obj q='' %}
+    </div>
+  </div>
+{% endblock %}

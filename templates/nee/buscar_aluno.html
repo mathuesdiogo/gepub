@@ -6,16 +6,18 @@
 
 {% include "core/partials/components/layout/page_head.html" with title="Buscar aluno (NEE)" subtitle="Aparecem apenas alunos com necessidade ativa. Use o autocomplete ou pesquise pelo nome." actions=actions %}
 
-<form method="get" class="form u-relative">
-  <div class="form-row">
-    <input id="nee-search" type="text" name="q" value="{{ q }}" placeholder="Digite o nome do aluno (min 2 letras)..." class="input" autocomplete="off">
-    <button type="submit" class="btn">Buscar</button>
+<form method="get" class="filter-bar gp-table__filters u-relative">
+  <div class="filter-bar__field gp-form-group">
+    <label class="small gp-form-label" for="nee-search">Buscar</label>
+    <input id="nee-search" type="text" name="q" value="{{ q }}" placeholder="Digite o nome do aluno (min 2 letras)..." class="gp-input" autocomplete="off">
+    <div id="nee-autocomplete" class="dropdown autocomplete-panel">
+      <div class="card"><div class="card__body autocomplete-panel__body">
+        <div id="nee-autocomplete-items"></div>
+      </div></div>
+    </div>
   </div>
-
-  <div id="nee-autocomplete" class="dropdown autocomplete-panel">
-    <div class="card"><div class="card__body autocomplete-panel__body">
-      <div id="nee-autocomplete-items"></div>
-    </div></div>
+  <div class="filter-bar__actions">
+    <button type="submit" class="gp-button gp-button--primary">Buscar</button>
   </div>
 </form>
 
@@ -50,17 +52,17 @@
   {% if page_obj %}
     <div class="pagination pagination-inline">
       {% if page_obj.has_previous %}
-        <a class="btn btn--ghost" href="?q={{ q|urlencode }}&page={{ page_obj.previous_page_number }}">← Anterior</a>
+        <a class="gp-button gp-button--outline" href="?q={{ q|urlencode }}&page={{ page_obj.previous_page_number }}">← Anterior</a>
       {% else %}
-        <span class="btn btn--ghost pagination-inline__disabled">← Anterior</span>
+        <span class="gp-button gp-button--outline pagination-inline__disabled" aria-disabled="true">← Anterior</span>
       {% endif %}
 
       <span class="u-opacity-80">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
 
       {% if page_obj.has_next %}
-        <a class="btn btn--ghost" href="?q={{ q|urlencode }}&page={{ page_obj.next_page_number }}">Próxima →</a>
+        <a class="gp-button gp-button--outline" href="?q={{ q|urlencode }}&page={{ page_obj.next_page_number }}">Próxima →</a>
       {% else %}
-        <span class="btn btn--ghost pagination-inline__disabled">Próxima →</span>
+        <span class="gp-button gp-button--outline pagination-inline__disabled" aria-disabled="true">Próxima →</span>
       {% endif %}
     </div>
   {% endif %}

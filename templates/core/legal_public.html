@@ -1,0 +1,30 @@
+{% extends "core/public_site_base.html" %}
+
+{% block public_page_content %}
+<section class="ps-hero">
+  <p class="ps-kicker">Governança e conformidade</p>
+  <h1>{{ page_title }}</h1>
+  <p>{{ page_subtitle }}</p>
+  <small class="ps-updated">Última atualização: {{ last_update }}</small>
+</section>
+
+<section class="ps-section ps-legal">
+  {% for section in sections %}
+    <article class="ps-card ps-legal__item">
+      <h2>{{ section.title }}</h2>
+
+      {% for paragraph in section.paragraphs %}
+        <p>{{ paragraph }}</p>
+      {% endfor %}
+
+      {% if section.items %}
+        <ul>
+          {% for item in section.items %}
+            <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </article>
+  {% endfor %}
+</section>
+{% endblock %}

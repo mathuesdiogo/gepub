@@ -16,17 +16,17 @@
     </section>
 
     <section class="carteira-public__search">
-      <form method="get" action="{% url 'educacao:carteira_verificar_lookup' %}">
+      <form class="gp-form" method="get" action="{% url 'educacao:carteira_verificar_lookup' %}">
         <input
-          class="input"
+          class="gp-input"
           type="text"
           name="codigo"
           value="{{ busca }}"
           placeholder="Ex.: MAT-000123 ou 5f53d76f-2dd6-46a1-bd75-70b1c3f6a2db"
           autocomplete="off"
         >
-        <button class="btn btn-primary" type="submit">Validar</button>
-        <a class="btn btn--ghost" href="{% url 'educacao:carteira_verificar_lookup' %}">Limpar</a>
+        <button class="gp-button gp-button--primary" type="submit">Validar</button>
+        <a class="gp-button gp-button--outline" href="{% url 'educacao:carteira_verificar_lookup' %}">Limpar</a>
       </form>
     </section>
 

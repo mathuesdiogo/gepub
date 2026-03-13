@@ -159,13 +159,17 @@
   /* Focus legado */
   --focus: var(--focus-ring);
 
-  /* Sidebar legado (por enquanto compatível; vamos redesenhar depois) */
-  --sidebar-bg: #FFFFFF;
-  --sidebar-surface: rgba(31,95,191,.08);
-  --sidebar-surface-2: rgba(31,95,191,.12);
-  --sidebar-border: rgba(17,24,39,.10);
-  --sidebar-text: rgba(17,24,39,.92);
-  --sidebar-muted: rgba(75,85,99,.85);
+  /* Sidebar legado (agora ligado aos tokens do tema ativo) */
+  --sidebar-bg-start: var(--gp-sidebar-bg-start, color-mix(in srgb, var(--gp-surface) 94%, var(--gp-primary) 6%));
+  --sidebar-bg-end: var(--gp-sidebar-bg-end, color-mix(in srgb, var(--gp-surface) 88%, var(--gp-secondary) 12%));
+  --sidebar-overlay-1: var(--gp-sidebar-overlay-1, color-mix(in srgb, var(--gp-primary) 16%, transparent));
+  --sidebar-overlay-2: var(--gp-sidebar-overlay-2, color-mix(in srgb, var(--gp-info) 12%, transparent));
+  --sidebar-bg: linear-gradient(180deg, var(--sidebar-bg-start) 0%, var(--sidebar-bg-end) 100%);
+  --sidebar-surface: var(--gp-sidebar-surface, color-mix(in srgb, var(--gp-primary) 10%, var(--gp-surface)));
+  --sidebar-surface-2: var(--gp-sidebar-surface-2, color-mix(in srgb, var(--gp-primary) 16%, var(--gp-surface)));
+  --sidebar-border: var(--gp-sidebar-border, color-mix(in srgb, var(--gp-border) 70%, transparent));
+  --sidebar-text: var(--gp-sidebar-text, var(--gp-text-primary));
+  --sidebar-muted: var(--gp-sidebar-muted, var(--gp-text-secondary));
 }
 
 /* Estado recolhido */

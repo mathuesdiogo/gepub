@@ -2,8 +2,8 @@
 {% block title %}Dashboard • Saúde • GEPUB{% endblock %}
 
 {% block module_content %}
-<div class="card saude-dashboard">
-  <div class="card__body">
+<div class="gp-card saude-dashboard">
+  <div class="gp-card__body">
 
     {% include "core/partials/components/layout/page_head.html" with title="Saúde" subtitle="Painel do módulo de Saúde" actions=None %}
 
@@ -19,17 +19,18 @@
           <span class="saude-chip"><i class="fa-solid fa-hospital"></i>{{ unidades_total }} unidades</span>
           <span class="saude-chip"><i class="fa-solid fa-user-doctor"></i>{{ profissionais_total }} profissionais ativos</span>
           <span class="saude-chip"><i class="fa-solid fa-notes-medical"></i>{{ atendimentos_total }} atendimentos</span>
+          <span class="saude-chip"><i class="fa-solid fa-hourglass-half"></i>{{ fila_aguardando }} em fila</span>
         </div>
       </div>
       <div class="saude-hero__actions">
-        <a class="btn btn-primary" href="{% url 'saude:agenda_list' %}">
+        <a class="gp-button gp-button--primary" href="{% url 'saude:agenda_list' %}">
           <i class="fa-solid fa-calendar-days"></i><span>Ver Agenda</span>
         </a>
-        <a class="btn btn--ghost" href="{% url 'saude:atendimento_list' %}">
+        <a class="gp-button gp-button--ghost" href="{% url 'saude:atendimento_list' %}">
           <i class="fa-solid fa-notes-medical"></i><span>Ver Atendimentos</span>
         </a>
         {% if perms.saude.manage %}
-          <a class="btn btn--ghost" href="{% url 'saude:agenda_create' %}">
+          <a class="gp-button gp-button--ghost" href="{% url 'saude:agenda_create' %}">
             <i class="fa-solid fa-plus"></i><span>Novo Agendamento</span>
           </a>
         {% endif %}
@@ -90,6 +91,42 @@
         </div>
         <div class="saude-metric__icon" aria-hidden="true"><i class="fa-solid fa-user-clock"></i></div>
       </div>
+
+      <div class="saude-metric">
+        <div>
+          <div class="saude-metric__label">Agenda pendente</div>
+          <div class="saude-metric__value">{{ agendamentos_pendentes }}</div>
+          <div class="saude-metric__meta">Marcados/confirmados</div>
+        </div>
+        <div class="saude-metric__icon" aria-hidden="true"><i class="fa-solid fa-calendar-check"></i></div>
+      </div>
+
+      <div class="saude-metric">
+        <div>
+          <div class="saude-metric__label">Absenteísmo (30d)</div>
+          <div class="saude-metric__value">{{ taxa_absenteismo_30d }}%</div>
+          <div class="saude-metric__meta">{{ faltas_30d }} falta(s) no período</div>
+        </div>
+        <div class="saude-metric__icon" aria-hidden="true"><i class="fa-solid fa-person-circle-xmark"></i></div>
+      </div>
+
+      <div class="saude-metric">
+        <div>
+          <div class="saude-metric__label">Fila fora de SLA</div>
+          <div class="saude-metric__value">{{ fila_aguardando_sla }}</div>
+          <div class="saude-metric__meta">Aguardando há mais de {{ fila_sla_dias }} dias</div>
+        </div>
+        <div class="saude-metric__icon" aria-hidden="true"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      </div>
+
+      <div class="saude-metric">
+        <div>
+          <div class="saude-metric__label">Acessos prontuário (7d)</div>
+          <div class="saude-metric__value">{{ acessos_prontuario_7d }}</div>
+          <div class="saude-metric__meta">Rastreabilidade recente</div>
+        </div>
+        <div class="saude-metric__icon" aria-hidden="true"><i class="fa-solid fa-shield-halved"></i></div>
+      </div>
     </div>
 
     <section class="saude-insights">
@@ -101,6 +138,7 @@
           <li><span>Atendimentos registrados</span><strong>{{ atendimentos_total }}</strong></li>
           <li><span>Agendamentos ativos</span><strong>{{ agendamentos_total }}</strong></li>
           <li><span>Unidades em funcionamento</span><strong>{{ unidades_ativas }}</strong></li>
+          <li><span>Fila aguardando</span><strong>{{ fila_aguardando }}</strong></li>
         </ul>
       </article>
 
@@ -108,13 +146,13 @@
         <h3>Rotina da Equipe</h3>
         <p>Atalhos para ações diárias do time assistencial e de regulação.</p>
         <div class="saude-insight-actions">
-          <a class="btn btn-primary" href="{% url 'saude:agenda_list' %}">
+          <a class="gp-button gp-button--primary" href="{% url 'saude:agenda_list' %}">
             <i class="fa-solid fa-calendar-days"></i><span>Gerenciar Agenda</span>
           </a>
-          <a class="btn btn--ghost" href="{% url 'saude:fila_list' %}">
+          <a class="gp-button gp-button--ghost" href="{% url 'saude:fila_list' %}">
             <i class="fa-solid fa-people-line"></i><span>Acompanhar Fila</span>
           </a>
-          <a class="btn btn--ghost" href="{% url 'saude:relatorio_mensal' %}">
+          <a class="gp-button gp-button--ghost" href="{% url 'saude:relatorio_mensal' %}">
             <i class="fa-solid fa-chart-column"></i><span>Ver Relatório</span>
           </a>
         </div>

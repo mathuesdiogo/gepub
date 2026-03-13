@@ -1,0 +1,54 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="card"><div class="card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="alert gp-alert alert--info" style="margin-bottom:12px;">
+    Módulo em edição: <strong>{{ module.title }}</strong> • destino de publicação: <strong>Portal da Câmara</strong>.
+  </div>
+
+  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+    {% if municipios and municipios|length %}
+      <select name="municipio" class="gp-input" style="max-width:240px;">
+        {% for m in municipios %}
+          <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+    <input name="q" value="{{ q }}" class="gp-input" placeholder="Buscar em {{ module.title|lower }}" style="max-width:320px;">
+    <button class="gp-button gp-button--outline gp-button--sm" type="submit">Filtrar</button>
+  </form>
+
+  <div class="table-shell"><div class="table-shell__body">
+    <table class="table">
+      <thead>
+        <tr>
+          {% for header in headers %}
+            <th>{{ header }}</th>
+          {% endfor %}
+          <th width="180">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+          <tr>
+            {% for value in row.values %}
+              <td>{{ value }}</td>
+            {% endfor %}
+            <td>
+              <a class="gp-button gp-button--outline gp-button--sm" href="{{ row.edit_url }}?municipio={{ municipio.pk }}">Editar</a>
+              <form method="post" action="{{ row.delete_url }}?municipio={{ municipio.pk }}" style="display:inline" onsubmit="return confirm('Remover registro?');">
+                {% csrf_token %}
+                <button class="gp-button gp-button--outline gp-button--sm" type="submit">Remover</button>
+              </form>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="{{ headers|length|add:1 }}">Nenhum registro encontrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

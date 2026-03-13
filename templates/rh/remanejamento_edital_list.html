@@ -1,0 +1,65 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="gp-card"><div class="gp-card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <form method="get" class="gp-table__filters">
+    {% if municipios and municipios|length %}
+      <select name="municipio" class="gp-input">
+        {% for m in municipios %}
+          <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+    <select name="status" class="gp-input">
+      <option value="">Todos os status</option>
+      {% for key,label in status_choices %}
+        <option value="{{ key }}" {% if status == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <select name="tipo" class="gp-input">
+      <option value="">Todos os tipos</option>
+      {% for key,label in tipo_choices %}
+        <option value="{{ key }}" {% if tipo == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <input name="q" value="{{ q }}" class="gp-input" placeholder="Número ou título do edital">
+    <button class="gp-button gp-button--sm" type="submit">Filtrar</button>
+  </form>
+
+  <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__body">
+    <table class="gp-table__native">
+      <thead>
+        <tr>
+          <th>Edital</th>
+          <th>Tipo</th>
+          <th>Inscrição</th>
+          <th>Status</th>
+          <th>Inscrições</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td>
+              <strong>{{ item.numero }}</strong><br>
+              <span class="gp-text-muted">{{ item.titulo }}</span>
+            </td>
+            <td>{{ item.get_tipo_servidor_display }}</td>
+            <td>{{ item.inscricao_inicio|date:"d/m/Y H:i" }} até {{ item.inscricao_fim|date:"d/m/Y H:i" }}</td>
+            <td>{{ item.get_status_display }}</td>
+            <td>{{ item.inscricoes.count }}</td>
+            <td>
+              <a class="gp-button gp-button--sm gp-button--ghost" href="{% url 'rh:remanejamento_edital_detail' item.pk %}?municipio={{ municipio.pk }}">Detalhes</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6">Nenhum edital de remanejamento encontrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

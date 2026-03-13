@@ -1,0 +1,32 @@
+<section class="admin-panel" style="margin-bottom: 16px;">
+  <div class="admin-panel__head">
+    <div>
+      <h3 class="admin-panel__title">Central de pendências</h3>
+      <p class="admin-panel__sub">{{ total }} alerta(s) com impacto operacional.</p>
+    </div>
+  </div>
+  <div class="table-shell"><div class="table-shell__body">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Prioridade</th>
+          <th>Pendência</th>
+          <th>Quantidade</th>
+          <th>Descrição</th>
+          <th>Ação</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td>{% if item.nivel == "alto" %}Alta{% else %}Média{% endif %}</td>
+            <td>{{ item.titulo }}</td>
+            <td>{{ item.valor }}</td>
+            <td>{{ item.descricao }}</td>
+            <td><a href="{{ item.url }}">Abrir</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</section>

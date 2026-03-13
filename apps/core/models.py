@@ -90,6 +90,8 @@ class DocumentoEmitido(models.Model):
         blank=True,
         related_name="documentos_emitidos",
     )
+    assinatura_emitente = models.CharField(max_length=180, blank=True, default="")
+    assinatura_cargo = models.CharField(max_length=120, blank=True, default="")
     gerado_em = models.DateTimeField(default=timezone.now)
     origem_url = models.TextField(blank=True)
     ativo = models.BooleanField(default=True)
@@ -99,6 +101,43 @@ class DocumentoEmitido(models.Model):
 
     def __str__(self):
         return f"{self.tipo} — {self.codigo}"
+
+    @staticmethod
+    def _resolve_emitente_nome(user) -> str:
+        if not user:
+            return "Sistema GEPUB"
+        full_name = ""
+        try:
+            full_name = (user.get_full_name() or "").strip()
+        except Exception:
+            full_name = ""
+        username = (getattr(user, "username", "") or "").strip()
+        return full_name or username or f"Usuário #{getattr(user, 'pk', 'N/A')}"
+
+    @staticmethod
+    def _resolve_emitente_cargo(user) -> str:
+        if not user:
+            return ""
+        profile = getattr(user, "profile", None)
+        if not profile:
+            return ""
+        try:
+            return (profile.get_role_display() or "").strip()
+        except Exception:
+            return (getattr(profile, "role", "") or "").strip()
+
+    @property
+    def assinatura_resumo(self) -> str:
+        nome = (self.assinatura_emitente or "").strip() or self._resolve_emitente_nome(self.gerado_por)
+        cargo = (self.assinatura_cargo or "").strip() or self._resolve_emitente_cargo(self.gerado_por)
+        return f"{nome} • {cargo}" if cargo else nome
+
+    def save(self, *args, **kwargs):
+        if not (self.assinatura_emitente or "").strip():
+            self.assinatura_emitente = self._resolve_emitente_nome(self.gerado_por)
+        if not (self.assinatura_cargo or "").strip():
+            self.assinatura_cargo = self._resolve_emitente_cargo(self.gerado_por)
+        super().save(*args, **kwargs)
 
 
 class InstitutionalPageConfig(models.Model):
@@ -325,6 +364,139 @@ class TransparenciaEventoPublico(models.Model):
 
     def __str__(self) -> str:
         return f"{self.get_modulo_display()} • {self.tipo_evento} • {self.titulo}"
+
+
+def _registro_operacao_upload_to(instance, filename: str) -> str:
+    return f"operacao/registros/{timezone.now():%Y/%m}/{filename}"
+
+
+class OperacaoRegistroTag(models.Model):
+    municipio = models.ForeignKey(
+        "org.Municipio",
+        on_delete=models.PROTECT,
+        related_name="operacao_registro_tags",
+    )
+    modulo = models.CharField(max_length=40)
+    entidade = models.CharField(max_length=80)
+    entidade_id = models.CharField(max_length=40)
+    tag = models.CharField(max_length=50)
+    criado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="operacao_registro_tags",
+    )
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Tag de registro operacional"
+        verbose_name_plural = "Tags de registros operacionais"
+        ordering = ["tag", "-criado_em"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["municipio", "modulo", "entidade", "entidade_id", "tag"],
+                name="uniq_operacao_registro_tag",
+            )
+        ]
+        indexes = [
+            models.Index(fields=["municipio", "modulo", "entidade", "entidade_id"]),
+            models.Index(fields=["tag"]),
+        ]
+
+    def save(self, *args, **kwargs):
+        self.modulo = (self.modulo or "").upper().strip()[:40]
+        self.entidade = (self.entidade or "").strip()[:80]
+        self.entidade_id = str(self.entidade_id or "").strip()[:40]
+        self.tag = (self.tag or "").strip()[:50]
+        super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return f"{self.modulo}:{self.entidade}#{self.entidade_id} • {self.tag}"
+
+
+class OperacaoRegistroComentario(models.Model):
+    municipio = models.ForeignKey(
+        "org.Municipio",
+        on_delete=models.PROTECT,
+        related_name="operacao_registro_comentarios",
+    )
+    modulo = models.CharField(max_length=40)
+    entidade = models.CharField(max_length=80)
+    entidade_id = models.CharField(max_length=40)
+    comentario = models.TextField()
+    interno = models.BooleanField(default=True)
+    criado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="operacao_registro_comentarios",
+    )
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Comentário de registro operacional"
+        verbose_name_plural = "Comentários de registros operacionais"
+        ordering = ["-criado_em", "-id"]
+        indexes = [
+            models.Index(fields=["municipio", "modulo", "entidade", "entidade_id", "criado_em"]),
+            models.Index(fields=["interno", "criado_em"]),
+        ]
+
+    def save(self, *args, **kwargs):
+        self.modulo = (self.modulo or "").upper().strip()[:40]
+        self.entidade = (self.entidade or "").strip()[:80]
+        self.entidade_id = str(self.entidade_id or "").strip()[:40]
+        self.comentario = (self.comentario or "").strip()
+        super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return f"{self.modulo}:{self.entidade}#{self.entidade_id}"
+
+
+class OperacaoRegistroAnexo(models.Model):
+    municipio = models.ForeignKey(
+        "org.Municipio",
+        on_delete=models.PROTECT,
+        related_name="operacao_registro_anexos",
+    )
+    modulo = models.CharField(max_length=40)
+    entidade = models.CharField(max_length=80)
+    entidade_id = models.CharField(max_length=40)
+    tipo = models.CharField(max_length=40, blank=True, default="")
+    titulo = models.CharField(max_length=140, blank=True, default="")
+    observacao = models.CharField(max_length=220, blank=True, default="")
+    arquivo = models.FileField(upload_to=_registro_operacao_upload_to)
+    criado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="operacao_registro_anexos",
+    )
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Anexo de registro operacional"
+        verbose_name_plural = "Anexos de registros operacionais"
+        ordering = ["-criado_em", "-id"]
+        indexes = [
+            models.Index(fields=["municipio", "modulo", "entidade", "entidade_id", "criado_em"]),
+            models.Index(fields=["tipo", "criado_em"]),
+        ]
+
+    def save(self, *args, **kwargs):
+        self.modulo = (self.modulo or "").upper().strip()[:40]
+        self.entidade = (self.entidade or "").strip()[:80]
+        self.entidade_id = str(self.entidade_id or "").strip()[:40]
+        self.tipo = (self.tipo or "").strip()[:40]
+        self.titulo = (self.titulo or "").strip()[:140]
+        self.observacao = (self.observacao or "").strip()[:220]
+        super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return f"{self.modulo}:{self.entidade}#{self.entidade_id}"
 
 
 class PortalMunicipalConfig(models.Model):

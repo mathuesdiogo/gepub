@@ -1,0 +1,51 @@
+{% extends "core/base.html" %}
+
+{% block title %}Gerar usuário prefeitura • GEPUB{% endblock %}
+{% block header %}Usuários{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+  <span class="breadcrumbs__sep">/</span>
+  <a class="breadcrumbs__link" href="{% url 'accounts:usuarios_list' %}">Usuários</a>
+  <span class="breadcrumbs__sep">/</span>
+  <span class="breadcrumbs__current">Gerar usuário prefeitura</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card__body">
+    {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+    <div class="alert alert--info" style="margin-bottom: 12px;">
+      Essa conta é exclusiva para <strong>primeiro acesso da prefeitura</strong> no onboarding.
+      No primeiro login, o usuário define nome/código/senha finais e cria o cadastro da prefeitura no onboarding.
+    </div>
+
+    {% if generated %}
+      <div class="alert alert--success" style="margin-bottom: 12px;">
+        <strong>Conta criada com sucesso.</strong>
+      </div>
+      <div class="card" style="margin-bottom: 16px; border: 1px dashed #b7c8e2;">
+        <div class="card__body">
+          <p><strong>Nome:</strong> {{ generated.nome }}</p>
+          <p><strong>E-mail:</strong> {{ generated.email }}</p>
+          <p><strong>Código de acesso:</strong> <code>{{ generated.codigo_acesso }}</code></p>
+          <p><strong>Senha inicial:</strong> <code>{{ generated.senha_inicial }}</code></p>
+          <p><strong>Fluxo:</strong> login em <code>/accounts/login/</code> e onboarding em <code>{{ generated.onboarding_url }}</code></p>
+        </div>
+      </div>
+    {% endif %}
+
+    <form method="post" class="form-vertical">
+      {% csrf_token %}
+      {% include "core/partials/components/forms/form_shell.html" with form=form %}
+      <div class="form-actions" style="display:flex; gap:8px; margin-top:12px;">
+        <button class="gp-button gp-button--primary" type="submit">Gerar usuário onboarding</button>
+        <a class="gp-button gp-button--outline" href="{% url 'accounts:usuarios_list' %}">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

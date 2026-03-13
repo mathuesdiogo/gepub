@@ -1,26 +1,26 @@
 {% extends "educacao/base_modulo.html" %}
 {% block title %}Relatório Geral da Turma • Educação • GEPUB{% endblock %}
 {% block module_content %}
-<div class="card"><div class="card__body">
+<div class="gp-card"><div class="gp-card__body">
 {% include "core/partials/components/layout/page_head.html" with title="Relatório Geral — Turma" subtitle=turma.nome actions=actions %}
 
-<form method="get" class="filter-bar" action="">
-  <div class="filter-bar__field">
+<form method="get" class="gp-form gp-table__filters" action="">
+  <div class="gp-form-group">
     <label class="small">Início</label>
-    <input type="date" name="inicio" value="{{ inicio }}" />
+    <input class="gp-input" type="date" name="inicio" value="{{ inicio }}" />
   </div>
-  <div class="filter-bar__field">
+  <div class="gp-form-group">
     <label class="small">Fim</label>
-    <input type="date" name="fim" value="{{ fim }}" />
+    <input class="gp-input" type="date" name="fim" value="{{ fim }}" />
   </div>
-  <div class="filter-bar__actions">
-    <button class="btn btn--ghost" type="submit"><i class="fa-solid fa-filter" aria-hidden="true"></i><span>Filtrar</span></button>
+  <div class="gp-action-bar">
+    <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter" aria-hidden="true"></i><span>Filtrar</span></button>
   </div>
 </form>
 
 <div class="small u-mt-10">Total de aulas no período: <strong>{{ total_aulas }}</strong></div>
 
-<table class="table u-table-mt">
+<table class="gp-table__native u-table-mt">
   <thead>
     <tr>
       <th>Aluno</th>

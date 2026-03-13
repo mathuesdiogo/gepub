@@ -1,7 +1,11 @@
-from django.test import SimpleTestCase
+from django.contrib.auth import get_user_model
+from django.test import SimpleTestCase, TestCase
+from django.urls import reverse
 
 from .services.dashboard import build_dashboard_payload
 from .services.ingest import ingest_dataset_bytes
+from .models import Dataset, DatasetVersion
+from apps.org.models import Municipio
 
 
 class IngestDatasetTests(SimpleTestCase):
@@ -45,3 +49,58 @@ class IngestDatasetTests(SimpleTestCase):
         self.assertEqual(payload["kpis"]["linhas_filtradas"], 2)
         self.assertEqual(payload["line"]["labels"], ["2026-01"])
         self.assertEqual(payload["line"]["values"], [30.0])
+
+
+class DatasetPublishChecklistTests(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.user = user_model.objects.create_superuser(
+            username="paineis_admin",
+            email="paineis_admin@example.com",
+            password="Senha@123",
+        )
+        profile = self.user.profile
+        profile.must_change_password = False
+        profile.save(update_fields=["must_change_password"])
+        self.municipio = Municipio.objects.create(nome="Municipio BI", uf="MA", ativo=True)
+        self.dataset = Dataset.objects.create(
+            municipio=self.municipio,
+            nome="Dataset teste",
+            categoria="Teste",
+            fonte=Dataset.Fonte.CSV,
+            visibilidade=Dataset.Visibilidade.INTERNO,
+            status=Dataset.Status.RASCUNHO,
+            criado_por=self.user,
+            atualizado_por=self.user,
+        )
+        self.version = DatasetVersion.objects.create(
+            dataset=self.dataset,
+            numero=1,
+            fonte=Dataset.Fonte.CSV,
+            status=DatasetVersion.Status.CONCLUIDO,
+            schema_json={"columns": [{"name": "valor", "sensitive": False}]},
+            profile_json={"row_count": 1, "column_count": 1},
+            preview_json=[{"valor": "10"}],
+            criado_por=self.user,
+        )
+
+    def test_publish_requires_checklist(self):
+        self.client.force_login(self.user)
+        response = self.client.post(reverse("paineis:dataset_publish", args=[self.dataset.pk]), {})
+        self.assertEqual(response.status_code, 302)
+        self.dataset.refresh_from_db()
+        self.assertEqual(self.dataset.status, Dataset.Status.RASCUNHO)
+
+    def test_publish_with_checklist_marks_dataset_as_publicado(self):
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse("paineis:dataset_publish", args=[self.dataset.pk]),
+            {
+                "check_quality": "1",
+                "check_lgpd": "1",
+                "check_publication_rules": "1",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.dataset.refresh_from_db()
+        self.assertEqual(self.dataset.status, Dataset.Status.PUBLICADO)

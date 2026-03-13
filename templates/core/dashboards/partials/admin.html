@@ -1,9 +1,9 @@
 <div class="admin-dash">
   <div class="dash-actions admin-dash__actions">
-    <a class="btn btn-primary" href="{% url 'org:municipio_list' %}"><i class="fa-solid fa-city"></i> Municípios</a>
-    <a class="btn btn-primary" href="{% url 'accounts:usuarios_list' %}"><i class="fa-solid fa-users"></i> Usuários</a>
-    <a class="btn btn-primary" href="{% url 'org:secretaria_list' %}"><i class="fa-solid fa-sitemap"></i> Secretarias</a>
-    <a class="btn btn-primary" href="{% url 'core:institutional_admin' %}"><i class="fa-solid fa-pen-ruler"></i> Editor Institucional</a>
+    <a class="gp-button gp-button--primary" href="{% url 'org:municipio_list' %}"><i class="fa-solid fa-city"></i> Municípios</a>
+    <a class="gp-button gp-button--primary" href="{% url 'accounts:usuarios_list' %}"><i class="fa-solid fa-users"></i> Usuários</a>
+    <a class="gp-button gp-button--primary" href="{% url 'org:secretaria_list' %}"><i class="fa-solid fa-sitemap"></i> Secretarias</a>
+    <a class="gp-button gp-button--primary" href="{% url 'core:institutional_admin' %}"><i class="fa-solid fa-pen-ruler"></i> Editor Institucional</a>
   </div>
 
   <div class="admin-kpi-grid">
@@ -44,14 +44,14 @@
     </a>
   </div>
 
-  <div class="admin-grid">
+  <div class="admin-grid admin-grid--top">
     <section class="admin-panel admin-panel--table">
       <div class="admin-panel__head">
         <div>
           <h3 class="admin-panel__title">Resumo por município</h3>
           <p class="admin-panel__sub">Secretarias e unidades com maior volume</p>
         </div>
-        <a class="btn btn--ghost" href="{% url 'org:municipio_list' %}"><i class="fa-solid fa-list"></i> Ver todos</a>
+        <a class="gp-button gp-button--outline" href="{% url 'org:municipio_list' %}"><i class="fa-solid fa-list"></i> Ver todos</a>
       </div>
 
       {% if top_municipios %}
@@ -75,7 +75,7 @@
                   <td>{{ m.secretarias }}</td>
                   <td>{{ m.unidades }}</td>
                   <td>
-                    <div class="admin-meter" data-value="{{ m.unidades }}" aria-hidden="true">
+                    <div class="admin-meter" data-value="{{ m.volume_score }}" aria-hidden="true">
                       <span class="admin-meter__fill"></span>
                     </div>
                   </td>
@@ -136,7 +136,7 @@
           <h3 class="admin-panel__title">Top unidades por turmas</h3>
           <p class="admin-panel__sub">Ranking das 10 unidades com mais turmas</p>
         </div>
-        <a class="btn btn--ghost" href="{% url 'org:unidade_list' %}"><i class="fa-solid fa-list"></i> Ver todas</a>
+        <a class="gp-button gp-button--outline" href="{% url 'org:unidade_list' %}"><i class="fa-solid fa-list"></i> Ver todas</a>
       </div>
 
       {% if top_unidades %}

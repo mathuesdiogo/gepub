@@ -1,0 +1,78 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}GEPUB Design System • Documentação{% endblock %}
+{% block header %}GEPUB Design System{% endblock %}
+
+{% block content %}
+<section class="gp-card gp-mb-4">
+  <div class="gp-card__body">
+    <div class="gp-action-bar gp-justify-between gp-align-center gp-flex-wrap">
+      <div>
+        <h2>GEPUB DS 2.0</h2>
+        <p class="gp-caption">Arquitetura oficial da administração interna, multi-tenant e versionada.</p>
+      </div>
+      <div class="gp-action-bar">
+        <label class="gp-form-label" for="themeSwitcher">Tema de preview</label>
+        <select id="themeSwitcher" class="gp-select" data-gp-theme-switch>
+          {% for theme in theme_options %}
+            <option value="{{ theme }}" {% if gepub_active_theme == theme %}selected{% endif %}>{{ theme|title }}</option>
+          {% endfor %}
+        </select>
+        <a class="gp-button gp-button--outline" href="{% url 'core:design_system_tokens_api' %}" target="_blank" rel="noopener">API tokens</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="gp-grid gp-mb-4">
+  <article class="gp-card gp-col-4"><div class="gp-card__body"><h3>Componentes</h3><p>Catálogo completo de botões, formulários, tabelas, feedback, indicadores e layout.</p><a class="gp-anchor-link" href="{% url 'core:design_system_components' %}">Abrir catálogo</a></div></article>
+  <article class="gp-card gp-col-4"><div class="gp-card__body"><h3>Temas</h3><p>Temas `kassya`, `inclusao` e `institucional`, com regras por tenant.</p><a class="gp-anchor-link" href="{% url 'core:design_system_themes' %}">Ver temas</a></div></article>
+  <article class="gp-card gp-col-4"><div class="gp-card__body"><h3>Versionamento</h3><p><strong>{{ ds_version }}</strong><br>Compatível com evolução para v2.1 e v3.0.</p><span class="gp-badge gp-badge--success">Oficial</span></div></article>
+</section>
+
+<section class="gp-card gp-mb-4">
+  <header class="gp-card__header"><h3>Tokens universais</h3></header>
+  <div class="gp-card__body">
+    <div class="gp-grid">
+      <div class="gp-col-6">
+        <ul class="gp-link-list">
+          <li><code>--gp-primary</code></li>
+          <li><code>--gp-primary-hover</code></li>
+          <li><code>--gp-secondary</code></li>
+          <li><code>--gp-background</code></li>
+          <li><code>--gp-surface</code></li>
+          <li><code>--gp-border</code></li>
+          <li><code>--gp-text-primary</code></li>
+          <li><code>--gp-text-secondary</code></li>
+        </ul>
+      </div>
+      <div class="gp-col-6">
+        <ul class="gp-link-list">
+          <li><code>--gp-success</code></li>
+          <li><code>--gp-warning</code></li>
+          <li><code>--gp-danger</code></li>
+          <li><code>--gp-info</code></li>
+          <li><code>--gp-radius</code></li>
+          <li><code>--gp-spacing-unit</code></li>
+          <li><code>--gp-shadow-1</code></li>
+          <li><code>--gp-shadow-2</code> / <code>--gp-shadow-3</code></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="gp-card">
+  <header class="gp-card__header"><h3>Arquitetura de arquivos</h3></header>
+  <div class="gp-card__body">
+<pre>/static/gepub-design-system
+  /core
+  /themes
+  /components
+  /docs
+/templates/core/design_system
+/apps/core/templatetags/gepub_design_system.py</pre>
+  </div>
+</section>
+{% endblock %}

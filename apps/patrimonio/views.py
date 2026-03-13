@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from apps.core.decorators import require_perm
+from apps.core.exports import export_csv, export_pdf_table
 from apps.core.services_auditoria import registrar_auditoria
 from apps.core.services_transparencia import publicar_evento_transparencia
 from apps.core.rbac import is_admin
@@ -107,6 +108,33 @@ def bem_list(request):
         qs = qs.filter(Q(codigo__icontains=q) | Q(tombo__icontains=q) | Q(nome__icontains=q))
     if situacao:
         qs = qs.filter(situacao=situacao)
+
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("nome"):
+            rows.append(
+                [
+                    item.codigo,
+                    item.tombo,
+                    item.nome,
+                    item.get_situacao_display(),
+                    item.get_status_display(),
+                    item.unidade.nome if item.unidade else "",
+                ]
+            )
+        headers = ["Codigo", "Tombo", "Nome", "Situacao", "Status", "Unidade"]
+        if export == "csv":
+            return export_csv("patrimonio_bens.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="patrimonio_bens.pdf",
+            title="Bens patrimoniais",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'} | Situacao={situacao or '-'}",
+        )
     return render(
         request,
         "patrimonio/bem_list.html",
@@ -125,6 +153,18 @@ def bem_list(request):
                     "url": reverse("patrimonio:bem_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&situacao={situacao}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&situacao={situacao}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
                 },
                 {
                     "label": "Painel patrimônio",
@@ -205,6 +245,33 @@ def movimentacao_list(request):
         qs = qs.filter(tipo=tipo)
     if q:
         qs = qs.filter(Q(bem__nome__icontains=q) | Q(observacao__icontains=q))
+
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-data_movimento", "-id"):
+            rows.append(
+                [
+                    str(item.data_movimento),
+                    item.bem.codigo,
+                    item.bem.nome,
+                    item.get_tipo_display(),
+                    item.unidade_origem.nome if item.unidade_origem else "",
+                    item.unidade_destino.nome if item.unidade_destino else "",
+                ]
+            )
+        headers = ["Data", "Bem codigo", "Bem", "Tipo", "Origem", "Destino"]
+        if export == "csv":
+            return export_csv("patrimonio_movimentacoes.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="patrimonio_movimentacoes.pdf",
+            title="Movimentacoes patrimoniais",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'} | Tipo={tipo or '-'}",
+        )
     return render(
         request,
         "patrimonio/movimentacao_list.html",
@@ -223,7 +290,19 @@ def movimentacao_list(request):
                     "url": reverse("patrimonio:movimentacao_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
-                }
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&tipo={tipo}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&tipo={tipo}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
+                },
             ],
         },
     )
@@ -291,6 +370,33 @@ def inventario_list(request):
     qs = PatrimonioInventario.objects.filter(municipio=municipio)
     if status:
         qs = qs.filter(status=status)
+
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-criado_em"):
+            rows.append(
+                [
+                    item.codigo,
+                    item.get_status_display(),
+                    str(item.total_bens),
+                    str(item.total_bens_ativos),
+                    str(item.criado_em),
+                    str(item.concluido_em or ""),
+                ]
+            )
+        headers = ["Codigo", "Status", "Total bens", "Ativos", "Criado em", "Concluido em"]
+        if export == "csv":
+            return export_csv("patrimonio_inventarios.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="patrimonio_inventarios.pdf",
+            title="Inventarios patrimoniais",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Status={status or '-'}",
+        )
     return render(
         request,
         "patrimonio/inventario_list.html",
@@ -308,7 +414,19 @@ def inventario_list(request):
                     "url": reverse("patrimonio:inventario_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
-                }
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&status={status}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&status={status}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
+                },
             ],
         },
     )

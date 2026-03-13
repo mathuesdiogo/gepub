@@ -291,6 +291,13 @@ NAMESPACE_CONFIG = {
         "perm": "accounts.view",
         "priority": ["meu_perfil", "alterar_senha", "usuarios_list", "usuario_create"],
     },
+    "comunicacao": {
+        "start": 2000,
+        "end": 2049,
+        "setor": "Administrativo",
+        "perm": "comunicacao.view",
+        "priority": ["index", "notifications_logs", "templates_api", "channels_config_api"],
+    },
 }
 
 DEFAULT_NAMESPACE_CONFIG = {
@@ -470,8 +477,6 @@ def _resolve_code_to_url(user, code: str):
     if perm and not (
         can(user, perm)
         or is_admin(user)
-        or getattr(user, "is_superuser", False)
-        or getattr(user, "is_staff", False)
     ):
         return None
 

@@ -1,0 +1,39 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Recorrências • Benefícios • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="gp-card"><div class="gp-card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <form method="get" class="gp-form gp-table__filters">
+    <input class="gp-input" name="q" value="{{ q }}" placeholder="Aluno/benefício">
+    <select class="gp-input" name="status">
+      <option value="">Status</option>
+      {% for value,label in status_choices %}
+      <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button class="gp-button gp-button--primary gp-button--sm" type="submit">Filtrar</button>
+  </form>
+
+  <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__body">
+    <table class="gp-table__native">
+      <thead><tr><th>Aluno</th><th>Benefício</th><th>Frequência</th><th>Início</th><th>Status</th><th>Ciclos</th></tr></thead>
+      <tbody>
+      {% for i in items %}
+      <tr>
+        <td>{{ i.aluno.nome }}</td>
+        <td><a href="{% url 'educacao:beneficio_recorrencia_detail' i.pk %}?municipio={{ i.municipio_id }}">{{ i.beneficio.nome }}</a></td>
+        <td>{{ i.get_frequencia_display }}</td>
+        <td>{{ i.data_inicio|date:"d/m/Y" }}</td>
+        <td>{{ i.get_status_display }}</td>
+        <td>{{ i.ciclos.count }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6">Nenhuma recorrência cadastrada.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

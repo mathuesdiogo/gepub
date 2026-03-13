@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from apps.core.exports import export_csv, export_pdf_table
+
 from .views_common import *
 from .views_common import _municipios_admin, _q_municipio, _recompute_competencia, _resolve_municipio
 
@@ -71,6 +73,32 @@ def rubrica_list(request):
     if status:
         qs = qs.filter(status=status)
 
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("codigo"):
+            rows.append(
+                [
+                    item.codigo,
+                    item.nome,
+                    item.get_tipo_evento_display(),
+                    item.get_status_display(),
+                    str(item.valor_referencia),
+                ]
+            )
+        headers = ["Codigo", "Nome", "Tipo", "Status", "Valor base"]
+        if export == "csv":
+            return export_csv("folha_rubricas.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="folha_rubricas.pdf",
+            title="Rubricas de folha",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'} | Tipo={tipo or '-'} | Status={status or '-'}",
+        )
+
     return render(
         request,
         "folha/rubrica_list.html",
@@ -91,6 +119,18 @@ def rubrica_list(request):
                     "url": reverse("folha:rubrica_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&tipo={tipo}&status={status}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&tipo={tipo}&status={status}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
                 },
                 {
                     "label": "Painel folha",
@@ -176,6 +216,33 @@ def competencia_list(request):
     qs = FolhaCompetencia.objects.filter(municipio=municipio)
     if status:
         qs = qs.filter(status=status)
+
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-competencia"):
+            rows.append(
+                [
+                    item.competencia,
+                    item.get_status_display(),
+                    item.total_colaboradores,
+                    str(item.total_proventos),
+                    str(item.total_descontos),
+                    str(item.total_liquido),
+                ]
+            )
+        headers = ["Competencia", "Status", "Colaboradores", "Proventos", "Descontos", "Liquido"]
+        if export == "csv":
+            return export_csv("folha_competencias.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="folha_competencias.pdf",
+            title="Competencias de folha",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Status={status or '-'}",
+        )
     return render(
         request,
         "folha/competencia_list.html",
@@ -193,6 +260,18 @@ def competencia_list(request):
                     "url": reverse("folha:competencia_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&status={status}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&status={status}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
                 },
                 {
                     "label": "Lançamentos",

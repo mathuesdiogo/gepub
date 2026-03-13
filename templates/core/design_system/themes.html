@@ -1,0 +1,54 @@
+{% extends "core/base.html" %}
+
+{% block title %}GEPUB DS • Temas{% endblock %}
+{% block header %}Temas e Acessibilidade{% endblock %}
+
+{% block content %}
+<section class="gp-card gp-mb-4">
+  <div class="gp-card__body gp-action-bar gp-justify-between">
+    <h2>Temas oficiais</h2>
+    <a class="gp-button gp-button--outline" href="{% url 'core:design_system_docs' %}">Voltar</a>
+  </div>
+</section>
+
+<section class="gp-grid gp-mb-4">
+  {% for theme_name, tokens in theme_tokens_preview.items %}
+    <article class="gp-card gp-col-4">
+      <div class="gp-card__body">
+        <h3>{{ theme_name|title }}</h3>
+        <p class="gp-caption">Preview rápido de tokens principais.</p>
+        <ul class="gp-link-list">
+          {% for tk, val in tokens.items %}
+            <li><code>{{ tk }}</code> = <strong>{{ val }}</strong></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </article>
+  {% endfor %}
+</section>
+
+<section class="gp-card gp-mb-4">
+  <header class="gp-card__header"><h3>Regras SaaS multi-tenant</h3></header>
+  <div class="gp-card__body">
+    <ul class="gp-link-list">
+      <li>Tema resolvido por <code>tenant_id + theme_config</code>.</li>
+      <li>Opção de bloquear troca individual por município.</li>
+      <li>Override de tokens por tenant via painel administrativo.</li>
+      <li>Compatível com white-label controlado.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="gp-card">
+  <header class="gp-card__header"><h3>Acessibilidade (Tema Inclusão)</h3></header>
+  <div class="gp-card__body">
+    <ul class="gp-link-list">
+      <li>Contraste AAA.</li>
+      <li>Focus ring de 3px.</li>
+      <li>Fonte base mínima de 16px.</li>
+      <li>Sem sombras e sem gradiente.</li>
+      <li>Navegação por teclado e ARIA preservados.</li>
+    </ul>
+  </div>
+</section>
+{% endblock %}

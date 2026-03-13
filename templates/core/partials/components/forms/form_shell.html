@@ -1,15 +1,15 @@
-<form method="{{ method|default:'post' }}" action="{{ action_url|default:'' }}" {% if enctype %}enctype="{{ enctype }}"{% endif %} class="form-shell">
+<form method="{{ method|default:'post' }}" action="{{ action_url|default:'' }}" {% if enctype %}enctype="{{ enctype }}"{% endif %} class="form-shell gp-form">
   {% csrf_token %}
 
   {% if form.non_field_errors %}
-    <div class="flash flash--error">{{ form.non_field_errors }}</div>
+    <div class="flash flash--error gp-alert gp-alert--error">{{ form.non_field_errors }}</div>
   {% endif %}
 
   {% if top_extra %}
     {{ top_extra|safe }}
   {% endif %}
 
-  <div class="form-shell__fields">
+  <div class="form-shell__fields gp-form-grid gp-form-grid--smart">
     {{ form.as_p }}
   </div>
 
@@ -17,8 +17,8 @@
     {{ bottom_extra|safe }}
   {% endif %}
 
-  <div class="form-shell__actions">
-    <button type="submit" class="btn btn-primary">{{ submit_label|default:"Salvar" }}</button>
-    <a class="link" href="{{ cancel_url|default:'/' }}">Cancelar</a>
+  <div class="form-shell__actions gp-action-bar">
+    <button type="submit" class="gp-button gp-button--primary">{{ submit_label|default:"Salvar" }}</button>
+    <a class="gp-button gp-button--outline" href="{{ cancel_url|default:'/' }}">Cancelar</a>
   </div>
 </form>

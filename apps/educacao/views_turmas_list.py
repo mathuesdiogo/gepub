@@ -23,6 +23,17 @@ class TurmaListView(BaseListViewGepub):
     autocomplete_url_name = "educacao:api_turmas_suggest"
     default_ano = timezone.now().year
 
+    @staticmethod
+    def _ensure_selected_choice(choices, selected, all_choices):
+        if not selected:
+            return choices
+        values = {value for value, _ in choices}
+        if selected in values:
+            return choices
+        all_map = dict(all_choices)
+        label = all_map.get(selected, selected)
+        return [*choices, (selected, f"{label} (legado)")]
+
     def get_base_queryset(self):
         qs = (
             Turma.objects.select_related(
@@ -30,6 +41,7 @@ class TurmaListView(BaseListViewGepub):
                 "unidade__secretaria",
                 "unidade__secretaria__municipio",
                 "curso",
+                "matriz_curricular",
             )
             .only(
                 "id",
@@ -38,15 +50,19 @@ class TurmaListView(BaseListViewGepub):
                 "turno",
                 "modalidade",
                 "etapa",
+                "serie_ano",
                 "forma_oferta",
                 "ativo",
                 "curso_id",
                 "curso__nome",
+                "matriz_curricular_id",
+                "matriz_curricular__nome",
                 "unidade_id",
                 "unidade__nome",
                 "unidade__secretaria__nome",
                 "unidade__secretaria__municipio__nome",
             )
+            .filter(unidade__tipo="EDUCACAO")
         )
         return scope_filter_turmas(self.request.user, qs)
 
@@ -66,9 +82,11 @@ class TurmaListView(BaseListViewGepub):
                 | Q(unidade__nome__icontains=q)
                 | Q(unidade__secretaria__nome__icontains=q)
                 | Q(unidade__secretaria__municipio__nome__icontains=q)
+                | Q(matriz_curricular__nome__icontains=q)
                 | Q(curso__nome__icontains=q)
                 | Q(modalidade__icontains=q)
                 | Q(etapa__icontains=q)
+                | Q(serie_ano__icontains=q)
             )
         if modalidade:
             filtered = filtered.filter(modalidade=modalidade)
@@ -81,6 +99,7 @@ class TurmaListView(BaseListViewGepub):
         ano = (request.GET.get("ano") or "").strip()
         modalidade = (request.GET.get("modalidade") or "").strip()
         etapa = (request.GET.get("etapa") or "").strip()
+        serie = (request.GET.get("serie") or "").strip()
         export = (request.GET.get("export") or "").strip().lower()
 
         qs = self.get_base_queryset()
@@ -90,6 +109,8 @@ class TurmaListView(BaseListViewGepub):
             qs = qs.filter(modalidade=modalidade)
         if etapa:
             qs = qs.filter(etapa=etapa)
+        if serie:
+            qs = qs.filter(serie_ano=serie)
         qs = self.apply_search(qs, q)
 
         if export in ("csv", "pdf"):
@@ -101,7 +122,9 @@ class TurmaListView(BaseListViewGepub):
                 "Turno",
                 "Modalidade",
                 "Etapa",
-                "Curso",
+                "Série/Ano",
+                "Matriz",
+                "Atividade Extra",
                 "Oferta",
                 "Unidade",
                 "Secretaria",
@@ -116,6 +139,8 @@ class TurmaListView(BaseListViewGepub):
                     t.get_turno_display() if hasattr(t, "get_turno_display") else (getattr(t, "turno", "") or "—"),
                     t.get_modalidade_display() if hasattr(t, "get_modalidade_display") else (getattr(t, "modalidade", "") or "—"),
                     t.get_etapa_display() if hasattr(t, "get_etapa_display") else (getattr(t, "etapa", "") or "—"),
+                    t.get_serie_ano_display() if hasattr(t, "get_serie_ano_display") else (getattr(t, "serie_ano", "") or "—"),
+                    getattr(getattr(t, "matriz_curricular", None), "nome", "—"),
                     getattr(getattr(t, "curso", None), "nome", "—"),
                     t.get_forma_oferta_display() if hasattr(t, "get_forma_oferta_display") else (getattr(t, "forma_oferta", "") or "—"),
                     getattr(getattr(t, "unidade", None), "nome", "—"),
@@ -127,7 +152,7 @@ class TurmaListView(BaseListViewGepub):
             if export == "csv":
                 return export_csv("turmas.csv", headers_export, rows_export)
 
-            filtros = f"Ano={ano or '-'} | Modalidade={modalidade or '-'} | Etapa={etapa or '-'} | Busca={q or '-'}"
+            filtros = f"Ano={ano or '-'} | Modalidade={modalidade or '-'} | Etapa={etapa or '-'} | Série={serie or '-'} | Busca={q or '-'}"
             return export_pdf_table(
                 request,
                 filename="turmas.pdf",
@@ -147,10 +172,13 @@ class TurmaListView(BaseListViewGepub):
             base_params.append(f"ano={ano}")
         modalidade = (self.request.GET.get("modalidade") or "").strip()
         etapa = (self.request.GET.get("etapa") or "").strip()
+        serie = (self.request.GET.get("serie") or "").strip()
         if modalidade:
             base_params.append(f"modalidade={modalidade}")
         if etapa:
             base_params.append(f"etapa={etapa}")
+        if serie:
+            base_params.append(f"serie={serie}")
         base_qs = "&".join(base_params)
 
         actions = [
@@ -184,7 +212,9 @@ class TurmaListView(BaseListViewGepub):
             {"label": "Turno", "width": "140px"},
             {"label": "Modalidade"},
             {"label": "Etapa"},
-            {"label": "Curso"},
+            {"label": "Série/Ano"},
+            {"label": "Matriz"},
+            {"label": "Atividade Extra"},
             {"label": "Unidade"},
             {"label": "Secretaria"},
             {"label": "Município"},
@@ -209,6 +239,8 @@ class TurmaListView(BaseListViewGepub):
                     {"text": t.get_turno_display() if hasattr(t, "get_turno_display") else (getattr(t, "turno", "") or "—")},
                     {"text": t.get_modalidade_display() if hasattr(t, "get_modalidade_display") else (getattr(t, "modalidade", "") or "—")},
                     {"text": t.get_etapa_display() if hasattr(t, "get_etapa_display") else (getattr(t, "etapa", "") or "—")},
+                    {"text": t.get_serie_ano_display() if hasattr(t, "get_serie_ano_display") else (getattr(t, "serie_ano", "") or "—")},
+                    {"text": getattr(getattr(t, "matriz_curricular", None), "nome", "—")},
                     {"text": getattr(getattr(t, "curso", None), "nome", "—")},
                     {"text": getattr(unidade, "nome", "—")},
                     {"text": getattr(secretaria, "nome", "—")},
@@ -226,16 +258,38 @@ class TurmaListView(BaseListViewGepub):
         anos = list(qs.order_by("-ano_letivo").values_list("ano_letivo", flat=True).distinct())[:12]
         modalidade = (self.request.GET.get("modalidade") or "").strip()
         etapa = (self.request.GET.get("etapa") or "").strip()
+        serie = (self.request.GET.get("serie") or "").strip()
+
+        modalidade_choices = self._ensure_selected_choice(
+            Turma.modalidades_motor_principal_choices(),
+            modalidade,
+            Turma.Modalidade.choices,
+        )
+        etapa_choices = self._ensure_selected_choice(
+            Turma.etapas_motor_principal_choices(),
+            etapa,
+            Turma.Etapa.choices,
+        )
+        serie_choices = self._ensure_selected_choice(
+            Turma.series_motor_principal_choices(),
+            serie,
+            Turma.SerieAno.choices,
+        )
 
         modalidades_opts = ['<option value="" {}>Todas modalidades</option>'.format("selected" if not modalidade else "")]
-        for value, label in Turma.Modalidade.choices:
+        for value, label in modalidade_choices:
             selected = "selected" if modalidade == value else ""
             modalidades_opts.append(f'<option value="{value}" {selected}>{label}</option>')
 
         etapas_opts = ['<option value="" {}>Todas etapas</option>'.format("selected" if not etapa else "")]
-        for value, label in Turma.Etapa.choices:
+        for value, label in etapa_choices:
             selected = "selected" if etapa == value else ""
             etapas_opts.append(f'<option value="{value}" {selected}>{label}</option>')
+
+        series_opts = ['<option value="" {}>Todas séries/anos</option>'.format("selected" if not serie else "")]
+        for value, label in serie_choices:
+            selected = "selected" if serie == value else ""
+            series_opts.append(f'<option value="{value}" {selected}>{label}</option>')
 
         if not anos:
             return f'''
@@ -249,6 +303,12 @@ class TurmaListView(BaseListViewGepub):
   <label class="small">Etapa</label>
   <select name="etapa">
     {''.join(etapas_opts)}
+  </select>
+</div>
+<div class="filter-bar__field">
+  <label class="small">Série/Ano</label>
+  <select name="serie">
+    {''.join(series_opts)}
   </select>
 </div>
 '''.strip()
@@ -275,6 +335,12 @@ class TurmaListView(BaseListViewGepub):
   <label class="small">Etapa</label>
   <select name="etapa">
     {''.join(etapas_opts)}
+  </select>
+</div>
+<div class="filter-bar__field">
+  <label class="small">Série/Ano</label>
+  <select name="serie">
+    {''.join(series_opts)}
   </select>
 </div>
 '''.strip()

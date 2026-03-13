@@ -1,12 +1,24 @@
 from django.urls import path
 
 from . import views
-from . import views_municipios, views_secretarias, views_unidades, views_setores, views_onboarding, views_governanca
+from . import (
+    views_addresses,
+    views_governanca,
+    views_municipios,
+    views_onboarding,
+    views_onboarding_wizard,
+    views_secretarias,
+    views_setores,
+    views_unidades,
+)
 
 app_name = "org"
 
 urlpatterns = [
     path("", views.index, name="index"),
+    path("onboarding/", views_onboarding_wizard.onboarding_wizard, name="onboarding_wizard"),
+    path("onboarding/etapa/<int:step>/", views_onboarding_wizard.onboarding_wizard_step, name="onboarding_wizard_step"),
+    path("onboarding/autosave/", views_onboarding_wizard.onboarding_wizard_autosave, name="onboarding_wizard_autosave"),
     path("onboarding/primeiro-acesso/", views_onboarding.onboarding_primeiro_acesso, name="onboarding_primeiro_acesso"),
     path("onboarding/painel/", views_onboarding.onboarding_painel, name="onboarding_painel"),
     path("secretarias/governanca/", views_governanca.secretaria_governanca_hub, name="secretaria_governanca_hub"),
@@ -75,4 +87,11 @@ urlpatterns = [
     path("autocomplete/unidades/", views_unidades.unidade_autocomplete, name="unidade_autocomplete"),
     path("autocomplete/municipios/", views_municipios.municipio_autocomplete, name="municipio_autocomplete"),
     path("api/setores-suggest/", views_setores.setor_autocomplete, name="setor_autocomplete"),
+
+    # Endereços & localização (Maps)
+    path("addresses/", views_addresses.address_list, name="address_list"),
+    path("addresses/novo/", views_addresses.address_create, name="address_create"),
+    path("addresses/<int:pk>/", views_addresses.address_update, name="address_update"),
+    path("addresses/<int:pk>/remover/", views_addresses.address_delete, name="address_delete"),
+    path("addresses/<int:pk>/geocode/", views_addresses.address_reprocess_geocode, name="address_reprocess_geocode"),
 ]

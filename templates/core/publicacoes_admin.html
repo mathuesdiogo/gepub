@@ -1,319 +1,405 @@
 {% extends "core/base.html" %}
 {% load static %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/pages/publicacoes-admin.css' %}">
-{% endblock %}
-
 {% block header %}Portais Públicos{% endblock %}
 
 {% block content %}
-<div class="card"><div class="card__body">
-  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+<div class="card publicacoes-admin-card">
+  <div class="card__body">
+    {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  {% if municipios %}
-    <form method="get" class="publicacoes-filter">
-      <div>
-        <label for="id_municipio">Município</label>
-        <select id="id_municipio" name="municipio" onchange="this.form.submit()">
-          {% for m in municipios %}
-            <option value="{{ m.pk }}" {% if m.pk == municipio.pk %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
-          {% endfor %}
+    <section class="publicacoes-admin-hero">
+      <article>
+        <p class="publicacoes-admin-hero__kicker">{{ portal_focus_label }}</p>
+        <h2>Gestão de publicações por portal</h2>
+        <p>{{ portal_focus_desc }}</p>
+      </article>
+      <div class="publicacoes-admin-hero__chips">
+        <span class="{% if plan_flags.portal %}is-on{% else %}is-off{% endif %}"><i class="fa-solid fa-globe"></i> Portal</span>
+        <span class="{% if plan_flags.camara %}is-on{% else %}is-off{% endif %}"><i class="fa-solid fa-landmark-dome"></i> Câmara</span>
+        <span class="{% if plan_flags.transparencia %}is-on{% else %}is-off{% endif %}"><i class="fa-solid fa-scale-balanced"></i> Transparência</span>
+      </div>
+    </section>
+
+    <section class="publicacoes-admin-toolbar" style="margin-top:10px;">
+      <div class="publicacoes-admin-toolbar__actions" style="display:flex;gap:8px;flex-wrap:wrap;">
+        <a class="gp-button gp-button--outline gp-button--sm {% if portal_focus == 'prefeitura' %}is-active{% endif %}" href="{% url 'core:publicacoes_admin' %}?municipio={{ municipio.pk }}&portal=prefeitura">Portal Prefeitura</a>
+        {% if plan_flags.camara %}
+          <a class="gp-button gp-button--outline gp-button--sm" href="{% url 'camara:index' %}?municipio={{ municipio.pk }}">Portal Câmara</a>
+        {% endif %}
+        {% if plan_flags.transparencia %}
+          <a class="gp-button gp-button--outline gp-button--sm {% if portal_focus == 'transparencia' %}is-active{% endif %}" href="{% url 'core:publicacoes_admin' %}?municipio={{ municipio.pk }}&portal=transparencia">Portal Transparência</a>
+        {% endif %}
+        <a class="gp-button gp-button--outline gp-button--sm {% if portal_focus == 'todos' %}is-active{% endif %}" href="{% url 'core:publicacoes_admin' %}?municipio={{ municipio.pk }}&portal=todos">Hub</a>
+      </div>
+    </section>
+
+    {% if municipios %}
+      <form method="get" class="publicacoes-filter">
+        <div class="gp-form-group">
+          <label class="gp-form-label" for="id_municipio">Município</label>
+          <select id="id_municipio" class="gp-select" name="municipio" onchange="this.form.submit()">
+            {% for m in municipios %}
+              <option value="{{ m.pk }}" {% if m.pk == municipio.pk %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </form>
+    {% endif %}
+
+    <section class="publicacoes-kpis">
+      <article class="publicacoes-kpi"><p class="publicacoes-kpi__value">{{ counts.noticias }}</p><p class="publicacoes-kpi__label">Notícias</p></article>
+      <article class="publicacoes-kpi"><p class="publicacoes-kpi__value">{{ counts.banners }}</p><p class="publicacoes-kpi__label">Banners</p></article>
+      <article class="publicacoes-kpi"><p class="publicacoes-kpi__value">{{ counts.paginas }}</p><p class="publicacoes-kpi__label">Páginas</p></article>
+      <article class="publicacoes-kpi"><p class="publicacoes-kpi__value">{{ counts.menus }}</p><p class="publicacoes-kpi__label">Menus</p></article>
+      <article class="publicacoes-kpi"><p class="publicacoes-kpi__value">{{ counts.blocos }}</p><p class="publicacoes-kpi__label">Blocos home</p></article>
+      {% if plan_flags.transparencia %}
+        <article class="publicacoes-kpi"><p class="publicacoes-kpi__value">{{ counts.arquivos_transparencia }}</p><p class="publicacoes-kpi__label">Arquivos transparência</p></article>
+      {% endif %}
+      <article class="publicacoes-kpi"><p class="publicacoes-kpi__value">{{ counts.diarios }}</p><p class="publicacoes-kpi__label">Diário oficial</p></article>
+      <article class="publicacoes-kpi"><p class="publicacoes-kpi__value">{{ counts.concursos }}</p><p class="publicacoes-kpi__label">Concursos</p></article>
+      {% if plan_flags.camara %}
+        <article class="publicacoes-kpi"><p class="publicacoes-kpi__value">{{ counts.materias }}</p><p class="publicacoes-kpi__label">Matérias câmara</p></article>
+        <article class="publicacoes-kpi"><p class="publicacoes-kpi__value">{{ counts.sessoes }}</p><p class="publicacoes-kpi__label">Sessões câmara</p></article>
+      {% endif %}
+    </section>
+
+    <section class="publicacoes-admin-toolbar">
+      <div class="gp-form-group">
+        <label class="gp-form-label" for="publicacoesSearch">Buscar seção</label>
+        <input id="publicacoesSearch" class="gp-input" type="search" placeholder="Ex.: notícias, diário, concursos..." autocomplete="off">
+      </div>
+      <div class="gp-form-group">
+        <label class="gp-form-label" for="publicacoesScope">Escopo</label>
+        <select id="publicacoesScope" class="gp-select">
+          <option value="all" {% if portal_focus_scope == 'all' %}selected{% endif %}>Todos os módulos</option>
+          <option value="conteudo" {% if portal_focus_scope == 'conteudo' %}selected{% endif %}>Portal e conteúdo</option>
+          <option value="transparencia" {% if portal_focus_scope == 'transparencia' %}selected{% endif %}>Transparência</option>
+          <option value="camara" {% if portal_focus_scope == 'camara' %}selected{% endif %}>Câmara</option>
         </select>
       </div>
-    </form>
-  {% endif %}
-
-  <section class="publicacoes-kpis">
-    <article class="publicacoes-kpi"><p class="publicacoes-kpi__value">{{ counts.noticias }}</p><p class="publicacoes-kpi__label">Notícias</p></article>
-    <article class="publicacoes-kpi"><p class="publicacoes-kpi__value">{{ counts.banners }}</p><p class="publicacoes-kpi__label">Banners</p></article>
-    <article class="publicacoes-kpi"><p class="publicacoes-kpi__value">{{ counts.paginas }}</p><p class="publicacoes-kpi__label">Páginas</p></article>
-    <article class="publicacoes-kpi"><p class="publicacoes-kpi__value">{{ counts.menus }}</p><p class="publicacoes-kpi__label">Menus</p></article>
-    <article class="publicacoes-kpi"><p class="publicacoes-kpi__value">{{ counts.blocos }}</p><p class="publicacoes-kpi__label">Blocos home</p></article>
-    <article class="publicacoes-kpi"><p class="publicacoes-kpi__value">{{ counts.arquivos_transparencia }}</p><p class="publicacoes-kpi__label">Arquivos transparência</p></article>
-    <article class="publicacoes-kpi"><p class="publicacoes-kpi__value">{{ counts.diarios }}</p><p class="publicacoes-kpi__label">Diário oficial</p></article>
-    <article class="publicacoes-kpi"><p class="publicacoes-kpi__value">{{ counts.concursos }}</p><p class="publicacoes-kpi__label">Concursos</p></article>
-    <article class="publicacoes-kpi"><p class="publicacoes-kpi__value">{{ counts.materias }}</p><p class="publicacoes-kpi__label">Matérias câmara</p></article>
-    <article class="publicacoes-kpi"><p class="publicacoes-kpi__value">{{ counts.sessoes }}</p><p class="publicacoes-kpi__label">Sessões câmara</p></article>
-  </section>
-
-  <section class="publicacoes-grid">
-    <article class="publicacoes-card">
-      <div class="publicacoes-card__head">
-        <h3>Notícias</h3>
-        <div class="publicacoes-card__actions">
-          <a class="publicacoes-btn" href="{% url 'core:noticia_create' %}?municipio={{ municipio.pk }}">Nova notícia</a>
-        </div>
+      <div class="publicacoes-admin-toolbar__actions">
+        <button type="button" id="publicacoesClear" class="gp-button gp-button--outline">Limpar filtros</button>
       </div>
-      <ul class="publicacoes-list">
-        {% for item in noticias %}
-          <li class="publicacoes-item">
-            <h4>{{ item.titulo }}</h4>
-            <p>{{ item.get_categoria_display }} • {{ item.publicado_em|date:"d/m/Y H:i" }}</p>
-            <div class="publicacoes-item__actions">
-              <a class="publicacoes-btn" href="{% url 'core:noticia_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
-              <form method="post" action="{% url 'core:noticia_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover notícia?');">
-                {% csrf_token %}
-                <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
-              </form>
-            </div>
-          </li>
-        {% empty %}
-          <li class="publicacoes-item"><p>Nenhuma notícia cadastrada.</p></li>
-        {% endfor %}
-      </ul>
-    </article>
+    </section>
 
-    <article class="publicacoes-card">
-      <div class="publicacoes-card__head">
-        <h3>Banners</h3>
-        <div class="publicacoes-card__actions">
-          <a class="publicacoes-btn" href="{% url 'core:banner_create' %}?municipio={{ municipio.pk }}">Novo banner</a>
+    <section class="publicacoes-grid" id="publicacoesGrid">
+      <article class="publicacoes-card" data-publicacoes-card data-scope="conteudo">
+        <div class="publicacoes-card__head">
+          <h3>Notícias</h3>
+          <div class="publicacoes-card__actions">
+            <a class="publicacoes-btn" href="{% url 'core:noticia_create' %}?municipio={{ municipio.pk }}">Nova notícia</a>
+          </div>
         </div>
-      </div>
-      <ul class="publicacoes-list">
-        {% for item in banners %}
-          <li class="publicacoes-item">
-            <h4>{{ item.titulo }}</h4>
-            <p>Ordem {{ item.ordem }} • {% if item.ativo %}Ativo{% else %}Inativo{% endif %}</p>
-            <div class="publicacoes-item__actions">
-              <a class="publicacoes-btn" href="{% url 'core:banner_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
-              <form method="post" action="{% url 'core:banner_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover banner?');">
-                {% csrf_token %}
-                <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
-              </form>
-            </div>
-          </li>
-        {% empty %}
-          <li class="publicacoes-item"><p>Nenhum banner cadastrado.</p></li>
-        {% endfor %}
-      </ul>
-    </article>
+        <ul class="publicacoes-list">
+          {% for item in noticias %}
+            <li class="publicacoes-item">
+              <h4>{{ item.titulo }}</h4>
+              <p>{{ item.get_categoria_display }} • {{ item.publicado_em|date:"d/m/Y H:i" }}</p>
+              <div class="publicacoes-item__actions">
+                <a class="publicacoes-btn" href="{% url 'core:noticia_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
+                <form method="post" action="{% url 'core:noticia_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover notícia?');">
+                  {% csrf_token %}
+                  <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
+                </form>
+              </div>
+            </li>
+          {% empty %}
+            <li class="publicacoes-item"><p>Nenhuma notícia cadastrada.</p></li>
+          {% endfor %}
+        </ul>
+      </article>
 
-    <article class="publicacoes-card">
-      <div class="publicacoes-card__head">
-        <h3>Páginas públicas</h3>
-        <div class="publicacoes-card__actions">
-          <a class="publicacoes-btn" href="{% url 'core:pagina_create' %}?municipio={{ municipio.pk }}">Nova página</a>
+      <article class="publicacoes-card" data-publicacoes-card data-scope="conteudo">
+        <div class="publicacoes-card__head">
+          <h3>Banners</h3>
+          <div class="publicacoes-card__actions">
+            <a class="publicacoes-btn" href="{% url 'core:banner_create' %}?municipio={{ municipio.pk }}">Novo banner</a>
+          </div>
         </div>
-      </div>
-      <ul class="publicacoes-list">
-        {% for item in paginas %}
-          <li class="publicacoes-item">
-            <h4>{{ item.titulo }}</h4>
-            <p>/paginas/{{ item.slug }}/ • {% if item.publicado %}Publicado{% else %}Rascunho{% endif %}</p>
-            <div class="publicacoes-item__actions">
-              <a class="publicacoes-btn" href="{% url 'core:pagina_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
-              <form method="post" action="{% url 'core:pagina_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover página pública?');">
-                {% csrf_token %}
-                <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
-              </form>
-            </div>
-          </li>
-        {% empty %}
-          <li class="publicacoes-item"><p>Nenhuma página cadastrada.</p></li>
-        {% endfor %}
-      </ul>
-    </article>
+        <ul class="publicacoes-list">
+          {% for item in banners %}
+            <li class="publicacoes-item">
+              <h4>{{ item.titulo }}</h4>
+              <p>Ordem {{ item.ordem }} • {% if item.ativo %}Ativo{% else %}Inativo{% endif %}</p>
+              <div class="publicacoes-item__actions">
+                <a class="publicacoes-btn" href="{% url 'core:banner_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
+                <form method="post" action="{% url 'core:banner_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover banner?');">
+                  {% csrf_token %}
+                  <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
+                </form>
+              </div>
+            </li>
+          {% empty %}
+            <li class="publicacoes-item"><p>Nenhum banner cadastrado.</p></li>
+          {% endfor %}
+        </ul>
+      </article>
 
-    <article class="publicacoes-card">
-      <div class="publicacoes-card__head">
-        <h3>Menu do portal</h3>
-        <div class="publicacoes-card__actions">
-          <a class="publicacoes-btn" href="{% url 'core:menu_create' %}?municipio={{ municipio.pk }}">Novo item</a>
+      <article class="publicacoes-card" data-publicacoes-card data-scope="conteudo">
+        <div class="publicacoes-card__head">
+          <h3>Páginas públicas</h3>
+          <div class="publicacoes-card__actions">
+            <a class="publicacoes-btn" href="{% url 'core:pagina_create' %}?municipio={{ municipio.pk }}">Nova página</a>
+          </div>
         </div>
-      </div>
-      <ul class="publicacoes-list">
-        {% for item in menus %}
-          <li class="publicacoes-item">
-            <h4>{{ item.titulo }}</h4>
-            <p>{{ item.get_posicao_display }} • {{ item.get_tipo_destino_display }} • ordem {{ item.ordem }}</p>
-            <div class="publicacoes-item__actions">
-              <a class="publicacoes-btn" href="{% url 'core:menu_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
-              <form method="post" action="{% url 'core:menu_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover item de menu?');">
-                {% csrf_token %}
-                <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
-              </form>
-            </div>
-          </li>
-        {% empty %}
-          <li class="publicacoes-item"><p>Nenhum item de menu cadastrado.</p></li>
-        {% endfor %}
-      </ul>
-    </article>
+        <ul class="publicacoes-list">
+          {% for item in paginas %}
+            <li class="publicacoes-item">
+              <h4>{{ item.titulo }}</h4>
+              <p>/paginas/{{ item.slug }}/ • {% if item.publicado %}Publicado{% else %}Rascunho{% endif %}</p>
+              <div class="publicacoes-item__actions">
+                <a class="publicacoes-btn" href="{% url 'core:pagina_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
+                <form method="post" action="{% url 'core:pagina_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover página pública?');">
+                  {% csrf_token %}
+                  <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
+                </form>
+              </div>
+            </li>
+          {% empty %}
+            <li class="publicacoes-item"><p>Nenhuma página cadastrada.</p></li>
+          {% endfor %}
+        </ul>
+      </article>
 
-    <article class="publicacoes-card">
-      <div class="publicacoes-card__head">
-        <h3>Blocos da home</h3>
-        <div class="publicacoes-card__actions">
-          <a class="publicacoes-btn" href="{% url 'core:home_bloco_create' %}?municipio={{ municipio.pk }}">Novo bloco</a>
+      <article class="publicacoes-card" data-publicacoes-card data-scope="conteudo">
+        <div class="publicacoes-card__head">
+          <h3>Menu do portal</h3>
+          <div class="publicacoes-card__actions">
+            <a class="publicacoes-btn" href="{% url 'core:menu_create' %}?municipio={{ municipio.pk }}">Novo item</a>
+          </div>
         </div>
-      </div>
-      <ul class="publicacoes-list">
-        {% for item in blocos %}
-          <li class="publicacoes-item">
-            <h4>{{ item.titulo }}</h4>
-            <p>Ordem {{ item.ordem }} • {% if item.ativo %}Ativo{% else %}Inativo{% endif %}</p>
-            <div class="publicacoes-item__actions">
-              <a class="publicacoes-btn" href="{% url 'core:home_bloco_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
-              <form method="post" action="{% url 'core:home_bloco_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover bloco da home?');">
-                {% csrf_token %}
-                <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
-              </form>
-            </div>
-          </li>
-        {% empty %}
-          <li class="publicacoes-item"><p>Nenhum bloco cadastrado.</p></li>
-        {% endfor %}
-      </ul>
-    </article>
+        <ul class="publicacoes-list">
+          {% for item in menus %}
+            <li class="publicacoes-item">
+              <h4>{{ item.titulo }}</h4>
+              <p>{{ item.get_posicao_display }} • {{ item.get_tipo_destino_display }} • ordem {{ item.ordem }}</p>
+              <div class="publicacoes-item__actions">
+                <a class="publicacoes-btn" href="{% url 'core:menu_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
+                <form method="post" action="{% url 'core:menu_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover item de menu?');">
+                  {% csrf_token %}
+                  <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
+                </form>
+              </div>
+            </li>
+          {% empty %}
+            <li class="publicacoes-item"><p>Nenhum item de menu cadastrado.</p></li>
+          {% endfor %}
+        </ul>
+      </article>
 
-    <article class="publicacoes-card">
-      <div class="publicacoes-card__head">
-        <h3>Diário Oficial</h3>
-        <div class="publicacoes-card__actions">
-          <a class="publicacoes-btn" href="{% url 'core:diario_create' %}?municipio={{ municipio.pk }}">Nova edição</a>
+      <article class="publicacoes-card" data-publicacoes-card data-scope="conteudo">
+        <div class="publicacoes-card__head">
+          <h3>Blocos da home</h3>
+          <div class="publicacoes-card__actions">
+            <a class="publicacoes-btn" href="{% url 'core:home_bloco_create' %}?municipio={{ municipio.pk }}">Novo bloco</a>
+          </div>
         </div>
-      </div>
-      <ul class="publicacoes-list">
-        {% for item in diarios %}
-          <li class="publicacoes-item">
-            <h4>Edição {{ item.numero }}</h4>
-            <p>{{ item.data_publicacao|date:"d/m/Y" }} • {% if item.publicado %}Publicado{% else %}Rascunho{% endif %}</p>
-            <div class="publicacoes-item__actions">
-              <a class="publicacoes-btn" href="{% url 'core:diario_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
-              <form method="post" action="{% url 'core:diario_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover edição?');">
-                {% csrf_token %}
-                <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
-              </form>
-            </div>
-          </li>
-        {% empty %}
-          <li class="publicacoes-item"><p>Nenhuma edição cadastrada.</p></li>
-        {% endfor %}
-      </ul>
-    </article>
+        <ul class="publicacoes-list">
+          {% for item in blocos %}
+            <li class="publicacoes-item">
+              <h4>{{ item.titulo }}</h4>
+              <p>Ordem {{ item.ordem }} • {% if item.ativo %}Ativo{% else %}Inativo{% endif %}</p>
+              <div class="publicacoes-item__actions">
+                <a class="publicacoes-btn" href="{% url 'core:home_bloco_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
+                <form method="post" action="{% url 'core:home_bloco_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover bloco da home?');">
+                  {% csrf_token %}
+                  <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
+                </form>
+              </div>
+            </li>
+          {% empty %}
+            <li class="publicacoes-item"><p>Nenhum bloco cadastrado.</p></li>
+          {% endfor %}
+        </ul>
+      </article>
 
-    <article class="publicacoes-card">
-      <div class="publicacoes-card__head">
-        <h3>Arquivos de Transparência</h3>
-        <div class="publicacoes-card__actions">
-          <a class="publicacoes-btn" href="{% url 'core:transparencia_arquivo_create' %}?municipio={{ municipio.pk }}">Novo arquivo</a>
+      <article class="publicacoes-card" data-publicacoes-card data-scope="conteudo">
+        <div class="publicacoes-card__head">
+          <h3>Diário Oficial</h3>
+          <div class="publicacoes-card__actions">
+            <a class="publicacoes-btn" href="{% url 'core:diario_create' %}?municipio={{ municipio.pk }}">Nova edição</a>
+          </div>
         </div>
-      </div>
-      <ul class="publicacoes-list">
-        {% for item in arquivos_transparencia %}
-          <li class="publicacoes-item">
-            <h4>{{ item.titulo }}</h4>
-            <p>{{ item.get_categoria_display }} • {{ item.get_formato_display }} • {% if item.publico %}Publicado{% else %}Rascunho{% endif %}</p>
-            <div class="publicacoes-item__actions">
-              <a class="publicacoes-btn" href="{% url 'core:transparencia_arquivo_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
-              <form method="post" action="{% url 'core:transparencia_arquivo_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover arquivo de transparência?');">
-                {% csrf_token %}
-                <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
-              </form>
-            </div>
-          </li>
-        {% empty %}
-          <li class="publicacoes-item"><p>Nenhum arquivo de transparência cadastrado.</p></li>
-        {% endfor %}
-      </ul>
-    </article>
+        <ul class="publicacoes-list">
+          {% for item in diarios %}
+            <li class="publicacoes-item">
+              <h4>Edição {{ item.numero }}</h4>
+              <p>{{ item.data_publicacao|date:"d/m/Y" }} • {% if item.publicado %}Publicado{% else %}Rascunho{% endif %}</p>
+              <div class="publicacoes-item__actions">
+                <a class="publicacoes-btn" href="{% url 'core:diario_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
+                <form method="post" action="{% url 'core:diario_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover edição?');">
+                  {% csrf_token %}
+                  <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
+                </form>
+              </div>
+            </li>
+          {% empty %}
+            <li class="publicacoes-item"><p>Nenhuma edição cadastrada.</p></li>
+          {% endfor %}
+        </ul>
+      </article>
 
-    <article class="publicacoes-card">
-      <div class="publicacoes-card__head">
-        <h3>Concursos</h3>
-        <div class="publicacoes-card__actions">
-          <a class="publicacoes-btn" href="{% url 'core:concurso_create' %}?municipio={{ municipio.pk }}">Novo concurso</a>
+      <article class="publicacoes-card" data-publicacoes-card data-scope="conteudo">
+        <div class="publicacoes-card__head">
+          <h3>Concursos</h3>
+          <div class="publicacoes-card__actions">
+            <a class="publicacoes-btn" href="{% url 'core:concurso_create' %}?municipio={{ municipio.pk }}">Novo concurso</a>
+          </div>
         </div>
-      </div>
-      <ul class="publicacoes-list">
-        {% for item in concursos %}
-          <li class="publicacoes-item">
-            <h4>{{ item.titulo }}</h4>
-            <p>{{ item.get_tipo_display }} • {{ item.get_status_display }}</p>
-            <div class="publicacoes-item__actions">
-              <a class="publicacoes-btn" href="{% url 'core:concurso_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
-              <a class="publicacoes-btn" href="{% url 'core:concurso_etapa_create' item.pk %}?municipio={{ municipio.pk }}">Nova etapa</a>
-              <form method="post" action="{% url 'core:concurso_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover concurso?');">
-                {% csrf_token %}
-                <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
-              </form>
-            </div>
-            {% if item.etapas.all %}
-              <ul class="publicacoes-list">
-                {% for etapa in item.etapas.all %}
-                  <li class="publicacoes-item">
-                    <h4>{{ etapa.titulo }}</h4>
-                    <p>{{ etapa.data_inicio|date:"d/m/Y"|default:"—" }} até {{ etapa.data_fim|date:"d/m/Y"|default:"—" }}</p>
-                    <div class="publicacoes-item__actions">
-                      <form method="post" action="{% url 'core:concurso_etapa_delete' etapa.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover etapa?');">
-                        {% csrf_token %}
-                        <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover etapa</button>
-                      </form>
-                    </div>
-                  </li>
-                {% endfor %}
-              </ul>
-            {% endif %}
-          </li>
-        {% empty %}
-          <li class="publicacoes-item"><p>Nenhum concurso cadastrado.</p></li>
-        {% endfor %}
-      </ul>
-    </article>
+        <ul class="publicacoes-list">
+          {% for item in concursos %}
+            <li class="publicacoes-item">
+              <h4>{{ item.titulo }}</h4>
+              <p>{{ item.get_tipo_display }} • {{ item.get_status_display }}</p>
+              <div class="publicacoes-item__actions">
+                <a class="publicacoes-btn" href="{% url 'core:concurso_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
+                <a class="publicacoes-btn" href="{% url 'core:concurso_etapa_create' item.pk %}?municipio={{ municipio.pk }}">Nova etapa</a>
+                <form method="post" action="{% url 'core:concurso_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover concurso?');">
+                  {% csrf_token %}
+                  <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
+                </form>
+              </div>
+              {% if item.etapas.all %}
+                <ul class="publicacoes-list publicacoes-sublist">
+                  {% for etapa in item.etapas.all %}
+                    <li class="publicacoes-item">
+                      <h4>{{ etapa.titulo }}</h4>
+                      <p>{{ etapa.data_inicio|date:"d/m/Y"|default:"—" }} até {{ etapa.data_fim|date:"d/m/Y"|default:"—" }}</p>
+                      <div class="publicacoes-item__actions">
+                        <form method="post" action="{% url 'core:concurso_etapa_delete' etapa.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover etapa?');">
+                          {% csrf_token %}
+                          <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover etapa</button>
+                        </form>
+                      </div>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </li>
+          {% empty %}
+            <li class="publicacoes-item"><p>Nenhum concurso cadastrado.</p></li>
+          {% endfor %}
+        </ul>
+      </article>
 
-    <article class="publicacoes-card">
-      <div class="publicacoes-card__head">
-        <h3>Matérias da Câmara</h3>
-        <div class="publicacoes-card__actions">
-          <a class="publicacoes-btn" href="{% url 'core:camara_materia_create' %}?municipio={{ municipio.pk }}">Nova matéria</a>
-        </div>
-      </div>
-      <ul class="publicacoes-list">
-        {% for item in materias %}
-          <li class="publicacoes-item">
-            <h4>{{ item.get_tipo_display }} {{ item.numero }}/{{ item.ano }}</h4>
-            <p>{{ item.get_status_display }} • {{ item.data_publicacao|date:"d/m/Y" }}</p>
-            <div class="publicacoes-item__actions">
-              <a class="publicacoes-btn" href="{% url 'core:camara_materia_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
-              <form method="post" action="{% url 'core:camara_materia_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover matéria?');">
-                {% csrf_token %}
-                <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
-              </form>
+      {% if plan_flags.transparencia %}
+        <article class="publicacoes-card" data-publicacoes-card data-scope="transparencia">
+          <div class="publicacoes-card__head">
+            <h3>Arquivos de Transparência</h3>
+            <div class="publicacoes-card__actions">
+              <a class="publicacoes-btn" href="{% url 'core:transparencia_arquivo_create' %}?municipio={{ municipio.pk }}">Novo arquivo</a>
             </div>
-          </li>
-        {% empty %}
-          <li class="publicacoes-item"><p>Nenhuma matéria cadastrada.</p></li>
-        {% endfor %}
-      </ul>
-    </article>
+          </div>
+          <ul class="publicacoes-list">
+            {% for item in arquivos_transparencia %}
+              <li class="publicacoes-item">
+                <h4>{{ item.titulo }}</h4>
+                <p>{{ item.get_categoria_display }} • {{ item.get_formato_display }} • {% if item.publico %}Publicado{% else %}Rascunho{% endif %}</p>
+                <div class="publicacoes-item__actions">
+                  <a class="publicacoes-btn" href="{% url 'core:transparencia_arquivo_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
+                  <form method="post" action="{% url 'core:transparencia_arquivo_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover arquivo de transparência?');">
+                    {% csrf_token %}
+                    <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
+                  </form>
+                </div>
+              </li>
+            {% empty %}
+              <li class="publicacoes-item"><p>Nenhum arquivo de transparência cadastrado.</p></li>
+            {% endfor %}
+          </ul>
+        </article>
+      {% endif %}
 
-    <article class="publicacoes-card">
-      <div class="publicacoes-card__head">
-        <h3>Sessões da Câmara</h3>
-        <div class="publicacoes-card__actions">
-          <a class="publicacoes-btn" href="{% url 'core:camara_sessao_create' %}?municipio={{ municipio.pk }}">Nova sessão</a>
-        </div>
-      </div>
-      <ul class="publicacoes-list">
-        {% for item in sessoes %}
-          <li class="publicacoes-item">
-            <h4>{{ item.titulo }}</h4>
-            <p>{{ item.data_sessao|date:"d/m/Y" }} • {% if item.publicado %}Publicado{% else %}Rascunho{% endif %}</p>
-            <div class="publicacoes-item__actions">
-              <a class="publicacoes-btn" href="{% url 'core:camara_sessao_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
-              <form method="post" action="{% url 'core:camara_sessao_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover sessão?');">
-                {% csrf_token %}
-                <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
-              </form>
+      {% if plan_flags.camara %}
+        <article class="publicacoes-card" data-publicacoes-card data-scope="camara">
+          <div class="publicacoes-card__head">
+            <h3>Matérias da Câmara (legado)</h3>
+            <div class="publicacoes-card__actions">
+              <a class="publicacoes-btn" href="{% url 'camara:index' %}?municipio={{ municipio.pk }}">Abrir App Câmara</a>
+              <a class="publicacoes-btn" href="{% url 'core:camara_materia_create' %}?municipio={{ municipio.pk }}">Nova matéria</a>
             </div>
-          </li>
-        {% empty %}
-          <li class="publicacoes-item"><p>Nenhuma sessão cadastrada.</p></li>
-        {% endfor %}
-      </ul>
-    </article>
-  </section>
-</div></div>
+          </div>
+          <ul class="publicacoes-list">
+            {% for item in materias %}
+              <li class="publicacoes-item">
+                <h4>{{ item.get_tipo_display }} {{ item.numero }}/{{ item.ano }}</h4>
+                <p>{{ item.get_status_display }} • {{ item.data_publicacao|date:"d/m/Y" }}</p>
+                <div class="publicacoes-item__actions">
+                  <a class="publicacoes-btn" href="{% url 'core:camara_materia_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
+                  <form method="post" action="{% url 'core:camara_materia_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover matéria?');">
+                    {% csrf_token %}
+                    <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
+                  </form>
+                </div>
+              </li>
+            {% empty %}
+              <li class="publicacoes-item"><p>Nenhuma matéria cadastrada.</p></li>
+            {% endfor %}
+          </ul>
+        </article>
+
+        <article class="publicacoes-card" data-publicacoes-card data-scope="camara">
+          <div class="publicacoes-card__head">
+            <h3>Sessões da Câmara (legado)</h3>
+            <div class="publicacoes-card__actions">
+              <a class="publicacoes-btn" href="{% url 'camara:index' %}?municipio={{ municipio.pk }}">Abrir App Câmara</a>
+              <a class="publicacoes-btn" href="{% url 'core:camara_sessao_create' %}?municipio={{ municipio.pk }}">Nova sessão</a>
+            </div>
+          </div>
+          <ul class="publicacoes-list">
+            {% for item in sessoes %}
+              <li class="publicacoes-item">
+                <h4>{{ item.titulo }}</h4>
+                <p>{{ item.data_sessao|date:"d/m/Y" }} • {% if item.publicado %}Publicado{% else %}Rascunho{% endif %}</p>
+                <div class="publicacoes-item__actions">
+                  <a class="publicacoes-btn" href="{% url 'core:camara_sessao_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
+                  <form method="post" action="{% url 'core:camara_sessao_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover sessão?');">
+                    {% csrf_token %}
+                    <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
+                  </form>
+                </div>
+              </li>
+            {% empty %}
+              <li class="publicacoes-item"><p>Nenhuma sessão cadastrada.</p></li>
+            {% endfor %}
+          </ul>
+        </article>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const search = document.getElementById("publicacoesSearch");
+  const scope = document.getElementById("publicacoesScope");
+  const clear = document.getElementById("publicacoesClear");
+  const cards = Array.from(document.querySelectorAll("[data-publicacoes-card]"));
+  if (!cards.length) return;
+
+  function applyFilters() {
+    const term = String(search?.value || "").trim().toLowerCase();
+    const activeScope = String(scope?.value || "all").toLowerCase();
+    cards.forEach((card) => {
+      const cardScope = String(card.getAttribute("data-scope") || "conteudo").toLowerCase();
+      const inScope = activeScope === "all" || activeScope === cardScope;
+      const text = (card.textContent || "").toLowerCase();
+      const matchesTerm = !term || text.indexOf(term) !== -1;
+      card.hidden = !(inScope && matchesTerm);
+    });
+  }
+
+  search?.addEventListener("input", applyFilters);
+  scope?.addEventListener("change", applyFilters);
+  clear?.addEventListener("click", function () {
+    if (search) search.value = "";
+    if (scope) scope.value = "all";
+    applyFilters();
+  });
+  applyFilters();
+})();
+</script>
 {% endblock %}

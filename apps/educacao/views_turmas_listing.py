@@ -4,9 +4,8 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.html import escape
 
-from apps.accounts.models import Profile
 from apps.core.exports import export_csv, export_pdf_table
-from apps.core.rbac import can, scope_filter_turmas
+from apps.core.rbac import can, is_professor_profile_role, scope_filter_turmas
 
 from .models import Matricula, Turma
 
@@ -32,6 +31,7 @@ def turma_list(request):
             "unidade__secretaria__nome",
             "unidade__secretaria__municipio__nome",
         )
+        .filter(unidade__tipo="EDUCACAO")
     )
 
     if ano.isdigit():
@@ -168,13 +168,14 @@ def turma_detail(request, pk: int):
             "unidade__secretaria",
             "unidade__secretaria__municipio",
             "curso",
-        ),
+            "matriz_curricular",
+        ).filter(unidade__tipo="EDUCACAO"),
     )
     turma = get_object_or_404(turma_qs, pk=pk)
 
     can_edu_manage = can(request.user, "educacao.manage")
-    role = (getattr(getattr(request.user, "profile", None), "role", "") or "").upper()
-    is_professor = role == "PROFESSOR"
+    role = getattr(getattr(request.user, "profile", None), "role", "")
+    is_professor = is_professor_profile_role(role)
 
     actions = [{"label": "Voltar", "url": reverse("educacao:turma_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
     if is_professor:
@@ -204,12 +205,8 @@ def turma_detail(request, pk: int):
     alunos_ativos = Matricula.objects.filter(turma_id=turma.id, aluno__ativo=True).values("aluno_id").distinct().count()
     alunos_inativos = Matricula.objects.filter(turma_id=turma.id, aluno__ativo=False).values("aluno_id").distinct().count()
 
-    professores = []
-    professores_total = 0
-    if any(getattr(f, "name", None) == "unidade" for f in Profile._meta.get_fields()):
-        professores_qs = Profile.objects.filter(unidade_id=turma.unidade_id, role="PROFESSOR").select_related("user").order_by("user__username")
-        professores = professores_qs
-        professores_total = professores_qs.count()
+    professores_qs = turma.professores.filter(is_active=True).order_by("first_name", "last_name", "username")
+    professores_total = professores_qs.count()
 
     necessidades_rows = list(
         Matricula.objects.filter(
@@ -251,12 +248,12 @@ def turma_detail(request, pk: int):
 
     headers_professores = [{"label": "Usuário"}, {"label": "Perfil"}]
     rows_professores = []
-    for p in professores:
+    for p in professores_qs:
         rows_professores.append(
             {
                 "cells": [
-                    {"text": getattr(getattr(p, "user", None), "username", "—") or "—", "url": ""},
-                    {"text": getattr(p, "role", "") or "—", "url": ""},
+                    {"text": (p.get_full_name() or "").strip() or p.username, "url": ""},
+                    {"text": p.username, "url": ""},
                 ],
                 "can_edit": False,
                 "edit_url": "",
@@ -271,7 +268,9 @@ def turma_detail(request, pk: int):
             {"label": "Turno", "value": turma.get_turno_display() if hasattr(turma, "get_turno_display") else turma.turno},
             {"label": "Modalidade", "value": turma.get_modalidade_display() if hasattr(turma, "get_modalidade_display") else turma.modalidade},
             {"label": "Etapa", "value": turma.get_etapa_display() if hasattr(turma, "get_etapa_display") else turma.etapa},
-            {"label": "Curso", "value": getattr(getattr(turma, "curso", None), "nome", "—")},
+            {"label": "Série/Ano", "value": turma.get_serie_ano_display() if hasattr(turma, "get_serie_ano_display") else turma.serie_ano},
+            {"label": "Matriz", "value": getattr(getattr(turma, "matriz_curricular", None), "nome", "—")},
+            {"label": "Atividade extra", "value": getattr(getattr(turma, "curso", None), "nome", "—")},
             {"label": "Oferta", "value": turma.get_forma_oferta_display() if hasattr(turma, "get_forma_oferta_display") else turma.forma_oferta},
         ],
         "pills": [

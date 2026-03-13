@@ -1,0 +1,23 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Ensino • Biblioteca e Materiais • {{ aluno.nome }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <article class="gp-student-stage__card">
+    <h3>Biblioteca / Materiais</h3>
+    <ul class="gp-student-list">
+      {% for arq in arquivos %}
+        <li class="gp-student-list__item">
+          <strong>{% if arq.arquivo %}<a class="gp-student-link" href="{{ arq.arquivo.url }}" target="_blank" rel="noopener">{{ arq.titulo }}</a>{% else %}{{ arq.titulo }}{% endif %}</strong>
+          <p>{{ arq.descricao|default:"Material educacional" }}</p>
+          <small>{{ arq.criado_em|date:"d/m/Y H:i" }}</small>
+        </li>
+      {% empty %}
+        <li class="gp-student-empty">Sem materiais publicados.</li>
+      {% endfor %}
+    </ul>
+  </article>
+</section>
+{% endblock %}

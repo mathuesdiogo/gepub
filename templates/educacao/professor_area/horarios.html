@@ -1,0 +1,87 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Locais e Horários • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage gp-professor-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <article class="gp-student-stage__card">
+    <form method="get" class="gp-form gp-form--smart gp-professor-filter-row gp-professor-filter-row--wide">
+      <div class="gp-form-group">
+        <label class="gp-form-label" for="id_turma">Turma</label>
+        <select id="id_turma" name="turma" class="gp-select">
+          <option value="">Todas</option>
+          {% for turma in turmas_filtro %}
+            <option value="{{ turma.id }}" {% if filtro_turma == turma.id|stringformat:'s' %}selected{% endif %}>{{ turma.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="gp-form-group">
+        <label class="gp-form-label" for="id_dia">Dia da semana</label>
+        <select id="id_dia" name="dia" class="gp-select">
+          <option value="">Todos</option>
+          {% for value, label in dias_choices %}
+            <option value="{{ value }}" {% if filtro_dia == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="gp-form-group">
+        <label class="gp-form-label">&nbsp;</label>
+        <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
+      </div>
+    </form>
+
+    <div class="gp-flex-wrap-row gp-mb-3">
+      {% if dia_totais %}
+        {% for dia_label, total in dia_totais.items %}
+          <span class="gp-badge gp-badge--neutral">{{ dia_label }}: {{ total }}</span>
+        {% endfor %}
+      {% else %}
+        <span class="gp-badge gp-badge--neutral">Sem horários encontrados</span>
+      {% endif %}
+    </div>
+
+    {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Sem horários" empty_text="Não há horários cadastrados para os filtros selecionados." %}
+  </article>
+
+  <article class="gp-student-stage__card">
+    <h3>Locais e Horários do Curso de Informática</h3>
+    <form method="get" class="gp-form gp-form--smart gp-professor-filter-row gp-professor-filter-row--wide">
+      <div class="gp-form-group">
+        <label class="gp-form-label" for="id_turma_informatica">Turma de Informática</label>
+        <select id="id_turma_informatica" name="turma_informatica" class="gp-select">
+          <option value="">Todas</option>
+          {% for turma in turmas_informatica_filtro %}
+            <option value="{{ turma.id }}" {% if filtro_turma_informatica == turma.id|stringformat:'s' %}selected{% endif %}>{{ turma.codigo }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="gp-form-group">
+        <label class="gp-form-label" for="id_dia_info">Dia da semana</label>
+        <select id="id_dia_info" name="dia_info" class="gp-select">
+          <option value="">Todos</option>
+          {% for value, label in dias_choices_informatica %}
+            <option value="{{ value }}" {% if filtro_dia_informatica == value|stringformat:'s' %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="gp-form-group">
+        <label class="gp-form-label">&nbsp;</label>
+        <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
+      </div>
+    </form>
+
+    <div class="gp-flex-wrap-row gp-mb-3">
+      {% if dia_totais_informatica %}
+        {% for dia_label, total in dia_totais_informatica.items %}
+          <span class="gp-badge gp-badge--neutral">{{ dia_label }}: {{ total }}</span>
+        {% endfor %}
+      {% else %}
+        <span class="gp-badge gp-badge--neutral">Sem horários de informática encontrados</span>
+      {% endif %}
+    </div>
+
+    {% include "core/partials/components/data/table_shell.html" with headers=headers_informatica rows=rows_informatica page_obj=None empty_title="Sem horários de informática" empty_text="Não há horários de informática para os filtros selecionados." %}
+  </article>
+</section>
+{% endblock %}

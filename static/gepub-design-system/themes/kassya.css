@@ -1,0 +1,30 @@
+html[data-theme="kassya"] {
+  --gp-primary: #274c77;
+  --gp-primary-hover: #1c2e4a;
+  --gp-secondary: #6096ba;
+  --gp-background: #e6eaf0;
+  --gp-surface: #ffffff;
+  --gp-border: #d3dce8;
+  --gp-text-primary: #1c2e4a;
+  --gp-text-secondary: #274c77;
+  --gp-success: #2e7d32;
+  --gp-warning: #fbc02d;
+  --gp-danger: #d32f2f;
+  --gp-info: #6096ba;
+  --gp-on-primary: #ffffff;
+  --gp-on-secondary: #ffffff;
+  --gp-on-success: #ffffff;
+  --gp-on-danger: #ffffff;
+  --gp-shadow-1: 0 1px 2px rgb(28 46 74 / 0.08);
+  --gp-shadow-2: 0 10px 26px rgb(28 46 74 / 0.14);
+  --gp-shadow-3: 0 22px 44px rgb(28 46 74 / 0.2);
+  --gp-sidebar-bg-start: #1c2e4a;
+  --gp-sidebar-bg-end: #274c77;
+  --gp-sidebar-overlay-1: color-mix(in srgb, #6096ba 30%, transparent);
+  --gp-sidebar-overlay-2: color-mix(in srgb, #4a7bd0 24%, transparent);
+  --gp-sidebar-border: color-mix(in srgb, #e6eaf0 22%, transparent);
+  --gp-sidebar-text: #ffffff;
+  --gp-sidebar-muted: #e8f1ff;
+  --gp-sidebar-surface: color-mix(in srgb, #6096ba 18%, #1c2e4a);
+  --gp-sidebar-surface-2: color-mix(in srgb, #6096ba 30%, #1c2e4a);
+}

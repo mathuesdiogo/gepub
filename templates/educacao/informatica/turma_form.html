@@ -1,0 +1,26 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}{% if mode == 'create' %}Nova Turma de Informática{% else %}Editar Turma de Informática{% endif %} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+  <div class="gp-card">
+    <div class="gp-card__body">
+      {% if mode == 'create' %}
+        {% include "core/partials/components/layout/page_head.html" with title="Nova Turma de Informática" subtitle="Defina curso e vincule uma grade oficial de horários" actions=actions %}
+      {% else %}
+        {% include "core/partials/components/layout/page_head.html" with title="Editar Turma de Informática" subtitle=turma.codigo actions=actions %}
+      {% endif %}
+
+      <form method="post" class="gp-form form-shell">
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="flash flash--error">{{ form.non_field_errors }}</div>{% endif %}
+
+        <div class="form-shell__fields">{{ form.as_p }}</div>
+
+        <div class="form-shell__actions">
+          <button type="submit" class="gp-button gp-button--primary">Salvar turma</button>
+          <a class="gp-button gp-button--outline" href="{% url 'educacao:informatica_turma_list' %}">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

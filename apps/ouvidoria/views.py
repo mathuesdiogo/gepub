@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from apps.core.decorators import require_perm
+from apps.core.exports import export_csv, export_pdf_table
 from apps.core.services_auditoria import registrar_auditoria
 from apps.core.services_transparencia import publicar_evento_transparencia
 from apps.core.rbac import is_admin
@@ -107,6 +108,33 @@ def chamado_list(request):
         qs = qs.filter(status=status)
     if tipo:
         qs = qs.filter(tipo=tipo)
+
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-criado_em"):
+            rows.append(
+                [
+                    item.protocolo,
+                    item.get_tipo_display(),
+                    item.assunto,
+                    item.solicitante_nome or "",
+                    item.get_status_display(),
+                    str(item.criado_em),
+                ]
+            )
+        headers = ["Protocolo", "Tipo", "Assunto", "Solicitante", "Status", "Criado em"]
+        if export == "csv":
+            return export_csv("ouvidoria_chamados.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="ouvidoria_chamados.pdf",
+            title="Chamados de ouvidoria",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'} | Tipo={tipo or '-'} | Status={status or '-'}",
+        )
     return render(
         request,
         "ouvidoria/chamado_list.html",
@@ -127,7 +155,19 @@ def chamado_list(request):
                     "url": reverse("ouvidoria:chamado_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
-                }
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&tipo={tipo}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&tipo={tipo}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
+                },
             ],
         },
     )
@@ -196,6 +236,30 @@ def tramitacao_list(request):
     if not municipio:
         return redirect("core:dashboard")
     qs = OuvidoriaTramitacao.objects.filter(municipio=municipio).select_related("chamado", "setor_origem", "setor_destino")
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-criado_em"):
+            rows.append(
+                [
+                    item.chamado.protocolo,
+                    item.setor_origem.nome if item.setor_origem else "",
+                    item.setor_destino.nome if item.setor_destino else "",
+                    item.observacao or "",
+                    str(item.criado_em),
+                ]
+            )
+        headers = ["Protocolo", "Setor origem", "Setor destino", "Observacao", "Criado em"]
+        if export == "csv":
+            return export_csv("ouvidoria_tramitacoes.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="ouvidoria_tramitacoes.pdf",
+            title="Tramitacoes de chamados",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+        )
     return render(
         request,
         "ouvidoria/tramitacao_list.html",
@@ -211,7 +275,19 @@ def tramitacao_list(request):
                     "url": reverse("ouvidoria:tramitacao_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
-                }
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
+                },
             ],
         },
     )
@@ -256,6 +332,30 @@ def resposta_list(request):
     if not municipio:
         return redirect("core:dashboard")
     qs = OuvidoriaResposta.objects.filter(municipio=municipio).select_related("chamado", "criado_por")
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-criado_em"):
+            rows.append(
+                [
+                    item.chamado.protocolo,
+                    item.criado_por.username if item.criado_por else "-",
+                    "SIM" if item.publico else "NAO",
+                    str(item.criado_em),
+                    item.resposta[:120],
+                ]
+            )
+        headers = ["Protocolo", "Respondido por", "Publica", "Criado em", "Resposta"]
+        if export == "csv":
+            return export_csv("ouvidoria_respostas.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="ouvidoria_respostas.pdf",
+            title="Respostas de ouvidoria",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+        )
     return render(
         request,
         "ouvidoria/resposta_list.html",
@@ -271,7 +371,19 @@ def resposta_list(request):
                     "url": reverse("ouvidoria:resposta_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
-                }
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
+                },
             ],
         },
     )

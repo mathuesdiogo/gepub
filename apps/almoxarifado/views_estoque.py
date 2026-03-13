@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from apps.core.exports import export_csv, export_pdf_table
+
 from .views_common import *
 from .views_common import _aplicar_movimento_estoque, _municipios_admin, _q_municipio, _resolve_municipio, _to_dec
 
@@ -64,6 +66,34 @@ def item_list(request):
         qs = qs.filter(Q(codigo__icontains=q) | Q(nome__icontains=q))
     if status:
         qs = qs.filter(status=status)
+
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("nome"):
+            rows.append(
+                [
+                    item.codigo,
+                    item.nome,
+                    item.unidade_medida,
+                    item.get_status_display(),
+                    str(item.saldo_atual),
+                    str(item.estoque_minimo),
+                    str(item.valor_medio),
+                ]
+            )
+        headers = ["Codigo", "Nome", "Unidade", "Status", "Saldo", "Minimo", "Valor medio"]
+        if export == "csv":
+            return export_csv("almoxarifado_itens.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="almoxarifado_itens.pdf",
+            title="Itens de estoque",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'} | Status={status or '-'}",
+        )
     return render(
         request,
         "almoxarifado/item_list.html",
@@ -82,7 +112,19 @@ def item_list(request):
                     "url": reverse("almoxarifado:item_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
-                }
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
+                },
             ],
         },
     )
@@ -153,6 +195,34 @@ def movimento_list(request):
         qs = qs.filter(tipo=tipo)
     if q:
         qs = qs.filter(Q(item__codigo__icontains=q) | Q(item__nome__icontains=q))
+
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-data_movimento", "-id"):
+            rows.append(
+                [
+                    str(item.data_movimento),
+                    item.item.codigo,
+                    item.item.nome,
+                    item.get_tipo_display(),
+                    str(item.quantidade),
+                    str(item.valor_unitario),
+                    item.documento or "",
+                ]
+            )
+        headers = ["Data", "Item", "Descricao", "Tipo", "Quantidade", "Valor unitario", "Documento"]
+        if export == "csv":
+            return export_csv("almoxarifado_movimentos.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="almoxarifado_movimentos.pdf",
+            title="Movimentos de estoque",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'} | Tipo={tipo or '-'}",
+        )
     return render(
         request,
         "almoxarifado/movimento_list.html",
@@ -171,7 +241,19 @@ def movimento_list(request):
                     "url": reverse("almoxarifado:movimento_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
-                }
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&tipo={tipo}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&tipo={tipo}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
+                },
             ],
         },
     )

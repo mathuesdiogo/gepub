@@ -5,7 +5,7 @@
 {% include "core/partials/components/layout/page_head.html" with title="Relatório por Tipo" subtitle="Totalizações por tipo de necessidade" actions=actions %}
 {% if extra_filters %}<div class="detail-summary">{{ extra_filters|safe }}</div>{% endif %}
 <div class="actions-bar">
-  <a class="btn btn--ghost" href="?export=csv"><i class="fa-solid fa-file-csv"></i> Exportar CSV</a>
+  <a class="gp-button gp-button--outline" href="?export=csv"><i class="fa-solid fa-file-csv"></i> Exportar CSV</a>
 </div>
 <table class="table-shell">
   <thead><tr><th>Tipo</th><th class="u-w-140">Total</th></tr></thead>

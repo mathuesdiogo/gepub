@@ -1,0 +1,155 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="card billing-page billing-page--admin-plano-detail"><div class="card__body billing-page__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  {% if not is_new %}
+    <section class="billing-section">
+      <div class="billing-summary-grid">
+        <div class="billing-box">
+          <div class="billing-box__label">Plano técnico</div>
+          <div class="billing-box__value">{{ plano.nome }}</div>
+          <div class="billing-box__meta">{{ plano.codigo }} • {% if plano.ativo %}Ativo{% else %}Inativo{% endif %}</div>
+        </div>
+        <div class="billing-box">
+          <div class="billing-box__label">Municípios usando</div>
+          <div class="billing-box__value">{{ resumo_uso.municipios|default:0 }}</div>
+          <div class="billing-box__meta">Usuários: {{ resumo_uso.usuarios|default:0 }} • Alunos: {{ resumo_uso.alunos|default:0 }}</div>
+        </div>
+        <div class="billing-box">
+          <div class="billing-box__label">Apps habilitados no plano</div>
+          <div class="billing-box__meta">
+            {% for modulo in modulos_destravados %}
+              <div>• {{ modulo }}</div>
+            {% empty %}
+              <div>Nenhum app habilitado.</div>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="billing-box">
+          <div class="billing-box__label">Documentos comerciais</div>
+          <div class="billing-box__meta">
+            <a href="{{ plano_preview.links.contratacao }}" target="_blank" rel="noopener">Contratação</a><br>
+            <a href="{{ plano_preview.links.servicos }}" target="_blank" rel="noopener">Prestação de serviços</a>
+          </div>
+        </div>
+      </div>
+
+      <form method="post" class="inline-action-form" style="margin-top: 10px;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="toggle_ativo">
+        <button type="submit" class="gp-button gp-button--outline">
+          {% if plano.ativo %}<i class="fa-solid fa-ban"></i> Desativar plano{% else %}<i class="fa-solid fa-check"></i> Ativar plano{% endif %}
+        </button>
+      </form>
+    </section>
+  {% endif %}
+
+  <section class="billing-section">
+    <div class="billing-section__head">
+      <h3>Configurações do plano</h3>
+      <p>Edição técnica e comercial em um único fluxo.</p>
+    </div>
+    <div class="billing-summary-grid">
+      <div class="billing-box">
+        <div class="billing-box__label">Configuração técnica</div>
+        <form method="post" class="form-shell">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="save">
+          <div class="form-shell__fields">
+            {{ plano_form.as_p }}
+          </div>
+          <div class="form-shell__actions">
+            <button type="submit" class="gp-button gp-button--primary">Salvar plano</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="billing-box">
+        <div class="billing-box__label">Configuração comercial</div>
+        <form method="post" class="form-shell">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="save">
+          <div class="form-shell__fields">
+            {{ comercial_form.as_p }}
+          </div>
+          <div class="form-shell__actions">
+            <button type="submit" class="gp-button gp-button--primary">Salvar comercial</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  {% if plano_preview %}
+    <section class="billing-section">
+      <div class="billing-section__head">
+        <h3>Preview de benefícios no portal</h3>
+        <p>Como o plano será exibido para os usuários finais.</p>
+      </div>
+      <div class="billing-summary-grid">
+        <div class="billing-box">
+          <div class="billing-box__label">Plano comercial</div>
+          <div class="billing-box__value">{{ plano_preview.nome_comercial }}</div>
+          <div class="billing-box__meta">{{ plano_preview.descricao_comercial }}</div>
+        </div>
+        <div class="billing-box">
+          <div class="billing-box__label">Benefícios</div>
+          <div class="billing-box__meta">
+            {% for item in plano_preview.beneficios %}
+              <div>• {{ item }}</div>
+            {% empty %}
+              <div>Sem benefícios preenchidos.</div>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="billing-box">
+          <div class="billing-box__label">Acessos especiais</div>
+          <div class="billing-box__meta">
+            {% for item in plano_preview.especiais %}
+              <div>• {{ item }}</div>
+            {% empty %}
+              <div>Sem acessos especiais preenchidos.</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </section>
+  {% endif %}
+
+  {% if assinaturas_recentes %}
+    <section class="billing-section">
+      <div class="billing-section__head">
+        <h3>Assinaturas recentes vinculadas</h3>
+        <p>Municípios mais recentemente atualizados neste plano.</p>
+      </div>
+      <div class="table-shell billing-table-shell">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Município</th>
+              <th>Status</th>
+              <th>Base mensal</th>
+              <th>Atualização</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ass in assinaturas_recentes %}
+              <tr>
+                <td>{{ ass.municipio.nome }}/{{ ass.municipio.uf }}</td>
+                <td>{{ ass.get_status_display }}</td>
+                <td>R$ {{ ass.valor_base_mensal }}</td>
+                <td>{{ ass.atualizado_em|date:"d/m/Y H:i" }}</td>
+                <td><a href="{% url 'billing:assinatura_admin_detail' ass.pk %}">Abrir</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+</div></div>
+{% endblock %}

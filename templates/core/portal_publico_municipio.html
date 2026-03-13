@@ -6,13 +6,13 @@
 {% block extra_head %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
 <link rel="stylesheet" href="{% static 'css/pages/portal-publico-municipio.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="city-page portal-prefeitura {% if request.GET.portal_editor == '1' %}city-page--editor{% endif %}" style="--portal-primary: {{ cor_primaria|default:'#0E4A7E' }}; --portal-secondary: {{ cor_secundaria|default:'#2F6EA9' }};">
+<div class="city-page portal-prefeitura {% if request.GET.portal_editor == '1' %}city-page--editor{% endif %}" style="--portal-primary: {{ cor_primaria|default:'#4F46E5' }}; --portal-secondary: {{ cor_secundaria|default:'#7C3AED' }};">
   <header class="pm-header-shell">
     <div class="pm-accessibility">
       <div class="city-wrap pm-accessibility__inner">
@@ -31,7 +31,7 @@
 
     <div class="pm-header-main">
       <div class="city-wrap pm-header-main__inner">
-        <a href="{% url 'core:home' %}" class="pm-brand">
+        <a href="{% url 'core:home' %}" class="pm-brand" data-theme-action="logo">
           {% if portal_cfg.logo %}
             <img src="{{ portal_cfg.logo.url }}" alt="{{ municipio.nome }}">
           {% else %}
@@ -76,23 +76,47 @@
   </header>
 
   <main id="conteudo-principal" class="pm-main">
-    <section class="pm-banner" data-theme-action="banner_imagem">
+    <section
+      class="pm-banner"
+      data-theme-action="slide_0_imagem"
+      data-banner-interval="{{ theme_builder.slider_interval_ms|default:5500 }}"
+      data-banner-autoplay="{% if theme_builder.slider_autoplay %}1{% else %}0{% endif %}"
+    >
       <div class="pm-banner__track">
         {% if banners_home %}
           {% for banner in banners_home|slice:":4" %}
-            <article class="pm-banner__slide {% if forloop.first %}is-active{% endif %}" data-banner-slide {% if banner.imagem %}style="--slide-image:url('{{ banner.imagem.url }}');"{% elif hero_image_url %}style="--slide-image:url('{{ hero_image_url }}');"{% endif %}>
+            <article
+              class="pm-banner__slide {% if forloop.first %}is-active{% endif %}"
+              data-banner-slide
+              data-theme-slide="{{ forloop.counter0 }}"
+              data-theme-action="slide_{{ forloop.counter0 }}_imagem"
+              {% if banner.imagem %}style="--slide-image:url('{{ banner.imagem.url }}');"{% elif hero_image_url %}style="--slide-image:url('{{ hero_image_url }}');"{% endif %}
+            >
               <div class="city-wrap">
                 <div class="pm-banner__content">
                   <p class="pm-banner__kicker">Portal da Prefeitura</p>
-                  <h1 data-theme-bind="banner_titulo">{{ banner.titulo|default:"Transparência e Serviços para o Cidadão" }}</h1>
-                  <p class="pm-banner__subtitle" data-theme-bind="banner_subtitulo">{{ banner.subtitulo|default:"Acompanhe notícias, serviços online e dados públicos do município." }}</p>
+                  <h1
+                    data-theme-bind="banner_{{ forloop.counter0 }}_titulo"
+                    data-theme-editable="banner_{{ forloop.counter0 }}_titulo"
+                    {% if request.GET.portal_editor == "1" %}contenteditable="true"{% endif %}
+                  >{{ banner.titulo|default:"Transparência e Serviços para o Cidadão" }}</h1>
+                  <p
+                    class="pm-banner__subtitle"
+                    data-theme-bind="banner_{{ forloop.counter0 }}_subtitulo"
+                    data-theme-editable="banner_{{ forloop.counter0 }}_subtitulo"
+                    {% if request.GET.portal_editor == "1" %}contenteditable="true"{% endif %}
+                  >{{ banner.subtitulo|default:"Acompanhe notícias, serviços online e dados públicos do município." }}</p>
                   <p
                     data-theme-bind="mensagem_boas_vindas"
                     data-theme-editable="mensagem_boas_vindas"
                     {% if request.GET.portal_editor == "1" %}contenteditable="true"{% endif %}
                   >{{ portal_cfg.mensagem_boas_vindas|default:"Bem-vindo ao portal oficial. Acesse serviços, acompanhe a gestão e consulte informações em tempo real." }}</p>
                   <div class="pm-banner__actions">
-                    <a class="pm-btn pm-btn--primary" href="{{ cta_transparencia }}">Portal da Transparência</a>
+                    {% if plan_flags.transparencia %}
+                      <a class="pm-btn pm-btn--primary" href="{{ banner.link|default:cta_transparencia }}" data-theme-bind-href="banner_{{ forloop.counter0 }}_link">Portal da Transparência</a>
+                    {% else %}
+                      <a class="pm-btn pm-btn--primary" href="{{ banner.link|default:cta_transparencia }}" data-theme-bind-href="banner_{{ forloop.counter0 }}_link">Notícias Oficiais</a>
+                    {% endif %}
                     <a class="pm-btn pm-btn--green" href="{{ cta_servicos_online }}">Serviços Online</a>
                   </div>
                 </div>
@@ -100,19 +124,38 @@
             </article>
           {% endfor %}
         {% else %}
-          <article class="pm-banner__slide is-active" data-banner-slide {% if hero_image_url %}style="--slide-image:url('{{ hero_image_url }}');"{% endif %}>
+          <article
+            class="pm-banner__slide is-active"
+            data-banner-slide
+            data-theme-slide="0"
+            data-theme-action="slide_0_imagem"
+            {% if hero_image_url %}style="--slide-image:url('{{ hero_image_url }}');"{% endif %}
+          >
             <div class="city-wrap">
               <div class="pm-banner__content">
                 <p class="pm-banner__kicker">Portal da Prefeitura</p>
-                <h1 data-theme-bind="banner_titulo">Prefeitura {{ municipio.nome }}</h1>
-                <p class="pm-banner__subtitle" data-theme-bind="banner_subtitulo">Transparência e compromisso com a população</p>
+                <h1
+                  data-theme-bind="banner_0_titulo"
+                  data-theme-editable="banner_0_titulo"
+                  {% if request.GET.portal_editor == "1" %}contenteditable="true"{% endif %}
+                >Prefeitura {{ municipio.nome }}</h1>
+                <p
+                  class="pm-banner__subtitle"
+                  data-theme-bind="banner_0_subtitulo"
+                  data-theme-editable="banner_0_subtitulo"
+                  {% if request.GET.portal_editor == "1" %}contenteditable="true"{% endif %}
+                >Transparência e compromisso com a população</p>
                 <p
                   data-theme-bind="mensagem_boas_vindas"
                   data-theme-editable="mensagem_boas_vindas"
                   {% if request.GET.portal_editor == "1" %}contenteditable="true"{% endif %}
                 >{{ portal_cfg.mensagem_boas_vindas|default:"Acesse informações públicas, serviços digitais e canais de atendimento oficial." }}</p>
                 <div class="pm-banner__actions">
-                  <a class="pm-btn pm-btn--primary" href="{{ cta_transparencia }}">Portal da Transparência</a>
+                  {% if plan_flags.transparencia %}
+                    <a class="pm-btn pm-btn--primary" href="{{ cta_transparencia }}" data-theme-bind-href="banner_0_link">Portal da Transparência</a>
+                  {% else %}
+                    <a class="pm-btn pm-btn--primary" href="{{ cta_transparencia }}" data-theme-bind-href="banner_0_link">Notícias Oficiais</a>
+                  {% endif %}
                   <a class="pm-btn pm-btn--green" href="{{ cta_servicos_online }}">Serviços Online</a>
                 </div>
               </div>
@@ -121,9 +164,11 @@
         {% endif %}
       </div>
 
-      {% if banners_home|length > 1 %}
+      {% if banners_home|length > 1 and theme_builder.slider_show_arrows %}
         <button class="pm-banner__control is-prev" type="button" data-banner-prev aria-label="Slide anterior"><i class="fa-solid fa-chevron-left"></i></button>
         <button class="pm-banner__control is-next" type="button" data-banner-next aria-label="Próximo slide"><i class="fa-solid fa-chevron-right"></i></button>
+      {% endif %}
+      {% if banners_home|length > 1 and theme_builder.slider_show_dots %}
         <div class="pm-banner__dots">
           {% for _item in banners_home|slice:":4" %}
             <button type="button" data-banner-dot data-banner-index="{{ forloop.counter0 }}" class="{% if forloop.first %}is-active{% endif %}" aria-label="Ir para slide {{ forloop.counter }}"></button>
@@ -136,8 +181,12 @@
       <div class="city-wrap">
         <div class="pm-main-services-grid">
           {% for item in servicos_cards|slice:":4" %}
-            <a class="pm-main-service pm-main-service--{{ forloop.counter }}" href="{{ item.url|default:'#' }}">
-              <i class="{{ item.icon|default:'fa-solid fa-circle-info' }}"></i>
+            <a class="pm-main-service pm-main-service--{{ forloop.counter }}" href="{{ item.url|default:'#' }}" data-theme-bind-href="bloco_{{ forloop.counter0 }}_link">
+              <i
+                class="{{ item.icon|default:'fa-solid fa-circle-info' }}"
+                data-theme-bind-icon="bloco_{{ forloop.counter0 }}_icone"
+                data-theme-icon-default="fa-solid fa-circle-info"
+              ></i>
               <h2
                 data-theme-bind="bloco_{{ forloop.counter0 }}_titulo"
                 data-theme-editable="bloco_{{ forloop.counter0 }}_titulo"
@@ -420,7 +469,7 @@
           </article>
 
           <article class="pm-arquivo-col">
-            <h3><i class="fa-solid fa-folder-open"></i> Transparência e links úteis</h3>
+            <h3><i class="fa-solid fa-folder-open"></i> Links úteis</h3>
             <div class="pm-arquivo-list">
               {% for item in menu_items_footer|slice:":3" %}
                 <a href="{{ item.url }}" {% if item.nova_aba %}target="_blank" rel="noopener"{% endif %}>
@@ -491,19 +540,19 @@
   <footer class="pm-footer">
     <div class="city-wrap">
       <div class="pm-footer__grid">
-        <article>
+        <article data-theme-action="endereco">
           <h3><i class="fa-solid fa-location-dot"></i> Endereço</h3>
           <p data-theme-bind="endereco">{{ portal_cfg.endereco|default:"Endereço não informado." }}</p>
         </article>
-        <article>
+        <article data-theme-action="telefone">
           <h3><i class="fa-solid fa-phone"></i> Telefone</h3>
           <p data-theme-bind="telefone">{{ portal_cfg.telefone|default:"Telefone não informado." }}</p>
         </article>
-        <article>
+        <article data-theme-action="email">
           <h3><i class="fa-solid fa-envelope"></i> E-mail</h3>
           <p data-theme-bind="email">{{ portal_cfg.email|default:"E-mail não informado." }}</p>
         </article>
-        <article>
+        <article data-theme-action="horario_atendimento">
           <h3><i class="fa-regular fa-clock"></i> Atendimento</h3>
           <p data-theme-bind="horario_atendimento">{{ portal_cfg.horario_atendimento|default:"Horário não informado." }}</p>
         </article>
@@ -529,10 +578,18 @@
         <div>
           <h4>Publicações</h4>
           <ul>
-            <li><a href="{{ cta_transparencia }}">Portal da Transparência</a></li>
+            {% if plan_flags.transparencia %}
+              <li><a href="{{ cta_transparencia }}">Portal da Transparência</a></li>
+            {% else %}
+              <li><a href="{% url 'core:portal_noticias_public' %}">Notícias</a></li>
+            {% endif %}
             <li><a href="{% url 'core:portal_diario_public' %}">Diário Oficial</a></li>
             <li><a href="{% url 'core:portal_noticias_public' %}">Notícias</a></li>
-            <li><a href="{{ cta_servicos_online }}">Ouvidoria</a></li>
+            {% if plan_flags.transparencia %}
+              <li><a href="{{ cta_servicos_online }}">Ouvidoria</a></li>
+            {% else %}
+              <li><a href="{{ cta_servicos_online }}">Serviços Públicos</a></li>
+            {% endif %}
           </ul>
         </div>
       </div>
@@ -541,7 +598,11 @@
         <p>© {% now "Y" %} {{ municipio.nome }} • Portal Público Municipal</p>
         <div>
           <a href="#conteudo-principal">Acessibilidade</a>
-          <a href="{{ cta_transparencia }}">Transparência</a>
+          {% if plan_flags.transparencia %}
+            <a href="{{ cta_transparencia }}">Transparência</a>
+          {% else %}
+            <a href="{% url 'core:portal_noticias_public' %}">Notícias</a>
+          {% endif %}
           <a href="{{ cta_login }}" target="_blank" rel="noopener">Sistema Interno</a>
         </div>
       </div>
@@ -579,12 +640,21 @@
       contrastBtn.classList.toggle("is-active");
     });
 
+    var bannerRoot = document.querySelector(".pm-banner");
     var slides = Array.prototype.slice.call(document.querySelectorAll("[data-banner-slide]"));
     var dots = Array.prototype.slice.call(document.querySelectorAll("[data-banner-dot]"));
     var prevBtn = document.querySelector("[data-banner-prev]");
     var nextBtn = document.querySelector("[data-banner-next]");
     var index = 0;
     var timer = null;
+    var autoplay = true;
+    var interval = 5500;
+
+    function refreshBannerConfig() {
+      autoplay = (bannerRoot && bannerRoot.getAttribute("data-banner-autoplay")) !== "0";
+      var intervalRaw = bannerRoot ? Number(bannerRoot.getAttribute("data-banner-interval") || 5500) : 5500;
+      interval = Number.isFinite(intervalRaw) ? Math.max(1500, Math.min(intervalRaw, 20000)) : 5500;
+    }
 
     function showSlide(nextIndex) {
       if (!slides.length) return;
@@ -598,11 +668,12 @@
     }
 
     function startAutoplay() {
-      if (slides.length < 2) return;
+      refreshBannerConfig();
+      if (!autoplay || slides.length < 2) return;
       stopAutoplay();
       timer = setInterval(function () {
         showSlide(index + 1);
-      }, 5500);
+      }, interval);
     }
 
     function stopAutoplay() {
@@ -628,6 +699,12 @@
       });
     });
 
+    bannerRoot && bannerRoot.addEventListener("mouseenter", stopAutoplay);
+    bannerRoot && bannerRoot.addEventListener("mouseleave", startAutoplay);
+    window.addEventListener("portal-theme:banner-config", function () {
+      startAutoplay();
+    });
+
     showSlide(0);
     startAutoplay();
   })();
@@ -638,6 +715,10 @@
   (function () {
     var page = document.querySelector(".city-page");
     if (!page) return;
+    var bannerRoot = document.querySelector(".pm-banner");
+    var bannerDots = document.querySelector(".pm-banner__dots");
+    var bannerArrowPrev = document.querySelector("[data-banner-prev]");
+    var bannerArrowNext = document.querySelector("[data-banner-next]");
 
     function cleanText(value) {
       return String(value || "").replace(/\s+/g, " ").trim();
@@ -646,9 +727,38 @@
     function bindSet(field, value) {
       document.querySelectorAll("[data-theme-bind='" + field + "']").forEach(function (el) {
         if (typeof value === "string") {
-          el.textContent = value || el.textContent;
+          el.textContent = value;
         }
       });
+    }
+
+    function bindHref(field, value) {
+      document.querySelectorAll("[data-theme-bind-href='" + field + "']").forEach(function (el) {
+        if (typeof value === "string") {
+          el.setAttribute("href", value.trim() || "#");
+        }
+      });
+    }
+
+    function bindIcon(field, value) {
+      document.querySelectorAll("[data-theme-bind-icon='" + field + "']").forEach(function (el) {
+        if (!el) return;
+        var iconClass = String(value || "").trim();
+        var fallback = String(el.getAttribute("data-theme-icon-default") || "fa-solid fa-circle-info").trim();
+        el.className = iconClass || fallback;
+      });
+    }
+
+    function bindToggle(field, value) {
+      var val = String(value || "1").trim();
+      if (field === "slider_show_arrows") {
+        var showArrows = val !== "0";
+        if (bannerArrowPrev) bannerArrowPrev.hidden = !showArrows;
+        if (bannerArrowNext) bannerArrowNext.hidden = !showArrows;
+      }
+      if (field === "slider_show_dots" && bannerDots) {
+        bannerDots.hidden = val === "0";
+      }
     }
 
     window.addEventListener("message", function (event) {
@@ -663,8 +773,19 @@
         page.style.setProperty("--portal-secondary", payload.cor_secundaria);
       }
 
+      if (Object.prototype.hasOwnProperty.call(payload, "slider_interval_ms") && bannerRoot) {
+        bannerRoot.setAttribute("data-banner-interval", String(payload.slider_interval_ms));
+      }
+      if (Object.prototype.hasOwnProperty.call(payload, "slider_autoplay") && bannerRoot) {
+        bannerRoot.setAttribute("data-banner-autoplay", String(payload.slider_autoplay));
+      }
+      window.dispatchEvent(new CustomEvent("portal-theme:banner-config"));
+
       Object.keys(payload).forEach(function (field) {
         bindSet(field, payload[field]);
+        bindHref(field, payload[field]);
+        bindIcon(field, payload[field]);
+        bindToggle(field, payload[field]);
       });
     });
 
@@ -685,10 +806,12 @@
       });
     });
 
-    document.querySelectorAll("[data-theme-action='banner_imagem']").forEach(function (el) {
-      el.addEventListener("click", function () {
-        window.parent.postMessage({ type: "portal-theme:focus", field: "banner_imagem" }, "*");
-      });
+    document.addEventListener("click", function (ev) {
+      var target = ev.target && ev.target.closest ? ev.target.closest("[data-theme-action]") : null;
+      if (!target) return;
+      var field = String(target.getAttribute("data-theme-action") || "").trim();
+      if (!field) return;
+      window.parent.postMessage({ type: "portal-theme:focus", field: field }, "*");
     });
 
     document.querySelectorAll("a").forEach(function (link) {

@@ -2,7 +2,7 @@
 {% block title %}{{ title }} • Internação • Saúde • GEPUB{% endblock %}
 
 {% block module_content %}
-<div class="card"><div class="card__body">
+<div class="gp-card"><div class="gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
   {% include "core/partials/components/layout/detail_summary.html" with fields=fields pills=pills %}
 
@@ -27,7 +27,7 @@
     <form method="post">
       {% csrf_token %}
       {{ reg_form.as_p }}
-      <button type="submit" class="btn btn-primary">Adicionar registro</button>
+      <button type="submit" class="gp-button gp-button--primary">Adicionar registro</button>
     </form>
   </div>
   {% endif %}

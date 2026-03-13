@@ -18,3 +18,19 @@ def autocomplete_attrs(url, href=None, min_chars=2, max_items=5):
     if href:
         parts.append(format_html('data-autocomplete-href="{}"', href))
     return format_html(" ".join([str(p) for p in parts]))
+
+
+@register.filter
+def get_item(obj, key):
+    """
+    Acesso dinâmico para dicts/forms em templates.
+    Ex.: {{ form|get_item:'campo_dinamico' }}
+    """
+    if obj is None:
+        return ""
+    try:
+        if hasattr(obj, "__getitem__"):
+            return obj[key]
+    except Exception:
+        return ""
+    return ""

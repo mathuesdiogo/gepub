@@ -1,0 +1,71 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Frequência da Aula • Informática • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+  <div class="gp-card">
+    <div class="gp-card__body">
+      {% include "core/partials/components/layout/page_head.html" with title="Frequência da aula" subtitle=aula.turma.codigo actions=None %}
+
+      <div class="u-mb-10">
+        <strong>Data:</strong> {{ aula.data_aula|date:"d/m/Y" }}
+        {% if aula.encontro %} • <strong>Encontro:</strong> {{ aula.encontro.get_dia_semana_display }} {{ aula.encontro.hora_inicio|time:"H:i" }}-{{ aula.encontro.hora_fim|time:"H:i" }}{% endif %}
+      </div>
+
+      <form method="post" class="gp-form">
+        {% csrf_token %}
+        {% if not can_edit_execucao %}
+          <div class="gp-alert gp-alert--info u-mb-12">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>Modo de acompanhamento: lançamento de frequência é exclusivo do professor.</span>
+          </div>
+        {% endif %}
+
+        <table class="table gp-table--striped gp-table--hover">
+          <thead>
+            <tr>
+              <th>Aluno</th>
+              <th>Escola de origem</th>
+              <th>Presente</th>
+              <th>Justificativa</th>
+              <th>Observação</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in alunos_rows %}
+              <tr>
+                <td>{{ row.matricula.aluno.nome }}</td>
+                <td>{{ row.matricula.escola_origem.nome }}</td>
+                <td>
+                  <label>
+                    <input type="checkbox" name="presente_{{ row.matricula.aluno_id }}" value="1" {% if not row.freq or row.freq.presente %}checked{% endif %}{% if not can_edit_execucao %} disabled{% endif %}>
+                    Presente
+                  </label>
+                </td>
+                <td>
+                  <input type="text" class="gp-input" name="justificativa_{{ row.matricula.aluno_id }}" value="{{ row.freq.justificativa|default:'' }}" placeholder="opcional"{% if not can_edit_execucao %} readonly{% endif %}>
+                </td>
+                <td>
+                  <input type="text" class="gp-input" name="observacao_{{ row.matricula.aluno_id }}" value="{{ row.freq.observacao|default:'' }}" placeholder="opcional"{% if not can_edit_execucao %} readonly{% endif %}>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="5">Nenhum aluno matriculado para esta turma.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <label class="u-mt-12 u-mb-12" style="display:block;">
+          <input type="checkbox" name="encerrar_aula" value="1" {% if aula.encerrada %}checked{% endif %}{% if not can_edit_execucao %} disabled{% endif %}>
+          Encerrar aula após salvar frequência
+        </label>
+
+        <div class="form-shell__actions">
+          {% if can_edit_execucao %}
+            <button type="submit" class="gp-button gp-button--primary">Salvar frequência</button>
+          {% endif %}
+          <a class="gp-button gp-button--outline" href="{% url 'educacao:informatica_frequencia' %}">Voltar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

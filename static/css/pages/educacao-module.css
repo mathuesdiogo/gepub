@@ -13,12 +13,16 @@
   --edu-ink-soft: #61778d;
 }
 
-.educacao-module.module-shell {
+.educacao-module.gp-module-shell {
   grid-template-columns: minmax(255px, 290px) 1fr;
   gap: 16px;
 }
 
-.educacao-module .module-shell__aside {
+.educacao-module.gp-module-shell.gp-module-shell--single {
+  grid-template-columns: 1fr;
+}
+
+.educacao-module .gp-module-shell__aside {
   top: 12px;
 }
 
@@ -120,14 +124,61 @@
   color: #ffffff;
 }
 
-.educacao-module .card {
+.educacao-module .gp-card {
   border: 1px solid var(--edu-border);
   border-radius: 20px;
   background: linear-gradient(180deg, #ffffff 0%, #fafdff 100%);
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.07);
 }
 
-.educacao-module .card > .card__body {
+.educacao-module .gp-card.edu-card-highlight {
+  border-color: #224596;
+  background:
+    radial-gradient(circle at 84% 6%, rgba(97, 190, 255, 0.3), transparent 42%),
+    linear-gradient(140deg, #152e7e 0%, #1d3f96 55%, #2d66c8 100%);
+  color: #eaf2ff;
+  box-shadow: 0 16px 34px rgba(18, 40, 98, 0.32);
+}
+
+.educacao-module .gp-card.edu-card-highlight .page-head {
+  border-bottom-color: rgba(214, 231, 255, 0.25);
+}
+
+.educacao-module .gp-card.edu-card-highlight .page-head__title {
+  color: #ffffff;
+}
+
+.educacao-module .gp-card.edu-card-highlight .page-head__subtitle {
+  color: rgba(235, 244, 255, 0.92);
+}
+
+.educacao-module .gp-card.edu-card-highlight .edu-kpi {
+  border-color: rgba(214, 232, 255, 0.34);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: none;
+}
+
+.educacao-module .gp-card.edu-card-highlight .edu-kpi:hover {
+  border-color: rgba(227, 239, 255, 0.64);
+  background: rgba(255, 255, 255, 0.17);
+  transform: translateY(-1px);
+}
+
+.educacao-module .gp-card.edu-card-highlight .edu-kpi__label,
+.educacao-module .gp-card.edu-card-highlight .edu-kpi__meta {
+  color: rgba(230, 242, 255, 0.9);
+}
+
+.educacao-module .gp-card.edu-card-highlight .edu-kpi__value {
+  color: #ffffff;
+}
+
+.educacao-module .gp-card.edu-card-highlight .edu-kpi__icon {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.educacao-module .gp-card > .gp-card__body {
   padding: 22px;
 }
 
@@ -146,25 +197,25 @@
   color: var(--edu-ink-soft);
 }
 
-.educacao-module .btn-primary {
+.educacao-module .gp-button--primary {
   background: linear-gradient(180deg, #3c93ff 0%, #2e75d8 100%);
 }
 
-.educacao-module .btn-primary:hover {
+.educacao-module .gp-button--primary:hover {
   background: linear-gradient(180deg, #3587ea 0%, #2869c2 100%);
 }
 
-.educacao-module .btn--ghost {
+.educacao-module .gp-button--ghost {
   border-color: #bcd5ec;
   color: #1a4f79;
   background: rgba(59, 130, 246, 0.07);
 }
 
-.educacao-module .btn--ghost:hover {
+.educacao-module .gp-button--ghost:hover {
   background: rgba(59, 130, 246, 0.14);
 }
 
-.educacao-module .edu-dashboard .card__body {
+.educacao-module .edu-dashboard .gp-card__body {
   display: grid;
   gap: 14px;
 }
@@ -243,13 +294,13 @@
   gap: 8px;
 }
 
-.educacao-module .edu-hero__actions .btn--ghost {
+.educacao-module .edu-hero__actions .gp-button--ghost {
   border-color: rgba(232, 242, 255, 0.55);
   background: rgba(255, 255, 255, 0.12);
   color: #f2f8ff;
 }
 
-.educacao-module .edu-hero__actions .btn--ghost:hover {
+.educacao-module .edu-hero__actions .gp-button--ghost:hover {
   background: rgba(255, 255, 255, 0.24);
 }
 
@@ -307,7 +358,7 @@
   background: rgba(59, 130, 246, 0.13);
 }
 
-.educacao-module .edu-quick .link-list {
+.educacao-module .edu-quick .gp-link-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(220px, 1fr));
   gap: 10px;
@@ -328,11 +379,11 @@
   background: #f5faff;
 }
 
-.educacao-module .edu-link-card .link-card__title {
+.educacao-module .edu-link-card .gp-link-box__title {
   color: #183750;
 }
 
-.educacao-module .edu-link-card .link-card__meta {
+.educacao-module .edu-link-card .gp-link-box__meta {
   margin-top: 4px;
   color: #637a8f;
 }
@@ -354,6 +405,190 @@
   color: #678197;
 }
 
+.educacao-module .edu-agenda-toolbar {
+  align-items: end;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.educacao-module .edu-agenda-toolbar__field {
+  display: grid;
+  gap: 6px;
+  min-width: min(520px, 100%);
+}
+
+.educacao-module .edu-agenda-toolbar__field label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #5f778c;
+  font-weight: 700;
+}
+
+.educacao-module .edu-agenda-toolbar__field .gp-input {
+  min-width: min(520px, 100%);
+}
+
+.educacao-module .edu-agenda-toolbar__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.educacao-module .edu-agenda-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(230px, 1fr));
+  gap: 10px;
+}
+
+.educacao-module .edu-day-card {
+  border: 1px solid #d9e8f3;
+  border-radius: 14px;
+  background: #f8fcff;
+  overflow: hidden;
+}
+
+.educacao-module .edu-day-card.is-busy {
+  border-color: #bfd8eb;
+  background: linear-gradient(180deg, #ffffff 0%, #f4faff 100%);
+}
+
+.educacao-module .edu-day-card__head {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e2eef7;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.educacao-module .edu-day-card__title {
+  display: grid;
+  gap: 2px;
+}
+
+.educacao-module .edu-day-card__head h4 {
+  margin: 0;
+  color: #1b3a52;
+  font-size: 0.95rem;
+  text-transform: capitalize;
+}
+
+.educacao-module .edu-day-card__head span {
+  color: #60798f;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.educacao-module .edu-day-card__count {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #255f9f;
+  border: 1px solid #cfe1f0;
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: #f6fbff;
+}
+
+.educacao-module .edu-day-card__body {
+  padding: 10px 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.educacao-module .edu-day-item {
+  border: 1px solid #d8e8f5;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 8px 9px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+  align-items: start;
+}
+
+.educacao-module .edu-day-item__time {
+  font-size: 12px;
+  font-weight: 800;
+  color: #1f69bf;
+  white-space: nowrap;
+}
+
+.educacao-module .edu-day-item__meta {
+  display: grid;
+  gap: 2px;
+}
+
+.educacao-module .edu-day-item__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.educacao-module .edu-day-item__meta strong {
+  color: #1d3d57;
+}
+
+.educacao-module .edu-day-item__meta small {
+  color: #667f95;
+}
+
+.educacao-module .edu-day-item__badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #2a6ab0;
+  border: 1px solid #cde1f3;
+  background: #f5fbff;
+  border-radius: 999px;
+  padding: 2px 6px;
+  line-height: 1.2;
+}
+
+.educacao-module .edu-day-item__course {
+  font-weight: 600;
+}
+
+.educacao-module .edu-day-item__teacher {
+  color: #7a91a4;
+}
+
+.educacao-module .edu-day-item__link {
+  margin-top: 3px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #1f64ba;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.educacao-module .edu-day-item__link:hover {
+  text-decoration: underline;
+}
+
+.educacao-module .edu-day-empty {
+  color: #6c8499;
+  font-size: 13px;
+  border: 1px dashed #cfe1ef;
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+  background: #ffffff;
+}
+
+.educacao-module .edu-day-empty i {
+  margin-right: 6px;
+  color: #8ca2b4;
+}
+
+.educacao-module .edu-report-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.educacao-module .gp-table__filters,
 .educacao-module .filter-bar {
   margin-bottom: 8px;
   padding: 12px;
@@ -362,6 +597,8 @@
   background: #f7fbff;
 }
 
+.educacao-module .gp-table__filters input,
+.educacao-module .gp-table__filters select,
 .educacao-module .filter-bar input,
 .educacao-module .filter-bar select {
   min-height: 40px;
@@ -370,13 +607,15 @@
   background: #ffffff;
 }
 
+.educacao-module .gp-table__filters input:focus,
+.educacao-module .gp-table__filters select:focus,
 .educacao-module .filter-bar input:focus,
 .educacao-module .filter-bar select:focus {
   border-color: #86b8de;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
 }
 
-.educacao-module .table-shell {
+.educacao-module .gp-table {
   margin-top: 10px;
   border: 1px solid #d8e7f2;
   border-radius: 16px;
@@ -384,12 +623,12 @@
   background: #ffffff;
 }
 
-.educacao-module .table-shell table {
+.educacao-module .gp-table table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.educacao-module .table-shell thead th {
+.educacao-module .gp-table thead th {
   position: sticky;
   top: 0;
   background: #f3f9ff;
@@ -401,27 +640,27 @@
   border-bottom: 1px solid #dae8f2;
 }
 
-.educacao-module .table-shell tbody td {
+.educacao-module .gp-table tbody td {
   padding: 11px 12px;
   border-bottom: 1px solid #e5eff7;
   color: #20364b;
 }
 
-.educacao-module .table-shell tbody tr:last-child td {
+.educacao-module .gp-table tbody tr:last-child td {
   border-bottom: 0;
 }
 
-.educacao-module .table-shell tbody tr:hover td {
+.educacao-module .gp-table tbody tr:hover td {
   background: #f3f9ff;
 }
 
-.educacao-module .table-shell tbody td a {
+.educacao-module .gp-table tbody td a {
   color: #1f64ba;
   font-weight: 700;
   text-decoration: none;
 }
 
-.educacao-module .table-shell tbody td a:hover {
+.educacao-module .gp-table tbody td a:hover {
   text-decoration: underline;
 }
 
@@ -473,21 +712,36 @@
 }
 
 @media (max-width: 1220px) {
-  .educacao-module.module-shell {
+  .educacao-module.gp-module-shell {
     grid-template-columns: 1fr;
   }
 
-  .educacao-module .module-shell__aside {
+  .educacao-module .gp-module-shell__aside {
     position: static;
   }
 
   .educacao-module .edu-kpis {
     grid-template-columns: repeat(2, minmax(170px, 1fr));
   }
+
+  .educacao-module .edu-agenda-grid,
+  .educacao-module .edu-report-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .educacao-module .edu-agenda-toolbar {
+    align-items: stretch;
+  }
+
+  .educacao-module .edu-agenda-toolbar__field,
+  .educacao-module .edu-agenda-toolbar__field .gp-input {
+    min-width: 0;
+    width: 100%;
+  }
 }
 
 @media (max-width: 860px) {
-  .educacao-module .card > .card__body {
+  .educacao-module .gp-card > .gp-card__body {
     padding: 16px;
   }
 

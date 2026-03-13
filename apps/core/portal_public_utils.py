@@ -20,8 +20,14 @@ ROTA_URL_NAME_MAP = {
 }
 
 
-def default_nav_urls() -> dict[str, str]:
-    return {k: reverse(v) for k, v in ROTA_URL_NAME_MAP.items()}
+def _route_allowed(route_key: str, allowed_internal_routes: set[str] | None = None) -> bool:
+    if allowed_internal_routes is None:
+        return True
+    return route_key in allowed_internal_routes
+
+
+def default_nav_urls(*, allowed_internal_routes: set[str] | None = None) -> dict[str, str]:
+    return {k: reverse(v) for k, v in ROTA_URL_NAME_MAP.items() if _route_allowed(k, allowed_internal_routes)}
 
 
 def resolve_internal_route_url(route_key: str) -> str:
@@ -31,15 +37,21 @@ def resolve_internal_route_url(route_key: str) -> str:
     return reverse(url_name)
 
 
-def _fallback_header_menu() -> list[dict]:
-    return [
-        {"titulo": "Início", "url": resolve_internal_route_url(PortalMenuPublico.RotaInterna.HOME), "nova_aba": False},
-        {"titulo": "Notícias", "url": resolve_internal_route_url(PortalMenuPublico.RotaInterna.NOTICIAS), "nova_aba": False},
-        {"titulo": "Licitações", "url": resolve_internal_route_url(PortalMenuPublico.RotaInterna.LICITACOES), "nova_aba": False},
-        {"titulo": "Contratos", "url": resolve_internal_route_url(PortalMenuPublico.RotaInterna.CONTRATOS), "nova_aba": False},
-        {"titulo": "Transparência", "url": resolve_internal_route_url(PortalMenuPublico.RotaInterna.TRANSPARENCIA), "nova_aba": False},
-        {"titulo": "e-SIC/Ouvidoria", "url": resolve_internal_route_url(PortalMenuPublico.RotaInterna.OUVIDORIA), "nova_aba": False},
+def _fallback_header_menu(*, allowed_internal_routes: set[str] | None = None) -> list[dict]:
+    base = [
+        ("Início", PortalMenuPublico.RotaInterna.HOME),
+        ("Notícias", PortalMenuPublico.RotaInterna.NOTICIAS),
+        ("Licitações", PortalMenuPublico.RotaInterna.LICITACOES),
+        ("Contratos", PortalMenuPublico.RotaInterna.CONTRATOS),
+        ("Transparência", PortalMenuPublico.RotaInterna.TRANSPARENCIA),
+        ("e-SIC/Ouvidoria", PortalMenuPublico.RotaInterna.OUVIDORIA),
     ]
+    items: list[dict] = []
+    for titulo, rota in base:
+        if not _route_allowed(rota, allowed_internal_routes):
+            continue
+        items.append({"titulo": titulo, "url": resolve_internal_route_url(rota), "nova_aba": False})
+    return items
 
 
 def _fallback_footer_menu(municipio) -> list[dict]:
@@ -61,7 +73,7 @@ def _fallback_footer_menu(municipio) -> list[dict]:
     ]
 
 
-def build_menu_items(municipio, *, posicao: str) -> list[dict]:
+def build_menu_items(municipio, *, posicao: str, allowed_internal_routes: set[str] | None = None) -> list[dict]:
     qs = (
         PortalMenuPublico.objects.filter(
             municipio=municipio,
@@ -74,6 +86,8 @@ def build_menu_items(municipio, *, posicao: str) -> list[dict]:
     items: list[dict] = []
     for item in qs:
         if item.tipo_destino == PortalMenuPublico.TipoDestino.INTERNO:
+            if not _route_allowed(item.rota_interna, allowed_internal_routes):
+                continue
             url = resolve_internal_route_url(item.rota_interna)
         elif item.tipo_destino == PortalMenuPublico.TipoDestino.PAGINA:
             if not item.pagina_id or not item.pagina or not item.pagina.publicado:
@@ -94,5 +108,5 @@ def build_menu_items(municipio, *, posicao: str) -> list[dict]:
     if items:
         return items
     if posicao == PortalMenuPublico.Posicao.HEADER:
-        return _fallback_header_menu()
+        return _fallback_header_menu(allowed_internal_routes=allowed_internal_routes)
     return _fallback_footer_menu(municipio)

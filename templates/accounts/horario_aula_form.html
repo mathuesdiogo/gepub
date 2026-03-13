@@ -4,7 +4,7 @@
 <div class="card"><div class="card__body">
 {% include "core/partials/components/layout/page_head.html" with title="Aula do Horário" subtitle=turma.nome actions=None %}
 
-<form method="post" class="form">
+<form method="post" class="gp-form">
   {% csrf_token %}
 
   <div class="form__row">
@@ -37,8 +37,8 @@
   </div>
 
   <div class="actions">
-    <a class="btn btn--ghost" href="{{ cancel_url }}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i><span>Cancelar</span></a>
-    <button class="btn btn-primary" type="submit"><i class="fa-solid fa-check" aria-hidden="true"></i><span>{{ submit_label }}</span></button>
+    <a class="gp-button gp-button--outline" href="{{ cancel_url }}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i><span>Cancelar</span></a>
+    <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-check" aria-hidden="true"></i><span>{{ submit_label }}</span></button>
   </div>
 </form>
 

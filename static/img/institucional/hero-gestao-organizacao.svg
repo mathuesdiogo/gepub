@@ -1,0 +1,95 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="800" y1="0" x2="800" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7FAFC"/>
+      <stop offset="1" stop-color="#EFF4F8"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="800" y1="120" x2="800" y2="780" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F6F9FC"/>
+    </linearGradient>
+    <linearGradient id="lineA" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#8FB4D4"/>
+      <stop offset="1" stop-color="#6B9BC5"/>
+    </linearGradient>
+    <linearGradient id="lineB" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#8FC2A7"/>
+      <stop offset="1" stop-color="#72A88D"/>
+    </linearGradient>
+    <filter id="soft" x="0" y="0" width="1600" height="900" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#274666" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <circle cx="220" cy="170" r="130" fill="#DDEBF7" fill-opacity="0.55"/>
+  <circle cx="1420" cy="740" r="180" fill="#DDEBF7" fill-opacity="0.45"/>
+  <circle cx="1310" cy="180" r="95" fill="#E6F2EA" fill-opacity="0.8"/>
+
+  <g filter="url(#soft)">
+    <rect x="210" y="110" width="1180" height="680" rx="36" fill="url(#panel)"/>
+  </g>
+
+  <rect x="250" y="150" width="1100" height="54" rx="16" fill="#EEF4FA"/>
+  <rect x="276" y="172" width="220" height="10" rx="5" fill="#C9DAEC"/>
+  <rect x="1130" y="172" width="190" height="10" rx="5" fill="#C9DAEC"/>
+
+  <g opacity="0.88">
+    <rect x="280" y="265" width="260" height="92" rx="18" fill="#EDF3F9"/>
+    <rect x="280" y="404" width="260" height="92" rx="18" fill="#EDF3F9"/>
+    <rect x="280" y="543" width="260" height="92" rx="18" fill="#EDF3F9"/>
+
+    <rect x="1060" y="265" width="260" height="92" rx="18" fill="#EDF3F9"/>
+    <rect x="1060" y="404" width="260" height="92" rx="18" fill="#EDF3F9"/>
+    <rect x="1060" y="543" width="260" height="92" rx="18" fill="#EDF3F9"/>
+  </g>
+
+  <g>
+    <rect x="640" y="236" width="320" height="84" rx="18" fill="#E8F2FF"/>
+    <rect x="640" y="362" width="320" height="84" rx="18" fill="#E8F7F0"/>
+    <rect x="640" y="488" width="320" height="84" rx="18" fill="#F1F6FB"/>
+    <rect x="640" y="614" width="320" height="84" rx="18" fill="#EAF2FB"/>
+  </g>
+
+  <g stroke-linecap="round" stroke-width="5">
+    <path d="M540 311H620C632 311 640 303 640 291V278" stroke="url(#lineA)"/>
+    <path d="M540 450H620C632 450 640 442 640 430V404" stroke="url(#lineA)"/>
+    <path d="M540 589H620C632 589 640 581 640 569V530" stroke="url(#lineA)"/>
+
+    <path d="M1060 311H980C968 311 960 303 960 291V278" stroke="url(#lineB)"/>
+    <path d="M1060 450H980C968 450 960 442 960 430V404" stroke="url(#lineB)"/>
+    <path d="M1060 589H980C968 589 960 581 960 569V530" stroke="url(#lineB)"/>
+
+    <path d="M800 320V362" stroke="#9AB6D2"/>
+    <path d="M800 446V488" stroke="#90B5A2"/>
+    <path d="M800 572V614" stroke="#A5BCD4"/>
+  </g>
+
+  <g>
+    <circle cx="640" cy="278" r="8" fill="#6B9BC5"/>
+    <circle cx="640" cy="404" r="8" fill="#6B9BC5"/>
+    <circle cx="640" cy="530" r="8" fill="#6B9BC5"/>
+    <circle cx="960" cy="278" r="8" fill="#72A88D"/>
+    <circle cx="960" cy="404" r="8" fill="#72A88D"/>
+    <circle cx="960" cy="530" r="8" fill="#72A88D"/>
+    <circle cx="800" cy="362" r="8" fill="#9AB6D2"/>
+    <circle cx="800" cy="488" r="8" fill="#90B5A2"/>
+    <circle cx="800" cy="614" r="8" fill="#A5BCD4"/>
+  </g>
+
+  <g fill="#C8D9EA">
+    <rect x="310" y="292" width="160" height="10" rx="5"/>
+    <rect x="310" y="314" width="126" height="10" rx="5"/>
+    <rect x="310" y="431" width="160" height="10" rx="5"/>
+    <rect x="310" y="453" width="126" height="10" rx="5"/>
+    <rect x="310" y="570" width="160" height="10" rx="5"/>
+    <rect x="310" y="592" width="126" height="10" rx="5"/>
+
+    <rect x="1090" y="292" width="160" height="10" rx="5"/>
+    <rect x="1090" y="314" width="126" height="10" rx="5"/>
+    <rect x="1090" y="431" width="160" height="10" rx="5"/>
+    <rect x="1090" y="453" width="126" height="10" rx="5"/>
+    <rect x="1090" y="570" width="160" height="10" rx="5"/>
+    <rect x="1090" y="592" width="126" height="10" rx="5"/>
+  </g>
+</svg>

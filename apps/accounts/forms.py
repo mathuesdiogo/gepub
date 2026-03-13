@@ -1,6 +1,6 @@
 from __future__ import annotations
 from apps.educacao.models import Turma
-from apps.core.rbac import is_admin, scope_filter_turmas
+from apps.core.rbac import allowed_roles_for_manager_role, is_admin, scope_filter_turmas
 from django import forms
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
@@ -26,12 +26,32 @@ class AlterarSenhaPrimeiroAcessoForm(forms.Form):
     )
 
 
+class UsuarioPrefeituraOnboardingForm(forms.Form):
+    nome_responsavel = forms.CharField(label="Nome do responsável", max_length=160)
+    email = forms.EmailField(label="E-mail", required=False)
+    codigo_acesso = forms.CharField(
+        label="Código de acesso (opcional)",
+        max_length=60,
+        required=False,
+        help_text="Se vazio, o sistema gera automaticamente.",
+    )
+    senha_inicial = forms.CharField(
+        label="Senha inicial (opcional)",
+        max_length=64,
+        required=False,
+        help_text="Se vazio, o sistema gera automaticamente.",
+    )
 
-_ROLE_ALLOWED_BY_MANAGER = {
-    "MUNICIPAL": {"SECRETARIA", "UNIDADE", "PROFESSOR", "ALUNO", "NEE", "LEITURA"},
-    "SECRETARIA": {"UNIDADE", "PROFESSOR", "ALUNO", "NEE", "LEITURA"},
-    "UNIDADE": {"PROFESSOR", "ALUNO", "NEE", "LEITURA"},
-}
+    def clean_codigo_acesso(self):
+        value = (self.cleaned_data.get("codigo_acesso") or "").strip().lower()
+        if not value:
+            return ""
+        if not all(ch.isalnum() or ch in {".", "-", "_"} for ch in value):
+            raise ValidationError("Use apenas letras, números, ponto, hífen ou sublinhado.")
+        if len(value) < 4:
+            raise ValidationError("Código de acesso deve ter ao menos 4 caracteres.")
+        return value
+
 
 
 class _UsuarioBaseForm(forms.Form):
@@ -57,8 +77,16 @@ class _UsuarioBaseForm(forms.Form):
         self.edited_user = edited_user
 
         self.fields["municipio"].queryset = Municipio.objects.filter(ativo=True).order_by("nome")
-        self.fields["secretaria"].queryset = Secretaria.objects.filter(ativo=True).order_by("nome")
-        self.fields["unidade"].queryset = Unidade.objects.filter(ativo=True).order_by("nome")
+        self.fields["secretaria"].queryset = (
+            Secretaria.objects.select_related("municipio")
+            .filter(ativo=True)
+            .order_by("nome")
+        )
+        self.fields["unidade"].queryset = (
+            Unidade.objects.select_related("secretaria", "secretaria__municipio")
+            .filter(ativo=True)
+            .order_by("nome")
+        )
         self.fields["setor"].queryset = (
             Setor.objects.select_related("unidade", "unidade__secretaria", "unidade__secretaria__municipio")
             .filter(ativo=True)
@@ -94,13 +122,14 @@ class _UsuarioBaseForm(forms.Form):
         if not p:
             return
         role_me = (p.role or "").upper()
-        allowed = _ROLE_ALLOWED_BY_MANAGER.get(role_me)
-        if allowed:
-            self.fields["role"].choices = [
-                (value, label)
-                for (value, label) in Profile.Role.choices
-                if value in allowed
-            ]
+        if role_me == "ADMIN":
+            return
+        allowed = allowed_roles_for_manager_role(role_me)
+        self.fields["role"].choices = [
+            (value, label)
+            for (value, label) in Profile.Role.choices
+            if value in allowed
+        ]
 
     def _apply_scope_lock(self):
         user = self.user

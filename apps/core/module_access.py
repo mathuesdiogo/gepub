@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from apps.core.rbac import get_profile, is_admin
+from apps.core.rbac import get_profile, is_admin, role_scope_base
 
 
 MANAGED_MODULES: set[str] = {
@@ -13,6 +13,7 @@ MANAGED_MODULES: set[str] = {
     "compras",
     "contratos",
     "integracoes",
+    "comunicacao",
     "paineis",
     "conversor",
     "rh",
@@ -23,11 +24,26 @@ MANAGED_MODULES: set[str] = {
     "frota",
     "ouvidoria",
     "tributos",
+    "camara",
 }
 
 MODULE_ALIASES: dict[str, set[str]] = {
     # NEE opera junto da trilha educacional em boa parte dos cenários municipais.
     "nee": {"nee", "educacao"},
+}
+
+# Controle por plano para módulos internos está desativado por padrão.
+# Diferenças atuais de plano são tratadas em apps públicos:
+# Portal da Prefeitura, Transparência e Câmara.
+MODULE_PLAN_FEATURES_ANY: dict[str, set[str]] = {
+    "camara": {
+        "CAMARA_CMS",
+        "CAMARA_VEREADORES_COMISSOES",
+        "CAMARA_SESSOES_PAUTAS_ATAS",
+        "CAMARA_PROPOSICOES",
+        "CAMARA_TRANSPARENCIA",
+        "CAMARA_YOUTUBE_LIVE",
+    }
 }
 
 
@@ -71,13 +87,13 @@ def _load_scope_modules(user) -> tuple[set[str], bool]:
         user._gepub_module_scope_cache = (modules, False)
         return user._gepub_module_scope_cache
 
-    role = (getattr(p, "role", "") or "").upper()
-    secretaria_id = _resolve_secretaria_id_from_profile(p) if role in {"SECRETARIA", "UNIDADE"} else None
+    role_base = role_scope_base(getattr(p, "role", None))
+    secretaria_id = _resolve_secretaria_id_from_profile(p) if role_base in {"SECRETARIA", "UNIDADE"} else None
     municipio_id = getattr(p, "municipio_id", None)
 
     # Perfis setoriais sem escopo vinculado devem ficar bloqueados
     # para evitar "vazamento" de módulos do catálogo municipal.
-    if role in {"SECRETARIA", "UNIDADE"} and not secretaria_id:
+    if role_base in {"SECRETARIA", "UNIDADE"} and not secretaria_id:
         user._gepub_module_scope_cache = (set(), True)
         return user._gepub_module_scope_cache
 
@@ -98,6 +114,33 @@ def _load_scope_modules(user) -> tuple[set[str], bool]:
 
     user._gepub_module_scope_cache = (modules, enforce)
     return user._gepub_module_scope_cache
+
+
+def _load_plan_features(user) -> tuple[set[str], bool]:
+    """
+    Retorna (features_ativas, enforce_flag) para o plano do município.
+    - enforce_flag=False => não restringe por feature (ex.: base legada sem assinatura).
+    """
+    if hasattr(user, "_gepub_plan_feature_cache"):
+        return user._gepub_plan_feature_cache
+
+    p = get_profile(user)
+    if not p or not getattr(p, "ativo", True) or not getattr(p, "municipio_id", None):
+        user._gepub_plan_feature_cache = (set(), False)
+        return user._gepub_plan_feature_cache
+
+    try:
+        from apps.billing.services import get_assinatura_ativa, municipio_plan_features
+    except Exception:
+        user._gepub_plan_feature_cache = (set(), False)
+        return user._gepub_plan_feature_cache
+
+    municipio = getattr(p, "municipio", None)
+    assinatura = get_assinatura_ativa(municipio, criar_default=False) if municipio else None
+    features = municipio_plan_features(municipio)
+    enforce = bool(assinatura)
+    user._gepub_plan_feature_cache = (features, enforce)
+    return user._gepub_plan_feature_cache
 
 
 def module_enabled_for_user(user, module_key: str) -> bool:
@@ -121,4 +164,16 @@ def module_enabled_for_user(user, module_key: str) -> bool:
         return True
 
     accepted_keys = MODULE_ALIASES.get(module, {module})
-    return any(key in modules for key in accepted_keys)
+    if not any(key in modules for key in accepted_keys):
+        return False
+
+    required_features = MODULE_PLAN_FEATURES_ANY.get(module)
+    if not required_features:
+        return True
+
+    features, enforce_features = _load_plan_features(user)
+    if not enforce_features:
+        # Base legada sem assinatura/plano configurado: mantém compatibilidade.
+        return True
+
+    return bool(required_features.intersection(features))

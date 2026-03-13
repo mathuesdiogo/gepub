@@ -1,0 +1,64 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}{% if mode == 'create' %}Nova Grade{% else %}Editar Grade{% endif %} • Informática • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+  <div class="gp-card">
+    <div class="gp-card__body">
+      {% if mode == 'create' %}
+        {% include "core/partials/components/layout/page_head.html" with title="Nova grade de horário" subtitle="Estrutura oficial reutilizável para as turmas" actions=actions %}
+      {% else %}
+        {% include "core/partials/components/layout/page_head.html" with title="Editar grade de horário" subtitle=grade.codigo actions=actions %}
+      {% endif %}
+
+      <form method="post" class="gp-form form-shell" id="gradeForm">
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="flash flash--error">{{ form.non_field_errors }}</div>{% endif %}
+
+        <div class="form-shell__fields">
+          {{ form.as_p }}
+        </div>
+
+        <div class="form-shell__actions">
+          <button type="submit" class="gp-button gp-button--primary">Salvar grade</button>
+          <a class="gp-button gp-button--outline" href="{% url 'educacao:informatica_grade_list' %}">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const tipo = document.getElementById("id_tipo_grade");
+      const dia2 = document.getElementById("id_dia_semana_2");
+      const aula = document.getElementById("id_duracao_aula_minutos");
+      const intervalo = document.getElementById("id_duracao_intervalo_minutos");
+      const total = document.getElementById("id_duracao_total_minutos");
+      const pausa = document.getElementById("id_pausa_interna_opcional_minutos");
+      const dia1 = document.getElementById("id_dia_semana_1");
+
+      if (!tipo) return;
+
+      function applyMode() {
+        if (tipo.value === "ESPECIAL_SEXTA") {
+          if (dia1) dia1.value = "4";
+          if (dia2) {
+            dia2.value = "";
+            dia2.disabled = true;
+          }
+          if (total && Number(total.value || 0) <= 60) total.value = "120";
+          if (aula && Number(aula.value || 0) <= 45) aula.value = "90";
+          if (intervalo && Number(intervalo.value || 0) < 15) intervalo.value = "30";
+          if (pausa && Number(pausa.value || 0) < 10) pausa.value = "15";
+        } else {
+          if (dia2) dia2.disabled = false;
+          if (total && (!total.value || Number(total.value) !== 60)) total.value = "60";
+          if (aula && (!aula.value || Number(aula.value) !== 45)) aula.value = "45";
+          if (intervalo && (!intervalo.value || Number(intervalo.value) !== 15)) intervalo.value = "15";
+        }
+      }
+
+      tipo.addEventListener("change", applyMode);
+      applyMode();
+    })();
+  </script>
+{% endblock %}

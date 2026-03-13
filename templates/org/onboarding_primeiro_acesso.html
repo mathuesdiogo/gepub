@@ -48,7 +48,7 @@
           {{ form_municipio.as_p }}
         </div>
         <div class="form-shell__actions">
-          <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Salvar Município</button>
+          <button type="submit" class="gp-button gp-button--primary"><i class="fa-solid fa-floppy-disk"></i> Salvar Município</button>
         </div>
       </form>
     </div>
@@ -67,7 +67,7 @@
           {{ form_plano.as_p }}
         </div>
         <div class="form-shell__actions">
-          <button type="submit" class="btn btn-primary"><i class="fa-solid fa-file-contract"></i> Salvar Plano</button>
+          <button type="submit" class="gp-button gp-button--primary"><i class="fa-solid fa-file-contract"></i> Salvar Plano</button>
         </div>
       </form>
       {% if assinatura %}
@@ -75,6 +75,27 @@
           Plano atual: <strong>{{ assinatura.plano.nome }}</strong> • Base mensal: <strong>R$ {{ assinatura.valor_base_mensal }}</strong>
         </div>
       {% endif %}
+
+      <div class="sec-metrics gp-mt-3">
+        {% for item in planos_catalogo %}
+          <article class="sec-kpi {% if plano_atual_info and plano_atual_info.codigo == item.codigo %}kpi-blue{% else %}kpi-card--slate{% endif %}">
+            <div>
+              <div class="sec-kpi__label">{{ item.nome_comercial }}</div>
+              <div class="sec-kpi__value">{{ item.categoria }}</div>
+              <div class="sec-kpi__meta">{{ item.descricao_comercial }}</div>
+              <div class="sec-kpi__meta gp-mt-2">
+                {% for feature in item.beneficios|slice:":3" %}
+                  <div>• {{ feature }}</div>
+                {% endfor %}
+              </div>
+              <div class="sec-kpi__meta gp-mt-2">
+                <a href="{{ item.links.contratacao }}" target="_blank" rel="noopener">Contratação</a> •
+                <a href="{{ item.links.servicos }}" target="_blank" rel="noopener">Prestação de serviços</a>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
     </div>
   </section>
 
@@ -84,9 +105,9 @@
   <div class="onboard-market-full__head">
     <div>
       <h3 class="onboard-market-full__title">3. Instalar Modelos de Secretaria</h3>
-      <p class="onboard-market-full__sub">Escolha os blocos desejados e clique em instalar. Layout em grade, 3 por linha, usando toda a largura disponível.</p>
+      <p class="onboard-market-full__sub">Selecione os modelos, revise a configuração e conclua a instalação em um único fluxo.</p>
       <p class="small">
-        Secretarias obrigatórias no onboarding inicial:
+        Secretarias obrigatórias no onboarding inicial (instalação automática):
         <strong>Administração, Educação e Saúde</strong>.
       </p>
     </div>
@@ -105,6 +126,12 @@
         <i class="{{ category.icon }}"></i> {{ category.label }} ({{ category.count }})
       </button>
     {% endfor %}
+  </div>
+
+  <div class="onboard-market-form__meta">
+    <span><i class="fa-solid fa-1"></i> Filtre por módulo ou busca</span>
+    <span><i class="fa-solid fa-2"></i> Selecione os modelos desejados</span>
+    <span><i class="fa-solid fa-3"></i> Clique em instalar</span>
   </div>
 
   {% if limite_secretarias_alert %}
@@ -130,7 +157,7 @@
             R$ {{ limite_secretarias_alert.valor_sugerido_mensal }}/mês
             <span>(R$ {{ limite_secretarias_alert.valor_unitario }} por secretaria)</span>
           </p>
-          <button type="submit" class="btn btn-primary">
+          <button type="submit" class="gp-button gp-button--primary">
             <i class="fa-solid fa-cart-plus"></i> Adicionar ao carrinho
           </button>
         </form>
@@ -146,7 +173,7 @@
               <option value="{{ plano.pk }}">{{ plano.nome }} (R$ {{ plano.preco_base_mensal }}/mês)</option>
             {% endfor %}
           </select>
-          <button type="submit" class="btn btn--ghost">
+          <button type="submit" class="gp-button gp-button--outline">
             <i class="fa-solid fa-arrow-up-right-dots"></i> Solicitar troca de plano
           </button>
         </form>
@@ -167,6 +194,15 @@
       <span><i class="fa-solid fa-circle-check"></i> <strong>{{ market_installed_total }}</strong> já instalados</span>
     </div>
 
+    <div class="form-shell__actions">
+      <button type="button" class="gp-button gp-button--outline gp-button--sm" data-onboard-action="select-recommended">
+        <i class="fa-solid fa-star"></i> Selecionar recomendadas
+      </button>
+      <button type="button" class="gp-button gp-button--outline gp-button--sm" data-onboard-action="clear-selection">
+        <i class="fa-solid fa-eraser"></i> Limpar seleção
+      </button>
+    </div>
+
     <div class="sec-metrics onboard-install-grid">
       {% for row in template_rows %}
         <article
@@ -177,7 +213,10 @@
         >
           <div class="onboard-portal-card__body">
             <div class="onboard-portal-card__top">
-              <p class="onboard-portal-card__module">{{ row.module_label }}</p>
+              <div>
+                <p class="onboard-portal-card__module">{{ row.module_label }}</p>
+                <p class="onboard-portal-card__title">{{ row.template.nome }}</p>
+              </div>
               {% if row.is_installed %}
                 <span class="onboard-portal-card__install onboard-portal-card__install--locked">
                   <i class="fa-solid fa-lock"></i> Instalado
@@ -200,7 +239,6 @@
                 </label>
               {% endif %}
             </div>
-            <p class="onboard-portal-card__title">{{ row.template.nome }}</p>
             <p class="onboard-portal-card__desc">{{ row.template.descricao }}</p>
             <div class="onboard-portal-card__status">
               {% if row.is_installed %}
@@ -210,31 +248,38 @@
                 <span class="onboard-portal-card__badge">Novo</span>
               {% endif %}
             </div>
-            <div class="onboard-portal-card__meta">
-              <span><i class="fa-solid fa-building"></i> {{ row.qtd_unidades }} unidades</span>
-              <span><i class="fa-solid fa-sitemap"></i> {{ row.qtd_setores }} setores</span>
-              <span><i class="fa-solid fa-database"></i> {{ row.qtd_cadastros_base }} base</span>
-              <span><i class="fa-solid fa-list-check"></i> {{ row.qtd_steps }} passos</span>
-            </div>
-          </div>
-
-          <div class="sec-kpi__icon onboard-portal-card__side" aria-hidden="true">
-            <i class="{{ row.icon }}"></i>
+            <details class="onboard-portal-card__details">
+              <summary>Ver composição do modelo</summary>
+              <div class="onboard-portal-card__meta">
+                <span><i class="fa-solid fa-building"></i> {{ row.qtd_unidades }} unidades</span>
+                <span><i class="fa-solid fa-sitemap"></i> {{ row.qtd_setores }} setores</span>
+                <span><i class="fa-solid fa-database"></i> {{ row.qtd_cadastros_base }} base</span>
+                <span><i class="fa-solid fa-list-check"></i> {{ row.qtd_steps }} passos</span>
+              </div>
+              {% if row.modulos_preview %}
+                <div class="onboard-portal-card__modules">
+                  {% for mod in row.modulos_preview %}
+                    <span class="onboard-market-chip">{{ mod|upper }}</span>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </details>
           </div>
 
           {% if row.is_installed %}
             <div class="onboard-portal-card__config onboard-portal-card__config--locked">
-              <div class="onboard-portal-card__config-title">Modelo já instalado</div>
-              <p class="small">Para este modelo, use os módulos já ativos no menu lateral.</p>
+              <div class="onboard-portal-card__config-title">Modelo já instalado neste município</div>
+              <p class="small">Use o painel de onboarding para acompanhar próximos passos e validações.</p>
             </div>
           {% elif row.is_required %}
             <div class="onboard-portal-card__config onboard-portal-card__config--required">
               <div class="onboard-portal-card__config-title">Instalação obrigatória</div>
-              <p class="small">Este modelo será instalado automaticamente no onboarding inicial.</p>
+              <p class="small">Esse modelo entra automaticamente mesmo sem seleção manual.</p>
             </div>
           {% else %}
             <div class="onboard-portal-card__config" data-onboard-template-config hidden>
               <div class="onboard-portal-card__config-title">Configuração da instalação</div>
+              <p class="small">Defina quantidade e nome base. O sistema cria as variações automaticamente.</p>
               <div class="onboard-portal-card__config-grid">
                 <div class="onboard-portal-card__field">
                   {{ row.qtd_field.label_tag }}
@@ -266,7 +311,7 @@
     </div>
 
     <div class="form-shell__actions onboard-market-form__actions">
-      <button type="submit" class="btn btn-primary"><i class="fa-solid fa-download"></i> Instalar Secretarias Selecionadas</button>
+      <button type="submit" class="gp-button gp-button--primary"><i class="fa-solid fa-download"></i> Instalar Secretarias Selecionadas</button>
     </div>
   </form>
 </section>
@@ -343,6 +388,39 @@
       }
     }
 
+    function bindQuickActions() {
+      var selectRecommended = document.querySelector('[data-onboard-action="select-recommended"]');
+      var clearSelection = document.querySelector('[data-onboard-action="clear-selection"]');
+      var recommended = {
+        administracao: true,
+        educacao: true,
+        saude: true
+      };
+
+      if (selectRecommended) {
+        selectRecommended.addEventListener("click", function () {
+          var toggles = document.querySelectorAll("[data-onboard-template-toggle]");
+          toggles.forEach(function (toggle) {
+            var slug = (toggle.getAttribute("data-onboard-template-toggle") || "").toLowerCase();
+            toggle.checked = !!recommended[slug];
+            syncCard(toggle);
+          });
+          updateSelectedCount();
+        });
+      }
+
+      if (clearSelection) {
+        clearSelection.addEventListener("click", function () {
+          var toggles = document.querySelectorAll("[data-onboard-template-toggle]");
+          toggles.forEach(function (toggle) {
+            toggle.checked = false;
+            syncCard(toggle);
+          });
+          updateSelectedCount();
+        });
+      }
+    }
+
     function bootstrapOnboardingMarketplace() {
       var toggles = document.querySelectorAll("[data-onboard-template-toggle]");
       toggles.forEach(function (toggle) {
@@ -353,6 +431,7 @@
         });
       });
       bindFilters();
+      bindQuickActions();
       updateSelectedCount();
       applyFilters();
     }

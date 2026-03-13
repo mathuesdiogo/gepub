@@ -5,7 +5,7 @@ from django.http import HttpResponseForbidden
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.core.rbac import can, scope_filter_turmas
+from apps.core.rbac import can, is_professor_profile_role, scope_filter_turmas
 from apps.core.views_gepub import BaseListViewGepub
 
 from .models import Turma
@@ -13,7 +13,7 @@ from .models_diario import DiarioTurma
 
 
 def _is_professor(user) -> bool:
-    return getattr(getattr(user, "profile", None), "role", "") == "PROFESSOR"
+    return is_professor_profile_role(getattr(getattr(user, "profile", None), "role", None))
 
 
 class DiarioListView(BaseListViewGepub):

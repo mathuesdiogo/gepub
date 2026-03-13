@@ -3,11 +3,14 @@ from __future__ import annotations
 from django import forms
 from django.db.models import Q
 
+from apps.core.rbac import can
+
 from .forms_bncc import BNCCModelMultipleChoiceField
 from .models_calendario import CalendarioEducacionalEvento
 from .models_diario import Aula
 from .models_notas import BNCCCodigo, ComponenteCurricular
 from .models_periodos import PeriodoLetivo
+from .services_requisitos import avaliar_requisitos_lancamento_componente
 
 
 def _bncc_context_from_turma(turma):
@@ -71,6 +74,17 @@ def _bncc_context_from_turma(turma):
 
 
 class AulaForm(forms.ModelForm):
+    override_requisitos = forms.BooleanField(
+        required=False,
+        label="Forçar lançamento com pendência de requisito",
+        help_text="Disponível para gestão pedagógica com trilha de auditoria.",
+    )
+    override_justificativa = forms.CharField(
+        required=False,
+        label="Justificativa do override",
+        widget=forms.Textarea(attrs={"rows": 2}),
+    )
+
     class Meta:
         model = Aula
         fields = [
@@ -80,6 +94,8 @@ class AulaForm(forms.ModelForm):
             "bncc_codigos",
             "conteudo",
             "observacoes",
+            "override_requisitos",
+            "override_justificativa",
         ]
         widgets = {
             "data": forms.DateInput(attrs={"type": "date"}),
@@ -88,7 +104,10 @@ class AulaForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.diario = kwargs.pop("diario", None)
+        self.user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
+        self.requisito_avisos: list[str] = []
+        self.override_requisitos_payload: dict = {}
 
         self.fields["periodo"].required = False
         self.fields["componente"].required = False
@@ -105,6 +124,10 @@ class AulaForm(forms.ModelForm):
         )
 
         self.bncc_hint = "Selecione a turma para filtrar os códigos BNCC."
+        self.can_override_requisitos = bool(self.user and can(self.user, "educacao.manage"))
+        if not self.can_override_requisitos:
+            self.fields["override_requisitos"].widget = forms.HiddenInput()
+            self.fields["override_justificativa"].widget = forms.HiddenInput()
 
         if not self.diario:
             return
@@ -181,6 +204,7 @@ class AulaForm(forms.ModelForm):
         turma = self.diario.turma
         data = cleaned.get("data")
         periodo = cleaned.get("periodo")
+        componente = cleaned.get("componente")
         codigos = cleaned.get("bncc_codigos")
 
         if data and getattr(turma, "ano_letivo", None):
@@ -229,5 +253,34 @@ class AulaForm(forms.ModelForm):
                 if etapas_validas and codigo.etapa not in etapas_validas:
                     self.add_error("bncc_codigos", f"Código {codigo.codigo} fora da etapa da turma.")
                     break
+
+        if componente:
+            avaliacao_requisitos = avaliar_requisitos_lancamento_componente(
+                turma=turma,
+                componente_id=componente.id,
+                aula_id=getattr(self.instance, "id", None),
+            )
+            wants_override = bool(cleaned.get("override_requisitos"))
+            justificativa = (cleaned.get("override_justificativa") or "").strip()
+            if avaliacao_requisitos.bloqueado:
+                if wants_override and self.can_override_requisitos and justificativa:
+                    self.override_requisitos_payload = {
+                        "pendencias": list(avaliacao_requisitos.pendencias),
+                        "justificativa": justificativa,
+                    }
+                else:
+                    for pendencia in avaliacao_requisitos.pendencias:
+                        self.add_error("componente", pendencia)
+                    if wants_override and not self.can_override_requisitos:
+                        self.add_error("override_requisitos", "Você não tem permissão para forçar lançamento.")
+                    if wants_override and self.can_override_requisitos and not justificativa:
+                        self.add_error("override_justificativa", "Informe a justificativa para registrar o override.")
+            else:
+                self.requisito_avisos = list(avaliacao_requisitos.avisos)
+                if wants_override and not justificativa:
+                    self.add_error("override_justificativa", "Informe a justificativa para registrar o override.")
+
+            if not wants_override:
+                cleaned["override_justificativa"] = ""
 
         return cleaned

@@ -12,25 +12,25 @@
   <div class="users-detail-actions">
     <form method="post" action="{% url 'accounts:usuario_toggle_ativo' u.id %}" class="u-inline-form">
       {% csrf_token %}
-      <button class="btn btn--ghost" type="submit">
+      <button class="gp-button gp-button--outline" type="submit">
         <i class="fa-solid fa-power-off"></i>
         {% if profile_obj.ativo %}Desativar conta{% else %}Ativar conta{% endif %}
       </button>
     </form>
     <form method="post" action="{% url 'accounts:usuario_toggle_bloqueio' u.id %}" class="u-inline-form">
       {% csrf_token %}
-      <button class="btn btn--ghost" type="submit">
+      <button class="gp-button gp-button--outline" type="submit">
         <i class="fa-solid fa-user-lock"></i>
         {% if profile_obj.bloqueado %}Desbloquear{% else %}Bloquear{% endif %}
       </button>
     </form>
     <form method="post" action="{% url 'accounts:usuario_reset_codigo' u.id %}" class="u-inline-form">
       {% csrf_token %}
-      <button class="btn btn--ghost" type="submit"><i class="fa-solid fa-rotate"></i> Resetar código</button>
+      <button class="gp-button gp-button--outline" type="submit"><i class="fa-solid fa-rotate"></i> Resetar código</button>
     </form>
     <form method="post" action="{% url 'accounts:usuario_reset_senha' u.id %}" class="u-inline-form">
       {% csrf_token %}
-      <button class="btn btn--ghost" type="submit"><i class="fa-solid fa-key"></i> Resetar senha</button>
+      <button class="gp-button gp-button--outline" type="submit"><i class="fa-solid fa-key"></i> Resetar senha</button>
     </form>
   </div>
 </section>

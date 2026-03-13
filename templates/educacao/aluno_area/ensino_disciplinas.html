@@ -1,0 +1,28 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Ensino • Minhas Disciplinas • {{ aluno.nome }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <article class="gp-student-stage__card">
+    <h3>Minhas Disciplinas</h3>
+    <ul class="gp-student-data-list">
+      {% for d in disciplinas %}
+        {% if usa_matriz_curricular %}
+          <li>
+            <strong>{{ d.componente.nome }}</strong>
+            • Ordem {{ d.ordem }}
+            • {{ d.carga_horaria_anual }}h/ano
+            • {{ d.aulas_semanais }} aula(s)/semana
+          </li>
+        {% else %}
+          <li><strong>{{ d.nome }}</strong> • {{ d.get_tipo_aula_display }} • {{ d.carga_horaria }}h</li>
+        {% endif %}
+      {% empty %}
+        <li>Nenhuma disciplina vinculada.</li>
+      {% endfor %}
+    </ul>
+  </article>
+</section>
+{% endblock %}

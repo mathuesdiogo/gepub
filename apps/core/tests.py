@@ -4,10 +4,14 @@ from django.contrib.auth.models import AnonymousUser
 from django.http import HttpResponse
 from django.test import RequestFactory
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.accounts.models import Profile
+from apps.billing.models import PlanoMunicipal
+from apps.billing.services import get_assinatura_ativa
 from apps.core.middleware import RBACMiddleware
 from apps.core.models import (
+    DocumentoEmitido,
     PortalBanner,
     PortalHomeBloco,
     PortalMenuPublico,
@@ -16,13 +20,38 @@ from apps.core.models import (
     PortalNoticia,
     TransparenciaEventoPublico,
 )
-from apps.core.rbac import can
+from apps.core.rbac import allowed_roles_for_manager_role, can, role_scope_base
 from apps.core.services_portal_seed import ensure_portal_seed_for_municipio
 from apps.core.views_codes import _resolve_code_to_url, get_code_routes
-from apps.org.models import Municipio, MunicipioModuloAtivo, Secretaria, SecretariaModuloAtivo
+from apps.org.models import (
+    Municipio,
+    MunicipioModuloAtivo,
+    MunicipioOnboardingWizard,
+    MunicipioThemeConfig,
+    OnboardingStep,
+    Secretaria,
+    SecretariaModuloAtivo,
+)
+from apps.processos.models import ProcessoAdministrativo
 
 
 User = get_user_model()
+
+
+def _mark_onboarding_completed(user, municipio=None):
+    if not user:
+        return
+    profile = getattr(user, "profile", None)
+    resolved_municipio = municipio if municipio is not None else getattr(profile, "municipio", None)
+    MunicipioOnboardingWizard.objects.update_or_create(
+        user=user,
+        defaults={
+            "municipio": resolved_municipio,
+            "current_step": 9,
+            "total_steps": 9,
+            "completed_at": timezone.now(),
+        },
+    )
 
 
 class RBACTestCase(TestCase):
@@ -36,6 +65,8 @@ class RBACTestCase(TestCase):
             profile.ativo = True
         profile.must_change_password = False
         profile.save(update_fields=["role", "ativo", "must_change_password"])
+        if role.strip().upper() == "MUNICIPAL":
+            _mark_onboarding_completed(user)
         return user
 
     def test_can_saude_depends_on_role(self):
@@ -43,6 +74,39 @@ class RBACTestCase(TestCase):
         nee = self._make_user("nee_t", "NEE")
         self.assertFalse(can(professor, "saude"))
         self.assertTrue(can(nee, "saude"))
+
+    def test_new_role_edu_secretario_has_educacao_and_nee(self):
+        user = self._make_user("edu_sec_t", "EDU_SECRETARIO")
+        self.assertTrue(can(user, "educacao.view"))
+        self.assertTrue(can(user, "educacao.manage"))
+        self.assertTrue(can(user, "nee.view"))
+        self.assertFalse(can(user, "saude.manage"))
+
+    def test_new_role_saude_medico_is_scoped_as_unidade(self):
+        user = self._make_user("sau_med_t", "SAU_MEDICO")
+        self.assertEqual(role_scope_base(user.profile.role), "UNIDADE")
+        self.assertTrue(can(user, "saude.view"))
+        self.assertTrue(can(user, "saude.manage"))
+        self.assertFalse(can(user, "financeiro.view"))
+
+    def test_billing_admin_is_blocked_for_municipal_even_if_staff(self):
+        user = self._make_user("muni_staff_billing", "MUNICIPAL")
+        user.is_staff = True
+        user.save(update_fields=["is_staff"])
+        self.assertFalse(can(user, "billing.admin"))
+        self.assertTrue(can(user, "billing.manage"))
+
+    def test_billing_admin_is_allowed_for_global_admin_role(self):
+        user = self._make_user("admin_billing", "ADMIN")
+        self.assertTrue(can(user, "billing.admin"))
+
+    def test_role_assignment_matrix_for_secretaria(self):
+        allowed = allowed_roles_for_manager_role("SECRETARIA")
+        self.assertIn("PROFESSOR", allowed)
+        self.assertIn("EDU_PROF", allowed)
+        self.assertIn("SAU_TEC_ENF", allowed)
+        self.assertNotIn("ADMIN", allowed)
+        self.assertNotIn("MUNICIPAL", allowed)
 
     def test_rbac_middleware_blocks_saude_for_professor(self):
         factory = RequestFactory()
@@ -103,6 +167,14 @@ class RBACTestCase(TestCase):
     def test_rbac_middleware_allows_public_documentacao_page(self):
         factory = RequestFactory()
         request = factory.get("/documentacao/")
+        request.user = AnonymousUser()
+        middleware = RBACMiddleware(lambda req: HttpResponse("ok"))
+        response = middleware(request)
+        self.assertEqual(response.status_code, 200)
+
+    def test_rbac_middleware_allows_public_validar_documento_page(self):
+        factory = RequestFactory()
+        request = factory.get("/validar-documento/")
         request.user = AnonymousUser()
         middleware = RBACMiddleware(lambda req: HttpResponse("ok"))
         response = middleware(request)
@@ -190,6 +262,27 @@ class PublicHomeRedirectTestCase(TestCase):
         response = self.client.get(reverse("core:transparencia_public"))
         self.assertEqual(response.status_code, 200)
 
+    def test_public_validacao_documento_is_accessible_anonymously(self):
+        response = self.client.get(reverse("core:validar_documento_public"))
+        self.assertEqual(response.status_code, 200)
+
+
+class DocumentoValidationPublicViewTestCase(TestCase):
+    def test_validacao_documento_public_exibe_assinatura_emitente(self):
+        user = User.objects.create_user(username="doc_assinatura", password="x", first_name="Ana", last_name="Silva")
+        doc = DocumentoEmitido.objects.create(
+            tipo="SAUDE.RELATORIO",
+            titulo="Relatório Clínico",
+            gerado_por=user,
+            origem_url="/saude/documentos/1/",
+            ativo=True,
+        )
+
+        response = self.client.get(reverse("core:validar_documento_codigo_public", args=[doc.codigo]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Documento válido")
+        self.assertContains(response, "Ana Silva")
+
 
 class InstitutionalEditorAccessTestCase(TestCase):
     def _make_user(self, username: str, role: str):
@@ -202,6 +295,8 @@ class InstitutionalEditorAccessTestCase(TestCase):
             profile.ativo = True
         profile.must_change_password = False
         profile.save(update_fields=["role", "ativo", "must_change_password"])
+        if role.strip().upper() == "MUNICIPAL":
+            _mark_onboarding_completed(user)
         return user
 
     def test_admin_can_access_institutional_editor(self):
@@ -275,6 +370,8 @@ class MunicipalAdministrativeAccessTestCase(TestCase):
         profile.must_change_password = False
         profile.municipio = municipio
         profile.save(update_fields=["role", "ativo", "must_change_password", "municipio"])
+        if role.strip().upper() == "MUNICIPAL":
+            _mark_onboarding_completed(user, municipio=municipio)
         return user
 
     def test_municipal_has_access_to_financial_and_admin_modules(self):
@@ -334,6 +431,61 @@ class MunicipalAdministrativeAccessTestCase(TestCase):
         self.assertContains(response, "Financeiro")
         self.assertNotContains(response, "Processos")
 
+
+class PlanPublicAppsAccessTestCase(TestCase):
+    def _make_user(self, username: str, role: str, municipio=None):
+        user = User.objects.create_user(username=username, password="x")
+        profile = getattr(user, "profile", None)
+        if not profile:
+            profile = Profile.objects.create(user=user, role=role, ativo=True)
+        else:
+            profile.role = role
+            profile.ativo = True
+        profile.must_change_password = False
+        profile.municipio = municipio
+        profile.save(update_fields=["role", "ativo", "must_change_password", "municipio"])
+        if role.strip().upper() == "MUNICIPAL":
+            _mark_onboarding_completed(user, municipio=municipio)
+        return user
+
+    def setUp(self):
+        self.municipio = Municipio.objects.create(nome="Cidade Plano Apps", uf="MA", ativo=True)
+        self.user = self._make_user("municipal_plano_apps", "MUNICIPAL", municipio=self.municipio)
+        self.client.force_login(self.user)
+        self.assinatura = get_assinatura_ativa(self.municipio)
+
+    def test_publicacoes_admin_bloqueado_no_essencial(self):
+        response = self.client.get(reverse("core:publicacoes_admin"))
+        self.assertEqual(response.status_code, 403)
+
+    def test_publicacoes_admin_liberado_no_plano_com_portal(self):
+        self.assinatura.plano = PlanoMunicipal.objects.get(codigo=PlanoMunicipal.Codigo.MUNICIPAL)
+        self.assinatura.save(update_fields=["plano", "atualizado_em"])
+        response = self.client.get(reverse("core:publicacoes_admin"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_transparencia_admin_liberada_apenas_com_transformacao_digital(self):
+        self.assinatura.plano = PlanoMunicipal.objects.get(codigo=PlanoMunicipal.Codigo.MUNICIPAL)
+        self.assinatura.save(update_fields=["plano", "atualizado_em"])
+        blocked = self.client.get(reverse("core:transparencia_arquivo_create"))
+        self.assertEqual(blocked.status_code, 403)
+
+        self.assinatura.plano = PlanoMunicipal.objects.get(codigo=PlanoMunicipal.Codigo.GESTAO_TOTAL)
+        self.assinatura.save(update_fields=["plano", "atualizado_em"])
+        allowed = self.client.get(reverse("core:transparencia_arquivo_create"))
+        self.assertEqual(allowed.status_code, 200)
+
+    def test_camara_admin_liberada_apenas_no_governo_completo(self):
+        self.assinatura.plano = PlanoMunicipal.objects.get(codigo=PlanoMunicipal.Codigo.GESTAO_TOTAL)
+        self.assinatura.save(update_fields=["plano", "atualizado_em"])
+        blocked = self.client.get(reverse("core:camara_materia_create"))
+        self.assertEqual(blocked.status_code, 403)
+
+        self.assinatura.plano = PlanoMunicipal.objects.get(codigo=PlanoMunicipal.Codigo.CONSORCIO)
+        self.assinatura.save(update_fields=["plano", "atualizado_em"])
+        allowed = self.client.get(reverse("core:camara_materia_create"))
+        self.assertEqual(allowed.status_code, 200)
+
     def test_secretaria_scope_shows_only_its_activated_modules_in_portal(self):
         municipio = Municipio.objects.create(nome="Cidade Secretaria", uf="MA", ativo=True)
         secretaria = Secretaria.objects.create(municipio=municipio, nome="Secretaria de Saúde", tipo_modelo="saude", ativo=True)
@@ -369,6 +521,43 @@ class MunicipalAdministrativeAccessTestCase(TestCase):
         self.assertNotContains(response, "Processos")
 
 
+class DashboardPendenciasTestCase(TestCase):
+    def test_dashboard_shows_central_pendencias_for_municipal(self):
+        municipio = Municipio.objects.create(nome="Cidade Painel", uf="MA", ativo=True)
+        user = User.objects.create_user(username="muni_dash", password="Senha@123")
+        profile = user.profile
+        profile.role = "MUNICIPAL"
+        profile.municipio = municipio
+        profile.ativo = True
+        profile.must_change_password = False
+        profile.save(update_fields=["role", "municipio", "ativo", "must_change_password"])
+        _mark_onboarding_completed(user, municipio=municipio)
+
+        OnboardingStep.objects.create(
+            municipio=municipio,
+            modulo="core",
+            codigo="STEP_1",
+            titulo="Configuração inicial",
+            ordem=1,
+            status=OnboardingStep.Status.CONCLUIDO,
+        )
+
+        ProcessoAdministrativo.objects.create(
+            municipio=municipio,
+            numero="PROC-1",
+            tipo="GERAL",
+            assunto="Teste atraso",
+            status=ProcessoAdministrativo.Status.ABERTO,
+            prazo_final=timezone.localdate() - timezone.timedelta(days=2),
+        )
+
+        self.client.force_login(user)
+        response = self.client.get(reverse("core:dashboard"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Central de pendências")
+        self.assertContains(response, "Processos em atraso")
+
+
 @override_settings(
     GEPUB_PUBLIC_ROOT_DOMAIN="gepub.com.br",
     GEPUB_APP_HOSTS=["app.gepub.com.br", "127.0.0.1", "localhost"],
@@ -379,6 +568,12 @@ class PublicTenantHostRoutingTestCase(TestCase):
     def setUp(self):
         self.muni_a = Municipio.objects.create(nome="Governador Archer", uf="MA", slug_site="governador-archer")
         self.muni_b = Municipio.objects.create(nome="Cidade B", uf="MA", slug_site="cidade-b")
+        assinatura_a = get_assinatura_ativa(self.muni_a)
+        plano_transformacao = PlanoMunicipal.objects.filter(codigo=PlanoMunicipal.Codigo.GESTAO_TOTAL).first()
+        if assinatura_a and plano_transformacao:
+            assinatura_a.plano = plano_transformacao
+            assinatura_a.preco_base_congelado = plano_transformacao.preco_base_mensal
+            assinatura_a.save(update_fields=["plano", "preco_base_congelado", "atualizado_em"])
         TransparenciaEventoPublico.objects.create(
             municipio=self.muni_a,
             modulo=TransparenciaEventoPublico.Modulo.FINANCEIRO,
@@ -459,3 +654,71 @@ class PortalSeedServiceTestCase(TestCase):
         self.assertEqual(PortalPaginaPublica.objects.filter(municipio=municipio).count(), paginas_count)
         self.assertEqual(PortalMenuPublico.objects.filter(municipio=municipio).count(), menus_count)
         self.assertEqual(PortalHomeBloco.objects.filter(municipio=municipio).count(), blocos_count)
+
+
+class DesignSystemThemeResolutionTestCase(TestCase):
+    def _make_user(self, username: str, municipio: Municipio):
+        user = User.objects.create_user(username=username, password="x")
+        profile = user.profile
+        profile.role = "MUNICIPAL"
+        profile.ativo = True
+        profile.must_change_password = False
+        profile.municipio = municipio
+        profile.save(update_fields=["role", "ativo", "must_change_password", "municipio"])
+        _mark_onboarding_completed(user, municipio=municipio)
+        return user
+
+    def test_base_renders_tenant_default_theme(self):
+        municipio = Municipio.objects.create(nome="Cidade Tema", uf="MA", ativo=True)
+        MunicipioThemeConfig.objects.create(
+            municipio=municipio,
+            default_theme=MunicipioThemeConfig.ThemeChoice.INSTITUCIONAL,
+            allow_user_theme_override=False,
+            lock_theme_for_users=True,
+        )
+        user = self._make_user("theme_default", municipio)
+        self.client.force_login(user)
+        response = self.client.get(reverse("core:dashboard"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'data-theme="institucional"')
+
+    def test_user_theme_override_respected_when_allowed(self):
+        municipio = Municipio.objects.create(nome="Cidade Tema Usuário", uf="MA", ativo=True)
+        MunicipioThemeConfig.objects.create(
+            municipio=municipio,
+            default_theme=MunicipioThemeConfig.ThemeChoice.KASSYA,
+            allow_user_theme_override=True,
+            lock_theme_for_users=False,
+        )
+        user = self._make_user("theme_override", municipio)
+        profile = user.profile
+        profile.ui_theme = "inclusao"
+        profile.save(update_fields=["ui_theme"])
+        self.client.force_login(user)
+        response = self.client.get(reverse("core:dashboard"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'data-theme="inclusao"')
+
+    def test_user_can_switch_theme_by_query_param_and_persist_choice(self):
+        municipio = Municipio.objects.create(nome="Cidade Tema Livre", uf="MA", ativo=True)
+        MunicipioThemeConfig.objects.create(
+            municipio=municipio,
+            default_theme=MunicipioThemeConfig.ThemeChoice.INSTITUCIONAL,
+            allow_user_theme_override=False,
+            lock_theme_for_users=True,
+        )
+        user = self._make_user("theme_switch_any", municipio)
+        self.client.force_login(user)
+
+        response = self.client.get(f"{reverse('core:dashboard')}?theme=inclusao")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'data-theme="inclusao"')
+        # UI atual usa um controle "clicavel" (botao) em vez de <select>
+        self.assertContains(response, 'id="topbarThemeCurrent"')
+
+        response2 = self.client.get(reverse("core:dashboard"))
+        self.assertEqual(response2.status_code, 200)
+        self.assertContains(response2, 'data-theme="inclusao"')
+
+        user.profile.refresh_from_db()
+        self.assertEqual(user.profile.ui_theme, "inclusao")

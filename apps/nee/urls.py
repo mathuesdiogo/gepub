@@ -11,6 +11,7 @@ from .views_relatorios import (
     relatorios_por_tipo,
     relatorios_por_municipio,
     relatorios_por_unidade,
+    relatorios_capacidade,
     relatorios_alunos,
 )
 
@@ -91,6 +92,7 @@ urlpatterns = [
     path("relatorios/por-tipo/", relatorios_por_tipo, name="relatorios_por_tipo"),
     path("relatorios/por-municipio/", relatorios_por_municipio, name="relatorios_por_municipio"),
     path("relatorios/por-unidade/", relatorios_por_unidade, name="relatorios_por_unidade"),
+    path("relatorios/capacidade/", relatorios_capacidade, name="relatorios_capacidade"),
     path("relatorios/alunos/", relatorios_alunos, name="relatorios_alunos"),
 
     # TIPOS

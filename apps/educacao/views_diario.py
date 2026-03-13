@@ -4,6 +4,7 @@ from apps.core.decorators import require_perm
 
 from . import views_diario_core
 from . import views_diario_frequencia
+from . import views_diario_justificativas
 
 
 @login_required
@@ -40,6 +41,18 @@ def aula_update(request, pk: int, aula_id: int):
 @require_perm("educacao.view")
 def api_alunos_turma_suggest(request, pk: int):
     return views_diario_frequencia.api_alunos_turma_suggest_impl(request, pk)
+
+
+@login_required
+@require_perm("educacao.view")
+def justificativa_falta_list(request):
+    return views_diario_justificativas.justificativa_falta_list_impl(request)
+
+
+@login_required
+@require_perm("educacao.view")
+def justificativa_falta_detail(request, pk: int):
+    return views_diario_justificativas.justificativa_falta_detail_impl(request, pk)
 
 
 @login_required

@@ -7,14 +7,14 @@ from django.urls import reverse
 
 from apps.core.decorators import require_perm
 from apps.core.exports import export_pdf_table
-from apps.core.rbac import can, scope_filter_turmas, scope_filter_alunos
+from apps.core.rbac import can, is_professor_profile_role, scope_filter_turmas, scope_filter_alunos
 
 from .models import Aluno, AlunoCertificado, Matricula, Turma
 from .models_diario import DiarioTurma, Avaliacao, Nota
 
 
 def _is_professor(user) -> bool:
-    return getattr(getattr(user, "profile", None), "role", "") == "PROFESSOR"
+    return is_professor_profile_role(getattr(getattr(user, "profile", None), "role", None))
 
 
 def _can_view_turma(user, turma: Turma) -> bool:
@@ -132,7 +132,7 @@ def boletim_turma(request, pk: int):
 @require_perm("educacao.view")
 def boletim_aluno(request, pk: int, aluno_id: int):
     # pk = turma_id
-    turma_qs = scope_filter_turmas(request.user, Turma.objects.select_related("unidade"))
+    turma_qs = scope_filter_turmas(request.user, Turma.objects.select_related("unidade", "matriz_curricular", "curso"))
     turma = get_object_or_404(turma_qs, pk=pk)
 
     aluno_qs = scope_filter_alunos(request.user, Aluno.objects.all())

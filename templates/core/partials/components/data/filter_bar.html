@@ -1,7 +1,8 @@
-<form method="get" class="filter-bar" action="{{ action_url|default:'' }}">
-  <div class="filter-bar__field">
-    <label class="small">Buscar</label>
+<form method="get" class="filter-bar gp-table__filters" action="{{ action_url|default:'' }}">
+  <div class="filter-bar__field gp-form-group">
+    <label class="small gp-form-label">Buscar</label>
     <input
+    class="gp-input"
     name="q"
     value="{{ q|default:'' }}"
     placeholder="{{ placeholder|default:'Digite para buscar...' }}"
@@ -17,13 +18,13 @@
   {% endif %}
 
   <div class="filter-bar__actions">
-    <button class="btn btn--ghost" type="submit">
+    <button class="gp-button gp-button--primary" type="submit">
       <i class="fa-solid fa-filter" aria-hidden="true"></i>
       <span>Filtrar</span>
     </button>
 
     {% if clear_url %}
-      <a class="btn btn--ghost" href="{{ clear_url }}">
+      <a class="gp-button gp-button--outline" href="{{ clear_url }}">
         <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
         <span>Limpar</span>
       </a>

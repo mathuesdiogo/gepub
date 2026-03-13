@@ -24,9 +24,9 @@
       </div>
     {% endfor %}
     <div style="grid-column:1 / -1;display:flex;gap:8px;">
-      <button class="btn btn--ghost" name="action" value="omr" type="submit"><i class="fa-solid fa-camera"></i> Ler marcações (OMR beta)</button>
-      <button class="btn btn-primary" name="action" value="save" type="submit"><i class="fa-solid fa-check"></i> Salvar correção</button>
-      <a class="btn btn--ghost" href="{% url 'avaliacoes:avaliacao_detail' avaliacao.id %}">Cancelar</a>
+      <button class="gp-button gp-button--outline" name="action" value="omr" type="submit"><i class="fa-solid fa-camera"></i> Ler marcações (OMR beta)</button>
+      <button class="gp-button gp-button--primary" name="action" value="save" type="submit"><i class="fa-solid fa-check"></i> Salvar correção</button>
+      <a class="gp-button gp-button--outline" href="{% url 'avaliacoes:avaliacao_detail' avaliacao.id %}">Cancelar</a>
     </div>
   </form>
 

@@ -1,12 +1,22 @@
+import json
+
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from unittest.mock import patch
 
 from apps.billing.models import AssinaturaMunicipio, PlanoMunicipal, SolicitacaoUpgrade
-from apps.core.models import PortalHomeBloco, PortalMenuPublico, PortalMunicipalConfig, PortalNoticia, PortalPaginaPublica
+from apps.core.models import (
+    AuditoriaEvento,
+    PortalHomeBloco,
+    PortalMenuPublico,
+    PortalMunicipalConfig,
+    PortalNoticia,
+    PortalPaginaPublica,
+)
 from apps.org.services.provisioning import seed_secretaria_templates
 from apps.org.models import (
+    Address,
     Municipio,
     Secretaria,
     SecretariaCadastroBase,
@@ -318,3 +328,215 @@ class OrgOnboardingProvisioningTestCase(TestCase):
         self.assertTrue(
             Secretaria.objects.filter(municipio=self.municipio, tipo_modelo="saude").exists()
         )
+
+
+class OrgAddressMapsTestCase(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_user(username="gestor_endereco", password="123456")
+        self.municipio = Municipio.objects.create(nome="Cidade Endereco", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="Secretaria de Educação")
+        self.unidade = Unidade.objects.create(
+            secretaria=self.secretaria,
+            nome="Escola Centro",
+            tipo=Unidade.Tipo.EDUCACAO,
+        )
+
+        profile = self.user.profile
+        profile.role = "MUNICIPAL"
+        profile.ativo = True
+        profile.municipio = self.municipio
+        profile.secretaria = self.secretaria
+        profile.unidade = self.unidade
+        profile.must_change_password = False
+        profile.save(
+            update_fields=[
+                "role",
+                "ativo",
+                "municipio",
+                "secretaria",
+                "unidade",
+                "must_change_password",
+            ]
+        )
+        self.client.force_login(self.user)
+
+    @patch("apps.org.views_addresses.geocode_address")
+    def test_create_secretaria_address_with_geocode_and_audit(self, mock_geocode):
+        mock_geocode.return_value = {
+            "ok": True,
+            "provider": "osm",
+            "latitude": "-2.5307335",
+            "longitude": "-44.3028579",
+        }
+        payload = {
+            "entity_type": "SECRETARIA",
+            "entity_id": self.secretaria.id,
+            "label": "Principal",
+            "logradouro": "Av. Principal",
+            "numero": "100",
+            "bairro": "Centro",
+            "cidade": "Cidade Endereco",
+            "estado": "ma",
+            "cep": "65000123",
+            "reference_point": "Próximo à praça",
+        }
+
+        resp = self.client.post(
+            reverse("org:address_create"),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 201)
+        body = resp.json()
+        self.assertTrue(body.get("ok"))
+
+        addr = Address.objects.get(entity_type="SECRETARIA", entity_id=self.secretaria.id, is_active=True)
+        self.assertEqual(addr.geocode_status, Address.GeocodeStatus.OK)
+        self.assertEqual(addr.geocode_provider, Address.GeocodeProvider.OSM)
+        self.assertTrue(addr.maps_url.startswith("https://www.google.com/maps?q="))
+        self.assertTrue(
+            AuditoriaEvento.objects.filter(
+                municipio=self.municipio,
+                evento="ADDRESS_CREATED",
+                entidade="Address",
+                entidade_id=str(addr.id),
+            ).exists()
+        )
+
+    def test_role_unidade_can_edit_only_own_unit_address(self):
+        user_unidade = get_user_model().objects.create_user(username="dir_escola", password="123456")
+        profile = user_unidade.profile
+        profile.role = "UNIDADE"
+        profile.ativo = True
+        profile.municipio = self.municipio
+        profile.secretaria = self.secretaria
+        profile.unidade = self.unidade
+        profile.must_change_password = False
+        profile.save(
+            update_fields=[
+                "role",
+                "ativo",
+                "municipio",
+                "secretaria",
+                "unidade",
+                "must_change_password",
+            ]
+        )
+        self.client.force_login(user_unidade)
+
+        payload = {
+            "entity_type": "UNIDADE",
+            "entity_id": self.unidade.id,
+            "logradouro": "Rua das Flores",
+            "numero": "S/N",
+            "bairro": "Centro",
+            "cidade": "Cidade Endereco",
+            "estado": "MA",
+            "latitude": "-2.5307335",
+            "longitude": "-44.3028579",
+        }
+        ok_resp = self.client.post(
+            reverse("org:address_create"),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+        self.assertEqual(ok_resp.status_code, 201)
+
+        outra_unidade = Unidade.objects.create(
+            secretaria=self.secretaria,
+            nome="Escola Bairro",
+            tipo=Unidade.Tipo.EDUCACAO,
+        )
+        payload["entity_id"] = outra_unidade.id
+        forbidden_resp = self.client.post(
+            reverse("org:address_create"),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+        self.assertIn(forbidden_resp.status_code, {403, 404})
+
+    def test_view_only_profile_lists_without_coordinates(self):
+        Address.objects.create(
+            entity_type=Address.EntityType.UNIDADE,
+            entity_id=self.unidade.id,
+            label="Principal",
+            logradouro="Rua Um",
+            numero="10",
+            bairro="Centro",
+            cidade="Cidade Endereco",
+            estado="MA",
+            latitude="-2.5307335",
+            longitude="-44.3028579",
+            geocode_status=Address.GeocodeStatus.MANUAL,
+            geocode_provider=Address.GeocodeProvider.MANUAL,
+        )
+
+        user_view = get_user_model().objects.create_user(username="cad_oper", password="123456")
+        profile = user_view.profile
+        profile.role = "CAD_OPER"
+        profile.ativo = True
+        profile.municipio = self.municipio
+        profile.secretaria = self.secretaria
+        profile.must_change_password = False
+        profile.save(
+            update_fields=[
+                "role",
+                "ativo",
+                "municipio",
+                "secretaria",
+                "must_change_password",
+            ]
+        )
+        self.client.force_login(user_view)
+
+        resp = self.client.get(
+            reverse("org:address_list"),
+            {"entity_type": "UNIDADE", "entity_id": self.unidade.id},
+        )
+        self.assertEqual(resp.status_code, 200)
+        body = resp.json()
+        self.assertTrue(body.get("ok"))
+        self.assertEqual(len(body.get("results", [])), 1)
+        self.assertIsNone(body["results"][0]["latitude"])
+        self.assertIsNone(body["results"][0]["longitude"])
+
+    def test_update_address_generates_audit_before_after(self):
+        addr = Address.objects.create(
+            entity_type=Address.EntityType.UNIDADE,
+            entity_id=self.unidade.id,
+            label="Principal",
+            logradouro="Rua Inicial",
+            numero="1",
+            bairro="Centro",
+            cidade="Cidade Endereco",
+            estado="MA",
+            latitude="-2.5307335",
+            longitude="-44.3028579",
+            geocode_status=Address.GeocodeStatus.MANUAL,
+            geocode_provider=Address.GeocodeProvider.MANUAL,
+        )
+
+        payload = {
+            "bairro": "Novo Centro",
+            "is_primary": True,
+            "is_public": True,
+        }
+        resp = self.client.put(
+            reverse("org:address_update", args=[addr.id]),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+        addr.refresh_from_db()
+        self.assertEqual(addr.bairro, "Novo Centro")
+
+        ev = AuditoriaEvento.objects.filter(
+            municipio=self.municipio,
+            evento="ADDRESS_UPDATED",
+            entidade="Address",
+            entidade_id=str(addr.id),
+        ).first()
+        self.assertIsNotNone(ev)
+        self.assertEqual((ev.antes or {}).get("bairro"), "Centro")
+        self.assertEqual((ev.depois or {}).get("bairro"), "Novo Centro")

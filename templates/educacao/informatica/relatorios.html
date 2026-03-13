@@ -1,0 +1,118 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Relatórios • Informática • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+  <div class="gp-card edu-card-highlight u-mb-12">
+    <div class="gp-card__body">
+      {% include "core/partials/components/layout/page_head.html" with title="Relatórios do Curso de Informática" subtitle="Visão gerencial e operacional" actions=None %}
+      <div class="edu-kpis">
+        <article class="edu-kpi"><div><div class="edu-kpi__label">Matriculados</div><div class="edu-kpi__value">{{ total_matriculados }}</div></div><div class="edu-kpi__icon"><i class="fa-solid fa-user-check"></i></div></article>
+        <article class="edu-kpi"><div><div class="edu-kpi__label">Alunos externos</div><div class="edu-kpi__value">{{ total_externos }}</div></div><div class="edu-kpi__icon"><i class="fa-solid fa-shuffle"></i></div></article>
+        <article class="edu-kpi"><div><div class="edu-kpi__label">Lista de espera</div><div class="edu-kpi__value">{{ total_lista_espera }}</div></div><div class="edu-kpi__icon"><i class="fa-solid fa-list-ol"></i></div></article>
+        <article class="edu-kpi"><div><div class="edu-kpi__label">Turmas sexta</div><div class="edu-kpi__value">{{ total_turmas_sexta }}</div></div><div class="edu-kpi__icon"><i class="fa-solid fa-clock"></i></div></article>
+      </div>
+    </div>
+  </div>
+
+  <div class="edu-report-grid u-mb-12">
+    <div class="gp-card">
+      <div class="gp-card__body">
+        <h3 class="section__title u-mb-8">Atendimento por tipo de grade</h3>
+        <div class="gp-table">
+          <table>
+            <thead><tr><th>Tipo</th><th>Total</th></tr></thead>
+            <tbody>
+              {% for row in por_tipo_grade %}
+                <tr>
+                  <td>{% if row.tipo == 'ESPECIAL_SEXTA' %}Especial de sexta{% else %}Padrão semanal{% endif %}</td>
+                  <td>{{ row.total }}</td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="2">Sem dados.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="gp-card">
+      <div class="gp-card__body">
+        <h3 class="section__title u-mb-8">Atendimento por escola de origem</h3>
+        <div class="gp-table">
+          <table>
+            <thead><tr><th>Escola</th><th>Total</th></tr></thead>
+            <tbody>
+              {% for row in por_escola %}
+                <tr><td>{{ row.nome }}</td><td>{{ row.total }}</td></tr>
+              {% empty %}
+                <tr><td colspan="2">Sem dados.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="gp-card">
+      <div class="gp-card__body">
+        <h3 class="section__title u-mb-8">Atendimento por laboratório</h3>
+        <div class="gp-table">
+          <table>
+            <thead><tr><th>Laboratório</th><th>Total</th></tr></thead>
+            <tbody>
+              {% for row in por_laboratorio %}
+                <tr><td>{{ row.nome }}</td><td>{{ row.total }}</td></tr>
+              {% empty %}
+                <tr><td colspan="2">Sem dados.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="gp-card">
+      <div class="gp-card__body">
+        <h3 class="section__title u-mb-8">Ocupação por turma</h3>
+        <div class="gp-table">
+          <table>
+            <thead><tr><th>Turma</th><th>Curso</th><th>Laboratório</th><th>Total</th></tr></thead>
+            <tbody>
+              {% for row in por_turma %}
+                <tr><td>{{ row.codigo }}</td><td>{{ row.curso_nome }}</td><td>{{ row.laboratorio }}</td><td>{{ row.total }}</td></tr>
+              {% empty %}
+                <tr><td colspan="4">Sem dados.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="gp-card">
+    <div class="gp-card__body">
+      <h3 class="section__title u-mb-8">Alertas de frequência</h3>
+      <p class="section__meta u-mb-10">Acompanhe faltas consecutivas e baixa frequência para ação preventiva da coordenação.</p>
+      <div class="gp-table">
+        <table>
+          <thead><tr><th>Turma</th><th>Aluno</th><th>Tipo</th><th>Frequência</th><th>Faltas consec.</th></tr></thead>
+          <tbody>
+            {% for a in alertas %}
+              <tr>
+                <td>{{ a.matricula.turma.codigo }}</td>
+                <td>{{ a.matricula.aluno.nome }}</td>
+                <td>{{ a.get_tipo_display }}</td>
+                <td>{{ a.percentual_frequencia }}%</td>
+                <td>{{ a.faltas_consecutivas }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="5">Sem alertas ativos.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

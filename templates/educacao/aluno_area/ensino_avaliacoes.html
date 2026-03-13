@@ -1,0 +1,116 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Ensino • Avaliações • {{ aluno.nome }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <article class="gp-student-stage__card gp-boletim-clean">
+    <h3>Avaliações por Período/Semestre</h3>
+    {% if periodos_disponiveis %}
+      <form method="get" class="gp-form gp-form--smart gp-boletim-clean__toolbar">
+        <div class="gp-form-group">
+          <label class="gp-form-label" for="periodo_ref">Semestre de referência</label>
+          <select id="periodo_ref" name="periodo" class="gp-select" onchange="this.form.submit()">
+            {% for p in periodos_disponiveis %}
+              <option
+                value="{{ p.id }}"
+                title="{{ p.get_tipo_display }}"
+                {% if periodo_referencia and p.id == periodo_referencia.id %}selected{% endif %}
+              >
+                {{ p.ano_letivo }}/{{ p.numero }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <noscript>
+          <button class="gp-button gp-button--ghost" type="submit">Consultar período</button>
+        </noscript>
+      </form>
+    {% endif %}
+
+    <p class="gp-boletim-clean__summary">
+      <strong>Período:</strong> {{ periodo_referencia_label }}
+      <span>•</span>
+      <strong>Avaliações:</strong> {{ notas_total }}
+      <span>•</span>
+      <strong>Notas lançadas:</strong> {{ notas_lancadas_total }}
+      <span>•</span>
+      <strong>Média:</strong> {% if media_periodo is not None %}{{ media_periodo|floatformat:2 }}{% else %}—{% endif %}
+    </p>
+
+    <div class="gp-table gp-table--responsive gp-boletim-clean__table">
+      <div class="gp-table__body">
+        <table class="gp-table__native">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Avaliação</th>
+              <th>Turma</th>
+              <th>Ano/Período</th>
+              <th>Nota</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for n in notas %}
+              <tr>
+                <td>{{ n.avaliacao.data|date:"d/m/Y" }}</td>
+                <td>{{ n.avaliacao.titulo }}</td>
+                <td>{{ n.avaliacao.diario.turma.nome }}</td>
+                <td>
+                  {% if n.avaliacao.periodo %}
+                    {{ n.avaliacao.periodo.ano_letivo }}/{{ n.avaliacao.periodo.numero }}
+                  {% else %}
+                    {{ n.avaliacao.diario.ano_letivo }}
+                  {% endif %}
+                </td>
+                <td>{% if n.valor is not None %}{{ n.valor|floatformat:2 }}{% else %}—{% endif %}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="5">Sem avaliações lançadas para o período de referência selecionado.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </article>
+
+  <article class="gp-student-stage__card gp-boletim-clean">
+    <h3>Avaliações do Curso de Informática</h3>
+    <p class="gp-boletim-clean__summary">
+      <strong>Avaliações:</strong> {{ notas_informatica_total }}
+      <span>•</span>
+      <strong>Notas lançadas:</strong> {{ notas_informatica_lancadas }}
+      <span>•</span>
+      <strong>Média:</strong> {% if media_informatica is not None %}{{ media_informatica|floatformat:2 }}{% else %}—{% endif %}
+    </p>
+
+    <div class="gp-table gp-table--responsive gp-boletim-clean__table">
+      <div class="gp-table__body">
+        <table class="gp-table__native">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Avaliação</th>
+              <th>Turma</th>
+              <th>Nota</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for n in notas_informatica %}
+              <tr>
+                <td>{{ n.avaliacao.data|date:"d/m/Y" }}</td>
+                <td>{{ n.avaliacao.titulo }}</td>
+                <td>{{ n.avaliacao.turma.codigo }}</td>
+                <td>{% if n.valor is not None %}{{ n.valor|floatformat:2 }}{% else %}—{% endif %}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4">Sem avaliações de Informática lançadas.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </article>
+</section>
+{% endblock %}

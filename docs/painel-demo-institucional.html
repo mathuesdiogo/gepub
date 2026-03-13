@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="institucional">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>GEPUB - Painel Institucional (Demo)</title>
+  <link rel="stylesheet" href="../static/gepub-design-system/gepub-design-system.css">
+  <style>
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+    }
+
+    body {
+      overflow: hidden;
+    }
+
+    .gp-shell {
+      min-height: 1080px;
+    }
+
+    .content {
+      display: grid;
+      gap: var(--gp-space-3);
+      padding-top: 12px;
+    }
+
+    .page-head {
+      margin-bottom: 0;
+    }
+
+    .kpi-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .kpi {
+      gap: 8px;
+    }
+
+    .kpi .delta {
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .kpi .delta.pos {
+      color: var(--gp-success);
+    }
+
+    .kpi .delta.neg {
+      color: var(--gp-danger);
+    }
+
+    .panel-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: var(--gp-space-3);
+    }
+
+    .demo-chart {
+      width: 100%;
+      height: 230px;
+      border: 1px solid var(--gp-border);
+      border-radius: var(--gp-radius-sm);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--gp-primary) 6%, var(--gp-surface)) 0%, var(--gp-surface) 100%);
+    }
+
+    .legend {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      color: var(--gp-text-secondary);
+      font-size: 0.82rem;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    .dot.primary { background: var(--gp-primary); }
+    .dot.secondary { background: var(--gp-secondary); }
+    .dot.success { background: var(--gp-success); }
+
+    .agenda {
+      display: grid;
+      gap: 10px;
+    }
+
+    .agenda-item {
+      padding: 10px;
+      border: 1px solid var(--gp-border);
+      border-radius: var(--gp-radius-sm);
+      background: color-mix(in srgb, var(--gp-primary) 3%, var(--gp-surface));
+    }
+
+    .agenda-item strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 0.86rem;
+    }
+
+    .agenda-item small {
+      color: var(--gp-text-secondary);
+      display: block;
+      margin-top: 6px;
+    }
+
+    .table-shell {
+      max-height: 300px;
+      overflow: hidden;
+    }
+
+    .badge-stack {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .menu__icon {
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .brand__logo {
+      font-weight: 800;
+    }
+
+    @media (max-width: 1200px) {
+      .kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .panel-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="gp-app">
+  <div class="gp-shell">
+    <aside class="sidebar">
+      <div class="sidebar__header">
+        <div class="brand">
+          <div class="brand__logo">GP</div>
+          <div class="brand__text">
+            <p class="brand__name">GEPUB</p>
+            <p class="brand__sub">Painel Institucional</p>
+          </div>
+        </div>
+        <button class="sidebar__toggle" aria-label="Recolher barra lateral">≡</button>
+      </div>
+
+      <nav class="menu">
+        <div class="menu__section">Visão Geral</div>
+        <a class="menu__item is-active" href="#">
+          <span class="menu__icon">01</span>
+          <span class="menu__label">Dashboard Executivo</span>
+        </a>
+        <a class="menu__item" href="#">
+          <span class="menu__icon">02</span>
+          <span class="menu__label">Indicadores Estratégicos</span>
+        </a>
+        <a class="menu__item" href="#">
+          <span class="menu__icon">03</span>
+          <span class="menu__label">Programas e Ações</span>
+        </a>
+
+        <div class="menu__section">Governança</div>
+        <a class="menu__item" href="#">
+          <span class="menu__icon">04</span>
+          <span class="menu__label">Prestação de Contas</span>
+        </a>
+        <a class="menu__item" href="#">
+          <span class="menu__icon">05</span>
+          <span class="menu__label">Compliance</span>
+        </a>
+        <a class="menu__item" href="#">
+          <span class="menu__icon">06</span>
+          <span class="menu__label">Relatórios Públicos</span>
+        </a>
+      </nav>
+
+      <div class="sidebar__footer">
+        <div class="sidebar__footer-tools">
+          <a class="sidebar__footer-btn" href="#" title="Configurações">⚙</a>
+          <a class="sidebar__footer-btn sidebar__footer-btn--danger" href="#" title="Sair">⎋</a>
+        </div>
+      </div>
+    </aside>
+
+    <main class="gp-main">
+      <header class="topbar">
+        <div class="topbar__left">
+          <div class="gp-breadcrumb">
+            <span class="gp-breadcrumb__link">Início</span>
+            <span class="gp-breadcrumb__sep">/</span>
+            <span class="gp-breadcrumb__current">Painel Institucional</span>
+          </div>
+          <div class="topbar__title">Monitoramento de Metas - 1º Trimestre 2026</div>
+        </div>
+
+        <div class="topbar__right">
+          <div class="topbar-search" aria-label="Busca">
+            <label class="topbar-search__label" for="busca">Buscar</label>
+            <input id="busca" class="topbar-search__input" value="programa de inclusão digital" readonly>
+            <button class="topbar-search__btn" type="button">⌕</button>
+          </div>
+
+          <button class="topbar-theme-current" data-theme-value="institucional" aria-label="Tema institucional"></button>
+
+          <a class="topbar-user" href="#">
+            <div class="gp-avatar topbar-user__avatar">MI</div>
+            <span class="topbar-user__info">
+              <span class="topbar-user__name">Meio Institucional</span>
+              <span class="topbar-user__role">Gestão Estratégica</span>
+            </span>
+          </a>
+        </div>
+      </header>
+
+      <section class="content">
+        <div class="gp-alert gp-alert--info">
+          Consolidado atualizado em 11/03/2026 às 09:30. Nível geral de execução institucional: <strong>86%</strong>.
+        </div>
+
+        <div class="page-head">
+          <div>
+            <h1 class="page-head__title">Painel Demonstrativo</h1>
+            <p class="page-head__subtitle">Modelo visual para uso em apresentação institucional do GEPUB.</p>
+          </div>
+          <div class="page-head__actions">
+            <button class="gp-button gp-button--outline">Exportar PDF</button>
+            <button class="gp-button gp-button--primary">Gerar Relatório</button>
+          </div>
+        </div>
+
+        <section class="kpi-grid" aria-label="Indicadores principais">
+          <article class="kpi">
+            <small>Metas Ativas</small>
+            <strong>42</strong>
+            <span class="delta pos">+8.2% no período</span>
+            <div class="gp-progress" style="--gp-progress: 84%;"><span class="gp-progress__value"></span></div>
+          </article>
+
+          <article class="kpi">
+            <small>Projetos Concluídos</small>
+            <strong>27</strong>
+            <span class="delta pos">+4 concluídos em março</span>
+            <div class="gp-progress" style="--gp-progress: 64%;"><span class="gp-progress__value"></span></div>
+          </article>
+
+          <article class="kpi">
+            <small>Investimento Executado</small>
+            <strong>R$ 8,4 mi</strong>
+            <span class="delta pos">91% da previsão trimestral</span>
+            <div class="gp-progress" style="--gp-progress: 91%;"><span class="gp-progress__value"></span></div>
+          </article>
+
+          <article class="kpi">
+            <small>Risco Operacional</small>
+            <strong>Baixo</strong>
+            <span class="delta neg">2 alertas pendentes</span>
+            <div class="gp-progress" style="--gp-progress: 28%;"><span class="gp-progress__value"></span></div>
+          </article>
+        </section>
+
+        <section class="panel-grid">
+          <article class="gp-card">
+            <header class="gp-card__header gp-flex gp-justify-between gp-align-center">
+              <strong>Evolução de Entregas (2025-2026)</strong>
+              <span class="gp-badge gp-badge--primary">Meta anual: 92%</span>
+            </header>
+            <div class="gp-card__body">
+              <svg class="demo-chart" viewBox="0 0 860 230" preserveAspectRatio="none" role="img" aria-label="Gráfico de evolução">
+                <defs>
+                  <linearGradient id="fill1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#4a7bd0" stop-opacity="0.38"></stop>
+                    <stop offset="100%" stop-color="#4a7bd0" stop-opacity="0.04"></stop>
+                  </linearGradient>
+                </defs>
+                <rect x="0" y="0" width="860" height="230" fill="transparent"></rect>
+                <g stroke="#d9dee7" stroke-width="1">
+                  <line x1="0" y1="190" x2="860" y2="190"></line>
+                  <line x1="0" y1="145" x2="860" y2="145"></line>
+                  <line x1="0" y1="100" x2="860" y2="100"></line>
+                  <line x1="0" y1="55" x2="860" y2="55"></line>
+                </g>
+                <path d="M0,185 C80,170 130,145 190,128 C250,110 310,118 370,95 C430,72 490,80 550,66 C610,54 690,65 760,42 C810,30 835,24 860,20 L860,230 L0,230 Z" fill="url(#fill1)"></path>
+                <path d="M0,185 C80,170 130,145 190,128 C250,110 310,118 370,95 C430,72 490,80 550,66 C610,54 690,65 760,42 C810,30 835,24 860,20" fill="none" stroke="#2f5da8" stroke-width="4"></path>
+                <circle cx="760" cy="42" r="7" fill="#2f5da8"></circle>
+                <circle cx="860" cy="20" r="7" fill="#2f5da8"></circle>
+              </svg>
+
+              <div class="legend" style="margin-top: 10px;">
+                <span><i class="dot primary"></i> Entregas concluídas</span>
+                <span><i class="dot secondary"></i> Programas em execução</span>
+                <span><i class="dot success"></i> Meta superada</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="gp-card">
+            <header class="gp-card__header gp-flex gp-justify-between gp-align-center">
+              <strong>Agenda Crítica</strong>
+              <span class="gp-badge gp-badge--warning">3 próximos marcos</span>
+            </header>
+            <div class="gp-card__body agenda">
+              <div class="agenda-item">
+                <strong>Comitê de Governança</strong>
+                <div class="badge-stack">
+                  <span class="gp-badge gp-badge--primary">14 mar</span>
+                  <span class="gp-badge gp-badge--neutral">09:00</span>
+                </div>
+                <small>Validação de resultados do eixo institucional.</small>
+              </div>
+
+              <div class="agenda-item">
+                <strong>Entrega do Relatório Mensal</strong>
+                <div class="badge-stack">
+                  <span class="gp-badge gp-badge--success">18 mar</span>
+                  <span class="gp-badge gp-badge--neutral">17:00</span>
+                </div>
+                <small>Publicação oficial de indicadores e evidências.</small>
+              </div>
+
+              <div class="agenda-item">
+                <strong>Revisão de Plano Orçamentário</strong>
+                <div class="badge-stack">
+                  <span class="gp-badge gp-badge--danger">22 mar</span>
+                  <span class="gp-badge gp-badge--neutral">10:30</span>
+                </div>
+                <small>Atualização de CAPEX e prioridades do trimestre.</small>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <article class="gp-card">
+          <header class="gp-card__header gp-flex gp-justify-between gp-align-center">
+            <strong>Status de Iniciativas Institucionais</strong>
+            <div class="gp-pills">
+              <span class="gp-pills__item">Q1 2026</span>
+              <span class="gp-pills__item">Atualizado hoje</span>
+            </div>
+          </header>
+          <div class="gp-card__body">
+            <div class="table-shell">
+              <table class="gp-table gp-table--striped gp-table--hover">
+                <thead>
+                  <tr>
+                    <th>Iniciativa</th>
+                    <th>Responsável</th>
+                    <th>Execução</th>
+                    <th>Prioridade</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Portal de Transparência 2.0</td>
+                    <td>Coord. Dados</td>
+                    <td>92%</td>
+                    <td>Alta</td>
+                    <td><span class="gp-badge gp-badge--success">No prazo</span></td>
+                  </tr>
+                  <tr>
+                    <td>Integração BI Institucional</td>
+                    <td>Núcleo Analytics</td>
+                    <td>78%</td>
+                    <td>Média</td>
+                    <td><span class="gp-badge gp-badge--primary">Em andamento</span></td>
+                  </tr>
+                  <tr>
+                    <td>Programa de Formação de Gestores</td>
+                    <td>Escola GEPUB</td>
+                    <td>64%</td>
+                    <td>Alta</td>
+                    <td><span class="gp-badge gp-badge--warning">Atenção</span></td>
+                  </tr>
+                  <tr>
+                    <td>Revisão de Normativos Internos</td>
+                    <td>Jurídico</td>
+                    <td>45%</td>
+                    <td>Baixa</td>
+                    <td><span class="gp-badge gp-badge--danger">Risco</span></td>
+                  </tr>
+                  <tr>
+                    <td>Digitalização de Processos</td>
+                    <td>Operações</td>
+                    <td>88%</td>
+                    <td>Média</td>
+                    <td><span class="gp-badge gp-badge--success">No prazo</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

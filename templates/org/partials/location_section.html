@@ -1,0 +1,383 @@
+<section class="org-board org-location" id="localizacao">
+  <div class="org-board__head org-location__head">
+    <div>
+      <h3 class="org-board__title">Localização</h3>
+      <p class="org-board__sub">Endereço padronizado e integração com Maps.</p>
+    </div>
+    {% if location_can_edit %}
+      <button type="button" class="gp-button gp-button--primary gp-button--sm" data-location-open
+        data-address-id="{% if location_address %}{{ location_address.id }}{% endif %}"
+        data-label="{% if location_address %}{{ location_address.label|escape }}{% endif %}"
+        data-cep="{% if location_address %}{{ location_address.cep|escape }}{% endif %}"
+        data-logradouro="{% if location_address %}{{ location_address.logradouro|escape }}{% endif %}"
+        data-numero="{% if location_address %}{{ location_address.numero|escape }}{% endif %}"
+        data-complemento="{% if location_address %}{{ location_address.complemento|escape }}{% endif %}"
+        data-bairro="{% if location_address %}{{ location_address.bairro|escape }}{% endif %}"
+        data-cidade="{% if location_address %}{{ location_address.cidade|escape }}{% endif %}"
+        data-estado="{% if location_address %}{{ location_address.estado|escape }}{% endif %}"
+        data-pais="{% if location_address %}{{ location_address.pais|escape }}{% endif %}"
+        data-reference-point="{% if location_address %}{{ location_address.reference_point|escape }}{% endif %}"
+        data-coverage-area="{% if location_address %}{{ location_address.coverage_area|escape }}{% endif %}"
+        data-opening-hours="{% if location_address %}{{ location_address.opening_hours|escape }}{% endif %}"
+        data-latitude="{% if location_address and location_show_coordinates %}{{ location_address.latitude }}{% endif %}"
+        data-longitude="{% if location_address and location_show_coordinates %}{{ location_address.longitude }}{% endif %}"
+        data-is-primary="{% if location_address and location_address.is_primary %}1{% else %}0{% endif %}"
+        data-is-public="{% if location_address and location_address.is_public %}1{% else %}0{% endif %}"
+      >
+        {% if location_address %}Editar endereço{% else %}Cadastrar endereço{% endif %}
+      </button>
+    {% endif %}
+  </div>
+
+  {% if location_address %}
+    <div class="org-location__content">
+      <p class="org-location__address">
+        {{ location_address.formatted_address|linebreaksbr }}
+      </p>
+
+      <dl class="org-location__meta">
+        {% if location_address.reference_point %}
+          <div>
+            <dt>Ponto de referência</dt>
+            <dd>{{ location_address.reference_point }}</dd>
+          </div>
+        {% endif %}
+        {% if location_address.coverage_area %}
+          <div>
+            <dt>Área de cobertura</dt>
+            <dd>{{ location_address.coverage_area }}</dd>
+          </div>
+        {% endif %}
+        {% if location_address.opening_hours %}
+          <div>
+            <dt>Horário</dt>
+            <dd>{{ location_address.opening_hours }}</dd>
+          </div>
+        {% endif %}
+        {% if location_show_coordinates and location_address.latitude and location_address.longitude %}
+          <div>
+            <dt>Coordenadas</dt>
+            <dd>{{ location_address.latitude }}, {{ location_address.longitude }}</dd>
+          </div>
+        {% endif %}
+        <div>
+          <dt>Geocode</dt>
+          <dd>{{ location_address.geocode_status|upper }}{% if location_address.geocode_provider %} • {{ location_address.geocode_provider }}{% endif %}</dd>
+        </div>
+      </dl>
+
+      <div class="org-location__actions">
+        {% if location_address.maps_url %}
+          <a class="gp-button gp-button--outline gp-button--sm" href="{{ location_address.maps_url }}" target="_blank" rel="noopener">Abrir no Maps</a>
+          <button type="button" class="gp-button gp-button--outline gp-button--sm" data-copy-text="{{ location_address.maps_url|escape }}">Copiar link</button>
+        {% endif %}
+        <a class="gp-button gp-button--outline gp-button--sm" href="{{ location_address.directions_url }}" target="_blank" rel="noopener">Ver rota</a>
+        <button type="button" class="gp-button gp-button--outline gp-button--sm" data-copy-text="{{ location_address.formatted_address|escape }}">Copiar endereço</button>
+        {% if location_can_edit and location_address %}
+          <button type="button" class="gp-button gp-button--outline gp-button--sm" data-location-geocode data-address-id="{{ location_address.id }}">Reprocessar geocode</button>
+        {% endif %}
+      </div>
+    </div>
+  {% elif legacy_address_text %}
+    <div class="org-location__content">
+      <p class="org-location__address">{{ legacy_address_text }}</p>
+      <div class="org-location__actions">
+        <a class="gp-button gp-button--outline gp-button--sm" href="https://www.google.com/maps/search/?api=1&query={{ legacy_address_text|urlencode }}" target="_blank" rel="noopener">Abrir no Maps</a>
+        <button type="button" class="gp-button gp-button--outline gp-button--sm" data-copy-text="{{ legacy_address_text|escape }}">Copiar endereço</button>
+      </div>
+    </div>
+  {% else %}
+    <p class="org-location__empty">Nenhum endereço principal cadastrado para esta entidade.</p>
+  {% endif %}
+</section>
+
+{% if location_can_edit %}
+  <div class="org-location-modal" data-location-modal hidden>
+    <div class="org-location-modal__backdrop" data-location-close></div>
+    <div class="org-location-modal__panel" role="dialog" aria-modal="true" aria-label="Editar endereço">
+      <div class="org-location-modal__head">
+        <h3>Editar endereço</h3>
+        <button type="button" class="gp-button gp-button--outline gp-button--sm" data-location-close>Fechar</button>
+      </div>
+
+      <form class="org-location-form" data-location-form>
+        <input type="hidden" name="address_id" value="{% if location_address %}{{ location_address.id }}{% endif %}">
+
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="form-label" for="loc-label">Rótulo</label>
+            <input id="loc-label" name="label" type="text" value="{% if location_address %}{{ location_address.label }}{% endif %}" placeholder="Principal">
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="loc-cep">CEP</label>
+            <input id="loc-cep" name="cep" type="text" value="{% if location_address %}{{ location_address.cep }}{% endif %}" placeholder="65000-000">
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="loc-logradouro">Logradouro</label>
+            <input id="loc-logradouro" name="logradouro" type="text" value="{% if location_address %}{{ location_address.logradouro }}{% endif %}" required>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="loc-numero">Número</label>
+            <input id="loc-numero" name="numero" type="text" value="{% if location_address %}{{ location_address.numero }}{% endif %}" placeholder="S/N" required>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="loc-complemento">Complemento</label>
+            <input id="loc-complemento" name="complemento" type="text" value="{% if location_address %}{{ location_address.complemento }}{% endif %}">
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="loc-bairro">Bairro</label>
+            <input id="loc-bairro" name="bairro" type="text" value="{% if location_address %}{{ location_address.bairro }}{% endif %}" required>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="loc-cidade">Cidade</label>
+            <input id="loc-cidade" name="cidade" type="text" value="{% if location_address %}{{ location_address.cidade }}{% endif %}" required>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="loc-estado">UF</label>
+            <input id="loc-estado" name="estado" type="text" maxlength="2" value="{% if location_address %}{{ location_address.estado }}{% endif %}" required>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="loc-reference-point">Ponto de referência</label>
+            <input id="loc-reference-point" name="reference_point" type="text" value="{% if location_address %}{{ location_address.reference_point }}{% endif %}">
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="loc-coverage-area">Área de cobertura</label>
+            <input id="loc-coverage-area" name="coverage_area" type="text" value="{% if location_address %}{{ location_address.coverage_area }}{% endif %}">
+          </div>
+
+          <div class="form-field form-field--full">
+            <label class="form-label" for="loc-opening-hours">Horário de funcionamento</label>
+            <input id="loc-opening-hours" name="opening_hours" type="text" value="{% if location_address %}{{ location_address.opening_hours }}{% endif %}" placeholder="Seg a Sex 08:00 às 17:00">
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="loc-latitude">Latitude (opcional)</label>
+            <input id="loc-latitude" name="latitude" type="text" value="{% if location_address and location_show_coordinates %}{{ location_address.latitude }}{% endif %}" placeholder="-2.5307335">
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="loc-longitude">Longitude (opcional)</label>
+            <input id="loc-longitude" name="longitude" type="text" value="{% if location_address and location_show_coordinates %}{{ location_address.longitude }}{% endif %}" placeholder="-44.3028579">
+          </div>
+
+          <div class="form-field form-field--checkbox">
+            <label class="form-label-inline"><input name="is_primary" type="checkbox" {% if not location_address or location_address.is_primary %}checked{% endif %}> Endereço principal</label>
+          </div>
+          <div class="form-field form-field--checkbox">
+            <label class="form-label-inline"><input name="is_public" type="checkbox" {% if not location_address or location_address.is_public %}checked{% endif %}> Endereço público</label>
+          </div>
+        </div>
+
+        <p class="form-error" data-location-error hidden></p>
+
+        <div class="form-actions">
+          <button type="submit" class="gp-button gp-button--primary gp-button--sm">Salvar</button>
+          <button type="button" class="gp-button gp-button--outline gp-button--sm" data-location-close>Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endif %}
+
+<script>
+(function () {
+  const copyButtons = document.querySelectorAll("[data-copy-text]");
+  copyButtons.forEach(function (btn) {
+    btn.addEventListener("click", async function () {
+      const text = btn.getAttribute("data-copy-text") || "";
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.dataset.originalLabel = btn.dataset.originalLabel || btn.textContent;
+        btn.textContent = "Copiado";
+        setTimeout(function () {
+          btn.textContent = btn.dataset.originalLabel || "Copiar";
+        }, 1200);
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  });
+
+  const openBtn = document.querySelector("[data-location-open]");
+  const modal = document.querySelector("[data-location-modal]");
+  const form = document.querySelector("[data-location-form]");
+  const errorEl = document.querySelector("[data-location-error]");
+  const geocodeBtn = document.querySelector("[data-location-geocode]");
+
+  function csrfToken() {
+    const name = "csrftoken=";
+    const decodedCookie = decodeURIComponent(document.cookie || "");
+    const parts = decodedCookie.split(";");
+    for (let i = 0; i < parts.length; i += 1) {
+      const item = parts[i].trim();
+      if (item.indexOf(name) === 0) {
+        return item.substring(name.length, item.length);
+      }
+    }
+    return "";
+  }
+
+  function setError(message) {
+    if (!errorEl) return;
+    if (!message) {
+      errorEl.hidden = true;
+      errorEl.textContent = "";
+      return;
+    }
+    errorEl.hidden = false;
+    errorEl.textContent = message;
+  }
+
+  function openModal() {
+    if (!modal) return;
+    modal.hidden = false;
+  }
+
+  function closeModal() {
+    if (!modal) return;
+    modal.hidden = true;
+    setError("");
+  }
+
+  document.querySelectorAll("[data-location-close]").forEach(function (btn) {
+    btn.addEventListener("click", closeModal);
+  });
+
+  if (openBtn) {
+    openBtn.addEventListener("click", function () {
+      if (!form) {
+        return;
+      }
+      const fields = [
+        "address_id",
+        "label",
+        "cep",
+        "logradouro",
+        "numero",
+        "complemento",
+        "bairro",
+        "cidade",
+        "estado",
+        "pais",
+        "reference_point",
+        "coverage_area",
+        "opening_hours",
+        "latitude",
+        "longitude",
+      ];
+      fields.forEach(function (field) {
+        const target = form.querySelector("[name='" + field + "']");
+        if (!target) {
+          return;
+        }
+        const sourceKey = field === "address_id" ? "addressId" : field.replace(/_([a-z])/g, function (_, ch) { return ch.toUpperCase(); });
+        target.value = openBtn.dataset[sourceKey] || "";
+      });
+
+      const primary = form.querySelector("[name='is_primary']");
+      const isPublic = form.querySelector("[name='is_public']");
+      if (primary) {
+        primary.checked = openBtn.dataset.isPrimary === "1" || !openBtn.dataset.addressId;
+      }
+      if (isPublic) {
+        isPublic.checked = openBtn.dataset.isPublic !== "0";
+      }
+      openModal();
+    });
+  }
+
+  if (geocodeBtn) {
+    geocodeBtn.addEventListener("click", async function () {
+      const addressId = geocodeBtn.getAttribute("data-address-id");
+      if (!addressId) return;
+      const urlTpl = "{% url 'org:address_reprocess_geocode' 0 %}";
+      const url = urlTpl.replace("/0/", "/" + addressId + "/");
+      geocodeBtn.disabled = true;
+      try {
+        const resp = await fetch(url, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": csrfToken(),
+            "Accept": "application/json",
+          },
+        });
+        const payload = await resp.json();
+        if (!resp.ok || !payload.ok) {
+          alert("Falha ao reprocessar geocode.");
+          return;
+        }
+        window.location.reload();
+      } catch (err) {
+        console.error(err);
+        alert("Falha ao reprocessar geocode.");
+      } finally {
+        geocodeBtn.disabled = false;
+      }
+    });
+  }
+
+  if (form) {
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      setError("");
+
+      const formData = new FormData(form);
+      const addressId = (formData.get("address_id") || "").toString().trim();
+      const payload = {
+        entity_type: "{{ location_entity_type }}",
+        entity_id: Number("{{ location_entity_id }}"),
+        label: formData.get("label") || "",
+        cep: formData.get("cep") || "",
+        logradouro: formData.get("logradouro") || "",
+        numero: formData.get("numero") || "",
+        complemento: formData.get("complemento") || "",
+        bairro: formData.get("bairro") || "",
+        cidade: formData.get("cidade") || "",
+        estado: formData.get("estado") || "",
+        pais: "BR",
+        reference_point: formData.get("reference_point") || "",
+        coverage_area: formData.get("coverage_area") || "",
+        opening_hours: formData.get("opening_hours") || "",
+        latitude: (formData.get("latitude") || "").toString().trim() || null,
+        longitude: (formData.get("longitude") || "").toString().trim() || null,
+        is_primary: Boolean(formData.get("is_primary")),
+        is_public: Boolean(formData.get("is_public")),
+      };
+
+      const createUrl = "{% url 'org:address_create' %}";
+      const updateUrlTpl = "{% url 'org:address_update' 0 %}";
+      const endpoint = addressId ? updateUrlTpl.replace("/0/", "/" + addressId + "/") : createUrl;
+      const method = addressId ? "PUT" : "POST";
+
+      try {
+        const resp = await fetch(endpoint, {
+          method,
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken(),
+            "Accept": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+        const response = await resp.json();
+
+        if (!resp.ok || !response.ok) {
+          const errors = response.errors || {};
+          const flat = Object.values(errors).flat();
+          setError((flat[0] || response.error || "Não foi possível salvar o endereço.").toString());
+          return;
+        }
+
+        closeModal();
+        window.location.reload();
+      } catch (err) {
+        console.error(err);
+        setError("Erro inesperado ao salvar endereço.");
+      }
+    });
+  }
+})();
+</script>

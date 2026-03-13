@@ -13,7 +13,15 @@ from django.utils import timezone
 from apps.core.rbac import scope_filter_alunos
 from apps.educacao.models import Aluno
 
-from .models import AlunoNecessidade, AcompanhamentoNEE, LaudoNEE, RecursoNEE
+from .models import (
+    AcompanhamentoNEE,
+    AlunoNecessidade,
+    EvolucaoPlanoNEE,
+    LaudoNEE,
+    ObjetivoPlanoNEE,
+    PlanoClinicoNEE,
+    RecursoNEE,
+)
 
 
 ALERTA_KINDS = {
@@ -41,6 +49,16 @@ ALERTA_KINDS = {
         "title": "Sem acompanhamento (30d+)",
         "subtitle": "Alunos sem acompanhamento recente (últimos 30 dias).",
         "icon": "fa-solid fa-clock",
+    },
+    "sem-evolucao-30d": {
+        "title": "Sem evolução de plano (30d+)",
+        "subtitle": "Alunos com plano sem evolução registrada nos últimos 30 dias.",
+        "icon": "fa-solid fa-chart-line",
+    },
+    "plano-incompleto": {
+        "title": "Plano incompleto",
+        "subtitle": "Plano clínico criado sem objetivos cadastrados.",
+        "icon": "fa-solid fa-list-check",
     },
     "sem-recurso": {
         "title": "Sem recurso",
@@ -117,6 +135,36 @@ def _qs_alerta(user, kind: str):
                 )
             )
         ).filter(has_recent=False)
+
+    # -------------------------
+    # SEM EVOLUÇÃO DE PLANO RECENTE
+    # -------------------------
+    if kind == "sem-evolucao-30d":
+        cutoff = today - timedelta(days=30)
+        return base.annotate(
+            has_plano=Exists(
+                PlanoClinicoNEE.objects.filter(aluno_id=OuterRef("pk"))
+            ),
+            has_recent_evolucao=Exists(
+                EvolucaoPlanoNEE.objects.filter(
+                    objetivo__plano__aluno_id=OuterRef("pk"),
+                    data__gte=cutoff,
+                )
+            ),
+        ).filter(has_plano=True, has_recent_evolucao=False)
+
+    # -------------------------
+    # PLANO INCOMPLETO (sem objetivos)
+    # -------------------------
+    if kind == "plano-incompleto":
+        return base.annotate(
+            has_plano=Exists(
+                PlanoClinicoNEE.objects.filter(aluno_id=OuterRef("pk"))
+            ),
+            has_objetivo=Exists(
+                ObjetivoPlanoNEE.objects.filter(plano__aluno_id=OuterRef("pk"))
+            ),
+        ).filter(has_plano=True, has_objetivo=False)
 
     # -------------------------
     # SEM RECURSO

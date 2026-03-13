@@ -1,9 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.core.decorators import require_perm
 from apps.core.rbac import can, scope_filter_unidades
@@ -352,9 +354,10 @@ def fila_list(request):
     q = (request.GET.get("q") or "").strip()
     status = (request.GET.get("status") or "").strip()
     unidades_qs = _scoped_unidades(request.user)
-    qs = FilaEsperaSaude.objects.select_related("unidade", "especialidade", "aluno").filter(
+    base_qs = FilaEsperaSaude.objects.select_related("unidade", "especialidade", "aluno").filter(
         unidade_id__in=unidades_qs.values_list("id", flat=True)
     )
+    qs = base_qs
     if q:
         qs = qs.filter(Q(paciente_nome__icontains=q) | Q(paciente_contato__icontains=q) | Q(unidade__nome__icontains=q))
     if status:
@@ -363,6 +366,16 @@ def fila_list(request):
     paginator = Paginator(qs.order_by("-criado_em", "-id"), 10)
     page_obj = paginator.get_page(request.GET.get("page"))
     can_manage = can(request.user, "saude.manage")
+    sla_days = int(getattr(settings, "SAUDE_FILA_SLA_DIAS", 15) or 15)
+    sla_cutoff = timezone.now() - timezone.timedelta(days=sla_days)
+    metrics = {
+        "total": base_qs.count(),
+        "aguardando": base_qs.filter(status=FilaEsperaSaude.Status.AGUARDANDO).count(),
+        "chamado": base_qs.filter(status=FilaEsperaSaude.Status.CHAMADO).count(),
+        "convertido": base_qs.filter(status=FilaEsperaSaude.Status.CONVERTIDO).count(),
+        "fora_sla": base_qs.filter(status=FilaEsperaSaude.Status.AGUARDANDO, criado_em__lt=sla_cutoff).count(),
+        "sla_days": sla_days,
+    }
     actions = []
     if can_manage:
         actions.append(
@@ -412,6 +425,7 @@ def fila_list(request):
         {
             "q": q,
             "status": status,
+            "metrics": metrics,
             "page_obj": page_obj,
             "actions": actions,
             "headers": headers,

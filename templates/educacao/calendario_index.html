@@ -2,27 +2,27 @@
 {% block title %}Calendário Educacional • Educação • GEPUB{% endblock %}
 
 {% block module_content %}
-<div class="card"><div class="card__body">
+<div class="gp-card"><div class="gp-card__body">
 {% include "core/partials/components/layout/page_head.html" with title="Calendário Educacional" subtitle="Dias letivos, feriados, datas comemorativas e marcos de bimestre" actions=actions %}
 
 <div class="cal-nav">
-  <a class="btn btn--ghost" href="{% url 'educacao:calendario_index' %}?ano={{ ano_prev }}&mes={{ mes_prev }}"><i class="fa-solid fa-chevron-left"></i> Mês anterior</a>
-  <form method="get" class="cal-nav__form">
+  <a class="gp-button gp-button--ghost" href="{% url 'educacao:calendario_index' %}?ano={{ ano_prev }}&mes={{ mes_prev }}"><i class="fa-solid fa-chevron-left"></i> Mês anterior</a>
+  <form method="get" class="gp-form cal-nav__form">
     <label class="small">Ano</label>
-    <select name="ano">
+    <select class="gp-select" name="ano">
       {% for a in anos_opcoes %}
         <option value="{{ a }}" {% if a == ano %}selected{% endif %}>{{ a }}</option>
       {% endfor %}
     </select>
     <label class="small">Mês</label>
-    <select name="mes">
+    <select class="gp-select" name="mes">
       {% for m_num, m_nome in meses_opcoes %}
         <option value="{{ m_num }}" {% if m_num == mes %}selected{% endif %}>{{ m_nome }}</option>
       {% endfor %}
     </select>
-    <button type="submit" class="btn btn-primary">Aplicar</button>
+    <button type="submit" class="gp-button gp-button--primary">Aplicar</button>
   </form>
-  <a class="btn btn--ghost" href="{% url 'educacao:calendario_index' %}?ano={{ ano_next }}&mes={{ mes_next }}">Próximo mês <i class="fa-solid fa-chevron-right"></i></a>
+  <a class="gp-button gp-button--ghost" href="{% url 'educacao:calendario_index' %}?ano={{ ano_next }}&mes={{ mes_next }}">Próximo mês <i class="fa-solid fa-chevron-right"></i></a>
 </div>
 
 <div class="cal-header">
@@ -87,8 +87,8 @@
 <hr>
 
 {% include "core/partials/components/layout/page_head.html" with title="Próximos eventos" subtitle="Agenda do calendário no escopo visível" actions=None %}
-<div class="dash-table">
-  <table class="table">
+<div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__body">
+  <table class="gp-table__native">
     <thead>
       <tr>
         <th>Data</th>
@@ -112,10 +112,10 @@
           <td>{% if ev.unidade %}{{ ev.unidade.nome }}{% else %}{{ ev.secretaria.nome }}{% endif %}</td>
           {% if can_manage_calendar %}
             <td>
-              <a class="btn btn--ghost" href="{% url 'educacao:calendario_evento_update' ev.pk %}"><i class="fa-solid fa-pen"></i> Editar</a>
-              <form method="post" action="{% url 'educacao:calendario_evento_delete' ev.pk %}" class="u-inline-block">
+              <a class="gp-button gp-button--ghost" href="{% url 'educacao:calendario_evento_update' ev.pk %}"><i class="fa-solid fa-pen"></i> Editar</a>
+              <form method="post" action="{% url 'educacao:calendario_evento_delete' ev.pk %}" class="gp-form u-inline-block">
                 {% csrf_token %}
-                <button type="submit" class="btn btn--ghost"><i class="fa-solid fa-trash"></i> Excluir</button>
+                <button type="submit" class="gp-button gp-button--ghost"><i class="fa-solid fa-trash"></i> Excluir</button>
               </form>
             </td>
           {% endif %}

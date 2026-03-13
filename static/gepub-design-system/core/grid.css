@@ -1,0 +1,25 @@
+.gp-container {
+  width: min(1320px, calc(100% - var(--gp-space-5) * 2));
+  margin-inline: auto;
+}
+
+.gp-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--gp-space-3);
+}
+
+.gp-col-12 { grid-column: span 12; }
+.gp-col-8 { grid-column: span 8; }
+.gp-col-6 { grid-column: span 6; }
+.gp-col-4 { grid-column: span 4; }
+.gp-col-3 { grid-column: span 3; }
+
+@media (max-width: 1024px) {
+  .gp-col-8,
+  .gp-col-6,
+  .gp-col-4,
+  .gp-col-3 {
+    grid-column: span 12;
+  }
+}

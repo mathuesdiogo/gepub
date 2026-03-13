@@ -2,22 +2,22 @@
 
 {% block title %}
   {% if mode == "create" %}
-    Novo Curso • Educação • GEPUB
+    Nova Atividade Extra • Educação • GEPUB
   {% else %}
-    Editar Curso • Educação • GEPUB
+    Editar Atividade Extra • Educação • GEPUB
   {% endif %}
 {% endblock %}
 
 {% block module_content %}
-  <div class="card">
-    <div class="card__body">
+  <div class="gp-card">
+    <div class="gp-card__body">
       {% if mode == "create" %}
-        {% include "core/partials/components/layout/page_head.html" with title="Novo Curso" subtitle="Cadastro acadêmico para ensino regular, EJA e cursos técnicos" actions=actions %}
+        {% include "core/partials/components/layout/page_head.html" with title="Nova Atividade Extra" subtitle="Cursos e trilhas extracurriculares complementares" actions=actions %}
       {% else %}
-        {% include "core/partials/components/layout/page_head.html" with title="Editar Curso" subtitle=curso.nome actions=actions %}
+        {% include "core/partials/components/layout/page_head.html" with title="Editar Atividade Extra" subtitle=curso.nome actions=actions %}
       {% endif %}
 
-      <form method="post" class="form-shell">
+      <form method="post" class="gp-form form-shell">
         {% csrf_token %}
         <input type="hidden" name="_action" value="save_curso">
 
@@ -31,25 +31,25 @@
 
         {% if mode == "create" and grade_form %}
           <hr class="divider">
-          <div class="section__title">Grade Curricular Inicial (Opcional)</div>
-          <div class="small">Você pode adicionar a primeira disciplina agora. Depois poderá complementar a grade no curso.</div>
+          <div class="section__title">Grade da Atividade (Opcional)</div>
+          <div class="small">Você pode adicionar o primeiro componente agora e complementar depois.</div>
           <div class="u-mt-10">
             {{ grade_form.as_p }}
           </div>
         {% endif %}
 
         <div class="form-shell__actions">
-          <button type="submit" class="btn btn-primary">{{ submit_label|default:"Salvar" }}</button>
-          <a class="link" href="{{ cancel_url|default:'/' }}">Cancelar</a>
+          <button type="submit" class="gp-button gp-button--primary">{{ submit_label|default:"Salvar" }}</button>
+          <a class="gp-button gp-button--outline" href="{{ cancel_url|default:'/' }}">Cancelar</a>
         </div>
       </form>
 
       {% if mode == "update" %}
         <hr class="divider">
         <div class="section">
-          <div class="section__title">Grade Curricular do Curso</div>
+          <div class="section__title">Grade da Atividade Extra</div>
 
-          <table class="table">
+          <table class="gp-table__native">
             <thead>
               <tr>
                 <th class="u-w-80">Ordem</th>
@@ -69,11 +69,11 @@
                   <td>{{ d.carga_horaria }}h</td>
                   <td>{% if d.obrigatoria %}Sim{% else %}Não{% endif %}</td>
                   <td>
-                    <form method="post">
+                    <form class="gp-form" method="post">
                       {% csrf_token %}
                       <input type="hidden" name="_action" value="remove_disciplina">
                       <input type="hidden" name="disciplina_id" value="{{ d.pk }}">
-                      <button type="submit" class="btn btn--ghost">Remover</button>
+                      <button type="submit" class="gp-button gp-button--ghost">Remover</button>
                     </form>
                   </td>
                 </tr>
@@ -87,11 +87,11 @@
 
           <div class="form-section u-mt-12">
             <div class="form-section__title">Adicionar disciplina</div>
-            <form method="post">
+            <form class="gp-form" method="post">
               {% csrf_token %}
               <input type="hidden" name="_action" value="add_disciplina">
               {{ grade_form.as_p }}
-              <button type="submit" class="btn btn-primary">Adicionar na grade</button>
+              <button type="submit" class="gp-button gp-button--primary">Adicionar na grade</button>
             </form>
           </div>
         </div>

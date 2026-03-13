@@ -1,0 +1,67 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Comunicação Social • {{ aluno.nome }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <div class="gp-grid-2 gp-student-stage__grid">
+    <article class="gp-student-stage__card">
+      <h3>Enquetes</h3>
+      {% for e in enquetes %}
+        <div class="gp-student-list__item">
+          <strong>{{ e.titulo }}</strong>
+          <form method="post" class="gp-inline-form gp-inline-form--stack gp-mt-2">
+            {% csrf_token %}
+            <input type="hidden" name="form_kind" value="enquete_voto">
+            <input type="hidden" name="enquete" value="{{ e.titulo }}">
+            <div class="gp-inline-options">
+              {% for op in e.opcoes %}
+                <button class="gp-button gp-button--outline" type="submit" name="voto" value="{{ op }}">{{ op }}</button>
+              {% endfor %}
+            </div>
+          </form>
+        </div>
+      {% endfor %}
+    </article>
+
+    <article class="gp-student-stage__card">
+      <h3>Eventos institucionais</h3>
+      <ul class="gp-student-data-list">
+        {% for ev in eventos %}
+          <li><strong>{{ ev.titulo }}</strong> • {{ ev.get_tipo_display }} • {{ ev.data_inicio|date:"d/m/Y" }}</li>
+        {% empty %}
+          <li>Sem eventos para exibição.</li>
+        {% endfor %}
+      </ul>
+    </article>
+  </div>
+
+  <article class="gp-student-stage__card">
+    <h3>Comunicados</h3>
+    <ul class="gp-student-list">
+      {% for a in avisos %}
+        <li class="gp-student-list__item">
+          <strong>{{ a.titulo }}</strong>
+          <p>{{ a.texto|default:"Comunicado institucional" }}</p>
+          <small>{{ a.criado_em|date:"d/m/Y H:i" }}</small>
+        </li>
+      {% empty %}
+        <li class="gp-student-empty">Nenhum comunicado disponível.</li>
+      {% endfor %}
+    </ul>
+  </article>
+
+  <article class="gp-student-stage__card">
+    <h3>Relatórios</h3>
+    <ul class="gp-student-data-list">
+      {% for r in relatorios %}
+        <li>
+          <strong>{{ r.titulo }}</strong> • {{ r.descricao }}
+          {% if r.url %}<a class="gp-student-link" href="{{ r.url }}">Acessar</a>{% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </article>
+</section>
+{% endblock %}

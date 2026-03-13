@@ -1,64 +1,128 @@
 {% extends "core/base.html" %}
+{% load static %}
+{% block title %}Painéis BI • GEPUB{% endblock %}
+{% block header %}Painéis BI{% endblock %}
 
 {% block content %}
-<div class="card"><div class="card__body">
+<div class="bi-shell">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <form method="get" class="filter-bar" style="margin-bottom:12px;">
-    {% if municipios and municipios|length %}
-      <select name="municipio" class="input" style="max-width:240px;">
-        {% for m in municipios %}
-          <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
-        {% endfor %}
-      </select>
-    {% endif %}
+  <section class="tool-hero bi-hero">
+    <article>
+      <p class="tool-hero__kicker">Ferramenta de dados</p>
+      <h2>Datasets governamentais com pipeline de validação e publicação</h2>
+      <p>Centralize fontes, qualidade e visibilidade dos dados para alimentar dashboards e relatórios executivos.</p>
+    </article>
+    <div class="tool-hero__chips">
+      <span class="tool-chip"><i class="fa-solid fa-database"></i> Catálogo único</span>
+      <span class="tool-chip"><i class="fa-solid fa-shield-halved"></i> Controle de sensíveis</span>
+      <span class="tool-chip"><i class="fa-solid fa-chart-column"></i> Pronto para BI</span>
+      <span class="tool-chip"><i class="fa-solid fa-cloud-arrow-up"></i> Ingestão versionada</span>
+    </div>
+  </section>
 
-    <select name="status" class="input" style="max-width:180px;">
-      <option value="">Todos os status</option>
-      {% for key,label in status_choices %}
-        <option value="{{ key }}" {% if status == key %}selected{% endif %}>{{ label }}</option>
-      {% endfor %}
-    </select>
+  <section class="bi-kpi-grid">
+    <article class="bi-kpi bi-kpi--neutral">
+      <span class="bi-kpi__label">Datasets totais</span>
+      <strong class="bi-kpi__value">{{ counts.total }}</strong>
+    </article>
+    <article class="bi-kpi bi-kpi--draft">
+      <span class="bi-kpi__label">Rascunho</span>
+      <strong class="bi-kpi__value">{{ counts.rascunho }}</strong>
+    </article>
+    <article class="bi-kpi bi-kpi--valid">
+      <span class="bi-kpi__label">Validado</span>
+      <strong class="bi-kpi__value">{{ counts.validado }}</strong>
+    </article>
+    <article class="bi-kpi bi-kpi--public">
+      <span class="bi-kpi__label">Publicado</span>
+      <strong class="bi-kpi__value">{{ counts.publicado }}</strong>
+    </article>
+    <article class="bi-kpi bi-kpi--archived">
+      <span class="bi-kpi__label">Arquivado</span>
+      <strong class="bi-kpi__value">{{ counts.arquivado }}</strong>
+    </article>
+  </section>
 
-    <input name="categoria" value="{{ categoria }}" class="input" placeholder="Categoria" style="max-width:200px;">
-    <input name="q" value="{{ q }}" class="input" placeholder="Buscar dataset" style="max-width:280px;">
-    <button class="btn btn--sm" type="submit">Filtrar</button>
-  </form>
+  <section class="bi-panel bi-panel--tool">
+    <div class="bi-panel__head">
+      <div>
+        <h3>Filtro de datasets</h3>
+        <p>Refine por município, status e categoria para acelerar análise.</p>
+      </div>
+    </div>
+    <form method="get" class="bi-filter-grid">
+      {% if municipios and municipios|length %}
+        <label class="gp-form-group">
+          <span class="gp-form-label">Município</span>
+          <select name="municipio" class="gp-select">
+            {% for m in municipios %}
+              <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+            {% endfor %}
+          </select>
+        </label>
+      {% endif %}
 
-  <div class="table-shell"><div class="table-shell__body">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Dataset</th>
-          <th>Categoria</th>
-          <th>Escopo</th>
-          <th>Status</th>
-          <th>Visibilidade</th>
-          <th>Atualizado</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in items %}
-          <tr>
-            <td>
-              <div class="item-title">{{ item.nome }}</div>
-              <div class="item-subtitle">Fonte: {{ item.get_fonte_display }}</div>
-            </td>
-            <td>{{ item.categoria|default:"-" }}</td>
-            <td>{{ item.secretaria|default:item.unidade|default:item.municipio }}</td>
-            <td>{{ item.get_status_display }}</td>
-            <td>{{ item.get_visibilidade_display }}</td>
-            <td>{{ item.atualizado_em|date:"d/m/Y H:i" }}</td>
-            <td>
-              <a class="link" href="{% url 'paineis:dataset_detail' item.id %}?municipio={{ municipio.id }}">abrir</a>
-            </td>
-          </tr>
-        {% empty %}
-          <tr><td colspan="7">Nenhum dataset encontrado.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div></div>
-</div></div>
+      <label class="gp-form-group">
+        <span class="gp-form-label">Status</span>
+        <select name="status" class="gp-select">
+          <option value="">Todos os status</option>
+          {% for key,label in status_choices %}
+            <option value="{{ key }}" {% if status == key %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label class="gp-form-group">
+        <span class="gp-form-label">Categoria</span>
+        <input name="categoria" value="{{ categoria }}" class="gp-input" placeholder="Ex.: Receita, Educação, Saúde">
+      </label>
+
+      <label class="gp-form-group">
+        <span class="gp-form-label">Busca textual</span>
+        <input name="q" value="{{ q }}" class="gp-input" placeholder="Nome, descrição ou tag do dataset">
+      </label>
+
+      <div class="bi-filter-grid__actions">
+        <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
+        <a class="gp-button gp-button--outline" href="{% url 'paineis:dataset_list' %}{% if municipio %}?municipio={{ municipio.id }}{% endif %}"><i class="fa-solid fa-eraser"></i> Limpar</a>
+      </div>
+    </form>
+  </section>
+
+  <section class="bi-dataset-grid">
+    {% for item in items %}
+      <article class="bi-dataset-card">
+        <div class="bi-dataset-card__head">
+          <div class="bi-dataset-card__title-wrap">
+            <h3>{{ item.nome }}</h3>
+            <p>{{ item.descricao|default:"Sem descrição"|truncatechars:130 }}</p>
+          </div>
+          <span class="bi-status bi-status--{{ item.status|lower }}">{{ item.get_status_display }}</span>
+        </div>
+
+        <div class="bi-dataset-card__meta">
+          <span><i class="fa-solid fa-layer-group"></i> {{ item.categoria|default:"Sem categoria" }}</span>
+          <span><i class="fa-solid fa-database"></i> {{ item.get_fonte_display }}</span>
+          <span><i class="fa-solid fa-eye"></i> {{ item.get_visibilidade_display }}</span>
+          <span><i class="fa-solid fa-building"></i> {{ item.secretaria|default:item.unidade|default:item.municipio }}</span>
+          <span><i class="fa-solid fa-gears"></i> Ingestão: {{ item.version_status_label }}</span>
+        </div>
+
+        <div class="bi-dataset-card__footer">
+          <small>Atualizado em {{ item.atualizado_em|date:"d/m/Y H:i" }}</small>
+          <a class="gp-button gp-button--primary gp-button--sm" href="{% url 'paineis:dataset_detail' item.id %}?municipio={{ municipio.id }}">
+            Abrir dataset
+          </a>
+        </div>
+      </article>
+    {% empty %}
+      <article class="bi-empty-state">
+        <i class="fa-solid fa-chart-line"></i>
+        <h3>Nenhum dataset encontrado</h3>
+        <p>Ajuste os filtros ou crie um novo dataset para gerar dashboards automáticos.</p>
+      </article>
+    {% endfor %}
+  </section>
+</div>
 {% endblock %}

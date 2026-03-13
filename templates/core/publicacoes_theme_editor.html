@@ -1,13 +1,6 @@
 {% extends "core/base.html" %}
 {% load static %}
 
-{% block extra_css %}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'css/pages/publicacoes-theme-editor.css' %}">
-{% endblock %}
-
 {% block header %}Editor Visual do Tema{% endblock %}
 
 {% block content %}
@@ -17,25 +10,26 @@
 
     <section class="theme-editor-intro">
       <article>
-        <p class="theme-editor-kicker">Editor em tempo real</p>
-        <h2>Personalize o portal público mantendo o padrão oficial do município</h2>
+        <p class="theme-editor-kicker">Theme Builder GEPUB</p>
+        <h2>Gerencie conteúdo, layout e identidade do portal em um único fluxo</h2>
         <p>
-          Edite textos, cores, banner, contatos e cards de serviço com autosave ativo.
-          O preview ao lado recebe as alterações na hora e permite clicar no conteúdo para editar.
+          Todas as alterações aplicadas no editor são refletidas no preview em tempo real.
+          Use os modos de edição para organizar o trabalho por etapa e publicar com segurança.
         </p>
       </article>
       <div class="theme-editor-intro__badges">
-        <span><i class="fa-solid fa-wand-magic-sparkles"></i> Edição visual</span>
-        <span><i class="fa-solid fa-bolt"></i> Autosave</span>
-        <span><i class="fa-solid fa-city"></i> Por município</span>
+        <span><i class="fa-solid fa-layer-group"></i> Conteúdo</span>
+        <span><i class="fa-solid fa-table-columns"></i> Layout</span>
+        <span><i class="fa-solid fa-palette"></i> Tema</span>
+        <span><i class="fa-solid fa-gears"></i> Configurações</span>
       </div>
     </section>
 
     {% if municipios %}
       <form method="get" class="theme-editor-filter" action="{% url 'core:publicacoes_theme_editor' %}">
-        <div>
-          <label for="id_municipio">Município em edição</label>
-          <select id="id_municipio" name="municipio" onchange="this.form.submit()">
+        <div class="gp-form-group">
+          <label class="gp-form-label" for="id_municipio">Município em edição</label>
+          <select id="id_municipio" class="gp-select" name="municipio" onchange="this.form.submit()">
             {% for m in municipios %}
               <option value="{{ m.pk }}" {% if m.pk == municipio.pk %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
             {% endfor %}
@@ -45,120 +39,284 @@
     {% endif %}
 
     <div class="theme-editor-shell">
-      <form id="themeEditorForm" class="theme-editor-panel" method="post" enctype="multipart/form-data">
+      <form id="themeEditorForm" class="theme-editor-panel gp-form gp-form--stacked" method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
         <div class="theme-editor-panel__head">
-          <h3><i class="fa-solid fa-pen-ruler"></i> Campos editáveis</h3>
-          <div class="theme-editor-status" id="themeEditorStatus">Pronto</div>
+          <div>
+            <h3><i class="fa-solid fa-pen-ruler"></i> Painel de edição</h3>
+            <p>Trabalhe por modo, sincronize em tempo real e publique quando finalizar.</p>
+          </div>
+          <div class="theme-editor-status-wrap">
+            <button type="button" class="gp-button gp-button--outline gp-button--icon" id="themeEditorUndo" aria-label="Desfazer">
+              <i class="fa-solid fa-rotate-left"></i>
+            </button>
+            <button type="button" class="gp-button gp-button--outline gp-button--icon" id="themeEditorRedo" aria-label="Refazer">
+              <i class="fa-solid fa-rotate-right"></i>
+            </button>
+            <button type="button" class="gp-button gp-button--outline" id="themeEditorSyncBtn">
+              <i class="fa-solid fa-cloud-arrow-up"></i> Sincronizar agora
+            </button>
+            <span class="theme-editor-status" id="themeEditorStatus">Pronto</span>
+            <span class="theme-editor-dirty" id="themeEditorDirty">Sem pendências</span>
+          </div>
         </div>
 
-        <section class="theme-editor-group">
-          <h4><i class="fa-solid fa-landmark"></i> Identidade do portal</h4>
-          <label>Título do portal</label>
-          <input class="input" type="text" name="titulo_portal" data-field="titulo_portal" value="{{ cfg.titulo_portal }}">
+        <nav class="theme-editor-modes" aria-label="Modo do editor">
+          <button type="button" class="theme-editor-mode is-active" data-mode-target="conteudo">
+            <i class="fa-solid fa-file-lines"></i> Conteúdo
+          </button>
+          <button type="button" class="theme-editor-mode" data-mode-target="layout">
+            <i class="fa-solid fa-table-columns"></i> Layout
+          </button>
+          <button type="button" class="theme-editor-mode" data-mode-target="tema">
+            <i class="fa-solid fa-palette"></i> Tema e identidade
+          </button>
+          <button type="button" class="theme-editor-mode" data-mode-target="config">
+            <i class="fa-solid fa-sliders"></i> Configurações
+          </button>
+        </nav>
 
-          <label>Subtítulo</label>
-          <input class="input" type="text" name="subtitulo_portal" data-field="subtitulo_portal" value="{{ cfg.subtitulo_portal }}">
+        <div class="theme-editor-search">
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+          <input
+            type="search"
+            id="themeEditorFieldSearch"
+            class="gp-input"
+            placeholder="Buscar campo no editor (ex: banner, telefone, card...)"
+            autocomplete="off"
+          >
+        </div>
 
-          <label>Mensagem de boas-vindas</label>
-          <textarea class="textarea" name="mensagem_boas_vindas" data-field="mensagem_boas_vindas" rows="4">{{ cfg.mensagem_boas_vindas }}</textarea>
-
-          <div class="theme-editor-grid2">
-            <div>
-              <label>Cor primária</label>
-              <input class="input" type="color" name="cor_primaria" data-field="cor_primaria" value="{{ cfg.cor_primaria|default:'#0E4A7E' }}">
-            </div>
-            <div>
-              <label>Cor secundária</label>
-              <input class="input" type="color" name="cor_secundaria" data-field="cor_secundaria" value="{{ cfg.cor_secundaria|default:'#2F6EA9' }}">
-            </div>
-          </div>
-
-          <label>Logo (cabeçalho)</label>
-          <input class="input" type="file" name="logo" accept="image/*" data-field="logo" id="id_logo">
-
-          <label>Brasão</label>
-          <input class="input" type="file" name="brasao" accept="image/*" data-field="brasao">
-        </section>
-
-        <section class="theme-editor-group">
-          <h4><i class="fa-solid fa-image"></i> Banner principal</h4>
-          <input type="hidden" name="banner_id" value="{{ banner.id|default:'' }}" data-field="banner_id">
-
-          <label>Título do banner</label>
-          <input class="input" type="text" name="banner_titulo" data-field="banner_titulo" value="{{ banner.titulo|default:'' }}">
-
-          <label>Subtítulo do banner</label>
-          <input class="input" type="text" name="banner_subtitulo" data-field="banner_subtitulo" value="{{ banner.subtitulo|default:'' }}">
-
-          <label>Link do banner</label>
-          <input class="input" type="text" name="banner_link" data-field="banner_link" value="{{ banner.link|default:'' }}">
+        <section class="theme-editor-group" data-mode="conteudo">
+          <header class="theme-editor-group__head">
+            <h4><i class="fa-solid fa-images"></i> Slider da home</h4>
+            <p>Gerencie os slides principais com ordem, status e conteúdo independente.</p>
+          </header>
 
           <div class="theme-editor-grid2">
-            <div>
-              <label>Ordem</label>
-              <input class="input" type="number" min="1" name="banner_ordem" data-field="banner_ordem" value="{{ banner.ordem|default:1 }}">
+            <div class="gp-form-group">
+              <label class="gp-form-label">Intervalo automático (ms)</label>
+              <input class="gp-input" type="number" min="1500" step="100" name="slider_interval_ms" data-field="slider_interval_ms" value="{{ theme_builder.slider_interval_ms|default:5500 }}">
             </div>
-            <div>
-              <label>Ativo</label>
-              <select class="input" name="banner_ativo" data-field="banner_ativo">
-                <option value="1" {% if banner.ativo or not banner %}selected{% endif %}>Sim</option>
-                <option value="0" {% if banner and not banner.ativo %}selected{% endif %}>Não</option>
+            <div class="gp-form-group">
+              <label class="gp-form-label">Autoplay</label>
+              <select class="gp-select" name="slider_autoplay" data-field="slider_autoplay">
+                <option value="1" {% if theme_builder.slider_autoplay %}selected{% endif %}>Ativado</option>
+                <option value="0" {% if not theme_builder.slider_autoplay %}selected{% endif %}>Desativado</option>
               </select>
             </div>
           </div>
 
-          <label>Imagem do banner</label>
-          <input class="input" type="file" name="banner_imagem" id="id_banner_imagem" accept="image/*" data-field="banner_imagem">
-          <p class="theme-editor-help">No preview, clique no banner para focar este campo.</p>
-        </section>
-
-        <section class="theme-editor-group">
-          <h4><i class="fa-solid fa-grip"></i> Cards de serviços (home)</h4>
-          {% for item in blocos_editor %}
-            <article class="theme-editor-block-row">
-              <h5>Card {{ forloop.counter }}</h5>
-              <input type="hidden" name="bloco_{{ item.idx }}_id" value="{{ item.id }}" data-field="bloco_{{ item.idx }}_id">
-
-              <label>Título</label>
-              <input class="input" type="text" name="bloco_{{ item.idx }}_titulo" data-field="bloco_{{ item.idx }}_titulo" value="{{ item.titulo }}">
-
-              <label>Descrição</label>
-              <textarea class="textarea" name="bloco_{{ item.idx }}_descricao" data-field="bloco_{{ item.idx }}_descricao" rows="2">{{ item.descricao }}</textarea>
-
-              <label>Ícone (FontAwesome)</label>
-              <input class="input" type="text" name="bloco_{{ item.idx }}_icone" data-field="bloco_{{ item.idx }}_icone" value="{{ item.icone }}">
-
-              <label>Link</label>
-              <input class="input" type="text" name="bloco_{{ item.idx }}_link" data-field="bloco_{{ item.idx }}_link" value="{{ item.link }}">
-
-              <label>Ativo</label>
-              <select class="input" name="bloco_{{ item.idx }}_ativo" data-field="bloco_{{ item.idx }}_ativo">
-                <option value="1" {% if item.ativo %}selected{% endif %}>Sim</option>
-                <option value="0" {% if not item.ativo %}selected{% endif %}>Não</option>
+          <div class="theme-editor-grid2">
+            <div class="gp-form-group">
+              <label class="gp-form-label">Setas de navegação</label>
+              <select class="gp-select" name="slider_show_arrows" data-field="slider_show_arrows">
+                <option value="1" {% if theme_builder.slider_show_arrows %}selected{% endif %}>Mostrar</option>
+                <option value="0" {% if not theme_builder.slider_show_arrows %}selected{% endif %}>Ocultar</option>
               </select>
-            </article>
-          {% endfor %}
+            </div>
+            <div class="gp-form-group">
+              <label class="gp-form-label">Indicadores (dots)</label>
+              <select class="gp-select" name="slider_show_dots" data-field="slider_show_dots">
+                <option value="1" {% if theme_builder.slider_show_dots %}selected{% endif %}>Mostrar</option>
+                <option value="0" {% if not theme_builder.slider_show_dots %}selected{% endif %}>Ocultar</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="theme-editor-card-grid">
+            {% for slide in slides_editor %}
+              <article class="theme-editor-block-row">
+                <h5>Slide {{ forloop.counter }}</h5>
+                <input type="hidden" name="slide_{{ slide.idx }}_id" value="{{ slide.id }}" data-field="slide_{{ slide.idx }}_id">
+
+                <div class="gp-form-group">
+                  <label class="gp-form-label">Título</label>
+                  <input
+                    class="gp-input"
+                    type="text"
+                    name="slide_{{ slide.idx }}_titulo"
+                    data-field="slide_{{ slide.idx }}_titulo"
+                    value="{{ slide.titulo }}"
+                    placeholder="Título do slide {{ forloop.counter }}"
+                  >
+                </div>
+
+                <div class="gp-form-group">
+                  <label class="gp-form-label">Subtítulo</label>
+                  <input
+                    class="gp-input"
+                    type="text"
+                    name="slide_{{ slide.idx }}_subtitulo"
+                    data-field="slide_{{ slide.idx }}_subtitulo"
+                    value="{{ slide.subtitulo }}"
+                    placeholder="Resumo do slide {{ forloop.counter }}"
+                  >
+                </div>
+
+                <div class="theme-editor-grid2">
+                  <div class="gp-form-group">
+                    <label class="gp-form-label">Link</label>
+                    <input
+                      class="gp-input"
+                      type="text"
+                      name="slide_{{ slide.idx }}_link"
+                      data-field="slide_{{ slide.idx }}_link"
+                      value="{{ slide.link }}"
+                      placeholder="/pagina ou https://..."
+                    >
+                  </div>
+                  <div class="gp-form-group">
+                    <label class="gp-form-label">Ordem</label>
+                    <input class="gp-input" type="number" min="1" name="slide_{{ slide.idx }}_ordem" data-field="slide_{{ slide.idx }}_ordem" value="{{ slide.ordem|default:forloop.counter }}">
+                  </div>
+                </div>
+
+                <div class="theme-editor-grid2">
+                  <div class="gp-form-group">
+                    <label class="gp-form-label">Ativo</label>
+                    <select class="gp-select" name="slide_{{ slide.idx }}_ativo" data-field="slide_{{ slide.idx }}_ativo">
+                      <option value="1" {% if slide.ativo %}selected{% endif %}>Sim</option>
+                      <option value="0" {% if not slide.ativo %}selected{% endif %}>Não</option>
+                    </select>
+                  </div>
+                  <div class="gp-form-group">
+                    <label class="gp-form-label">Imagem</label>
+                    <input class="gp-input" type="file" name="slide_{{ slide.idx }}_imagem" id="id_slide_{{ slide.idx }}_imagem" accept="image/*" data-field="slide_{{ slide.idx }}_imagem">
+                    {% if slide.tem_imagem %}
+                      <small class="gp-form-help">Slide já possui imagem publicada.</small>
+                    {% endif %}
+                  </div>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
         </section>
 
-        <section class="theme-editor-group">
-          <h4><i class="fa-solid fa-address-card"></i> Rodapé e contato</h4>
-          <label>Endereço</label>
-          <input class="input" type="text" name="endereco" data-field="endereco" value="{{ cfg.endereco }}">
+        <section class="theme-editor-group" data-mode="layout">
+          <header class="theme-editor-group__head">
+            <h4><i class="fa-solid fa-grip"></i> Cards de serviços da home</h4>
+            <p>Defina conteúdo, ícone e link dos atalhos principais.</p>
+          </header>
 
-          <label>Telefone</label>
-          <input class="input" type="text" name="telefone" data-field="telefone" value="{{ cfg.telefone }}">
+          <div class="theme-editor-card-grid">
+            {% for item in blocos_editor %}
+              <article class="theme-editor-block-row">
+                <h5>Card {{ forloop.counter }}</h5>
+                <input type="hidden" name="bloco_{{ item.idx }}_id" value="{{ item.id }}" data-field="bloco_{{ item.idx }}_id">
 
-          <label>E-mail</label>
-          <input class="input" type="email" name="email" data-field="email" value="{{ cfg.email }}">
+                <div class="gp-form-group">
+                  <label class="gp-form-label">Título</label>
+                  <input class="gp-input" type="text" name="bloco_{{ item.idx }}_titulo" data-field="bloco_{{ item.idx }}_titulo" value="{{ item.titulo }}">
+                </div>
 
-          <label>Horário de atendimento</label>
-          <input class="input" type="text" name="horario_atendimento" data-field="horario_atendimento" value="{{ cfg.horario_atendimento }}">
+                <div class="gp-form-group">
+                  <label class="gp-form-label">Descrição</label>
+                  <textarea class="gp-textarea" name="bloco_{{ item.idx }}_descricao" data-field="bloco_{{ item.idx }}_descricao" rows="2">{{ item.descricao }}</textarea>
+                </div>
+
+                <div class="theme-editor-grid2">
+                  <div class="gp-form-group">
+                    <label class="gp-form-label">Ícone (Font Awesome)</label>
+                    <input class="gp-input" type="text" name="bloco_{{ item.idx }}_icone" data-field="bloco_{{ item.idx }}_icone" value="{{ item.icone }}">
+                  </div>
+                  <div class="gp-form-group">
+                    <label class="gp-form-label">Link</label>
+                    <input class="gp-input" type="text" name="bloco_{{ item.idx }}_link" data-field="bloco_{{ item.idx }}_link" value="{{ item.link }}">
+                  </div>
+                </div>
+
+                <div class="gp-form-group">
+                  <label class="gp-form-label">Ativo</label>
+                  <select class="gp-select" name="bloco_{{ item.idx }}_ativo" data-field="bloco_{{ item.idx }}_ativo">
+                    <option value="1" {% if item.ativo %}selected{% endif %}>Sim</option>
+                    <option value="0" {% if not item.ativo %}selected{% endif %}>Não</option>
+                  </select>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
         </section>
 
-        <section class="theme-editor-group">
-          <h4><i class="fa-solid fa-diagram-project"></i> Publicações por módulo</h4>
+        <section class="theme-editor-group" data-mode="tema">
+          <header class="theme-editor-group__head">
+            <h4><i class="fa-solid fa-landmark"></i> Identidade do portal</h4>
+            <p>Título institucional, mensagem de boas-vindas e paleta visual.</p>
+          </header>
+
+          <div class="theme-editor-grid2">
+            <div class="gp-form-group">
+              <label class="gp-form-label">Título do portal</label>
+              <input class="gp-input" type="text" name="titulo_portal" data-field="titulo_portal" value="{{ cfg.titulo_portal }}">
+            </div>
+            <div class="gp-form-group">
+              <label class="gp-form-label">Subtítulo</label>
+              <input class="gp-input" type="text" name="subtitulo_portal" data-field="subtitulo_portal" value="{{ cfg.subtitulo_portal }}">
+            </div>
+          </div>
+
+          <div class="gp-form-group">
+            <label class="gp-form-label">Mensagem de boas-vindas</label>
+            <textarea class="gp-textarea" name="mensagem_boas_vindas" data-field="mensagem_boas_vindas" rows="4">{{ cfg.mensagem_boas_vindas }}</textarea>
+          </div>
+
+          <div class="theme-editor-grid2">
+            <div class="gp-form-group">
+              <label class="gp-form-label">Cor primária</label>
+              <input class="gp-input" type="color" name="cor_primaria" data-field="cor_primaria" value="{{ cfg.cor_primaria|default:'#0E4A7E' }}">
+            </div>
+            <div class="gp-form-group">
+              <label class="gp-form-label">Cor secundária</label>
+              <input class="gp-input" type="color" name="cor_secundaria" data-field="cor_secundaria" value="{{ cfg.cor_secundaria|default:'#2F6EA9' }}">
+            </div>
+          </div>
+
+          <div class="theme-editor-grid2">
+            <div class="gp-form-group">
+              <label class="gp-form-label">Logo (cabeçalho)</label>
+              <input class="gp-input" type="file" name="logo" accept="image/*" data-field="logo" id="id_logo">
+            </div>
+            <div class="gp-form-group">
+              <label class="gp-form-label">Brasão</label>
+              <input class="gp-input" type="file" name="brasao" accept="image/*" data-field="brasao">
+            </div>
+          </div>
+        </section>
+
+        <section class="theme-editor-group" data-mode="config">
+          <header class="theme-editor-group__head">
+            <h4><i class="fa-solid fa-address-card"></i> Rodapé e governança</h4>
+            <p>Dados públicos de contato exibidos no rodapé do portal.</p>
+          </header>
+
+          <div class="gp-form-group">
+            <label class="gp-form-label">Endereço</label>
+            <input class="gp-input" type="text" name="endereco" data-field="endereco" value="{{ cfg.endereco }}">
+          </div>
+
+          <div class="theme-editor-grid2">
+            <div class="gp-form-group">
+              <label class="gp-form-label">Telefone</label>
+              <input class="gp-input" type="text" name="telefone" data-field="telefone" value="{{ cfg.telefone }}">
+            </div>
+            <div class="gp-form-group">
+              <label class="gp-form-label">E-mail</label>
+              <input class="gp-input" type="email" name="email" data-field="email" value="{{ cfg.email }}">
+            </div>
+          </div>
+
+          <div class="gp-form-group">
+            <label class="gp-form-label">Horário de atendimento</label>
+            <input class="gp-input" type="text" name="horario_atendimento" data-field="horario_atendimento" value="{{ cfg.horario_atendimento }}">
+          </div>
+        </section>
+
+        <section class="theme-editor-group" data-mode="config">
+          <header class="theme-editor-group__head">
+            <h4><i class="fa-solid fa-diagram-project"></i> Biblioteca de módulos</h4>
+            <p>Atalhos para criar conteúdo publicado no portal.</p>
+          </header>
           <div class="theme-editor-links">
             {% for item in modulos_links %}
               <a href="{{ item.url }}"><i class="fa-solid fa-arrow-up-right-from-square"></i> {{ item.label }}</a>
@@ -167,8 +325,12 @@
         </section>
 
         <div class="theme-editor-panel__footer">
-          <button class="btn btn--primary" type="submit">Salvar alterações</button>
-          <a class="btn btn--ghost" target="_blank" rel="noopener" href="{{ preview_url }}">Abrir preview em nova aba</a>
+          <button class="gp-button gp-button--primary" type="submit">
+            <i class="fa-solid fa-floppy-disk"></i> Salvar e publicar versão
+          </button>
+          <a class="gp-button gp-button--outline" target="_blank" rel="noopener" href="{{ preview_url }}">
+            <i class="fa-solid fa-up-right-from-square"></i> Abrir preview em nova aba
+          </a>
         </div>
       </form>
 
@@ -176,17 +338,26 @@
         <div class="theme-editor-preview__head">
           <div>
             <h3><i class="fa-solid fa-display"></i> Preview em tempo real</h3>
-            <p>Clique em textos do portal para editar direto no formulário.</p>
+            <p>Clique nos textos do portal para trazer o campo correspondente no editor.</p>
           </div>
-          <button type="button" class="btn btn--ghost" id="previewReloadBtn">Recarregar</button>
+          <div class="theme-editor-preview__actions">
+            <div class="theme-editor-device-toggle" role="group" aria-label="Visualização do preview">
+              <button type="button" class="is-active" data-device="desktop"><i class="fa-solid fa-desktop"></i></button>
+              <button type="button" data-device="tablet"><i class="fa-solid fa-tablet-screen-button"></i></button>
+              <button type="button" data-device="mobile"><i class="fa-solid fa-mobile-screen-button"></i></button>
+            </div>
+            <button type="button" class="gp-button gp-button--outline" id="previewReloadBtn">Recarregar</button>
+          </div>
         </div>
 
         <div class="theme-editor-preview__tip">
           <i class="fa-solid fa-hand-pointer"></i>
-          Alterações de texto e cores são aplicadas instantaneamente no preview.
+          Preview conectado ao editor: textos, cores, ícones, links e contatos são sincronizados.
         </div>
 
-        <iframe id="themePreviewFrame" src="{{ preview_url }}" loading="lazy" title="Preview do portal"></iframe>
+        <div class="theme-editor-preview__frame-wrap theme-editor-preview__frame-wrap--desktop" id="themePreviewWrap">
+          <iframe id="themePreviewFrame" src="{{ preview_url }}" loading="lazy" title="Preview do portal"></iframe>
+        </div>
       </section>
     </div>
   </div>
@@ -198,13 +369,26 @@
 (function () {
   const form = document.getElementById("themeEditorForm");
   const iframe = document.getElementById("themePreviewFrame");
+  const previewWrap = document.getElementById("themePreviewWrap");
   const status = document.getElementById("themeEditorStatus");
+  const dirty = document.getElementById("themeEditorDirty");
   const reloadBtn = document.getElementById("previewReloadBtn");
+  const syncBtn = document.getElementById("themeEditorSyncBtn");
+  const undoBtn = document.getElementById("themeEditorUndo");
+  const redoBtn = document.getElementById("themeEditorRedo");
+  const searchInput = document.getElementById("themeEditorFieldSearch");
+  const modeButtons = Array.from(document.querySelectorAll("[data-mode-target]"));
+  const groups = Array.from(document.querySelectorAll(".theme-editor-group[data-mode]"));
+  const deviceButtons = Array.from(document.querySelectorAll("[data-device]"));
   if (!form || !iframe) return;
 
   const autosaveUrl = "{{ autosave_url }}";
   let saveTimer = null;
   let previewTimer = null;
+  let historyTimer = null;
+  const historyStack = [];
+  let historyIndex = -1;
+  let applyingHistory = false;
 
   function setStatus(text, cls) {
     if (!status) return;
@@ -212,10 +396,76 @@
     status.className = "theme-editor-status" + (cls ? " " + cls : "");
   }
 
+  function setDirty(isDirty) {
+    if (!dirty) return;
+    dirty.textContent = isDirty ? "Alterações não salvas" : "Sem pendências";
+    dirty.classList.toggle("is-dirty", Boolean(isDirty));
+  }
+
   function markField(input) {
     if (!input) return;
     input.classList.add("theme-editor-input-focus");
     window.setTimeout(() => input.classList.remove("theme-editor-input-focus"), 1400);
+  }
+
+  function resolveFieldName(field) {
+    const raw = String(field || "").trim();
+    if (!raw) return raw;
+    const match = raw.match(/^banner_(\d+)_(titulo|subtitulo|link)$/);
+    if (match) {
+      return `slide_${match[1]}_${match[2]}`;
+    }
+    if (raw === "banner_titulo") return "slide_0_titulo";
+    if (raw === "banner_subtitulo") return "slide_0_subtitulo";
+    if (raw === "banner_link") return "slide_0_link";
+    return raw;
+  }
+
+  function getState() {
+    const state = {};
+    Array.from(form.elements).forEach((el) => {
+      if (!el.name || el.type === "file") return;
+      state[el.name] = el.value;
+    });
+    return state;
+  }
+
+  function setState(state, opts) {
+    const options = opts || {};
+    applyingHistory = true;
+    Object.keys(state || {}).forEach((name) => {
+      const input = form.querySelector(`[name="${name}"]`);
+      if (!input || input.type === "file") return;
+      input.value = state[name];
+    });
+    applyingHistory = false;
+    if (!options.skipSync) {
+      pushPreviewUpdate();
+      autosave();
+    }
+  }
+
+  function updateHistoryButtons() {
+    if (undoBtn) undoBtn.disabled = historyIndex <= 0;
+    if (redoBtn) redoBtn.disabled = historyIndex >= historyStack.length - 1;
+  }
+
+  function pushHistorySnapshot() {
+    const state = getState();
+    const serialized = JSON.stringify(state);
+    if (historyIndex >= 0 && historyStack[historyIndex] === serialized) {
+      return;
+    }
+    historyStack.splice(historyIndex + 1);
+    historyStack.push(serialized);
+    historyIndex = historyStack.length - 1;
+    updateHistoryButtons();
+  }
+
+  function scheduleHistorySnapshot() {
+    if (applyingHistory) return;
+    clearTimeout(historyTimer);
+    historyTimer = setTimeout(pushHistorySnapshot, 220);
   }
 
   function collectPreviewPayload() {
@@ -225,16 +475,28 @@
       mensagem_boas_vindas: form.querySelector("[name='mensagem_boas_vindas']")?.value || "",
       cor_primaria: form.querySelector("[name='cor_primaria']")?.value || "",
       cor_secundaria: form.querySelector("[name='cor_secundaria']")?.value || "",
-      banner_titulo: form.querySelector("[name='banner_titulo']")?.value || "",
-      banner_subtitulo: form.querySelector("[name='banner_subtitulo']")?.value || "",
-      banner_link: form.querySelector("[name='banner_link']")?.value || "",
+      slider_interval_ms: form.querySelector("[name='slider_interval_ms']")?.value || "5500",
+      slider_autoplay: form.querySelector("[name='slider_autoplay']")?.value || "1",
+      slider_show_arrows: form.querySelector("[name='slider_show_arrows']")?.value || "1",
+      slider_show_dots: form.querySelector("[name='slider_show_dots']")?.value || "1",
       telefone: form.querySelector("[name='telefone']")?.value || "",
       endereco: form.querySelector("[name='endereco']")?.value || "",
+      email: form.querySelector("[name='email']")?.value || "",
       horario_atendimento: form.querySelector("[name='horario_atendimento']")?.value || "",
     };
+    for (let i = 0; i < 4; i += 1) {
+      payload[`banner_${i}_titulo`] = form.querySelector(`[name='slide_${i}_titulo']`)?.value || "";
+      payload[`banner_${i}_subtitulo`] = form.querySelector(`[name='slide_${i}_subtitulo']`)?.value || "";
+      payload[`banner_${i}_link`] = form.querySelector(`[name='slide_${i}_link']`)?.value || "#";
+    }
+    payload.banner_titulo = payload.banner_0_titulo || "";
+    payload.banner_subtitulo = payload.banner_0_subtitulo || "";
+    payload.banner_link = payload.banner_0_link || "#";
     for (let i = 0; i < 6; i += 1) {
       payload[`bloco_${i}_titulo`] = form.querySelector(`[name='bloco_${i}_titulo']`)?.value || "";
       payload[`bloco_${i}_descricao`] = form.querySelector(`[name='bloco_${i}_descricao']`)?.value || "";
+      payload[`bloco_${i}_icone`] = form.querySelector(`[name='bloco_${i}_icone']`)?.value || "fa-solid fa-circle-info";
+      payload[`bloco_${i}_link`] = form.querySelector(`[name='bloco_${i}_link']`)?.value || "#";
     }
     return payload;
   }
@@ -249,14 +511,16 @@
 
   function debouncedPreview() {
     clearTimeout(previewTimer);
-    previewTimer = setTimeout(pushPreviewUpdate, 120);
+    previewTimer = setTimeout(pushPreviewUpdate, 100);
   }
 
   async function autosave() {
     const data = new FormData(form);
     data.delete("logo");
     data.delete("brasao");
-    data.delete("banner_imagem");
+    for (let i = 0; i < 4; i += 1) {
+      data.delete(`slide_${i}_imagem`);
+    }
     setStatus("Salvando...", "is-saving");
     try {
       const response = await fetch(autosaveUrl, {
@@ -266,7 +530,8 @@
       });
       const json = await response.json();
       if (!response.ok || !json.ok) throw new Error("erro_ao_salvar");
-      setStatus("Salvo automaticamente", "is-ok");
+      setStatus("Sincronizado", "is-ok");
+      setDirty(false);
     } catch (err) {
       setStatus("Falha no autosave", "is-error");
     }
@@ -274,24 +539,86 @@
 
   function debouncedAutosave() {
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(autosave, 700);
+    saveTimer = setTimeout(autosave, 650);
+  }
+
+  function activateMode(mode) {
+    modeButtons.forEach((button) => {
+      button.classList.toggle("is-active", button.getAttribute("data-mode-target") === mode);
+    });
+    groups.forEach((group) => {
+      group.hidden = group.getAttribute("data-mode") !== mode;
+    });
+  }
+
+  function applySearch(value) {
+    const term = String(value || "").trim().toLowerCase();
+    groups.forEach((group) => {
+      const inActiveMode = !group.hidden;
+      if (!inActiveMode) return;
+      if (!term) {
+        group.classList.remove("is-filtered-out");
+        return;
+      }
+      const text = (group.textContent || "").toLowerCase();
+      group.classList.toggle("is-filtered-out", text.indexOf(term) === -1);
+    });
   }
 
   form.addEventListener("input", function (event) {
     const target = event.target;
     if (!target || !target.name) return;
     setStatus("Alterações pendentes...", "is-saving");
+    setDirty(true);
     debouncedPreview();
-    if (target.type === "file") return;
-    debouncedAutosave();
+    if (target.type !== "file") {
+      debouncedAutosave();
+      scheduleHistorySnapshot();
+    }
   });
 
   form.addEventListener("change", function (event) {
     const target = event.target;
     if (!target || !target.name) return;
+    setStatus("Alterações pendentes...", "is-saving");
+    setDirty(true);
     debouncedPreview();
-    if (target.type === "file") return;
-    debouncedAutosave();
+    if (target.type !== "file") {
+      debouncedAutosave();
+      scheduleHistorySnapshot();
+    }
+  });
+
+  modeButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      const mode = String(button.getAttribute("data-mode-target") || "");
+      if (!mode) return;
+      activateMode(mode);
+      applySearch(searchInput?.value || "");
+    });
+  });
+
+  searchInput?.addEventListener("input", function () {
+    applySearch(searchInput.value);
+  });
+
+  deviceButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      const device = String(button.getAttribute("data-device") || "desktop");
+      deviceButtons.forEach((btn) => btn.classList.toggle("is-active", btn === button));
+      if (!previewWrap) return;
+      previewWrap.classList.remove(
+        "theme-editor-preview__frame-wrap--desktop",
+        "theme-editor-preview__frame-wrap--tablet",
+        "theme-editor-preview__frame-wrap--mobile"
+      );
+      previewWrap.classList.add("theme-editor-preview__frame-wrap--" + device);
+    });
+  });
+
+  syncBtn?.addEventListener("click", function () {
+    autosave();
+    pushPreviewUpdate();
   });
 
   reloadBtn?.addEventListener("click", function () {
@@ -299,22 +626,57 @@
     iframe.src = iframe.src;
   });
 
+  undoBtn?.addEventListener("click", function () {
+    if (historyIndex <= 0) return;
+    historyIndex -= 1;
+    updateHistoryButtons();
+    setState(JSON.parse(historyStack[historyIndex]), {skipSync: false});
+  });
+
+  redoBtn?.addEventListener("click", function () {
+    if (historyIndex >= historyStack.length - 1) return;
+    historyIndex += 1;
+    updateHistoryButtons();
+    setState(JSON.parse(historyStack[historyIndex]), {skipSync: false});
+  });
+
+  form.addEventListener("keydown", function (event) {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
+      event.preventDefault();
+      autosave();
+      setStatus("Salvo por atalho", "is-ok");
+      return;
+    }
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") {
+      event.preventDefault();
+      undoBtn?.click();
+      return;
+    }
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "y") {
+      event.preventDefault();
+      redoBtn?.click();
+    }
+  });
+
   window.addEventListener("message", function (event) {
     const data = event.data || {};
     if (data.type === "portal-theme:field-edit") {
-      const field = String(data.field || "").trim();
+      const field = resolveFieldName(data.field);
       const value = String(data.value || "");
       if (!field) return;
       const input = form.querySelector(`[name='${field}']`);
       if (!input) return;
       input.value = value;
       markField(input);
+      setStatus("Alterações pendentes...", "is-saving");
+      setDirty(true);
       debouncedPreview();
       debouncedAutosave();
+      scheduleHistorySnapshot();
       return;
     }
     if (data.type === "portal-theme:focus") {
-      const field = String(data.field || "").trim();
+      const field = resolveFieldName(data.field);
       if (!field) return;
       const input = form.querySelector(`[name='${field}']`);
       if (!input) return;
@@ -328,6 +690,11 @@
     setStatus("Preview sincronizado", "is-ok");
     pushPreviewUpdate();
   });
+
+  activateMode("conteudo");
+  pushHistorySnapshot();
+  updateHistoryButtons();
+  pushPreviewUpdate();
 })();
 </script>
 {% endblock %}

@@ -1,0 +1,71 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Painel do Professor • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage gp-professor-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <article class="gp-student-stage__card">
+    <div class="gp-professor-metrics">
+      {% for m in metricas %}
+        <div class="gp-professor-metric">
+          <span>{{ m.label }}</span>
+          <strong>{{ m.value }}</strong>
+        </div>
+      {% endfor %}
+    </div>
+  </article>
+
+  <div class="gp-student-stage__grid">
+    <article class="gp-student-stage__card">
+      <h3>Ações rápidas</h3>
+      <h4 class="u-mb-8">Docência geral</h4>
+      <div class="gp-student-actions gp-student-actions--stacked">
+        {% for item in quick_links_docencia %}
+          <a class="gp-student-pill" href="{{ item.url }}">
+            <i class="{{ item.icon }}" aria-hidden="true"></i>
+            <span>{{ item.label }}</span>
+          </a>
+        {% endfor %}
+      </div>
+      {% if quick_links_informatica %}
+        <h4 class="u-mb-8 u-mt-12">Curso de Informática</h4>
+        <div class="gp-student-actions gp-student-actions--stacked">
+          {% for item in quick_links_informatica %}
+            <a class="gp-student-pill" href="{{ item.url }}">
+              <i class="{{ item.icon }}" aria-hidden="true"></i>
+              <span>{{ item.label }}</span>
+            </a>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </article>
+
+    <article class="gp-student-stage__card">
+      <h3>Justificativas pendentes</h3>
+      {% if pendentes %}
+        <ul class="gp-student-list">
+          {% for item in pendentes %}
+            <li class="gp-student-list__item">
+              <strong>{{ item.aluno.nome }} • {{ item.aula.diario.turma.nome }}</strong>
+              <p>{{ item.aula.data|date:"d/m/Y" }}{% if item.aula.componente %} • {{ item.aula.componente }}{% endif %}</p>
+              <small>{{ item.criado_em|date:"d/m/Y H:i" }}</small>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="gp-student-empty">Nenhum pedido pendente no momento.</div>
+      {% endif %}
+      <a class="gp-student-pill gp-student-pill--compact" href="{% url 'educacao:professor_justificativas' code_value %}">
+        <i class="fa-solid fa-file-signature" aria-hidden="true"></i>
+        <span>Ir para análise ({{ total_justificativas_pendentes }})</span>
+      </a>
+    </article>
+  </div>
+
+  <article class="gp-student-stage__card">
+    <h3>Diários ativos</h3>
+    {% include "core/partials/components/data/table_shell.html" with headers=headers_diarios rows=rows_diarios page_obj=None empty_title="Sem diários" empty_text="Não há diários disponíveis para este professor." %}
+  </article>
+</section>
+{% endblock %}

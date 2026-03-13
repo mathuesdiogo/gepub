@@ -45,16 +45,12 @@ def institutional_admin(request):
         messages.success(request, "Configuração institucional atualizada.")
         return redirect("core:institutional_admin")
 
-    slides = page.slides.all().order_by("ordem", "id")
-    method_steps = page.metodo_passos.all().order_by("ordem", "id")
-    service_cards = page.servicos.all().order_by("ordem", "id")
-
     return render(
         request,
         "core/institutional_admin.html",
         {
             "title": "Editor da Institucional",
-            "subtitle": "Gerencie textos, logo, slides e conteúdo da home pública",
+            "subtitle": "Gerencie apenas os campos ativos no novo tema institucional",
             "actions": [
                 {
                     "label": "Ver página pública",
@@ -71,9 +67,6 @@ def institutional_admin(request):
             ],
             "form": form,
             "page": page,
-            "slides": slides,
-            "method_steps": method_steps,
-            "service_cards": service_cards,
             "cancel_url": reverse("core:dashboard"),
             "submit_label": "Salvar alterações",
             "enctype": "multipart/form-data",

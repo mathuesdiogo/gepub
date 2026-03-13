@@ -23,6 +23,11 @@ class ConversionError(RuntimeError):
     pass
 
 
+A4_WIDTH_MM = 210
+A4_HEIGHT_MM = 297
+DEFAULT_A4_DPI = 300
+
+
 def _command_exists(*names: str) -> str | None:
     for name in names:
         path = shutil.which(name)
@@ -72,22 +77,68 @@ def _run_docx_to_pdf(input_paths: list[Path], workdir: Path) -> tuple[str, bytes
     return out_file.name, out_file.read_bytes(), (proc.stdout or "Conversão DOCX concluída.").strip()
 
 
+def _run_xlsx_to_pdf(input_paths: list[Path], workdir: Path) -> tuple[str, bytes, str]:
+    if not input_paths:
+        raise ConversionError("Nenhum arquivo Excel informado.")
+
+    binary = _command_exists("libreoffice", "soffice")
+    if not binary:
+        raise ConversionError("LibreOffice headless não encontrado no servidor.")
+
+    input_path = input_paths[0]
+    cmd = [binary, "--headless", "--convert-to", "pdf", "--outdir", str(workdir), str(input_path)]
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    if proc.returncode != 0:
+        raise ConversionError((proc.stderr or proc.stdout or "Falha no LibreOffice").strip())
+
+    out_file = workdir / f"{input_path.stem}.pdf"
+    if not out_file.exists():
+        raise ConversionError("Arquivo PDF não foi gerado pelo LibreOffice.")
+
+    return out_file.name, out_file.read_bytes(), (proc.stdout or "Conversão Excel concluída.").strip()
+
+
 def _run_img_to_pdf(input_paths: list[Path], workdir: Path) -> tuple[str, bytes, str]:
     if not input_paths:
         raise ConversionError("Nenhuma imagem enviada para conversão.")
 
     images = []
     try:
+        a4_w_px = int((A4_WIDTH_MM / 25.4) * DEFAULT_A4_DPI)
+        a4_h_px = int((A4_HEIGHT_MM / 25.4) * DEFAULT_A4_DPI)
+        margin_px = int(0.05 * a4_w_px)
+
         for path in input_paths:
             img = Image.open(path)
             if img.mode != "RGB":
                 img = img.convert("RGB")
-            images.append(img)
+
+            max_w = max(1, a4_w_px - (margin_px * 2))
+            max_h = max(1, a4_h_px - (margin_px * 2))
+            scale = min(max_w / img.width, max_h / img.height)
+            resized_w = max(1, int(img.width * scale))
+            resized_h = max(1, int(img.height * scale))
+            resized = img.resize((resized_w, resized_h), Image.LANCZOS)
+
+            # Força cada página em canvas A4 branco, centralizando a imagem.
+            canvas = Image.new("RGB", (a4_w_px, a4_h_px), "white")
+            offset_x = (a4_w_px - resized_w) // 2
+            offset_y = (a4_h_px - resized_h) // 2
+            canvas.paste(resized, (offset_x, offset_y))
+            images.append(canvas)
+            img.close()
+            resized.close()
 
         output = workdir / "imagens_convertidas.pdf"
         first, others = images[0], images[1:]
-        first.save(output, "PDF", save_all=True, append_images=others)
-        return output.name, output.read_bytes(), f"{len(images)} imagem(ns) convertida(s) para PDF."
+        first.save(
+            output,
+            "PDF",
+            save_all=True,
+            append_images=others,
+            resolution=DEFAULT_A4_DPI,
+        )
+        return output.name, output.read_bytes(), f"{len(images)} imagem(ns) convertida(s) para PDF (padrão A4)."
     finally:
         for img in images:
             try:
@@ -200,6 +251,25 @@ def _run_pdf_to_images(input_paths: list[Path], workdir: Path) -> tuple[str, byt
     return "pdf_imagens.zip", zip_buffer.getvalue(), f"{len(files)} imagem(ns) gerada(s)."
 
 
+def _run_pdf_to_text(input_paths: list[Path], workdir: Path) -> tuple[str, bytes, str]:
+    if not input_paths:
+        raise ConversionError("Nenhum PDF enviado para extração de texto.")
+
+    PdfReader, _PdfWriter = _require_pypdf()
+    reader = PdfReader(str(input_paths[0]))
+    chunks: list[str] = []
+    for idx, page in enumerate(reader.pages, start=1):
+        text = (page.extract_text() or "").strip()
+        chunks.append(f"===== Página {idx} =====")
+        chunks.append(text)
+        chunks.append("")
+
+    text_content = "\n".join(chunks).strip() + "\n"
+    out_file = workdir / "pdf_extraido.txt"
+    out_file.write_text(text_content, encoding="utf-8")
+    return out_file.name, out_file.read_bytes(), f"Texto extraído de {len(reader.pages)} página(s)."
+
+
 def process_conversion_job(job: ConversionJob) -> ConversionJob:
     started = time.monotonic()
     job.status = ConversionJob.Status.PROCESSANDO
@@ -215,6 +285,8 @@ def process_conversion_job(job: ConversionJob) -> ConversionJob:
 
             if job.tipo == ConversionJob.Tipo.DOCX_TO_PDF:
                 out_name, out_bytes, logs = _run_docx_to_pdf(input_paths, workdir)
+            elif job.tipo == ConversionJob.Tipo.XLSX_TO_PDF:
+                out_name, out_bytes, logs = _run_xlsx_to_pdf(input_paths, workdir)
             elif job.tipo == ConversionJob.Tipo.IMG_TO_PDF:
                 out_name, out_bytes, logs = _run_img_to_pdf(input_paths, workdir)
             elif job.tipo == ConversionJob.Tipo.PDF_MERGE:
@@ -224,6 +296,8 @@ def process_conversion_job(job: ConversionJob) -> ConversionJob:
                 out_name, out_bytes, logs = _run_pdf_split(input_paths, workdir, pages)
             elif job.tipo == ConversionJob.Tipo.PDF_TO_IMAGES:
                 out_name, out_bytes, logs = _run_pdf_to_images(input_paths, workdir)
+            elif job.tipo == ConversionJob.Tipo.PDF_TO_TEXT:
+                out_name, out_bytes, logs = _run_pdf_to_text(input_paths, workdir)
             else:
                 raise ConversionError("Tipo de conversão não suportado.")
 

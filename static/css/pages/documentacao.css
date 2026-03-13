@@ -1,14 +1,24 @@
 :root {
-  --doc-bg: #eef3f8;
+  --doc-bg: #f8fafc;
   --doc-surface: #ffffff;
-  --doc-line: #d5e0ee;
-  --doc-ink: #10243c;
-  --doc-soft: #4a6684;
+  --doc-line: #e2e8f0;
+  --doc-ink: #0f172a;
+  --doc-soft: #64748b;
 
-  --doc-primary: #1f5fbf;
-  --doc-primary-700: #123b80;
-  --doc-secondary: #16a34a;
-  --doc-secondary-700: #117a3a;
+  --doc-primary: #4f46e5;
+  --doc-primary-700: #4338ca;
+  --doc-secondary: #7c3aed;
+  --doc-secondary-700: #6d28d9;
+  --doc-success: #10b981;
+
+  --doc-grad: linear-gradient(135deg, var(--doc-primary), var(--doc-secondary));
+  --doc-grad-soft: linear-gradient(135deg, rgba(79, 70, 229, 0.12), rgba(124, 58, 237, 0.12));
+  --doc-shadow-card: 0 4px 20px -2px rgba(79, 70, 229, 0.1);
+  --doc-shadow-card-hover: 0 10px 25px -5px rgba(79, 70, 229, 0.15),
+    0 8px 10px -6px rgba(79, 70, 229, 0.1);
+  --doc-shadow-button: 0 4px 14px 0 rgba(79, 70, 229, 0.3);
+
+  --doc-font: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 html {
@@ -18,18 +28,21 @@ html {
 .public-body {
   margin: 0;
   min-height: 100vh;
-  overflow-y: auto !important;
   overflow-x: hidden;
-  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  font-family: var(--doc-font);
   color: var(--doc-ink);
   background:
-    radial-gradient(circle at 6% -10%, #dbe9ff 0, transparent 34%),
-    radial-gradient(circle at 98% 0, #ddf7e8 0, transparent 32%),
+    radial-gradient(circle at 12% -10%, rgba(124, 58, 237, 0.2), transparent 42%),
+    radial-gradient(circle at 86% 0%, rgba(79, 70, 229, 0.22), transparent 40%),
+    radial-gradient(circle at 58% 120%, rgba(79, 70, 229, 0.14), transparent 44%),
     var(--doc-bg);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .doc2-page {
-  width: min(1220px, calc(100% - 28px));
+  width: min(1280px, calc(100% - 32px));
   margin: 14px auto 24px;
 }
 
@@ -37,10 +50,11 @@ html {
   position: sticky;
   top: 10px;
   z-index: 20;
-  border: 1px solid var(--doc-line);
+  border: 1px solid rgba(226, 232, 240, 0.9);
   border-radius: 16px;
-  background: rgba(255, 255, 255, .9);
-  backdrop-filter: blur(8px);
+  background: rgba(248, 250, 252, 0.78);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
   min-height: 72px;
   padding: 10px 12px;
   display: flex;
@@ -55,9 +69,8 @@ html {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-family: "Manrope", sans-serif;
   font-weight: 800;
-  letter-spacing: .01em;
+  letter-spacing: -0.01em;
 }
 
 .doc2-brand__badge {
@@ -68,7 +81,8 @@ html {
   place-items: center;
   overflow: hidden;
   color: #fff;
-  background: linear-gradient(140deg, var(--doc-primary), var(--doc-secondary));
+  background: var(--doc-grad);
+  box-shadow: var(--doc-shadow-button);
 }
 
 .doc2-brand__badge img {
@@ -80,18 +94,25 @@ html {
 .doc2-nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: 8px;
 }
 
 .doc2-nav a {
   text-decoration: none;
-  color: #355677;
+  color: rgba(51, 65, 85, 0.95);
   font-size: 13px;
   font-weight: 700;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, color 0.2s ease;
 }
 
 .doc2-nav a:hover {
-  color: var(--doc-primary);
+  color: rgba(30, 27, 75, 0.98);
+  border-color: rgba(79, 70, 229, 0.24);
+  background: rgba(79, 70, 229, 0.08);
+  transform: translateY(-1px);
 }
 
 .doc2-actions {
@@ -102,31 +123,42 @@ html {
 
 .btn-doc2 {
   border-radius: 999px;
-  min-height: 40px;
-  padding: 0 16px;
+  min-height: 44px;
+  padding: 0 18px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
-  letter-spacing: .04em;
+  letter-spacing: -0.01em;
   text-decoration: none;
-  transition: transform .2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease, background-color 0.2s ease,
+    border-color 0.2s ease, color 0.2s ease;
+  border: 1px solid transparent;
 }
 
 .btn-doc2:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: var(--doc-shadow-card-hover);
 }
 
 .btn-doc2--primary {
   color: #fff;
-  background: linear-gradient(120deg, var(--doc-secondary), var(--doc-secondary-700));
+  background: var(--doc-grad);
+  box-shadow: var(--doc-shadow-button);
 }
 
 .btn-doc2--ghost {
-  color: var(--doc-primary-700);
-  border: 1px solid #cadaee;
-  background: #f4f8ff;
+  color: rgba(51, 65, 85, 0.98);
+  border-color: var(--doc-line);
+  background: #fff;
+  box-shadow: none;
+}
+
+.btn-doc2--ghost:hover {
+  background: rgba(248, 250, 252, 0.96);
+  border-color: rgba(79, 70, 229, 0.22);
+  box-shadow: none;
 }
 
 .doc2-main {
@@ -138,7 +170,7 @@ html {
 .doc2-hero,
 .doc2-section,
 .doc2-cta {
-  border: 1px solid var(--doc-line);
+  border: 1px solid rgba(226, 232, 240, 0.9);
   border-radius: 22px;
   background: var(--doc-surface);
 }
@@ -148,22 +180,30 @@ html {
   display: grid;
   grid-template-columns: 1.15fr .85fr;
   gap: 22px;
+  background:
+    linear-gradient(135deg, rgba(79, 70, 229, 0.06), rgba(124, 58, 237, 0.06)),
+    radial-gradient(circle at 76% 18%, rgba(124, 58, 237, 0.16), transparent 44%),
+    radial-gradient(circle at 18% 76%, rgba(79, 70, 229, 0.16), transparent 48%),
+    #fff;
+  box-shadow: var(--doc-shadow-card-hover);
 }
 
 .doc2-kicker {
   margin: 0;
-  color: var(--doc-primary);
-  letter-spacing: .12em;
+  color: var(--doc-secondary);
+  letter-spacing: 0.14em;
   font-size: 11px;
   font-weight: 800;
+  text-transform: uppercase;
 }
 
 .doc2-hero h1 {
   margin: 8px 0 12px;
-  font-family: "Manrope", sans-serif;
   font-size: clamp(30px, 4vw, 50px);
   line-height: 1.06;
   max-width: 17ch;
+  letter-spacing: -0.02em;
+  font-weight: 800;
 }
 
 .doc2-hero p {
@@ -171,6 +211,19 @@ html {
   max-width: 68ch;
   color: var(--doc-soft);
   line-height: 1.62;
+}
+
+.doc2-hero h1 {
+  color: var(--doc-ink);
+}
+
+@supports (-webkit-background-clip: text) or (background-clip: text) {
+  .doc2-hero h1 {
+    background: var(--doc-grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
 }
 
 .doc2-hero__actions {
@@ -188,39 +241,42 @@ html {
 }
 
 .doc2-stats > div {
-  border: 1px solid #dbe7f5;
+  border: 1px solid rgba(226, 232, 240, 0.9);
   border-radius: 12px;
-  background: #f9fbff;
+  background: #fff;
   padding: 10px;
+  box-shadow: var(--doc-shadow-card);
 }
 
 .doc2-stats strong {
   display: block;
   font-size: 20px;
-  font-family: "Manrope", sans-serif;
-  color: var(--doc-primary-700);
+  color: rgba(30, 27, 75, 0.98);
+  font-weight: 800;
 }
 
 .doc2-stats span {
   display: block;
   margin-top: 2px;
   font-size: 11px;
-  color: #4f6c89;
+  color: var(--doc-soft);
   font-weight: 600;
 }
 
 .doc2-hero__panel {
-  border: 1px solid #dae6f5;
+  border: 1px solid rgba(226, 232, 240, 0.9);
   border-radius: 16px;
   background:
-    linear-gradient(180deg, #f5f9ff, #ffffff 40%);
+    linear-gradient(180deg, rgba(248, 250, 252, 0.98), #ffffff 40%);
   padding: 16px;
+  box-shadow: var(--doc-shadow-card);
 }
 
 .doc2-hero__panel h3 {
   margin: 0;
-  font-family: "Manrope", sans-serif;
   font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
 
 .doc2-hero__panel ul {
@@ -232,12 +288,12 @@ html {
 }
 
 .doc2-hero__panel li {
-  border: 1px solid #d8e5f5;
+  border: 1px solid rgba(226, 232, 240, 0.9);
   border-radius: 10px;
   background: #fff;
   padding: 10px;
   font-size: 13px;
-  color: #2f4e70;
+  color: rgba(51, 65, 85, 0.96);
   line-height: 1.5;
 }
 
@@ -247,10 +303,11 @@ html {
 
 .doc2-section__head h2 {
   margin: 6px 0 0;
-  font-family: "Manrope", sans-serif;
   font-size: clamp(22px, 2.4vw, 33px);
   line-height: 1.16;
   max-width: 30ch;
+  letter-spacing: -0.02em;
+  font-weight: 800;
 }
 
 .doc2-accordion {
@@ -260,10 +317,11 @@ html {
 }
 
 .doc2-item {
-  border: 1px solid #d8e4f3;
+  border: 1px solid rgba(226, 232, 240, 0.9);
   border-radius: 14px;
   background: #fff;
   overflow: hidden;
+  box-shadow: var(--doc-shadow-card);
 }
 
 .doc2-item summary {
@@ -294,14 +352,16 @@ html {
   display: grid;
   place-items: center;
   color: #fff;
-  background: linear-gradient(140deg, var(--doc-primary), #2d84d3);
+  background: var(--doc-grad);
+  box-shadow: var(--doc-shadow-button);
   flex-shrink: 0;
 }
 
 .doc2-item__left strong {
   display: block;
-  font-family: "Manrope", sans-serif;
   font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
 
 .doc2-item__left small {
@@ -316,7 +376,7 @@ html {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #547493;
+  color: rgba(100, 116, 139, 0.98);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: .05em;
@@ -327,8 +387,8 @@ html {
   content: "";
   width: 7px;
   height: 7px;
-  border-right: 2px solid #6e8caa;
-  border-bottom: 2px solid #6e8caa;
+  border-right: 2px solid rgba(100, 116, 139, 0.9);
+  border-bottom: 2px solid rgba(100, 116, 139, 0.9);
   transform: rotate(45deg);
   margin-top: -3px;
   transition: transform .18s ease;
@@ -354,13 +414,13 @@ html {
 .doc2-list li,
 .doc2-flow li {
   margin-bottom: 7px;
-  color: #2b4a6b;
+  color: rgba(51, 65, 85, 0.96);
   font-size: 13px;
   line-height: 1.55;
 }
 
 .doc2-accordion--soft .doc2-item {
-  background: #fbfdff;
+  background: linear-gradient(180deg, #ffffff 0%, rgba(248, 250, 252, 0.98) 100%);
 }
 
 .doc2-columns {
@@ -371,16 +431,18 @@ html {
 }
 
 .doc2-panel {
-  border: 1px solid #dae6f4;
+  border: 1px solid rgba(226, 232, 240, 0.9);
   border-radius: 16px;
   background: #fff;
   padding: 14px;
+  box-shadow: var(--doc-shadow-card);
 }
 
 .doc2-panel h3,
 .doc2-panel h4 {
   margin: 0 0 10px;
-  font-family: "Manrope", sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
 
 .doc2-panel h3 {
@@ -408,13 +470,13 @@ html {
 }
 
 .doc2-badge.is-on {
-  color: #0d7c3f;
-  background: #ddf9e8;
+  color: #065f46;
+  background: rgba(16, 185, 129, 0.18);
 }
 
 .doc2-badge.is-soon {
-  color: #7c4f09;
-  background: #feefcc;
+  color: #92400e;
+  background: rgba(245, 158, 11, 0.2);
 }
 
 .doc2-accordion--plans .doc2-item {
@@ -422,8 +484,7 @@ html {
 }
 
 .doc2-price {
-  color: var(--doc-primary-700);
-  font-family: "Manrope", sans-serif;
+  color: rgba(30, 27, 75, 0.98);
   font-size: 22px;
   font-weight: 800;
   white-space: nowrap;
@@ -431,7 +492,7 @@ html {
 
 .doc2-price small {
   font-size: 11px;
-  color: #537290;
+  color: var(--doc-soft);
   margin-left: 2px;
 }
 
@@ -444,29 +505,34 @@ html {
 .doc2-plan-columns h4 {
   margin: 2px 0 8px;
   font-size: 14px;
-  font-family: "Manrope", sans-serif;
+  font-weight: 800;
 }
 
 .doc2-cta {
   padding: 30px;
   text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   background:
-    linear-gradient(125deg, rgba(31, 95, 191, .11), transparent),
-    linear-gradient(230deg, rgba(22, 163, 74, .12), transparent),
-    #fff;
+    radial-gradient(circle at 18% 12%, rgba(124, 58, 237, 0.35), transparent 58%),
+    radial-gradient(circle at 82% 0, rgba(79, 70, 229, 0.35), transparent 55%),
+    linear-gradient(135deg, #1e1b4b 0%, #0b1220 88%);
+  color: #fff;
+  box-shadow: 0 22px 70px rgba(15, 23, 42, 0.28);
 }
 
 .doc2-cta h2 {
   margin: 0;
-  font-family: "Manrope", sans-serif;
   font-size: clamp(26px, 3vw, 40px);
   line-height: 1.12;
+  color: #fff;
+  letter-spacing: -0.02em;
+  font-weight: 800;
 }
 
 .doc2-cta p {
   margin: 10px auto 0;
   max-width: 66ch;
-  color: var(--doc-soft);
+  color: rgba(226, 232, 240, 0.85);
 }
 
 .doc2-cta__actions {
@@ -475,6 +541,32 @@ html {
   justify-content: center;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.doc2-cta .btn-doc2--primary {
+  background: #fff;
+  color: rgba(30, 27, 75, 0.98);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.34), 0 12px 36px rgba(0, 0, 0, 0.18);
+}
+
+.doc2-cta .btn-doc2--ghost {
+  background: transparent;
+  color: rgba(226, 232, 240, 0.92);
+  border-color: rgba(226, 232, 240, 0.28);
+}
+
+.doc2-cta .btn-doc2--ghost:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(226, 232, 240, 0.36);
+}
+
+.btn-doc2:focus-visible,
+.doc2-nav a:focus-visible,
+.doc2-brand:focus-visible,
+.doc2-item summary:focus-visible {
+  outline: 3px solid rgba(79, 70, 229, 0.35);
+  outline-offset: 2px;
 }
 
 @media (max-width: 1080px) {

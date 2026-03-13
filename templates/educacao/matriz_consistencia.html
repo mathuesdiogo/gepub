@@ -1,0 +1,54 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Consistência da Matriz • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+  <div class="gp-card">
+    <div class="gp-card__body">
+      {% include "core/partials/components/layout/page_head.html" with title="Relatório de Consistência da Matriz" subtitle=matriz.nome actions=actions %}
+
+      <div class="u-grid-4 u-mb-12">
+        <div class="gp-indicator-box">
+          <div class="gp-indicator-box__label">CH esperada</div>
+          <div class="gp-indicator-box__value">{{ ch_esperada }}h</div>
+        </div>
+        <div class="gp-indicator-box">
+          <div class="gp-indicator-box__label">CH distribuída</div>
+          <div class="gp-indicator-box__value">{{ ch_distribuida }}h</div>
+        </div>
+        <div class="gp-indicator-box">
+          <div class="gp-indicator-box__label">Cobertura</div>
+          <div class="gp-indicator-box__value">{{ cobertura }}%</div>
+        </div>
+        <div class="gp-indicator-box">
+          <div class="gp-indicator-box__label">Aulas semanais</div>
+          <div class="gp-indicator-box__value">{{ aulas_semanais }}</div>
+        </div>
+      </div>
+
+      <div class="u-grid-3 u-mb-12">
+        <div class="gp-text-box">
+          <strong>Componentes</strong>
+          <div class="small">{{ total_ativos }} ativos de {{ total_componentes }}</div>
+        </div>
+        <div class="gp-text-box">
+          <strong>Obrigatórios</strong>
+          <div class="small">{{ total_obrigatorios }}</div>
+        </div>
+        <div class="gp-text-box">
+          <strong>Saldo de carga horária</strong>
+          <div class="small">
+            {% if deficit > 0 %}
+              Déficit de {{ deficit }}h
+            {% elif excesso > 0 %}
+              Excesso de {{ excesso }}h
+            {% else %}
+              Balanceada
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Sem componentes" empty_text="Adicione componentes na matriz para gerar este relatório." %}
+    </div>
+  </div>
+{% endblock %}

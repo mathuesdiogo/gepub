@@ -1,21 +1,16 @@
 {% extends "core/base.html" %}
-{% load static %}
 {% block title %}{{ aluno.nome }} • Alunos • Educação • GEPUB{% endblock %}
 {% block header %}Educação{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/pages/educacao-aluno-detail.css' %}">
-{% endblock %}
-
 {% block breadcrumbs %}
-<div class="breadcrumbs">
-  <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
-  <span class="breadcrumbs__sep">/</span>
-  <a class="breadcrumbs__link" href="{% url 'educacao:index' %}">Educação</a>
-  <span class="breadcrumbs__sep">/</span>
-  <a class="breadcrumbs__link" href="{% url 'educacao:aluno_list' %}">Alunos</a>
-  <span class="breadcrumbs__sep">/</span>
-  <span class="breadcrumbs__current">{{ aluno.nome }}</span>
+<div class="gp-breadcrumb">
+  <a class="gp-breadcrumb__link" href="{% url 'core:dashboard' %}">Início</a>
+  <span class="gp-breadcrumb__sep">/</span>
+  <a class="gp-breadcrumb__link" href="{% url 'educacao:index' %}">Educação</a>
+  <span class="gp-breadcrumb__sep">/</span>
+  <a class="gp-breadcrumb__link" href="{% url 'educacao:aluno_list' %}">Alunos</a>
+  <span class="gp-breadcrumb__sep">/</span>
+  <span class="gp-breadcrumb__current">{{ aluno.nome }}</span>
 </div>
 {% endblock %}
 
@@ -67,7 +62,8 @@
           <a href="#etapa-cursos"><span>03</span>Cursos</a>
           <a href="#etapa-nee"><span>04</span>NEE</a>
           <a href="#etapa-saude"><span>05</span>Saúde</a>
-          <a href="#etapa-documentos"><span>06</span>Documentos</a>
+          <a href="#etapa-beneficios"><span>06</span>Benefícios</a>
+          <a href="#etapa-documentos"><span>07</span>Documentos</a>
         {% endif %}
       </nav>
     </aside>
@@ -106,20 +102,20 @@
           <div class="aluno-stage__forms">
             <details class="aluno-form-panel">
               <summary><i class="fa-solid fa-plus"></i>Adicionar matrícula</summary>
-              <form method="post">
+              <form class="gp-form" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="_action" value="add_matricula">
                 {{ form_matricula.as_p }}
-                <button type="submit" class="btn btn-primary">Salvar matrícula</button>
+                <button type="submit" class="gp-button gp-button--primary">Salvar matrícula</button>
               </form>
             </details>
             <details class="aluno-form-panel">
               <summary><i class="fa-solid fa-shuffle"></i>Movimentar matrícula</summary>
-              <form method="post">
+              <form class="gp-form" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="_action" value="mov_matricula">
                 {{ form_movimentacao.as_p }}
-                <button type="submit" class="btn btn-primary">Executar movimentação</button>
+                <button type="submit" class="gp-button gp-button--primary">Executar movimentação</button>
               </form>
             </details>
           </div>
@@ -162,11 +158,11 @@
           {% if can_edu_manage %}
             <details class="aluno-form-panel">
               <summary><i class="fa-solid fa-book-open-reader"></i>Matricular em curso</summary>
-              <form method="post">
+              <form class="gp-form" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="_action" value="add_matricula_curso">
                 {{ form_matricula_curso.as_p }}
-                <button type="submit" class="btn btn-primary">Salvar matrícula em curso</button>
+                <button type="submit" class="gp-button gp-button--primary">Salvar matrícula em curso</button>
               </form>
             </details>
           {% endif %}
@@ -181,9 +177,9 @@
             </div>
           </header>
 
-          <div class="chips aluno-chip-list">
+          <div class="gp-pills aluno-chip-list">
             {% for n in necessidades %}
-              <span class="pill">{{ n.tipo.nome }}</span>
+              <span class="gp-pills__item">{{ n.tipo.nome }}</span>
             {% empty %}
               <span class="aluno-empty-line">Nenhuma necessidade vinculada.</span>
             {% endfor %}
@@ -204,20 +200,20 @@
             <div class="aluno-stage__forms">
               <details class="aluno-form-panel">
                 <summary><i class="fa-solid fa-hand-holding-medical"></i>Adicionar necessidade NEE</summary>
-                <form method="post">
+                <form class="gp-form" method="post">
                   {% csrf_token %}
                   <input type="hidden" name="_action" value="add_nee">
                   {{ form_nee.as_p }}
-                  <button type="submit" class="btn btn-primary">Salvar necessidade</button>
+                  <button type="submit" class="gp-button gp-button--primary">Salvar necessidade</button>
                 </form>
               </details>
               <details class="aluno-form-panel">
                 <summary><i class="fa-solid fa-people-arrows-left-right"></i>Registrar apoio</summary>
-                <form method="post">
+                <form class="gp-form" method="post">
                   {% csrf_token %}
                   <input type="hidden" name="_action" value="add_apoio">
                   {{ form_apoio.as_p }}
-                  <button type="submit" class="btn btn-primary">Salvar apoio</button>
+                  <button type="submit" class="gp-button gp-button--primary">Salvar apoio</button>
                 </form>
               </details>
             </div>
@@ -233,9 +229,9 @@
             </div>
           </header>
 
-          <div class="chips aluno-chip-list">
-            <span class="pill">Atendimentos: {{ atendimentos_saude|length }}</span>
-            <span class="pill">Agendamentos: {{ agendamentos_saude|length }}</span>
+          <div class="gp-pills aluno-chip-list">
+            <span class="gp-pills__item">Atendimentos: {{ atendimentos_saude|length }}</span>
+            <span class="gp-pills__item">Agendamentos: {{ agendamentos_saude|length }}</span>
           </div>
 
           <div class="aluno-dual-list">
@@ -268,9 +264,53 @@
           </div>
         </section>
 
-        <section id="etapa-documentos" class="aluno-stage aluno-stage--f">
+        <section id="etapa-beneficios" class="aluno-stage aluno-stage--f">
           <header class="aluno-stage__header">
             <div class="aluno-stage__step">06</div>
+            <div>
+              <h3>Benefícios e Entregas</h3>
+              <p>Histórico de kits/doações/benefícios, campanhas e inscrições em editais.</p>
+            </div>
+          </header>
+
+          <div class="gp-pills aluno-chip-list">
+            <span class="gp-pills__item">Entregas: {{ beneficios_entregas|length }}</span>
+            <span class="gp-pills__item">Inscrições em editais: {{ beneficios_inscricoes|length }}</span>
+          </div>
+
+          <div class="aluno-dual-list">
+            <div>
+              <h4>Últimas entregas</h4>
+              <div class="aluno-listing">
+                {% for e in beneficios_entregas %}
+                  <article class="aluno-listing__item">
+                    <h4>{{ e.data_hora|date:"d/m/Y H:i" }} • {{ e.beneficio.nome }}</h4>
+                    <p>Status: {{ e.get_status_display }}{% if e.campanha %} • Campanha: {{ e.campanha.nome }}{% endif %}</p>
+                  </article>
+                {% empty %}
+                  <div class="aluno-empty-line">Nenhuma entrega registrada.</div>
+                {% endfor %}
+              </div>
+            </div>
+            <div>
+              <h4>Editais</h4>
+              <div class="aluno-listing">
+                {% for i in beneficios_inscricoes %}
+                  <article class="aluno-listing__item">
+                    <h4>{{ i.edital.numero_ano }} • {{ i.edital.titulo }}</h4>
+                    <p>Status: {{ i.get_status_display }} • {{ i.data_hora|date:"d/m/Y H:i" }}</p>
+                  </article>
+                {% empty %}
+                  <div class="aluno-empty-line">Nenhuma inscrição em edital.</div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="etapa-documentos" class="aluno-stage aluno-stage--g">
+          <header class="aluno-stage__header">
+            <div class="aluno-stage__step">07</div>
             <div>
               <h3>Documentos e Certificados</h3>
               <p>Acervo digital para histórico escolar, declarações e certificados do aluno.</p>
@@ -307,7 +347,7 @@
                     Código: {{ cert.codigo_verificacao }} • Emissão: {{ cert.data_emissao|date:"d/m/Y" }}
                     {% if cert.curso %} • Curso: {{ cert.curso.nome }}{% endif %}
                     {% if cert.arquivo_pdf %}
-                      • <a href="{{ cert.arquivo_pdf.url }}" target="_blank" rel="noopener">Abrir PDF</a>
+                      • <a class="gp-anchor-link" href="{{ cert.arquivo_pdf.url }}" target="_blank" rel="noopener">Abrir PDF</a>
                     {% endif %}
                   </p>
                 </article>
@@ -315,6 +355,13 @@
                 <div class="aluno-empty-line">Nenhum certificado emitido.</div>
               {% endfor %}
             </div>
+            {% if can_emitir_declaracao %}
+              <div class="aluno-stage__cta">
+                <a class="gp-button gp-button--primary" href="{% url 'educacao:declaracao_vinculo_pdf' aluno.pk %}">
+                  <i class="fa-solid fa-file-signature"></i> Emitir declaração de vínculo (PDF)
+                </a>
+              </div>
+            {% endif %}
           </div>
 
           <div class="aluno-stage__subblock">
@@ -336,7 +383,7 @@
             </div>
             {% if can_edu_manage %}
               <div class="aluno-stage__cta">
-                <a class="btn btn-primary" href="{% url 'educacao:carteira_emitir_pdf' aluno.pk %}">
+                <a class="gp-button gp-button--primary" href="{% url 'educacao:carteira_emitir_pdf' aluno.pk %}">
                   <i class="fa-solid fa-id-card"></i> Emitir carteira estudantil (PDF)
                 </a>
               </div>
@@ -347,20 +394,20 @@
             <div class="aluno-stage__forms">
               <details class="aluno-form-panel">
                 <summary><i class="fa-solid fa-folder-plus"></i>Adicionar documento</summary>
-                <form method="post" enctype="multipart/form-data">
+                <form class="gp-form" method="post" enctype="multipart/form-data">
                   {% csrf_token %}
                   <input type="hidden" name="_action" value="add_documento">
                   {{ form_documento.as_p }}
-                  <button type="submit" class="btn btn-primary">Salvar documento</button>
+                  <button type="submit" class="gp-button gp-button--primary">Salvar documento</button>
                 </form>
               </details>
               <details class="aluno-form-panel">
                 <summary><i class="fa-solid fa-certificate"></i>Emitir/registrar certificado</summary>
-                <form method="post" enctype="multipart/form-data">
+                <form class="gp-form" method="post" enctype="multipart/form-data">
                   {% csrf_token %}
                   <input type="hidden" name="_action" value="add_certificado">
                   {{ form_certificado.as_p }}
-                  <button type="submit" class="btn btn-primary">Salvar certificado</button>
+                  <button type="submit" class="gp-button gp-button--primary">Salvar certificado</button>
                 </form>
               </details>
             </div>

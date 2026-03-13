@@ -1,0 +1,60 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Remanejamento de Matrícula • Informática • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+  <div class="gp-card u-mb-12">
+    <div class="gp-card__body">
+      {% include "core/partials/components/layout/page_head.html" with title="Remanejamento de matrícula" subtitle=matricula.aluno.nome actions=actions %}
+
+      <div class="u-mb-8">
+        <strong>Curso:</strong> {{ matricula.curso.nome }}<br>
+        <strong>Turma atual:</strong> {{ matricula.turma.codigo }}<br>
+        <strong>Status:</strong> {{ matricula.get_status_display }}
+      </div>
+
+      <form method="post" class="gp-form form-shell">
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="flash flash--error">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="form-shell__fields">{{ form.as_p }}</div>
+        <div class="form-shell__actions">
+          <button type="submit" class="gp-button gp-button--primary">Confirmar remanejamento</button>
+          <a class="gp-button gp-button--outline" href="{% url 'educacao:informatica_matricula_list' %}">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="gp-card">
+    <div class="gp-card__body">
+      <h3>Últimas movimentações</h3>
+      <table class="table gp-table--striped gp-table--hover">
+        <thead>
+          <tr>
+            <th>Data/Hora</th>
+            <th>Tipo</th>
+            <th>Origem</th>
+            <th>Destino</th>
+            <th>Status</th>
+            <th>Usuário</th>
+            <th>Motivo</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for mov in movimentacoes %}
+            <tr>
+              <td>{{ mov.criado_em|date:"d/m/Y H:i" }}</td>
+              <td>{{ mov.get_tipo_display }}</td>
+              <td>{% if mov.turma_origem %}{{ mov.turma_origem.codigo }}{% else %}—{% endif %}</td>
+              <td>{% if mov.turma_destino %}{{ mov.turma_destino.codigo }}{% else %}—{% endif %}</td>
+              <td>{{ mov.status_anterior|default:"—" }} → {{ mov.status_novo|default:"—" }}</td>
+              <td>{% if mov.usuario %}{{ mov.usuario.get_full_name|default:mov.usuario.username }}{% else %}—{% endif %}</td>
+              <td>{{ mov.motivo|default:"—" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="7">Sem movimentações registradas.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

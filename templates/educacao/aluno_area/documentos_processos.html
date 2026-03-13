@@ -1,0 +1,146 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Documentos e Processos • {{ aluno.nome }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <div class="gp-grid-2 gp-student-stage__grid">
+    <article class="gp-student-stage__card">
+      <h3>Solicitar Documento</h3>
+      <form method="post" class="gp-form gp-form--smart">
+        {% csrf_token %}
+        <input type="hidden" name="form_kind" value="documento">
+        {% for field in doc_form %}
+          <div class="gp-form-group">
+            <label class="gp-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}<small class="gp-form-error">{{ field.errors|striptags }}</small>{% endif %}
+          </div>
+        {% endfor %}
+        <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-paper-plane"></i> Enviar solicitação</button>
+      </form>
+    </article>
+
+    <article class="gp-student-stage__card">
+      <h3>Abrir Processo</h3>
+      <form method="post" class="gp-form gp-form--smart">
+        {% csrf_token %}
+        <input type="hidden" name="form_kind" value="processo">
+        {% for field in proc_form %}
+          <div class="gp-form-group">
+            <label class="gp-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}<small class="gp-form-error">{{ field.errors|striptags }}</small>{% endif %}
+          </div>
+        {% endfor %}
+        <button class="gp-button gp-button--secondary" type="submit"><i class="fa-solid fa-folder-plus"></i> Abrir processo</button>
+      </form>
+    </article>
+  </div>
+
+  <article class="gp-student-stage__card">
+    <h3>Documentos gerados</h3>
+    <div class="gp-student-actions gp-student-actions--stacked">
+      {% for link in links_rapidos %}
+        <a class="gp-student-pill" href="{{ link.url }}" target="_blank" rel="noopener"><i class="fa-solid fa-file-arrow-down"></i><span>{{ link.titulo }}</span></a>
+      {% endfor %}
+    </div>
+
+    <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover gp-mt-3"><div class="gp-table__body">
+      <table class="gp-table__native">
+        <thead>
+          <tr>
+            <th>Documento</th>
+            <th>Data</th>
+            <th>Status</th>
+            <th>Download</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in documentos_gerados %}
+            <tr>
+              <td>{{ d.titulo }}</td>
+              <td>{{ d.criado_em|date:"d/m/Y H:i" }}</td>
+              <td>Disponível</td>
+              <td>{% if d.arquivo %}<a class="gp-button gp-button--outline" href="{{ d.arquivo.url }}" target="_blank" rel="noopener">Baixar</a>{% else %}—{% endif %}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4">Nenhum documento emitido até o momento.</td></tr>
+          {% endfor %}
+          {% for c in certificados %}
+            <tr>
+              <td>{{ c.titulo }}</td>
+              <td>{{ c.data_emissao|date:"d/m/Y" }}</td>
+              <td>Disponível</td>
+              <td>{% if c.arquivo_pdf %}<a class="gp-button gp-button--outline" href="{{ c.arquivo_pdf.url }}" target="_blank" rel="noopener">Baixar</a>{% else %}—{% endif %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </article>
+
+  <article class="gp-student-stage__card">
+    <h3>Processos administrativos</h3>
+    <h4 class="gp-mb-2">Solicitações de documentos</h4>
+    <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover gp-mb-3"><div class="gp-table__body">
+      <table class="gp-table__native">
+        <thead>
+          <tr>
+            <th>Número</th>
+            <th>Documento</th>
+            <th>Status</th>
+            <th>Abertura</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in documentos_processos %}
+            <tr>
+              <td>{{ p.numero }}</td>
+              <td>{{ p.tipo }}</td>
+              <td>{{ p.status_publico|default:p.get_status_display }}</td>
+              <td>{{ p.criado_em|date:"d/m/Y H:i" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4">Sem solicitações de documentos no período.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+
+    <h4 class="gp-mb-2">Outros processos do aluno</h4>
+    <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__body">
+      <table class="gp-table__native">
+        <thead>
+          <tr>
+            <th>Número</th>
+            <th>Tipo</th>
+            <th>Assunto</th>
+            <th>Status</th>
+            <th>Data</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in processos_aluno %}
+            <tr>
+              <td>{{ p.numero }}</td>
+              <td>{{ p.tipo }}</td>
+              <td>{{ p.assunto }}</td>
+              <td>{{ p.status_publico|default:p.get_status_display }}</td>
+              <td>{{ p.criado_em|date:"d/m/Y H:i" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5">Nenhum processo aberto por você.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </article>
+
+  <article class="gp-student-stage__card">
+    <h3>Fluxo</h3>
+    <p class="gp-text-muted">Aluno solicita → Escola/Secretaria analisa no administrativo → após aprovação, documento fica disponível para download.</p>
+  </article>
+</section>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Agenda de Laboratórios • Informática • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+  <div class="gp-card edu-card-highlight u-mb-12">
+    <div class="gp-card__body">
+      {% include "core/partials/components/layout/page_head.html" with title="Agenda semanal do laboratório" subtitle="Listagem de ocupação por dia e horário" actions=None %}
+
+      <section class="edu-kpis">
+        <article class="edu-kpi">
+          <div>
+            <div class="edu-kpi__label">Laboratórios</div>
+            <div class="edu-kpi__value">{{ laboratorios|length }}</div>
+            <div class="edu-kpi__meta">Disponíveis no escopo</div>
+          </div>
+          <div class="edu-kpi__icon"><i class="fa-solid fa-laptop-house"></i></div>
+        </article>
+        <article class="edu-kpi">
+          <div>
+            <div class="edu-kpi__label">Encontros na semana</div>
+            <div class="edu-kpi__value">{{ total_encontros_semana }}</div>
+            <div class="edu-kpi__meta">{{ semana_inicio|date:"d/m" }} a {{ semana_fim|date:"d/m" }}</div>
+          </div>
+          <div class="edu-kpi__icon"><i class="fa-solid fa-calendar-week"></i></div>
+        </article>
+        <article class="edu-kpi">
+          <div>
+            <div class="edu-kpi__label">Turmas em agenda</div>
+            <div class="edu-kpi__value">{{ total_turmas_semana }}</div>
+            <div class="edu-kpi__meta">Ativas no filtro atual</div>
+          </div>
+          <div class="edu-kpi__icon"><i class="fa-solid fa-people-group"></i></div>
+        </article>
+        <article class="edu-kpi">
+          <div>
+            <div class="edu-kpi__label">Dias ocupados</div>
+            <div class="edu-kpi__value">{{ dias_ocupados }}</div>
+            <div class="edu-kpi__meta">Dias com blocos agendados</div>
+          </div>
+          <div class="edu-kpi__icon"><i class="fa-solid fa-clock"></i></div>
+        </article>
+      </section>
+    </div>
+  </div>
+
+  <div class="gp-card">
+    <div class="gp-card__body">
+      <h3 class="section__title u-mb-8">Listagem e filtros</h3>
+      <p class="section__meta u-mb-10">Mesmo padrão da tela de turmas: selecione laboratório e filtre por dia ou turma/professor.</p>
+
+      <form method="get" class="gp-form gp-form--inline filter-bar u-mb-10">
+        <select class="gp-input" name="laboratorio">
+          <option value="">Selecione um laboratório...</option>
+          {% for lab in laboratorios %}
+            <option value="{{ lab.id }}" {% if laboratorio and laboratorio.id == lab.id %}selected{% endif %}>{{ lab.nome }} — {{ lab.unidade.nome }}</option>
+          {% endfor %}
+        </select>
+        <select class="gp-input" name="dia">
+          <option value="">Todos os dias</option>
+          {% for value, label in dias_choices %}
+            <option value="{{ value }}" {% if dia == value|stringformat:'s' %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <input type="text" class="gp-input" name="q" placeholder="Turma, curso ou instrutor" value="{{ q }}">
+        <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
+        <a class="gp-button gp-button--outline" href="{{ request.path }}">Limpar</a>
+      </form>
+
+      {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q empty_title="Nenhum horário encontrado" empty_text="Ajuste os filtros ou cadastre encontros para o laboratório selecionado." %}
+    </div>
+  </div>
+{% endblock %}

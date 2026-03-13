@@ -1,0 +1,65 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Frequência e Diário • Informática • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+  <div class="gp-card edu-card-highlight u-mb-12">
+    <div class="gp-card__body">
+      {% include "core/partials/components/layout/page_head.html" with title="Frequência e Diário" subtitle="Registro por aula e por aluno" actions=actions %}
+
+      <section class="edu-kpis">
+        <article class="edu-kpi">
+          <div>
+            <div class="edu-kpi__label">Aulas no filtro</div>
+            <div class="edu-kpi__value">{{ total_aulas }}</div>
+            <div class="edu-kpi__meta">Período carregado</div>
+          </div>
+          <div class="edu-kpi__icon"><i class="fa-solid fa-chalkboard"></i></div>
+        </article>
+        <article class="edu-kpi">
+          <div>
+            <div class="edu-kpi__label">Aulas realizadas</div>
+            <div class="edu-kpi__value">{{ total_aulas_realizadas }}</div>
+            <div class="edu-kpi__meta">Com status concluído</div>
+          </div>
+          <div class="edu-kpi__icon"><i class="fa-solid fa-circle-check"></i></div>
+        </article>
+        <article class="edu-kpi">
+          <div>
+            <div class="edu-kpi__label">Aulas encerradas</div>
+            <div class="edu-kpi__value">{{ total_aulas_encerradas }}</div>
+            <div class="edu-kpi__meta">Chamada fechada</div>
+          </div>
+          <div class="edu-kpi__icon"><i class="fa-solid fa-lock"></i></div>
+        </article>
+        <article class="edu-kpi">
+          <div>
+            <div class="edu-kpi__label">Aulas abertas</div>
+            <div class="edu-kpi__value">{{ total_aulas_abertas }}</div>
+            <div class="edu-kpi__meta">Pendentes de fechamento</div>
+          </div>
+          <div class="edu-kpi__icon"><i class="fa-solid fa-unlock"></i></div>
+        </article>
+      </section>
+    </div>
+  </div>
+
+  <div class="gp-card">
+    <div class="gp-card__body">
+      <h3 class="section__title u-mb-8">Aulas e lançamentos</h3>
+      <p class="section__meta u-mb-10">Selecione a turma para trabalhar somente com as aulas daquele grupo e acelerar a rotina de chamada.</p>
+
+      <form method="get" class="gp-form gp-form--inline filter-bar u-mb-10">
+        <select class="gp-input" name="turma">
+          <option value="">Todas as turmas</option>
+          {% for t in turmas %}
+            <option value="{{ t.id }}" {% if turma_id == t.id|stringformat:'s' %}selected{% endif %}>{{ t.codigo }} — {{ t.curso.nome }}</option>
+          {% endfor %}
+        </select>
+        <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
+        <a class="gp-button gp-button--outline" href="{{ request.path }}">Limpar</a>
+      </form>
+
+      {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj q='' empty_title="Nenhuma aula registrada" empty_text="Crie a primeira aula para lançar frequência." %}
+    </div>
+  </div>
+{% endblock %}

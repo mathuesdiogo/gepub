@@ -1,0 +1,53 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Nova Avaliação de Informática • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage gp-professor-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <article class="gp-student-stage__card">
+    <div class="gp-professor-inline-actions gp-mb-3">
+      <span class="gp-badge gp-badge--primary">Turma: {{ turma_informatica.codigo }}</span>
+      <span class="gp-badge gp-badge--neutral">Ano: {{ turma_informatica.ano_letivo }}</span>
+    </div>
+
+    <form method="post" class="gp-form gp-form--smart">
+      {% csrf_token %}
+
+      <div class="gp-form-group gp-field--full">
+        <label class="gp-form-label" for="id_titulo">Título</label>
+        {{ form.titulo }}
+      </div>
+      <div class="gp-form-group">
+        <label class="gp-form-label" for="id_data">Data</label>
+        {{ form.data }}
+      </div>
+      <div class="gp-form-group">
+        <label class="gp-form-label" for="id_peso">Peso</label>
+        {{ form.peso }}
+      </div>
+      <div class="gp-form-group">
+        <label class="gp-form-label" for="id_nota_maxima">Nota máxima</label>
+        {{ form.nota_maxima }}
+      </div>
+      <div class="gp-form-group gp-form-group--check">
+        <label class="gp-form-label" for="id_ativo">Ativa</label>
+        {{ form.ativo }}
+      </div>
+
+      {% if form.non_field_errors %}
+        <p class="gp-form-error">{{ form.non_field_errors|join:", " }}</p>
+      {% endif %}
+
+      <div class="gp-professor-inline-actions">
+        <button class="gp-button gp-button--primary" type="submit">
+          <i class="fa-solid fa-floppy-disk"></i> Salvar avaliação
+        </button>
+        <a class="gp-button gp-button--outline" href="{% url 'educacao:professor_informatica_avaliacoes' code_value turma_informatica.id %}">
+          <i class="fa-solid fa-arrow-left"></i> Voltar
+        </a>
+      </div>
+    </form>
+  </article>
+</section>
+{% endblock %}

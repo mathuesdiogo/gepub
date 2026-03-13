@@ -2,10 +2,10 @@
 
 <div class="admin-dash">
   <div class="dash-actions admin-dash__actions">
-    <a class="btn btn-primary" href="{% url 'org:secretaria_list' %}"><i class="fa-solid fa-building-columns"></i> Secretarias</a>
-    <a class="btn btn-primary" href="{% url 'org:unidade_list' %}"><i class="fa-solid fa-school"></i> Unidades</a>
-    <a class="btn btn-primary" href="{% url 'educacao:aluno_list' %}"><i class="fa-solid fa-user-graduate"></i> Alunos</a>
-    <a class="btn btn-primary" href="{{ onboarding_url }}"><i class="fa-solid fa-list-check"></i> Onboarding</a>
+    <a class="gp-button gp-button--primary" href="{% url 'org:secretaria_list' %}"><i class="fa-solid fa-building-columns"></i> Secretarias</a>
+    <a class="gp-button gp-button--primary" href="{% url 'org:unidade_list' %}"><i class="fa-solid fa-school"></i> Unidades</a>
+    <a class="gp-button gp-button--primary" href="{% url 'educacao:aluno_list' %}"><i class="fa-solid fa-user-graduate"></i> Alunos</a>
+    <a class="gp-button gp-button--primary" href="{{ onboarding_url }}"><i class="fa-solid fa-list-check"></i> Onboarding</a>
   </div>
 
   <div class="dash-kpi-grid">
@@ -64,6 +64,10 @@
     </a>
   </div>
 
+  {% if central_pendencias_total|default:0 %}
+    {% include "core/partials/components/alerts/central_pendencias.html" with items=central_pendencias total=central_pendencias_total %}
+  {% endif %}
+
   <div class="dash-panel-grid">
     <section class="admin-panel">
       <div class="admin-panel__head">
@@ -105,7 +109,7 @@
           <h3 class="admin-panel__title">Últimas secretarias</h3>
           <p class="admin-panel__sub">Cadastros recentes do município</p>
         </div>
-        <a class="btn btn--ghost" href="{% url 'org:secretaria_list' %}"><i class="fa-solid fa-list"></i> Ver todas</a>
+        <a class="gp-button gp-button--outline" href="{% url 'org:secretaria_list' %}"><i class="fa-solid fa-list"></i> Ver todas</a>
       </div>
 
       {% if ultimas_secretarias %}
@@ -123,7 +127,7 @@
                 <tr>
                   <td>{{ s.nome }}</td>
                   <td>{{ s.municipio.nome|default:"—" }}</td>
-                  <td><a class="btn btn--ghost" href="{% url 'org:secretaria_detail' s.pk %}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir</a></td>
+                  <td><a class="gp-button gp-button--outline" href="{% url 'org:secretaria_detail' s.pk %}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir</a></td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -140,7 +144,7 @@
           <h3 class="admin-panel__title">Últimos alunos</h3>
           <p class="admin-panel__sub">Cadastros recentes de alunos</p>
         </div>
-        <a class="btn btn--ghost" href="{% url 'educacao:aluno_list' %}"><i class="fa-solid fa-list"></i> Ver todos</a>
+        <a class="gp-button gp-button--outline" href="{% url 'educacao:aluno_list' %}"><i class="fa-solid fa-list"></i> Ver todos</a>
       </div>
 
       {% if ultimos_alunos %}
@@ -166,7 +170,7 @@
                       —
                     {% endif %}
                   </td>
-                  <td><a class="btn btn--ghost" href="{% url 'educacao:aluno_detail' a.pk %}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir</a></td>
+                  <td><a class="gp-button gp-button--outline" href="{% url 'educacao:aluno_detail' a.pk %}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir</a></td>
                 </tr>
               {% endfor %}
             </tbody>

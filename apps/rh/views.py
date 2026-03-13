@@ -9,13 +9,21 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from apps.core.decorators import require_perm
+from apps.core.exports import export_csv, export_pdf_table
 from apps.core.services_auditoria import registrar_auditoria
 from apps.core.services_transparencia import publicar_evento_transparencia
 from apps.core.rbac import is_admin
 from apps.org.models import Municipio
 
 from .forms import RhCadastroForm, RhDocumentoForm, RhMovimentacaoForm
-from .models import RhCadastro, RhDocumento, RhMovimentacao
+from .models import (
+    RhCadastro,
+    RhDocumento,
+    RhMovimentacao,
+    RhPdpPlano,
+    RhRemanejamentoEdital,
+    RhSubstituicaoServidor,
+)
 
 
 def _resolve_municipio(request, *, require_selected: bool = False):
@@ -54,6 +62,9 @@ def index(request):
     servidores_qs = RhCadastro.objects.filter(municipio=municipio)
     mov_qs = RhMovimentacao.objects.filter(municipio=municipio)
     docs_qs = RhDocumento.objects.filter(municipio=municipio)
+    rem_qs = RhRemanejamentoEdital.objects.filter(municipio=municipio)
+    sub_qs = RhSubstituicaoServidor.objects.filter(municipio=municipio)
+    pdp_qs = RhPdpPlano.objects.filter(municipio=municipio)
 
     return render(
         request,
@@ -73,6 +84,9 @@ def index(request):
                 },
                 {"label": "Movimentações pendentes", "value": mov_qs.filter(status=RhMovimentacao.Status.PENDENTE).count()},
                 {"label": "Documentos funcionais", "value": docs_qs.count()},
+                {"label": "Editais de remanejamento", "value": rem_qs.count()},
+                {"label": "Substituições vigentes", "value": sub_qs.filter(status=RhSubstituicaoServidor.Status.VIGENTE).count()},
+                {"label": "PDP em coleta", "value": pdp_qs.filter(status=RhPdpPlano.Status.COLETA).count()},
             ],
             "latest_movimentacoes": mov_qs.select_related("servidor").order_by("-data_inicio", "-id")[:10],
             "latest_documentos": docs_qs.select_related("servidor").order_by("-data_documento", "-id")[:10],
@@ -93,6 +107,24 @@ def index(request):
                     "label": "Documentos",
                     "url": reverse("rh:documento_list") + _q_municipio(municipio),
                     "icon": "fa-solid fa-folder-open",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "Remanejamento",
+                    "url": reverse("rh:remanejamento_edital_list") + _q_municipio(municipio),
+                    "icon": "fa-solid fa-arrow-right-arrow-left",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "Substituições",
+                    "url": reverse("rh:substituicao_list") + _q_municipio(municipio),
+                    "icon": "fa-solid fa-user-clock",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDP",
+                    "url": reverse("rh:pdp_plano_list") + _q_municipio(municipio),
+                    "icon": "fa-solid fa-graduation-cap",
                     "variant": "btn--ghost",
                 },
             ],
@@ -125,6 +157,34 @@ def servidor_list(request):
     if status:
         qs = qs.filter(status=status)
 
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("nome"):
+            rows.append(
+                [
+                    item.codigo,
+                    item.matricula,
+                    item.nome,
+                    item.cargo,
+                    item.funcao,
+                    item.get_situacao_funcional_display(),
+                    item.get_status_display(),
+                ]
+            )
+        headers = ["Codigo", "Matricula", "Nome", "Cargo", "Funcao", "Situacao", "Status"]
+        if export == "csv":
+            return export_csv("rh_servidores.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="rh_servidores.pdf",
+            title="Servidores funcionais",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'} | Situacao={situacao or '-'} | Status={status or '-'}",
+        )
+
     return render(
         request,
         "rh/servidor_list.html",
@@ -145,6 +205,18 @@ def servidor_list(request):
                     "url": reverse("rh:servidor_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&situacao={situacao}&status={status}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&situacao={situacao}&status={status}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
                 },
                 {
                     "label": "Painel RH",
@@ -272,6 +344,33 @@ def movimentacao_list(request):
     if q:
         qs = qs.filter(Q(servidor__nome__icontains=q) | Q(observacao__icontains=q))
 
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-data_inicio", "-id"):
+            rows.append(
+                [
+                    item.servidor.nome,
+                    item.get_tipo_display(),
+                    str(item.data_inicio),
+                    str(item.data_fim or ""),
+                    item.get_status_display(),
+                    item.aprovado_por.username if item.aprovado_por else "-",
+                ]
+            )
+        headers = ["Servidor", "Tipo", "Inicio", "Fim", "Status", "Aprovado por"]
+        if export == "csv":
+            return export_csv("rh_movimentacoes.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="rh_movimentacoes.pdf",
+            title="Movimentacoes funcionais",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'} | Tipo={tipo or '-'} | Status={status or '-'}",
+        )
+
     return render(
         request,
         "rh/movimentacao_list.html",
@@ -292,6 +391,18 @@ def movimentacao_list(request):
                     "url": reverse("rh:movimentacao_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&tipo={tipo}&status={status}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&tipo={tipo}&status={status}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
                 },
                 {
                     "label": "Servidores",
@@ -435,6 +546,32 @@ def documento_list(request):
     if q:
         qs = qs.filter(Q(numero__icontains=q) | Q(descricao__icontains=q) | Q(servidor__nome__icontains=q))
 
+    export = (request.GET.get("export") or "").strip().lower()
+    if export in {"csv", "pdf"}:
+        rows = []
+        for item in qs.order_by("-data_documento", "-id"):
+            rows.append(
+                [
+                    item.servidor.nome,
+                    item.get_tipo_display(),
+                    item.numero,
+                    str(item.data_documento),
+                    item.descricao or "",
+                ]
+            )
+        headers = ["Servidor", "Tipo", "Numero", "Data", "Descricao"]
+        if export == "csv":
+            return export_csv("rh_documentos.csv", headers, rows)
+        return export_pdf_table(
+            request,
+            filename="rh_documentos.pdf",
+            title="Documentos funcionais",
+            subtitle=f"{municipio.nome}/{municipio.uf}",
+            headers=headers,
+            rows=rows,
+            filtros=f"Busca={q or '-'} | Tipo={tipo or '-'}",
+        )
+
     return render(
         request,
         "rh/documento_list.html",
@@ -453,6 +590,18 @@ def documento_list(request):
                     "url": reverse("rh:documento_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
                     "variant": "btn-primary",
+                },
+                {
+                    "label": "CSV",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&tipo={tipo}&export=csv",
+                    "icon": "fa-solid fa-file-csv",
+                    "variant": "btn--ghost",
+                },
+                {
+                    "label": "PDF",
+                    "url": request.path + f"?municipio={municipio.pk}&q={q}&tipo={tipo}&export=pdf",
+                    "icon": "fa-solid fa-file-pdf",
+                    "variant": "btn--ghost",
                 },
                 {
                     "label": "Movimentações",

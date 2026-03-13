@@ -1,0 +1,108 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Ensino • Justificativa de Falta • {{ aluno.nome }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <article class="gp-student-stage__card">
+    <h3>Solicitação de Justificativa de Falta</h3>
+    <p class="gp-text-muted">Faltas em aberto para justificativa: <strong>{{ faltas_em_aberto }}</strong></p>
+    <form method="post" enctype="multipart/form-data" class="gp-form gp-form--smart">
+      {% csrf_token %}
+      <input type="hidden" name="form_kind" value="justificativa">
+      {% for field in falta_form %}
+        <div class="gp-form-group">
+          <label class="gp-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}<small class="gp-form-error">{{ field.errors|striptags }}</small>{% endif %}
+        </div>
+      {% endfor %}
+      <button class="gp-button gp-button--secondary" type="submit"><i class="fa-solid fa-file-circle-check"></i> Enviar justificativa</button>
+    </form>
+  </article>
+
+  <article class="gp-student-stage__card">
+    <h3>Solicitação de Justificativa de Falta (Curso de Informática)</h3>
+    <p class="gp-text-muted">
+      Faltas da Informática em aberto: <strong>{{ faltas_informatica_em_aberto }}</strong> •
+      Justificadas: <strong>{{ faltas_informatica_justificadas }}</strong>
+    </p>
+    <form method="post" class="gp-form gp-form--smart">
+      {% csrf_token %}
+      <input type="hidden" name="form_kind" value="justificativa_informatica">
+      {% for field in falta_info_form %}
+        <div class="gp-form-group">
+          <label class="gp-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}<small class="gp-form-error">{{ field.errors|striptags }}</small>{% endif %}
+        </div>
+      {% endfor %}
+      <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-laptop-code"></i> Enviar justificativa (Informática)</button>
+    </form>
+  </article>
+
+  <article class="gp-student-stage__card">
+    <h3>Acompanhamento dos pedidos</h3>
+    <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__body">
+      <table class="gp-table__native">
+        <thead>
+          <tr>
+            <th>Turma</th>
+            <th>Aula</th>
+            <th>Status</th>
+            <th>Resposta do professor</th>
+            <th>Atualizado em</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in pedidos %}
+            <tr>
+              <td>{{ p.aula.diario.turma.nome }}</td>
+              <td>{{ p.aula.data|date:"d/m/Y" }}{% if p.aula.componente %} • {{ p.aula.componente }}{% endif %}</td>
+              <td>{{ p.status_publico }}</td>
+              <td>{% if p.parecer %}{{ p.parecer|truncatechars:110 }}{% else %}—{% endif %}</td>
+              <td>{{ p.atualizado_em|date:"d/m/Y H:i" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5">Nenhuma justificativa registrada até o momento.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </article>
+
+  <article class="gp-student-stage__card">
+    <h3>Acompanhamento das faltas (Curso de Informática)</h3>
+    <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__body">
+      <table class="gp-table__native">
+        <thead>
+          <tr>
+            <th>Turma</th>
+            <th>Aula</th>
+            <th>Status</th>
+            <th>Justificativa</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in pedidos_informatica %}
+            <tr>
+              <td>{{ p.aula.turma.codigo }}</td>
+              <td>
+                {{ p.aula.data_aula|date:"d/m/Y" }}
+                {% if p.aula.encontro %}
+                  • {{ p.aula.encontro.hora_inicio|time:"H:i" }}-{{ p.aula.encontro.hora_fim|time:"H:i" }}
+                {% endif %}
+              </td>
+              <td>{{ p.status_publico }}</td>
+              <td>{% if p.justificativa %}{{ p.justificativa|truncatechars:110 }}{% else %}—{% endif %}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4">Nenhuma falta registrada no Curso de Informática até o momento.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </article>
+</section>
+{% endblock %}

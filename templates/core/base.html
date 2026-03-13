@@ -1,18 +1,23 @@
 {% load static %}
 
 <!doctype html>
-<html lang="pt-br">
+<html lang="pt-br" data-theme="{{ gepub_active_theme|default:'kassya' }}">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}GEPUB{% endblock %}</title>
-  <link rel="stylesheet" href="{% static 'css/app.css' %}">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   {% block extra_css %}{% endblock %}
+  <link rel="stylesheet" href="{% static 'gepub-design-system/gepub-design-system.css' %}">
+  <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
+  {% if gepub_theme_tokens_style %}
+  <style id="gepub-tenant-theme-overrides">
+{{ gepub_theme_tokens_style }}
+  </style>
+  {% endif %}
 </head>
-<body class="theme-institucional">
-  <div class="layout">
-    <aside class="sidebar" aria-label="Menu lateral">
+<body class="gp-app theme-{{ gepub_active_theme|default:'kassya' }}">
+  <div class="layout gp-shell">
+    <aside class="sidebar gp-sidebar" aria-label="Menu lateral">
       <div class="sidebar__header">
         <div class="brand">
           <div class="brand__logo" aria-hidden="true">
@@ -49,8 +54,8 @@
       </div>
     </aside>
 
-    <main class="main" id="conteudo">
-      <header class="topbar">
+    <main class="main gp-main" id="conteudo">
+      <header class="topbar gp-topbar">
         <div class="topbar__left">
           <div class="topbar__title">{% block header %}Dashboard{% endblock %}</div>
           {% block breadcrumbs %}{% if breadcrumbs %}{% include "core/partials/components/layout/breadcrumbs.html" with items=breadcrumbs %}{% endif %}{% endblock %}
@@ -58,13 +63,12 @@
 
         <div class="topbar__right">
           <form class="topbar-search" method="get" action="{% url 'core:go_code' %}">
-            <label class="topbar-search__label" for="topbarCodeSearch">Buscar</label>
-            <i class="fa-solid fa-magnifying-glass topbar-search__icon" aria-hidden="true"></i>
             <input
               id="topbarCodeSearch"
               class="topbar-search__input"
               type="text"
               name="c"
+              aria-label="Pesquisar por código ou tela"
               inputmode="numeric"
               autocomplete="off"
               placeholder="Pesquisar por código ou tela..."
@@ -73,6 +77,18 @@
               <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
             </button>
           </form>
+
+          {% if request.user.is_authenticated %}
+            <button
+              type="button"
+              id="topbarThemeCurrent"
+              class="topbar-theme-current"
+              data-theme-value="{{ gepub_active_theme|default:'kassya' }}"
+              data-theme-options="{% for value, label in gepub_theme_options %}{{ value }}{% if not forloop.last %},{% endif %}{% endfor %}"
+              aria-label="Trocar tema da interface"
+              title="Tema atual: {{ gepub_active_theme|default:'kassya' }}. Clique para alternar"
+            ></button>
+          {% endif %}
 
           {% with display_name=request.user.get_full_name|default:request.user.username user_role=request.user.groups.first.name|default:"Usuário" %}
             <a class="topbar-user" href="{% url 'accounts:meu_perfil' %}">
@@ -92,11 +108,11 @@
         </div>
       </header>
 
-      <section class="content">
+      <section class="content gp-content">
         {% if messages %}
           <div class="alert-stack">
             {% for message in messages %}
-              <div class="alert alert--{{ message.tags }}">
+              <div class="alert gp-alert gp-alert--dismissible alert--{{ message.tags }}">
                 {{ message }}
                 <button type="button" class="alert__close" aria-label="Fechar">&times;</button>
               </div>
@@ -109,6 +125,7 @@
   </div>
 
   <script src="{% static 'js/autocomplete.js' %}"></script>
+  <script src="{% static 'js/gepub-design-system.js' %}"></script>
   <script>
     (function () {
       const key = "gepub.sidebar.collapsed";
@@ -177,10 +194,51 @@
         });
       }
 
+      function setupThemeSwitcher() {
+        const current = document.getElementById("topbarThemeCurrent");
+        if (current) {
+          const raw = current.getAttribute("data-theme-options") || "";
+          const options = raw.split(",").map(v => v.trim()).filter(Boolean);
+          const active = current.getAttribute("data-theme-value") || "kassya";
+          const safeOptions = options.length ? options : ["kassya", "inclusao", "institucional"];
+          current.addEventListener("click", function () {
+            const idx = Math.max(0, safeOptions.indexOf(active));
+            const next = safeOptions[(idx + 1) % safeOptions.length];
+            const url = new URL(window.location.href);
+            url.searchParams.set("theme", next);
+            window.location.href = url.toString();
+          });
+          return;
+        }
+
+        const swatches = Array.from(document.querySelectorAll(".topbar-theme-swatch[data-theme-value]"));
+        if (swatches.length) {
+          swatches.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              const theme = btn.getAttribute("data-theme-value");
+              if (!theme) return;
+              const url = new URL(window.location.href);
+              url.searchParams.set("theme", theme);
+              window.location.href = url.toString();
+            });
+          });
+          return;
+        }
+
+        const select = document.getElementById("topbarThemeSwitch");
+        if (!select) return;
+        select.addEventListener("change", function () {
+          const url = new URL(window.location.href);
+          url.searchParams.set("theme", select.value);
+          window.location.href = url.toString();
+        });
+      }
+
       function boot() {
         setupSidebar();
         setupAlerts();
         setupActionMenus();
+        setupThemeSwitcher();
       }
 
       if (document.readyState === "loading") {

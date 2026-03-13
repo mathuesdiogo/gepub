@@ -1,7 +1,7 @@
 {% extends "educacao/base_modulo.html" %}
 {% block title %}Lançar Notas • Educação • GEPUB{% endblock %}
 {% block module_content %}
-<div class="card"><div class="card__body">
+<div class="gp-card"><div class="gp-card__body">
 
 {% include "core/partials/components/layout/page_head.html" with title="Lançamento de Notas" subtitle=avaliacao.titulo actions=actions %}
 
@@ -12,10 +12,10 @@
   <div><strong>Máx:</strong> {{ avaliacao.valor_maximo }} • <strong>Peso:</strong> {{ avaliacao.peso }}</div>
 </div>
 
-<form method="post" id="notas-form">
+<form class="gp-form" method="post" id="notas-form">
   {% csrf_token %}
 
-  <div class="table">
+  <div class="gp-table__native">
     <table>
       <thead>
         <tr>
@@ -29,7 +29,7 @@
           <td>{{ a.aluno_nome }}</td>
           <td>
             {% if can_edit %}
-              <input name="mat_{{ a.matricula_id }}" value="{{ a.valor }}" placeholder="0 a {{ avaliacao.valor_maximo }}" />
+              <input class="gp-input" name="mat_{{ a.matricula_id }}" value="{{ a.valor }}" placeholder="0 a {{ avaliacao.valor_maximo }}" />
             {% else %}
               {{ a.valor|default:"—" }}
             {% endif %}
@@ -44,7 +44,7 @@
 
   {% if can_edit %}
   <div class="form__actions">
-    <button class="btn btn-primary" type="submit">Salvar Notas</button>
+    <button class="gp-button gp-button--primary" type="submit">Salvar Notas</button>
   </div>
   {% endif %}
 </form>

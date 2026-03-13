@@ -1,4 +1,4 @@
-{% with route=request.resolver_match.url_name|default:'' %}
+{% with route=request.resolver_match.url_name|default:'' prof_codigo=request.user.profile.codigo_acesso|default:request.user.username %}
 <nav class="module-menu module-menu--educacao">
   <div class="module-menu__title">
     <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
@@ -33,7 +33,13 @@
         </a>
       </li>
       <li class="module-menu__item">
-        <a class="module-menu__link {% if route == 'portal_professor' %}is-active{% endif %}" href="{% url 'educacao:portal_professor' %}">
+        <a class="module-menu__link {% if 'informatica_' in route %}is-active{% endif %}" href="{% url 'educacao:informatica_index' %}">
+          <i class="fa-solid fa-laptop-code" aria-hidden="true"></i>
+          <span>Curso de Informática</span>
+        </a>
+      </li>
+      <li class="module-menu__item">
+        <a class="module-menu__link {% if route == 'portal_professor' or 'professor_' in route %}is-active{% endif %}" href="{% url 'educacao:professor_inicio' prof_codigo %}">
           <i class="fa-solid fa-chalkboard-user" aria-hidden="true"></i>
           <span>Portal Professor</span>
         </a>
@@ -80,6 +86,12 @@
           </a>
         </li>
         <li class="module-menu__item">
+          <a class="module-menu__link {% if request.resolver_match.app_name == 'org' and request.GET.tipo == 'EDUCACAO' %}is-active{% endif %}" href="{% url 'org:unidade_list' %}?tipo=EDUCACAO">
+            <i class="fa-solid fa-school" aria-hidden="true"></i>
+            <span>Unidades Educacionais</span>
+          </a>
+        </li>
+        <li class="module-menu__item">
           <a class="module-menu__link {% if 'matricula' in route %}is-active{% endif %}" href="{% url 'educacao:matricula_create' %}">
             <i class="fa-solid fa-id-card" aria-hidden="true"></i>
             <span>Matrículas</span>
@@ -92,7 +104,7 @@
           </a>
         </li>
         <li class="module-menu__item">
-          <a class="module-menu__link {% if route == 'portal_professor' %}is-active{% endif %}" href="{% url 'educacao:portal_professor' %}">
+          <a class="module-menu__link {% if route == 'portal_professor' or 'professor_' in route %}is-active{% endif %}" href="{% url 'educacao:portal_professor' %}">
             <i class="fa-solid fa-chalkboard-user" aria-hidden="true"></i>
             <span>Portal Professor</span>
           </a>
@@ -122,6 +134,12 @@
           </a>
         </li>
         <li class="module-menu__item">
+          <a class="module-menu__link {% if 'matriz' in route %}is-active{% endif %}" href="{% url 'educacao:matriz_list' %}">
+            <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+            <span>Matrizes</span>
+          </a>
+        </li>
+        <li class="module-menu__item">
           <a class="module-menu__link {% if route == 'horarios_index' %}is-active{% endif %}" href="{% url 'educacao:horarios_index' %}">
             <i class="fa-solid fa-clock" aria-hidden="true"></i>
             <span>Horários</span>
@@ -134,9 +152,33 @@
           </a>
         </li>
         <li class="module-menu__item">
+          <a class="module-menu__link {% if 'estagio' in route %}is-active{% endif %}" href="{% url 'educacao:estagio_list' %}">
+            <i class="fa-solid fa-briefcase" aria-hidden="true"></i>
+            <span>Estágios</span>
+          </a>
+        </li>
+        <li class="module-menu__item">
+          <a class="module-menu__link {% if 'informatica_' in route %}is-active{% endif %}" href="{% url 'educacao:informatica_index' %}">
+            <i class="fa-solid fa-laptop-code" aria-hidden="true"></i>
+            <span>Curso de Informática</span>
+          </a>
+        </li>
+        <li class="module-menu__item">
+          <a class="module-menu__link {% if route == 'informatica_grade_list' or route == 'informatica_grade_create' or route == 'informatica_grade_update' %}is-active{% endif %}" href="{% url 'educacao:informatica_grade_list' %}">
+            <i class="fa-solid fa-calendar-week" aria-hidden="true"></i>
+            <span>Informática: Grades</span>
+          </a>
+        </li>
+        <li class="module-menu__item">
+          <a class="module-menu__link {% if route == 'informatica_professor_agenda' %}is-active{% endif %}" href="{% url 'educacao:informatica_professor_agenda' %}">
+            <i class="fa-solid fa-chalkboard-user" aria-hidden="true"></i>
+            <span>Informática: Agenda Professor</span>
+          </a>
+        </li>
+        <li class="module-menu__item">
           <a class="module-menu__link {% if 'curso' in route %}is-active{% endif %}" href="{% url 'educacao:curso_list' %}">
             <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
-            <span>Cursos</span>
+            <span>Atividades Extras</span>
           </a>
         </li>
       </ul>
@@ -145,6 +187,12 @@
     <div class="module-menu__group">
       <div class="module-menu__group-title">Apoio</div>
       <ul class="module-menu__list">
+        <li class="module-menu__item">
+          <a class="module-menu__link {% if 'beneficio_' in route or route == 'beneficios_index' %}is-active{% endif %}" href="{% url 'educacao:beneficios_index' %}">
+            <i class="fa-solid fa-box-open" aria-hidden="true"></i>
+            <span>Benefícios e Entregas</span>
+          </a>
+        </li>
         <li class="module-menu__item">
           <a class="module-menu__link {% if route == 'assistencia_index' %}is-active{% endif %}" href="{% url 'educacao:assistencia_index' %}">
             <i class="fa-solid fa-utensils" aria-hidden="true"></i>

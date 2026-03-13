@@ -6,7 +6,7 @@
 
   <form method="get" class="filter-bar" style="margin-bottom:12px;">
     {% if municipios and municipios|length %}
-      <select name="municipio" class="input" style="max-width:240px;" onchange="this.form.submit()">
+      <select name="municipio" class="gp-input" style="max-width:240px;" onchange="this.form.submit()">
         {% for m in municipios %}
           <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
         {% endfor %}
@@ -34,7 +34,7 @@
               {% if item.status != "CONCLUIDO" %}
                 <form method="post" action="{% url 'ouvidoria:chamado_concluir' item.pk %}?municipio={{ municipio.pk }}" style="display:inline;">
                   {% csrf_token %}
-                  <button class="btn btn--sm btn-primary" type="submit">Concluir</button>
+                  <button class="gp-button gp-button--primary gp-button--sm" type="submit">Concluir</button>
                 </form>
               {% else %}
                 -

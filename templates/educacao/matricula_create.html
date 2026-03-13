@@ -2,18 +2,18 @@
 {% block title %}Nova Matrícula • Educação • GEPUB{% endblock %}
 
 {% block breadcrumbs %}
-  <div class="breadcrumbs">
-    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
-    <span class="breadcrumbs__sep">/</span>
-    <a class="breadcrumbs__link" href="{% url 'educacao:index' %}">Educação</a>
-    <span class="breadcrumbs__sep">/</span>
-    <span class="breadcrumbs__current">Nova Matrícula</span>
+  <div class="gp-breadcrumb">
+    <a class="gp-breadcrumb__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="gp-breadcrumb__sep">/</span>
+    <a class="gp-breadcrumb__link" href="{% url 'educacao:index' %}">Educação</a>
+    <span class="gp-breadcrumb__sep">/</span>
+    <span class="gp-breadcrumb__current">Nova Matrícula</span>
   </div>
 {% endblock %}
 
 {% block module_content %}
-  <div class="card educacao-matricula-create">
-    <div class="card__body">
+  <div class="gp-card educacao-matricula-create">
+    <div class="gp-card__body">
 
       {% include "core/partials/components/layout/page_head.html" with title="Nova matrícula" subtitle="Busque o aluno e confirme os dados" actions=actions%}
 
@@ -24,10 +24,10 @@
             <div class="section__meta">Digite nome, CPF ou NIS e selecione pelo autocomplete.</div>
           </div>
 
-          <form method="get" action="{{ search_action_url }}" class="matricula-search-form">
+          <form method="get" action="{{ search_action_url }}" class="gp-form matricula-search-form">
             <div class="matricula-search-form__field">
               <label class="small">Buscar aluno</label>
-              <input
+              <input class="gp-input"
                 name="q"
                 value="{{ q|default:'' }}"
                 placeholder="Digite nome, CPF ou NIS..."
@@ -43,8 +43,8 @@
               {% endif %}
             </div>
             <div class="matricula-search-form__actions">
-              <button class="btn btn-primary" type="submit">Selecionar aluno</button>
-              <a class="btn btn--ghost" href="{{ clear_url }}">Limpar</a>
+              <button class="gp-button gp-button--primary" type="submit">Selecionar aluno</button>
+              <a class="gp-button gp-button--outline" href="{{ clear_url }}">Limpar</a>
             </div>
           </form>
 

@@ -4,26 +4,36 @@ from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
 from apps.core.decorators import require_perm
-from apps.core.rbac import scope_filter_turmas
+from apps.core.rbac import can, scope_filter_turmas
 
 from .forms_fechamento import FechamentoPeriodoTurmaForm
 from .models import Matricula, Turma
+from .models_diario import DiarioTurma
 from .models_periodos import FechamentoPeriodoTurma, PeriodoLetivo
 from .services_academico import calc_periodo_metrics_by_aluno, classify_resultado
+from .views_diario_permissions import is_professor
 
 
 @login_required
-@require_perm("educacao.manage")
+@require_perm("educacao.view")
 def fechamento_turma_periodo(request, pk: int):
     turma_qs = scope_filter_turmas(
         request.user,
         Turma.objects.select_related("unidade", "unidade__secretaria", "unidade__secretaria__municipio"),
     )
     turma = get_object_or_404(turma_qs, pk=pk)
+
+    can_close = can(request.user, "educacao.manage")
+    if is_professor(request.user):
+        owns_diario = DiarioTurma.objects.filter(turma=turma, professor=request.user).exists()
+        if not owns_diario:
+            return HttpResponseForbidden("403 — Somente o professor responsável pode fechar este diário.")
+        can_close = True
 
     periodos = PeriodoLetivo.objects.filter(ano_letivo=turma.ano_letivo, ativo=True).order_by("numero")
     if not periodos.exists():
@@ -87,6 +97,8 @@ def fechamento_turma_periodo(request, pk: int):
         )
 
     if request.method == "POST":
+        if not can_close:
+            return HttpResponseForbidden("403 — Você não tem permissão para concluir o fechamento.")
         if form.is_valid():
             fechamento = form.save(commit=False)
             fechamento.turma = turma
@@ -145,5 +157,6 @@ def fechamento_turma_periodo(request, pk: int):
                 {"label": "Resultado", "width": "140px"},
             ],
             "rows_preview": rows_preview,
+            "can_close": can_close,
         },
     )

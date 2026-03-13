@@ -1,0 +1,69 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Entrega #{{ obj.pk }} • Benefícios • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="gp-card"><div class="gp-card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="gp-pills">
+    <span class="gp-pills__item">{{ obj.get_status_display }}</span>
+    <span class="gp-pills__item">{{ obj.beneficio.nome }}</span>
+    <span class="gp-pills__item">Aluno: {{ obj.aluno.nome }}</span>
+    {% if obj.campanha %}<span class="gp-pills__item">Campanha: {{ obj.campanha.nome }}</span>{% endif %}
+  </div>
+
+  <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__head"><h3>Itens da entrega</h3></div><div class="gp-table__body">
+    <table class="gp-table__native">
+      <thead><tr><th>Item</th><th>Planejado</th><th>Entregue</th><th>Pendente</th><th>Substituição</th><th></th></tr></thead>
+      <tbody>
+      {% for item in items %}
+        <tr>
+          <td>{{ item.item_nome }}</td>
+          <td>{{ item.quantidade_planejada }} {{ item.unidade }}</td>
+          <td>{{ item.quantidade_entregue }} {{ item.unidade }}</td>
+          <td>{% if item.pendente %}Sim{% else %}Não{% endif %}</td>
+          <td>{% if item.substituido %}{{ item.motivo_substituicao|default:"Sim" }}{% else %}Não{% endif %}</td>
+          <td>
+            {% if can_manage %}
+            <form class="gp-form" method="post" action="{% url 'educacao:beneficio_entrega_item_remove' obj.pk item.pk %}?municipio={{ municipio.id }}">
+              {% csrf_token %}
+              <button class="gp-button gp-button--ghost gp-button--sm" type="submit">Remover</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+      <tr><td colspan="6">Sem itens.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+
+  {% if can_manage %}
+  <div class="gp-grid-2">
+    <details class="aluno-form-panel">
+      <summary><i class="fa-solid fa-plus"></i>Adicionar item manual</summary>
+      <form class="gp-form" method="post" action="{% url 'educacao:beneficio_entrega_item_add' obj.pk %}?municipio={{ municipio.id }}">
+        {% csrf_token %}
+        {{ form_item.as_p }}
+        <button class="gp-button gp-button--primary" type="submit">Adicionar item</button>
+      </form>
+    </details>
+
+    <div class="gp-card"><div class="gp-card__body">
+      <h4>Ações de execução</h4>
+      <form class="gp-form" method="post" action="{% url 'educacao:beneficio_entrega_confirmar' obj.pk %}?municipio={{ municipio.id }}">
+        {% csrf_token %}
+        <button class="gp-button gp-button--primary" type="submit" {% if obj.status == 'ENTREGUE' %}disabled{% endif %}>Confirmar entrega</button>
+      </form>
+      <form class="gp-form" method="post" action="{% url 'educacao:beneficio_entrega_estornar' obj.pk %}?municipio={{ municipio.id }}">
+        {% csrf_token %}
+        <label>Motivo do estorno</label>
+        <textarea class="gp-textarea" name="motivo" rows="2" required></textarea>
+        <button class="gp-button gp-button--danger gp-button--sm" type="submit" {% if obj.status != 'ENTREGUE' %}disabled{% endif %}>Estornar</button>
+      </form>
+    </div></div>
+  </div>
+  {% endif %}
+</div></div>
+{% endblock %}

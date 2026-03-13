@@ -18,10 +18,203 @@ from .models import (
     AssinaturaMunicipio,
     AssinaturaQuotaExtra,
     FaturaMunicipio,
+    PlanoComercialConfig,
     PlanoMunicipal,
     SolicitacaoUpgrade,
     UsoMunicipio,
 )
+
+
+class PlanoApp:
+    GESTAO = "GESTAO"
+    PORTAL = "PORTAL"
+    TRANSPARENCIA = "TRANSPARENCIA"
+    CAMARA = "CAMARA"
+
+
+PLANO_APP_ORDER: list[str] = [
+    PlanoApp.GESTAO,
+    PlanoApp.PORTAL,
+    PlanoApp.TRANSPARENCIA,
+    PlanoApp.CAMARA,
+]
+
+PLANO_APP_LABELS: dict[str, str] = {
+    PlanoApp.GESTAO: "Gestão Interna (Secretarias)",
+    PlanoApp.PORTAL: "Portal da Prefeitura",
+    PlanoApp.TRANSPARENCIA: "Portal da Transparência",
+    PlanoApp.CAMARA: "Portal da Câmara",
+}
+
+APP_FEATURE_FLAGS: dict[str, set[str]] = {
+    PlanoApp.GESTAO: {
+        "GESTAO_ORGAO_ESTRUTURA",
+        "GESTAO_USUARIOS_RBAC",
+        "GESTAO_PROTOCOLO",
+        "GESTAO_DOCUMENTOS_MODELOS",
+        "GESTAO_RELATORIOS_BASICO",
+        "GESTAO_AUDITORIA_LOGS",
+    },
+    PlanoApp.PORTAL: {
+        "PORTAL_CMS",
+        "PORTAL_PAGINAS",
+        "PORTAL_NOTICIAS",
+        "PORTAL_BANNERS",
+        "PORTAL_DOWNLOADS",
+        "PORTAL_SEO_CONFIG",
+    },
+    PlanoApp.TRANSPARENCIA: {
+        "TRANS_DADOS_RECEITAS",
+        "TRANS_DADOS_DESPESAS",
+        "TRANS_LICITACOES_CONTRATOS",
+        "TRANS_PUBLICACOES_OFICIAIS",
+        "TRANS_EXPORT_PDF_EXCEL",
+        "TRANS_ESIC",
+        "TRANS_AUDITORIA_PUBLICA",
+    },
+    PlanoApp.CAMARA: {
+        "CAMARA_CMS",
+        "CAMARA_VEREADORES_COMISSOES",
+        "CAMARA_SESSOES_PAUTAS_ATAS",
+        "CAMARA_PROPOSICOES",
+        "CAMARA_TRANSPARENCIA",
+        "CAMARA_YOUTUBE_LIVE",
+    },
+}
+
+PLANO_APPS_BY_CODE: dict[str, set[str]] = {
+    PlanoMunicipal.Codigo.STARTER: {
+        PlanoApp.GESTAO,
+    },
+    PlanoMunicipal.Codigo.MUNICIPAL: {
+        PlanoApp.GESTAO,
+        PlanoApp.PORTAL,
+    },
+    PlanoMunicipal.Codigo.GESTAO_TOTAL: {
+        PlanoApp.GESTAO,
+        PlanoApp.PORTAL,
+        PlanoApp.TRANSPARENCIA,
+    },
+    PlanoMunicipal.Codigo.CONSORCIO: {
+        PlanoApp.GESTAO,
+        PlanoApp.PORTAL,
+        PlanoApp.TRANSPARENCIA,
+        PlanoApp.CAMARA,
+    },
+}
+
+PLANO_COMERCIAL_SPECS: dict[str, dict] = {
+    PlanoMunicipal.Codigo.STARTER: {
+        "nome_comercial": "GEPUB Essencial",
+        "categoria": "Etapa 1",
+        "descricao_comercial": "Gestão interna da prefeitura com foco em organização operacional por secretarias.",
+        "beneficios": [
+            "Gestão interna completa por secretarias e unidades",
+            "Protocolo interno, documentos e trilha de operação",
+            "Controle de usuários e perfis com RBAC",
+        ],
+        "especiais": [
+            "Ideal para iniciar a digitalização municipal com governança",
+        ],
+        "limitacoes": [
+            "Não inclui Portal da Prefeitura",
+            "Não inclui Portal da Transparência",
+            "Não inclui Portal da Câmara",
+        ],
+        "dependencias": [
+            "Evolução recomendada: Gestão Integrada para ativar o Portal da Prefeitura.",
+        ],
+    },
+    PlanoMunicipal.Codigo.MUNICIPAL: {
+        "nome_comercial": "GEPUB Gestão Integrada",
+        "categoria": "Etapa 2",
+        "descricao_comercial": "Gestão interna + portal institucional da prefeitura para comunicação oficial com o cidadão.",
+        "beneficios": [
+            "Tudo do Essencial",
+            "CMS do Portal da Prefeitura com páginas, notícias e banners",
+            "Biblioteca pública de documentos e comunicados oficiais",
+        ],
+        "especiais": [
+            "Ideal para estruturar presença institucional digital",
+        ],
+        "limitacoes": [
+            "Não inclui Portal da Transparência completo",
+            "Não inclui Portal da Câmara",
+        ],
+        "dependencias": [
+            "Evolução recomendada: Transformação Digital para e-SIC e transparência completa.",
+        ],
+    },
+    PlanoMunicipal.Codigo.GESTAO_TOTAL: {
+        "nome_comercial": "GEPUB Transformação Digital",
+        "categoria": "Etapa 3",
+        "descricao_comercial": "Gestão + Portal + Transparência completa com e-SIC, exportações e trilha de auditoria pública.",
+        "beneficios": [
+            "Tudo do Gestão Integrada",
+            "Portal da Transparência com receitas, despesas, licitações e contratos",
+            "e-SIC com gestão de prazos, respostas e histórico",
+            "Exportações e relatórios para governança e auditoria",
+        ],
+        "especiais": [
+            "Ideal para fortalecer conformidade legal e reputação institucional",
+        ],
+        "limitacoes": [
+            "Não inclui Portal da Câmara completo",
+        ],
+        "dependencias": [
+            "Evolução recomendada: Governo Completo para integrar Executivo e Legislativo.",
+        ],
+    },
+    PlanoMunicipal.Codigo.CONSORCIO: {
+        "nome_comercial": "GEPUB Governo Completo",
+        "categoria": "Etapa 4",
+        "descricao_comercial": "Executivo + Legislativo em plataforma única, com portais e transparência integrados.",
+        "beneficios": [
+            "Tudo do Transformação Digital",
+            "Portal da Câmara com sessões, pautas, atas e proposições",
+            "Transparência da Câmara (gastos, contratos, licitações e diárias)",
+            "Integração com transmissões ao vivo via YouTube",
+        ],
+        "especiais": [
+            "Ideal para municípios que buscam referência em transformação digital pública",
+        ],
+        "limitacoes": [
+            "Serviços presenciais e escopos especiais dependem de proposta específica",
+        ],
+        "dependencias": [
+            "Fluxos legislativos avançados podem ser ativados por demanda.",
+        ],
+    },
+}
+
+PLANO_DOC_LINKS: dict[str, dict[str, str]] = {
+    PlanoMunicipal.Codigo.STARTER: {
+        "contratacao": "/docs/contratacao/gepub-essencial.pdf",
+        "servicos": "/docs/prestacao-servicos/gepub-essencial.pdf",
+    },
+    PlanoMunicipal.Codigo.MUNICIPAL: {
+        "contratacao": "/docs/contratacao/gepub-gestao-integrada.pdf",
+        "servicos": "/docs/prestacao-servicos/gepub-gestao-integrada.pdf",
+    },
+    PlanoMunicipal.Codigo.GESTAO_TOTAL: {
+        "contratacao": "/docs/contratacao/gepub-transformacao-digital.pdf",
+        "servicos": "/docs/prestacao-servicos/gepub-transformacao-digital.pdf",
+    },
+    PlanoMunicipal.Codigo.CONSORCIO: {
+        "contratacao": "/docs/contratacao/gepub-governo-completo.pdf",
+        "servicos": "/docs/prestacao-servicos/gepub-governo-completo.pdf",
+    },
+}
+
+LEGACY_PLAN_FEATURES: list[str] = [
+    "feature_bi_light",
+    "feature_bi_municipal",
+    "feature_bi_avancado",
+    "feature_importacao_assistida",
+    "feature_sla_prioritario",
+    "feature_migracao_assistida",
+    "feature_treinamento_continuo",
+]
 
 
 class MetricaLimite:
@@ -68,6 +261,110 @@ class ResultadoSimulador:
     total_adicionais: Decimal
     total_mensal: Decimal
     justificativa: str
+
+
+def _limit_text(value: int | None) -> str:
+    if value is None:
+        return "Ilimitado (fair use)"
+    return str(int(value))
+
+
+def plan_apps_for_code(plan_code: str | None) -> set[str]:
+    return set(PLANO_APPS_BY_CODE.get(str(plan_code or "").strip(), {PlanoApp.GESTAO}))
+
+
+def plan_feature_flags_for_code(plan_code: str | None) -> set[str]:
+    apps = plan_apps_for_code(plan_code)
+    features: set[str] = set()
+    for app in apps:
+        features.update(APP_FEATURE_FLAGS.get(app, set()))
+    return features
+
+
+def plan_app_labels_for_code(plan_code: str | None) -> list[str]:
+    apps = plan_apps_for_code(plan_code)
+    return [PLANO_APP_LABELS[item] for item in PLANO_APP_ORDER if item in apps]
+
+
+def plano_comercial_data(plano: PlanoMunicipal | None) -> dict:
+    if not plano:
+        return {
+            "codigo": "",
+            "nome": "",
+            "nome_comercial": "Plano não definido",
+            "categoria": "",
+            "descricao_comercial": "Defina um plano para liberar limites e benefícios comerciais.",
+            "beneficios": [],
+            "especiais": [],
+            "limitacoes": [],
+            "dependencias": [],
+            "features_habilitadas": [],
+            "limites": {
+                "secretarias": "Ilimitado",
+                "usuarios": "Ilimitado",
+                "alunos": "Ilimitado",
+                "atendimentos_ano": "Ilimitado",
+            },
+            "links": {
+                "contratacao": "#",
+                "servicos": "#",
+            },
+        }
+
+    spec = PLANO_COMERCIAL_SPECS.get(plano.codigo, {})
+    links = PLANO_DOC_LINKS.get(plano.codigo, {})
+    config: PlanoComercialConfig | None = getattr(plano, "comercial_config", None)
+    apps_habilitados = plan_app_labels_for_code(plano.codigo)
+    features_habilitadas = apps_habilitados
+    beneficios = list((config.beneficios if config else None) or spec.get("beneficios", []))
+    especiais = list((config.especiais if config else None) or spec.get("especiais", []))
+    limitacoes = list((config.limitacoes if config else None) or spec.get("limitacoes", []))
+    dependencias = list((config.dependencias if config else None) or spec.get("dependencias", []))
+    for item in apps_habilitados:
+        if item not in beneficios:
+            beneficios.append(item)
+
+    return {
+        "codigo": plano.codigo,
+        "nome": plano.nome,
+        "nome_comercial": (config.nome_comercial if config else "") or spec.get("nome_comercial") or plano.nome,
+        "categoria": (config.categoria if config else "") or spec.get("categoria", ""),
+        "descricao_comercial": (config.descricao_comercial if config else "") or spec.get("descricao_comercial") or plano.descricao,
+        "beneficios": beneficios,
+        "especiais": especiais,
+        "limitacoes": limitacoes,
+        "dependencias": dependencias,
+        "apps_habilitados": apps_habilitados,
+        "features_habilitadas": features_habilitadas,
+        "limites": {
+            "secretarias": "Ilimitado",
+            "usuarios": _limit_text(plano.limite_usuarios),
+            "alunos": _limit_text(plano.limite_alunos),
+            "atendimentos_ano": _limit_text(plano.limite_atendimentos_ano),
+        },
+        "links": {
+            "contratacao": (config.link_documento_contratacao if config else "") or links.get("contratacao", "#"),
+            "servicos": (config.link_documento_servicos if config else "") or links.get("servicos", "#"),
+        },
+    }
+
+
+def catalogo_planos_comercial(planos: list[PlanoMunicipal] | None = None) -> list[dict]:
+    if planos is None:
+        planos = list(
+            PlanoMunicipal.objects.filter(
+                ativo=True,
+                codigo__in=[
+                    PlanoMunicipal.Codigo.STARTER,
+                    PlanoMunicipal.Codigo.MUNICIPAL,
+                    PlanoMunicipal.Codigo.GESTAO_TOTAL,
+                    PlanoMunicipal.Codigo.CONSORCIO,
+                ],
+            )
+            .select_related("comercial_config")
+            .order_by("preco_base_mensal", "nome")
+        )
+    return [plano_comercial_data(plano) for plano in planos]
 
 
 def _hoje() -> timezone.datetime.date:
@@ -119,6 +416,47 @@ def get_assinatura_ativa(municipio: Municipio, *, criar_default: bool = True) ->
         contrato_meses=12,
         preco_base_congelado=starter.preco_base_mensal,
     )
+
+
+def municipio_plan_features(municipio: Municipio | None) -> set[str]:
+    """
+    Retorna as features habilitadas no plano ativo do município.
+    """
+    if not municipio:
+        return set()
+    assinatura = get_assinatura_ativa(municipio, criar_default=False)
+    if not assinatura or not assinatura.plano_id:
+        return set()
+
+    plano = assinatura.plano
+    features: set[str] = set(plan_feature_flags_for_code(plano.codigo))
+    for attr in LEGACY_PLAN_FEATURES:
+        if bool(getattr(plano, attr, False)):
+            features.add(attr)
+    return features
+
+
+def municipio_plan_apps(municipio: Municipio | None) -> set[str]:
+    if not municipio:
+        return set()
+    assinatura = get_assinatura_ativa(municipio, criar_default=False)
+    if not assinatura or not assinatura.plano_id:
+        return set()
+    return plan_apps_for_code(assinatura.plano.codigo)
+
+
+def municipio_has_plan_app(municipio: Municipio | None, app_key: str) -> bool:
+    app = (app_key or "").strip().upper()
+    if not app:
+        return False
+    return app in municipio_plan_apps(municipio)
+
+
+def municipio_has_plan_feature(municipio: Municipio | None, feature_name: str) -> bool:
+    feature = (feature_name or "").strip()
+    if not feature:
+        return False
+    return feature in municipio_plan_features(municipio)
 
 
 def recalc_uso_municipio(municipio: Municipio, *, ano: int | None = None) -> UsoMunicipio:
@@ -173,7 +511,8 @@ def _valor_unitario_por_metrica(plano: PlanoMunicipal, metrica: str) -> Decimal:
 
 def _limite_base_por_metrica(plano: PlanoMunicipal, metrica: str) -> int | None:
     if metrica == MetricaLimite.SECRETARIAS:
-        return plano.limite_secretarias
+        # Política comercial atual: sem limitação de secretarias por plano.
+        return None
     if metrica == MetricaLimite.USUARIOS:
         return plano.limite_usuarios
     if metrica == MetricaLimite.ALUNOS:
@@ -474,8 +813,10 @@ def recomendar_plano_por_porte(*, alunos: int) -> PlanoMunicipal | None:
         codigo = PlanoMunicipal.Codigo.STARTER
     elif alunos <= 8000:
         codigo = PlanoMunicipal.Codigo.MUNICIPAL
-    else:
+    elif alunos <= 20000:
         codigo = PlanoMunicipal.Codigo.GESTAO_TOTAL
+    else:
+        codigo = PlanoMunicipal.Codigo.CONSORCIO
     return PlanoMunicipal.objects.filter(codigo=codigo, ativo=True).first()
 
 
@@ -505,12 +846,7 @@ def simular_plano(
             }
         )
 
-    if plano.limite_secretarias is not None:
-        _add_extra(
-            "Secretarias extras",
-            max(0, int(secretarias) - int(plano.limite_secretarias)),
-            plano.valor_secretaria_extra,
-        )
+    # Política comercial atual: secretarias sem cobrança de excedente.
 
     if plano.limite_usuarios is not None:
         _add_extra(
@@ -537,11 +873,13 @@ def simular_plano(
     total_mensal = (plano.preco_base_mensal + total_adicionais).quantize(Decimal("0.01"))
 
     if plano.codigo == PlanoMunicipal.Codigo.STARTER:
-        justificativa = "Porte municipal pequeno com melhor custo de entrada." 
+        justificativa = "Plano base para organizar a gestão interna por secretarias."
     elif plano.codigo == PlanoMunicipal.Codigo.MUNICIPAL:
-        justificativa = "Plano recomendado por equilíbrio entre cobertura e custo-benefício."
+        justificativa = "Gestão + Portal da Prefeitura para comunicação institucional."
+    elif plano.codigo == PlanoMunicipal.Codigo.GESTAO_TOTAL:
+        justificativa = "Gestão + Portal + Transparência para governança e conformidade."
     else:
-        justificativa = "Porte médio/grande, com necessidade de escala e BI executivo."
+        justificativa = "Executivo + Legislativo com portais completos e integração Câmara."
 
     return ResultadoSimulador(
         plano=plano,

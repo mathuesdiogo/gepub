@@ -2,8 +2,16 @@
 {% block title %}Fila de Espera • Saúde • GEPUB{% endblock %}
 
 {% block module_content %}
-<div class="card"><div class="card__body">
+<div class="gp-card"><div class="gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title="Fila de Espera" subtitle="Gestão de pacientes aguardando vaga" actions=actions %}
+  <div class="grid grid--5">
+    {% include "core/partials/components/data/kpi_card.html" with label="Total" value=metrics.total %}
+    {% include "core/partials/components/data/kpi_card.html" with label="Aguardando" value=metrics.aguardando %}
+    {% include "core/partials/components/data/kpi_card.html" with label="Chamado" value=metrics.chamado %}
+    {% include "core/partials/components/data/kpi_card.html" with label="Convertido" value=metrics.convertido %}
+    {% include "core/partials/components/data/kpi_card.html" with label="Fora SLA" value=metrics.fora_sla %}
+  </div>
+  <p class="small u-mt-8">SLA atual de espera: {{ metrics.sla_days }} dias.</p>
   {% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Buscar por paciente, contato, unidade..." action_url=action_url clear_url=clear_url has_filters=has_filters extra_filters=extra_filters %}
   {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj empty_title="Nenhuma entrada encontrada" empty_text="Cadastre a primeira entrada da fila." %}
 </div></div>

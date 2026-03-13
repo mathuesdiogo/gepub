@@ -1,0 +1,123 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}{{ turma.codigo }} • Turma de Informática • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+  <div class="gp-card u-mb-12">
+    <div class="gp-card__body">
+      {% include "core/partials/components/layout/page_head.html" with title=turma.codigo subtitle=turma.curso.nome actions=None %}
+
+      <div class="edu-kpis">
+        <article class="edu-kpi">
+          <div><div class="edu-kpi__label">Laboratório</div><div class="edu-kpi__value">{{ turma.laboratorio.nome }}</div><div class="edu-kpi__meta">{{ turma.laboratorio.unidade.nome }}</div></div>
+          <div class="edu-kpi__icon"><i class="fa-solid fa-laptop"></i></div>
+        </article>
+        <article class="edu-kpi">
+          <div><div class="edu-kpi__label">Grade</div><div class="edu-kpi__value">{% if turma.grade_horario %}{{ turma.grade_horario.codigo }}{% else %}—{% endif %}</div><div class="edu-kpi__meta">{% if turma.grade_horario %}{{ turma.grade_horario.nome }}{% endif %}</div></div>
+          <div class="edu-kpi__icon"><i class="fa-solid fa-calendar-week"></i></div>
+        </article>
+        <article class="edu-kpi">
+          <div><div class="edu-kpi__label">Vagas</div><div class="edu-kpi__value">{{ turma.vagas_ocupadas }}/{{ turma.max_vagas }}</div><div class="edu-kpi__meta">Matriculados ativos</div></div>
+          <div class="edu-kpi__icon"><i class="fa-solid fa-user-group"></i></div>
+        </article>
+        <article class="edu-kpi">
+          <div><div class="edu-kpi__label">Instrutor</div><div class="edu-kpi__value">{% if turma.instrutor %}{{ turma.instrutor.get_full_name|default:turma.instrutor.username }}{% else %}—{% endif %}</div><div class="edu-kpi__meta">Responsável pela turma</div></div>
+          <div class="edu-kpi__icon"><i class="fa-solid fa-chalkboard-user"></i></div>
+        </article>
+        <article class="edu-kpi">
+          <div><div class="edu-kpi__label">Modalidade</div><div class="edu-kpi__value">{% if turma.encontro_unico_semana %}Especial de Sexta{% else %}Padrão Semanal{% endif %}</div><div class="edu-kpi__meta">{{ turma.carga_horaria_semanal_minutos }} min/semana</div></div>
+          <div class="edu-kpi__icon"><i class="fa-solid fa-clock"></i></div>
+        </article>
+      </div>
+
+      <div class="u-mt-10">
+        <a class="gp-button gp-button--outline" href="{% url 'educacao:informatica_turma_list' %}"><i class="fa-solid fa-arrow-left"></i> Voltar</a>
+        {% if can_manage %}
+          <a class="gp-button gp-button--primary" href="{% url 'educacao:informatica_turma_update' turma.pk %}"><i class="fa-solid fa-pen"></i> Editar turma</a>
+        {% endif %}
+        {% if can_matricular %}
+          <a class="gp-button gp-button--outline" href="{% url 'educacao:informatica_matricula_create' %}?turma={{ turma.pk }}"><i class="fa-solid fa-user-plus"></i> Nova matrícula</a>
+        {% endif %}
+      </div>
+
+      <hr class="divider">
+      <h3>Encontros semanais</h3>
+      <ul>
+        {% for e in turma.encontros_ativos_qs %}
+          <li>{{ e.get_dia_semana_display }} • {{ e.hora_inicio|time:"H:i" }} - {{ e.hora_fim|time:"H:i" }}</li>
+        {% empty %}
+          <li>Nenhum encontro ativo definido.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="gp-card u-mb-12">
+    <div class="gp-card__body">
+      <h3>Alunos matriculados</h3>
+      <table class="table gp-table--striped gp-table--hover">
+        <thead>
+          <tr>
+            <th>Aluno</th>
+            <th>Escola de origem</th>
+            <th>Status</th>
+            <th>Origem</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in matriculas %}
+            <tr>
+              <td>{{ m.aluno.nome }}</td>
+              <td>{{ m.escola_origem.nome }}</td>
+              <td>{{ m.get_status_display }}</td>
+              <td>{% if m.externo_laboratorio %}Externo{% else %}Interno{% endif %}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4">Nenhuma matrícula para esta turma.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% if can_view_execucao %}
+    <div class="gp-card u-mb-12">
+      <div class="gp-card__body">
+        <h3>Últimas aulas</h3>
+        <table class="table gp-table--striped gp-table--hover">
+          <thead><tr><th>Data</th><th>Conteúdo</th><th>Ações</th></tr></thead>
+          <tbody>
+            {% for aula in aulas %}
+              <tr>
+                <td>{{ aula.data_aula|date:"d/m/Y" }}</td>
+                <td>{{ aula.conteudo_ministrado|default:"—"|truncatechars:90 }}</td>
+                <td><a class="gp-button gp-button--outline" href="{% url 'educacao:informatica_frequencia_aula' aula.pk %}">Frequência</a></td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="3">Nenhuma aula registrada para esta turma.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="gp-card">
+    <div class="gp-card__body">
+      <h3>Lista de espera do curso</h3>
+      <table class="table gp-table--striped gp-table--hover">
+        <thead><tr><th>Posição</th><th>Aluno</th><th>Escola</th></tr></thead>
+        <tbody>
+          {% for item in lista_espera %}
+            <tr>
+              <td>{{ item.posicao }}</td>
+              <td>{{ item.aluno.nome }}</td>
+              <td>{{ item.escola_origem.nome }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="3">Sem fila ativa.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

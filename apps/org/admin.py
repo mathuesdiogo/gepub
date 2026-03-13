@@ -3,6 +3,7 @@ from .models import (
     Municipio,
     Secretaria,
     Unidade,
+    Address,
     Setor,
     SecretariaTemplate,
     SecretariaTemplateItem,
@@ -10,6 +11,7 @@ from .models import (
     MunicipioModuloAtivo,
     SecretariaModuloAtivo,
     OnboardingStep,
+    MunicipioThemeConfig,
 )
 
 
@@ -39,6 +41,13 @@ class SetorAdmin(admin.ModelAdmin):
     list_display = ("nome", "unidade", "ativo")
     search_fields = ("nome", "unidade__nome")
     list_filter = ("ativo", "unidade")
+
+
+@admin.register(Address)
+class AddressAdmin(admin.ModelAdmin):
+    list_display = ("entity_type", "entity_id", "label", "cidade", "estado", "is_primary", "is_public", "is_active")
+    search_fields = ("logradouro", "bairro", "cidade", "cep")
+    list_filter = ("entity_type", "estado", "is_primary", "is_public", "is_active", "geocode_status", "geocode_provider")
 
 
 @admin.register(SecretariaTemplate)
@@ -81,3 +90,17 @@ class OnboardingStepAdmin(admin.ModelAdmin):
     list_display = ("municipio", "secretaria", "modulo", "codigo", "ordem", "status")
     search_fields = ("municipio__nome", "secretaria__nome", "modulo", "codigo", "titulo")
     list_filter = ("modulo", "status")
+
+
+@admin.register(MunicipioThemeConfig)
+class MunicipioThemeConfigAdmin(admin.ModelAdmin):
+    list_display = (
+        "municipio",
+        "default_theme",
+        "lock_theme_for_users",
+        "allow_user_theme_override",
+        "ds_version",
+        "atualizado_em",
+    )
+    search_fields = ("municipio__nome",)
+    list_filter = ("default_theme", "lock_theme_for_users", "allow_user_theme_override", "ds_version")

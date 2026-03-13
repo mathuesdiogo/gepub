@@ -1,0 +1,38 @@
+{% extends "educacao/base_modulo.html" %}
+{% load gepub_ui %}
+{% block title %}Ensino • Processos Seletivos • {{ aluno.nome }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <article class="gp-student-stage__card">
+    <h3>Processos Seletivos</h3>
+    <ul class="gp-student-list">
+      {% for e in editais_educacao %}
+        <li class="gp-student-list__item">
+          <strong>{{ e.numero_ano }} • {{ e.titulo }}</strong>
+          <p>{{ e.beneficio.nome }} • {{ e.get_status_display }}</p>
+          {% with inscr=inscricoes_map|get_item:e.id %}
+            {% if inscr %}
+              <small>Inscrição: {{ inscr.get_status_display }}</small>
+            {% else %}
+              <form method="post" class="gp-inline-form gp-mt-2">
+                {% csrf_token %}
+                <input type="hidden" name="form_kind" value="inscrever_edital">
+                <input type="hidden" name="edital_id" value="{{ e.id }}">
+                <button class="gp-button gp-button--outline" type="submit">Inscrever-se</button>
+              </form>
+            {% endif %}
+          {% endwith %}
+        </li>
+      {% empty %}
+        <li class="gp-student-empty">Nenhum edital ativo para inscrição.</li>
+      {% endfor %}
+    </ul>
+
+    <h4 class="gp-mt-3">Estágios e Projetos</h4>
+    <p class="gp-text-muted">As inscrições em estágios e projetos são acompanhadas pelos editais e processos seletivos desta seção.</p>
+  </article>
+</section>
+{% endblock %}
