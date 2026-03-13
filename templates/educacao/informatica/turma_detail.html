@@ -28,17 +28,17 @@
             <strong>{% if turma.instrutor %}{{ turma.instrutor.get_full_name|default:turma.instrutor.username }}{% else %}—{% endif %}</strong>
             <small>{% if turma.encontro_unico_semana %}Especial de Sexta{% else %}Padrão Semanal{% endif %} • {{ turma.carga_horaria_semanal_minutos }} min/semana</small>
           </div>
-        </div>
-
-        <div class="edu-inf-turma-clean__schedule">
-          <h4>Encontros semanais</h4>
-          <ul>
-            {% for e in turma.encontros_ativos_qs %}
-              <li>{{ e.get_dia_semana_display }} • {{ e.hora_inicio|time:"H:i" }} - {{ e.hora_fim|time:"H:i" }}</li>
-            {% empty %}
-              <li>Nenhum encontro ativo definido.</li>
-            {% endfor %}
-          </ul>
+          <div class="edu-inf-turma-clean__chip">
+            <span>Encontros</span>
+            <strong>Horários semanais</strong>
+            <small>
+              {% for e in turma.encontros_ativos_qs %}
+                {{ e.get_dia_semana_display }} {{ e.hora_inicio|time:"H:i" }}-{{ e.hora_fim|time:"H:i" }}{% if not forloop.last %} • {% endif %}
+              {% empty %}
+                Nenhum encontro ativo definido.
+              {% endfor %}
+            </small>
+          </div>
         </div>
 
         <div class="edu-inf-turma-clean__actions">
