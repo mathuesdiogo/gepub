@@ -1,0 +1,115 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Ensino • Renovação de Matrícula • {{ aluno.nome }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  {% for renovacao in renovacoes_abertas %}
+    <article class="gp-student-stage__card">
+      <h3>{{ renovacao.descricao }}</h3>
+      <p>
+        Secretaria: <strong>{{ renovacao.secretaria.nome }}</strong>
+        • Janela: <strong>{{ renovacao.data_inicio|date:"d/m/Y" }}</strong> até <strong>{{ renovacao.data_fim|date:"d/m/Y" }}</strong>
+        {% if renovacao.periodo_letivo %}
+          • Período: <strong>{{ renovacao.periodo_letivo.ano_letivo }}/{{ renovacao.periodo_letivo.numero }}</strong>
+        {% endif %}
+      </p>
+
+      <div class="gp-table gp-table--responsive gp-table--striped"><div class="gp-table__body">
+        <table class="gp-table__native">
+          <thead>
+            <tr>
+              <th>Turma ofertada</th>
+              <th>Unidade</th>
+              <th>Prioridade</th>
+              <th>Observação</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for oferta in renovacao.ofertas_ativas %}
+              <tr>
+                <td>{{ oferta.turma.nome }}</td>
+                <td>{{ oferta.turma.unidade.nome|default:"—" }}</td>
+                <td>
+                  <form method="post" class="gp-inline-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_kind" value="pedido_renovacao">
+                    <input type="hidden" name="renovacao_id" value="{{ renovacao.id }}">
+                    <input type="hidden" name="oferta_id" value="{{ oferta.id }}">
+                    <select name="prioridade" class="gp-select" style="min-width: 110px">
+                      <option value="1">1 (mais alta)</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5">5</option>
+                      <option value="6">6</option>
+                    </select>
+                </td>
+                <td>
+                    <input type="text" name="observacao_aluno" class="gp-input" placeholder="Opcional" maxlength="500">
+                </td>
+                <td>
+                    <button class="gp-button gp-button--outline" type="submit">Enviar pedido</button>
+                  </form>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5">Nenhuma oferta ativa cadastrada para esta renovação.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div></div>
+
+      <h4 class="u-mt-12">Meus pedidos nesta renovação</h4>
+      <div class="gp-table gp-table--responsive gp-table--striped"><div class="gp-table__body">
+        <table class="gp-table__native">
+          <thead>
+            <tr>
+              <th>Turma</th>
+              <th>Prioridade</th>
+              <th>Status</th>
+              <th>Observação do processamento</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for pedido in renovacao.meus_pedidos %}
+              <tr>
+                <td>{{ pedido.oferta.turma.nome }}</td>
+                <td>{{ pedido.prioridade }}</td>
+                <td>{{ pedido.get_status_display }}</td>
+                <td>{{ pedido.observacao_processamento|default:"—" }}</td>
+                <td>
+                  {% if pedido.status == 'PENDENTE' %}
+                    <form method="post" class="gp-inline-form">
+                      {% csrf_token %}
+                      <input type="hidden" name="form_kind" value="cancelar_pedido_renovacao">
+                      <input type="hidden" name="pedido_id" value="{{ pedido.id }}">
+                      <button class="gp-button gp-button--ghost" type="submit">Cancelar</button>
+                    </form>
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5">Você ainda não possui pedidos para esta renovação.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div></div>
+    </article>
+  {% empty %}
+    <article class="gp-student-stage__card">
+      <h3>Renovação de Matrícula</h3>
+      <p>Nenhuma janela de renovação está aberta para as suas turmas no momento.</p>
+    </article>
+  {% endfor %}
+</section>
+{% endblock %}

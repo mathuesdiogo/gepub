@@ -13,12 +13,13 @@ from apps.core.rbac import (
     role_scope_base,
     scope_filter_alunos,
     scope_filter_matriculas,
+    scope_filter_secretarias,
     scope_filter_turmas,
     scope_filter_unidades,
 )
-from apps.org.models import Unidade
+from apps.org.models import Secretaria, Unidade
 
-from .models import Aluno, Matricula, MatrizCurricular, Turma
+from .models import Aluno, Matricula, MatrizCurricular, RenovacaoMatricula, Turma
 from .models_calendario import CalendarioEducacionalEvento
 from .models_diario import Aula, DiarioTurma, JustificativaFaltaPedido
 from . import views_alunos_crud, views_turmas_crud
@@ -129,12 +130,39 @@ def index(request):
         unidades_scope = unidades_educacao_qs
         matrizes_total = matrizes_qs.filter(unidade__in=unidades_scope, ativo=True).count()
 
+        secretarias_scope = scope_filter_secretarias(user, Secretaria.objects.all())
+        hoje = timezone.localdate()
+        renovacoes_qs = RenovacaoMatricula.objects.filter(secretaria__in=secretarias_scope)
+        renovacoes_total = renovacoes_qs.count()
+        renovacoes_agendadas = renovacoes_qs.filter(
+            ativo=True,
+            processado_em__isnull=True,
+            data_inicio__gt=hoje,
+        ).count()
+        renovacoes_abertas = renovacoes_qs.filter(
+            ativo=True,
+            processado_em__isnull=True,
+            data_inicio__lte=hoje,
+            data_fim__gte=hoje,
+        ).count()
+        renovacoes_pendentes_processamento = renovacoes_qs.filter(
+            ativo=True,
+            processado_em__isnull=True,
+            data_fim__lt=hoje,
+        ).count()
+        renovacoes_processadas = renovacoes_qs.filter(processado_em__isnull=False).count()
+
         data = {
             "unidades_total": unidades_total,
             "turmas_total": turmas_total,
             "alunos_total": alunos_total,
             "matriculas_total": matriculas_total,
             "matrizes_total": matrizes_total,
+            "renovacoes_total": renovacoes_total,
+            "renovacoes_agendadas": renovacoes_agendadas,
+            "renovacoes_abertas": renovacoes_abertas,
+            "renovacoes_pendentes_processamento": renovacoes_pendentes_processamento,
+            "renovacoes_processadas": renovacoes_processadas,
         }
 
         cache.set(cache_key, data, 300)

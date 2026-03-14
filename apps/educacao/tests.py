@@ -5,6 +5,7 @@ from datetime import date, time, timedelta
 from decimal import Decimal
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 from django.contrib.auth import get_user_model
 
@@ -28,6 +29,9 @@ from apps.educacao.models import (
     Matricula,
     MatriculaCurso,
     MatriculaMovimentacao,
+    RenovacaoMatricula,
+    RenovacaoMatriculaOferta,
+    RenovacaoMatriculaPedido,
     Estagio,
     Turma,
 )
@@ -65,7 +69,12 @@ from apps.educacao.models_informatica import (
     InformaticaMatriculaMovimentacao,
     InformaticaTurma,
 )
-from apps.educacao.services_matricula import registrar_movimentacao
+from apps.educacao.services_matricula import (
+    aplicar_movimentacao_matricula,
+    desfazer_movimentacao_matricula,
+    desfazer_ultima_movimentacao_matricula,
+    registrar_movimentacao,
+)
 from apps.educacao.services_requisitos import (
     avaliar_requisitos_matricula,
     registrar_override_requisitos_matricula,
@@ -74,6 +83,7 @@ from apps.educacao.services_turma_setup import (
     clonar_matriz_para_ano,
     preencher_componentes_base_matriz,
 )
+from apps.educacao.views_renovacao import _processar_pedidos_renovacao
 from apps.org.models import Municipio, Secretaria, Unidade
 from apps.processos.models import ProcessoAdministrativo
 from apps.ouvidoria.models import OuvidoriaCadastro
@@ -111,6 +121,219 @@ class EducacaoRoutesSmokeTestCase(TestCase):
         self.assertIn("/informatica/alunos/novo/", reverse("educacao:informatica_aluno_create"))
         self.assertIn("/informatica/api/aluno/1/origem/", reverse("educacao:informatica_api_aluno_origem", args=[1]))
         self.assertIn("/informatica/matriculas/1/remanejar/", reverse("educacao:informatica_matricula_remanejar", args=[1]))
+        self.assertIn("/matriculas/renovacao/", reverse("educacao:renovacao_matricula_list"))
+        self.assertIn("/aluno/aln1/ensino/renovacao-matricula/", reverse("educacao:aluno_ensino_renovacao", args=["aln1"]))
+
+
+class RenovacaoMatriculaModelTestCase(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            username="renovacao_admin",
+            email="renovacao.admin@example.com",
+            password="123456",
+        )
+        self.municipio = Municipio.objects.create(nome="Cidade Renovação", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="Secretaria de Educação")
+        self.unidade = Unidade.objects.create(
+            secretaria=self.secretaria,
+            nome="Escola Renovação",
+            tipo=Unidade.Tipo.EDUCACAO,
+        )
+        self.turma = Turma.objects.create(
+            unidade=self.unidade,
+            nome="6º Ano A",
+            ano_letivo=2026,
+            turno=Turma.Turno.MANHA,
+        )
+        self.aluno = Aluno.objects.create(nome="Aluno Renovação")
+
+    def test_etapas_por_janela_e_processamento(self):
+        hoje = date.today()
+        renovacao = RenovacaoMatricula.objects.create(
+            descricao="Renovação 2026",
+            ano_letivo=2026,
+            secretaria=self.secretaria,
+            data_inicio=hoje + timedelta(days=2),
+            data_fim=hoje + timedelta(days=10),
+            criado_por=self.user,
+        )
+        self.assertEqual(renovacao.etapa_atual(ref_date=hoje), RenovacaoMatricula.Etapa.AGENDADA)
+        self.assertEqual(renovacao.etapa_atual(ref_date=hoje + timedelta(days=3)), RenovacaoMatricula.Etapa.AGUARDANDO_MATRICULA)
+        self.assertEqual(
+            renovacao.etapa_atual(ref_date=hoje + timedelta(days=20)),
+            RenovacaoMatricula.Etapa.AGUARDANDO_PROCESSAMENTO,
+        )
+
+        renovacao.processado_em = timezone.now()
+        renovacao.save(update_fields=["processado_em"])
+        self.assertEqual(renovacao.etapa_atual(ref_date=hoje + timedelta(days=20)), RenovacaoMatricula.Etapa.PROCESSADA)
+
+    def test_pedido_deve_ter_oferta_da_mesma_renovacao(self):
+        hoje = date.today()
+        renovacao_1 = RenovacaoMatricula.objects.create(
+            descricao="Renovação A",
+            ano_letivo=2026,
+            secretaria=self.secretaria,
+            data_inicio=hoje,
+            data_fim=hoje + timedelta(days=5),
+            criado_por=self.user,
+        )
+        renovacao_2 = RenovacaoMatricula.objects.create(
+            descricao="Renovação B",
+            ano_letivo=2026,
+            secretaria=self.secretaria,
+            data_inicio=hoje,
+            data_fim=hoje + timedelta(days=5),
+            criado_por=self.user,
+        )
+        oferta = RenovacaoMatriculaOferta.objects.create(renovacao=renovacao_2, turma=self.turma)
+        pedido = RenovacaoMatriculaPedido(
+            renovacao=renovacao_1,
+            aluno=self.aluno,
+            oferta=oferta,
+            prioridade=1,
+        )
+        with self.assertRaises(ValidationError):
+            pedido.full_clean()
+
+
+class RenovacaoMatriculaProcessingTestCase(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            username="renovacao_proc_admin",
+            email="renovacao.proc@example.com",
+            password="123456",
+        )
+        self.municipio = Municipio.objects.create(nome="Cidade Processamento", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="Secretaria Municipal de Educação")
+        self.unidade = Unidade.objects.create(
+            secretaria=self.secretaria,
+            nome="Escola Processamento",
+            tipo=Unidade.Tipo.EDUCACAO,
+        )
+        self.turma_origem = Turma.objects.create(
+            unidade=self.unidade,
+            nome="7º Ano A",
+            ano_letivo=2026,
+            turno=Turma.Turno.MANHA,
+        )
+        self.turma_destino_1 = Turma.objects.create(
+            unidade=self.unidade,
+            nome="7º Ano B",
+            ano_letivo=2026,
+            turno=Turma.Turno.MANHA,
+        )
+        self.turma_destino_2 = Turma.objects.create(
+            unidade=self.unidade,
+            nome="7º Ano C",
+            ano_letivo=2026,
+            turno=Turma.Turno.MANHA,
+        )
+        hoje = date.today()
+        self.renovacao = RenovacaoMatricula.objects.create(
+            descricao="Renovação Processamento 2026",
+            ano_letivo=2026,
+            secretaria=self.secretaria,
+            data_inicio=hoje - timedelta(days=3),
+            data_fim=hoje + timedelta(days=3),
+            criado_por=self.user,
+        )
+        self.oferta_1 = RenovacaoMatriculaOferta.objects.create(
+            renovacao=self.renovacao,
+            turma=self.turma_destino_1,
+        )
+        self.oferta_2 = RenovacaoMatriculaOferta.objects.create(
+            renovacao=self.renovacao,
+            turma=self.turma_destino_2,
+        )
+
+    def test_processamento_aprova_maior_prioridade_e_remaneja_matricula_ativa(self):
+        aluno = Aluno.objects.create(nome="Aluno Prioridade")
+        matricula_origem = Matricula.objects.create(
+            aluno=aluno,
+            turma=self.turma_origem,
+            situacao=Matricula.Situacao.ATIVA,
+        )
+        pedido_prioridade_2 = RenovacaoMatriculaPedido.objects.create(
+            renovacao=self.renovacao,
+            aluno=aluno,
+            oferta=self.oferta_1,
+            prioridade=2,
+        )
+        pedido_prioridade_1 = RenovacaoMatriculaPedido.objects.create(
+            renovacao=self.renovacao,
+            aluno=aluno,
+            oferta=self.oferta_2,
+            prioridade=1,
+        )
+
+        resultado = _processar_pedidos_renovacao(self.renovacao, self.user)
+
+        self.assertEqual(resultado["total"], 2)
+        self.assertEqual(resultado["aprovados"], 1)
+        self.assertEqual(resultado["rejeitados"], 1)
+
+        pedido_prioridade_1.refresh_from_db()
+        pedido_prioridade_2.refresh_from_db()
+        matricula_origem.refresh_from_db()
+
+        self.assertEqual(pedido_prioridade_1.status, RenovacaoMatriculaPedido.Status.APROVADO)
+        self.assertEqual(pedido_prioridade_2.status, RenovacaoMatriculaPedido.Status.REJEITADO)
+        self.assertEqual(matricula_origem.turma_id, self.turma_destino_2.id)
+        self.assertEqual(matricula_origem.situacao, Matricula.Situacao.ATIVA)
+        self.assertEqual(Matricula.objects.filter(aluno=aluno).count(), 1)
+        self.assertTrue(
+            MatriculaMovimentacao.objects.filter(
+                matricula=matricula_origem,
+                tipo=MatriculaMovimentacao.Tipo.REMANEJAMENTO,
+                turma_origem=self.turma_origem,
+                turma_destino=self.turma_destino_2,
+            ).exists()
+        )
+
+    def test_processamento_rejeita_quando_oferta_esta_inativa(self):
+        aluno = Aluno.objects.create(nome="Aluno Oferta Inativa")
+        self.oferta_1.ativo = False
+        self.oferta_1.save(update_fields=["ativo"])
+
+        pedido = RenovacaoMatriculaPedido.objects.create(
+            renovacao=self.renovacao,
+            aluno=aluno,
+            oferta=self.oferta_1,
+            prioridade=1,
+        )
+
+        resultado = _processar_pedidos_renovacao(self.renovacao, self.user)
+        pedido.refresh_from_db()
+
+        self.assertEqual(resultado["total"], 1)
+        self.assertEqual(resultado["aprovados"], 0)
+        self.assertEqual(resultado["rejeitados"], 1)
+        self.assertEqual(pedido.status, RenovacaoMatriculaPedido.Status.REJEITADO)
+        self.assertIn("oferta indisponível", pedido.observacao_processamento.lower())
+        self.assertFalse(Matricula.objects.filter(aluno=aluno).exists())
+
+    def test_processamento_cria_matricula_quando_nao_existe_ativa_no_ano(self):
+        aluno = Aluno.objects.create(nome="Aluno Sem Matrícula")
+        pedido = RenovacaoMatriculaPedido.objects.create(
+            renovacao=self.renovacao,
+            aluno=aluno,
+            oferta=self.oferta_1,
+            prioridade=1,
+        )
+
+        resultado = _processar_pedidos_renovacao(self.renovacao, self.user)
+        pedido.refresh_from_db()
+
+        self.assertEqual(resultado["aprovados"], 1)
+        self.assertEqual(pedido.status, RenovacaoMatriculaPedido.Status.APROVADO)
+        self.assertIsNotNone(pedido.matricula_resultante)
+        self.assertTrue(
+            MatriculaMovimentacao.objects.filter(
+                matricula=pedido.matricula_resultante,
+                tipo=MatriculaMovimentacao.Tipo.CRIACAO,
+            ).exists()
+        )
 
 
 class InformaticaGradeTurmaRulesTestCase(TestCase):
@@ -607,6 +830,63 @@ class MatriculaMovimentacaoTestCase(TestCase):
         self.assertEqual(mov.matricula_id, self.matricula.id)
         self.assertEqual(mov.tipo, MatriculaMovimentacao.Tipo.CRIACAO)
         self.assertEqual(mov.situacao_nova, Matricula.Situacao.ATIVA)
+
+    def test_aplicar_trancamento_altera_situacao_e_registra_movimento(self):
+        resultado = aplicar_movimentacao_matricula(
+            matricula=self.matricula,
+            tipo=MatriculaMovimentacao.Tipo.TRANCAMENTO,
+            usuario=self.user,
+            data_referencia=date(2026, 3, 15),
+            tipo_trancamento=MatriculaMovimentacao.TipoTrancamento.VOLUNTARIO,
+            motivo="Pausa temporária",
+        )
+        self.matricula.refresh_from_db()
+        self.assertEqual(self.matricula.situacao, Matricula.Situacao.TRANCADO)
+        self.assertEqual(resultado.movimentacao.tipo, MatriculaMovimentacao.Tipo.TRANCAMENTO)
+        self.assertEqual(resultado.movimentacao.situacao_nova, Matricula.Situacao.TRANCADO)
+        self.assertEqual(resultado.movimentacao.data_referencia, date(2026, 3, 15))
+        self.assertEqual(
+            resultado.movimentacao.tipo_trancamento,
+            MatriculaMovimentacao.TipoTrancamento.VOLUNTARIO,
+        )
+
+    def test_desfazer_ultimo_procedimento_restabelece_estado_anterior(self):
+        aplicar_movimentacao_matricula(
+            matricula=self.matricula,
+            tipo=MatriculaMovimentacao.Tipo.CANCELAMENTO,
+            usuario=self.user,
+            motivo="Teste cancelamento",
+        )
+        resultado = desfazer_ultima_movimentacao_matricula(
+            matricula=self.matricula,
+            usuario=self.user,
+            motivo="Correção de lançamento",
+        )
+        self.matricula.refresh_from_db()
+        self.assertEqual(self.matricula.situacao, Matricula.Situacao.ATIVA)
+        self.assertEqual(resultado.movimentacao.tipo, MatriculaMovimentacao.Tipo.DESFAZER)
+        self.assertEqual(resultado.movimentacao.situacao_nova, Matricula.Situacao.ATIVA)
+
+    def test_desfazer_movimentacao_especifica_exige_ultimo_registro(self):
+        mov1 = aplicar_movimentacao_matricula(
+            matricula=self.matricula,
+            tipo=MatriculaMovimentacao.Tipo.CANCELAMENTO,
+            usuario=self.user,
+            motivo="Primeiro passo",
+        ).movimentacao
+        aplicar_movimentacao_matricula(
+            matricula=self.matricula,
+            tipo=MatriculaMovimentacao.Tipo.REATIVACAO,
+            usuario=self.user,
+            motivo="Segundo passo",
+        )
+        with self.assertRaisesMessage(ValueError, "Só é possível desfazer o último procedimento."):
+            desfazer_movimentacao_matricula(
+                matricula=self.matricula,
+                usuario=self.user,
+                movimentacao_id=mov1.id,
+                motivo="Tentativa fora de ordem",
+            )
 
 
 class HorarioConflitosFormTestCase(TestCase):

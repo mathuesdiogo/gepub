@@ -194,6 +194,7 @@
             <span class="edu-chip"><i class="fa-solid fa-people-group"></i>{{ turmas_total }} turmas</span>
             <span class="edu-chip"><i class="fa-solid fa-user-graduate"></i>{{ alunos_total }} alunos</span>
             <span class="edu-chip"><i class="fa-solid fa-id-card"></i>{{ matriculas_total }} matrículas</span>
+            <span class="edu-chip"><i class="fa-solid fa-arrows-rotate"></i>{{ renovacoes_abertas|default:0 }} renovações abertas</span>
           </div>
         </div>
         <div class="edu-hero__actions">
@@ -253,6 +254,17 @@
             <div class="edu-kpi__meta">Base curricular ativa por etapa e série/ano</div>
           </div>
           <div class="edu-kpi__icon"><i class="fa-solid fa-layer-group"></i></div>
+        </a>
+
+        <a class="edu-kpi" href="{% url 'educacao:renovacao_matricula_list' %}">
+          <div>
+            <div class="edu-kpi__label">Renovação</div>
+            <div class="edu-kpi__value">{{ renovacoes_total|default:0 }}</div>
+            <div class="edu-kpi__meta">
+              {{ renovacoes_abertas|default:0 }} abertas • {{ renovacoes_pendentes_processamento|default:0 }} pendentes de processamento
+            </div>
+          </div>
+          <div class="edu-kpi__icon"><i class="fa-solid fa-arrows-rotate"></i></div>
         </a>
       </div>
 
@@ -340,6 +352,17 @@
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
+          {% if can_edu_manage %}
+            <a class="gp-link-box edu-link-card" href="{% url 'educacao:renovacao_matricula_list' %}">
+              <div>
+                <div class="gp-link-box__title">Renovação de Matrícula</div>
+                <div class="gp-link-box__meta">
+                  {{ renovacoes_agendadas|default:0 }} agendadas • {{ renovacoes_abertas|default:0 }} abertas • {{ renovacoes_processadas|default:0 }} processadas
+                </div>
+              </div>
+              <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          {% endif %}
           <a class="gp-link-box edu-link-card" href="{% url 'educacao:indicadores_gerenciais' %}">
             <div>
               <div class="gp-link-box__title">Indicadores Gerenciais</div>

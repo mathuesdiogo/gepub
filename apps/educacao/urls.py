@@ -22,6 +22,7 @@ from . import views_aluno_area
 from . import views_professor_area
 from . import views_estagios
 from . import views_informatica
+from . import views_renovacao
 from .views_turmas_list import TurmaListView
 from .views_alunos_list import AlunoListView
 from .views_diarios_list import DiarioListView
@@ -95,6 +96,7 @@ urlpatterns = [
     path("aluno/<str:codigo>/ensino/biblioteca/", views_aluno_area.aluno_ensino_biblioteca, name="aluno_ensino_biblioteca"),
     path("aluno/<str:codigo>/ensino/apoio/", views_aluno_area.aluno_ensino_apoio, name="aluno_ensino_apoio"),
     path("aluno/<str:codigo>/ensino/processos-seletivos/", views_aluno_area.aluno_ensino_seletivos, name="aluno_ensino_seletivos"),
+    path("aluno/<str:codigo>/ensino/renovacao-matricula/", views_aluno_area.aluno_ensino_renovacao, name="aluno_ensino_renovacao"),
     path("aluno/<str:codigo>/pesquisa/", views_aluno_area.aluno_pesquisa, name="aluno_pesquisa"),
     path("aluno/<str:codigo>/central-servicos/", views_aluno_area.aluno_central_servicos, name="aluno_central_servicos"),
     path("aluno/<str:codigo>/atividades-estudantis/", views_aluno_area.aluno_atividades, name="aluno_atividades"),
@@ -228,6 +230,8 @@ urlpatterns = [
     ),
     path("api/alunos-suggest/", views_api.api_alunos_suggest, name="api_alunos_suggest"),
     path("api/turmas-suggest/", views_api.api_turmas_suggest, name="api_turmas_suggest"),
+    path("matriculas/renovacao/", views_renovacao.renovacao_matricula_list, name="renovacao_matricula_list"),
+    path("matriculas/renovacao/<int:pk>/", views_renovacao.renovacao_matricula_detail, name="renovacao_matricula_detail"),
     path("calendario/", views_calendario.calendario_index, name="calendario_index"),
     path("calendario/eventos/novo/", views_calendario.calendario_evento_create, name="calendario_evento_create"),
     path("calendario/eventos/<int:pk>/editar/", views_calendario.calendario_evento_update, name="calendario_evento_update"),

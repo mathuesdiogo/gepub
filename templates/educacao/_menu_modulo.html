@@ -128,6 +128,12 @@
           </a>
         </li>
         <li class="module-menu__item">
+          <a class="module-menu__link {% if 'renovacao_matricula' in route %}is-active{% endif %}" href="{% url 'educacao:renovacao_matricula_list' %}">
+            <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
+            <span>Renovação de Matrícula</span>
+          </a>
+        </li>
+        <li class="module-menu__item">
           <a class="module-menu__link {% if route == 'componente_list' %}is-active{% endif %}" href="{% url 'educacao:componente_list' %}">
             <i class="fa-solid fa-book-open" aria-hidden="true"></i>
             <span>Componentes</span>

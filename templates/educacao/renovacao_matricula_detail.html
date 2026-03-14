@@ -1,0 +1,124 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}{{ renovacao.descricao }} • Renovação de Matrícula • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="gp-card"><div class="gp-card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=renovacao.descricao subtitle="Detalhes operacionais da renovação." actions=actions %}
+
+  <div class="gp-pills u-mb-12">
+    <span class="gp-pills__item is-active">Etapa: {{ etapa_label }}</span>
+    <span class="gp-pills__item">Ano: {{ renovacao.ano_letivo }}</span>
+    <span class="gp-pills__item">Secretaria: {{ renovacao.secretaria.nome }}</span>
+    <span class="gp-pills__item">Janela: {{ renovacao.data_inicio|date:"d/m/Y" }} até {{ renovacao.data_fim|date:"d/m/Y" }}</span>
+    <span class="gp-pills__item">Pendentes: {{ pendentes }}</span>
+    <span class="gp-pills__item">Aprovados: {{ aprovados }}</span>
+    <span class="gp-pills__item">Rejeitados: {{ rejeitados }}</span>
+  </div>
+
+  <form method="post" class="gp-inline-form u-mb-12" style="display: inline-flex; gap: 8px; flex-wrap: wrap;">
+    {% csrf_token %}
+    <input type="hidden" name="_action" value="toggle_ativo">
+    <button class="gp-button gp-button--outline" type="submit">
+      {% if renovacao.ativo %}Inativar renovação{% else %}Ativar renovação{% endif %}
+    </button>
+  </form>
+
+  {% if can_processar %}
+    <form method="post" class="gp-inline-form u-mb-12" style="display: inline-flex; gap: 8px;">
+      {% csrf_token %}
+      <input type="hidden" name="_action" value="processar">
+      <button class="gp-button gp-button--primary" type="submit">Processar pedidos pendentes</button>
+    </form>
+  {% endif %}
+
+  <section class="u-mb-12">
+    <h3>Turmas ofertadas</h3>
+
+    <form method="post" class="gp-form gp-form--smart u-mb-12">
+      {% csrf_token %}
+      <input type="hidden" name="_action" value="add_oferta">
+      {{ oferta_form.as_p }}
+      <button class="gp-button gp-button--outline" type="submit">Adicionar oferta</button>
+    </form>
+
+    <div class="gp-table gp-table--responsive gp-table--striped"><div class="gp-table__body">
+      <table class="gp-table__native">
+        <thead>
+          <tr>
+            <th>Turma</th>
+            <th>Unidade</th>
+            <th>Matrículas ativas</th>
+            <th>Observação</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for oferta in ofertas %}
+            <tr>
+              <td>{{ oferta.turma.nome }}</td>
+              <td>{{ oferta.turma.unidade.nome|default:"—" }}</td>
+              <td>{{ oferta.matriculados_ativos }}</td>
+              <td>{{ oferta.observacao|default:"—" }}</td>
+              <td>
+                <form method="post" class="gp-inline-form">
+                  {% csrf_token %}
+                  <input type="hidden" name="_action" value="remove_oferta">
+                  <input type="hidden" name="oferta_id" value="{{ oferta.id }}">
+                  <button class="gp-button gp-button--ghost" type="submit">Remover</button>
+                </form>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5">Nenhuma oferta cadastrada para esta renovação.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </section>
+
+  <section>
+    <h3>Pedidos dos alunos</h3>
+    <div class="gp-table gp-table--responsive gp-table--striped"><div class="gp-table__body">
+      <table class="gp-table__native">
+        <thead>
+          <tr>
+            <th>Aluno</th>
+            <th>Turma escolhida</th>
+            <th>Prioridade</th>
+            <th>Status</th>
+            <th>Matrícula resultante</th>
+            <th>Processamento</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pedido in pedidos %}
+            <tr>
+              <td>
+                <a href="{% url 'educacao:aluno_detail' pedido.aluno_id %}">{{ pedido.aluno.nome }}</a>
+              </td>
+              <td>{{ pedido.oferta.turma.nome }}</td>
+              <td>{{ pedido.prioridade }}</td>
+              <td>{{ pedido.get_status_display }}</td>
+              <td>
+                {% if pedido.matricula_resultante %}
+                  #{{ pedido.matricula_resultante_id }}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+              <td>
+                {{ pedido.observacao_processamento|default:"—" }}
+                {% if pedido.processado_em %}
+                  <br><small>{{ pedido.processado_em|date:"d/m/Y H:i" }}{% if pedido.processado_por %} • {{ pedido.processado_por.username }}{% endif %}</small>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6">Nenhum pedido recebido nesta renovação.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </section>
+</div></div>
+{% endblock %}

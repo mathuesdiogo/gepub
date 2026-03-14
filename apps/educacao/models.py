@@ -654,6 +654,7 @@ class Aluno(models.Model):
 class Matricula(models.Model):
     class Situacao(models.TextChoices):
         ATIVA = "ATIVA", "Ativa"
+        TRANCADO = "TRANCADO", "Trancado"
         TRANSFERIDO = "TRANSFERIDO", "Transferido"
         CONCLUIDO = "CONCLUIDO", "Concluído"
         EVADIDO = "EVADIDO", "Evadido"
@@ -707,8 +708,16 @@ class MatriculaMovimentacao(models.Model):
         REMANEJAMENTO = "REMANEJAMENTO", "Remanejamento"
         TRANSFERENCIA = "TRANSFERENCIA", "Transferência"
         CANCELAMENTO = "CANCELAMENTO", "Cancelamento"
+        TRANCAMENTO = "TRANCAMENTO", "Trancamento"
         REATIVACAO = "REATIVACAO", "Reativação"
+        DESFAZER = "DESFAZER", "Desfazer procedimento"
         SITUACAO = "SITUACAO", "Mudança de situação"
+
+    class TipoTrancamento(models.TextChoices):
+        VOLUNTARIO = "VOLUNTARIO", "Voluntário"
+        COMPULSORIO = "COMPULSORIO", "Compulsório"
+        INTERCAMBIO = "INTERCAMBIO", "Intercâmbio"
+        OUTRO = "OUTRO", "Outro"
 
     matricula = models.ForeignKey(
         "educacao.Matricula",
@@ -743,9 +752,18 @@ class MatriculaMovimentacao(models.Model):
         null=True,
         blank=True,
     )
+    movimentacao_desfeita = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="desfeita_por",
+    )
 
     situacao_anterior = models.CharField(max_length=20, blank=True, default="")
     situacao_nova = models.CharField(max_length=20, blank=True, default="")
+    data_referencia = models.DateField(null=True, blank=True)
+    tipo_trancamento = models.CharField(max_length=20, choices=TipoTrancamento.choices, blank=True, default="")
     motivo = models.TextField(blank=True, default="")
     criado_em = models.DateTimeField(auto_now_add=True)
 
@@ -761,6 +779,231 @@ class MatriculaMovimentacao(models.Model):
 
     def __str__(self) -> str:
         return f"{self.aluno} • {self.get_tipo_display()} • {self.criado_em:%d/%m/%Y %H:%M}"
+
+
+class RenovacaoMatricula(models.Model):
+    class Etapa(models.TextChoices):
+        AGENDADA = "AGENDADA", "Agendada"
+        AGUARDANDO_MATRICULA = "AGUARDANDO_MATRICULA", "Aguardando matrícula"
+        AGUARDANDO_PROCESSAMENTO = "AGUARDANDO_PROCESSAMENTO", "Aguardando processamento"
+        PROCESSADA = "PROCESSADA", "Processada"
+        INATIVA = "INATIVA", "Inativa"
+
+    descricao = models.CharField(max_length=220)
+    ano_letivo = models.PositiveIntegerField(db_index=True)
+    periodo_letivo = models.ForeignKey(
+        "educacao.PeriodoLetivo",
+        on_delete=models.SET_NULL,
+        related_name="renovacoes_matricula",
+        null=True,
+        blank=True,
+    )
+    secretaria = models.ForeignKey(
+        "org.Secretaria",
+        on_delete=models.PROTECT,
+        related_name="renovacoes_matricula",
+    )
+    data_inicio = models.DateField(db_index=True)
+    data_fim = models.DateField(db_index=True)
+    ativo = models.BooleanField(default=True, db_index=True)
+    observacao = models.TextField(blank=True, default="")
+    processado_em = models.DateTimeField(null=True, blank=True, db_index=True)
+    processado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="renovacoes_matricula_processadas",
+    )
+    criado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="renovacoes_matricula_criadas",
+    )
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Renovação de matrícula"
+        verbose_name_plural = "Renovações de matrícula"
+        ordering = ["-ano_letivo", "-data_inicio", "-id"]
+        indexes = [
+            models.Index(fields=["secretaria", "ano_letivo"]),
+            models.Index(fields=["secretaria", "ativo"]),
+            models.Index(fields=["data_inicio", "data_fim"]),
+        ]
+
+    def clean(self):
+        errors = {}
+        if self.data_inicio and self.data_fim and self.data_fim < self.data_inicio:
+            errors["data_fim"] = "A data de término deve ser igual ou posterior à data de início."
+        if self.periodo_letivo_id and self.periodo_letivo.ano_letivo != self.ano_letivo:
+            errors["periodo_letivo"] = "O período letivo precisa pertencer ao mesmo ano letivo da renovação."
+        if errors:
+            raise ValidationError(errors)
+
+    def etapa_atual(self, ref_date=None) -> str:
+        if not self.ativo:
+            return self.Etapa.INATIVA
+        if self.processado_em:
+            return self.Etapa.PROCESSADA
+        today = ref_date or timezone.localdate()
+        if today < self.data_inicio:
+            return self.Etapa.AGENDADA
+        if self.data_inicio <= today <= self.data_fim:
+            return self.Etapa.AGUARDANDO_MATRICULA
+        return self.Etapa.AGUARDANDO_PROCESSAMENTO
+
+    @property
+    def etapa_display(self) -> str:
+        etapa = self.etapa_atual()
+        return dict(self.Etapa.choices).get(etapa, etapa)
+
+    @property
+    def janela_aberta(self) -> bool:
+        return self.etapa_atual() == self.Etapa.AGUARDANDO_MATRICULA
+
+    def __str__(self) -> str:
+        return f"{self.descricao} • {self.ano_letivo}"
+
+
+class RenovacaoMatriculaOferta(models.Model):
+    renovacao = models.ForeignKey(
+        "educacao.RenovacaoMatricula",
+        on_delete=models.CASCADE,
+        related_name="ofertas",
+    )
+    turma = models.ForeignKey(
+        "educacao.Turma",
+        on_delete=models.PROTECT,
+        related_name="renovacoes_ofertadas",
+    )
+    diario = models.ForeignKey(
+        "educacao.DiarioTurma",
+        on_delete=models.SET_NULL,
+        related_name="renovacoes_ofertadas",
+        null=True,
+        blank=True,
+    )
+    ativo = models.BooleanField(default=True)
+    observacao = models.TextField(blank=True, default="")
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Oferta de renovação"
+        verbose_name_plural = "Ofertas de renovação"
+        ordering = ["turma__nome", "id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["renovacao", "turma"],
+                name="uniq_renovacao_oferta_turma",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["renovacao", "ativo"]),
+            models.Index(fields=["turma"]),
+        ]
+
+    def clean(self):
+        errors = {}
+        if self.renovacao_id and self.turma_id:
+            turma_unidade = getattr(self.turma, "unidade", None)
+            turma_secretaria_id = getattr(turma_unidade, "secretaria_id", None)
+            if turma_secretaria_id and turma_secretaria_id != self.renovacao.secretaria_id:
+                errors["turma"] = "A turma deve pertencer à mesma secretaria da renovação."
+            if self.turma.ano_letivo != self.renovacao.ano_letivo:
+                errors["turma"] = "A turma deve pertencer ao mesmo ano letivo da renovação."
+        if self.diario_id and self.diario.turma_id != self.turma_id:
+            errors["diario"] = "O diário selecionado deve pertencer à turma informada."
+        if errors:
+            raise ValidationError(errors)
+
+    def __str__(self) -> str:
+        return f"{self.renovacao.descricao} • {self.turma.nome}"
+
+
+class RenovacaoMatriculaPedido(models.Model):
+    class Status(models.TextChoices):
+        PENDENTE = "PENDENTE", "Pendente"
+        APROVADO = "APROVADO", "Aprovado"
+        REJEITADO = "REJEITADO", "Rejeitado"
+
+    renovacao = models.ForeignKey(
+        "educacao.RenovacaoMatricula",
+        on_delete=models.CASCADE,
+        related_name="pedidos",
+    )
+    aluno = models.ForeignKey(
+        "educacao.Aluno",
+        on_delete=models.PROTECT,
+        related_name="pedidos_renovacao_matricula",
+    )
+    oferta = models.ForeignKey(
+        "educacao.RenovacaoMatriculaOferta",
+        on_delete=models.PROTECT,
+        related_name="pedidos",
+    )
+    prioridade = models.PositiveSmallIntegerField(default=1)
+    observacao_aluno = models.TextField(blank=True, default="")
+    origem_matricula = models.ForeignKey(
+        "educacao.Matricula",
+        on_delete=models.SET_NULL,
+        related_name="pedidos_renovacao_origem",
+        null=True,
+        blank=True,
+    )
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDENTE, db_index=True)
+    observacao_processamento = models.TextField(blank=True, default="")
+    processado_em = models.DateTimeField(null=True, blank=True)
+    processado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="pedidos_renovacao_processados",
+    )
+    matricula_resultante = models.ForeignKey(
+        "educacao.Matricula",
+        on_delete=models.SET_NULL,
+        related_name="pedidos_renovacao_resultantes",
+        null=True,
+        blank=True,
+    )
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Pedido de renovação de matrícula"
+        verbose_name_plural = "Pedidos de renovação de matrícula"
+        ordering = ["status", "prioridade", "criado_em", "id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["renovacao", "aluno", "oferta"],
+                name="uniq_renovacao_pedido_aluno_oferta",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["renovacao", "status"]),
+            models.Index(fields=["aluno", "status"]),
+            models.Index(fields=["renovacao", "prioridade"]),
+        ]
+
+    def clean(self):
+        errors = {}
+        if self.oferta_id and self.renovacao_id and self.oferta.renovacao_id != self.renovacao_id:
+            errors["oferta"] = "A oferta selecionada deve pertencer à mesma renovação."
+        if errors:
+            raise ValidationError(errors)
+
+    @property
+    def turma(self):
+        return getattr(self.oferta, "turma", None)
+
+    def __str__(self) -> str:
+        turma_nome = getattr(getattr(self.oferta, "turma", None), "nome", "Turma")
+        return f"{self.aluno} • {turma_nome} • {self.get_status_display()}"
 
 
 class Estagio(models.Model):

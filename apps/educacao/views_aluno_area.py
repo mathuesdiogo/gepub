@@ -19,7 +19,16 @@ from apps.ouvidoria.models import OuvidoriaCadastro, OuvidoriaResposta
 from apps.processos.models import ProcessoAdministrativo
 from apps.saude.models import AgendamentoSaude, AtendimentoSaude, PacienteSaude
 
-from .models import Aluno, AlunoCertificado, AlunoDocumento, Matricula, Turma
+from .models import (
+    Aluno,
+    AlunoCertificado,
+    AlunoDocumento,
+    Matricula,
+    RenovacaoMatricula,
+    RenovacaoMatriculaOferta,
+    RenovacaoMatriculaPedido,
+    Turma,
+)
 from .models_beneficios import (
     BeneficioCampanhaAluno,
     BeneficioEdital,
@@ -241,6 +250,12 @@ class CadastroSolicitacaoForm(forms.Form):
     descricao = forms.CharField(label="Descrição", widget=forms.Textarea(attrs={"rows": 2}), required=True)
 
 
+class RenovacaoPedidoAlunoForm(forms.Form):
+    oferta_id = forms.IntegerField(required=True)
+    prioridade = forms.IntegerField(required=True, min_value=1, max_value=6)
+    observacao_aluno = forms.CharField(required=False, max_length=500)
+
+
 def _apply_gp_form_classes(form):
     for field in form.fields.values():
         widget = field.widget
@@ -337,6 +352,12 @@ def _student_nav(codigo: str):
             "label": "Ensino",
             "url": reverse("educacao:aluno_ensino", args=[codigo]),
             "icon": "fa-solid fa-graduation-cap",
+        },
+        {
+            "key": "ensino_renovacao",
+            "label": "Renovação de Matrícula",
+            "url": reverse("educacao:aluno_ensino_renovacao", args=[codigo]),
+            "icon": "fa-solid fa-arrows-rotate",
         },
         {
             "key": "pesquisa",
@@ -688,6 +709,155 @@ def _ensino_page_base_context(ctx: dict, *, subtitle: str):
         page_subtitle=subtitle,
         nav_key="ensino",
     )
+
+
+@login_required
+@require_perm("educacao.view")
+def aluno_ensino_renovacao(request, codigo: str):
+    ctx = _resolve_contexto_aluno(request, codigo)
+    aluno = ctx["aluno"]
+    hoje = timezone.localdate()
+
+    secretaria_ids = {
+        getattr(getattr(getattr(m, "turma", None), "unidade", None), "secretaria_id", None)
+        for m in ctx["matriculas"]
+        if getattr(getattr(getattr(m, "turma", None), "unidade", None), "secretaria_id", None)
+    }
+    secretaria_ids = {sid for sid in secretaria_ids if sid is not None}
+
+    renovacoes_abertas = list(
+        RenovacaoMatricula.objects.select_related("secretaria", "periodo_letivo")
+        .prefetch_related(
+            "ofertas",
+            "ofertas__turma",
+            "ofertas__turma__unidade",
+        )
+        .filter(
+            secretaria_id__in=secretaria_ids,
+            ativo=True,
+            processado_em__isnull=True,
+            data_inicio__lte=hoje,
+            data_fim__gte=hoje,
+        )
+        .order_by("data_fim", "id")
+    )
+    renovacoes_map = {r.id: r for r in renovacoes_abertas}
+
+    if request.method == "POST":
+        form_kind = (request.POST.get("form_kind") or "").strip()
+
+        if form_kind == "pedido_renovacao":
+            pedido_form = RenovacaoPedidoAlunoForm(request.POST)
+            renovacao_id_raw = (request.POST.get("renovacao_id") or "").strip()
+
+            if not renovacao_id_raw.isdigit() or int(renovacao_id_raw) not in renovacoes_map:
+                messages.error(request, "Renovação inválida ou fora da janela de matrícula.")
+                return redirect(reverse("educacao:aluno_ensino_renovacao", args=[ctx["codigo_canonico"]]))
+
+            renovacao = renovacoes_map[int(renovacao_id_raw)]
+            if not pedido_form.is_valid():
+                messages.error(request, "Corrija os dados do pedido para continuar.")
+                return redirect(reverse("educacao:aluno_ensino_renovacao", args=[ctx["codigo_canonico"]]))
+
+            oferta_id = pedido_form.cleaned_data["oferta_id"]
+            oferta = RenovacaoMatriculaOferta.objects.select_related("turma").filter(
+                renovacao=renovacao,
+                ativo=True,
+                pk=oferta_id,
+            ).first()
+            if not oferta:
+                messages.error(request, "Oferta selecionada não está disponível para esta renovação.")
+                return redirect(reverse("educacao:aluno_ensino_renovacao", args=[ctx["codigo_canonico"]]))
+
+            origem_matricula = (
+                Matricula.objects.filter(
+                    aluno=aluno,
+                    turma__ano_letivo=renovacao.ano_letivo,
+                )
+                .order_by("-id")
+                .first()
+            )
+
+            pedido, created = RenovacaoMatriculaPedido.objects.get_or_create(
+                renovacao=renovacao,
+                aluno=aluno,
+                oferta=oferta,
+                defaults={
+                    "prioridade": pedido_form.cleaned_data["prioridade"],
+                    "observacao_aluno": pedido_form.cleaned_data.get("observacao_aluno") or "",
+                    "origem_matricula": origem_matricula,
+                },
+            )
+            if not created:
+                pedido.prioridade = pedido_form.cleaned_data["prioridade"]
+                pedido.observacao_aluno = pedido_form.cleaned_data.get("observacao_aluno") or ""
+                pedido.origem_matricula = origem_matricula
+                pedido.status = RenovacaoMatriculaPedido.Status.PENDENTE
+                pedido.processado_em = None
+                pedido.processado_por = None
+                pedido.observacao_processamento = ""
+                pedido.matricula_resultante = None
+                pedido.save(
+                    update_fields=[
+                        "prioridade",
+                        "observacao_aluno",
+                        "origem_matricula",
+                        "status",
+                        "processado_em",
+                        "processado_por",
+                        "observacao_processamento",
+                        "matricula_resultante",
+                        "atualizado_em",
+                    ]
+                )
+            messages.success(request, "Pedido de renovação registrado com sucesso.")
+            return redirect(reverse("educacao:aluno_ensino_renovacao", args=[ctx["codigo_canonico"]]))
+
+        if form_kind == "cancelar_pedido_renovacao":
+            pedido_id = (request.POST.get("pedido_id") or "").strip()
+            if pedido_id.isdigit():
+                pedido = RenovacaoMatriculaPedido.objects.filter(
+                    pk=int(pedido_id),
+                    aluno=aluno,
+                    status=RenovacaoMatriculaPedido.Status.PENDENTE,
+                    renovacao__processado_em__isnull=True,
+                    renovacao__data_inicio__lte=hoje,
+                    renovacao__data_fim__gte=hoje,
+                ).first()
+                if pedido:
+                    pedido.delete()
+                    messages.success(request, "Pedido pendente removido.")
+            return redirect(reverse("educacao:aluno_ensino_renovacao", args=[ctx["codigo_canonico"]]))
+
+    pedidos = list(
+        RenovacaoMatriculaPedido.objects.select_related(
+            "renovacao",
+            "oferta",
+            "oferta__turma",
+            "processado_por",
+            "matricula_resultante",
+        )
+        .filter(aluno=aluno, renovacao_id__in=[r.id for r in renovacoes_abertas])
+        .order_by("renovacao__data_fim", "prioridade", "id")
+    )
+    pedidos_por_renovacao: dict[int, list[RenovacaoMatriculaPedido]] = {}
+    for pedido in pedidos:
+        pedidos_por_renovacao.setdefault(pedido.renovacao_id, []).append(pedido)
+
+    for renovacao in renovacoes_abertas:
+        renovacao.ofertas_ativas = [of for of in renovacao.ofertas.all() if of.ativo]
+        renovacao.meus_pedidos = pedidos_por_renovacao.get(renovacao.id, [])
+
+    context = {
+        **_base_context(
+            ctx,
+            page_title="Ensino",
+            page_subtitle="Escolha suas turmas de preferência durante a janela de renovação e acompanhe o processamento.",
+            nav_key="ensino_renovacao",
+        ),
+        "renovacoes_abertas": renovacoes_abertas,
+    }
+    return render(request, "educacao/aluno_area/ensino_renovacao.html", context)
 
 
 def _resolver_periodo_referencia_ensino(ctx: dict, request):

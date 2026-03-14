@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from datetime import date
-
 from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -13,8 +11,12 @@ from django.urls import reverse
 from apps.core.decorators import require_perm
 from apps.core.rbac import can, scope_filter_turmas
 
-from .models import Aluno, Matricula, MatriculaMovimentacao, Turma
-from .services_matricula import registrar_movimentacao
+from .models import Aluno, Matricula, MatriculaMovimentacao, RenovacaoMatriculaPedido, Turma
+from .services_matricula import (
+    aplicar_movimentacao_matricula,
+    desfazer_ultima_movimentacao_matricula,
+    registrar_movimentacao,
+)
 
 from apps.nee.models import AlunoNecessidade, TipoNecessidade, ApoioMatricula
 
@@ -78,7 +80,9 @@ class MatriculaMovimentacaoForm(forms.Form):
             (MatriculaMovimentacao.Tipo.REMANEJAMENTO, "Remanejamento de turma"),
             (MatriculaMovimentacao.Tipo.TRANSFERENCIA, "Transferência"),
             (MatriculaMovimentacao.Tipo.CANCELAMENTO, "Cancelamento"),
+            (MatriculaMovimentacao.Tipo.TRANCAMENTO, "Trancamento"),
             (MatriculaMovimentacao.Tipo.REATIVACAO, "Reativação"),
+            (MatriculaMovimentacao.Tipo.DESFAZER, "Desfazer último procedimento"),
         ],
     )
     turma_destino = forms.ModelChoiceField(
@@ -90,6 +94,16 @@ class MatriculaMovimentacaoForm(forms.Form):
         label="Motivo",
         required=False,
         widget=forms.Textarea(attrs={"rows": 3}),
+    )
+    data_referencia = forms.DateField(
+        label="Data do procedimento",
+        required=False,
+        widget=forms.DateInput(attrs={"type": "date"}),
+    )
+    tipo_trancamento = forms.ChoiceField(
+        label="Tipo de trancamento",
+        required=False,
+        choices=[("", "Selecione")] + list(MatriculaMovimentacao.TipoTrancamento.choices),
     )
 
     def __init__(self, aluno: Aluno, user, *args, **kwargs):
@@ -126,6 +140,15 @@ class MatriculaMovimentacaoForm(forms.Form):
                 self.add_error("turma_destino", "Selecione a turma de destino.")
             elif turma_destino == matricula.turma:
                 self.add_error("turma_destino", "A turma de destino deve ser diferente da turma atual.")
+        if tipo == MatriculaMovimentacao.Tipo.TRANCAMENTO and not cleaned.get("tipo_trancamento"):
+            self.add_error("tipo_trancamento", "Informe o tipo de trancamento.")
+        if tipo == MatriculaMovimentacao.Tipo.TRANCAMENTO and not cleaned.get("data_referencia"):
+            self.add_error("data_referencia", "Informe a data do trancamento.")
+        if tipo != MatriculaMovimentacao.Tipo.TRANCAMENTO:
+            cleaned["tipo_trancamento"] = ""
+        if tipo == MatriculaMovimentacao.Tipo.DESFAZER:
+            cleaned["turma_destino"] = None
+            cleaned["tipo_trancamento"] = ""
 
         return cleaned
 
@@ -189,6 +212,16 @@ class AlunoDetailView(View):
             .filter(aluno=aluno)
             .order_by("-criado_em", "-id")[:50]
         )
+        pedidos_renovacao = list(
+            RenovacaoMatriculaPedido.objects.select_related(
+                "renovacao",
+                "oferta",
+                "oferta__turma",
+                "matricula_resultante",
+            )
+            .filter(aluno=aluno)
+            .order_by("-criado_em", "-id")[:30]
+        )
 
         headers_movimentacoes = [
             {"label": "Data/Hora", "width": "160px"},
@@ -237,6 +270,7 @@ class AlunoDetailView(View):
             "apoios": apoios,
             "headers_movimentacoes": headers_movimentacoes,
             "rows_movimentacoes": rows_movimentacoes,
+            "pedidos_renovacao": pedidos_renovacao,
             "form_matricula": form_matricula or MatriculaInlineForm(),
             "form_nee": form_nee or NeeInlineForm(),
             "form_apoio": form_apoio or ApoioInlineForm(aluno),
@@ -296,98 +330,45 @@ class AlunoDetailView(View):
                 tipo = form_movimentacao.cleaned_data["tipo"]
                 turma_destino = form_movimentacao.cleaned_data.get("turma_destino")
                 motivo = form_movimentacao.cleaned_data.get("motivo") or ""
-
-                situacao_anterior = matricula.situacao
-                turma_origem = matricula.turma
-
-                if tipo == MatriculaMovimentacao.Tipo.REMANEJAMENTO:
-                    if Matricula.objects.filter(aluno=aluno, turma=turma_destino).exclude(pk=matricula.pk).exists():
-                        form_movimentacao.add_error("turma_destino", "Já existe matrícula deste aluno na turma de destino.")
+                data_referencia = form_movimentacao.cleaned_data.get("data_referencia")
+                tipo_trancamento = form_movimentacao.cleaned_data.get("tipo_trancamento") or ""
+                if tipo == MatriculaMovimentacao.Tipo.DESFAZER:
+                    try:
+                        desfazer_ultima_movimentacao_matricula(
+                            matricula=matricula,
+                            usuario=request.user,
+                            motivo=motivo,
+                        )
+                    except ValueError as exc:
+                        form_movimentacao.add_error(None, str(exc))
+                        messages.error(request, str(exc))
                     else:
-                        matricula.turma = turma_destino
-                        matricula.situacao = Matricula.Situacao.ATIVA
-                        matricula.save(update_fields=["turma", "situacao"])
-                        registrar_movimentacao(
+                        messages.success(request, "Último procedimento desfeito com sucesso.")
+                        return redirect("educacao:aluno_detail", pk=aluno.pk)
+                else:
+                    try:
+                        aplicar_movimentacao_matricula(
                             matricula=matricula,
                             tipo=tipo,
                             usuario=request.user,
-                            turma_origem=turma_origem,
                             turma_destino=turma_destino,
-                            situacao_anterior=situacao_anterior,
-                            situacao_nova=matricula.situacao,
+                            data_referencia=data_referencia,
+                            tipo_trancamento=tipo_trancamento,
                             motivo=motivo,
                         )
-                        messages.success(request, "Remanejamento realizado com sucesso.")
-                        return redirect("educacao:aluno_detail", pk=aluno.pk)
-
-                elif tipo == MatriculaMovimentacao.Tipo.TRANSFERENCIA:
-                    if Matricula.objects.filter(aluno=aluno, turma=turma_destino).exists():
-                        form_movimentacao.add_error("turma_destino", "Já existe matrícula deste aluno na turma de destino.")
+                    except ValueError as exc:
+                        form_movimentacao.add_error("turma_destino", str(exc))
+                        messages.error(request, str(exc))
                     else:
-                        matricula.situacao = Matricula.Situacao.TRANSFERIDO
-                        matricula.save(update_fields=["situacao"])
-                        registrar_movimentacao(
-                            matricula=matricula,
-                            tipo=tipo,
-                            usuario=request.user,
-                            turma_origem=turma_origem,
-                            turma_destino=turma_destino,
-                            situacao_anterior=situacao_anterior,
-                            situacao_nova=Matricula.Situacao.TRANSFERIDO,
-                            motivo=motivo,
-                        )
-                        nova_matricula = Matricula.objects.create(
-                            aluno=aluno,
-                            turma=turma_destino,
-                            data_matricula=date.today(),
-                            situacao=Matricula.Situacao.ATIVA,
-                            observacao=(f"Transferência da matrícula #{matricula.pk}. {motivo}".strip()),
-                        )
-                        registrar_movimentacao(
-                            matricula=nova_matricula,
-                            tipo=MatriculaMovimentacao.Tipo.CRIACAO,
-                            usuario=request.user,
-                            turma_origem=turma_origem,
-                            turma_destino=turma_destino,
-                            situacao_nova=nova_matricula.situacao,
-                            motivo="Matrícula de destino criada automaticamente por transferência.",
-                        )
-                        messages.success(request, "Transferência realizada com sucesso.")
+                        messages_map = {
+                            MatriculaMovimentacao.Tipo.REMANEJAMENTO: "Remanejamento realizado com sucesso.",
+                            MatriculaMovimentacao.Tipo.TRANSFERENCIA: "Transferência realizada com sucesso.",
+                            MatriculaMovimentacao.Tipo.CANCELAMENTO: "Matrícula cancelada com sucesso.",
+                            MatriculaMovimentacao.Tipo.TRANCAMENTO: "Matrícula trancada com sucesso.",
+                            MatriculaMovimentacao.Tipo.REATIVACAO: "Matrícula reativada com sucesso.",
+                        }
+                        messages.success(request, messages_map.get(tipo, "Movimentação realizada com sucesso."))
                         return redirect("educacao:aluno_detail", pk=aluno.pk)
-
-                elif tipo == MatriculaMovimentacao.Tipo.CANCELAMENTO:
-                    matricula.situacao = Matricula.Situacao.CANCELADO
-                    matricula.save(update_fields=["situacao"])
-                    registrar_movimentacao(
-                        matricula=matricula,
-                        tipo=tipo,
-                        usuario=request.user,
-                        turma_origem=turma_origem,
-                        turma_destino=turma_origem,
-                        situacao_anterior=situacao_anterior,
-                        situacao_nova=matricula.situacao,
-                        motivo=motivo,
-                    )
-                    messages.success(request, "Matrícula cancelada com sucesso.")
-                    return redirect("educacao:aluno_detail", pk=aluno.pk)
-
-                elif tipo == MatriculaMovimentacao.Tipo.REATIVACAO:
-                    matricula.situacao = Matricula.Situacao.ATIVA
-                    matricula.save(update_fields=["situacao"])
-                    registrar_movimentacao(
-                        matricula=matricula,
-                        tipo=tipo,
-                        usuario=request.user,
-                        turma_origem=turma_origem,
-                        turma_destino=turma_origem,
-                        situacao_anterior=situacao_anterior,
-                        situacao_nova=matricula.situacao,
-                        motivo=motivo,
-                    )
-                    messages.success(request, "Matrícula reativada com sucesso.")
-                    return redirect("educacao:aluno_detail", pk=aluno.pk)
-
-                messages.error(request, "Não foi possível concluir a movimentação informada.")
 
         else:
             messages.error(request, "Ação inválida.")

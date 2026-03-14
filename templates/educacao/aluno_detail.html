@@ -124,7 +124,28 @@
         {% if not is_professor_role %}
           <div class="aluno-stage__subblock">
             <h4>Trilha de movimentações</h4>
-            {% include "core/partials/components/data/table_shell.html" with headers=headers_movimentacoes rows=rows_movimentacoes page_obj=None empty_title="Sem movimentações" empty_text="Nenhuma movimentação registrada para este aluno." %}
+            {% include "core/partials/components/data/table_shell.html" with headers=headers_movimentacoes rows=rows_movimentacoes actions_partial=movimentacoes_actions_partial page_obj=None empty_title="Sem movimentações" empty_text="Nenhuma movimentação registrada para este aluno." %}
+          </div>
+          <div class="aluno-stage__subblock">
+            <h4>Pedidos de renovação de matrícula</h4>
+            <div class="aluno-listing">
+              {% for pedido in pedidos_renovacao %}
+                <article class="aluno-listing__item">
+                  <h4>{{ pedido.renovacao.descricao }} • {{ pedido.oferta.turma.nome }}</h4>
+                  <p>
+                    Prioridade {{ pedido.prioridade }} • Status: {{ pedido.get_status_display }}
+                    {% if pedido.matricula_resultante %}
+                      • Matrícula resultante #{{ pedido.matricula_resultante_id }}
+                    {% endif %}
+                    {% if pedido.observacao_processamento %}
+                      • {{ pedido.observacao_processamento }}
+                    {% endif %}
+                  </p>
+                </article>
+              {% empty %}
+                <div class="aluno-empty-line">Sem pedidos de renovação registrados.</div>
+              {% endfor %}
+            </div>
           </div>
         {% endif %}
       </section>

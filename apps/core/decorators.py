@@ -73,6 +73,7 @@ _ALUNO_EDUCACAO_ALLOWED_ROUTES = {
     "educacao:aluno_ensino_biblioteca",
     "educacao:aluno_ensino_apoio",
     "educacao:aluno_ensino_seletivos",
+    "educacao:aluno_ensino_renovacao",
     "educacao:aluno_pesquisa",
     "educacao:aluno_central_servicos",
     "educacao:aluno_atividades",
