@@ -6,6 +6,7 @@
   {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
 
   <div class="gp-student-stage__grid">
+    {% if has_regular_access %}
     <article class="gp-student-stage__card">
       <h3>Novo lançamento por diário</h3>
       {% if diarios_links %}
@@ -24,6 +25,7 @@
         <div class="gp-student-empty">Nenhum diário disponível.</div>
       {% endif %}
     </article>
+    {% endif %}
 
     <article class="gp-student-stage__card">
       <h3>Buscar aulas</h3>
@@ -36,6 +38,7 @@
       </form>
     </article>
 
+    {% if has_informatica_access %}
     <article class="gp-student-stage__card">
       <h3>Lançamento no Curso de Informática</h3>
       {% if informatica_turmas_links %}
@@ -55,16 +58,29 @@
         <div class="gp-student-empty">Nenhuma turma de informática disponível.</div>
       {% endif %}
     </article>
+    {% endif %}
   </div>
 
+  {% if has_regular_access %}
   <article class="gp-student-stage__card">
     <h3>Histórico recente de aulas</h3>
     {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Sem aulas" empty_text="Nenhuma aula encontrada para o filtro informado." %}
   </article>
+  {% endif %}
 
+  {% if has_informatica_access %}
   <article class="gp-student-stage__card">
     <h3>Aulas pendentes para lançamento (Informática)</h3>
     {% include "core/partials/components/data/table_shell.html" with headers=headers_informatica rows=rows_informatica page_obj=None empty_title="Sem aulas pendentes de informática" empty_text="Não há aulas pendentes para lançamento com os filtros informados." %}
   </article>
+  {% endif %}
+
+  {% if not has_regular_access and not has_informatica_access %}
+  <article class="gp-student-stage__card">
+    <div class="gp-alert gp-alert--info">
+      Este professor ainda não possui aulas/diários vinculados para lançamento.
+    </div>
+  </article>
+  {% endif %}
 </section>
 {% endblock %}

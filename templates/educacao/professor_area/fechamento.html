@@ -5,6 +5,7 @@
 <section class="gp-student-stage gp-professor-stage">
   {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
 
+  {% if has_regular_access %}
   <article class="gp-student-stage__card">
     {% if not can_close %}
       <div class="gp-alert gp-alert--info">
@@ -14,10 +15,21 @@
 
     {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Sem turmas" empty_text="Nenhuma turma disponível para fechamento." %}
   </article>
+  {% endif %}
 
+  {% if has_informatica_access %}
   <article class="gp-student-stage__card">
     <h3>Fechamento do Curso de Informática</h3>
     {% include "core/partials/components/data/table_shell.html" with headers=headers_informatica rows=rows_informatica page_obj=None empty_title="Sem turmas de informática" empty_text="Nenhuma turma de informática disponível para fechamento." %}
   </article>
+  {% endif %}
+
+  {% if not has_regular_access and not has_informatica_access %}
+  <article class="gp-student-stage__card">
+    <div class="gp-alert gp-alert--info">
+      Este professor ainda não possui turmas vinculadas para fechamento.
+    </div>
+  </article>
+  {% endif %}
 </section>
 {% endblock %}

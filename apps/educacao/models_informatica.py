@@ -902,7 +902,10 @@ class InformaticaMatriculaMovimentacao(models.Model):
 class InformaticaPlanoEnsinoProfessor(models.Model):
     class Status(models.TextChoices):
         RASCUNHO = "RASCUNHO", "Rascunho"
-        SUBMETIDO = "SUBMETIDO", "Submetido"
+        SUBMETIDO = "SUBMETIDO", "Aguardando aprovação"
+        APROVADO = "APROVADO", "Aguardando homologação"
+        HOMOLOGADO = "HOMOLOGADO", "Homologado"
+        DEVOLVIDO = "DEVOLVIDO", "Devolvido para ajustes"
 
     turma = models.ForeignKey(
         InformaticaTurma,
@@ -924,6 +927,31 @@ class InformaticaPlanoEnsinoProfessor(models.Model):
     referencias = models.TextField(blank=True, default="")
     status = models.CharField(max_length=12, choices=Status.choices, default=Status.RASCUNHO, db_index=True)
     submetido_em = models.DateTimeField(null=True, blank=True)
+    aprovado_em = models.DateTimeField(null=True, blank=True)
+    aprovado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="planos_ensino_info_aprovados",
+    )
+    homologado_em = models.DateTimeField(null=True, blank=True)
+    homologado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="planos_ensino_info_homologados",
+    )
+    devolvido_em = models.DateTimeField(null=True, blank=True)
+    devolvido_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="planos_ensino_info_devolvidos",
+    )
+    motivo_devolucao = models.TextField(blank=True, default="")
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
 
@@ -945,13 +973,58 @@ class InformaticaPlanoEnsinoProfessor(models.Model):
     def __str__(self) -> str:
         return f"{self.turma.codigo} • {self.ano_letivo} • {self.get_status_display()}"
 
+    @property
+    def pode_editar_professor(self) -> bool:
+        return self.status in {self.Status.RASCUNHO, self.Status.DEVOLVIDO}
+
     def submeter(self):
         self.status = self.Status.SUBMETIDO
         self.submetido_em = timezone.now()
+        self.aprovado_em = None
+        self.aprovado_por = None
+        self.homologado_em = None
+        self.homologado_por = None
+        self.devolvido_em = None
+        self.devolvido_por = None
+        self.motivo_devolucao = ""
+
+    def aprovar(self, usuario=None):
+        self.status = self.Status.APROVADO
+        self.aprovado_em = timezone.now()
+        self.aprovado_por = usuario
+        self.devolvido_em = None
+        self.devolvido_por = None
+        self.motivo_devolucao = ""
+
+    def homologar(self, usuario=None):
+        self.status = self.Status.HOMOLOGADO
+        self.homologado_em = timezone.now()
+        self.homologado_por = usuario
+        if not self.aprovado_em:
+            self.aprovado_em = timezone.now()
+            self.aprovado_por = usuario
+        self.devolvido_em = None
+        self.devolvido_por = None
+        self.motivo_devolucao = ""
+
+    def devolver(self, usuario=None, motivo: str = ""):
+        self.status = self.Status.DEVOLVIDO
+        self.devolvido_em = timezone.now()
+        self.devolvido_por = usuario
+        self.motivo_devolucao = (motivo or "").strip()
+        self.homologado_em = None
+        self.homologado_por = None
 
     def cancelar_submissao(self):
         self.status = self.Status.RASCUNHO
         self.submetido_em = None
+        self.aprovado_em = None
+        self.aprovado_por = None
+        self.homologado_em = None
+        self.homologado_por = None
+        self.devolvido_em = None
+        self.devolvido_por = None
+        self.motivo_devolucao = ""
 
 
 class InformaticaAvaliacao(models.Model):

@@ -711,6 +711,531 @@
   border-top: 1px solid #deebf5;
 }
 
+/* Plano de ensino — fluxo SUAP-like */
+.educacao-module .edu-plan-shell {
+  display: grid;
+  gap: 14px;
+}
+
+.educacao-module .edu-plan-shell__summary {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.educacao-module .edu-plan-kpi {
+  border: 1px solid #d6e6f4;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+  padding: 10px 12px;
+  display: grid;
+  gap: 3px;
+}
+
+.educacao-module .edu-plan-kpi small {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: #61798f;
+  font-weight: 700;
+}
+
+.educacao-module .edu-plan-kpi strong {
+  font-size: 1.2rem;
+  color: #1b3a54;
+}
+
+.educacao-module .edu-plan-filter {
+  align-items: end;
+}
+
+.educacao-module .edu-plan-shell__head h3 {
+  margin: 0;
+  color: #1a3852;
+  font-size: 1.1rem;
+}
+
+.educacao-module .edu-plan-shell__head p {
+  margin: 4px 0 0;
+  color: #61798f;
+  font-size: 13px;
+}
+
+.educacao-module .edu-plan-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(280px, 1fr));
+  gap: 10px;
+}
+
+.educacao-module .edu-plan-card {
+  border: 1px solid #d6e6f2;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 12px;
+  display: grid;
+  gap: 9px;
+}
+
+.educacao-module .edu-plan-card.is-success {
+  border-color: #bde4c7;
+  background: linear-gradient(180deg, #ffffff 0%, #f6fff9 100%);
+}
+
+.educacao-module .edu-plan-card.is-primary {
+  border-color: #c5daf1;
+  background: linear-gradient(180deg, #ffffff 0%, #f4f9ff 100%);
+}
+
+.educacao-module .edu-plan-card.is-warning {
+  border-color: #f1dfb5;
+  background: linear-gradient(180deg, #ffffff 0%, #fffaf0 100%);
+}
+
+.educacao-module .edu-plan-card.is-danger {
+  border-color: #eccdcd;
+  background: linear-gradient(180deg, #ffffff 0%, #fff6f6 100%);
+}
+
+.educacao-module .edu-plan-card.is-neutral {
+  border-color: #d6e4ef;
+  background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+}
+
+.educacao-module .edu-plan-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.educacao-module .edu-plan-card__context {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  border: 1px solid #cde1ef;
+  background: #f5fbff;
+  color: #245d9d;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.educacao-module .edu-plan-card__head h4 {
+  margin: 7px 0 2px;
+  color: #1f3e58;
+  font-size: 1rem;
+}
+
+.educacao-module .edu-plan-card__head p {
+  margin: 0;
+  color: #688097;
+  font-size: 12px;
+}
+
+.educacao-module .edu-plan-card__progress {
+  display: grid;
+  gap: 5px;
+}
+
+.educacao-module .edu-plan-card__progress small {
+  color: #678097;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.educacao-module .edu-plan-progress {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: #e9f2f8;
+  overflow: hidden;
+}
+
+.educacao-module .edu-plan-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #3c93ff 0%, #2b67c5 100%);
+}
+
+.educacao-module .edu-plan-card__missing {
+  margin: 0;
+  color: #83540c;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.educacao-module .edu-plan-card__missing i {
+  margin-right: 6px;
+}
+
+.educacao-module .edu-plan-card__foot {
+  border-top: 1px dashed #d5e5f1;
+  padding-top: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.educacao-module .edu-plan-card__foot > span {
+  color: #6b8298;
+  font-size: 12px;
+}
+
+.educacao-module .edu-plan-editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 14px;
+}
+
+.educacao-module .edu-plan-editor__main {
+  display: grid;
+  gap: 12px;
+}
+
+.educacao-module .edu-plan-editor__status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.educacao-module .edu-plan-form {
+  display: grid;
+  gap: 12px;
+}
+
+.educacao-module .edu-plan-form__group {
+  border: 1px solid #d8e8f3;
+  border-radius: 12px;
+  background: #fbfdff;
+  padding: 12px;
+  display: grid;
+  gap: 9px;
+}
+
+.educacao-module .edu-plan-form__group h3 {
+  margin: 0;
+  color: #1b3a54;
+  font-size: 1rem;
+}
+
+.educacao-module .edu-plan-form__group p {
+  margin: 0;
+  color: #637b91;
+  font-size: 12px;
+}
+
+.educacao-module .edu-plan-form__actions {
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid #d9e7f3;
+}
+
+.educacao-module .edu-plan-form__actions form {
+  margin: 0;
+}
+
+.educacao-module .edu-plan-text {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.55;
+}
+
+.educacao-module .edu-plan-editor__side {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.educacao-module .edu-plan-side-card {
+  border: 1px solid #d8e8f3;
+  border-radius: 12px;
+  background: #fbfdff;
+  padding: 12px;
+}
+
+.educacao-module .edu-plan-side-card h4 {
+  margin: 0;
+  color: #1e3d58;
+  font-size: .95rem;
+}
+
+.educacao-module .edu-plan-side-card p {
+  margin: 5px 0 0;
+  color: #688095;
+  font-size: 12px;
+}
+
+.educacao-module .edu-plan-checklist {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.educacao-module .edu-plan-checklist li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  border-radius: 10px;
+  border: 1px solid #dbe9f4;
+  background: #ffffff;
+  padding: 0 10px;
+  color: #23445f;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.educacao-module .edu-plan-checklist li i {
+  font-size: 12px;
+}
+
+.educacao-module .edu-plan-checklist li.is-done {
+  border-color: #cce8d4;
+  color: #246043;
+  background: #f4fff8;
+}
+
+.educacao-module .edu-plan-checklist li.is-missing {
+  border-color: #e9ddc0;
+  color: #8a5d14;
+  background: #fffaf1;
+}
+
+.educacao-module .edu-plan-flow {
+  margin: 10px 0 0;
+  padding: 0 0 0 16px;
+  display: grid;
+  gap: 8px;
+}
+
+.educacao-module .edu-plan-flow li {
+  color: #5f778d;
+}
+
+.educacao-module .edu-plan-flow li strong {
+  display: block;
+  color: #27445d;
+  font-size: 13px;
+}
+
+.educacao-module .edu-plan-flow li span {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+}
+
+.educacao-module .edu-plan-flow li.is-done strong {
+  color: #1f6a4a;
+}
+
+.educacao-module .edu-plan-flow li.is-active strong {
+  color: #1f64ba;
+}
+
+.educacao-module .edu-plan-admin-history {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.educacao-module .edu-plan-admin-history li {
+  border: 1px solid #dae8f4;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 8px 10px;
+  color: #355169;
+  font-size: 12px;
+}
+
+/* Plano de ensino — refinamento visual SUAP-like */
+.educacao-module .edu-plan-shell,
+.educacao-module .edu-plan-editor {
+  border: 1px solid #d8dde6;
+  border-radius: 10px;
+  background: #f5f6f8;
+  padding: 12px;
+  box-shadow: none;
+}
+
+.educacao-module .edu-plan-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.educacao-module .edu-plan-tab {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid #cfd6e2;
+  background: #ffffff;
+  color: #2f435b;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.educacao-module .edu-plan-tab:hover {
+  border-color: #9bb2d1;
+  background: #f8fbff;
+}
+
+.educacao-module .edu-plan-tab.is-active {
+  border-color: #2f7d4a;
+  background: #e8f6ee;
+  color: #1f5a33;
+}
+
+.educacao-module .edu-plan-shell__summary {
+  grid-template-columns: repeat(5, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.educacao-module .edu-plan-kpi {
+  border: 1px solid #d8dfe9;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 8px 10px;
+}
+
+.educacao-module .edu-plan-kpi small {
+  letter-spacing: .04em;
+  color: #5f7186;
+}
+
+.educacao-module .edu-plan-kpi strong {
+  font-size: 1.1rem;
+  color: #22364e;
+}
+
+.educacao-module .edu-plan-filter {
+  padding: 10px;
+  border: 1px solid #d7dde7;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.educacao-module .edu-plan-shell__head h3 {
+  font-size: 1rem;
+  text-transform: none;
+}
+
+.educacao-module .edu-plan-shell__head p {
+  font-size: 12px;
+}
+
+.educacao-module .edu-plan-grid {
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.educacao-module .edu-plan-card {
+  border: 1px solid #d7dde7;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 10px;
+  gap: 8px;
+}
+
+.educacao-module .edu-plan-card__context {
+  min-height: 20px;
+  padding: 0 7px;
+  border-radius: 6px;
+  border-color: #cfd9e8;
+  background: #f8fbff;
+  font-size: 10px;
+}
+
+.educacao-module .edu-plan-card__head h4 {
+  margin: 6px 0 2px;
+  font-size: 0.95rem;
+}
+
+.educacao-module .edu-plan-card__head p {
+  font-size: 12px;
+}
+
+.educacao-module .edu-plan-progress {
+  height: 7px;
+  background: #ebeff5;
+}
+
+.educacao-module .edu-plan-progress > span {
+  background: linear-gradient(90deg, #2f8f56 0%, #2b6fb0 100%);
+}
+
+.educacao-module .edu-plan-card__foot {
+  border-top: 1px solid #e4e9f2;
+  padding-top: 8px;
+}
+
+.educacao-module .edu-plan-card__foot > span {
+  font-size: 11px;
+}
+
+.educacao-module .edu-plan-editor {
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 10px;
+}
+
+.educacao-module .edu-plan-editor__status {
+  padding: 8px;
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.educacao-module .edu-plan-form__group,
+.educacao-module .edu-plan-side-card {
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 10px;
+}
+
+.educacao-module .edu-plan-form__group h3,
+.educacao-module .edu-plan-side-card h4 {
+  font-size: .92rem;
+}
+
+.educacao-module .edu-plan-form__group p,
+.educacao-module .edu-plan-side-card p {
+  font-size: 12px;
+}
+
+.educacao-module .edu-plan-checklist li,
+.educacao-module .edu-plan-admin-history li {
+  border-radius: 8px;
+}
+
+.educacao-module .edu-plan-form .gp-button--primary {
+  background: linear-gradient(180deg, #2f8f56 0%, #257445 100%);
+}
+
+.educacao-module .edu-plan-form .gp-button--primary:hover {
+  background: linear-gradient(180deg, #2a7f4d 0%, #20653c 100%);
+}
+
+.educacao-module .edu-plan-form .gp-button--success {
+  background: linear-gradient(180deg, #2f8f56 0%, #257445 100%);
+}
+
+.educacao-module .edu-plan-form .gp-button--success:hover {
+  background: linear-gradient(180deg, #2a7f4d 0%, #20653c 100%);
+}
+
 /* Turma de informática (detalhe) — versão clean */
 .educacao-module .edu-inf-turma-clean {
   display: grid;
@@ -836,6 +1361,18 @@
 }
 
 @media (max-width: 1220px) {
+  .educacao-module .edu-plan-editor {
+    grid-template-columns: 1fr;
+  }
+
+  .educacao-module .edu-plan-shell__summary {
+    grid-template-columns: repeat(3, minmax(150px, 1fr));
+  }
+
+  .educacao-module .edu-plan-grid {
+    grid-template-columns: 1fr;
+  }
+
   .educacao-module .edu-inf-turma-clean__chips {
     grid-template-columns: repeat(3, minmax(150px, 1fr));
   }
@@ -890,6 +1427,19 @@
 
   .educacao-module .edu-inf-turma-clean__chips {
     grid-template-columns: repeat(2, minmax(120px, 1fr));
+  }
+
+  .educacao-module .edu-plan-shell__summary {
+    grid-template-columns: repeat(2, minmax(130px, 1fr));
+  }
+
+  .educacao-module .edu-plan-card__foot {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .educacao-module .edu-plan-form__actions {
+    display: grid;
   }
 }
 

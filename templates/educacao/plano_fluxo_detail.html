@@ -1,0 +1,146 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Análise de Plano de Ensino • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage">
+  {% include "core/partials/components/layout/page_head.html" with title="Análise de Plano de Ensino" subtitle="Fluxo institucional de aprovação e homologação pela coordenação." actions=None %}
+
+  <article class="gp-student-stage__card edu-plan-editor">
+    <div class="edu-plan-editor__main">
+      <div class="edu-plan-editor__status">
+        <span class="gp-badge {{ status_meta.badge_class }}">
+          Status: {{ plano.get_status_display }}
+        </span>
+        {% if is_informatica %}
+          <span class="gp-badge gp-badge--primary">Turma de Informática: {{ referencia_turma }}</span>
+        {% else %}
+          <span class="gp-badge gp-badge--primary">Turma Regular: {{ referencia_turma }}</span>
+        {% endif %}
+        <span class="gp-badge gp-badge--neutral">Unidade: {{ referencia_unidade }}</span>
+        <span class="gp-badge gp-badge--neutral">Professor: {{ professor_nome }} ({{ professor_codigo }})</span>
+      </div>
+
+      <div class="edu-plan-form">
+        <section class="edu-plan-form__group">
+          <h3>Título</h3>
+          <p>{{ plano.titulo|default:"—" }}</p>
+        </section>
+
+        <section class="edu-plan-form__group">
+          <h3>Ementa</h3>
+          <p class="edu-plan-text">{{ plano.ementa|linebreaksbr|default:"—" }}</p>
+        </section>
+
+        <section class="edu-plan-form__group">
+          <h3>Objetivos</h3>
+          <p class="edu-plan-text">{{ plano.objetivos|linebreaksbr|default:"—" }}</p>
+        </section>
+
+        <section class="edu-plan-form__group">
+          <h3>Metodologia</h3>
+          <p class="edu-plan-text">{{ plano.metodologia|linebreaksbr|default:"—" }}</p>
+        </section>
+
+        <section class="edu-plan-form__group">
+          <h3>Critérios de Avaliação</h3>
+          <p class="edu-plan-text">{{ plano.criterios_avaliacao|linebreaksbr|default:"—" }}</p>
+        </section>
+
+        <section class="edu-plan-form__group">
+          <h3>Cronograma</h3>
+          <p class="edu-plan-text">{{ plano.cronograma|linebreaksbr|default:"—" }}</p>
+        </section>
+
+        <section class="edu-plan-form__group">
+          <h3>Referências</h3>
+          <p class="edu-plan-text">{{ plano.referencias|linebreaksbr|default:"—" }}</p>
+        </section>
+
+        {% if plano.motivo_devolucao %}
+          <section class="edu-plan-form__group">
+            <h3>Motivo da devolução anterior</h3>
+            <p class="edu-plan-text">{{ plano.motivo_devolucao|linebreaksbr }}</p>
+          </section>
+        {% endif %}
+
+        <section class="edu-plan-form__group">
+          <h3>Ações da Coordenação</h3>
+          <div class="gp-professor-inline-actions edu-plan-form__actions">
+            <a class="gp-button gp-button--ghost" href="{% url 'educacao:plano_ensino_fluxo_list' %}">
+              <i class="fa-solid fa-arrow-left"></i> Voltar para fila
+            </a>
+            {% if plano.status == "SUBMETIDO" %}
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="aprovar">
+                <button class="gp-button gp-button--primary" type="submit">
+                  <i class="fa-solid fa-check"></i> Aprovar
+                </button>
+              </form>
+            {% endif %}
+            {% if plano.status == "APROVADO" %}
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="homologar">
+                <button class="gp-button gp-button--success" type="submit">
+                  <i class="fa-solid fa-stamp"></i> Homologar
+                </button>
+              </form>
+            {% endif %}
+          </div>
+
+          {% if plano.status == "SUBMETIDO" or plano.status == "APROVADO" %}
+            <form method="post" class="gp-form gp-form--smart">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="devolver">
+              <div class="gp-form-group gp-field--full">
+                <label class="gp-form-label" for="id_motivo_devolucao">Devolver para ajustes (motivo obrigatório)</label>
+                <textarea id="id_motivo_devolucao" name="motivo_devolucao" class="gp-textarea" rows="3" placeholder="Descreva os ajustes necessários para o professor."></textarea>
+              </div>
+              <button class="gp-button gp-button--outline" type="submit">
+                <i class="fa-solid fa-reply"></i> Devolver para ajustes
+              </button>
+            </form>
+          {% endif %}
+        </section>
+      </div>
+    </div>
+
+    <aside class="edu-plan-editor__side">
+      <section class="edu-plan-side-card">
+        <h4>Checklist de preenchimento</h4>
+        <ul class="edu-plan-checklist">
+          {% for item in plano_checklist.items %}
+            <li class="{% if item.filled %}is-done{% else %}is-missing{% endif %}">
+              <i class="fa-solid {% if item.filled %}fa-circle-check{% else %}fa-circle-dot{% endif %}"></i>
+              <span>{{ item.label }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+
+      <section class="edu-plan-side-card">
+        <h4>Fluxo institucional</h4>
+        <ol class="edu-plan-flow">
+          {% for step in plano_fluxo %}
+            <li class="is-{{ step.state }}">
+              <strong>{{ step.title }}</strong>
+              <span>{{ step.desc }}</span>
+            </li>
+          {% endfor %}
+        </ol>
+      </section>
+
+      <section class="edu-plan-side-card">
+        <h4>Histórico de decisão</h4>
+        <ul class="edu-plan-admin-history">
+          <li><strong>Submetido:</strong> {% if plano.submetido_em %}{{ plano.submetido_em|date:"d/m/Y H:i" }}{% else %}—{% endif %}</li>
+          <li><strong>Aprovado:</strong> {% if plano.aprovado_em %}{{ plano.aprovado_em|date:"d/m/Y H:i" }}{% else %}—{% endif %}</li>
+          <li><strong>Homologado:</strong> {% if plano.homologado_em %}{{ plano.homologado_em|date:"d/m/Y H:i" }}{% else %}—{% endif %}</li>
+          <li><strong>Devolvido:</strong> {% if plano.devolvido_em %}{{ plano.devolvido_em|date:"d/m/Y H:i" }}{% else %}—{% endif %}</li>
+        </ul>
+      </section>
+    </aside>
+  </article>
+</section>
+{% endblock %}

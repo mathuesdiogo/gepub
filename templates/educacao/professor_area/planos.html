@@ -8,21 +8,47 @@
   <article class="gp-student-stage__card">
     <form method="get" class="gp-form gp-form--smart gp-professor-filter-row">
       <div class="gp-form-group gp-field--full">
-        <label class="gp-form-label" for="id_q">Buscar diário</label>
-        <input id="id_q" type="text" class="gp-input" name="q" value="{{ q }}" placeholder="Turma, unidade ou ano letivo" />
+        <label class="gp-form-label" for="id_q">Buscar plano</label>
+        <input id="id_q" type="text" class="gp-input" name="q" value="{{ q }}" placeholder="Turma, laboratório, unidade ou ano" />
+      </div>
+      <div class="gp-form-group">
+        <label class="gp-form-label" for="id_status">Status</label>
+        <select id="id_status" class="gp-select" name="status">
+          <option value="todos" {% if status_filter == "todos" %}selected{% endif %}>Todos</option>
+          <option value="editaveis" {% if status_filter == "editaveis" %}selected{% endif %}>Em edição / devolvidos</option>
+          <option value="enviados" {% if status_filter == "enviados" %}selected{% endif %}>Aguardando aprovação/homologação</option>
+          <option value="homologados" {% if status_filter == "homologados" %}selected{% endif %}>Homologados</option>
+          <option value="devolvidos" {% if status_filter == "devolvidos" %}selected{% endif %}>Devolvidos</option>
+        </select>
       </div>
       <div class="gp-form-group">
         <label class="gp-form-label">&nbsp;</label>
         <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
       </div>
     </form>
-
-    {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Sem diários" empty_text="Nenhum diário encontrado para preencher plano de ensino." %}
   </article>
 
+  {% if has_regular_access %}
+  <article class="gp-student-stage__card">
+    <p class="gp-text-muted">{{ total_planos_regular }} plano(s) regular(es) encontrado(s).</p>
+    {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Sem planos regulares" empty_text="Nenhum plano regular encontrado para esse filtro." %}
+  </article>
+  {% endif %}
+
+  {% if has_informatica_access %}
   <article class="gp-student-stage__card">
     <h3>Planos de Ensino do Curso de Informática</h3>
-    {% include "core/partials/components/data/table_shell.html" with headers=headers_informatica rows=rows_informatica page_obj=None empty_title="Sem turmas de informática" empty_text="Nenhuma turma de informática encontrada para preencher plano de ensino." %}
+    <p class="gp-text-muted">{{ total_planos_informatica }} plano(s) de informática encontrado(s).</p>
+    {% include "core/partials/components/data/table_shell.html" with headers=headers_informatica rows=rows_informatica page_obj=None empty_title="Sem planos de informática" empty_text="Nenhum plano de informática encontrado para esse filtro." %}
   </article>
+  {% endif %}
+
+  {% if not has_regular_access and not has_informatica_access %}
+  <article class="gp-student-stage__card">
+    <div class="gp-alert gp-alert--info">
+      Este professor ainda não possui planos de ensino disponíveis no momento.
+    </div>
+  </article>
+  {% endif %}
 </section>
 {% endblock %}

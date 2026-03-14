@@ -142,6 +142,21 @@ urlpatterns = [
         views_professor_area.professor_plano_ensino_informatica_editar,
         name="professor_plano_ensino_informatica_editar",
     ),
+    path(
+        "planos-ensino/fluxo/",
+        views_professor_area.plano_ensino_fluxo_list,
+        name="plano_ensino_fluxo_list",
+    ),
+    path(
+        "planos-ensino/fluxo/regular/<int:pk>/",
+        views_professor_area.plano_ensino_fluxo_regular_detail,
+        name="plano_ensino_fluxo_regular_detail",
+    ),
+    path(
+        "planos-ensino/fluxo/informatica/<int:pk>/",
+        views_professor_area.plano_ensino_fluxo_informatica_detail,
+        name="plano_ensino_fluxo_informatica_detail",
+    ),
     path("professor/<str:codigo>/materiais/", views_professor_area.professor_materiais, name="professor_materiais"),
     path("professor/<str:codigo>/materiais/novo/", views_professor_area.professor_material_novo, name="professor_material_novo"),
     path(

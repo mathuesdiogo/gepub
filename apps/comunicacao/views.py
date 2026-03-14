@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 from typing import Any
 
@@ -11,6 +12,9 @@ from django.db.models import F, Q
 from django.http import HttpRequest, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
+from django.utils.crypto import constant_time_compare
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
 from apps.core.decorators import require_perm
@@ -19,10 +23,18 @@ from apps.core.rbac import can, is_admin
 from apps.org.models import Municipio, Secretaria, Unidade
 
 from .forms import NotificationChannelConfigForm, NotificationTemplateForm
-from .models import NotificationChannelConfig, NotificationJob, NotificationLog, NotificationTemplate
+from .models import (
+    NotificationChannelConfig,
+    NotificationJob,
+    NotificationLog,
+    NotificationTemplate,
+    NotificationTenantSettings,
+    NotificationWebhookEvent,
+)
 from .services import (
     process_pending_notification_jobs,
     queue_event_notifications,
+    run_channel_connection_test,
     validate_template_payload,
 )
 from .tasks import process_notification_job_task
@@ -201,6 +213,84 @@ def _parse_recipients(data: dict[str, Any]) -> list[dict[str, Any]]:
     if any(single.values()):
         return [single]
     return []
+
+
+def _serialize_tenant_settings(item: NotificationTenantSettings) -> dict[str, Any]:
+    return {
+        "municipio_id": item.municipio_id,
+        "sender_name": item.sender_name,
+        "sender_email": item.sender_email,
+        "reply_to": item.reply_to,
+        "sending_domain": item.sending_domain,
+        "default_email_provider": item.default_email_provider,
+        "default_whatsapp_provider": item.default_whatsapp_provider,
+        "support_contact_email": item.support_contact_email,
+        "support_contact_phone": item.support_contact_phone,
+        "dns_spf_ok": item.dns_spf_ok,
+        "dns_dkim_ok": item.dns_dkim_ok,
+        "dns_dmarc_ok": item.dns_dmarc_ok,
+        "onboarding_step": item.onboarding_step,
+        "is_active": item.is_active,
+        "last_validation_status": item.last_validation_status,
+        "last_validation_message": item.last_validation_message,
+        "last_validated_at": item.last_validated_at.isoformat() if item.last_validated_at else None,
+        "wizard_completed_at": item.wizard_completed_at.isoformat() if item.wizard_completed_at else None,
+    }
+
+
+def _parse_credentials_payload(data: dict[str, Any]) -> tuple[bool, dict[str, Any] | None]:
+    if "credentials_json" not in data:
+        return False, None
+    raw = data.get("credentials_json")
+    if isinstance(raw, dict):
+        return True, raw
+    if isinstance(raw, str):
+        text = raw.strip()
+        if not text:
+            return True, {}
+        try:
+            parsed = json.loads(text)
+        except Exception:
+            return True, {}
+        if isinstance(parsed, dict):
+            return True, parsed
+    return True, {}
+
+
+def _resolve_municipio_from_webhook_payload(data: dict[str, Any]) -> Municipio | None:
+    municipio_id = str(data.get("municipio_id") or "").strip()
+    if municipio_id.isdigit():
+        item = Municipio.objects.filter(pk=int(municipio_id), ativo=True).first()
+        if item:
+            return item
+    slug = str(data.get("municipio_slug") or data.get("tenant") or "").strip().lower()
+    if slug:
+        item = Municipio.objects.filter(slug_site=slug, ativo=True).first()
+        if item:
+            return item
+    nome = str(data.get("municipio_nome") or "").strip()
+    if nome:
+        return Municipio.objects.filter(nome__iexact=nome, ativo=True).first()
+    return None
+
+
+def _resolve_webhook_job(
+    *,
+    provider: str,
+    municipio: Municipio | None,
+    external_event_id: str,
+    destination: str,
+) -> NotificationJob | None:
+    qs = NotificationJob.objects.filter(provider=provider)
+    if municipio is not None:
+        qs = qs.filter(municipio=municipio)
+    if external_event_id:
+        job = qs.filter(provider_message_id=external_event_id).order_by("-id").first()
+        if job:
+            return job
+    if destination:
+        return qs.filter(destination=destination).order_by("-created_at", "-id").first()
+    return None
 
 
 @login_required
@@ -518,6 +608,8 @@ def notifications_send(request):
         urgent=urgent,
         subject_override=subject,
         body_override=body,
+        message_kind=NotificationJob.MessageKind.CAMPANHA,
+        correlation_key=str(data.get("correlation_key") or ""),
         entity_module=str(data.get("entity_module") or ""),
         entity_type=str(data.get("entity_type") or ""),
         entity_id=str(data.get("entity_id") or ""),
@@ -566,6 +658,8 @@ def notifications_trigger(request):
         actor=request.user,
         priority=priority,
         urgent=urgent,
+        message_kind=NotificationJob.MessageKind.TRANSACIONAL,
+        correlation_key=str(data.get("correlation_key") or ""),
         entity_module=str(data.get("entity_module") or ""),
         entity_type=str(data.get("entity_type") or ""),
         entity_id=str(data.get("entity_id") or ""),
@@ -793,6 +887,11 @@ def channels_config_api(request):
                 "prioridade": item.prioridade,
                 "secretaria_id": item.secretaria_id,
                 "unidade_id": item.unidade_id,
+                "has_credentials": bool(item.credentials_encrypted or item.credentials_json),
+                "credentials_masked": item.get_masked_credentials(),
+                "last_test_status": item.last_test_status,
+                "last_tested_at": item.last_tested_at.isoformat() if item.last_tested_at else None,
+                "last_test_message": item.last_test_message,
             }
             for item in qs[:200]
         ]
@@ -815,6 +914,241 @@ def channels_config_api(request):
         saved = form.save(commit=False)
         saved.municipio = municipio
         saved.atualizado_por = request.user
+        has_credentials_input, credentials_payload = _parse_credentials_payload(data)
+        if _bool_value(data.get("clear_credentials"), default=False):
+            saved.set_credentials({})
+        elif has_credentials_input:
+            saved.set_credentials(credentials_payload or {})
         saved.save()
         return JsonResponse({"ok": True, "id": saved.id})
     return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
+
+@login_required
+@require_perm("comunicacao.view")
+@require_http_methods(["GET", "POST"])
+def tenant_settings_api(request):
+    municipio = _resolve_municipio(request, require_selected=(request.method == "POST"))
+    if not municipio:
+        return JsonResponse({"ok": False, "error": "Município não selecionado."}, status=400)
+
+    settings_obj, _created = NotificationTenantSettings.objects.get_or_create(municipio=municipio)
+    if request.method == "GET":
+        return JsonResponse(
+            {
+                "ok": True,
+                "item": _serialize_tenant_settings(settings_obj),
+                "email_providers": [
+                    {"value": value, "label": label}
+                    for value, label in NotificationChannelConfig.Provider.choices
+                    if value
+                    in {
+                        NotificationChannelConfig.Provider.SMTP,
+                        NotificationChannelConfig.Provider.SES,
+                        NotificationChannelConfig.Provider.POSTMARK,
+                        NotificationChannelConfig.Provider.SENDGRID,
+                        NotificationChannelConfig.Provider.MAILGUN,
+                        NotificationChannelConfig.Provider.OUTRO,
+                        NotificationChannelConfig.Provider.MOCK,
+                    }
+                ],
+                "whatsapp_providers": [
+                    {"value": value, "label": label}
+                    for value, label in NotificationChannelConfig.Provider.choices
+                    if value
+                    in {
+                        NotificationChannelConfig.Provider.TWILIO,
+                        NotificationChannelConfig.Provider.META,
+                        NotificationChannelConfig.Provider.OUTRO,
+                        NotificationChannelConfig.Provider.MOCK,
+                    }
+                ],
+            }
+        )
+
+    if not can(request.user, "comunicacao.admin"):
+        return HttpResponseForbidden("403 — Somente admin pode atualizar a configuração da prefeitura.")
+
+    data = _request_data(request)
+    parse_error = _input_error(data)
+    if parse_error:
+        return JsonResponse({"ok": False, "error": "Payload JSON inválido ou acima do limite permitido."}, status=400)
+
+    settings_obj.sender_name = str(data.get("sender_name") or settings_obj.sender_name or "")[:140]
+    settings_obj.sender_email = str(data.get("sender_email") or settings_obj.sender_email or "")[:254]
+    settings_obj.reply_to = str(data.get("reply_to") or settings_obj.reply_to or "")[:254]
+    settings_obj.sending_domain = str(data.get("sending_domain") or settings_obj.sending_domain or "")[:180]
+    settings_obj.support_contact_email = str(data.get("support_contact_email") or settings_obj.support_contact_email or "")[:254]
+    settings_obj.support_contact_phone = str(data.get("support_contact_phone") or settings_obj.support_contact_phone or "")[:40]
+
+    email_provider = str(data.get("default_email_provider") or settings_obj.default_email_provider or "").strip().upper()
+    whatsapp_provider = str(data.get("default_whatsapp_provider") or settings_obj.default_whatsapp_provider or "").strip().upper()
+    valid_providers = {choice for choice, _label in NotificationChannelConfig.Provider.choices}
+    if email_provider in valid_providers:
+        settings_obj.default_email_provider = email_provider
+    if whatsapp_provider in valid_providers:
+        settings_obj.default_whatsapp_provider = whatsapp_provider
+
+    settings_obj.dns_spf_ok = _bool_value(data.get("dns_spf_ok"), default=settings_obj.dns_spf_ok)
+    settings_obj.dns_dkim_ok = _bool_value(data.get("dns_dkim_ok"), default=settings_obj.dns_dkim_ok)
+    settings_obj.dns_dmarc_ok = _bool_value(data.get("dns_dmarc_ok"), default=settings_obj.dns_dmarc_ok)
+    settings_obj.onboarding_step = _safe_int(
+        data.get("onboarding_step"),
+        default=settings_obj.onboarding_step or 1,
+        minimum=1,
+        maximum=5,
+    )
+    settings_obj.is_active = _bool_value(data.get("is_active"), default=settings_obj.is_active)
+    settings_obj.updated_by = request.user
+    if _bool_value(data.get("complete_wizard"), default=False):
+        settings_obj.wizard_completed_at = timezone.now()
+        settings_obj.is_active = True
+    settings_obj.save()
+
+    return JsonResponse({"ok": True, "item": _serialize_tenant_settings(settings_obj)})
+
+
+@login_required
+@require_perm("comunicacao.admin")
+@require_POST
+def channel_test_api(request):
+    municipio = _resolve_municipio(request, require_selected=True)
+    if not municipio:
+        return JsonResponse({"ok": False, "error": "Município não selecionado."}, status=400)
+
+    data = _request_data(request)
+    parse_error = _input_error(data)
+    if parse_error:
+        return JsonResponse({"ok": False, "error": "Payload JSON inválido ou acima do limite permitido."}, status=400)
+    channel_id = _safe_int(data.get("channel_id") or data.get("id"), default=0, minimum=0)
+    if channel_id <= 0:
+        return JsonResponse({"ok": False, "error": "Informe channel_id válido."}, status=400)
+    config_obj = NotificationChannelConfig.objects.filter(pk=channel_id, municipio=municipio).first()
+    if not config_obj:
+        return JsonResponse({"ok": False, "error": "Canal não encontrado para o município selecionado."}, status=404)
+
+    destination = str(data.get("destination") or "").strip()
+    try:
+        result = run_channel_connection_test(config=config_obj, destination=destination, actor=request.user)
+        return JsonResponse({"ok": True, "result": result})
+    except Exception as exc:
+        return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+
+
+@csrf_exempt
+@require_POST
+def provider_webhook_api(request, provider: str):
+    provider_code = (provider or "").strip().upper()
+    valid_providers = {choice for choice, _label in NotificationChannelConfig.Provider.choices}
+    if provider_code not in valid_providers:
+        return JsonResponse({"ok": False, "error": "Provedor não suportado."}, status=404)
+
+    data = _request_data(request)
+    parse_error = _input_error(data)
+    if parse_error:
+        return JsonResponse({"ok": False, "error": "Payload inválido."}, status=400)
+
+    configured_secret = (os.getenv("COMUNICACAO_WEBHOOK_SHARED_SECRET") or "").strip()
+    received_secret = (
+        request.headers.get("X-GEPUB-WEBHOOK-SECRET")
+        or request.headers.get("X-Webhook-Secret")
+        or ""
+    ).strip()
+    signature_valid = bool(configured_secret and received_secret and constant_time_compare(configured_secret, received_secret))
+    if configured_secret and not signature_valid:
+        NotificationWebhookEvent.objects.create(
+            provider=provider_code,
+            event_type=str(data.get("event") or data.get("type") or "unknown")[:120],
+            payload_json=data,
+            signature_valid=False,
+            processing_status=NotificationWebhookEvent.ProcessingStatus.ERRO,
+            error_message="Assinatura inválida.",
+        )
+        return JsonResponse({"ok": False, "error": "Assinatura inválida."}, status=403)
+
+    municipio = _resolve_municipio_from_webhook_payload(data)
+    event_type = str(data.get("event") or data.get("type") or data.get("status") or "unknown")[:120]
+    external_event_id = str(data.get("id") or data.get("message_id") or data.get("sid") or "")[:180]
+    destination = str(data.get("to") or data.get("destination") or data.get("recipient") or "")[:180]
+    channel = str(data.get("channel") or "").strip().upper()
+    if channel not in {c for c, _label in NotificationChannelConfig.Channel.choices}:
+        channel = ""
+
+    webhook_event = NotificationWebhookEvent.objects.create(
+        municipio=municipio,
+        provider=provider_code,
+        event_type=event_type,
+        external_event_id=external_event_id,
+        channel=channel,
+        destination=destination,
+        payload_json=data,
+        signature_valid=(signature_valid or not configured_secret),
+        processing_status=NotificationWebhookEvent.ProcessingStatus.RECEBIDO,
+    )
+
+    status_raw = str(data.get("status") or data.get("event") or data.get("type") or "").strip().lower()
+    status_map = {
+        "queued": NotificationJob.Status.ENVIADO,
+        "sent": NotificationJob.Status.ENVIADO,
+        "accepted": NotificationJob.Status.ENVIADO,
+        "delivered": NotificationJob.Status.ENTREGUE,
+        "delivery": NotificationJob.Status.ENTREGUE,
+        "read": NotificationJob.Status.ENTREGUE,
+        "opened": NotificationJob.Status.ENTREGUE,
+        "failed": NotificationJob.Status.FALHA,
+        "undelivered": NotificationJob.Status.FALHA,
+        "bounced": NotificationJob.Status.FALHA,
+        "complaint": NotificationJob.Status.FALHA,
+    }
+    target_status = status_map.get(status_raw)
+    related_job = _resolve_webhook_job(
+        provider=provider_code,
+        municipio=municipio,
+        external_event_id=external_event_id,
+        destination=destination,
+    )
+
+    if related_job is None:
+        webhook_event.processing_status = NotificationWebhookEvent.ProcessingStatus.IGNORADO
+        webhook_event.error_message = "Nenhum job relacionado encontrado."
+        webhook_event.processed_at = timezone.now()
+        webhook_event.save(update_fields=["processing_status", "error_message", "processed_at"])
+        return JsonResponse({"ok": True, "processed": False, "reason": "job_not_found"})
+
+    if target_status is None:
+        webhook_event.processing_status = NotificationWebhookEvent.ProcessingStatus.IGNORADO
+        webhook_event.error_message = "Status do evento não mapeado."
+        webhook_event.processed_at = timezone.now()
+        webhook_event.save(update_fields=["processing_status", "error_message", "processed_at"])
+        return JsonResponse({"ok": True, "processed": False, "reason": "status_not_mapped"})
+
+    now = timezone.now()
+    related_job.status = target_status
+    if target_status == NotificationJob.Status.ENVIADO and not related_job.sent_at:
+        related_job.sent_at = now
+    if target_status == NotificationJob.Status.ENTREGUE:
+        if not related_job.sent_at:
+            related_job.sent_at = now
+        related_job.delivered_at = now
+        related_job.error_message = ""
+    if target_status == NotificationJob.Status.FALHA:
+        related_job.error_message = str(data.get("error") or data.get("reason") or data.get("message") or "")[:1000]
+    related_job.save(update_fields=["status", "sent_at", "delivered_at", "error_message", "updated_at"])
+    NotificationLog.objects.create(
+        job=related_job,
+        status=target_status,
+        attempt=max(1, int(related_job.attempts or 1)),
+        channel=related_job.channel,
+        provider=provider_code,
+        destination=related_job.destination,
+        subject=related_job.subject_rendered or "",
+        body=related_job.body_rendered or "",
+        provider_response=data,
+        error_message=(related_job.error_message or "")[:1000],
+    )
+
+    webhook_event.processing_status = NotificationWebhookEvent.ProcessingStatus.PROCESSADO
+    webhook_event.error_message = ""
+    webhook_event.processed_at = now
+    webhook_event.save(update_fields=["processing_status", "error_message", "processed_at"])
+    return JsonResponse({"ok": True, "processed": True, "job_id": related_job.pk, "status": related_job.status})

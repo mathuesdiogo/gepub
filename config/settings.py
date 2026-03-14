@@ -96,7 +96,7 @@ CPF_ENCRYPTION_KEY = os.getenv("DJANGO_CPF_ENCRYPTION_KEY", "")
 DEBUG = _env_bool("DJANGO_DEBUG", default=False)
 ALLOWED_HOSTS = _env_list(
     "DJANGO_ALLOWED_HOSTS",
-    default=["127.0.0.1", "localhost", ".gepub.com.br"],
+    default=["127.0.0.1", "localhost", "testserver", ".gepub.com.br"],
 )
 
 GEPUB_PUBLIC_ROOT_DOMAIN = (os.getenv("GEPUB_PUBLIC_ROOT_DOMAIN", "gepub.com.br") or "").strip().lower().strip(".")
@@ -290,6 +290,17 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = _env_bool(
     "CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP",
     default=True,
 )
+CELERY_TASK_ROUTES = {
+    "comunicacao.process_job": {"queue": "comunicacao"},
+    "comunicacao.process_pending": {"queue": "comunicacao"},
+}
+CELERY_BEAT_SCHEDULE = {
+    "comunicacao-process-pending": {
+        "task": "comunicacao.process_pending",
+        "schedule": _env_int("COMUNICACAO_PROCESS_INTERVAL_SECONDS", default=60),
+        "args": (_env_int("COMUNICACAO_PROCESS_BATCH_SIZE", default=200),),
+    }
+}
 
 # =========================
 # API (DRF + JWT)
@@ -376,6 +387,15 @@ COMUNICACAO_API_MAX_JSON_BODY_BYTES = _env_int(
     "COMUNICACAO_API_MAX_JSON_BODY_BYTES",
     default=256 * 1024,
 )
+COMUNICACAO_RETRY_BASE_MINUTES = _env_int("COMUNICACAO_RETRY_BASE_MINUTES", default=2)
+COMUNICACAO_RETRY_MAX_MINUTES = _env_int("COMUNICACAO_RETRY_MAX_MINUTES", default=60)
+COMUNICACAO_WEBHOOK_SHARED_SECRET = (os.getenv("COMUNICACAO_WEBHOOK_SHARED_SECRET", "") or "").strip()
+
+EMAIL_BACKEND = os.getenv(
+    "DJANGO_EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend" if DEBUG else "django.core.mail.backends.smtp.EmailBackend",
+).strip()
+DEFAULT_FROM_EMAIL = (os.getenv("DJANGO_DEFAULT_FROM_EMAIL", "no-reply@gepub.local") or "no-reply@gepub.local").strip()
 
 SECURE_HSTS_SECONDS = _env_int("DJANGO_SECURE_HSTS_SECONDS", default=(31536000 if not DEBUG else 0))
 SECURE_HSTS_INCLUDE_SUBDOMAINS = _env_bool(

@@ -5,69 +5,149 @@
 <section class="gp-student-stage gp-professor-stage">
   {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
 
-  <article class="gp-student-stage__card">
-    <div class="gp-flex-wrap-row gp-mb-3">
-      <span class="gp-badge {% if plano.status == 'SUBMETIDO' %}gp-badge--success{% else %}gp-badge--warning{% endif %}">
-        Status: {{ status_label }}
-      </span>
-      {% if plano.submetido_em %}
-        <span class="gp-badge gp-badge--neutral">Submetido em {{ plano.submetido_em|date:"d/m/Y H:i" }}</span>
-      {% endif %}
-      {% if is_informatica %}
-        <span class="gp-badge gp-badge--neutral">Ano: {{ turma_informatica.ano_letivo }}</span>
-        <span class="gp-badge gp-badge--primary">Turma: {{ turma_informatica.codigo }}</span>
-      {% else %}
-        <span class="gp-badge gp-badge--neutral">Ano: {{ diario.ano_letivo }}</span>
-        <span class="gp-badge gp-badge--neutral">Turma: {{ diario.turma.nome }}</span>
-      {% endif %}
-    </div>
-
-    <form method="post" class="gp-form gp-form--smart gp-form--teacher-plan">
-      {% csrf_token %}
-      <div class="gp-form-group gp-field--full">
-        <label class="gp-form-label" for="id_titulo">Título</label>
-        {{ form.titulo }}
-      </div>
-      <div class="gp-form-group gp-field--full">
-        <label class="gp-form-label" for="id_ementa">Ementa</label>
-        {{ form.ementa }}
-      </div>
-      <div class="gp-form-group gp-field--full">
-        <label class="gp-form-label" for="id_objetivos">Objetivos</label>
-        {{ form.objetivos }}
-      </div>
-      <div class="gp-form-group gp-field--full">
-        <label class="gp-form-label" for="id_metodologia">Metodologia</label>
-        {{ form.metodologia }}
-      </div>
-      <div class="gp-form-group gp-field--full">
-        <label class="gp-form-label" for="id_criterios_avaliacao">Critérios de avaliação</label>
-        {{ form.criterios_avaliacao }}
-      </div>
-      <div class="gp-form-group gp-field--full">
-        <label class="gp-form-label" for="id_cronograma">Cronograma</label>
-        {{ form.cronograma }}
-      </div>
-      <div class="gp-form-group gp-field--full">
-        <label class="gp-form-label" for="id_referencias">Referências</label>
-        {{ form.referencias }}
-      </div>
-
-      <div class="gp-professor-inline-actions">
-        <button class="gp-button gp-button--primary" type="submit" name="action" value="save">
-          <i class="fa-solid fa-floppy-disk"></i> Salvar rascunho
-        </button>
-        {% if plano.status == 'SUBMETIDO' %}
-          <button class="gp-button gp-button--outline" type="submit" name="action" value="cancel_submit">
-            <i class="fa-solid fa-rotate-left"></i> Cancelar submissão
-          </button>
+  <article class="gp-student-stage__card edu-plan-editor">
+    <div class="edu-plan-editor__main">
+      <div class="edu-plan-editor__status">
+        <span class="gp-badge {{ status_meta.badge_class }}">
+          Status: {{ status_label }}
+        </span>
+        <span class="gp-badge gp-badge--neutral">
+          Preenchimento: {{ plano_checklist.percent }}%
+        </span>
+        {% if plano.submetido_em %}
+          <span class="gp-badge gp-badge--neutral">Submetido em {{ plano.submetido_em|date:"d/m/Y H:i" }}</span>
+        {% endif %}
+        {% if plano.aprovado_em %}
+          <span class="gp-badge gp-badge--neutral">Aprovado em {{ plano.aprovado_em|date:"d/m/Y H:i" }}</span>
+        {% endif %}
+        {% if plano.homologado_em %}
+          <span class="gp-badge gp-badge--success">Homologado em {{ plano.homologado_em|date:"d/m/Y H:i" }}</span>
+        {% endif %}
+        {% if is_informatica %}
+          <span class="gp-badge gp-badge--primary">Turma: {{ turma_informatica.codigo }}</span>
+          <span class="gp-badge gp-badge--neutral">Ano: {{ turma_informatica.ano_letivo }}</span>
         {% else %}
-          <button class="gp-button gp-button--success" type="submit" name="action" value="submit">
-            <i class="fa-solid fa-paper-plane"></i> Submeter plano
-          </button>
+          <span class="gp-badge gp-badge--primary">Turma: {{ diario.turma.nome }}</span>
+          <span class="gp-badge gp-badge--neutral">Ano: {{ diario.ano_letivo }}</span>
         {% endif %}
       </div>
-    </form>
+
+      {% if plano.status == "DEVOLVIDO" and plano.motivo_devolucao %}
+        <div class="gp-alert gp-alert--warning">
+          <strong>Plano devolvido pela coordenação:</strong> {{ plano.motivo_devolucao }}
+        </div>
+      {% endif %}
+
+      {% if not plano_editavel_professor %}
+        <div class="gp-alert gp-alert--info">
+          Este plano está em análise institucional e não pode ser alterado pelo professor neste momento.
+        </div>
+      {% endif %}
+
+      <form method="post" class="gp-form gp-form--smart gp-form--teacher-plan edu-plan-form">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+          <div class="gp-alert gp-alert--danger">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <section class="edu-plan-form__group">
+          <h3>Identificação</h3>
+          <p>Defina um título claro para facilitar o acompanhamento da coordenação.</p>
+          <div class="gp-form-group gp-field--full">
+            <label class="gp-form-label" for="id_titulo">Título</label>
+            {{ form.titulo }}
+          </div>
+        </section>
+
+        <section class="edu-plan-form__group">
+          <h3>Base pedagógica</h3>
+          <p>Registre ementa, objetivos e metodologia que serão usados no período letivo.</p>
+          <div class="gp-form-group gp-field--full">
+            <label class="gp-form-label" for="id_ementa">Ementa</label>
+            {{ form.ementa }}
+          </div>
+          <div class="gp-form-group gp-field--full">
+            <label class="gp-form-label" for="id_objetivos">Objetivos</label>
+            {{ form.objetivos }}
+          </div>
+          <div class="gp-form-group gp-field--full">
+            <label class="gp-form-label" for="id_metodologia">Metodologia</label>
+            {{ form.metodologia }}
+          </div>
+        </section>
+
+        <section class="edu-plan-form__group">
+          <h3>Avaliação e cronograma</h3>
+          <p>Informe como o desempenho será medido e como o conteúdo será distribuído no tempo.</p>
+          <div class="gp-form-group gp-field--full">
+            <label class="gp-form-label" for="id_criterios_avaliacao">Critérios de avaliação</label>
+            {{ form.criterios_avaliacao }}
+          </div>
+          <div class="gp-form-group gp-field--full">
+            <label class="gp-form-label" for="id_cronograma">Cronograma</label>
+            {{ form.cronograma }}
+          </div>
+          <div class="gp-form-group gp-field--full">
+            <label class="gp-form-label" for="id_referencias">Referências</label>
+            {{ form.referencias }}
+          </div>
+        </section>
+
+        <div class="gp-professor-inline-actions edu-plan-form__actions">
+          <a class="gp-button gp-button--ghost" href="{% url 'educacao:professor_planos_ensino' code_value %}">
+            <i class="fa-solid fa-arrow-left"></i> Voltar para lista
+          </a>
+          {% if plano_editavel_professor %}
+            <button class="gp-button gp-button--primary" type="submit" name="action" value="save">
+              <i class="fa-solid fa-floppy-disk"></i> Salvar rascunho
+            </button>
+            {% if can_cancel_submissao %}
+              <button class="gp-button gp-button--outline" type="submit" name="action" value="cancel_submit">
+                <i class="fa-solid fa-rotate-left"></i> Cancelar submissão
+              </button>
+            {% else %}
+              <button class="gp-button gp-button--success" type="submit" name="action" value="submit">
+                <i class="fa-solid fa-paper-plane"></i> Submeter plano
+              </button>
+            {% endif %}
+          {% elif can_cancel_submissao %}
+            <button class="gp-button gp-button--outline" type="submit" name="action" value="cancel_submit">
+              <i class="fa-solid fa-rotate-left"></i> Cancelar submissão
+            </button>
+          {% else %}
+            <span class="gp-badge gp-badge--neutral">Aguardando análise da coordenação</span>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+
+    <aside class="edu-plan-editor__side">
+      <section class="edu-plan-side-card">
+        <h4>Checklist obrigatório</h4>
+        <p>Para submeter, complete todos os campos abaixo.</p>
+        <ul class="edu-plan-checklist">
+          {% for item in plano_checklist.items %}
+            <li class="{% if item.filled %}is-done{% else %}is-missing{% endif %}">
+              <i class="fa-solid {% if item.filled %}fa-circle-check{% else %}fa-circle-dot{% endif %}"></i>
+              <span>{{ item.label }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+
+      <section class="edu-plan-side-card">
+        <h4>Fluxo do plano</h4>
+        <ol class="edu-plan-flow">
+          {% for step in plano_fluxo %}
+            <li class="is-{{ step.state }}">
+              <strong>{{ step.title }}</strong>
+              <span>{{ step.desc }}</span>
+            </li>
+          {% endfor %}
+        </ol>
+      </section>
+    </aside>
   </article>
 </section>
 {% endblock %}

@@ -181,6 +181,133 @@ def _actions_group(*buttons_html: str) -> str:
     return f'<div class="gp-professor-inline-actions">{joined}</div>'
 
 
+PLANO_REQUIRED_FIELDS: tuple[tuple[str, str], ...] = (
+    ("titulo", "Título do plano"),
+    ("ementa", "Ementa"),
+    ("objetivos", "Objetivos"),
+    ("metodologia", "Metodologia"),
+    ("criterios_avaliacao", "Critérios de avaliação"),
+    ("cronograma", "Cronograma"),
+    ("referencias", "Referências"),
+)
+
+
+def _plano_checklist(plano) -> dict:
+    checks = []
+    preenchidos = 0
+    for field, label in PLANO_REQUIRED_FIELDS:
+        value = getattr(plano, field, "") if plano is not None else ""
+        filled = bool((value or "").strip())
+        if filled:
+            preenchidos += 1
+        checks.append(
+            {
+                "field": field,
+                "label": label,
+                "filled": filled,
+            }
+        )
+    total = len(checks)
+    pendencias = [item["label"] for item in checks if not item["filled"]]
+    percentual = int(round((preenchidos / total) * 100)) if total else 0
+    return {
+        "items": checks,
+        "total": total,
+        "filled": preenchidos,
+        "missing": total - preenchidos,
+        "missing_labels": pendencias,
+        "percent": percentual,
+        "can_submit": not pendencias,
+    }
+
+
+def _plano_status_meta(plano) -> dict:
+    if plano is None:
+        return {
+            "key": "nao_iniciado",
+            "label": "Não iniciado",
+            "badge_class": "gp-badge--neutral",
+            "chip_class": "is-neutral",
+        }
+    if plano.status == PlanoEnsinoProfessor.Status.SUBMETIDO:
+        return {
+            "key": "submetido",
+            "label": "Aguardando aprovação",
+            "badge_class": "gp-badge--primary",
+            "chip_class": "is-primary",
+        }
+    if plano.status == PlanoEnsinoProfessor.Status.APROVADO:
+        return {
+            "key": "aprovado",
+            "label": "Aguardando homologação",
+            "badge_class": "gp-badge--primary",
+            "chip_class": "is-primary",
+        }
+    if plano.status == PlanoEnsinoProfessor.Status.HOMOLOGADO:
+        return {
+            "key": "homologado",
+            "label": "Homologado",
+            "badge_class": "gp-badge--success",
+            "chip_class": "is-success",
+        }
+    if plano.status == PlanoEnsinoProfessor.Status.DEVOLVIDO:
+        return {
+            "key": "devolvido",
+            "label": "Devolvido para ajustes",
+            "badge_class": "gp-badge--danger",
+            "chip_class": "is-danger",
+        }
+    return {
+        "key": "rascunho",
+        "label": "Rascunho",
+        "badge_class": "gp-badge--warning",
+        "chip_class": "is-warning",
+    }
+
+
+def _plano_fluxo_status(plano) -> list[dict]:
+    status = getattr(plano, "status", "")
+    is_devolvido = status == PlanoEnsinoProfessor.Status.DEVOLVIDO
+    step_submit_done = status in {
+        PlanoEnsinoProfessor.Status.SUBMETIDO,
+        PlanoEnsinoProfessor.Status.APROVADO,
+        PlanoEnsinoProfessor.Status.HOMOLOGADO,
+        PlanoEnsinoProfessor.Status.DEVOLVIDO,
+    }
+    step_approve_done = status in {
+        PlanoEnsinoProfessor.Status.APROVADO,
+        PlanoEnsinoProfessor.Status.HOMOLOGADO,
+    }
+    step_homolog_done = status == PlanoEnsinoProfessor.Status.HOMOLOGADO
+    return [
+        {
+            "title": "Acesso e edição",
+            "desc": "Preencha todos os campos pedagógicos do plano.",
+            "state": "done" if plano else "active",
+        },
+        {
+            "title": "Submissão",
+            "desc": "Envie o plano para validação institucional.",
+            "state": "done" if step_submit_done else ("active" if plano else "pending"),
+        },
+        {
+            "title": "Aprovação da coordenação",
+            "desc": "A coordenação valida o conteúdo pedagógico enviado.",
+            "state": "done" if step_approve_done else ("active" if step_submit_done else "pending"),
+        },
+        {
+            "title": "Homologação",
+            "desc": "Conclusão institucional do plano para o período letivo.",
+            "state": "done" if step_homolog_done else ("active" if step_approve_done else "pending"),
+        },
+        {
+            "title": "Ajustes (quando necessário)",
+            "desc": "Se devolvido, o professor ajusta e reenvia o plano.",
+            "state": "active" if is_devolvido else "pending",
+        },
+    ]
+
+
 def _build_diario_stats(diarios: list[DiarioTurma]):
     diario_ids = [d.id for d in diarios]
     turma_ids = [d.turma_id for d in diarios]
@@ -260,10 +387,12 @@ def _professor_informatica_turmas_qs(professor_user):
             "grade_horario",
         )
         .filter(
-            instrutor=professor_user,
+            Q(instrutor=professor_user)
+            | Q(instrutor__isnull=True, grade_horario__professor_principal=professor_user),
             status__in=[InformaticaTurma.Status.PLANEJADA, InformaticaTurma.Status.ATIVA],
         )
         .order_by("-ano_letivo", "codigo")
+        .distinct()
     )
 
 
@@ -433,6 +562,9 @@ def _base_context(*, request, professor_user, codigo: str, page_title: str, page
             "variant": "btn--ghost",
         },
     ]
+    has_regular_access = _professor_diarios_qs(request.user, professor_user).exists()
+    has_informatica_access = _professor_informatica_turmas_qs(professor_user).exists()
+
     return {
         "hide_module_menu": True,
         "professor_user": professor_user,
@@ -444,6 +576,8 @@ def _base_context(*, request, professor_user, codigo: str, page_title: str, page
         "actions": actions,
         "display_name": display_name,
         "is_own_profile": request.user.id == professor_user.id,
+        "has_regular_access": has_regular_access,
+        "has_informatica_access": has_informatica_access,
     }
 
 
@@ -1776,37 +1910,102 @@ def professor_planos_ensino(request, codigo: str):
             or ql in (getattr(getattr(d.turma, "unidade", None), "nome", "").lower())
         ]
 
+    status_filter = (_clean_code(request.GET.get("status")) or "todos").lower()
+    if status_filter not in {"todos", "editaveis", "enviados", "homologados", "devolvidos"}:
+        status_filter = "todos"
+
     headers = [
         {"label": "Turma"},
+        {"label": "Unidade"},
         {"label": "Ano", "width": "90px"},
-        {"label": "Status", "width": "140px"},
-        {"label": "Atualizado em", "width": "160px"},
-        {"label": "Ação", "width": "180px"},
+        {"label": "Status", "width": "170px"},
+        {"label": "Preenchimento", "width": "150px"},
+        {"label": "Atualizado em", "width": "150px"},
+        {"label": "Ações", "width": "220px"},
     ]
-    rows = []
+
+    cards_regular = []
+    rows_regular = []
+    total_enviados = 0
+    total_em_edicao = 0
+    total_homologados = 0
+    total_devolvidos = 0
+    total_nao_iniciado = 0
+    total_com_pendencias = 0
+
     for diario in diarios_filtrados:
         plano = planos_map.get(diario.id)
-        if plano is None:
-            status_html = _status_badge("Não iniciado", "neutral")
-            atualizado = "—"
-        elif plano.status == PlanoEnsinoProfessor.Status.SUBMETIDO:
-            status_html = _status_badge("Submetido", "success")
-            atualizado = plano.atualizado_em.strftime("%d/%m/%Y %H:%M")
-        else:
-            status_html = _status_badge("Rascunho", "warning")
-            atualizado = plano.atualizado_em.strftime("%d/%m/%Y %H:%M")
+        checklist = _plano_checklist(plano)
+        status_meta = _plano_status_meta(plano)
 
-        rows.append(
+        if status_meta["key"] in {"submetido", "aprovado"}:
+            total_enviados += 1
+        elif status_meta["key"] == "homologado":
+            total_homologados += 1
+        elif status_meta["key"] == "devolvido":
+            total_devolvidos += 1
+        else:
+            total_em_edicao += 1
+        if status_meta["key"] == "nao_iniciado":
+            total_nao_iniciado += 1
+        if checklist["missing"] > 0:
+            total_com_pendencias += 1
+
+        if status_filter == "enviados" and status_meta["key"] not in {"submetido", "aprovado"}:
+            continue
+        if status_filter == "editaveis" and status_meta["key"] not in {"nao_iniciado", "rascunho", "devolvido"}:
+            continue
+        if status_filter == "homologados" and status_meta["key"] != "homologado":
+            continue
+        if status_filter == "devolvidos" and status_meta["key"] != "devolvido":
+            continue
+
+        plano_url = reverse("educacao:professor_plano_ensino_editar", args=[codigo_canonico, diario.id])
+        cards_regular.append(
+            {
+                "contexto": "Ensino regular",
+                "titulo": diario.turma.nome,
+                "subtitulo": f"Ano letivo {diario.ano_letivo}",
+                "status_label": status_meta["label"],
+                "status_badge_class": status_meta["badge_class"],
+                "status_chip_class": status_meta["chip_class"],
+                "status_key": status_meta["key"],
+                "percent": checklist["percent"],
+                "missing": checklist["missing"],
+                "missing_labels": checklist["missing_labels"],
+                "atualizado_em": plano.atualizado_em.strftime("%d/%m/%Y %H:%M") if plano else "Nunca preenchido",
+                "submetido_em": plano.submetido_em.strftime("%d/%m/%Y %H:%M") if plano and plano.submetido_em else "",
+                "url": plano_url,
+            }
+        )
+        rows_regular.append(
             {
                 "cells": [
-                    {"text": diario.turma.nome},
+                    {"text": diario.turma.nome, "url": plano_url},
+                    {"text": getattr(getattr(diario.turma, "unidade", None), "nome", "—")},
                     {"text": str(diario.ano_letivo)},
-                    {"html": status_html},
-                    {"text": atualizado},
+                    {
+                        "html": _status_badge(
+                            status_meta["label"],
+                            (
+                                "success"
+                                if status_meta["key"] == "homologado"
+                                else "primary"
+                                if status_meta["key"] in {"submetido", "aprovado"}
+                                else "danger"
+                                if status_meta["key"] == "devolvido"
+                                else "warning"
+                                if status_meta["key"] == "rascunho"
+                                else "neutral"
+                            ),
+                        )
+                    },
+                    {"text": f"{checklist['percent']}% • {checklist['missing']} pendência(s)"},
+                    {"text": plano.atualizado_em.strftime("%d/%m/%Y %H:%M") if plano else "Nunca"},
                     {
                         "html": _actions_group(
                             _link_button(
-                                reverse("educacao:professor_plano_ensino_editar", args=[codigo_canonico, diario.id]),
+                                plano_url,
                                 "Abrir plano",
                                 "fa-solid fa-pen-to-square",
                             )
@@ -1838,38 +2037,92 @@ def professor_planos_ensino(request, codigo: str):
 
     headers_informatica = [
         {"label": "Turma (Informática)"},
+        {"label": "Laboratório"},
         {"label": "Ano", "width": "90px"},
-        {"label": "Status", "width": "140px"},
-        {"label": "Atualizado em", "width": "160px"},
-        {"label": "Ação", "width": "200px"},
+        {"label": "Status", "width": "170px"},
+        {"label": "Preenchimento", "width": "150px"},
+        {"label": "Atualizado em", "width": "150px"},
+        {"label": "Ações", "width": "220px"},
     ]
+
+    cards_informatica = []
     rows_informatica = []
     for turma in turmas_info_filtradas:
         plano = planos_info_map.get(turma.id)
-        if plano is None:
-            status_html = _status_badge("Não iniciado", "neutral")
-            atualizado = "—"
-        elif plano.status == InformaticaPlanoEnsinoProfessor.Status.SUBMETIDO:
-            status_html = _status_badge("Submetido", "success")
-            atualizado = plano.atualizado_em.strftime("%d/%m/%Y %H:%M")
-        else:
-            status_html = _status_badge("Rascunho", "warning")
-            atualizado = plano.atualizado_em.strftime("%d/%m/%Y %H:%M")
+        checklist = _plano_checklist(plano)
+        status_meta = _plano_status_meta(plano)
 
+        if status_meta["key"] in {"submetido", "aprovado"}:
+            total_enviados += 1
+        elif status_meta["key"] == "homologado":
+            total_homologados += 1
+        elif status_meta["key"] == "devolvido":
+            total_devolvidos += 1
+        else:
+            total_em_edicao += 1
+        if status_meta["key"] == "nao_iniciado":
+            total_nao_iniciado += 1
+        if checklist["missing"] > 0:
+            total_com_pendencias += 1
+
+        if status_filter == "enviados" and status_meta["key"] not in {"submetido", "aprovado"}:
+            continue
+        if status_filter == "editaveis" and status_meta["key"] not in {"nao_iniciado", "rascunho", "devolvido"}:
+            continue
+        if status_filter == "homologados" and status_meta["key"] != "homologado":
+            continue
+        if status_filter == "devolvidos" and status_meta["key"] != "devolvido":
+            continue
+
+        plano_url = reverse(
+            "educacao:professor_plano_ensino_informatica_editar",
+            args=[codigo_canonico, turma.id],
+        )
+        cards_informatica.append(
+            {
+                "contexto": "Curso de informática",
+                "titulo": turma.codigo,
+                "subtitulo": f"Ano letivo {turma.ano_letivo}",
+                "status_label": status_meta["label"],
+                "status_badge_class": status_meta["badge_class"],
+                "status_chip_class": status_meta["chip_class"],
+                "status_key": status_meta["key"],
+                "percent": checklist["percent"],
+                "missing": checklist["missing"],
+                "missing_labels": checklist["missing_labels"],
+                "atualizado_em": plano.atualizado_em.strftime("%d/%m/%Y %H:%M") if plano else "Nunca preenchido",
+                "submetido_em": plano.submetido_em.strftime("%d/%m/%Y %H:%M") if plano and plano.submetido_em else "",
+                "url": plano_url,
+            }
+        )
         rows_informatica.append(
             {
                 "cells": [
-                    {"text": turma.codigo},
-                    {"text": str(turma.ano_letivo)},
-                    {"html": status_html},
-                    {"text": atualizado},
+                    {"text": turma.codigo, "url": plano_url},
+                    {"text": getattr(getattr(turma, "laboratorio", None), "nome", "—")},
+                    {"text": str(turma.ano_letivo or "—")},
+                    {
+                        "html": _status_badge(
+                            status_meta["label"],
+                            (
+                                "success"
+                                if status_meta["key"] == "homologado"
+                                else "primary"
+                                if status_meta["key"] in {"submetido", "aprovado"}
+                                else "danger"
+                                if status_meta["key"] == "devolvido"
+                                else "warning"
+                                if status_meta["key"] == "rascunho"
+                                else "neutral"
+                            ),
+                        )
+                    },
+                    {"text": f"{checklist['percent']}% • {checklist['missing']} pendência(s)"},
+                    {"text": plano.atualizado_em.strftime("%d/%m/%Y %H:%M") if plano else "Nunca"},
                     {
                         "html": _actions_group(
                             _link_button(
-                                reverse(
-                                    "educacao:professor_plano_ensino_informatica_editar",
-                                    args=[codigo_canonico, turma.id],
-                                ),
+                                plano_url,
                                 "Abrir plano",
                                 "fa-solid fa-pen-to-square",
                             )
@@ -1878,6 +2131,8 @@ def professor_planos_ensino(request, codigo: str):
                 ]
             }
         )
+
+    total_planos = len(diarios_filtrados) + len(turmas_info_filtradas)
 
     context = {
         **_base_context(
@@ -1889,10 +2144,24 @@ def professor_planos_ensino(request, codigo: str):
             nav_key="planos",
         ),
         "q": q,
+        "status_filter": status_filter,
         "headers": headers,
-        "rows": rows,
+        "rows": rows_regular,
+        "total_planos_regular": len(rows_regular),
         "headers_informatica": headers_informatica,
         "rows_informatica": rows_informatica,
+        "total_planos_informatica": len(rows_informatica),
+        "cards_regular": cards_regular,
+        "cards_informatica": cards_informatica,
+        "resumo_planos": {
+            "total": total_planos,
+            "enviados": total_enviados,
+            "em_edicao": total_em_edicao,
+            "homologados": total_homologados,
+            "devolvidos": total_devolvidos,
+            "nao_iniciados": total_nao_iniciado,
+            "com_pendencias": total_com_pendencias,
+        },
     }
     return render(request, "educacao/professor_area/planos.html", context)
 
@@ -1916,8 +2185,23 @@ def professor_plano_ensino_editar(request, codigo: str, diario_id: int):
     )
 
     if request.method == "POST":
-        form = PlanoEnsinoProfessorForm(request.POST, instance=plano)
         action = (_clean_code(request.POST.get("action")) or "save").lower()
+        can_cancel_submissao = plano.status == PlanoEnsinoProfessor.Status.SUBMETIDO
+
+        if action == "cancel_submit" and can_cancel_submissao:
+            plano.cancelar_submissao()
+            plano.save()
+            messages.info(request, "Submissão cancelada. O plano voltou para rascunho.")
+            return redirect("educacao:professor_plano_ensino_editar", codigo=codigo_canonico, diario_id=diario.id)
+
+        if not plano.pode_editar_professor:
+            messages.error(
+                request,
+                "Este plano não pode ser editado no momento. Aguarde devolução da coordenação, se necessário.",
+            )
+            return redirect("educacao:professor_plano_ensino_editar", codigo=codigo_canonico, diario_id=diario.id)
+
+        form = PlanoEnsinoProfessorForm(request.POST, instance=plano)
         if form.is_valid():
             plano = form.save(commit=False)
             plano.diario = diario
@@ -1925,11 +2209,18 @@ def professor_plano_ensino_editar(request, codigo: str, diario_id: int):
             plano.ano_letivo = diario.ano_letivo
 
             if action == "submit":
-                plano.submeter()
-                messages.success(request, "Plano de ensino submetido com sucesso.")
-            elif action == "cancel_submit":
-                plano.cancelar_submissao()
-                messages.info(request, "Submissão cancelada. O plano voltou para rascunho.")
+                checklist = _plano_checklist(plano)
+                if checklist["can_submit"]:
+                    plano.submeter()
+                    messages.success(request, "Plano de ensino submetido com sucesso.")
+                else:
+                    plano.cancelar_submissao()
+                    pendencias_txt = ", ".join(checklist["missing_labels"])
+                    messages.error(
+                        request,
+                        f"Não foi possível submeter. Preencha os campos obrigatórios: {pendencias_txt}.",
+                    )
+                    messages.info(request, "O plano foi salvo como rascunho.")
             else:
                 messages.success(request, "Plano de ensino salvo como rascunho.")
 
@@ -1937,6 +2228,12 @@ def professor_plano_ensino_editar(request, codigo: str, diario_id: int):
             return redirect("educacao:professor_plano_ensino_editar", codigo=codigo_canonico, diario_id=diario.id)
     else:
         form = PlanoEnsinoProfessorForm(instance=plano)
+
+    plano_editavel_professor = plano.pode_editar_professor
+    can_cancel_submissao = plano.status == PlanoEnsinoProfessor.Status.SUBMETIDO
+    if not plano_editavel_professor:
+        for field in form.fields.values():
+            field.disabled = True
 
     context = {
         **_base_context(
@@ -1950,7 +2247,12 @@ def professor_plano_ensino_editar(request, codigo: str, diario_id: int):
         "form": form,
         "diario": diario,
         "plano": plano,
+        "status_meta": _plano_status_meta(plano),
         "status_label": plano.get_status_display(),
+        "plano_editavel_professor": plano_editavel_professor,
+        "can_cancel_submissao": can_cancel_submissao,
+        "plano_checklist": _plano_checklist(plano),
+        "plano_fluxo": _plano_fluxo_status(plano),
     }
     return render(request, "educacao/professor_area/plano_form.html", context)
 
@@ -1983,8 +2285,31 @@ def professor_plano_ensino_informatica_editar(request, codigo: str, turma_id: in
     )
 
     if request.method == "POST":
-        form = InformaticaPlanoEnsinoProfessorForm(request.POST, instance=plano)
         action = (_clean_code(request.POST.get("action")) or "save").lower()
+        can_cancel_submissao = plano.status == InformaticaPlanoEnsinoProfessor.Status.SUBMETIDO
+
+        if action == "cancel_submit" and can_cancel_submissao:
+            plano.cancelar_submissao()
+            plano.save()
+            messages.info(request, "Submissão cancelada. O plano voltou para rascunho.")
+            return redirect(
+                "educacao:professor_plano_ensino_informatica_editar",
+                codigo=codigo_canonico,
+                turma_id=turma.id,
+            )
+
+        if not plano.pode_editar_professor:
+            messages.error(
+                request,
+                "Este plano não pode ser editado no momento. Aguarde devolução da coordenação, se necessário.",
+            )
+            return redirect(
+                "educacao:professor_plano_ensino_informatica_editar",
+                codigo=codigo_canonico,
+                turma_id=turma.id,
+            )
+
+        form = InformaticaPlanoEnsinoProfessorForm(request.POST, instance=plano)
         if form.is_valid():
             plano = form.save(commit=False)
             plano.turma = turma
@@ -1992,11 +2317,18 @@ def professor_plano_ensino_informatica_editar(request, codigo: str, turma_id: in
             plano.ano_letivo = turma.ano_letivo
 
             if action == "submit":
-                plano.submeter()
-                messages.success(request, "Plano de ensino (informática) submetido com sucesso.")
-            elif action == "cancel_submit":
-                plano.cancelar_submissao()
-                messages.info(request, "Submissão cancelada. O plano voltou para rascunho.")
+                checklist = _plano_checklist(plano)
+                if checklist["can_submit"]:
+                    plano.submeter()
+                    messages.success(request, "Plano de ensino (informática) submetido com sucesso.")
+                else:
+                    plano.cancelar_submissao()
+                    pendencias_txt = ", ".join(checklist["missing_labels"])
+                    messages.error(
+                        request,
+                        f"Não foi possível submeter. Preencha os campos obrigatórios: {pendencias_txt}.",
+                    )
+                    messages.info(request, "O plano foi salvo como rascunho.")
             else:
                 messages.success(request, "Plano de ensino (informática) salvo como rascunho.")
 
@@ -2009,6 +2341,12 @@ def professor_plano_ensino_informatica_editar(request, codigo: str, turma_id: in
     else:
         form = InformaticaPlanoEnsinoProfessorForm(instance=plano)
 
+    plano_editavel_professor = plano.pode_editar_professor
+    can_cancel_submissao = plano.status == InformaticaPlanoEnsinoProfessor.Status.SUBMETIDO
+    if not plano_editavel_professor:
+        for field in form.fields.values():
+            field.disabled = True
+
     context = {
         **_base_context(
             request=request,
@@ -2020,11 +2358,365 @@ def professor_plano_ensino_informatica_editar(request, codigo: str, turma_id: in
         ),
         "form": form,
         "plano": plano,
+        "status_meta": _plano_status_meta(plano),
         "status_label": plano.get_status_display(),
         "turma_informatica": turma,
         "is_informatica": True,
+        "plano_editavel_professor": plano_editavel_professor,
+        "can_cancel_submissao": can_cancel_submissao,
+        "plano_checklist": _plano_checklist(plano),
+        "plano_fluxo": _plano_fluxo_status(plano),
     }
     return render(request, "educacao/professor_area/plano_form.html", context)
+
+
+def _apply_profile_scope_regular_planos(request_user, qs):
+    profile = getattr(request_user, "profile", None)
+    if getattr(request_user, "is_superuser", False):
+        return qs
+    if getattr(profile, "unidade_id", None):
+        return qs.filter(diario__turma__unidade_id=profile.unidade_id)
+    if getattr(profile, "secretaria_id", None):
+        return qs.filter(diario__turma__unidade__secretaria_id=profile.secretaria_id)
+    if getattr(profile, "municipio_id", None):
+        return qs.filter(diario__turma__unidade__secretaria__municipio_id=profile.municipio_id)
+    return qs
+
+
+def _apply_profile_scope_informatica_planos(request_user, qs):
+    profile = getattr(request_user, "profile", None)
+    if getattr(request_user, "is_superuser", False):
+        return qs
+    if getattr(profile, "unidade_id", None):
+        return qs.filter(turma__laboratorio__unidade_id=profile.unidade_id)
+    if getattr(profile, "secretaria_id", None):
+        return qs.filter(turma__laboratorio__unidade__secretaria_id=profile.secretaria_id)
+    if getattr(profile, "municipio_id", None):
+        return qs.filter(turma__laboratorio__unidade__secretaria__municipio_id=profile.municipio_id)
+    return qs
+
+
+@login_required
+@require_perm("educacao.manage")
+def plano_ensino_fluxo_list(request):
+    q = _clean_code(request.GET.get("q"))
+    status_filter = (_clean_code(request.GET.get("status")) or "todos").upper()
+    tipo_filter = (_clean_code(request.GET.get("tipo")) or "todos").lower()
+
+    status_valid = {
+        "TODOS",
+        PlanoEnsinoProfessor.Status.SUBMETIDO,
+        PlanoEnsinoProfessor.Status.APROVADO,
+        PlanoEnsinoProfessor.Status.HOMOLOGADO,
+        PlanoEnsinoProfessor.Status.DEVOLVIDO,
+        PlanoEnsinoProfessor.Status.RASCUNHO,
+    }
+    if status_filter not in status_valid:
+        status_filter = "TODOS"
+    if tipo_filter not in {"todos", "regular", "informatica"}:
+        tipo_filter = "todos"
+
+    regular_qs = _apply_profile_scope_regular_planos(
+        request.user,
+        PlanoEnsinoProfessor.objects.select_related(
+            "diario",
+            "diario__turma",
+            "diario__turma__unidade",
+            "professor",
+            "professor__profile",
+        ),
+    )
+    informatica_qs = _apply_profile_scope_informatica_planos(
+        request.user,
+        InformaticaPlanoEnsinoProfessor.objects.select_related(
+            "turma",
+            "turma__laboratorio",
+            "turma__laboratorio__unidade",
+            "professor",
+            "professor__profile",
+        ),
+    )
+
+    if q:
+        ql = q.lower()
+        regular_qs = regular_qs.filter(
+            Q(diario__turma__nome__icontains=ql)
+            | Q(diario__turma__unidade__nome__icontains=ql)
+            | Q(professor__username__icontains=ql)
+            | Q(professor__profile__codigo_acesso__icontains=ql)
+            | Q(titulo__icontains=ql)
+        )
+        informatica_qs = informatica_qs.filter(
+            Q(turma__codigo__icontains=ql)
+            | Q(turma__nome__icontains=ql)
+            | Q(turma__laboratorio__nome__icontains=ql)
+            | Q(turma__laboratorio__unidade__nome__icontains=ql)
+            | Q(professor__username__icontains=ql)
+            | Q(professor__profile__codigo_acesso__icontains=ql)
+            | Q(titulo__icontains=ql)
+        )
+
+    if status_filter != "TODOS":
+        regular_qs = regular_qs.filter(status=status_filter)
+        informatica_qs = informatica_qs.filter(status=status_filter)
+
+    regular_qs = regular_qs.order_by("-atualizado_em", "-id")
+    informatica_qs = informatica_qs.order_by("-atualizado_em", "-id")
+
+    resumo_regular = _apply_profile_scope_regular_planos(request.user, PlanoEnsinoProfessor.objects.all())
+    resumo_info = _apply_profile_scope_informatica_planos(request.user, InformaticaPlanoEnsinoProfessor.objects.all())
+    resumo = {
+        "total": resumo_regular.count() + resumo_info.count(),
+        "submetidos": resumo_regular.filter(status=PlanoEnsinoProfessor.Status.SUBMETIDO).count()
+        + resumo_info.filter(status=InformaticaPlanoEnsinoProfessor.Status.SUBMETIDO).count(),
+        "aprovados": resumo_regular.filter(status=PlanoEnsinoProfessor.Status.APROVADO).count()
+        + resumo_info.filter(status=InformaticaPlanoEnsinoProfessor.Status.APROVADO).count(),
+        "homologados": resumo_regular.filter(status=PlanoEnsinoProfessor.Status.HOMOLOGADO).count()
+        + resumo_info.filter(status=InformaticaPlanoEnsinoProfessor.Status.HOMOLOGADO).count(),
+        "devolvidos": resumo_regular.filter(status=PlanoEnsinoProfessor.Status.DEVOLVIDO).count()
+        + resumo_info.filter(status=InformaticaPlanoEnsinoProfessor.Status.DEVOLVIDO).count(),
+    }
+
+    headers_regular = [
+        {"label": "Turma"},
+        {"label": "Professor", "width": "190px"},
+        {"label": "Status", "width": "210px"},
+        {"label": "Atualizado em", "width": "165px"},
+        {"label": "Ação", "width": "170px"},
+    ]
+    rows_regular = []
+    for plano in regular_qs:
+        status_meta = _plano_status_meta(plano)
+        professor_nome = plano.professor.get_full_name() if plano.professor_id else "—"
+        if not professor_nome and plano.professor_id:
+            professor_nome = plano.professor.username
+        professor_codigo = (
+            codigo_professor_canonico(plano.professor)
+            if plano.professor_id
+            else "—"
+        )
+        professor_html = (
+            f"<strong>{professor_nome}</strong><br><small>{professor_codigo}</small>"
+            if plano.professor_id
+            else "—"
+        )
+        rows_regular.append(
+            {
+                "cells": [
+                    {"text": f"{plano.diario.turma.nome} • {plano.ano_letivo}"},
+                    {"html": professor_html},
+                    {"html": _status_badge(status_meta["label"], status_meta["badge_class"].replace("gp-badge--", ""))},
+                    {"text": plano.atualizado_em.strftime("%d/%m/%Y %H:%M")},
+                    {
+                        "html": _actions_group(
+                            _link_button(
+                                reverse("educacao:plano_ensino_fluxo_regular_detail", args=[plano.pk]),
+                                "Analisar",
+                                "fa-solid fa-clipboard-check",
+                            )
+                        )
+                    },
+                ]
+            }
+        )
+
+    headers_informatica = [
+        {"label": "Turma (Informática)"},
+        {"label": "Professor", "width": "190px"},
+        {"label": "Status", "width": "210px"},
+        {"label": "Atualizado em", "width": "165px"},
+        {"label": "Ação", "width": "170px"},
+    ]
+    rows_informatica = []
+    for plano in informatica_qs:
+        status_meta = _plano_status_meta(plano)
+        professor_nome = plano.professor.get_full_name() if plano.professor_id else "—"
+        if not professor_nome and plano.professor_id:
+            professor_nome = plano.professor.username
+        professor_codigo = (
+            codigo_professor_canonico(plano.professor)
+            if plano.professor_id
+            else "—"
+        )
+        professor_html = (
+            f"<strong>{professor_nome}</strong><br><small>{professor_codigo}</small>"
+            if plano.professor_id
+            else "—"
+        )
+        rows_informatica.append(
+            {
+                "cells": [
+                    {"text": f"{plano.turma.codigo} • {plano.ano_letivo}"},
+                    {"html": professor_html},
+                    {"html": _status_badge(status_meta["label"], status_meta["badge_class"].replace("gp-badge--", ""))},
+                    {"text": plano.atualizado_em.strftime("%d/%m/%Y %H:%M")},
+                    {
+                        "html": _actions_group(
+                            _link_button(
+                                reverse("educacao:plano_ensino_fluxo_informatica_detail", args=[plano.pk]),
+                                "Analisar",
+                                "fa-solid fa-clipboard-check",
+                            )
+                        )
+                    },
+                ]
+            }
+        )
+
+    if tipo_filter == "regular":
+        rows_informatica = []
+    elif tipo_filter == "informatica":
+        rows_regular = []
+
+    actions = [
+        {
+            "label": "Painel Educação",
+            "url": reverse("educacao:index"),
+            "icon": "fa-solid fa-chart-line",
+            "variant": "btn--ghost",
+        }
+    ]
+
+    context = {
+        "q": q,
+        "status_filter": status_filter,
+        "tipo_filter": tipo_filter,
+        "resumo": resumo,
+        "actions": actions,
+        "headers_regular": headers_regular,
+        "rows_regular": rows_regular,
+        "headers_informatica": headers_informatica,
+        "rows_informatica": rows_informatica,
+    }
+    return render(request, "educacao/plano_fluxo_list.html", context)
+
+
+def _processar_acao_coord_plano(request, plano):
+    action = (_clean_code(request.POST.get("action")) or "").lower()
+    if not action:
+        messages.warning(request, "Ação inválida.")
+        return
+
+    status_submetido = plano.Status.SUBMETIDO
+    status_aprovado = plano.Status.APROVADO
+    status_devolvido = plano.Status.DEVOLVIDO
+
+    if action == "aprovar":
+        if plano.status != status_submetido:
+            messages.warning(request, "Só é possível aprovar planos que estejam submetidos.")
+            return
+        plano.aprovar(usuario=request.user)
+        plano.save()
+        messages.success(request, "Plano aprovado. Próxima etapa: homologação.")
+        return
+
+    if action == "homologar":
+        if plano.status != status_aprovado:
+            messages.warning(request, "Só é possível homologar planos já aprovados.")
+            return
+        plano.homologar(usuario=request.user)
+        plano.save()
+        messages.success(request, "Plano homologado com sucesso.")
+        return
+
+    if action == "devolver":
+        motivo = _clean_code(request.POST.get("motivo_devolucao"))
+        if plano.status not in {status_submetido, status_aprovado}:
+            messages.warning(request, "Só é possível devolver planos em análise.")
+            return
+        if len(motivo) < 5:
+            messages.error(request, "Informe um motivo de devolução com pelo menos 5 caracteres.")
+            return
+        plano.devolver(usuario=request.user, motivo=motivo)
+        plano.save()
+        messages.success(request, "Plano devolvido para ajustes do professor.")
+        return
+
+    messages.warning(request, "Ação não reconhecida.")
+
+
+@login_required
+@require_perm("educacao.manage")
+def plano_ensino_fluxo_regular_detail(request, pk: int):
+    plano = get_object_or_404(
+        _apply_profile_scope_regular_planos(
+            request.user,
+            PlanoEnsinoProfessor.objects.select_related(
+                "diario",
+                "diario__turma",
+                "diario__turma__unidade",
+                "professor",
+                "professor__profile",
+                "aprovado_por",
+                "homologado_por",
+                "devolvido_por",
+            ),
+        ),
+        pk=pk,
+    )
+
+    if request.method == "POST":
+        _processar_acao_coord_plano(request, plano)
+        return redirect("educacao:plano_ensino_fluxo_regular_detail", pk=plano.pk)
+
+    professor_nome = plano.professor.get_full_name() if plano.professor_id else "—"
+    if not professor_nome and plano.professor_id:
+        professor_nome = plano.professor.username
+
+    context = {
+        "plano": plano,
+        "is_informatica": False,
+        "status_meta": _plano_status_meta(plano),
+        "plano_checklist": _plano_checklist(plano),
+        "plano_fluxo": _plano_fluxo_status(plano),
+        "professor_nome": professor_nome,
+        "professor_codigo": codigo_professor_canonico(plano.professor) if plano.professor_id else "—",
+        "referencia_turma": plano.diario.turma.nome,
+        "referencia_unidade": getattr(plano.diario.turma.unidade, "nome", "—"),
+    }
+    return render(request, "educacao/plano_fluxo_detail.html", context)
+
+
+@login_required
+@require_perm("educacao.manage")
+def plano_ensino_fluxo_informatica_detail(request, pk: int):
+    plano = get_object_or_404(
+        _apply_profile_scope_informatica_planos(
+            request.user,
+            InformaticaPlanoEnsinoProfessor.objects.select_related(
+                "turma",
+                "turma__laboratorio",
+                "turma__laboratorio__unidade",
+                "professor",
+                "professor__profile",
+                "aprovado_por",
+                "homologado_por",
+                "devolvido_por",
+            ),
+        ),
+        pk=pk,
+    )
+
+    if request.method == "POST":
+        _processar_acao_coord_plano(request, plano)
+        return redirect("educacao:plano_ensino_fluxo_informatica_detail", pk=plano.pk)
+
+    professor_nome = plano.professor.get_full_name() if plano.professor_id else "—"
+    if not professor_nome and plano.professor_id:
+        professor_nome = plano.professor.username
+
+    context = {
+        "plano": plano,
+        "is_informatica": True,
+        "status_meta": _plano_status_meta(plano),
+        "plano_checklist": _plano_checklist(plano),
+        "plano_fluxo": _plano_fluxo_status(plano),
+        "professor_nome": professor_nome,
+        "professor_codigo": codigo_professor_canonico(plano.professor) if plano.professor_id else "—",
+        "referencia_turma": plano.turma.codigo,
+        "referencia_unidade": getattr(plano.turma.laboratorio.unidade, "nome", "—"),
+    }
+    return render(request, "educacao/plano_fluxo_detail.html", context)
 
 
 @login_required

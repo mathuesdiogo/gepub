@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
@@ -13,6 +15,8 @@ class NotificationChannelConfig(models.Model):
 
     class Provider(models.TextChoices):
         SMTP = "SMTP", "SMTP"
+        SES = "SES", "Amazon SES"
+        POSTMARK = "POSTMARK", "Postmark"
         SENDGRID = "SENDGRID", "SendGrid"
         MAILGUN = "MAILGUN", "Mailgun"
         TWILIO = "TWILIO", "Twilio"
@@ -20,6 +24,11 @@ class NotificationChannelConfig(models.Model):
         META = "META", "Meta Cloud API"
         MOCK = "MOCK", "Mock interno"
         OUTRO = "OUTRO", "Outro"
+
+    class TestStatus(models.TextChoices):
+        NAO_TESTADO = "NAO_TESTADO", "Não testado"
+        SUCESSO = "SUCESSO", "Sucesso"
+        FALHA = "FALHA", "Falha"
 
     municipio = models.ForeignKey("org.Municipio", on_delete=models.PROTECT, related_name="notification_channels")
     secretaria = models.ForeignKey(
@@ -45,10 +54,26 @@ class NotificationChannelConfig(models.Model):
         default="",
         help_text="E-mail remetente ou número/identificador do canal.",
     )
-    credentials_json = models.JSONField(default=dict, blank=True)
+    credentials_json = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Legado. Novas credenciais são persistidas em credentials_encrypted.",
+    )
+    credentials_encrypted = models.TextField(
+        blank=True,
+        default="",
+        help_text="Credenciais cifradas em repouso para este canal.",
+    )
     options_json = models.JSONField(default=dict, blank=True)
     is_active = models.BooleanField(default=True)
     prioridade = models.PositiveSmallIntegerField(default=10)
+    last_test_status = models.CharField(
+        max_length=20,
+        choices=TestStatus.choices,
+        default=TestStatus.NAO_TESTADO,
+    )
+    last_tested_at = models.DateTimeField(null=True, blank=True)
+    last_test_message = models.TextField(blank=True, default="")
 
     atualizado_por = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -79,6 +104,47 @@ class NotificationChannelConfig(models.Model):
     def __str__(self) -> str:
         scope = self.unidade or self.secretaria or self.municipio
         return f"{scope} • {self.get_channel_display()} • {self.get_provider_display()}"
+
+    def set_credentials(self, payload: dict[str, Any] | None) -> None:
+        from .security import encrypt_credentials_payload
+
+        source = payload if isinstance(payload, dict) else {}
+        clean_payload = {str(key): value for key, value in source.items() if str(key).strip()}
+        if not clean_payload:
+            self.credentials_encrypted = ""
+            self.credentials_json = {}
+            return
+        self.credentials_encrypted = encrypt_credentials_payload(clean_payload)
+        self.credentials_json = {}
+
+    def get_credentials(self) -> dict[str, Any]:
+        from .security import decrypt_credentials_payload
+
+        if self.credentials_encrypted:
+            try:
+                payload = decrypt_credentials_payload(self.credentials_encrypted)
+                if isinstance(payload, dict):
+                    return payload
+            except Exception:
+                pass
+        return dict(self.credentials_json or {})
+
+    def get_masked_credentials(self) -> dict[str, str]:
+        sensitive_terms = {"pass", "password", "token", "secret", "key", "api"}
+        masked: dict[str, str] = {}
+        for key, value in self.get_credentials().items():
+            lower_key = str(key).lower()
+            if any(term in lower_key for term in sensitive_terms):
+                masked[str(key)] = "********"
+                continue
+            text = str(value or "")
+            if len(text) > 14:
+                masked[str(key)] = f"{text[:4]}...{text[-4:]}"
+            elif text:
+                masked[str(key)] = f"{text[:2]}***"
+            else:
+                masked[str(key)] = ""
+        return masked
 
 
 class NotificationTemplate(models.Model):
@@ -208,6 +274,64 @@ class NotificationPreference(models.Model):
         return self.nome_contato or self.email or self.whatsapp or f"Preferência #{self.pk}"
 
 
+class NotificationTenantSettings(models.Model):
+    municipio = models.OneToOneField(
+        "org.Municipio",
+        on_delete=models.CASCADE,
+        related_name="notification_settings",
+    )
+    sender_name = models.CharField(max_length=140, blank=True, default="")
+    sender_email = models.EmailField(blank=True, default="")
+    reply_to = models.EmailField(blank=True, default="")
+    sending_domain = models.CharField(max_length=180, blank=True, default="")
+    default_email_provider = models.CharField(
+        max_length=20,
+        choices=NotificationChannelConfig.Provider.choices,
+        default=NotificationChannelConfig.Provider.SMTP,
+    )
+    default_whatsapp_provider = models.CharField(
+        max_length=20,
+        choices=NotificationChannelConfig.Provider.choices,
+        default=NotificationChannelConfig.Provider.TWILIO,
+    )
+    support_contact_email = models.EmailField(blank=True, default="")
+    support_contact_phone = models.CharField(max_length=40, blank=True, default="")
+    dns_spf_ok = models.BooleanField(default=False)
+    dns_dkim_ok = models.BooleanField(default=False)
+    dns_dmarc_ok = models.BooleanField(default=False)
+    onboarding_step = models.PositiveSmallIntegerField(default=1)
+    is_active = models.BooleanField(default=False)
+    last_validation_status = models.CharField(
+        max_length=20,
+        choices=NotificationChannelConfig.TestStatus.choices,
+        default=NotificationChannelConfig.TestStatus.NAO_TESTADO,
+    )
+    last_validation_message = models.TextField(blank=True, default="")
+    last_validated_at = models.DateTimeField(null=True, blank=True)
+    wizard_completed_at = models.DateTimeField(null=True, blank=True)
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="notification_settings_updated",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Configuração de comunicação da prefeitura"
+        verbose_name_plural = "Configurações de comunicação das prefeituras"
+        ordering = ["municipio__nome"]
+        indexes = [
+            models.Index(fields=["default_email_provider", "is_active"]),
+            models.Index(fields=["default_whatsapp_provider", "is_active"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.municipio} • Configuração de comunicação"
+
+
 class NotificationJob(models.Model):
     class Priority(models.TextChoices):
         URGENTE = "URGENTE", "Urgente"
@@ -222,6 +346,11 @@ class NotificationJob(models.Model):
         ENTREGUE = "ENTREGUE", "Entregue"
         FALHA = "FALHA", "Falha"
         CANCELADO = "CANCELADO", "Cancelado"
+
+    class MessageKind(models.TextChoices):
+        TRANSACIONAL = "TRANSACIONAL", "Transacional"
+        CAMPANHA = "CAMPANHA", "Campanha"
+        INTERNA = "INTERNA", "Interna"
 
     municipio = models.ForeignKey("org.Municipio", on_delete=models.PROTECT, related_name="notification_jobs")
     secretaria = models.ForeignKey(
@@ -247,6 +376,13 @@ class NotificationJob(models.Model):
     provider = models.CharField(max_length=20, blank=True, default="")
     to_name = models.CharField(max_length=140, blank=True, default="")
     destination = models.CharField(max_length=180)
+    message_kind = models.CharField(
+        max_length=20,
+        choices=MessageKind.choices,
+        default=MessageKind.TRANSACIONAL,
+        db_index=True,
+    )
+    correlation_key = models.CharField(max_length=120, blank=True, default="", db_index=True)
     payload_json = models.JSONField(default=dict, blank=True)
     subject_rendered = models.CharField(max_length=220, blank=True, default="")
     body_rendered = models.TextField(blank=True, default="")
@@ -282,6 +418,7 @@ class NotificationJob(models.Model):
         ordering = ["-created_at", "-id"]
         indexes = [
             models.Index(fields=["municipio", "status", "scheduled_at"]),
+            models.Index(fields=["municipio", "message_kind", "status"]),
             models.Index(fields=["channel", "status", "scheduled_at"]),
             models.Index(fields=["event_key", "created_at"]),
             models.Index(fields=["entity_module", "entity_type", "entity_id"]),
@@ -315,3 +452,53 @@ class NotificationLog(models.Model):
 
     def __str__(self) -> str:
         return f"Job #{self.job_id} • {self.get_status_display()} • Tentativa {self.attempt}"
+
+
+class NotificationWebhookEvent(models.Model):
+    class ProcessingStatus(models.TextChoices):
+        RECEBIDO = "RECEBIDO", "Recebido"
+        PROCESSADO = "PROCESSADO", "Processado"
+        IGNORADO = "IGNORADO", "Ignorado"
+        ERRO = "ERRO", "Erro"
+
+    municipio = models.ForeignKey(
+        "org.Municipio",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="notification_webhook_events",
+    )
+    provider = models.CharField(max_length=20, choices=NotificationChannelConfig.Provider.choices, db_index=True)
+    event_type = models.CharField(max_length=120, db_index=True)
+    external_event_id = models.CharField(max_length=180, blank=True, default="", db_index=True)
+    channel = models.CharField(
+        max_length=20,
+        choices=NotificationChannelConfig.Channel.choices,
+        blank=True,
+        default="",
+    )
+    destination = models.CharField(max_length=180, blank=True, default="")
+    payload_json = models.JSONField(default=dict, blank=True)
+    signature_valid = models.BooleanField(default=False)
+    processing_status = models.CharField(
+        max_length=20,
+        choices=ProcessingStatus.choices,
+        default=ProcessingStatus.RECEBIDO,
+        db_index=True,
+    )
+    error_message = models.TextField(blank=True, default="")
+    received_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Evento de webhook de comunicação"
+        verbose_name_plural = "Eventos de webhook de comunicação"
+        ordering = ["-received_at", "-id"]
+        indexes = [
+            models.Index(fields=["provider", "received_at"]),
+            models.Index(fields=["processing_status", "received_at"]),
+            models.Index(fields=["municipio", "received_at"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.provider} • {self.event_type} • {self.processing_status}"

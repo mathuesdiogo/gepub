@@ -157,6 +157,14 @@
             <span>Coordenação</span>
           </a>
         </li>
+        {% if can_edu_manage %}
+          <li class="module-menu__item">
+            <a class="module-menu__link {% if 'plano_ensino_fluxo' in route %}is-active{% endif %}" href="{% url 'educacao:plano_ensino_fluxo_list' %}">
+              <i class="fa-solid fa-clipboard-check" aria-hidden="true"></i>
+              <span>Fluxo Planos de Ensino</span>
+            </a>
+          </li>
+        {% endif %}
         <li class="module-menu__item">
           <a class="module-menu__link {% if 'estagio' in route %}is-active{% endif %}" href="{% url 'educacao:estagio_list' %}">
             <i class="fa-solid fa-briefcase" aria-hidden="true"></i>

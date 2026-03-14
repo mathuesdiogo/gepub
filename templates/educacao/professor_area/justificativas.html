@@ -26,6 +26,7 @@
       </div>
     </form>
 
+    {% if has_regular_access %}
     <div class="gp-flex-wrap-row gp-mb-3">
       <span class="gp-badge gp-badge--warning">Pendentes: {{ counters.pendente }}</span>
       <span class="gp-badge gp-badge--success">Deferidos: {{ counters.deferido }}</span>
@@ -33,8 +34,14 @@
     </div>
 
     {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Sem pedidos" empty_text="Nenhuma justificativa encontrada para o filtro informado." %}
+    {% else %}
+    <div class="gp-alert gp-alert--info">
+      Este professor não possui justificativas do ensino regular no momento.
+    </div>
+    {% endif %}
   </article>
 
+  {% if has_informatica_access %}
   <article class="gp-student-stage__card">
     <h3>Justificativas do Curso de Informática</h3>
     <div class="gp-flex-wrap-row gp-mb-3">
@@ -44,5 +51,6 @@
     </div>
     {% include "core/partials/components/data/table_shell.html" with headers=headers_informatica rows=rows_informatica page_obj=None empty_title="Sem justificativas de informática" empty_text="Nenhuma justificativa/falta encontrada nas aulas de informática." %}
   </article>
+  {% endif %}
 </section>
 {% endblock %}

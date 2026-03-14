@@ -17,13 +17,21 @@
       </div>
     </form>
 
+    {% if has_regular_access %}
     {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Sem avaliações" empty_text="Nenhuma avaliação cadastrada para esse filtro." %}
+    {% else %}
+    <div class="gp-alert gp-alert--info">
+      Este professor não possui diários regulares ativos. Exibindo somente turmas de Informática.
+    </div>
+    {% endif %}
   </article>
 
+  {% if has_informatica_access %}
   <article class="gp-student-stage__card">
     <h3>Turmas de Informática</h3>
     <p class="gp-text-muted">Gerencie avaliações, lançamento de notas e frequência das turmas de informática no mesmo menu do professor.</p>
     {% include "core/partials/components/data/table_shell.html" with headers=headers_informatica rows=rows_informatica page_obj=None empty_title="Sem turmas de informática" empty_text="Nenhuma turma de informática vinculada ao professor." %}
   </article>
+  {% endif %}
 </section>
 {% endblock %}

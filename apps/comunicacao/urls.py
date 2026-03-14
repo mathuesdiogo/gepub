@@ -16,4 +16,7 @@ urlpatterns = [
     path("templates", views.templates_api, name="templates_api"),
     path("templates/<int:pk>", views.template_update_api, name="template_update_api"),
     path("channels/config", views.channels_config_api, name="channels_config_api"),
+    path("channels/test", views.channel_test_api, name="channel_test_api"),
+    path("tenant/settings", views.tenant_settings_api, name="tenant_settings_api"),
+    path("webhooks/<str:provider>", views.provider_webhook_api, name="provider_webhook_api"),
 ]

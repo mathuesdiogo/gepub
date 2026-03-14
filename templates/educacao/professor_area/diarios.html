@@ -16,15 +16,29 @@
         <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
       </div>
     </form>
+  </article>
 
+  {% if has_regular_access %}
+  <article class="gp-student-stage__card">
     <p class="gp-text-muted">{{ total_diarios }} diário(s) encontrado(s).</p>
     {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Sem diários" empty_text="Nenhum diário encontrado para esse filtro." %}
   </article>
+  {% endif %}
 
+  {% if has_informatica_access %}
   <article class="gp-student-stage__card">
     <h3>Diários do Curso de Informática</h3>
     <p class="gp-text-muted">{{ total_diarios_informatica }} turma(s) de informática vinculada(s) ao professor.</p>
     {% include "core/partials/components/data/table_shell.html" with headers=headers_informatica rows=rows_informatica page_obj=None empty_title="Sem turmas de informática" empty_text="Nenhuma turma ativa/planejada de informática encontrada." %}
   </article>
+  {% endif %}
+
+  {% if not has_regular_access and not has_informatica_access %}
+  <article class="gp-student-stage__card">
+    <div class="gp-alert gp-alert--info">
+      Este professor ainda não possui diários/turmas vinculados no momento.
+    </div>
+  </article>
+  {% endif %}
 </section>
 {% endblock %}

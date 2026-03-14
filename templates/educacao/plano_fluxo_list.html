@@ -1,0 +1,99 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Fluxo de Planos de Ensino • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage">
+  {% include "core/partials/components/layout/page_head.html" with title="Fluxo de Planos de Ensino" subtitle="Coordenação pedagógica: aprovação e homologação no regular e no módulo de informática." actions=actions %}
+
+  <article class="gp-student-stage__card edu-plan-shell">
+    <div class="edu-plan-tabs" aria-label="Status da fila">
+      <a class="edu-plan-tab {% if status_filter == 'TODOS' %}is-active{% endif %}" href="?status=TODOS{% if q %}&q={{ q|urlencode }}{% endif %}{% if tipo_filter %}&tipo={{ tipo_filter }}{% endif %}">
+        Todos
+      </a>
+      <a class="edu-plan-tab {% if status_filter == 'SUBMETIDO' %}is-active{% endif %}" href="?status=SUBMETIDO{% if q %}&q={{ q|urlencode }}{% endif %}{% if tipo_filter %}&tipo={{ tipo_filter }}{% endif %}">
+        Aguardando aprovação
+      </a>
+      <a class="edu-plan-tab {% if status_filter == 'APROVADO' %}is-active{% endif %}" href="?status=APROVADO{% if q %}&q={{ q|urlencode }}{% endif %}{% if tipo_filter %}&tipo={{ tipo_filter }}{% endif %}">
+        Aguardando homologação
+      </a>
+      <a class="edu-plan-tab {% if status_filter == 'HOMOLOGADO' %}is-active{% endif %}" href="?status=HOMOLOGADO{% if q %}&q={{ q|urlencode }}{% endif %}{% if tipo_filter %}&tipo={{ tipo_filter }}{% endif %}">
+        Homologados
+      </a>
+      <a class="edu-plan-tab {% if status_filter == 'DEVOLVIDO' %}is-active{% endif %}" href="?status=DEVOLVIDO{% if q %}&q={{ q|urlencode }}{% endif %}{% if tipo_filter %}&tipo={{ tipo_filter }}{% endif %}">
+        Devolvidos
+      </a>
+    </div>
+
+    <div class="edu-plan-shell__summary">
+      <div class="edu-plan-kpi">
+        <small>Total</small>
+        <strong>{{ resumo.total }}</strong>
+      </div>
+      <div class="edu-plan-kpi">
+        <small>Submetidos</small>
+        <strong>{{ resumo.submetidos }}</strong>
+      </div>
+      <div class="edu-plan-kpi">
+        <small>Aprovados</small>
+        <strong>{{ resumo.aprovados }}</strong>
+      </div>
+      <div class="edu-plan-kpi">
+        <small>Homologados</small>
+        <strong>{{ resumo.homologados }}</strong>
+      </div>
+      <div class="edu-plan-kpi">
+        <small>Devolvidos</small>
+        <strong>{{ resumo.devolvidos }}</strong>
+      </div>
+    </div>
+
+    <form method="get" class="gp-form gp-form--smart edu-plan-filter">
+      <div class="gp-form-group gp-field--full">
+        <label class="gp-form-label" for="id_q">Busca rápida</label>
+        <input id="id_q" type="text" class="gp-input" name="q" value="{{ q }}" placeholder="Turma, professor, código, unidade..." />
+      </div>
+      <div class="gp-form-group">
+        <label class="gp-form-label" for="id_status">Status</label>
+        <select id="id_status" class="gp-select" name="status">
+          <option value="TODOS" {% if status_filter == "TODOS" %}selected{% endif %}>Todos</option>
+          <option value="SUBMETIDO" {% if status_filter == "SUBMETIDO" %}selected{% endif %}>Submetidos</option>
+          <option value="APROVADO" {% if status_filter == "APROVADO" %}selected{% endif %}>Aprovados</option>
+          <option value="HOMOLOGADO" {% if status_filter == "HOMOLOGADO" %}selected{% endif %}>Homologados</option>
+          <option value="DEVOLVIDO" {% if status_filter == "DEVOLVIDO" %}selected{% endif %}>Devolvidos</option>
+          <option value="RASCUNHO" {% if status_filter == "RASCUNHO" %}selected{% endif %}>Rascunhos</option>
+        </select>
+      </div>
+      <div class="gp-form-group">
+        <label class="gp-form-label" for="id_tipo">Tipo</label>
+        <select id="id_tipo" class="gp-select" name="tipo">
+          <option value="todos" {% if tipo_filter == "todos" %}selected{% endif %}>Todos</option>
+          <option value="regular" {% if tipo_filter == "regular" %}selected{% endif %}>Regular</option>
+          <option value="informatica" {% if tipo_filter == "informatica" %}selected{% endif %}>Informática</option>
+        </select>
+      </div>
+      <div class="gp-form-group">
+        <label class="gp-form-label">&nbsp;</label>
+        <button class="gp-button gp-button--primary" type="submit">
+          <i class="fa-solid fa-filter"></i> Filtrar
+        </button>
+      </div>
+    </form>
+  </article>
+
+  <article class="gp-student-stage__card edu-plan-shell">
+    <div class="edu-plan-shell__head">
+      <h3>Fila de análise • Regular</h3>
+      <p>Turmas regulares com plano submetido, aprovado, devolvido ou homologado.</p>
+    </div>
+    {% include "core/partials/components/data/table_shell.html" with headers=headers_regular rows=rows_regular page_obj=None empty_title="Nenhum plano regular encontrado" empty_text="Ajuste os filtros para listar os planos regulares." %}
+  </article>
+
+  <article class="gp-student-stage__card edu-plan-shell">
+    <div class="edu-plan-shell__head">
+      <h3>Fila de análise • Informática</h3>
+      <p>Mesma governança pedagógica aplicada às turmas de informática.</p>
+    </div>
+    {% include "core/partials/components/data/table_shell.html" with headers=headers_informatica rows=rows_informatica page_obj=None empty_title="Nenhum plano de informática encontrado" empty_text="Ajuste os filtros para listar os planos da informática." %}
+  </article>
+</section>
+{% endblock %}

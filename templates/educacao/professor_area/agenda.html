@@ -29,6 +29,7 @@
       </div>
     </form>
 
+    {% if has_regular_access %}
     <div class="gp-flex-wrap-row gp-mb-3">
       <span class="gp-badge gp-badge--primary">Hoje: {{ resumo.hoje }}</span>
       <span class="gp-badge gp-badge--neutral">Próx. 7 dias: {{ resumo.proximos_7_dias }}</span>
@@ -36,8 +37,14 @@
     </div>
 
     {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=None empty_title="Sem avaliações" empty_text="Nenhuma avaliação encontrada para os filtros selecionados." %}
+    {% else %}
+    <div class="gp-alert gp-alert--info">
+      Este professor não possui diários regulares ativos. Exibindo apenas agenda da Informática.
+    </div>
+    {% endif %}
   </article>
 
+  {% if has_informatica_access %}
   <article class="gp-student-stage__card">
     <h3>Agenda de Avaliações do Curso de Informática</h3>
     <div class="gp-flex-wrap-row gp-mb-3">
@@ -88,5 +95,6 @@
       </div>
     </div>
   </article>
+  {% endif %}
 </section>
 {% endblock %}

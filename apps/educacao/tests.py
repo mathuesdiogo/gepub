@@ -70,6 +70,7 @@ from apps.educacao.models_informatica import (
     InformaticaLaboratorio,
     InformaticaMatricula,
     InformaticaMatriculaMovimentacao,
+    InformaticaPlanoEnsinoProfessor,
     InformaticaTurma,
 )
 from apps.educacao.services_matricula import (
@@ -118,6 +119,7 @@ class EducacaoRoutesSmokeTestCase(TestCase):
         self.assertIn("/api/turmas/1/alunos-suggest/", reverse("educacao:api_alunos_turma_suggest", args=[1]))
         self.assertIn("/professor/prof1/agenda-avaliacoes/", reverse("educacao:professor_agenda_avaliacoes", args=["prof1"]))
         self.assertIn("/professor/prof1/planos-ensino/", reverse("educacao:professor_planos_ensino", args=["prof1"]))
+        self.assertIn("/planos-ensino/fluxo/", reverse("educacao:plano_ensino_fluxo_list"))
         self.assertIn("/professor/prof1/materiais/", reverse("educacao:professor_materiais", args=["prof1"]))
         self.assertIn("/informatica/grades/", reverse("educacao:informatica_grade_list"))
         self.assertIn("/informatica/professor/agenda/", reverse("educacao:informatica_professor_agenda"))
@@ -1320,6 +1322,19 @@ class FechamentoHistoricoTestCase(TestCase):
         profile.save()
         return prof_user, profile
 
+    def _create_coordenador_profile_user(self, username: str = "coord.area"):
+        User = get_user_model()
+        coord_user = User.objects.create_user(username=username, password="123456")
+        profile, _ = Profile.objects.get_or_create(user=coord_user, defaults={"ativo": True})
+        profile.role = Profile.Role.EDU_COORD
+        profile.municipio = self.turma.unidade.secretaria.municipio
+        profile.secretaria = self.turma.unidade.secretaria
+        profile.unidade = self.turma.unidade
+        profile.must_change_password = False
+        profile.codigo_acesso = username
+        profile.save()
+        return coord_user, profile
+
     def test_aluno_role_can_access_meus_dados(self):
         aluno_user, profile = self._create_aluno_profile_user("aluno.santa2026")
 
@@ -1428,6 +1443,171 @@ class FechamentoHistoricoTestCase(TestCase):
         plano.refresh_from_db()
         self.assertEqual(plano.status, PlanoEnsinoProfessor.Status.RASCUNHO)
         self.assertIsNone(plano.submetido_em)
+
+    def test_professor_plano_ensino_nao_submete_com_pendencias(self):
+        prof_user, profile = self._create_professor_profile_user("prof.plano.pendente")
+        self.diario.professor = prof_user
+        self.diario.save(update_fields=["professor"])
+        self.turma.professores.add(prof_user)
+
+        self.client.force_login(prof_user)
+        url = reverse("educacao:professor_plano_ensino_editar", args=[profile.codigo_acesso, self.diario.pk])
+        resp_submit = self.client.post(
+            url,
+            data={
+                "titulo": "Plano anual 5A",
+                "ementa": "",
+                "objetivos": "",
+                "metodologia": "",
+                "criterios_avaliacao": "",
+                "cronograma": "",
+                "referencias": "",
+                "action": "submit",
+            },
+            follow=True,
+        )
+        self.assertEqual(resp_submit.status_code, 200)
+        self.assertContains(resp_submit, "Não foi possível submeter.")
+        plano = PlanoEnsinoProfessor.objects.get(diario=self.diario, professor=prof_user)
+        self.assertEqual(plano.status, PlanoEnsinoProfessor.Status.RASCUNHO)
+        self.assertIsNone(plano.submetido_em)
+
+    def test_professor_nao_edita_plano_aprovado(self):
+        prof_user, profile = self._create_professor_profile_user("prof.plano.aprovado")
+        self.diario.professor = prof_user
+        self.diario.save(update_fields=["professor"])
+        self.turma.professores.add(prof_user)
+        plano = PlanoEnsinoProfessor.objects.create(
+            diario=self.diario,
+            professor=prof_user,
+            ano_letivo=self.diario.ano_letivo,
+            titulo="Plano já aprovado",
+            ementa="Texto base",
+            objetivos="Objetivos",
+            metodologia="Metodologia",
+            criterios_avaliacao="Critérios",
+            cronograma="Cronograma",
+            referencias="Referências",
+            status=PlanoEnsinoProfessor.Status.APROVADO,
+            submetido_em=timezone.now(),
+            aprovado_em=timezone.now(),
+        )
+
+        self.client.force_login(prof_user)
+        url = reverse("educacao:professor_plano_ensino_editar", args=[profile.codigo_acesso, self.diario.pk])
+        resp = self.client.post(
+            url,
+            data={
+                "titulo": "Alteração indevida",
+                "ementa": plano.ementa,
+                "objetivos": plano.objetivos,
+                "metodologia": plano.metodologia,
+                "criterios_avaliacao": plano.criterios_avaliacao,
+                "cronograma": plano.cronograma,
+                "referencias": plano.referencias,
+                "action": "save",
+            },
+            follow=True,
+        )
+        self.assertEqual(resp.status_code, 200)
+        plano.refresh_from_db()
+        self.assertEqual(plano.titulo, "Plano já aprovado")
+        self.assertContains(resp, "não pode ser editado no momento")
+
+    def test_coordenacao_aprova_e_homologa_plano_regular(self):
+        prof_user, _profile_prof = self._create_professor_profile_user("prof.plano.coord")
+        coord_user, _profile_coord = self._create_coordenador_profile_user("coord.plano.regular")
+        self.diario.professor = prof_user
+        self.diario.save(update_fields=["professor"])
+        self.turma.professores.add(prof_user)
+
+        plano = PlanoEnsinoProfessor.objects.create(
+            diario=self.diario,
+            professor=prof_user,
+            ano_letivo=self.diario.ano_letivo,
+            titulo="Plano para aprovação",
+            ementa="Ementa",
+            objetivos="Objetivos",
+            metodologia="Metodologia",
+            criterios_avaliacao="Critérios",
+            cronograma="Cronograma",
+            referencias="Referências",
+            status=PlanoEnsinoProfessor.Status.SUBMETIDO,
+            submetido_em=timezone.now(),
+        )
+
+        self.client.force_login(coord_user)
+        url = reverse("educacao:plano_ensino_fluxo_regular_detail", args=[plano.pk])
+
+        resp_aprovar = self.client.post(url, data={"action": "aprovar"}, follow=True)
+        self.assertEqual(resp_aprovar.status_code, 200)
+        plano.refresh_from_db()
+        self.assertEqual(plano.status, PlanoEnsinoProfessor.Status.APROVADO)
+        self.assertEqual(plano.aprovado_por_id, coord_user.id)
+
+        resp_homologar = self.client.post(url, data={"action": "homologar"}, follow=True)
+        self.assertEqual(resp_homologar.status_code, 200)
+        plano.refresh_from_db()
+        self.assertEqual(plano.status, PlanoEnsinoProfessor.Status.HOMOLOGADO)
+        self.assertEqual(plano.homologado_por_id, coord_user.id)
+
+    def test_coordenacao_devolve_plano_informatica(self):
+        prof_user, _profile_prof = self._create_professor_profile_user("prof.plano.info")
+        coord_user, _profile_coord = self._create_coordenador_profile_user("coord.plano.info")
+
+        municipio = self.turma.unidade.secretaria.municipio
+        laboratorio = InformaticaLaboratorio.objects.create(
+            nome="Lab Teste",
+            unidade=self.turma.unidade,
+            quantidade_computadores=20,
+            capacidade_operacional=12,
+        )
+        curso = InformaticaCurso.objects.create(
+            municipio=municipio,
+            nome="Curso Informática Teste",
+            descricao="Curso de teste",
+            max_alunos_por_turma=12,
+        )
+        turma_info = InformaticaTurma.objects.create(
+            curso=curso,
+            laboratorio=laboratorio,
+            codigo="INFO-T1",
+            nome="Turma Info T1",
+            instrutor=prof_user,
+            ano_letivo=2026,
+            status=InformaticaTurma.Status.ATIVA,
+            max_vagas=12,
+        )
+        plano_info = InformaticaPlanoEnsinoProfessor.objects.create(
+            turma=turma_info,
+            professor=prof_user,
+            ano_letivo=2026,
+            titulo="Plano informática",
+            ementa="Ementa",
+            objetivos="Objetivos",
+            metodologia="Metodologia",
+            criterios_avaliacao="Critérios",
+            cronograma="Cronograma",
+            referencias="Referências",
+            status=InformaticaPlanoEnsinoProfessor.Status.SUBMETIDO,
+            submetido_em=timezone.now(),
+        )
+
+        self.client.force_login(coord_user)
+        url = reverse("educacao:plano_ensino_fluxo_informatica_detail", args=[plano_info.pk])
+        resp = self.client.post(
+            url,
+            data={
+                "action": "devolver",
+                "motivo_devolucao": "Ajustar critérios de avaliação para incluir recuperação.",
+            },
+            follow=True,
+        )
+        self.assertEqual(resp.status_code, 200)
+        plano_info.refresh_from_db()
+        self.assertEqual(plano_info.status, InformaticaPlanoEnsinoProfessor.Status.DEVOLVIDO)
+        self.assertEqual(plano_info.devolvido_por_id, coord_user.id)
+        self.assertIn("Ajustar critérios", plano_info.motivo_devolucao)
 
     def test_professor_material_create(self):
         prof_user, profile = self._create_professor_profile_user("prof.material")
