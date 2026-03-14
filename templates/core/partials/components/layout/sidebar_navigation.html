@@ -508,6 +508,10 @@
             <a class="menu__subitem {% if ns == 'saude' and route == 'index' %}is-active{% endif %}" href="{% url 'saude:index' %}"><i class="fa-solid fa-gauge"></i><span>Painel Saúde</span></a>
             <a class="menu__subitem {% if ns == 'saude' and route == 'atendimento_list' %}is-active{% endif %}" href="{% url 'saude:atendimento_list' %}"><i class="fa-solid fa-notes-medical"></i><span>Atendimentos</span></a>
             <a class="menu__subitem {% if ns == 'saude' and route == 'agenda_list' %}is-active{% endif %}" href="{% url 'saude:agenda_list' %}"><i class="fa-solid fa-calendar-check"></i><span>Agenda</span></a>
+            {% if perms.saude.manage %}
+              <a class="menu__subitem {% if ns == 'saude' and route == 'agenda_create' %}is-active{% endif %}" href="{% url 'saude:agenda_create' %}"><i class="fa-solid fa-circle-plus"></i><span>Novo agendamento</span></a>
+              <a class="menu__subitem {% if ns == 'saude' and route == 'atendimento_create' %}is-active{% endif %}" href="{% url 'saude:atendimento_create' %}"><i class="fa-solid fa-plus"></i><span>Novo atendimento</span></a>
+            {% endif %}
             <a class="menu__subitem {% if ns == 'saude' and route == 'relatorio_mensal' %}is-active{% endif %}" href="{% url 'saude:relatorio_mensal' %}"><i class="fa-solid fa-chart-column"></i><span>Relatório mensal</span></a>
 
             <div class="menu__subsection">Regulação</div>

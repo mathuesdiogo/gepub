@@ -3,8 +3,7 @@
 {% block header %}Saúde{% endblock %}
 
 {% block content %}
-<div class="gp-module-shell gp-module-shell--saude saude-module">
-  <aside class="gp-module-shell__aside">{% include "saude/_menu_modulo.html" %}</aside>
+<div class="gp-module-shell gp-module-shell--saude gp-module-shell--single saude-module">
   <main class="gp-module-shell__main">{% block module_content %}{% endblock %}</main>
 </div>
 {% endblock %}
