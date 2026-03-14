@@ -214,6 +214,9 @@ def index(request):
             }
         )
 
+    # A página inicial já possui navegação global na sidebar do sistema.
+    # Mantemos o painel em modo single para evitar duplicidade visual de menus.
+    data["hide_module_menu"] = True
     data["can_edu_manage"] = can(user, "educacao.manage")
     data["can_nee_view"] = can(user, "nee.view")
 
