@@ -1,0 +1,81 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Minicursos • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<style>
+  .gp-inline-list {
+    margin: 0;
+    padding-left: 18px;
+    display: grid;
+    gap: 4px;
+  }
+</style>
+<div class="gp-card">
+  <div class="gp-card__body">
+    {% include "core/partials/components/layout/page_head.html" with title="Minicursos" subtitle="Cadastro, turmas, matrículas e certificados em um fluxo integrado." actions=actions %}
+
+    <section class="edu-kpis">
+      <article class="edu-kpi">
+        <div><div class="edu-kpi__label">Minicursos</div><div class="edu-kpi__value">{{ stats.cursos }}</div><div class="edu-kpi__meta">FIC e cursos livres</div></div>
+        <div class="edu-kpi__icon"><i class="fa-solid fa-graduation-cap"></i></div>
+      </article>
+      <article class="edu-kpi">
+        <div><div class="edu-kpi__label">Turmas</div><div class="edu-kpi__value">{{ stats.turmas }}</div><div class="edu-kpi__meta">Ofertas ativas</div></div>
+        <div class="edu-kpi__icon"><i class="fa-solid fa-people-group"></i></div>
+      </article>
+      <article class="edu-kpi">
+        <div><div class="edu-kpi__label">Matrículas</div><div class="edu-kpi__value">{{ stats.matriculas }}</div><div class="edu-kpi__meta">Alunos inscritos</div></div>
+        <div class="edu-kpi__icon"><i class="fa-solid fa-user-plus"></i></div>
+      </article>
+      <article class="edu-kpi">
+        <div><div class="edu-kpi__label">Certificados</div><div class="edu-kpi__value">{{ stats.certificados }}</div><div class="edu-kpi__meta">Emitidos no módulo</div></div>
+        <div class="edu-kpi__icon"><i class="fa-solid fa-certificate"></i></div>
+      </article>
+    </section>
+
+    <div class="u-mt-16">
+      <h3 class="page-head__title" style="font-size:1.1rem;">Últimos minicursos</h3>
+      <ul class="gp-inline-list">
+        {% for c in recentes_cursos %}
+          <li>{{ c.nome }} • {{ c.get_modalidade_oferta_display }}</li>
+        {% empty %}
+          <li>Sem minicursos cadastrados.</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="u-mt-16">
+      <h3 class="page-head__title" style="font-size:1.1rem;">Últimas turmas</h3>
+      <ul class="gp-inline-list">
+        {% for t in recentes_turmas %}
+          <li>{{ t.nome }} • {{ t.unidade.nome }} • {{ t.ano_letivo }}</li>
+        {% empty %}
+          <li>Sem turmas de minicurso.</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="u-mt-16">
+      <h3 class="page-head__title" style="font-size:1.1rem;">Últimas matrículas</h3>
+      <ul class="gp-inline-list">
+        {% for m in recentes_matriculas %}
+          <li>{{ m.aluno.nome }} • {{ m.curso.nome }} • {{ m.get_situacao_display }}</li>
+        {% empty %}
+          <li>Sem matrículas registradas.</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="u-mt-16">
+      <h3 class="page-head__title" style="font-size:1.1rem;">Últimos certificados</h3>
+      <ul class="gp-inline-list">
+        {% for c in recentes_certificados %}
+          <li>{{ c.aluno.nome }} • {{ c.curso.nome|default:"—" }} • {{ c.codigo_verificacao }}</li>
+        {% empty %}
+          <li>Sem certificados emitidos.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

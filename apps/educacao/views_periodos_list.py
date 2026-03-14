@@ -38,6 +38,12 @@ class PeriodoListView(BaseListViewGepub):
         actions = []
         if can(self.request.user, "educacao.manage"):
             actions.append({
+                "label": "Fechamento em Lote",
+                "url": reverse("educacao:fechamento_periodo_lote"),
+                "icon": "fa-solid fa-check-double",
+                "variant": "btn--outline",
+            })
+            actions.append({
                 "label": "Gerar Bimestres",
                 "url": reverse("educacao:periodo_gerar_bimestres"),
                 "icon": "fa-solid fa-wand-magic-sparkles",

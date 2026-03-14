@@ -324,6 +324,13 @@
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
+          <a class="gp-link-box edu-link-card" href="{% url 'educacao:justificativa_falta_list' %}">
+            <div>
+              <div class="gp-link-box__title">Justificativas de Falta</div>
+              <div class="gp-link-box__meta">Fila centralizada de análise por perfil operacional</div>
+            </div>
+            <i class="fa-solid fa-arrow-right"></i>
+          </a>
           <a class="gp-link-box edu-link-card" href="{% url 'educacao:assistencia_index' %}">
             <div>
               <div class="gp-link-box__title">Assistência Escolar</div>
@@ -353,12 +360,47 @@
             <i class="fa-solid fa-arrow-right"></i>
           </a>
           {% if can_edu_manage %}
+            <a class="gp-link-box edu-link-card" href="{% url 'educacao:turma_geracao_lote' %}">
+              <div>
+                <div class="gp-link-box__title">Wizard de Turmas e Diários</div>
+                <div class="gp-link-box__meta">Geração em lote por matriz/ano/período com setup automático</div>
+              </div>
+              <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <a class="gp-link-box edu-link-card" href="{% url 'educacao:evasao_lote' %}">
+              <div>
+                <div class="gp-link-box__title">Evasão em Lote</div>
+                <div class="gp-link-box__meta">Prévia, execução em massa e rollback seguro por token</div>
+              </div>
+              <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <a class="gp-link-box edu-link-card" href="{% url 'educacao:fechamento_periodo_lote' %}">
+              <div>
+                <div class="gp-link-box__title">Fechamento de Período em Lote</div>
+                <div class="gp-link-box__meta">Fechar ou reabrir turmas por secretaria/unidade em um único fluxo</div>
+              </div>
+              <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <a class="gp-link-box edu-link-card" href="{% url 'educacao:operacoes_lote' %}">
+              <div>
+                <div class="gp-link-box__title">Operações em Lote</div>
+                <div class="gp-link-box__meta">Carômetro, etiquetas e atualização de fotos por ZIP</div>
+              </div>
+              <i class="fa-solid fa-arrow-right"></i>
+            </a>
             <a class="gp-link-box edu-link-card" href="{% url 'educacao:renovacao_matricula_list' %}">
               <div>
                 <div class="gp-link-box__title">Renovação de Matrícula</div>
                 <div class="gp-link-box__meta">
                   {{ renovacoes_agendadas|default:0 }} agendadas • {{ renovacoes_abertas|default:0 }} abertas • {{ renovacoes_processadas|default:0 }} processadas
                 </div>
+              </div>
+              <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <a class="gp-link-box edu-link-card" href="{% url 'educacao:minicurso_dashboard' %}">
+              <div>
+                <div class="gp-link-box__title">Minicursos</div>
+                <div class="gp-link-box__meta">Cadastro, turmas, matrículas e certificados de FIC e cursos livres</div>
               </div>
               <i class="fa-solid fa-arrow-right"></i>
             </a>

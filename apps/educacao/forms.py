@@ -482,11 +482,42 @@ class AlunoForm(forms.ModelForm):
 
 
 class AlunoCreateComTurmaForm(AlunoForm):
+    ORIGEM_INGRESSO_CHOICES = [
+        ("DIRETO", "Ingresso direto"),
+        ("PROCESSO_SELETIVO", "Processo seletivo"),
+    ]
+
     turma = forms.ModelChoiceField(
         queryset=Turma.objects.none(),
         required=True,
         label="Turma",
         help_text="Selecione a turma para já matricular o aluno.",
+    )
+    origem_ingresso = forms.ChoiceField(
+        label="Origem do ingresso",
+        choices=ORIGEM_INGRESSO_CHOICES,
+        initial="DIRETO",
+    )
+    processo_numero = forms.CharField(
+        label="Número do processo seletivo",
+        required=False,
+        max_length=40,
+    )
+    processo_assunto = forms.CharField(
+        label="Assunto do processo",
+        required=False,
+        max_length=180,
+        initial="Ingresso de aluno",
+    )
+    edital_referencia = forms.CharField(
+        label="Edital (opcional)",
+        required=False,
+        max_length=80,
+    )
+    observacao_ingresso = forms.CharField(
+        label="Observação do ingresso",
+        required=False,
+        widget=forms.Textarea(attrs={"rows": 2}),
     )
 
     def __init__(self, *args, **kwargs):
@@ -504,6 +535,24 @@ class AlunoCreateComTurmaForm(AlunoForm):
             qs = scope_filter_turmas(self.user, qs)
 
         self.fields["turma"].queryset = qs
+
+    def clean(self):
+        cleaned = super().clean()
+        origem = (cleaned.get("origem_ingresso") or "DIRETO").strip().upper()
+        processo_numero = (cleaned.get("processo_numero") or "").strip()
+        processo_assunto = (cleaned.get("processo_assunto") or "").strip()
+
+        if origem == "PROCESSO_SELETIVO":
+            if not processo_numero:
+                self.add_error("processo_numero", "Informe o número do processo seletivo.")
+            if not processo_assunto:
+                self.add_error("processo_assunto", "Informe o assunto do processo seletivo.")
+        else:
+            cleaned["processo_numero"] = ""
+            cleaned["processo_assunto"] = ""
+            cleaned["edital_referencia"] = ""
+            cleaned["observacao_ingresso"] = ""
+        return cleaned
 
 
 class MatriculaForm(forms.ModelForm):

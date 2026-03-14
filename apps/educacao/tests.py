@@ -6,6 +6,9 @@ from decimal import Decimal
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.http import HttpResponse
+from io import BytesIO
+from zipfile import ZipFile
 
 from django.contrib.auth import get_user_model
 
@@ -122,6 +125,11 @@ class EducacaoRoutesSmokeTestCase(TestCase):
         self.assertIn("/informatica/api/aluno/1/origem/", reverse("educacao:informatica_api_aluno_origem", args=[1]))
         self.assertIn("/informatica/matriculas/1/remanejar/", reverse("educacao:informatica_matricula_remanejar", args=[1]))
         self.assertIn("/matriculas/renovacao/", reverse("educacao:renovacao_matricula_list"))
+        self.assertIn("/turmas/geracao-lote/", reverse("educacao:turma_geracao_lote"))
+        self.assertIn("/matriculas/evasao-lote/", reverse("educacao:evasao_lote"))
+        self.assertIn("/periodos/fechamento-lote/", reverse("educacao:fechamento_periodo_lote"))
+        self.assertIn("/alunos/operacoes-lote/", reverse("educacao:operacoes_lote"))
+        self.assertIn("/minicursos/", reverse("educacao:minicurso_dashboard"))
         self.assertIn("/aluno/aln1/ensino/renovacao-matricula/", reverse("educacao:aluno_ensino_renovacao", args=["aln1"]))
 
 
@@ -363,6 +371,46 @@ class RenovacaoMatriculaProcessingTestCase(TestCase):
                 tipo=MatriculaMovimentacao.Tipo.CRIACAO,
             ).exists()
         )
+
+    def test_processamento_por_chamada_respeita_prioridade_e_finaliza_quando_zerar_pendencias(self):
+        aluno_chamada_1 = Aluno.objects.create(nome="Aluno Chamada 1")
+        aluno_chamada_2 = Aluno.objects.create(nome="Aluno Chamada 2")
+        pedido_1 = RenovacaoMatriculaPedido.objects.create(
+            renovacao=self.renovacao,
+            aluno=aluno_chamada_1,
+            oferta=self.oferta_1,
+            prioridade=1,
+        )
+        pedido_2 = RenovacaoMatriculaPedido.objects.create(
+            renovacao=self.renovacao,
+            aluno=aluno_chamada_2,
+            oferta=self.oferta_2,
+            prioridade=2,
+        )
+
+        resultado_chamada_1 = _processar_pedidos_renovacao(self.renovacao, self.user, prioridade_max=1)
+        self.assertEqual(resultado_chamada_1["total"], 1)
+        self.assertEqual(resultado_chamada_1["aprovados"], 1)
+        self.assertEqual(resultado_chamada_1["rejeitados"], 0)
+        self.assertEqual(resultado_chamada_1["pendentes_restantes"], 1)
+
+        pedido_1.refresh_from_db()
+        pedido_2.refresh_from_db()
+        self.renovacao.refresh_from_db()
+        self.assertEqual(pedido_1.status, RenovacaoMatriculaPedido.Status.APROVADO)
+        self.assertEqual(pedido_2.status, RenovacaoMatriculaPedido.Status.PENDENTE)
+        self.assertIsNone(self.renovacao.processado_em)
+
+        resultado_chamada_2 = _processar_pedidos_renovacao(self.renovacao, self.user, prioridade_max=2)
+        self.assertEqual(resultado_chamada_2["total"], 1)
+        self.assertEqual(resultado_chamada_2["aprovados"], 1)
+        self.assertEqual(resultado_chamada_2["rejeitados"], 0)
+        self.assertEqual(resultado_chamada_2["pendentes_restantes"], 0)
+
+        pedido_2.refresh_from_db()
+        self.renovacao.refresh_from_db()
+        self.assertEqual(pedido_2.status, RenovacaoMatriculaPedido.Status.APROVADO)
+        self.assertIsNotNone(self.renovacao.processado_em)
 
 
 class RenovacaoMatriculaTransparenciaTestCase(TestCase):
@@ -3620,3 +3668,502 @@ class EstagioCrudViewTestCase(TestCase):
         )
         with self.assertRaises(ValidationError):
             estagio.full_clean()
+
+
+class TurmaGeracaoLoteViewTestCase(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.admin = user_model.objects.create_superuser(
+            username="admin_lote_turma",
+            password="123456",
+            email="admin_lote_turma@local",
+        )
+        profile = getattr(self.admin, "profile", None)
+        if profile:
+            profile.must_change_password = False
+            profile.save(update_fields=["must_change_password"])
+        self.client.force_login(self.admin)
+
+        self.municipio = Municipio.objects.create(nome="Cidade Lote", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="SEMED Lote")
+        self.unidade = Unidade.objects.create(secretaria=self.secretaria, nome="Escola Lote", tipo=Unidade.Tipo.EDUCACAO)
+        self.matriz = MatrizCurricular.objects.create(
+            unidade=self.unidade,
+            nome="Matriz Lote 5º Ano",
+            etapa_base=MatrizCurricular.EtapaBase.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=MatrizCurricular.SerieAno.FUNDAMENTAL_5,
+            ano_referencia=2026,
+            ativo=True,
+        )
+
+    def _payload(self, action: str):
+        return {
+            "_action": action,
+            "ano_letivo": "2026",
+            "secretaria": str(self.secretaria.pk),
+            "unidade": str(self.unidade.pk),
+            "matrizes": [str(self.matriz.pk)],
+            "quantidade_por_matriz": "2",
+            "turno": Turma.Turno.MANHA,
+            "prefixo_nome": "GNF",
+            "gerar_horario": "on",
+            "turmas_ativas": "on",
+        }
+
+    def test_wizard_preview_and_execute(self):
+        resp_preview = self.client.post(
+            reverse("educacao:turma_geracao_lote"),
+            data=self._payload("preview"),
+            follow=True,
+        )
+        self.assertEqual(resp_preview.status_code, 200)
+        self.assertContains(resp_preview, "Pr\u00e9via da gera\u00e7\u00e3o")
+
+        resp_execute = self.client.post(
+            reverse("educacao:turma_geracao_lote"),
+            data=self._payload("execute"),
+            follow=True,
+        )
+        self.assertEqual(resp_execute.status_code, 200)
+        turmas = Turma.objects.filter(unidade=self.unidade, ano_letivo=2026, matriz_curricular=self.matriz)
+        self.assertEqual(turmas.count(), 2)
+        self.assertEqual(GradeHorario.objects.filter(turma__in=turmas).count(), 2)
+
+
+class EvasaoLoteViewTestCase(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.admin = user_model.objects.create_superuser(
+            username="admin_evasao_lote",
+            password="123456",
+            email="admin_evasao_lote@local",
+        )
+        profile = getattr(self.admin, "profile", None)
+        if profile:
+            profile.must_change_password = False
+            profile.save(update_fields=["must_change_password"])
+        self.client.force_login(self.admin)
+
+        self.municipio = Municipio.objects.create(nome="Cidade Evasao", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="SEMED Evasao")
+        self.unidade = Unidade.objects.create(secretaria=self.secretaria, nome="Escola Evasao", tipo=Unidade.Tipo.EDUCACAO)
+        self.matriz = MatrizCurricular.objects.create(
+            unidade=self.unidade,
+            nome="Matriz Evasao 6º Ano",
+            etapa_base=MatrizCurricular.EtapaBase.FUNDAMENTAL_ANOS_FINAIS,
+            serie_ano=MatrizCurricular.SerieAno.FUNDAMENTAL_6,
+            ano_referencia=2026,
+            ativo=True,
+        )
+        self.turma = Turma.objects.create(
+            unidade=self.unidade,
+            nome="6A",
+            ano_letivo=2026,
+            turno=Turma.Turno.MANHA,
+            modalidade=Turma.Modalidade.REGULAR,
+            etapa=Turma.Etapa.FUNDAMENTAL_ANOS_FINAIS,
+            serie_ano=Turma.SerieAno.FUNDAMENTAL_6,
+            matriz_curricular=self.matriz,
+            ativo=True,
+        )
+        self.aluno = Aluno.objects.create(nome="Aluno Lote Evasao")
+        self.matricula = Matricula.objects.create(
+            aluno=self.aluno,
+            turma=self.turma,
+            situacao=Matricula.Situacao.ATIVA,
+            data_matricula=date(2026, 3, 1),
+        )
+
+    def test_evasao_lote_execute_and_rollback(self):
+        resp_execute = self.client.post(
+            reverse("educacao:evasao_lote"),
+            data={
+                "_action": "execute",
+                "ano_letivo": "2026",
+                "secretaria": str(self.secretaria.pk),
+                "unidade": str(self.unidade.pk),
+                "turma": str(self.turma.pk),
+                "data_referencia": "2026-03-13",
+                "motivo": "Teste de evasão em lote",
+            },
+            follow=True,
+        )
+        self.assertEqual(resp_execute.status_code, 200)
+        self.matricula.refresh_from_db()
+        self.assertEqual(self.matricula.situacao, Matricula.Situacao.EVADIDO)
+
+        mov = (
+            MatriculaMovimentacao.objects.filter(
+                matricula=self.matricula,
+                tipo=MatriculaMovimentacao.Tipo.SITUACAO,
+                situacao_nova=Matricula.Situacao.EVADIDO,
+            )
+            .order_by("-id")
+            .first()
+        )
+        self.assertIsNotNone(mov)
+        self.assertIn("[EVASAO-LOTE:", mov.motivo)
+        token = mov.motivo.split("[EVASAO-LOTE:", 1)[1].split("]", 1)[0]
+
+        resp_rollback = self.client.post(
+            reverse("educacao:evasao_lote"),
+            data={
+                "_action": "rollback",
+                "rollback_token": token,
+            },
+            follow=True,
+        )
+        self.assertEqual(resp_rollback.status_code, 200)
+
+        self.matricula.refresh_from_db()
+        self.assertEqual(self.matricula.situacao, Matricula.Situacao.ATIVA)
+        self.assertTrue(
+            MatriculaMovimentacao.objects.filter(
+                matricula=self.matricula,
+                tipo=MatriculaMovimentacao.Tipo.DESFAZER,
+                movimentacao_desfeita=mov,
+            ).exists()
+        )
+
+
+class FechamentoPeriodoLoteViewTestCase(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.admin = user_model.objects.create_superuser(
+            username="admin_fechamento_lote",
+            password="123456",
+            email="admin_fechamento_lote@local",
+        )
+        profile = getattr(self.admin, "profile", None)
+        if profile:
+            profile.must_change_password = False
+            profile.save(update_fields=["must_change_password"])
+        self.client.force_login(self.admin)
+
+        self.municipio = Municipio.objects.create(nome="Cidade Fechamento Lote", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="SEMED Fechamento Lote")
+        self.unidade = Unidade.objects.create(secretaria=self.secretaria, nome="Escola Fechamento Lote", tipo=Unidade.Tipo.EDUCACAO)
+        self.matriz = MatrizCurricular.objects.create(
+            unidade=self.unidade,
+            nome="Matriz Fechamento 8º Ano",
+            etapa_base=MatrizCurricular.EtapaBase.FUNDAMENTAL_ANOS_FINAIS,
+            serie_ano=MatrizCurricular.SerieAno.FUNDAMENTAL_8,
+            ano_referencia=2026,
+            ativo=True,
+        )
+        self.turma = Turma.objects.create(
+            unidade=self.unidade,
+            nome="8A",
+            ano_letivo=2026,
+            turno=Turma.Turno.MANHA,
+            modalidade=Turma.Modalidade.REGULAR,
+            etapa=Turma.Etapa.FUNDAMENTAL_ANOS_FINAIS,
+            serie_ano=Turma.SerieAno.FUNDAMENTAL_8,
+            matriz_curricular=self.matriz,
+            ativo=True,
+        )
+        self.aluno = Aluno.objects.create(nome="Aluno Fechamento Lote")
+        Matricula.objects.create(aluno=self.aluno, turma=self.turma, situacao=Matricula.Situacao.ATIVA)
+        self.periodo = PeriodoLetivo.objects.create(
+            ano_letivo=2026,
+            tipo=PeriodoLetivo.Tipo.BIMESTRE,
+            numero=1,
+            inicio=date(2026, 2, 16),
+            fim=date(2026, 5, 4),
+            ativo=True,
+        )
+
+    def _payload(self, action: str):
+        return {
+            "_action": action,
+            "ano_letivo": "2026",
+            "periodo": str(self.periodo.pk),
+            "secretaria": str(self.secretaria.pk),
+            "unidade": str(self.unidade.pk),
+            "media_corte": "6.00",
+            "frequencia_corte": "75.00",
+            "somente_com_matriculas": "on",
+            "observacao": "Fechamento em lote para validação.",
+        }
+
+    def test_fluxo_fechamento_e_reabertura_em_lote(self):
+        resp_preview = self.client.post(
+            reverse("educacao:fechamento_periodo_lote"),
+            data=self._payload("preview"),
+            follow=True,
+        )
+        self.assertEqual(resp_preview.status_code, 200)
+        self.assertContains(resp_preview, "Prévia do lote")
+
+        resp_fechar = self.client.post(
+            reverse("educacao:fechamento_periodo_lote"),
+            data=self._payload("fechar"),
+            follow=True,
+        )
+        self.assertEqual(resp_fechar.status_code, 200)
+        self.assertTrue(
+            FechamentoPeriodoTurma.objects.filter(turma=self.turma, periodo=self.periodo).exists()
+        )
+
+        resp_reabrir = self.client.post(
+            reverse("educacao:fechamento_periodo_lote"),
+            data=self._payload("reabrir"),
+            follow=True,
+        )
+        self.assertEqual(resp_reabrir.status_code, 200)
+        self.assertFalse(
+            FechamentoPeriodoTurma.objects.filter(turma=self.turma, periodo=self.periodo).exists()
+        )
+
+
+class AlunoIngressoProcessoSeletivoTestCase(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.admin = user_model.objects.create_superuser(
+            username="admin_ingresso_processo",
+            password="123456",
+            email="admin_ingresso_processo@local",
+        )
+        profile = getattr(self.admin, "profile", None)
+        if profile:
+            profile.must_change_password = False
+            profile.save(update_fields=["must_change_password"])
+        self.client.force_login(self.admin)
+
+        self.municipio = Municipio.objects.create(nome="Cidade Ingresso", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="SEMED Ingresso")
+        self.unidade = Unidade.objects.create(secretaria=self.secretaria, nome="Escola Ingresso", tipo=Unidade.Tipo.EDUCACAO)
+        self.matriz = MatrizCurricular.objects.create(
+            unidade=self.unidade,
+            nome="Matriz Ingresso 4º Ano",
+            etapa_base=MatrizCurricular.EtapaBase.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=MatrizCurricular.SerieAno.FUNDAMENTAL_4,
+            ano_referencia=2026,
+            ativo=True,
+        )
+        self.turma = Turma.objects.create(
+            unidade=self.unidade,
+            nome="4A",
+            ano_letivo=2026,
+            turno=Turma.Turno.MANHA,
+            modalidade=Turma.Modalidade.REGULAR,
+            etapa=Turma.Etapa.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=Turma.SerieAno.FUNDAMENTAL_4,
+            matriz_curricular=self.matriz,
+            ativo=True,
+        )
+
+    def test_cria_ingressante_com_processo_seletivo(self):
+        resp = self.client.post(
+            reverse("educacao:aluno_create"),
+            data={
+                "nome": "Aluno Processo Seletivo",
+                "turma": str(self.turma.pk),
+                "origem_ingresso": "PROCESSO_SELETIVO",
+                "processo_numero": "PROC-PS-2026-0001",
+                "processo_assunto": "Ingresso por processo seletivo",
+                "edital_referencia": "Edital 01/2026",
+                "observacao_ingresso": "Aprovado na primeira chamada.",
+                "ativo": "on",
+            },
+            follow=True,
+        )
+        self.assertEqual(resp.status_code, 200)
+        aluno = Aluno.objects.filter(nome="Aluno Processo Seletivo").first()
+        self.assertIsNotNone(aluno)
+
+        matricula = Matricula.objects.filter(aluno=aluno, turma=self.turma).first()
+        self.assertIsNotNone(matricula)
+
+        processo = ProcessoAdministrativo.objects.filter(
+            municipio=self.municipio,
+            numero="PROC-PS-2026-0001",
+        ).first()
+        self.assertIsNotNone(processo)
+        self.assertEqual(processo.status, ProcessoAdministrativo.Status.CONCLUIDO)
+
+        self.assertTrue(
+            MatriculaMovimentacao.objects.filter(
+                matricula=matricula,
+                tipo=MatriculaMovimentacao.Tipo.CRIACAO,
+                motivo__icontains="PROC-PS-2026-0001",
+            ).exists()
+        )
+
+
+class OperacoesLoteViewTestCase(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.admin = user_model.objects.create_superuser(
+            username="admin_operacoes_lote",
+            password="123456",
+            email="admin_operacoes_lote@local",
+        )
+        profile = getattr(self.admin, "profile", None)
+        if profile:
+            profile.must_change_password = False
+            profile.save(update_fields=["must_change_password"])
+        self.client.force_login(self.admin)
+
+        self.municipio = Municipio.objects.create(nome="Cidade Operações", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="SEMED Operações")
+        self.unidade = Unidade.objects.create(secretaria=self.secretaria, nome="Escola Operações", tipo=Unidade.Tipo.EDUCACAO)
+        self.matriz = MatrizCurricular.objects.create(
+            unidade=self.unidade,
+            nome="Matriz Operações",
+            etapa_base=MatrizCurricular.EtapaBase.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=MatrizCurricular.SerieAno.FUNDAMENTAL_3,
+            ano_referencia=2026,
+            ativo=True,
+        )
+        self.turma = Turma.objects.create(
+            unidade=self.unidade,
+            nome="3A",
+            ano_letivo=2026,
+            turno=Turma.Turno.MANHA,
+            modalidade=Turma.Modalidade.REGULAR,
+            etapa=Turma.Etapa.FUNDAMENTAL_ANOS_INICIAIS,
+            serie_ano=Turma.SerieAno.FUNDAMENTAL_3,
+            matriz_curricular=self.matriz,
+            ativo=True,
+        )
+        self.aluno = Aluno.objects.create(nome="Aluno Foto Lote", cpf="11122233344")
+        self.matricula = Matricula.objects.create(aluno=self.aluno, turma=self.turma, situacao=Matricula.Situacao.ATIVA)
+
+    def _base_payload(self):
+        return {
+            "turma": str(self.turma.pk),
+            "estrategia_foto": "ALUNO_ID",
+        }
+
+    def test_aplicar_fotos_zip_por_id_aluno(self):
+        png_bytes = (
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01"
+            b"\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\nIDATx\x9cc`\x00\x00\x00"
+            b"\x02\x00\x01\xe2!\xbc3\x00\x00\x00\x00IEND\xaeB`\x82"
+        )
+        buffer = BytesIO()
+        with ZipFile(buffer, "w") as zf:
+            zf.writestr(f"{self.aluno.id}.png", png_bytes)
+        zip_upload = SimpleUploadedFile("fotos.zip", buffer.getvalue(), content_type="application/zip")
+
+        payload = self._base_payload()
+        payload["_action"] = "aplicar_fotos"
+
+        resp = self.client.post(
+            reverse("educacao:operacoes_lote"),
+            data={**payload, "arquivo_zip": zip_upload},
+            follow=True,
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.aluno.refresh_from_db()
+        self.assertTrue(bool(self.aluno.foto))
+
+    def test_gera_carometro_pdf(self):
+        with patch("apps.educacao.views_operacoes_lote.export_pdf_template") as export_mock:
+            export_mock.return_value = HttpResponse(b"%PDF-1.4", content_type="application/pdf")
+            payload = self._base_payload()
+            payload["_action"] = "carometro_pdf"
+            resp = self.client.post(reverse("educacao:operacoes_lote"), data=payload)
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp["Content-Type"], "application/pdf")
+            export_mock.assert_called_once()
+
+
+class MinicursoFlowTestCase(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.admin = user_model.objects.create_superuser(
+            username="admin_minicurso_flow",
+            password="123456",
+            email="admin_minicurso_flow@local",
+        )
+        profile = getattr(self.admin, "profile", None)
+        if profile:
+            profile.must_change_password = False
+            profile.save(update_fields=["must_change_password"])
+        self.client.force_login(self.admin)
+
+        self.prof = user_model.objects.create_user(
+            username="prof_minicurso",
+            password="123456",
+            email="prof_minicurso@local",
+        )
+        if getattr(self.prof, "profile", None):
+            self.prof.profile.role = "EDU_PROF"
+            self.prof.profile.ativo = True
+            self.prof.profile.must_change_password = False
+            self.prof.profile.save(update_fields=["role", "ativo", "must_change_password"])
+
+        self.municipio = Municipio.objects.create(nome="Cidade Minicurso", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="SEMED Minicurso")
+        self.unidade = Unidade.objects.create(secretaria=self.secretaria, nome="Escola Minicurso", tipo=Unidade.Tipo.EDUCACAO)
+        self.aluno = Aluno.objects.create(nome="Aluno Minicurso")
+
+    def test_fluxo_completo_minicurso(self):
+        resp_curso = self.client.post(
+            reverse("educacao:minicurso_curso_create"),
+            data={
+                "nome": "Minicurso Robótica",
+                "codigo": "MINI-ROBO-01",
+                "modalidade_oferta": Curso.ModalidadeOferta.FIC,
+                "eixo_tecnologico": "Tecnologia",
+                "carga_horaria": "40",
+                "ativo": "on",
+            },
+            follow=True,
+        )
+        self.assertEqual(resp_curso.status_code, 200)
+        curso = Curso.objects.filter(codigo="MINI-ROBO-01").first()
+        self.assertIsNotNone(curso)
+
+        resp_turma = self.client.post(
+            reverse("educacao:minicurso_turma_create"),
+            data={
+                "curso": str(curso.pk),
+                "unidade": str(self.unidade.pk),
+                "nome": "Turma Robótica A",
+                "ano_letivo": "2026",
+                "turno": Turma.Turno.TARDE,
+                "professores": [str(self.prof.pk)],
+                "ativo": "on",
+            },
+            follow=True,
+        )
+        self.assertEqual(resp_turma.status_code, 200)
+        turma = Turma.objects.filter(nome="Turma Robótica A", curso=curso).first()
+        self.assertIsNotNone(turma)
+        self.assertEqual(turma.modalidade, Turma.Modalidade.ATIVIDADE_COMPLEMENTAR)
+
+        resp_matricula = self.client.post(
+            reverse("educacao:minicurso_matricula_create"),
+            data={
+                "aluno": str(self.aluno.pk),
+                "curso": str(curso.pk),
+                "turma": str(turma.pk),
+                "data_matricula": "2026-03-16",
+                "observacao": "Matrícula de teste no fluxo.",
+            },
+            follow=True,
+        )
+        self.assertEqual(resp_matricula.status_code, 200)
+        matricula = MatriculaCurso.objects.filter(aluno=self.aluno, curso=curso, turma=turma).first()
+        self.assertIsNotNone(matricula)
+
+        resp_cert = self.client.post(
+            reverse("educacao:minicurso_certificado_emitir"),
+            data={
+                "matricula_curso": str(matricula.pk),
+                "data_emissao": "2026-07-20",
+                "titulo": "Certificado de Robótica",
+                "resultado_final": "Aprovado",
+            },
+            follow=True,
+        )
+        self.assertEqual(resp_cert.status_code, 200)
+        certificado = AlunoCertificado.objects.filter(
+            aluno=self.aluno,
+            curso=curso,
+            tipo=AlunoCertificado.Tipo.CERTIFICADO_CURSO,
+        ).first()
+        self.assertIsNotNone(certificado)

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <title>{{ title }}</title>
+  <style>
+    @page { size: A4 portrait; margin: 10mm; }
+    body { font-family: Arial, sans-serif; color: #111827; }
+    .header { margin-bottom: 8px; }
+    .title { font-size: 16px; font-weight: 700; margin: 0 0 2px; }
+    .meta { font-size: 10px; color: #4b5563; margin: 0; }
+    .labels { font-size: 0; margin-top: 8px; }
+    .label {
+      display: inline-block;
+      width: 31.9%;
+      height: 72px;
+      border: 1px dashed #9ca3af;
+      box-sizing: border-box;
+      margin: 0 1.5% 8px 0;
+      padding: 7px;
+      font-size: 11px;
+      vertical-align: top;
+      border-radius: 6px;
+      background: #f8fafc;
+    }
+    .name { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
+    .line { color: #334155; margin-bottom: 1px; }
+  </style>
+</head>
+<body>
+  <section class="header">
+    <h1 class="title">{{ title }}</h1>
+    <p class="meta">Turma: {{ turma.nome }} • Gerado em {{ printed_at }} por {{ printed_by }}</p>
+  </section>
+
+  <section class="labels">
+    {% for aluno in alunos %}
+      <article class="label">
+        <div class="name">{{ aluno.nome }}</div>
+        <div class="line">Turma: {{ aluno.turma }}</div>
+        <div class="line">ID aluno: {{ aluno.aluno_id }}</div>
+        <div class="line">Situação: {{ aluno.situacao }}</div>
+      </article>
+    {% endfor %}
+  </section>
+</body>
+</html>
+

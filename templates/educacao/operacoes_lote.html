@@ -1,0 +1,41 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Operações em Lote • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="gp-card">
+  <div class="gp-card__body">
+    {% include "core/partials/components/layout/page_head.html" with title="Operações em Lote" subtitle="Carômetro, etiquetas e atualização de fotos dos alunos em um único fluxo." actions=actions %}
+
+    <form method="post" enctype="multipart/form-data" class="gp-form gp-form--smart">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <div class="form-shell__actions gp-action-bar">
+        <button type="submit" name="_action" value="preview" class="gp-button gp-button--outline">
+          <i class="fa-solid fa-eye"></i>
+          Pré-visualizar turma
+        </button>
+        <button type="submit" name="_action" value="carometro_pdf" class="gp-button gp-button--primary">
+          <i class="fa-solid fa-id-card-clip"></i>
+          Gerar carômetro (PDF)
+        </button>
+        <button type="submit" name="_action" value="etiquetas_pdf" class="gp-button gp-button--outline">
+          <i class="fa-solid fa-tags"></i>
+          Gerar etiquetas (PDF)
+        </button>
+        <button type="submit" name="_action" value="aplicar_fotos" class="gp-button gp-button--primary">
+          <i class="fa-solid fa-camera"></i>
+          Aplicar fotos via ZIP
+        </button>
+      </div>
+    </form>
+
+    {% if preview_rows %}
+      <div class="u-mt-16">
+        <h3 class="page-head__title" style="font-size:1.1rem;">Prévia da turma ({{ preview_total }})</h3>
+        {% include "core/partials/components/data/table_shell.html" with headers=preview_headers rows=preview_rows page_obj=None empty_title="Sem alunos" empty_text="Não há matrículas para os filtros informados." %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+

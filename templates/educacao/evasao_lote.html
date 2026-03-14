@@ -1,0 +1,49 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Evasão em Lote • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="gp-card">
+  <div class="gp-card__body">
+    {% include "core/partials/components/layout/page_head.html" with title="Evasão em Lote" subtitle="Pré-visualize os alunos elegíveis, aplique a evasão em lote e use rollback seguro quando necessário." actions=actions %}
+
+    <form method="post" class="gp-form gp-form--smart">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <div class="form-shell__actions gp-action-bar">
+        <button type="submit" name="_action" value="preview" class="gp-button gp-button--outline">
+          <i class="fa-solid fa-eye"></i>
+          Gerar prévia
+        </button>
+        <button type="submit" name="_action" value="execute" class="gp-button gp-button--danger">
+          <i class="fa-solid fa-user-minus"></i>
+          Aplicar evasão em lote
+        </button>
+      </div>
+    </form>
+
+    {% if ultimo_token %}
+      <div class="gp-alert gp-alert--warning u-mt-16" role="status">
+        <div>
+          <strong>Rollback disponível:</strong> token <code>{{ ultimo_token }}</code>
+        </div>
+        <form method="post" class="u-mt-8">
+          {% csrf_token %}
+          <input type="hidden" name="_action" value="rollback">
+          <input type="hidden" name="rollback_token" value="{{ ultimo_token }}">
+          <button type="submit" class="gp-button gp-button--outline">
+            <i class="fa-solid fa-rotate-left"></i>
+            Executar rollback seguro deste lote
+          </button>
+        </form>
+      </div>
+    {% endif %}
+
+    {% if preview_rows %}
+      <div class="u-mt-16">
+        <h3 class="page-head__title" style="font-size:1.1rem;">Prévia da evasão ({{ preview_total }})</h3>
+        {% include "core/partials/components/data/table_shell.html" with headers=preview_headers rows=preview_rows page_obj=None empty_title="Sem alunos elegíveis" empty_text="Nenhuma matrícula ativa foi encontrada com os filtros informados." %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

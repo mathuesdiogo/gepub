@@ -322,7 +322,12 @@ def _sincronizar_processo_pedido(*, pedido: RenovacaoMatriculaPedido, aprovado: 
 
 
 @transaction.atomic
-def _processar_pedidos_renovacao(renovacao: RenovacaoMatricula, usuario):
+def _processar_pedidos_renovacao(
+    renovacao: RenovacaoMatricula,
+    usuario,
+    *,
+    prioridade_max: int | None = None,
+):
     pendentes = list(
         RenovacaoMatriculaPedido.objects.select_related("aluno", "oferta", "oferta__turma", "renovacao", "processo_administrativo")
         .filter(renovacao=renovacao, status=RenovacaoMatriculaPedido.Status.PENDENTE)
@@ -333,7 +338,7 @@ def _processar_pedidos_renovacao(renovacao: RenovacaoMatricula, usuario):
         renovacao.processado_em = timezone.now()
         renovacao.processado_por = usuario if getattr(usuario, "is_authenticated", False) else None
         renovacao.save(update_fields=["processado_em", "processado_por", "atualizado_em"])
-        return {"total": 0, "aprovados": 0, "rejeitados": 0}
+        return {"total": 0, "aprovados": 0, "rejeitados": 0, "pendentes_restantes": 0}
 
     pedidos_por_aluno: dict[int, list[RenovacaoMatriculaPedido]] = defaultdict(list)
     for pedido in pendentes:
@@ -345,6 +350,8 @@ def _processar_pedidos_renovacao(renovacao: RenovacaoMatricula, usuario):
     for _, pedidos in pedidos_por_aluno.items():
         pedidos.sort(key=lambda p: (p.prioridade, p.criado_em, p.id))
         pedido_escolhido = next((p for p in pedidos if p.oferta.ativo), None)
+        if pedido_escolhido is not None and prioridade_max is not None and pedido_escolhido.prioridade > prioridade_max:
+            continue
 
         if pedido_escolhido is None:
             for pedido in pedidos:
@@ -408,14 +415,25 @@ def _processar_pedidos_renovacao(renovacao: RenovacaoMatricula, usuario):
             _sincronizar_processo_pedido(pedido=pedido, aprovado=False, usuario=usuario)
             rejeitados += 1
 
-    renovacao.processado_em = timezone.now()
-    renovacao.processado_por = usuario if getattr(usuario, "is_authenticated", False) else None
-    renovacao.save(update_fields=["processado_em", "processado_por", "atualizado_em"])
+    pendentes_restantes = RenovacaoMatriculaPedido.objects.filter(
+        renovacao=renovacao,
+        status=RenovacaoMatriculaPedido.Status.PENDENTE,
+    ).count()
+    if pendentes_restantes == 0:
+        renovacao.processado_em = timezone.now()
+        renovacao.processado_por = usuario if getattr(usuario, "is_authenticated", False) else None
+        renovacao.save(update_fields=["processado_em", "processado_por", "atualizado_em"])
+    elif prioridade_max is not None and (renovacao.processado_em or renovacao.processado_por_id):
+        renovacao.processado_em = None
+        renovacao.processado_por = None
+        renovacao.save(update_fields=["processado_em", "processado_por", "atualizado_em"])
 
     return {
-        "total": len(pendentes),
+        "total": aprovados + rejeitados,
         "aprovados": aprovados,
         "rejeitados": rejeitados,
+        "pendentes_restantes": pendentes_restantes,
+        "prioridade_max": prioridade_max,
     }
 
 
@@ -655,8 +673,14 @@ def renovacao_matricula_detail(request, pk: int):
                     messages.success(request, "Oferta removida da renovação.")
                     return redirect("educacao:renovacao_matricula_detail", pk=renovacao.pk)
         elif action == "processar":
+            chamada_raw = (request.POST.get("chamada_prioridade") or "").strip()
+            prioridade_max = int(chamada_raw) if chamada_raw.isdigit() and int(chamada_raw) > 0 else None
             try:
-                resultado = _processar_pedidos_renovacao(renovacao, request.user)
+                resultado = _processar_pedidos_renovacao(
+                    renovacao,
+                    request.user,
+                    prioridade_max=prioridade_max,
+                )
             except Exception as exc:
                 messages.error(request, f"Erro ao processar pedidos: {exc}")
             else:
@@ -668,6 +692,8 @@ def renovacao_matricula_detail(request, pk: int):
                         "total": resultado["total"],
                         "aprovados": resultado["aprovados"],
                         "rejeitados": resultado["rejeitados"],
+                        "pendentes_restantes": resultado.get("pendentes_restantes", 0),
+                        "chamada_prioridade": prioridade_max or "TODAS",
                         "processado_em": str(renovacao.processado_em or ""),
                     },
                     observacao="Processamento automático de pedidos executado.",
@@ -684,15 +710,18 @@ def renovacao_matricula_detail(request, pk: int):
                         "total_pedidos_processados": resultado["total"],
                         "total_aprovados": resultado["aprovados"],
                         "total_rejeitados": resultado["rejeitados"],
+                        "pendentes_restantes": resultado.get("pendentes_restantes", 0),
+                        "chamada_prioridade": prioridade_max or "TODAS",
                     },
                 )
                 messages.success(
                     request,
                     (
-                        f"Processamento concluído. "
+                        f"{'Chamada até prioridade ' + str(prioridade_max) if prioridade_max else 'Processamento geral'} concluído. "
                         f"Total: {resultado['total']} | "
                         f"Aprovados: {resultado['aprovados']} | "
-                        f"Rejeitados: {resultado['rejeitados']}"
+                        f"Rejeitados: {resultado['rejeitados']} | "
+                        f"Pendentes restantes: {resultado.get('pendentes_restantes', 0)}"
                     ),
                 )
             return redirect("educacao:renovacao_matricula_detail", pk=renovacao.pk)

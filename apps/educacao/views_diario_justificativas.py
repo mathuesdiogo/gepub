@@ -68,6 +68,12 @@ def justificativa_falta_list_impl(request):
             "variant": "btn--ghost",
         },
     ]
+    if can(request.user, "educacao.manage"):
+        subtitle = "Painel central da secretaria para análise de justificativas por unidade/turma."
+    elif is_professor(request.user):
+        subtitle = "Painel do professor para análise das justificativas dos seus diários."
+    else:
+        subtitle = "Painel de acompanhamento das justificativas de falta."
     return render(
         request,
         "educacao/justificativa_falta_list.html",
@@ -77,6 +83,7 @@ def justificativa_falta_list_impl(request):
             "q": q,
             "actions": actions,
             "counters": counters,
+            "subtitle": subtitle,
         },
     )
 

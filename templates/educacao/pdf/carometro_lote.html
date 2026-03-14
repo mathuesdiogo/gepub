@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <title>{{ title }}</title>
+  <style>
+    @page { size: A4 portrait; margin: 14mm; }
+    body { font-family: Arial, sans-serif; color: #111827; }
+    .header { margin-bottom: 10px; }
+    .title { font-size: 18px; font-weight: 700; margin: 0 0 2px; }
+    .meta { font-size: 11px; color: #4b5563; margin: 0; }
+    .grid { margin-top: 10px; font-size: 0; }
+    .card {
+      width: 24%;
+      display: inline-block;
+      vertical-align: top;
+      box-sizing: border-box;
+      border: 1px solid #dbe4f0;
+      border-radius: 8px;
+      padding: 8px;
+      margin: 0 1% 8px 0;
+      text-align: center;
+      min-height: 170px;
+      font-size: 12px;
+      background: #f8fafc;
+    }
+    .photo {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      margin: 0 auto 8px;
+      border: 2px solid #c9d8ee;
+      object-fit: cover;
+      background: #e5e7eb;
+    }
+    .photo-fallback {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      margin: 0 auto 8px;
+      border: 2px solid #c9d8ee;
+      line-height: 76px;
+      font-weight: 700;
+      color: #64748b;
+      background: #e5e7eb;
+    }
+    .name { font-weight: 700; margin-bottom: 2px; }
+    .line { color: #475569; font-size: 11px; margin-bottom: 2px; }
+  </style>
+</head>
+<body>
+  <section class="header">
+    <h1 class="title">{{ title }}</h1>
+    <p class="meta">Turma: {{ turma.nome }} • Ano letivo: {{ turma.ano_letivo }} • Gerado em {{ printed_at }} por {{ printed_by }}</p>
+  </section>
+
+  <section class="grid">
+    {% for aluno in alunos %}
+      <article class="card">
+        {% if aluno.foto_url %}
+          <img src="{{ aluno.foto_url }}" alt="{{ aluno.nome }}" class="photo">
+        {% else %}
+          <div class="photo-fallback">SEM FOTO</div>
+        {% endif %}
+        <div class="name">{{ aluno.nome }}</div>
+        <div class="line">ID: {{ aluno.aluno_id }}</div>
+        <div class="line">{{ aluno.situacao }}</div>
+      </article>
+    {% endfor %}
+  </section>
+</body>
+</html>
+

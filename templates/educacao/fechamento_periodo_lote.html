@@ -1,0 +1,36 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Fechamento em Lote • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="gp-card">
+  <div class="gp-card__body">
+    {% include "core/partials/components/layout/page_head.html" with title="Fechamento/Reabertura em Lote" subtitle="Execute fechamento de período por secretaria/unidade com pré-visualização e opção de reabrir." actions=actions %}
+
+    <form method="post" class="gp-form gp-form--smart">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <div class="form-shell__actions gp-action-bar">
+        <button type="submit" name="_action" value="preview" class="gp-button gp-button--outline">
+          <i class="fa-solid fa-eye"></i>
+          Gerar prévia
+        </button>
+        <button type="submit" name="_action" value="fechar" class="gp-button gp-button--primary">
+          <i class="fa-solid fa-check-double"></i>
+          Fechar em lote
+        </button>
+        <button type="submit" name="_action" value="reabrir" class="gp-button gp-button--danger">
+          <i class="fa-solid fa-lock-open"></i>
+          Reabrir em lote
+        </button>
+      </div>
+    </form>
+
+    {% if preview_rows %}
+      <div class="u-mt-16">
+        <h3 class="page-head__title" style="font-size:1.1rem;">Prévia do lote ({{ preview_total }})</h3>
+        {% include "core/partials/components/data/table_shell.html" with headers=preview_headers rows=preview_rows page_obj=None empty_title="Sem turmas elegíveis" empty_text="Nenhuma turma foi encontrada para os filtros informados." %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

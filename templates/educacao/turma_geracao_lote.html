@@ -1,0 +1,32 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Geração em Lote de Turmas • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="gp-card">
+  <div class="gp-card__body">
+    {% include "core/partials/components/layout/page_head.html" with title="Wizard de Turmas e Diários" subtitle="Gere turmas por matriz/ano/período e inicialize diários + horários automaticamente." actions=actions %}
+
+    <form method="post" class="gp-form gp-form--smart">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <div class="form-shell__actions gp-action-bar">
+        <button type="submit" name="_action" value="preview" class="gp-button gp-button--outline">
+          <i class="fa-solid fa-eye"></i>
+          Gerar prévia
+        </button>
+        <button type="submit" name="_action" value="execute" class="gp-button gp-button--primary">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          Executar geração
+        </button>
+      </div>
+    </form>
+
+    {% if preview_rows %}
+      <div class="u-mt-16">
+        <h3 class="page-head__title" style="font-size:1.1rem;">Prévia da geração ({{ preview_total }})</h3>
+        {% include "core/partials/components/data/table_shell.html" with headers=preview_headers rows=preview_rows page_obj=None empty_title="Sem itens" empty_text="Nenhuma turma planejada para os filtros informados." %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

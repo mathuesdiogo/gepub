@@ -198,6 +198,12 @@ class TurmaListView(BaseListViewGepub):
 
         if can(self.request.user, "educacao.manage") or is_admin(self.request.user):
             actions.append({
+                "label": "Gerar Turmas em Lote",
+                "url": reverse("educacao:turma_geracao_lote"),
+                "icon": "fa-solid fa-wand-magic-sparkles",
+                "variant": "btn--outline",
+            })
+            actions.append({
                 "label": "Nova Turma",
                 "url": reverse("educacao:turma_create"),
                 "icon": "fa-solid fa-plus",

@@ -24,9 +24,16 @@
   </form>
 
   {% if can_processar %}
-    <form method="post" class="gp-inline-form u-mb-12" style="display: inline-flex; gap: 8px;">
+    <form method="post" class="gp-inline-form u-mb-12" style="display: inline-flex; gap: 8px; align-items: center; flex-wrap: wrap;">
       {% csrf_token %}
       <input type="hidden" name="_action" value="processar">
+      <label for="id_chamada_prioridade" style="font-size: 0.85rem; color: #4d5f7a;">Processar chamada</label>
+      <select id="id_chamada_prioridade" name="chamada_prioridade" class="gp-select">
+        <option value="">Todas as prioridades</option>
+        <option value="1">1ª chamada (prioridade 1)</option>
+        <option value="2">2ª chamada (prioridade até 2)</option>
+        <option value="3">3ª chamada (prioridade até 3)</option>
+      </select>
       <button class="gp-button gp-button--primary" type="submit">Processar pedidos pendentes</button>
     </form>
   {% endif %}

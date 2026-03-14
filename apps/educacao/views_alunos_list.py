@@ -96,6 +96,22 @@ class AlunoListView(BaseListViewGepub):
         ]
 
         if can_edu_manage:
+            actions.append(
+                {
+                    "label": "Operações em Lote",
+                    "url": reverse("educacao:operacoes_lote"),
+                    "icon": "fa-solid fa-layer-group",
+                    "variant": "btn--outline",
+                }
+            )
+            actions.append(
+                {
+                    "label": "Evasão em Lote",
+                    "url": reverse("educacao:evasao_lote"),
+                    "icon": "fa-solid fa-user-minus",
+                    "variant": "btn--outline",
+                }
+            )
             actions.append({"label": "Novo Aluno", "url": reverse("educacao:aluno_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
         return actions
 

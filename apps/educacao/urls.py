@@ -23,6 +23,10 @@ from . import views_professor_area
 from . import views_estagios
 from . import views_informatica
 from . import views_renovacao
+from . import views_lotes
+from . import views_fechamento_lote
+from . import views_operacoes_lote
+from . import views_minicursos
 from .views_turmas_list import TurmaListView
 from .views_alunos_list import AlunoListView
 from .views_diarios_list import DiarioListView
@@ -64,6 +68,7 @@ urlpatterns = [
     # ======================
     path("turmas/", require_perm("educacao.view")(TurmaListView.as_view()), name="turma_list"),
     path("turmas/novo/", views.turma_create, name="turma_create"),
+    path("turmas/geracao-lote/", views_lotes.turma_geracao_lote, name="turma_geracao_lote"),
     path("turmas/<int:pk>/", views.turma_detail, name="turma_detail"),
     path("turmas/<int:pk>/editar/", views.turma_update, name="turma_update"),
 
@@ -80,6 +85,8 @@ urlpatterns = [
     path("carteira/validar/<uuid:codigo>/", views_carteira.carteira_verificar_public, name="carteira_verificar_public"),
     path("alunos/<int:pk>/historico/", views_historico.historico_aluno, name="historico_aluno"),
     path("matriculas/nova/", views_matriculas.matricula_create, name="matricula_create"),
+    path("matriculas/evasao-lote/", views_lotes.evasao_lote, name="evasao_lote"),
+    path("alunos/operacoes-lote/", views_operacoes_lote.operacoes_lote, name="operacoes_lote"),
     path("portal/professor/", views_portal.portal_professor, name="portal_professor"),
     path("portal/aluno/<int:pk>/", views_portal.portal_aluno, name="portal_aluno"),
     path("portal/aluno/<int:pk>/editais/<int:inscricao_id>/", views_portal.portal_aluno_edital_detail, name="portal_aluno_edital_detail"),
@@ -280,6 +287,16 @@ urlpatterns = [
     path("periodos/novo/", periodo_create, name="periodo_create"),
     path("periodos/<int:pk>/editar/", periodo_update, name="periodo_update"),
     path("periodos/gerar-bimestres/", periodo_gerar_bimestres, name="periodo_gerar_bimestres"),
+    path("periodos/fechamento-lote/", views_fechamento_lote.fechamento_periodo_lote, name="fechamento_periodo_lote"),
+
+    # ======================
+    # MINICURSOS
+    # ======================
+    path("minicursos/", views_minicursos.minicurso_dashboard, name="minicurso_dashboard"),
+    path("minicursos/cadastro/", views_minicursos.minicurso_curso_create, name="minicurso_curso_create"),
+    path("minicursos/turmas/nova/", views_minicursos.minicurso_turma_create, name="minicurso_turma_create"),
+    path("minicursos/matriculas/nova/", views_minicursos.minicurso_matricula_create, name="minicurso_matricula_create"),
+    path("minicursos/certificados/emitir/", views_minicursos.minicurso_certificado_emitir, name="minicurso_certificado_emitir"),
 
     # ======================
     # COMPONENTES CURRICULARES
