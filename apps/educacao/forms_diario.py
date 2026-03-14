@@ -89,17 +89,29 @@ class AulaForm(forms.ModelForm):
         model = Aula
         fields = [
             "data",
+            "quantidade_aulas",
+            "tipo_aula",
             "periodo",
             "componente",
             "bncc_codigos",
             "conteudo",
+            "url_atividade",
             "observacoes",
             "override_requisitos",
             "override_justificativa",
         ]
         widgets = {
-            "data": forms.DateInput(attrs={"type": "date"}),
+            "data": forms.DateInput(attrs={"type": "date", "class": "gp-input"}),
+            "quantidade_aulas": forms.NumberInput(attrs={"class": "gp-input", "min": 1, "max": 12}),
+            "tipo_aula": forms.Select(attrs={"class": "gp-select"}),
+            "periodo": forms.Select(attrs={"class": "gp-select"}),
+            "componente": forms.Select(attrs={"class": "gp-select"}),
             "bncc_codigos": forms.SelectMultiple(attrs={"size": 10}),
+            "conteudo": forms.Textarea(attrs={"rows": 4, "class": "gp-textarea"}),
+            "url_atividade": forms.URLInput(attrs={"class": "gp-input", "placeholder": "https://"}),
+            "observacoes": forms.Textarea(attrs={"rows": 3, "class": "gp-textarea"}),
+            "override_requisitos": forms.CheckboxInput(attrs={"class": "gp-checkbox"}),
+            "override_justificativa": forms.Textarea(attrs={"rows": 2, "class": "gp-textarea"}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -112,6 +124,14 @@ class AulaForm(forms.ModelForm):
         self.fields["periodo"].required = False
         self.fields["componente"].required = False
         self.fields["bncc_codigos"].required = False
+        self.fields["quantidade_aulas"].required = False
+        self.fields["tipo_aula"].required = False
+        self.fields["quantidade_aulas"].initial = 1
+        self.fields["tipo_aula"].initial = Aula.TipoAula.TEORICA
+        self.fields["quantidade_aulas"].help_text = "Indique o quantitativo de aulas ministradas no encontro."
+        self.fields["tipo_aula"].help_text = "Selecione se o encontro foi teórico ou prático."
+        self.fields["periodo"].help_text = "Etapa/período de lançamento da aula."
+        self.fields["url_atividade"].help_text = "Link da aula/transmissão, quando aplicável."
 
         self.fields["periodo"].queryset = PeriodoLetivo.objects.none()
         self.fields["componente"].queryset = ComponenteCurricular.objects.filter(ativo=True).order_by("nome")
@@ -206,6 +226,10 @@ class AulaForm(forms.ModelForm):
         periodo = cleaned.get("periodo")
         componente = cleaned.get("componente")
         codigos = cleaned.get("bncc_codigos")
+        if not cleaned.get("quantidade_aulas"):
+            cleaned["quantidade_aulas"] = 1
+        if not cleaned.get("tipo_aula"):
+            cleaned["tipo_aula"] = Aula.TipoAula.TEORICA
 
         if data and getattr(turma, "ano_letivo", None):
             if data.year != int(turma.ano_letivo):

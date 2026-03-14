@@ -8,7 +8,6 @@ from apps.core.exports import export_pdf_table
 from apps.core.rbac import can, scope_filter_turmas
 
 from .forms_diario import AulaForm
-from .forms_bncc import bncc_option_label
 from .models import Turma, Matricula
 from .models_diario import DiarioTurma, Aula
 from .services_requisitos import registrar_override_requisitos_lancamento
@@ -74,16 +73,17 @@ def diario_detail_impl(request, pk: int):
     )
 
     if export == "pdf":
-        headers = ["Data", "Período", "Componente", "Códigos BNCC", "Conteúdo", "Observações"]
+        headers = ["Data", "Qtd", "Tipo", "Etapa", "Componente", "Conteúdo", "URL", "Observações"]
         rows = []
         for a in aulas:
-            codigos_txt = ", ".join([bncc_option_label(c, max_chars=64) for c in a.bncc_codigos.all()][:3])
             rows.append([
                 a.data.strftime("%d/%m/%Y") if a.data else "—",
+                str(a.quantidade_aulas or 1),
+                a.get_tipo_aula_display(),
                 str(a.periodo) if a.periodo else "—",
                 str(a.componente) if a.componente else "—",
-                codigos_txt or "—",
                 (a.conteudo or "—")[:80],
+                (a.url_atividade or "—")[:80],
                 (a.observacoes or "—")[:80],
             ])
 
@@ -140,25 +140,45 @@ def diario_detail_impl(request, pk: int):
 
     headers = [
         {"label": "Data", "width": "140px"},
-        {"label": "Período", "width": "200px"},
-        {"label": "Componente", "width": "180px"},
-        {"label": "BNCC", "width": "220px"},
+        {"label": "Qtd", "width": "70px"},
+        {"label": "Tipo", "width": "130px"},
+        {"label": "Etapa", "width": "170px"},
+        {"label": "Componente", "width": "170px"},
         {"label": "Conteúdo"},
-        {"label": "Ações", "width": "220px"},
+        {"label": "URL", "width": "150px"},
+        {"label": "Ações", "width": "250px"},
     ]
 
     rows = []
     for a in aulas:
-        codigos = [bncc_option_label(c, max_chars=46) for c in a.bncc_codigos.all()]
+        acoes = [
+            {
+                "label": "Frequência",
+                "url": reverse("educacao:aula_frequencia", args=[diario.pk, a.pk]),
+            }
+        ]
+        if can_edit:
+            acoes.append(
+                {
+                    "label": "Editar aula",
+                    "url": reverse("educacao:aula_update", args=[diario.pk, a.pk]),
+                }
+            )
+        acoes_html = '<div class="gp-professor-inline-actions">' + "".join(
+            f'<a class="gp-button gp-button--outline" href="{item["url"]}">{item["label"]}</a>'
+            for item in acoes
+        ) + "</div>"
         rows.append(
             {
                 "cells": [
                     {"text": a.data.strftime("%d/%m/%Y") if a.data else "—", "url": ""},
+                    {"text": str(a.quantidade_aulas or 1)},
+                    {"text": a.get_tipo_aula_display()},
                     {"text": str(a.periodo) if a.periodo else "—"},
                     {"text": str(a.componente) if a.componente else "—"},
-                    {"text": ", ".join(codigos[:2]) if codigos else "—"},
                     {"text": (a.conteudo or "—")[:120]},
-                    {"text": "Frequência", "url": reverse("educacao:aula_frequencia", args=[diario.pk, a.pk])},
+                    {"text": "Abrir link", "url": a.url_atividade} if a.url_atividade else {"text": "—"},
+                    {"html": acoes_html},
                 ],
                 "can_edit": False,
                 "edit_url": "",

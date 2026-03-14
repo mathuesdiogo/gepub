@@ -125,6 +125,11 @@ urlpatterns = [
         name="professor_informatica_avaliacao_create",
     ),
     path(
+        "professor/<str:codigo>/informatica/turmas/<int:turma_id>/avaliacoes/<int:avaliacao_id>/editar/",
+        views_professor_area.professor_informatica_avaliacao_update,
+        name="professor_informatica_avaliacao_update",
+    ),
+    path(
         "professor/<str:codigo>/informatica/avaliacoes/<int:avaliacao_id>/notas/",
         views_professor_area.professor_informatica_notas_lancar,
         name="professor_informatica_notas_lancar",
@@ -281,6 +286,7 @@ urlpatterns = [
     # Avaliações / Notas (mantém FBV por enquanto)
     path("diario/<int:pk>/avaliacoes/", views_notas.avaliacao_list, name="avaliacao_list"),
     path("diario/<int:pk>/avaliacoes/nova/", views_notas.avaliacao_create, name="avaliacao_create"),
+    path("diario/<int:pk>/avaliacoes/<int:avaliacao_id>/editar/", views_notas.avaliacao_update, name="avaliacao_update"),
     path("avaliacoes/<int:pk>/notas/", views_notas.notas_lancar, name="notas_lancar"),
 
     # ======================

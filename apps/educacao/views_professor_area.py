@@ -24,6 +24,7 @@ from .forms_professor_area import (
 )
 from .models import Matricula, Turma
 from .models_diario import (
+    AVALIACAO_CONCEITOS_CHOICES,
     Aula,
     Avaliacao,
     DiarioTurma,
@@ -155,6 +156,10 @@ def _fmt_decimal(value) -> str:
     except (InvalidOperation, TypeError, ValueError):
         return str(value)
     return f"{num:.2f}".replace(".", ",")
+
+
+def _nota_lancada_q(prefix: str = ""):
+    return Q(**{f"{prefix}valor__isnull": False}) | ~Q(**{f"{prefix}conceito": ""})
 
 
 def _status_badge(label: str, variant: str = "neutral") -> str:
@@ -352,7 +357,7 @@ def _build_diario_stats(diarios: list[DiarioTurma]):
     notas_latest_map = {
         row["avaliacao_id"]: row["total"]
         for row in Nota.objects.filter(avaliacao_id__in=latest_avaliacao_ids)
-        .exclude(valor__isnull=True)
+        .filter(_nota_lancada_q())
         .values("avaliacao_id")
         .annotate(total=Count("id"))
     }
@@ -841,6 +846,7 @@ def professor_diarios(request, codigo: str):
     stats = _build_diario_stats(diarios_all)
 
     q = _clean_code(request.GET.get("q"))
+    ano_filtro = _clean_code(request.GET.get("ano"))
     diarios = diarios_all
     if q:
         ql = q.lower()
@@ -851,6 +857,10 @@ def professor_diarios(request, codigo: str):
             or ql in (getattr(getattr(d.turma, "unidade", None), "nome", "").lower())
             or ql in str(getattr(d, "ano_letivo", "")).lower()
         ]
+    if ano_filtro.isdigit():
+        diarios = [d for d in diarios if int(getattr(d, "ano_letivo", 0)) == int(ano_filtro)]
+
+    anos_disponiveis = sorted({str(getattr(d, "ano_letivo", "")) for d in diarios_all if getattr(d, "ano_letivo", None)}, reverse=True)
 
     headers = [
         {"label": "Turma"},
@@ -867,7 +877,7 @@ def professor_diarios(request, codigo: str):
         latest_aula_id = stats["latest_aula"].get(diario.id)
         latest_avaliacao_id = stats["latest_avaliacao"].get(diario.id)
         buttons = [
-            _link_button(reverse("educacao:diario_detail", args=[diario.id]), "Abrir", "fa-solid fa-book-open"),
+            _link_button(reverse("educacao:diario_detail", args=[diario.id]), "Acessar diário", "fa-solid fa-book-open"),
             _link_button(reverse("educacao:aula_create", args=[diario.id]), "Nova aula", "fa-solid fa-plus"),
             _link_button(reverse("educacao:avaliacao_list", args=[diario.id]), "Avaliações", "fa-solid fa-list-check"),
         ]
@@ -973,6 +983,8 @@ def professor_diarios(request, codigo: str):
             nav_key="diarios",
         ),
         "q": q,
+        "ano_filtro": ano_filtro,
+        "anos_disponiveis": anos_disponiveis,
         "headers": headers,
         "rows": rows,
         "total_diarios": len(diarios),
@@ -1335,7 +1347,7 @@ def professor_notas(request, codigo: str):
         for row in Nota.objects.filter(avaliacao_id__in=avaliacao_ids)
         .values("avaliacao_id")
         .annotate(
-            lancadas=Count("id", filter=Q(valor__isnull=False)),
+            lancadas=Count("id", filter=_nota_lancada_q()),
             media=Avg("valor"),
         )
     }
@@ -1353,12 +1365,14 @@ def professor_notas(request, codigo: str):
     headers = [
         {"label": "Data", "width": "110px"},
         {"label": "Turma"},
+        {"label": "Instrumento", "width": "170px"},
         {"label": "Avaliação"},
         {"label": "Período", "width": "140px"},
+        {"label": "Modo", "width": "95px"},
         {"label": "Lançadas", "width": "90px"},
         {"label": "Pendências", "width": "100px"},
         {"label": "Média", "width": "90px"},
-        {"label": "Ações", "width": "290px"},
+        {"label": "Ações", "width": "360px"},
     ]
 
     rows = []
@@ -1374,8 +1388,10 @@ def professor_notas(request, codigo: str):
                 "cells": [
                     {"text": av.data.strftime("%d/%m/%Y") if av.data else "—"},
                     {"text": getattr(getattr(av.diario, "turma", None), "nome", "—")},
+                    {"text": f"{(av.sigla or '').upper()} • {av.get_tipo_display()}" if av.sigla else av.get_tipo_display()},
                     {"text": av.titulo},
                     {"text": str(av.periodo) if av.periodo else "—"},
+                    {"text": av.get_modo_registro_display()},
                     {"text": str(total_lancadas)},
                     {
                         "html": _status_badge(str(pendencias), "warning" if pendencias else "success"),
@@ -1383,7 +1399,12 @@ def professor_notas(request, codigo: str):
                     {"text": _fmt_decimal(media) if media is not None else "—"},
                     {
                         "html": _actions_group(
-                            _link_button(reverse("educacao:notas_lancar", args=[av.id]), "Lançar notas", "fa-solid fa-clipboard-check"),
+                            _link_button(
+                                reverse("educacao:notas_lancar", args=[av.id]),
+                                "Registrar conceitos" if av.modo_registro == "CONCEITO" else "Lançar notas",
+                                "fa-solid fa-clipboard-check",
+                            ),
+                            _link_button(reverse("educacao:avaliacao_update", args=[av.diario_id, av.id]), "Configurar", "fa-solid fa-sliders"),
                             _link_button(reverse("educacao:avaliacao_list", args=[av.diario_id]), "Avaliações", "fa-solid fa-list-check"),
                         )
                     },
@@ -1396,6 +1417,7 @@ def professor_notas(request, codigo: str):
     turmas_info_ids = [t.id for t in turmas_informatica]
     avaliacoes_info_qs = InformaticaAvaliacao.objects.filter(turma_id__in=turmas_info_ids)
     avaliacoes_info = list(avaliacoes_info_qs.order_by("turma_id", "-data", "-id"))
+    modo_info_map = {a.id: a.modo_registro for a in avaliacoes_info}
     avaliacoes_totais_map = {
         row["turma_id"]: row["total"]
         for row in InformaticaAvaliacao.objects.filter(turma_id__in=turmas_info_ids)
@@ -1407,7 +1429,7 @@ def professor_notas(request, codigo: str):
         latest_avaliacao_map.setdefault(row.turma_id, row.id)
     notas_info_rows = list(
         InformaticaNota.objects.filter(avaliacao_id__in=[a.id for a in avaliacoes_info])
-        .exclude(valor__isnull=True)
+        .filter(_nota_lancada_q())
         .values("avaliacao_id")
         .annotate(total=Count("id"), media=Avg("valor"))
     )
@@ -1454,7 +1476,9 @@ def professor_notas(request, codigo: str):
                                 )
                                 if latest_avaliacao_id
                                 else reverse("educacao:professor_informatica_avaliacoes", args=[codigo_canonico, turma.id]),
-                                "Lançar notas",
+                                "Registrar conceitos"
+                                if latest_avaliacao_id and modo_info_map.get(latest_avaliacao_id) == "CONCEITO"
+                                else "Lançar notas",
                                 "fa-solid fa-clipboard-check",
                             ),
                             _link_button(
@@ -1530,7 +1554,7 @@ def professor_agenda_avaliacoes(request, codigo: str):
     notas_stats = {
         row["avaliacao_id"]: row["lancadas"]
         for row in Nota.objects.filter(avaliacao_id__in=avaliacao_ids)
-        .exclude(valor__isnull=True)
+        .filter(_nota_lancada_q())
         .values("avaliacao_id")
         .annotate(lancadas=Count("id"))
     }
@@ -1577,7 +1601,7 @@ def professor_agenda_avaliacoes(request, codigo: str):
                         "html": _actions_group(
                             _link_button(
                                 reverse("educacao:notas_lancar", args=[av.id]),
-                                "Lançar notas",
+                                "Registrar conceitos" if av.modo_registro == "CONCEITO" else "Lançar notas",
                                 "fa-solid fa-clipboard-check",
                             )
                         )
@@ -1620,7 +1644,7 @@ def professor_agenda_avaliacoes(request, codigo: str):
     avaliacoes_info = list(avaliacoes_info_qs.order_by("data", "id")[:220])
     notas_info_rows = list(
         InformaticaNota.objects.filter(avaliacao_id__in=[a.id for a in avaliacoes_info])
-        .exclude(valor__isnull=True)
+        .filter(_nota_lancada_q())
         .values("avaliacao_id")
         .annotate(total=Count("id"))
     )
@@ -1659,7 +1683,7 @@ def professor_agenda_avaliacoes(request, codigo: str):
                                     "educacao:professor_informatica_notas_lancar",
                                     args=[codigo_canonico, avaliacao_info.id],
                                 ),
-                                "Lançar notas",
+                                "Registrar conceitos" if avaliacao_info.modo_registro == "CONCEITO" else "Lançar notas",
                                 "fa-solid fa-clipboard-check",
                             )
                         )
@@ -2738,7 +2762,7 @@ def professor_informatica_avaliacoes(request, codigo: str, turma_id: int):
     ).count()
     notas_rows = list(
         InformaticaNota.objects.filter(avaliacao_id__in=[a.id for a in avaliacoes])
-        .exclude(valor__isnull=True)
+        .filter(_nota_lancada_q())
         .values("avaliacao_id")
         .annotate(total=Count("id"), media=Avg("valor"))
     )
@@ -2746,13 +2770,15 @@ def professor_informatica_avaliacoes(request, codigo: str, turma_id: int):
     notas_media_map = {row["avaliacao_id"]: row["media"] for row in notas_rows}
 
     headers = [
+        {"label": "Instrumento", "width": "170px"},
         {"label": "Título"},
         {"label": "Data", "width": "110px"},
+        {"label": "Modo", "width": "95px"},
         {"label": "Peso", "width": "90px"},
         {"label": "Lançadas", "width": "90px"},
         {"label": "Pendências", "width": "100px"},
         {"label": "Média", "width": "90px"},
-        {"label": "Ações", "width": "220px"},
+        {"label": "Ações", "width": "320px"},
     ]
     can_edit_notas = True
     rows = []
@@ -2763,16 +2789,23 @@ def professor_informatica_avaliacoes(request, codigo: str, turma_id: int):
         if can_edit_notas:
             action_cell = _actions_group(
                 _link_button(
+                    reverse("educacao:professor_informatica_avaliacao_update", args=[codigo_canonico, turma.id, av.id]),
+                    "Configurar",
+                    "fa-solid fa-sliders",
+                ),
+                _link_button(
                     reverse("educacao:professor_informatica_notas_lancar", args=[codigo_canonico, av.id]),
-                    "Lançar notas",
+                    "Registrar conceitos" if av.modo_registro == "CONCEITO" else "Lançar notas",
                     "fa-solid fa-clipboard-check",
                 )
             )
         rows.append(
             {
                 "cells": [
+                    {"text": f"{(av.sigla or '').upper()} • {av.get_tipo_display()}" if av.sigla else av.get_tipo_display()},
                     {"text": av.titulo},
                     {"text": av.data.strftime("%d/%m/%Y") if av.data else "—"},
+                    {"text": av.get_modo_registro_display()},
                     {"text": _fmt_decimal(av.peso)},
                     {"text": f"{lancadas}/{total_alunos}"},
                     {"html": _status_badge(str(pendencias), "warning" if pendencias else "success")},
@@ -2823,19 +2856,67 @@ def professor_informatica_avaliacao_create(request, codigo: str, turma_id: int):
             messages.success(request, "Avaliação de informática criada com sucesso.")
             return redirect("educacao:professor_informatica_avaliacoes", codigo=codigo_canonico, turma_id=turma.id)
     else:
-        form = InformaticaAvaliacaoForm()
+        form = InformaticaAvaliacaoForm(
+            initial={
+                "tipo": "PROVA",
+                "modo_registro": "NOTA",
+                "peso": Decimal("1.00"),
+                "nota_maxima": Decimal("10.00"),
+            }
+        )
 
     context = {
         **_base_context(
             request=request,
             professor_user=professor_user,
             codigo=codigo_canonico,
-            page_title=f"Nova avaliação • {turma.codigo}",
-            page_subtitle="Defina título, data, peso e nota máxima para a avaliação.",
+            page_title=f"Editar Configuração de Avaliação • {turma.codigo}",
+            page_subtitle="Defina tipo, sigla, etapa de lançamento e critérios do instrumento.",
             nav_key="notas",
         ),
         "turma_informatica": turma,
         "form": form,
+        "mode": "create",
+    }
+    return render(request, "educacao/professor_area/informatica_notas_form.html", context)
+
+
+@login_required
+@require_perm("educacao.view")
+def professor_informatica_avaliacao_update(request, codigo: str, turma_id: int, avaliacao_id: int):
+    ctx = _resolve_professor_context(request, codigo)
+    professor_user = ctx["professor_user"]
+    codigo_canonico = ctx["codigo_canonico"]
+    if not _can_edit_informatica_execucao(request.user, professor_user):
+        raise Http404("Apenas o professor da turma pode editar avaliações de informática.")
+    turma = _resolve_professor_turma_informatica_or_404(
+        turma_id=turma_id,
+        turmas=list(_professor_informatica_turmas_qs(professor_user)),
+    )
+    avaliacao = get_object_or_404(InformaticaAvaliacao, pk=avaliacao_id, turma=turma)
+
+    if request.method == "POST":
+        form = InformaticaAvaliacaoForm(request.POST, instance=avaliacao)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Configuração da avaliação atualizada com sucesso.")
+            return redirect("educacao:professor_informatica_avaliacoes", codigo=codigo_canonico, turma_id=turma.id)
+    else:
+        form = InformaticaAvaliacaoForm(instance=avaliacao)
+
+    context = {
+        **_base_context(
+            request=request,
+            professor_user=professor_user,
+            codigo=codigo_canonico,
+            page_title=f"Editar Configuração de Avaliação • {turma.codigo}",
+            page_subtitle="Atualize tipo, sigla, modo de registro e parâmetros da avaliação.",
+            nav_key="notas",
+        ),
+        "turma_informatica": turma,
+        "form": form,
+        "avaliacao_informatica": avaliacao,
+        "mode": "update",
     }
     return render(request, "educacao/professor_area/informatica_notas_form.html", context)
 
@@ -2869,13 +2950,20 @@ def professor_informatica_notas_lancar(request, codigo: str, avaliacao_id: int):
         for nota in InformaticaNota.objects.filter(avaliacao=avaliacao).select_related("aluno")
     }
     can_edit_notas = True
+    is_modo_conceito = avaliacao.modo_registro == "CONCEITO"
+    conceitos_validos = {item[0] for item in AVALIACAO_CONCEITOS_CHOICES}
 
     if request.method == "POST":
         with transaction.atomic():
             for m in matriculas:
                 raw = (request.POST.get(f"aluno_{m.aluno_id}") or "").strip()
                 valor = None
-                if raw:
+                conceito = ""
+                if is_modo_conceito:
+                    conceito = raw.upper()
+                    if conceito not in conceitos_validos:
+                        conceito = ""
+                elif raw:
                     try:
                         valor = Decimal(raw.replace(",", "."))
                     except (InvalidOperation, TypeError, ValueError):
@@ -2884,9 +2972,14 @@ def professor_informatica_notas_lancar(request, codigo: str, avaliacao_id: int):
                 InformaticaNota.objects.update_or_create(
                     avaliacao=avaliacao,
                     aluno_id=m.aluno_id,
-                    defaults={"valor": valor},
+                    defaults={"valor": valor, "conceito": conceito},
                 )
-        messages.success(request, "Notas de informática salvas com sucesso.")
+        messages.success(
+            request,
+            "Conceitos da informática salvos com sucesso."
+            if is_modo_conceito
+            else "Notas de informática salvas com sucesso.",
+        )
         return redirect(
             "educacao:professor_informatica_notas_lancar",
             codigo=codigo_canonico,
@@ -2901,6 +2994,7 @@ def professor_informatica_notas_lancar(request, codigo: str, avaliacao_id: int):
                 "aluno_id": m.aluno_id,
                 "aluno_nome": m.aluno.nome,
                 "valor": "" if (not nota or nota.valor is None) else str(nota.valor).replace(".", ","),
+                "conceito": "" if not nota else (nota.conceito or ""),
             }
         )
 
@@ -2918,6 +3012,8 @@ def professor_informatica_notas_lancar(request, codigo: str, avaliacao_id: int):
         "alunos_rows": alunos_rows,
         "voltar_url": reverse("educacao:professor_informatica_avaliacoes", args=[codigo_canonico, turma.id]),
         "can_edit_notas": can_edit_notas,
+        "is_modo_conceito": is_modo_conceito,
+        "conceito_choices": AVALIACAO_CONCEITOS_CHOICES,
     }
     return render(request, "educacao/professor_area/informatica_notas_lancar.html", context)
 

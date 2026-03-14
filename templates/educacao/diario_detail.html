@@ -2,8 +2,16 @@
 {% block title %}Diário • Educação • GEPUB{% endblock %}
 
 {% block module_content %}
-<div class="gp-card"><div class="gp-card__body">
-{% include "core/partials/components/layout/page_head.html" with title="Diário de Classe" subtitle=diario.turma.nome actions=actions %}
-{% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj empty_title="Nenhuma aula registrada" empty_text="Crie uma aula para lançar frequência." %}
-</div></div>
+<section class="gp-student-stage gp-professor-stage">
+  <article class="gp-student-stage__card">
+    {% include "core/partials/components/layout/page_head.html" with title="Diário de Classe" subtitle=diario.turma.nome actions=actions %}
+    <div class="gp-flex-wrap-row gp-mb-3">
+      <span class="gp-badge gp-badge--primary">Turma: {{ diario.turma.nome }}</span>
+      <span class="gp-badge gp-badge--neutral">Unidade: {{ diario.turma.unidade.nome|default:"—" }}</span>
+      <span class="gp-badge gp-badge--neutral">Ano: {{ diario.ano_letivo }}</span>
+      <span class="gp-badge gp-badge--neutral">Professor: {{ diario.professor.get_full_name|default:diario.professor.username }}</span>
+    </div>
+    {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj empty_title="Nenhuma aula registrada" empty_text="Use “Nova Aula” para iniciar o preenchimento do diário." %}
+  </article>
+</section>
 {% endblock %}

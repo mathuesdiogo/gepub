@@ -55,6 +55,10 @@ from .services_academico import classify_resultado
 from .views_portal import _codigo_aluno_canonico, _resolve_aluno_by_codigo
 
 
+def _nota_lancada_q(prefix: str = ""):
+    return Q(**{f"{prefix}valor__isnull": False}) | ~Q(**{f"{prefix}conceito": ""})
+
+
 class DocumentoSolicitacaoForm(forms.Form):
     TIPO_CHOICES = [
         ("DECLARACAO_MATRICULA", "Declaração de matrícula"),
@@ -1209,7 +1213,7 @@ def aluno_ensino_boletins(request, codigo: str):
         periodo_ref=periodo_ref,
         anos_letivos=anos_letivos,
     )
-    notas_lancadas_qs = notas_qs.exclude(valor__isnull=True)
+    notas_lancadas_qs = notas_qs.filter(_nota_lancada_q())
     media_periodo = notas_lancadas_qs.aggregate(media=Avg("valor")).get("media")
     notas_total = notas_qs.count()
     notas_lancadas_total = notas_lancadas_qs.count()
@@ -1224,7 +1228,7 @@ def aluno_ensino_boletins(request, codigo: str):
     rows_boletim = []
     for turma in turmas_ref.values():
         notas_turma_qs = notas_qs.filter(avaliacao__diario__turma_id=turma.id)
-        notas_turma_lancadas_qs = notas_turma_qs.exclude(valor__isnull=True)
+        notas_turma_lancadas_qs = notas_turma_qs.filter(_nota_lancada_q())
         media_turma = notas_turma_lancadas_qs.aggregate(media=Avg("valor")).get("media")
         avaliacoes_turma_total = notas_turma_qs.values("avaliacao_id").distinct().count()
         notas_turma_lancadas = notas_turma_lancadas_qs.count()
@@ -1286,7 +1290,7 @@ def aluno_ensino_boletins(request, codigo: str):
             aluno=aluno,
             avaliacao__in=avaliacoes_info_qs,
         )
-        notas_info_lancadas = notas_info_qs.exclude(valor__isnull=True)
+        notas_info_lancadas = notas_info_qs.filter(_nota_lancada_q())
         media_info = notas_info_lancadas.aggregate(media=Avg("valor")).get("media")
         avaliacoes_info_total = avaliacoes_info_qs.count()
         notas_info_total = notas_info_lancadas.count()
@@ -1368,9 +1372,9 @@ def aluno_ensino_avaliacoes(request, codigo: str):
         anos_letivos=anos_letivos,
     )
     notas = list(notas_qs.order_by("avaliacao__data", "avaliacao__titulo", "id")[:200])
-    notas_lancadas_total = notas_qs.exclude(valor__isnull=True).count()
+    notas_lancadas_total = notas_qs.filter(_nota_lancada_q()).count()
     notas_total = notas_qs.count()
-    media_periodo = notas_qs.exclude(valor__isnull=True).aggregate(media=Avg("valor")).get("media")
+    media_periodo = notas_qs.filter(_nota_lancada_q()).aggregate(media=Avg("valor")).get("media")
     notas_informatica_qs = InformaticaNota.objects.select_related("avaliacao", "avaliacao__turma").filter(
         aluno=aluno,
         avaliacao__turma_id__in=informatica_ctx["turma_ids"],
@@ -1378,8 +1382,8 @@ def aluno_ensino_avaliacoes(request, codigo: str):
     )
     notas_informatica = list(notas_informatica_qs.order_by("avaliacao__data", "avaliacao__titulo", "id")[:200])
     notas_informatica_total = notas_informatica_qs.count()
-    notas_informatica_lancadas = notas_informatica_qs.exclude(valor__isnull=True).count()
-    media_informatica = notas_informatica_qs.exclude(valor__isnull=True).aggregate(media=Avg("valor")).get("media")
+    notas_informatica_lancadas = notas_informatica_qs.filter(_nota_lancada_q()).count()
+    media_informatica = notas_informatica_qs.filter(_nota_lancada_q()).aggregate(media=Avg("valor")).get("media")
 
     context = {
         **_ensino_page_base_context(
@@ -1937,7 +1941,7 @@ def aluno_comunicacao(request, codigo: str):
     matriculas_total = len(ctx["matriculas"])
     notas_qs = Nota.objects.filter(aluno=aluno)
     notas_total = notas_qs.count()
-    notas_lancadas = notas_qs.exclude(valor__isnull=True).count()
+    notas_lancadas = notas_qs.filter(_nota_lancada_q()).count()
 
     relatorios = [
         {

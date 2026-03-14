@@ -8,6 +8,7 @@ from django.db import models
 from django.utils import timezone
 
 from apps.org.models import Municipio, Unidade
+from .models_diario import AVALIACAO_MODO_CHOICES, AVALIACAO_TIPO_CHOICES
 
 
 def _to_minutes(value: time) -> int:
@@ -1040,7 +1041,20 @@ class InformaticaAvaliacao(models.Model):
         blank=True,
         related_name="avaliacoes_informatica",
     )
+    tipo = models.CharField(
+        max_length=20,
+        choices=AVALIACAO_TIPO_CHOICES,
+        default="OUTRO",
+    )
+    sigla = models.CharField(max_length=12, blank=True, default="")
     titulo = models.CharField(max_length=180)
+    descricao = models.TextField(blank=True, default="")
+    modo_registro = models.CharField(
+        max_length=12,
+        choices=AVALIACAO_MODO_CHOICES,
+        default="NOTA",
+        db_index=True,
+    )
     peso = models.DecimalField(max_digits=5, decimal_places=2, default=1)
     nota_maxima = models.DecimalField(max_digits=5, decimal_places=2, default=10)
     data = models.DateField(default=timezone.localdate)
@@ -1074,6 +1088,7 @@ class InformaticaNota(models.Model):
         related_name="notas_informatica",
     )
     valor = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    conceito = models.CharField(max_length=4, blank=True, default="")
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
 
@@ -1092,6 +1107,13 @@ class InformaticaNota(models.Model):
         ]
 
     def clean(self):
+        modo = getattr(getattr(self, "avaliacao", None), "modo_registro", "NOTA")
+        if modo == "CONCEITO":
+            if not (self.conceito or "").strip():
+                raise ValidationError({"conceito": "Informe um conceito para esta avaliação."})
+            self.valor = None
+        else:
+            self.conceito = ""
         matriculado = InformaticaMatricula.objects.filter(
             turma_id=self.avaliacao.turma_id,
             aluno_id=self.aluno_id,

@@ -1,5 +1,5 @@
 {% extends "educacao/base_modulo.html" %}
-{% block title %}Nova Avaliação de Informática • Educação • GEPUB{% endblock %}
+{% block title %}{% if mode == "update" %}Configurar Avaliação{% else %}Nova Avaliação de Informática{% endif %} • Educação • GEPUB{% endblock %}
 
 {% block module_content %}
 <section class="gp-student-stage gp-professor-stage">
@@ -9,18 +9,39 @@
     <div class="gp-professor-inline-actions gp-mb-3">
       <span class="gp-badge gp-badge--primary">Turma: {{ turma_informatica.codigo }}</span>
       <span class="gp-badge gp-badge--neutral">Ano: {{ turma_informatica.ano_letivo }}</span>
+      <span class="gp-badge gp-badge--neutral">Curso: {{ turma_informatica.curso.nome }}</span>
     </div>
 
     <form method="post" class="gp-form gp-form--smart">
       {% csrf_token %}
 
+      {% if form.non_field_errors %}
+        <p class="gp-form-error">{{ form.non_field_errors|join:", " }}</p>
+      {% endif %}
+
+      <div class="gp-form-group">
+        <label class="gp-form-label" for="id_tipo">Tipo de avaliação</label>
+        {{ form.tipo }}
+      </div>
+      <div class="gp-form-group">
+        <label class="gp-form-label" for="id_sigla">Sigla</label>
+        {{ form.sigla }}
+      </div>
       <div class="gp-form-group gp-field--full">
         <label class="gp-form-label" for="id_titulo">Título</label>
         {{ form.titulo }}
       </div>
+      <div class="gp-form-group gp-field--full">
+        <label class="gp-form-label" for="id_descricao">Descrição</label>
+        {{ form.descricao }}
+      </div>
       <div class="gp-form-group">
         <label class="gp-form-label" for="id_data">Data</label>
         {{ form.data }}
+      </div>
+      <div class="gp-form-group">
+        <label class="gp-form-label" for="id_modo_registro">Modo de registro</label>
+        {{ form.modo_registro }}
       </div>
       <div class="gp-form-group">
         <label class="gp-form-label" for="id_peso">Peso</label>
@@ -35,13 +56,10 @@
         {{ form.ativo }}
       </div>
 
-      {% if form.non_field_errors %}
-        <p class="gp-form-error">{{ form.non_field_errors|join:", " }}</p>
-      {% endif %}
-
       <div class="gp-professor-inline-actions">
         <button class="gp-button gp-button--primary" type="submit">
-          <i class="fa-solid fa-floppy-disk"></i> Salvar avaliação
+          <i class="fa-solid fa-floppy-disk"></i>
+          {% if mode == "update" %}Salvar configuração{% else %}Adicionar avaliação{% endif %}
         </button>
         <a class="gp-button gp-button--outline" href="{% url 'educacao:professor_informatica_avaliacoes' code_value turma_informatica.id %}">
           <i class="fa-solid fa-arrow-left"></i> Voltar

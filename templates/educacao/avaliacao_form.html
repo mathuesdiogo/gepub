@@ -1,64 +1,22 @@
 {% extends "educacao/base_modulo.html" %}
-{% block title %}Nova Avaliação • Educação • GEPUB{% endblock %}
+{% block title %}{% if mode == "update" %}Configurar Avaliação{% else %}Nova Avaliação{% endif %} • Educação • GEPUB{% endblock %}
+
 {% block module_content %}
-<div class="gp-card"><div class="gp-card__body">
-{% include "core/partials/components/layout/page_head.html" with title="Nova Avaliação" subtitle="Vincule turma, período e componente" actions=actions %}
+<section class="gp-student-stage gp-professor-stage">
+  <article class="gp-student-stage__card">
+    {% if mode == "update" %}
+      {% include "core/partials/components/layout/page_head.html" with title="Editar Configuração de Avaliação" subtitle=diario.turma.nome actions=None %}
+    {% else %}
+      {% include "core/partials/components/layout/page_head.html" with title="Editar Configuração de Avaliação" subtitle=diario.turma.nome actions=None %}
+    {% endif %}
 
-<form method="post" action="{{ action_url }}" class="gp-form" id="avaliacao-form">
-  {% csrf_token %}
-
-  <div class="form__grid">
-    <div class="form__field">
-      <label>Turma</label>
-      <select class="gp-select" name="turma" required>
-        <option value="">—</option>
-        {% for t in turmas %}
-          <option value="{{ t.id }}">{{ t.nome }} • {{ t.ano_letivo }} • {{ t.unidade.nome }}</option>
-        {% endfor %}
-      </select>
+    <div class="gp-flex-wrap-row gp-mb-3">
+      <span class="gp-badge gp-badge--primary">Turma: {{ diario.turma.nome }}</span>
+      <span class="gp-badge gp-badge--neutral">Ano: {{ diario.ano_letivo }}</span>
+      <span class="gp-badge gp-badge--neutral">Professor: {{ diario.professor.get_full_name|default:diario.professor.username }}</span>
     </div>
 
-    <div class="form__field">
-      <label>Período</label>
-      <select class="gp-select" name="periodo" required>
-        <option value="">—</option>
-        {% for p in periodos %}
-          <option value="{{ p.id }}">{{ p }}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div class="form__field">
-      <label>Componente</label>
-      <select class="gp-select" name="componente" required>
-        <option value="">—</option>
-        {% for c in componentes %}
-          <option value="{{ c.id }}">{{ c.nome }}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div class="form__field">
-      <label>Título</label>
-      <input class="gp-input" name="titulo" required placeholder="Ex.: Prova 1" />
-    </div>
-
-    <div class="form__field">
-      <label>Peso</label>
-      <input class="gp-input" name="peso" value="1" />
-    </div>
-
-    <div class="form__field">
-      <label>Valor máximo</label>
-      <input class="gp-input" name="valor_maximo" value="10" />
-    </div>
-  </div>
-
-  <div class="form__actions">
-    <a class="gp-button gp-button--outline" href="{{ cancel_url }}">Cancelar</a>
-    <button class="gp-button gp-button--primary" type="submit">{{ submit_label }}</button>
-  </div>
-</form>
-
-</div></div>
+    {% include "core/partials/components/forms/form_shell.html" with form=form cancel_url=cancel_url submit_label=submit_label action_url=action_url %}
+  </article>
+</section>
 {% endblock %}

@@ -1,53 +1,76 @@
 {% extends "educacao/base_modulo.html" %}
-{% block title %}Lançar Notas • Educação • GEPUB{% endblock %}
+{% block title %}{% if is_modo_conceito %}Registro de Conceitos{% else %}Lançar Notas{% endif %} • Educação • GEPUB{% endblock %}
 {% block module_content %}
-<div class="gp-card"><div class="gp-card__body">
+<section class="gp-student-stage gp-professor-stage">
+  <article class="gp-student-stage__card">
+    {% if is_modo_conceito %}
+      {% include "core/partials/components/layout/page_head.html" with title="Registro de Conceitos" subtitle=avaliacao.titulo actions=actions %}
+    {% else %}
+      {% include "core/partials/components/layout/page_head.html" with title="Lançamento de Notas" subtitle=avaliacao.titulo actions=actions %}
+    {% endif %}
 
-{% include "core/partials/components/layout/page_head.html" with title="Lançamento de Notas" subtitle=avaliacao.titulo actions=actions %}
+    <div class="gp-flex-wrap-row gp-mb-3">
+      <span class="gp-badge gp-badge--primary">Turma: {{ turma.nome }} • {{ turma.ano_letivo }}</span>
+      <span class="gp-badge gp-badge--neutral">Etapa: {{ avaliacao.periodo|default:"—" }}</span>
+      <span class="gp-badge gp-badge--neutral">Modo: {{ avaliacao.get_modo_registro_display }}</span>
+      <span class="gp-badge gp-badge--neutral">Tipo: {{ avaliacao.get_tipo_display }}</span>
+      <span class="gp-badge gp-badge--neutral">Sigla: {{ avaliacao.sigla|default:"—" }}</span>
+      {% if not is_modo_conceito %}
+        <span class="gp-badge gp-badge--neutral">Máx: {{ avaliacao.nota_maxima }} • Peso: {{ avaliacao.peso }}</span>
+      {% endif %}
+    </div>
 
-<div class="detail-summary">
-  <div><strong>Turma:</strong> {{ turma.nome }} • {{ turma.ano_letivo }}</div>
-  <div><strong>Período:</strong> {{ avaliacao.periodo }}</div>
-  <div><strong>Componente:</strong> {{ avaliacao.componente }}</div>
-  <div><strong>Máx:</strong> {{ avaliacao.valor_maximo }} • <strong>Peso:</strong> {{ avaliacao.peso }}</div>
-</div>
+    <form class="gp-form" method="post" id="notas-form">
+      {% csrf_token %}
 
-<form class="gp-form" method="post" id="notas-form">
-  {% csrf_token %}
+      <div class="gp-table__native">
+        <table>
+          <thead>
+            <tr>
+              <th>Aluno</th>
+              <th class="u-w-220">{% if is_modo_conceito %}Conceito{% else %}Nota{% endif %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for a in alunos_render %}
+            <tr>
+              <td>{{ a.aluno_nome }}</td>
+              <td>
+                {% if can_edit %}
+                  {% if is_modo_conceito %}
+                    <select class="gp-select" name="mat_{{ a.matricula_id }}">
+                      <option value="">—</option>
+                      {% for value, label in conceito_choices %}
+                        <option value="{{ value }}" {% if a.conceito == value %}selected{% endif %}>{{ label }}</option>
+                      {% endfor %}
+                    </select>
+                  {% else %}
+                    <input class="gp-input" name="mat_{{ a.matricula_id }}" value="{{ a.valor }}" placeholder="0 a {{ avaliacao.nota_maxima }}" />
+                  {% endif %}
+                {% else %}
+                  {% if is_modo_conceito %}
+                    {{ a.conceito|default:"—" }}
+                  {% else %}
+                    {{ a.valor|default:"—" }}
+                  {% endif %}
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="2">Nenhum aluno matriculado.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
 
-  <div class="gp-table__native">
-    <table>
-      <thead>
-        <tr>
-          <th>Aluno</th>
-          <th class="u-w-160">Nota</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for a in alunos_render %}
-        <tr>
-          <td>{{ a.aluno_nome }}</td>
-          <td>
-            {% if can_edit %}
-              <input class="gp-input" name="mat_{{ a.matricula_id }}" value="{{ a.valor }}" placeholder="0 a {{ avaliacao.valor_maximo }}" />
-            {% else %}
-              {{ a.valor|default:"—" }}
-            {% endif %}
-          </td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="2">Nenhum aluno matriculado.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-
-  {% if can_edit %}
-  <div class="form__actions">
-    <button class="gp-button gp-button--primary" type="submit">Salvar Notas</button>
-  </div>
-  {% endif %}
-</form>
-
-</div></div>
+      {% if can_edit %}
+      <div class="form__actions">
+        <button class="gp-button gp-button--primary" type="submit">
+          {% if is_modo_conceito %}Salvar Conceitos{% else %}Salvar Notas{% endif %}
+        </button>
+      </div>
+      {% endif %}
+    </form>
+  </article>
+</section>
 {% endblock %}

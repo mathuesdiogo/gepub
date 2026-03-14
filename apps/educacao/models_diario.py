@@ -4,6 +4,30 @@ from django.db import models
 from django.utils import timezone
 
 
+AVALIACAO_TIPO_CHOICES = [
+    ("PROVA", "Prova"),
+    ("TRABALHO", "Trabalho"),
+    ("ATIVIDADE", "Atividade"),
+    ("PROJETO", "Projeto"),
+    ("PARTICIPACAO", "Participação"),
+    ("OUTRO", "Outro"),
+]
+
+AVALIACAO_MODO_CHOICES = [
+    ("NOTA", "Notas"),
+    ("CONCEITO", "Conceitos"),
+]
+
+AVALIACAO_CONCEITOS_CHOICES = [
+    ("A", "A"),
+    ("B", "B"),
+    ("C", "C"),
+    ("D", "D"),
+    ("E", "E"),
+    ("F", "F"),
+]
+
+
 def _current_year() -> int:
     return timezone.localdate().year
 
@@ -31,6 +55,10 @@ class DiarioTurma(models.Model):
 
 
 class Aula(models.Model):
+    class TipoAula(models.TextChoices):
+        TEORICA = "TEORICA", "Aula Teórica"
+        PRATICA = "PRATICA", "Aula Prática"
+
     diario = models.ForeignKey(
         DiarioTurma,
         on_delete=models.CASCADE,
@@ -51,12 +79,19 @@ class Aula(models.Model):
         blank=True,
     )
     data = models.DateField(default=timezone.localdate)
+    quantidade_aulas = models.PositiveSmallIntegerField(default=1)
+    tipo_aula = models.CharField(
+        max_length=12,
+        choices=TipoAula.choices,
+        default=TipoAula.TEORICA,
+    )
     bncc_codigos = models.ManyToManyField(
         "educacao.BNCCCodigo",
         blank=True,
         related_name="aulas",
     )
     conteudo = models.TextField(blank=True)
+    url_atividade = models.URLField(blank=True, default="")
     observacoes = models.TextField(blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)
 
@@ -117,7 +152,20 @@ class Avaliacao(models.Model):
         related_name="avaliacoes",
     )
 
+    tipo = models.CharField(
+        max_length=20,
+        choices=AVALIACAO_TIPO_CHOICES,
+        default="OUTRO",
+    )
+    sigla = models.CharField(max_length=12, blank=True, default="")
     titulo = models.CharField(max_length=160)
+    descricao = models.TextField(blank=True, default="")
+    modo_registro = models.CharField(
+        max_length=12,
+        choices=AVALIACAO_MODO_CHOICES,
+        default="NOTA",
+        db_index=True,
+    )
     peso = models.DecimalField(max_digits=5, decimal_places=2, default=1)
     nota_maxima = models.DecimalField(max_digits=5, decimal_places=2, default=10)
     data = models.DateField(default=timezone.localdate)
@@ -143,14 +191,27 @@ class Nota(models.Model):
     """
     avaliacao = models.ForeignKey("educacao.Avaliacao", on_delete=models.CASCADE, related_name="notas")
     aluno = models.ForeignKey("educacao.Aluno", on_delete=models.CASCADE, related_name="notas")
-    valor = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    valor = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    conceito = models.CharField(max_length=4, blank=True, default="")
 
     class Meta:
         unique_together = [("avaliacao", "aluno")]
         ordering = ["aluno_id"]
 
+    def clean(self):
+        modo = getattr(getattr(self, "avaliacao", None), "modo_registro", "NOTA")
+        if modo == "CONCEITO":
+            if not (self.conceito or "").strip():
+                raise ValidationError({"conceito": "Informe um conceito para esta avaliação."})
+            self.valor = None
+        else:
+            if self.valor is None:
+                raise ValidationError({"valor": "Informe uma nota para esta avaliação."})
+            self.conceito = ""
+
     def __str__(self) -> str:
-        return f"{self.aluno_id} • {self.avaliacao_id} • {self.valor}"
+        valor_txt = self.conceito or self.valor
+        return f"{self.aluno_id} • {self.avaliacao_id} • {valor_txt}"
 
 
 class JustificativaFaltaPedido(models.Model):

@@ -3,14 +3,21 @@
 
 {% block module_content %}
 <section class="gp-student-stage gp-professor-stage">
-  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+  {% if is_modo_conceito %}
+    {% include "core/partials/components/layout/page_head.html" with title="Registro de Conceitos • Informática" subtitle=page_subtitle actions=actions %}
+  {% else %}
+    {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+  {% endif %}
 
   <article class="gp-student-stage__card">
     <div class="gp-flex-wrap-row gp-mb-3">
       <span class="gp-badge gp-badge--primary">Turma: {{ turma_informatica.codigo }}</span>
       <span class="gp-badge gp-badge--neutral">Data: {{ avaliacao_informatica.data|date:"d/m/Y" }}</span>
+      <span class="gp-badge gp-badge--neutral">Modo: {{ avaliacao_informatica.get_modo_registro_display }}</span>
       <span class="gp-badge gp-badge--neutral">Peso: {{ avaliacao_informatica.peso }}</span>
-      <span class="gp-badge gp-badge--neutral">Máx: {{ avaliacao_informatica.nota_maxima }}</span>
+      {% if not is_modo_conceito %}
+        <span class="gp-badge gp-badge--neutral">Máx: {{ avaliacao_informatica.nota_maxima }}</span>
+      {% endif %}
     </div>
 
     <form method="post" class="gp-form" id="notas-info-form">
@@ -26,7 +33,7 @@
           <thead>
             <tr>
               <th>Aluno</th>
-              <th class="u-w-160">Nota</th>
+              <th class="u-w-220">{% if is_modo_conceito %}Conceito{% else %}Nota{% endif %}</th>
             </tr>
           </thead>
           <tbody>
@@ -34,7 +41,16 @@
               <tr>
                 <td>{{ row.aluno_nome }}</td>
                 <td>
-                  <input class="gp-input" name="aluno_{{ row.aluno_id }}" value="{{ row.valor }}" placeholder="0 a {{ avaliacao_informatica.nota_maxima }}"{% if not can_edit_notas %} readonly{% endif %} />
+                  {% if is_modo_conceito %}
+                    <select class="gp-select" name="aluno_{{ row.aluno_id }}"{% if not can_edit_notas %} disabled{% endif %}>
+                      <option value="">—</option>
+                      {% for value, label in conceito_choices %}
+                        <option value="{{ value }}" {% if row.conceito == value %}selected{% endif %}>{{ label }}</option>
+                      {% endfor %}
+                    </select>
+                  {% else %}
+                    <input class="gp-input" name="aluno_{{ row.aluno_id }}" value="{{ row.valor }}" placeholder="0 a {{ avaliacao_informatica.nota_maxima }}"{% if not can_edit_notas %} readonly{% endif %} />
+                  {% endif %}
                 </td>
               </tr>
             {% empty %}
@@ -47,7 +63,7 @@
       <div class="gp-professor-inline-actions u-mt-12">
         {% if can_edit_notas %}
           <button class="gp-button gp-button--primary" type="submit">
-            <i class="fa-solid fa-floppy-disk"></i> Salvar notas
+            <i class="fa-solid fa-floppy-disk"></i> {% if is_modo_conceito %}Salvar conceitos{% else %}Salvar notas{% endif %}
           </button>
         {% endif %}
         <a class="gp-button gp-button--outline" href="{{ voltar_url }}">

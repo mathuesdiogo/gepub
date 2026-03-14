@@ -3,6 +3,7 @@ from __future__ import annotations
 from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -15,6 +16,10 @@ from .models_beneficios import BeneficioEdital, BeneficioEditalInscricao
 from .models_diario import Avaliacao, DiarioTurma, Nota
 from .models_periodos import PeriodoLetivo
 from .services_academico import calc_historico_resumo
+
+
+def _nota_lancada_q():
+    return Q(valor__isnull=False) | ~Q(conceito="")
 
 
 def _resolve_aluno_by_codigo(user, codigo: str):
@@ -147,7 +152,7 @@ def portal_professor(request):
         ultima_avaliacao = Avaliacao.objects.filter(diario=d).order_by("-data", "-id").first()
         if ultima_avaliacao:
             ativos = Matricula.objects.filter(turma=d.turma, situacao=Matricula.Situacao.ATIVA).count()
-            lancadas = Nota.objects.filter(avaliacao=ultima_avaliacao).exclude(valor__isnull=True).count()
+            lancadas = Nota.objects.filter(avaliacao=ultima_avaliacao).filter(_nota_lancada_q()).count()
             pendencias = max(ativos - lancadas, 0)
             total_pendencias += pendencias
 

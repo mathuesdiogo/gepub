@@ -12,6 +12,15 @@
         <input id="id_q" type="text" class="gp-input" name="q" value="{{ q }}" placeholder="Turma, unidade ou ano" />
       </div>
       <div class="gp-form-group">
+        <label class="gp-form-label" for="id_ano">Ano letivo</label>
+        <select id="id_ano" name="ano" class="gp-select">
+          <option value="">Todos</option>
+          {% for ano in anos_disponiveis %}
+            <option value="{{ ano }}" {% if ano_filtro == ano %}selected{% endif %}>{{ ano }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="gp-form-group">
         <label class="gp-form-label">&nbsp;</label>
         <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
       </div>

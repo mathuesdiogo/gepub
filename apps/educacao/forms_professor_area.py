@@ -60,18 +60,34 @@ class InformaticaAvaliacaoForm(forms.ModelForm):
     class Meta:
         model = InformaticaAvaliacao
         fields = [
+            "tipo",
+            "sigla",
             "titulo",
+            "descricao",
+            "modo_registro",
             "peso",
             "nota_maxima",
             "data",
             "ativo",
         ]
         widgets = {
+            "tipo": forms.Select(attrs={"class": "gp-select"}),
+            "sigla": forms.TextInput(attrs={"class": "gp-input", "maxlength": 12, "placeholder": "Ex.: P1"}),
             "titulo": forms.TextInput(attrs={"class": "gp-input", "maxlength": 180}),
+            "descricao": forms.Textarea(attrs={"class": "gp-textarea", "rows": 3}),
+            "modo_registro": forms.Select(attrs={"class": "gp-select"}),
             "peso": forms.NumberInput(attrs={"class": "gp-input", "step": "0.01", "min": "0"}),
             "nota_maxima": forms.NumberInput(attrs={"class": "gp-input", "step": "0.01", "min": "0"}),
             "data": forms.DateInput(attrs={"class": "gp-input", "type": "date"}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["sigla"].required = False
+        self.fields["descricao"].required = False
+        self.fields["tipo"].help_text = "Tipo do instrumento avaliativo."
+        self.fields["sigla"].help_text = "Sigla curta para visualização no cronograma."
+        self.fields["modo_registro"].help_text = "Escolha entre nota numérica ou conceito."
 
 
 class MaterialAulaProfessorForm(forms.ModelForm):
