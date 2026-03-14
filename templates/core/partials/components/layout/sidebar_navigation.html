@@ -459,7 +459,12 @@
           </summary>
           <div class="menu__submenu">
             <div class="menu__subsection">Processos avaliativos</div>
-            <a class="menu__subitem {% if ns == 'avaliacoes' %}is-active{% endif %}" href="{% url 'avaliacoes:avaliacao_list' %}"><i class="fa-solid fa-list-check"></i><span>Gerenciar avaliações</span></a>
+            <a class="menu__subitem {% if ns == 'avaliacoes' and route == 'index' %}is-active{% endif %}" href="{% url 'avaliacoes:index' %}"><i class="fa-solid fa-gauge"></i><span>Painel de avaliações</span></a>
+            <a class="menu__subitem {% if ns == 'avaliacoes' and route == 'avaliacao_list' %}is-active{% endif %}" href="{% url 'avaliacoes:avaliacao_list' %}"><i class="fa-solid fa-list-check"></i><span>Gerenciar avaliações</span></a>
+            <a class="menu__subitem {% if ns == 'avaliacoes' and route == 'avaliacao_create' %}is-active{% endif %}" href="{% url 'avaliacoes:avaliacao_create' %}"><i class="fa-solid fa-circle-plus"></i><span>Nova avaliação</span></a>
+
+            <div class="menu__subsection">Correção e validação</div>
+            <a class="menu__subitem {% if ns == 'avaliacoes' and route == 'folha_lookup' %}is-active{% endif %}" href="{% url 'avaliacoes:folha_lookup' %}"><i class="fa-solid fa-magnifying-glass"></i><span>Localizar folha</span></a>
           </div>
         </details>
       {% endif %}
@@ -472,9 +477,21 @@
             <span class="menu__caret" aria-hidden="true"><i class="fa-solid fa-chevron-down"></i></span>
           </summary>
           <div class="menu__submenu">
-            <div class="menu__subsection">Educação especial</div>
+            <div class="menu__subsection">Painel e acompanhamento</div>
             <a class="menu__subitem {% if ns == 'nee' and route == 'index' %}is-active{% endif %}" href="{% url 'nee:index' %}"><i class="fa-solid fa-gauge"></i><span>Painel NEE</span></a>
-            <a class="menu__subitem {% if ns == 'nee' and 'relatorios' in route %}is-active{% endif %}" href="{% url 'nee:relatorios_index' %}"><i class="fa-solid fa-chart-column"></i><span>Relatórios NEE</span></a>
+            <a class="menu__subitem {% if ns == 'nee' and route == 'buscar_aluno' or ns == 'nee' and route == 'aluno_search' %}is-active{% endif %}" href="{% url 'nee:buscar_aluno' %}"><i class="fa-solid fa-user-magnifying-glass"></i><span>Buscar aluno</span></a>
+            <a class="menu__subitem {% if ns == 'nee' and route == 'alertas_index' or ns == 'nee' and route == 'alertas_lista' %}is-active{% endif %}" href="{% url 'nee:alertas_index' %}"><i class="fa-solid fa-bell"></i><span>Alertas</span></a>
+
+            <div class="menu__subsection">Relatórios NEE</div>
+            <a class="menu__subitem {% if ns == 'nee' and route == 'relatorios_index' %}is-active{% endif %}" href="{% url 'nee:relatorios_index' %}"><i class="fa-solid fa-chart-pie"></i><span>Visão geral</span></a>
+            <a class="menu__subitem {% if ns == 'nee' and route == 'relatorios_por_tipo' %}is-active{% endif %}" href="{% url 'nee:relatorios_por_tipo' %}"><i class="fa-solid fa-chart-column"></i><span>Por tipo</span></a>
+            <a class="menu__subitem {% if ns == 'nee' and route == 'relatorios_por_unidade' %}is-active{% endif %}" href="{% url 'nee:relatorios_por_unidade' %}"><i class="fa-solid fa-school"></i><span>Por unidade</span></a>
+            <a class="menu__subitem {% if ns == 'nee' and route == 'relatorios_por_municipio' %}is-active{% endif %}" href="{% url 'nee:relatorios_por_municipio' %}"><i class="fa-solid fa-city"></i><span>Por município</span></a>
+            <a class="menu__subitem {% if ns == 'nee' and route == 'relatorios_capacidade' %}is-active{% endif %}" href="{% url 'nee:relatorios_capacidade' %}"><i class="fa-solid fa-layer-group"></i><span>Capacidade</span></a>
+            <a class="menu__subitem {% if ns == 'nee' and route == 'relatorios_alunos' %}is-active{% endif %}" href="{% url 'nee:relatorios_alunos' %}"><i class="fa-solid fa-user-graduate"></i><span>Alunos</span></a>
+
+            <div class="menu__subsection">Cadastros</div>
+            <a class="menu__subitem {% if ns == 'nee' and route == 'tipo_list' %}is-active{% endif %}" href="{% url 'nee:tipo_list' %}"><i class="fa-solid fa-tags"></i><span>Tipos de necessidade</span></a>
           </div>
         </details>
       {% endif %}
@@ -487,9 +504,40 @@
             <span class="menu__caret" aria-hidden="true"><i class="fa-solid fa-chevron-down"></i></span>
           </summary>
           <div class="menu__submenu">
-            <div class="menu__subsection">Atenção municipal</div>
+            <div class="menu__subsection">Painel e atendimento</div>
             <a class="menu__subitem {% if ns == 'saude' and route == 'index' %}is-active{% endif %}" href="{% url 'saude:index' %}"><i class="fa-solid fa-gauge"></i><span>Painel Saúde</span></a>
             <a class="menu__subitem {% if ns == 'saude' and route == 'atendimento_list' %}is-active{% endif %}" href="{% url 'saude:atendimento_list' %}"><i class="fa-solid fa-notes-medical"></i><span>Atendimentos</span></a>
+            <a class="menu__subitem {% if ns == 'saude' and route == 'agenda_list' %}is-active{% endif %}" href="{% url 'saude:agenda_list' %}"><i class="fa-solid fa-calendar-check"></i><span>Agenda</span></a>
+            <a class="menu__subitem {% if ns == 'saude' and route == 'relatorio_mensal' %}is-active{% endif %}" href="{% url 'saude:relatorio_mensal' %}"><i class="fa-solid fa-chart-column"></i><span>Relatório mensal</span></a>
+
+            <div class="menu__subsection">Regulação</div>
+            <a class="menu__subitem {% if ns == 'saude' and route == 'grade_list' %}is-active{% endif %}" href="{% url 'saude:grade_list' %}"><i class="fa-solid fa-table-cells-large"></i><span>Grades de agenda</span></a>
+            <a class="menu__subitem {% if ns == 'saude' and route == 'bloqueio_list' %}is-active{% endif %}" href="{% url 'saude:bloqueio_list' %}"><i class="fa-solid fa-calendar-xmark"></i><span>Bloqueios</span></a>
+            <a class="menu__subitem {% if ns == 'saude' and route == 'fila_list' %}is-active{% endif %}" href="{% url 'saude:fila_list' %}"><i class="fa-solid fa-list-ol"></i><span>Fila de espera</span></a>
+
+            <div class="menu__subsection">Rede e profissionais</div>
+            <a class="menu__subitem {% if ns == 'saude' and route == 'unidade_list' %}is-active{% endif %}" href="{% url 'saude:unidade_list' %}"><i class="fa-solid fa-hospital"></i><span>Unidades</span></a>
+            <a class="menu__subitem {% if ns == 'saude' and route == 'profissional_list' %}is-active{% endif %}" href="{% url 'saude:profissional_list' %}"><i class="fa-solid fa-user-doctor"></i><span>Profissionais</span></a>
+            <a class="menu__subitem {% if ns == 'saude' and route == 'especialidade_list' %}is-active{% endif %}" href="{% url 'saude:especialidade_list' %}"><i class="fa-solid fa-stethoscope"></i><span>Especialidades</span></a>
+            <a class="menu__subitem {% if ns == 'saude' and route == 'programa_list' %}is-active{% endif %}" href="{% url 'saude:programa_list' %}"><i class="fa-solid fa-diagram-project"></i><span>Programas</span></a>
+            <a class="menu__subitem {% if ns == 'saude' and route == 'cid_list' %}is-active{% endif %}" href="{% url 'saude:cid_list' %}"><i class="fa-solid fa-file-medical"></i><span>CID</span></a>
+
+            <div class="menu__subsection">Pacientes e assistência</div>
+            <a class="menu__subitem {% if ns == 'saude' and route == 'paciente_list' %}is-active{% endif %}" href="{% url 'saude:paciente_list' %}"><i class="fa-solid fa-users"></i><span>Pacientes</span></a>
+            <a class="menu__subitem {% if ns == 'saude' and route == 'checkin_list' %}is-active{% endif %}" href="{% url 'saude:checkin_list' %}"><i class="fa-solid fa-clipboard-user"></i><span>Check-ins</span></a>
+            <a class="menu__subitem {% if ns == 'saude' and route == 'procedimento_list' %}is-active{% endif %}" href="{% url 'saude:procedimento_list' %}"><i class="fa-solid fa-syringe"></i><span>Procedimentos</span></a>
+            <a class="menu__subitem {% if ns == 'saude' and route == 'encaminhamento_list' %}is-active{% endif %}" href="{% url 'saude:encaminhamento_list' %}"><i class="fa-solid fa-share-from-square"></i><span>Encaminhamentos</span></a>
+            <a class="menu__subitem {% if ns == 'saude' and route == 'vacinacao_list' %}is-active{% endif %}" href="{% url 'saude:vacinacao_list' %}"><i class="fa-solid fa-shield-virus"></i><span>Vacinação</span></a>
+
+            <div class="menu__subsection">Farmácia e exames</div>
+            <a class="menu__subitem {% if ns == 'saude' and route == 'medicamento_uso_list' %}is-active{% endif %}" href="{% url 'saude:medicamento_uso_list' %}"><i class="fa-solid fa-pills"></i><span>Medicamentos em uso</span></a>
+            <a class="menu__subitem {% if ns == 'saude' and route == 'dispensacao_list' %}is-active{% endif %}" href="{% url 'saude:dispensacao_list' %}"><i class="fa-solid fa-prescription-bottle-medical"></i><span>Dispensações</span></a>
+            <a class="menu__subitem {% if ns == 'saude' and route == 'exame_coleta_list' %}is-active{% endif %}" href="{% url 'saude:exame_coleta_list' %}"><i class="fa-solid fa-vial-circle-check"></i><span>Fluxo de exames</span></a>
+            <a class="menu__subitem {% if ns == 'saude' and route == 'internacao_list' %}is-active{% endif %}" href="{% url 'saude:internacao_list' %}"><i class="fa-solid fa-bed-pulse"></i><span>Internações</span></a>
+
+            <div class="menu__subsection">Portal e auditoria</div>
+            <a class="menu__subitem {% if ns == 'saude' and route == 'portal_inscritos_list' %}is-active{% endif %}" href="{% url 'saude:portal_inscritos_list' %}"><i class="fa-solid fa-globe"></i><span>Inscritos do portal</span></a>
+            <a class="menu__subitem {% if ns == 'saude' and route == 'auditoria_prontuario_list' %}is-active{% endif %}" href="{% url 'saude:auditoria_prontuario_list' %}"><i class="fa-solid fa-shield-halved"></i><span>Auditoria de prontuário</span></a>
           </div>
         </details>
       {% endif %}
