@@ -14,6 +14,7 @@ from django.utils import timezone
 from apps.core.decorators import require_perm
 from apps.core.rbac import scope_filter_secretarias, scope_filter_turmas
 from apps.core.services_auditoria import registrar_auditoria
+from apps.core.services_transparencia import publicar_evento_transparencia
 from apps.org.models import Secretaria
 from apps.processos.models import ProcessoAdministrativo, ProcessoAndamento
 
@@ -169,6 +170,37 @@ def _registrar_auditoria_renovacao(
         antes=antes or {},
         depois=depois or {},
         observacao=observacao,
+    )
+
+
+def _publicar_evento_renovacao(
+    *,
+    renovacao: RenovacaoMatricula,
+    tipo_evento: str,
+    titulo: str,
+    descricao: str = "",
+    dados: dict | None = None,
+):
+    municipio = getattr(getattr(renovacao, "secretaria", None), "municipio", None)
+    if municipio is None:
+        return
+    payload = {
+        "contexto": "EDUCACAO_RENOVACAO",
+        "renovacao_id": renovacao.pk,
+        "secretaria_id": renovacao.secretaria_id,
+        "ano_letivo": renovacao.ano_letivo,
+    }
+    if dados:
+        payload.update(dados)
+    publicar_evento_transparencia(
+        municipio=municipio,
+        modulo="OUTROS",
+        tipo_evento=tipo_evento,
+        titulo=titulo,
+        descricao=descricao,
+        referencia=f"RENOVACAO-{renovacao.pk}",
+        dados=payload,
+        publico=True,
     )
 
 
@@ -426,6 +458,19 @@ def renovacao_matricula_list(request):
                 },
                 observacao="Renovação criada no painel da secretaria.",
             )
+            _publicar_evento_renovacao(
+                renovacao=renovacao,
+                tipo_evento="RENOVACAO_CRIADA",
+                titulo=f"Renovação de matrícula criada: {renovacao.descricao}",
+                descricao=(
+                    f"Janela de renovação da secretaria {renovacao.secretaria.nome} "
+                    f"para o ano letivo {renovacao.ano_letivo}."
+                ),
+                dados={
+                    "data_inicio": str(renovacao.data_inicio),
+                    "data_fim": str(renovacao.data_fim),
+                },
+            )
             messages.success(request, "Configuração de renovação criada com sucesso.")
             return redirect("educacao:renovacao_matricula_detail", pk=renovacao.pk)
         messages.error(request, "Corrija os erros para criar a renovação.")
@@ -626,6 +671,20 @@ def renovacao_matricula_detail(request, pk: int):
                         "processado_em": str(renovacao.processado_em or ""),
                     },
                     observacao="Processamento automático de pedidos executado.",
+                )
+                _publicar_evento_renovacao(
+                    renovacao=renovacao,
+                    tipo_evento="RENOVACAO_PROCESSADA",
+                    titulo=f"Renovação processada: {renovacao.descricao}",
+                    descricao=(
+                        "Processamento automático de pedidos de renovação concluído "
+                        f"na secretaria {renovacao.secretaria.nome}."
+                    ),
+                    dados={
+                        "total_pedidos_processados": resultado["total"],
+                        "total_aprovados": resultado["aprovados"],
+                        "total_rejeitados": resultado["rejeitados"],
+                    },
                 )
                 messages.success(
                     request,

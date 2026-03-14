@@ -11,7 +11,7 @@ from django.contrib.auth import get_user_model
 
 from apps.accounts.models import Profile
 from apps.almoxarifado.models import AlmoxarifadoCadastro
-from apps.core.models import AuditoriaEvento
+from apps.core.models import AuditoriaEvento, TransparenciaEventoPublico
 from apps.educacao.forms_horarios import AulaHorarioForm
 from apps.educacao.forms_diario import AulaForm
 from apps.educacao.models import (
@@ -363,6 +363,108 @@ class RenovacaoMatriculaProcessingTestCase(TestCase):
                 tipo=MatriculaMovimentacao.Tipo.CRIACAO,
             ).exists()
         )
+
+
+class RenovacaoMatriculaTransparenciaTestCase(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            username="renovacao_trans_admin",
+            email="renovacao.trans@example.com",
+            password="123456",
+            is_superuser=True,
+            is_staff=True,
+        )
+        self.municipio = Municipio.objects.create(nome="Cidade Transparência", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="Secretaria de Educação")
+        self.unidade = Unidade.objects.create(
+            secretaria=self.secretaria,
+            nome="Escola Transparência",
+            tipo=Unidade.Tipo.EDUCACAO,
+        )
+        self.turma = Turma.objects.create(
+            unidade=self.unidade,
+            nome="8º Ano A",
+            ano_letivo=2026,
+            turno=Turma.Turno.MANHA,
+        )
+        profile = self.user.profile
+        profile.role = Profile.Role.ADMIN
+        profile.ativo = True
+        profile.municipio = self.municipio
+        profile.must_change_password = False
+        profile.save(update_fields=["role", "ativo", "municipio", "must_change_password"])
+        self.client.force_login(self.user)
+
+    def test_criar_renovacao_publica_evento_transparencia(self):
+        response = self.client.post(
+            reverse("educacao:renovacao_matricula_list"),
+            {
+                "_action": "create",
+                "descricao": "Renovação Transparência 2026",
+                "ano_letivo": 2026,
+                "secretaria": self.secretaria.id,
+                "data_inicio": "2026-03-01",
+                "data_fim": "2026-03-31",
+                "observacao": "Janela oficial",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+
+        renovacao = RenovacaoMatricula.objects.filter(descricao="Renovação Transparência 2026").first()
+        self.assertIsNotNone(renovacao)
+        evento = TransparenciaEventoPublico.objects.filter(
+            municipio=self.municipio,
+            tipo_evento="RENOVACAO_CRIADA",
+            referencia=f"RENOVACAO-{renovacao.pk}",
+        ).first()
+
+        self.assertIsNotNone(evento)
+        self.assertEqual(evento.modulo, TransparenciaEventoPublico.Modulo.OUTROS)
+        self.assertEqual(evento.dados.get("contexto"), "EDUCACAO_RENOVACAO")
+        self.assertEqual(evento.dados.get("renovacao_id"), renovacao.id)
+        self.assertEqual(evento.dados.get("ano_letivo"), 2026)
+
+    def test_processar_renovacao_publica_evento_transparencia(self):
+        hoje = date.today()
+        renovacao = RenovacaoMatricula.objects.create(
+            descricao="Renovação Processamento Transparência",
+            ano_letivo=2026,
+            secretaria=self.secretaria,
+            data_inicio=hoje - timedelta(days=2),
+            data_fim=hoje + timedelta(days=2),
+            criado_por=self.user,
+        )
+        oferta = RenovacaoMatriculaOferta.objects.create(
+            renovacao=renovacao,
+            turma=self.turma,
+        )
+        aluno = Aluno.objects.create(nome="Aluno Transparência")
+        RenovacaoMatriculaPedido.objects.create(
+            renovacao=renovacao,
+            aluno=aluno,
+            oferta=oferta,
+            prioridade=1,
+        )
+
+        response = self.client.post(
+            reverse("educacao:renovacao_matricula_detail", args=[renovacao.id]),
+            {"_action": "processar"},
+        )
+        self.assertEqual(response.status_code, 302)
+
+        evento = TransparenciaEventoPublico.objects.filter(
+            municipio=self.municipio,
+            tipo_evento="RENOVACAO_PROCESSADA",
+            referencia=f"RENOVACAO-{renovacao.pk}",
+        ).first()
+
+        self.assertIsNotNone(evento)
+        self.assertEqual(evento.modulo, TransparenciaEventoPublico.Modulo.OUTROS)
+        self.assertEqual(evento.dados.get("contexto"), "EDUCACAO_RENOVACAO")
+        self.assertEqual(evento.dados.get("renovacao_id"), renovacao.id)
+        self.assertEqual(evento.dados.get("total_pedidos_processados"), 1)
+        self.assertEqual(evento.dados.get("total_aprovados"), 1)
+        self.assertEqual(evento.dados.get("total_rejeitados"), 0)
 
 
 class InformaticaGradeTurmaRulesTestCase(TestCase):

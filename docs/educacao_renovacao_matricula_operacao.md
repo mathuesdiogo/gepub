@@ -57,6 +57,13 @@ Padronizar a renovação de matrícula no GEPUB com três frentes:
   - submissão/cancelamento de pedido pelo aluno;
   - processamento final da renovação.
 
+## Transparência pública
+
+- A criação e o processamento da renovação também geram eventos em `Transparência`:
+  - `RENOVACAO_CRIADA`;
+  - `RENOVACAO_PROCESSADA`.
+- Os eventos são publicados com referência `RENOVACAO-{id}` e payload resumido para rastreabilidade operacional.
+
 ## Onde consultar
 
 - Painel principal da Educação:

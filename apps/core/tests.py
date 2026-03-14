@@ -475,6 +475,65 @@ class PlanPublicAppsAccessTestCase(TestCase):
         allowed = self.client.get(reverse("core:transparencia_arquivo_create"))
         self.assertEqual(allowed.status_code, 200)
 
+    def test_transparencia_arquivo_create_publica_evento_transparencia(self):
+        self.assinatura.plano = PlanoMunicipal.objects.get(codigo=PlanoMunicipal.Codigo.GESTAO_TOTAL)
+        self.assinatura.save(update_fields=["plano", "atualizado_em"])
+
+        response = self.client.post(
+            reverse("core:transparencia_arquivo_create"),
+            {
+                "categoria": "OUTROS",
+                "titulo": "Dados abertos de teste",
+                "descricao": "Publicação automática para validação de eventos.",
+                "competencia": "2026-03",
+                "data_referencia": "2026-03-13",
+                "formato": "LINK",
+                "link_externo": "https://dados.example.com/arquivo.csv",
+                "publico": "on",
+                "ordem": 1,
+                "publicado_em": "2026-03-13T10:00",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        evento = TransparenciaEventoPublico.objects.filter(
+            municipio=self.municipio,
+            tipo_evento="PORTAL_TRANSPARENCIA_ARQUIVO_CRIADO",
+        ).first()
+        self.assertIsNotNone(evento)
+        self.assertEqual(evento.modulo, TransparenciaEventoPublico.Modulo.OUTROS)
+        self.assertEqual(evento.dados.get("contexto"), "PORTAL_PUBLICACOES")
+        self.assertEqual(evento.dados.get("categoria"), "OUTROS")
+        self.assertEqual(evento.dados.get("formato"), "LINK")
+
+    def test_concurso_create_publica_evento_transparencia(self):
+        self.assinatura.plano = PlanoMunicipal.objects.get(codigo=PlanoMunicipal.Codigo.MUNICIPAL)
+        self.assinatura.save(update_fields=["plano", "atualizado_em"])
+
+        response = self.client.post(
+            reverse("core:concurso_create"),
+            {
+                "titulo": "Concurso Público 2026",
+                "tipo": "CONCURSO",
+                "status": "INSCRICOES_ABERTAS",
+                "descricao": "Concurso de demonstração para trilha SUAP.",
+                "inicio_inscricao": "2026-04-01",
+                "fim_inscricao": "2026-04-30",
+                "publicado": "on",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        evento = TransparenciaEventoPublico.objects.filter(
+            municipio=self.municipio,
+            tipo_evento="PORTAL_CONCURSO_CRIADO",
+        ).first()
+        self.assertIsNotNone(evento)
+        self.assertEqual(evento.modulo, TransparenciaEventoPublico.Modulo.OUTROS)
+        self.assertEqual(evento.dados.get("contexto"), "PORTAL_PUBLICACOES")
+        self.assertEqual(evento.dados.get("tipo"), "CONCURSO")
+        self.assertEqual(evento.dados.get("status"), "INSCRICOES_ABERTAS")
+
     def test_camara_admin_liberada_apenas_no_governo_completo(self):
         self.assinatura.plano = PlanoMunicipal.objects.get(codigo=PlanoMunicipal.Codigo.GESTAO_TOTAL)
         self.assinatura.save(update_fields=["plano", "atualizado_em"])

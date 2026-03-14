@@ -41,6 +41,7 @@ from apps.core.models import (
     PortalNoticia,
 )
 from apps.core.rbac import can, is_admin, role_scope_base
+from apps.core.services_transparencia import publicar_evento_transparencia
 from apps.org.models import Municipio
 
 
@@ -95,6 +96,30 @@ def _q_municipio(municipio: Municipio) -> str:
 
 def _redirect_hub(municipio: Municipio):
     return redirect(reverse("core:publicacoes_admin") + _q_municipio(municipio) + "&portal=todos")
+
+
+def _publicar_evento_publicacao(
+    *,
+    municipio: Municipio,
+    tipo_evento: str,
+    titulo: str,
+    descricao: str = "",
+    referencia: str = "",
+    dados: dict | None = None,
+):
+    payload = {"contexto": "PORTAL_PUBLICACOES"}
+    if dados:
+        payload.update(dados)
+    publicar_evento_transparencia(
+        municipio=municipio,
+        modulo="OUTROS",
+        tipo_evento=tipo_evento,
+        titulo=titulo,
+        descricao=descricao,
+        referencia=referencia,
+        dados=payload,
+        publico=True,
+    )
 
 
 def _resolve_portal_focus(raw: str | None) -> str:
@@ -1109,6 +1134,19 @@ def transparencia_arquivo_create(request):
         obj.municipio = municipio
         obj.criado_por = request.user
         obj.save()
+        _publicar_evento_publicacao(
+            municipio=municipio,
+            tipo_evento="PORTAL_TRANSPARENCIA_ARQUIVO_CRIADO",
+            titulo=f"Arquivo de transparência publicado: {obj.titulo}",
+            descricao="Nova publicação de transparência adicionada no portal municipal.",
+            referencia=f"TRANSP-{obj.pk}",
+            dados={
+                "arquivo_id": obj.pk,
+                "categoria": obj.categoria,
+                "formato": obj.formato,
+                "publico": bool(obj.publico),
+            },
+        )
         messages.success(request, "Arquivo de transparência publicado.")
         return _redirect_hub(municipio)
     return render(
@@ -1142,7 +1180,20 @@ def transparencia_arquivo_update(request, pk: int):
     obj = get_object_or_404(PortalTransparenciaArquivo, pk=pk, municipio=municipio)
     form = PortalTransparenciaArquivoForm(request.POST or None, request.FILES or None, instance=obj)
     if request.method == "POST" and form.is_valid():
-        form.save()
+        obj = form.save()
+        _publicar_evento_publicacao(
+            municipio=municipio,
+            tipo_evento="PORTAL_TRANSPARENCIA_ARQUIVO_ATUALIZADO",
+            titulo=f"Arquivo de transparência atualizado: {obj.titulo}",
+            descricao="Publicação de transparência atualizada no portal municipal.",
+            referencia=f"TRANSP-{obj.pk}",
+            dados={
+                "arquivo_id": obj.pk,
+                "categoria": obj.categoria,
+                "formato": obj.formato,
+                "publico": bool(obj.publico),
+            },
+        )
         messages.success(request, "Arquivo de transparência atualizado.")
         return _redirect_hub(municipio)
     return render(
@@ -1174,7 +1225,21 @@ def transparencia_arquivo_delete(request, pk: int):
     if denied:
         return denied
     obj = get_object_or_404(PortalTransparenciaArquivo, pk=pk, municipio=municipio)
+    obj_ref = obj.pk
+    obj_titulo = obj.titulo
+    obj_categoria = obj.categoria
     obj.delete()
+    _publicar_evento_publicacao(
+        municipio=municipio,
+        tipo_evento="PORTAL_TRANSPARENCIA_ARQUIVO_REMOVIDO",
+        titulo=f"Arquivo de transparência removido: {obj_titulo}",
+        descricao="Publicação de transparência removida do portal municipal.",
+        referencia=f"TRANSP-{obj_ref}",
+        dados={
+            "arquivo_id": obj_ref,
+            "categoria": obj_categoria,
+        },
+    )
     messages.success(request, "Arquivo de transparência removido.")
     return _redirect_hub(municipio)
 
@@ -1198,6 +1263,18 @@ def diario_create(request):
         obj.municipio = municipio
         obj.criado_por = request.user
         obj.save()
+        _publicar_evento_publicacao(
+            municipio=municipio,
+            tipo_evento="PORTAL_DIARIO_CRIADO",
+            titulo=f"Edição do diário publicada: {obj.numero}",
+            descricao="Nova edição do Diário Oficial cadastrada no portal.",
+            referencia=f"DIARIO-{obj.pk}",
+            dados={
+                "diario_id": obj.pk,
+                "numero": obj.numero,
+                "publicado": bool(obj.publicado),
+            },
+        )
         messages.success(request, "Edição do diário oficial salva.")
         return _redirect_hub(municipio)
     return render(
@@ -1231,7 +1308,19 @@ def diario_update(request, pk: int):
     obj = get_object_or_404(DiarioOficialEdicao, pk=pk, municipio=municipio)
     form = DiarioOficialEdicaoForm(request.POST or None, request.FILES or None, instance=obj)
     if request.method == "POST" and form.is_valid():
-        form.save()
+        obj = form.save()
+        _publicar_evento_publicacao(
+            municipio=municipio,
+            tipo_evento="PORTAL_DIARIO_ATUALIZADO",
+            titulo=f"Edição do diário atualizada: {obj.numero}",
+            descricao="Edição do Diário Oficial atualizada no portal.",
+            referencia=f"DIARIO-{obj.pk}",
+            dados={
+                "diario_id": obj.pk,
+                "numero": obj.numero,
+                "publicado": bool(obj.publicado),
+            },
+        )
         messages.success(request, "Diário atualizado.")
         return _redirect_hub(municipio)
     return render(
@@ -1263,7 +1352,20 @@ def diario_delete(request, pk: int):
     if denied:
         return denied
     obj = get_object_or_404(DiarioOficialEdicao, pk=pk, municipio=municipio)
+    obj_ref = obj.pk
+    obj_numero = obj.numero
     obj.delete()
+    _publicar_evento_publicacao(
+        municipio=municipio,
+        tipo_evento="PORTAL_DIARIO_REMOVIDO",
+        titulo=f"Edição do diário removida: {obj_numero}",
+        descricao="Edição do Diário Oficial removida do portal.",
+        referencia=f"DIARIO-{obj_ref}",
+        dados={
+            "diario_id": obj_ref,
+            "numero": obj_numero,
+        },
+    )
     messages.success(request, "Edição removida.")
     return _redirect_hub(municipio)
 
@@ -1287,6 +1389,19 @@ def concurso_create(request):
         obj.municipio = municipio
         obj.criado_por = request.user
         obj.save()
+        _publicar_evento_publicacao(
+            municipio=municipio,
+            tipo_evento="PORTAL_CONCURSO_CRIADO",
+            titulo=f"Concurso publicado: {obj.titulo}",
+            descricao="Novo concurso/processo seletivo cadastrado no portal.",
+            referencia=f"CONCURSO-{obj.pk}",
+            dados={
+                "concurso_id": obj.pk,
+                "tipo": obj.tipo,
+                "status": obj.status,
+                "publicado": bool(obj.publicado),
+            },
+        )
         messages.success(request, "Concurso salvo.")
         return _redirect_hub(municipio)
     return render(
@@ -1320,7 +1435,20 @@ def concurso_update(request, pk: int):
     obj = get_object_or_404(ConcursoPublico, pk=pk, municipio=municipio)
     form = ConcursoPublicoForm(request.POST or None, request.FILES or None, instance=obj)
     if request.method == "POST" and form.is_valid():
-        form.save()
+        obj = form.save()
+        _publicar_evento_publicacao(
+            municipio=municipio,
+            tipo_evento="PORTAL_CONCURSO_ATUALIZADO",
+            titulo=f"Concurso atualizado: {obj.titulo}",
+            descricao="Concurso/processo seletivo atualizado no portal.",
+            referencia=f"CONCURSO-{obj.pk}",
+            dados={
+                "concurso_id": obj.pk,
+                "tipo": obj.tipo,
+                "status": obj.status,
+                "publicado": bool(obj.publicado),
+            },
+        )
         messages.success(request, "Concurso atualizado.")
         return _redirect_hub(municipio)
     return render(
@@ -1352,7 +1480,21 @@ def concurso_delete(request, pk: int):
     if denied:
         return denied
     obj = get_object_or_404(ConcursoPublico, pk=pk, municipio=municipio)
+    obj_ref = obj.pk
+    obj_titulo = obj.titulo
+    obj_tipo = obj.tipo
     obj.delete()
+    _publicar_evento_publicacao(
+        municipio=municipio,
+        tipo_evento="PORTAL_CONCURSO_REMOVIDO",
+        titulo=f"Concurso removido: {obj_titulo}",
+        descricao="Concurso/processo seletivo removido do portal.",
+        referencia=f"CONCURSO-{obj_ref}",
+        dados={
+            "concurso_id": obj_ref,
+            "tipo": obj_tipo,
+        },
+    )
     messages.success(request, "Concurso removido.")
     return _redirect_hub(municipio)
 
@@ -1376,6 +1518,20 @@ def concurso_etapa_create(request, concurso_pk: int):
         etapa = form.save(commit=False)
         etapa.concurso = concurso
         etapa.save()
+        _publicar_evento_publicacao(
+            municipio=municipio,
+            tipo_evento="PORTAL_CONCURSO_ETAPA_CRIADA",
+            titulo=f"Etapa publicada: {etapa.titulo}",
+            descricao=f"Nova etapa cadastrada para o concurso {concurso.titulo}.",
+            referencia=f"CONCURSO-ETAPA-{etapa.pk}",
+            dados={
+                "etapa_id": etapa.pk,
+                "concurso_id": concurso.pk,
+                "concurso_titulo": concurso.titulo,
+                "ordem": etapa.ordem,
+                "publicado": bool(etapa.publicado),
+            },
+        )
         messages.success(request, "Etapa cadastrada.")
         return _redirect_hub(municipio)
     return render(
@@ -1407,7 +1563,23 @@ def concurso_etapa_delete(request, pk: int):
     if denied:
         return denied
     etapa = get_object_or_404(ConcursoEtapa.objects.select_related("concurso"), pk=pk, concurso__municipio=municipio)
+    etapa_ref = etapa.pk
+    etapa_titulo = etapa.titulo
+    concurso_ref = etapa.concurso_id
+    concurso_titulo = etapa.concurso.titulo
     etapa.delete()
+    _publicar_evento_publicacao(
+        municipio=municipio,
+        tipo_evento="PORTAL_CONCURSO_ETAPA_REMOVIDA",
+        titulo=f"Etapa removida: {etapa_titulo}",
+        descricao=f"Etapa removida do concurso {concurso_titulo}.",
+        referencia=f"CONCURSO-ETAPA-{etapa_ref}",
+        dados={
+            "etapa_id": etapa_ref,
+            "concurso_id": concurso_ref,
+            "concurso_titulo": concurso_titulo,
+        },
+    )
     messages.success(request, "Etapa removida.")
     return _redirect_hub(municipio)
 
