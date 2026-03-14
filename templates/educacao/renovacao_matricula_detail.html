@@ -86,6 +86,7 @@
             <th>Turma escolhida</th>
             <th>Prioridade</th>
             <th>Status</th>
+            <th>Processo</th>
             <th>Matrícula resultante</th>
             <th>Processamento</th>
           </tr>
@@ -99,6 +100,16 @@
               <td>{{ pedido.oferta.turma.nome }}</td>
               <td>{{ pedido.prioridade }}</td>
               <td>{{ pedido.get_status_display }}</td>
+              <td>
+                {% if pedido.processo_administrativo_id %}
+                  <a href="{% url 'processos:detail' pedido.processo_administrativo_id %}?municipio={{ renovacao.secretaria.municipio_id }}">
+                    {{ pedido.processo_administrativo.numero }}
+                  </a>
+                  <br><small>{{ pedido.processo_administrativo.get_status_display }}</small>
+                {% else %}
+                  —
+                {% endif %}
+              </td>
               <td>
                 {% if pedido.matricula_resultante %}
                   #{{ pedido.matricula_resultante_id }}
@@ -114,7 +125,7 @@
               </td>
             </tr>
           {% empty %}
-            <tr><td colspan="6">Nenhum pedido recebido nesta renovação.</td></tr>
+            <tr><td colspan="7">Nenhum pedido recebido nesta renovação.</td></tr>
           {% endfor %}
         </tbody>
       </table>

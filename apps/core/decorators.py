@@ -129,9 +129,11 @@ def require_perm(perm: str):
             if perm == "educacao.view" and _is_aluno(user):
                 route_name = _route_name(request)
                 route_leaf = route_name.split(":", 1)[-1] if route_name else ""
+                allow_by_prefix = route_leaf.startswith("aluno_ensino_")
                 if (
                     (route_name and route_name in _ALUNO_EDUCACAO_ALLOWED_ROUTES)
                     or (route_leaf and route_leaf in _ALUNO_EDUCACAO_ALLOWED_ROUTES_LEAF)
+                    or allow_by_prefix
                 ):
                     return view_func(request, *args, **kwargs)
                 return HttpResponseForbidden(

@@ -13,7 +13,9 @@ from django.utils import timezone
 
 from apps.core.decorators import require_perm
 from apps.core.rbac import scope_filter_secretarias, scope_filter_turmas
+from apps.core.services_auditoria import registrar_auditoria
 from apps.org.models import Secretaria
+from apps.processos.models import ProcessoAdministrativo, ProcessoAndamento
 
 from .models import (
     Matricula,
@@ -145,6 +147,31 @@ def _status_badge_class(etapa: str) -> str:
     }.get(etapa, "muted")
 
 
+def _registrar_auditoria_renovacao(
+    *,
+    renovacao: RenovacaoMatricula,
+    evento: str,
+    usuario=None,
+    antes: dict | None = None,
+    depois: dict | None = None,
+    observacao: str = "",
+):
+    municipio = getattr(getattr(renovacao, "secretaria", None), "municipio", None)
+    if municipio is None:
+        return
+    registrar_auditoria(
+        municipio=municipio,
+        modulo="EDUCACAO",
+        evento=evento,
+        entidade="RenovacaoMatricula",
+        entidade_id=renovacao.pk,
+        usuario=usuario if getattr(usuario, "is_authenticated", False) else None,
+        antes=antes or {},
+        depois=depois or {},
+        observacao=observacao,
+    )
+
+
 def _resolver_origem_matricula(aluno, renovacao: RenovacaoMatricula):
     return (
         Matricula.objects.select_related("turma")
@@ -236,10 +263,36 @@ def _garantir_matricula_destino(*, pedido: RenovacaoMatriculaPedido, usuario):
     return nova_matricula
 
 
+def _sincronizar_processo_pedido(*, pedido: RenovacaoMatriculaPedido, aprovado: bool, usuario=None):
+    processo = pedido.processo_administrativo
+    if processo is None:
+        return
+
+    novo_status = ProcessoAdministrativo.Status.CONCLUIDO if aprovado else ProcessoAdministrativo.Status.ARQUIVADO
+    if processo.status != novo_status:
+        processo.status = novo_status
+        processo.save(update_fields=["status", "atualizado_em"])
+
+    despacho = (
+        f"Renovação '{pedido.renovacao.descricao}' processada. "
+        f"Turma selecionada: {pedido.oferta.turma.nome}. "
+        f"Resultado: {'aprovado' if aprovado else 'rejeitado'}."
+    )
+    if pedido.observacao_processamento:
+        despacho = f"{despacho} {pedido.observacao_processamento}"
+    ProcessoAndamento.objects.create(
+        processo=processo,
+        tipo=ProcessoAndamento.Tipo.CONCLUSAO,
+        despacho=despacho[:1000],
+        data_evento=timezone.localdate(),
+        criado_por=usuario if getattr(usuario, "is_authenticated", False) else None,
+    )
+
+
 @transaction.atomic
 def _processar_pedidos_renovacao(renovacao: RenovacaoMatricula, usuario):
     pendentes = list(
-        RenovacaoMatriculaPedido.objects.select_related("aluno", "oferta", "oferta__turma", "renovacao")
+        RenovacaoMatriculaPedido.objects.select_related("aluno", "oferta", "oferta__turma", "renovacao", "processo_administrativo")
         .filter(renovacao=renovacao, status=RenovacaoMatriculaPedido.Status.PENDENTE)
         .order_by("aluno_id", "prioridade", "criado_em", "id")
     )
@@ -276,6 +329,7 @@ def _processar_pedidos_renovacao(renovacao: RenovacaoMatricula, usuario):
                         "atualizado_em",
                     ]
                 )
+                _sincronizar_processo_pedido(pedido=pedido, aprovado=False, usuario=usuario)
                 rejeitados += 1
             continue
 
@@ -298,6 +352,7 @@ def _processar_pedidos_renovacao(renovacao: RenovacaoMatricula, usuario):
                 "atualizado_em",
             ]
         )
+        _sincronizar_processo_pedido(pedido=pedido_escolhido, aprovado=True, usuario=usuario)
         aprovados += 1
 
         for pedido in pedidos:
@@ -318,6 +373,7 @@ def _processar_pedidos_renovacao(renovacao: RenovacaoMatricula, usuario):
                     "atualizado_em",
                 ]
             )
+            _sincronizar_processo_pedido(pedido=pedido, aprovado=False, usuario=usuario)
             rejeitados += 1
 
     renovacao.processado_em = timezone.now()
@@ -355,6 +411,20 @@ def renovacao_matricula_list(request):
                 data_fim=form.cleaned_data["data_fim"],
                 observacao=form.cleaned_data.get("observacao") or "",
                 criado_por=request.user if request.user.is_authenticated else None,
+            )
+            _registrar_auditoria_renovacao(
+                renovacao=renovacao,
+                evento="RENOVACAO_CRIADA",
+                usuario=request.user,
+                depois={
+                    "descricao": renovacao.descricao,
+                    "ano_letivo": renovacao.ano_letivo,
+                    "secretaria_id": renovacao.secretaria_id,
+                    "data_inicio": str(renovacao.data_inicio),
+                    "data_fim": str(renovacao.data_fim),
+                    "ativo": renovacao.ativo,
+                },
+                observacao="Renovação criada no painel da secretaria.",
             )
             messages.success(request, "Configuração de renovação criada com sucesso.")
             return redirect("educacao:renovacao_matricula_detail", pk=renovacao.pk)
@@ -504,6 +574,18 @@ def renovacao_matricula_detail(request, pk: int):
                 except Exception as exc:
                     messages.error(request, f"Não foi possível adicionar a oferta: {exc}")
                 else:
+                    _registrar_auditoria_renovacao(
+                        renovacao=renovacao,
+                        evento="RENOVACAO_OFERTA_ADICIONADA",
+                        usuario=request.user,
+                        depois={
+                            "oferta_id": oferta.id,
+                            "turma_id": oferta.turma_id,
+                            "turma_nome": oferta.turma.nome,
+                            "oferta_ativa": oferta.ativo,
+                        },
+                        observacao="Turma adicionada à oferta de renovação.",
+                    )
                     messages.success(request, "Turma adicionada na oferta de renovação.")
                 return redirect("educacao:renovacao_matricula_detail", pk=renovacao.pk)
             messages.error(request, "Corrija os erros para adicionar a oferta.")
@@ -512,7 +594,19 @@ def renovacao_matricula_detail(request, pk: int):
             if oferta_id.isdigit():
                 oferta = RenovacaoMatriculaOferta.objects.filter(renovacao=renovacao, pk=int(oferta_id)).first()
                 if oferta:
+                    oferta_info = {
+                        "oferta_id": oferta.id,
+                        "turma_id": oferta.turma_id,
+                        "turma_nome": oferta.turma.nome,
+                    }
                     oferta.delete()
+                    _registrar_auditoria_renovacao(
+                        renovacao=renovacao,
+                        evento="RENOVACAO_OFERTA_REMOVIDA",
+                        usuario=request.user,
+                        antes=oferta_info,
+                        observacao="Turma removida da oferta de renovação.",
+                    )
                     messages.success(request, "Oferta removida da renovação.")
                     return redirect("educacao:renovacao_matricula_detail", pk=renovacao.pk)
         elif action == "processar":
@@ -521,6 +615,18 @@ def renovacao_matricula_detail(request, pk: int):
             except Exception as exc:
                 messages.error(request, f"Erro ao processar pedidos: {exc}")
             else:
+                _registrar_auditoria_renovacao(
+                    renovacao=renovacao,
+                    evento="RENOVACAO_PROCESSADA",
+                    usuario=request.user,
+                    depois={
+                        "total": resultado["total"],
+                        "aprovados": resultado["aprovados"],
+                        "rejeitados": resultado["rejeitados"],
+                        "processado_em": str(renovacao.processado_em or ""),
+                    },
+                    observacao="Processamento automático de pedidos executado.",
+                )
                 messages.success(
                     request,
                     (
@@ -532,8 +638,17 @@ def renovacao_matricula_detail(request, pk: int):
                 )
             return redirect("educacao:renovacao_matricula_detail", pk=renovacao.pk)
         elif action == "toggle_ativo":
+            ativo_anterior = renovacao.ativo
             renovacao.ativo = not renovacao.ativo
             renovacao.save(update_fields=["ativo", "atualizado_em"])
+            _registrar_auditoria_renovacao(
+                renovacao=renovacao,
+                evento="RENOVACAO_STATUS_ALTERADO",
+                usuario=request.user,
+                antes={"ativo": ativo_anterior},
+                depois={"ativo": renovacao.ativo},
+                observacao="Ativação/inativação manual da renovação.",
+            )
             messages.success(request, "Status de ativação atualizado.")
             return redirect("educacao:renovacao_matricula_detail", pk=renovacao.pk)
     else:
@@ -558,6 +673,7 @@ def renovacao_matricula_detail(request, pk: int):
             "origem_matricula",
             "matricula_resultante",
             "processado_por",
+            "processo_administrativo",
         )
         .filter(renovacao=renovacao)
         .order_by("aluno__nome", "prioridade", "id")

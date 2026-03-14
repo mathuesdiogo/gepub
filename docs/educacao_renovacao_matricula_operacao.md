@@ -29,6 +29,14 @@ Padronizar a renovação de matrícula no GEPUB com três frentes:
    - `Aprovado`;
    - `Rejeitado`.
 
+### Processo eletrônico automático
+
+- Cada pedido gera (ou reaproveita) um `ProcessoAdministrativo` do tipo `RENOVACAO_MATRICULA`.
+- Cancelamento pelo aluno arquiva o processo vinculado.
+- No processamento final da secretaria:
+  - pedido aprovado -> processo `Concluído`;
+  - pedido rejeitado -> processo `Arquivado`.
+
 ## Regras de Processamento
 
 - Para cada aluno, apenas o pedido de maior prioridade é aprovado.
@@ -39,6 +47,15 @@ Padronizar a renovação de matrícula no GEPUB com três frentes:
   - é feito remanejamento automático.
 - Se não existir matrícula ativa:
   - é criada nova matrícula automaticamente.
+
+## Auditoria
+
+- Eventos de auditoria registrados no módulo `EDUCACAO`:
+  - criação de renovação;
+  - adição/remoção de oferta;
+  - ativação/inativação;
+  - submissão/cancelamento de pedido pelo aluno;
+  - processamento final da renovação.
 
 ## Onde consultar
 

@@ -291,6 +291,35 @@ class RenovacaoMatriculaProcessingTestCase(TestCase):
             ).exists()
         )
 
+    def test_processamento_atualiza_status_do_processo_vinculado(self):
+        aluno = Aluno.objects.create(nome="Aluno Processo Vinculado")
+        processo = ProcessoAdministrativo.objects.create(
+            municipio=self.municipio,
+            secretaria=self.secretaria,
+            unidade=self.unidade,
+            numero=f"ALUNO-{date.today().strftime('%Y%m%d')}-7001",
+            tipo="RENOVACAO_MATRICULA",
+            assunto="Pedido de renovação",
+            solicitante_nome=aluno.nome,
+            descricao="Fluxo de validação de processo.",
+            status=ProcessoAdministrativo.Status.ABERTO,
+            criado_por=self.user,
+        )
+        pedido = RenovacaoMatriculaPedido.objects.create(
+            renovacao=self.renovacao,
+            aluno=aluno,
+            oferta=self.oferta_1,
+            prioridade=1,
+            processo_administrativo=processo,
+        )
+
+        _processar_pedidos_renovacao(self.renovacao, self.user)
+        pedido.refresh_from_db()
+        processo.refresh_from_db()
+
+        self.assertEqual(pedido.status, RenovacaoMatriculaPedido.Status.APROVADO)
+        self.assertEqual(processo.status, ProcessoAdministrativo.Status.CONCLUIDO)
+
     def test_processamento_rejeita_quando_oferta_esta_inativa(self):
         aluno = Aluno.objects.create(nome="Aluno Oferta Inativa")
         self.oferta_1.ativo = False
@@ -1157,6 +1186,7 @@ class FechamentoHistoricoTestCase(TestCase):
             "aluno_documentos_processos",
             "aluno_ensino",
             "aluno_ensino_dados",
+            "aluno_ensino_renovacao",
             "aluno_ensino_justificativa",
             "aluno_ensino_boletins",
             "aluno_ensino_avaliacoes",
@@ -1415,6 +1445,96 @@ class FechamentoHistoricoTestCase(TestCase):
                 solicitante_nome=self.aluno.nome,
             ).exists()
         )
+
+    def test_aluno_renovacao_post_cria_pedido_e_processo(self):
+        aluno_user, profile = self._create_aluno_profile_user("aluno.renovacao")
+        hoje = date.today()
+        renovacao = RenovacaoMatricula.objects.create(
+            descricao="Renovação Rede 2026",
+            ano_letivo=2026,
+            secretaria=self.turma.unidade.secretaria,
+            data_inicio=hoje - timedelta(days=1),
+            data_fim=hoje + timedelta(days=3),
+            criado_por=self.admin,
+        )
+        oferta = RenovacaoMatriculaOferta.objects.create(
+            renovacao=renovacao,
+            turma=self.turma,
+        )
+
+        self.client.force_login(aluno_user)
+        url = reverse("educacao:aluno_ensino_renovacao", args=[profile.codigo_acesso])
+        resp = self.client.post(
+            url,
+            {
+                "form_kind": "pedido_renovacao",
+                "renovacao_id": str(renovacao.pk),
+                "oferta_id": str(oferta.pk),
+                "prioridade": 1,
+                "observacao_aluno": "Solicitação dentro da janela.",
+            },
+            follow=True,
+        )
+        self.assertEqual(resp.status_code, 200)
+        pedido = RenovacaoMatriculaPedido.objects.get(renovacao=renovacao, aluno=self.aluno, oferta=oferta)
+        self.assertIsNotNone(pedido.processo_administrativo_id)
+        self.assertTrue(
+            ProcessoAdministrativo.objects.filter(
+                pk=pedido.processo_administrativo_id,
+                tipo="RENOVACAO_MATRICULA",
+                solicitante_nome=self.aluno.nome,
+            ).exists()
+        )
+
+    def test_aluno_renovacao_cancelar_pedido_arquiva_processo(self):
+        aluno_user, profile = self._create_aluno_profile_user("aluno.renovacao.cancel")
+        hoje = date.today()
+        renovacao = RenovacaoMatricula.objects.create(
+            descricao="Renovação Cancelamento 2026",
+            ano_letivo=2026,
+            secretaria=self.turma.unidade.secretaria,
+            data_inicio=hoje - timedelta(days=1),
+            data_fim=hoje + timedelta(days=3),
+            criado_por=self.admin,
+        )
+        oferta = RenovacaoMatriculaOferta.objects.create(
+            renovacao=renovacao,
+            turma=self.turma,
+        )
+        processo = ProcessoAdministrativo.objects.create(
+            municipio=self.turma.unidade.secretaria.municipio,
+            secretaria=self.turma.unidade.secretaria,
+            unidade=self.turma.unidade,
+            numero=f"ALUNO-{hoje.strftime('%Y%m%d')}-9001",
+            tipo="RENOVACAO_MATRICULA",
+            assunto="Teste de cancelamento",
+            solicitante_nome=self.aluno.nome,
+            descricao="Pedido de teste",
+            status=ProcessoAdministrativo.Status.ABERTO,
+            criado_por=aluno_user,
+        )
+        pedido = RenovacaoMatriculaPedido.objects.create(
+            renovacao=renovacao,
+            aluno=self.aluno,
+            oferta=oferta,
+            prioridade=1,
+            processo_administrativo=processo,
+        )
+
+        self.client.force_login(aluno_user)
+        url = reverse("educacao:aluno_ensino_renovacao", args=[profile.codigo_acesso])
+        resp = self.client.post(
+            url,
+            {
+                "form_kind": "cancelar_pedido_renovacao",
+                "pedido_id": str(pedido.pk),
+            },
+            follow=True,
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertFalse(RenovacaoMatriculaPedido.objects.filter(pk=pedido.pk).exists())
+        processo.refresh_from_db()
+        self.assertEqual(processo.status, ProcessoAdministrativo.Status.ARQUIVADO)
 
     def test_aluno_role_can_emitir_carteira_pdf(self):
         aluno_user, _profile = self._create_aluno_profile_user("aluno.carteira")

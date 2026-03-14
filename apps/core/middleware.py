@@ -55,6 +55,7 @@ _ALUNO_EDUCACAO_ALLOWED_VIEW_NAMES = {
     "educacao:aluno_ensino_biblioteca",
     "educacao:aluno_ensino_apoio",
     "educacao:aluno_ensino_seletivos",
+    "educacao:aluno_ensino_renovacao",
     "educacao:aluno_pesquisa",
     "educacao:aluno_central_servicos",
     "educacao:aluno_atividades",
@@ -83,7 +84,9 @@ def _is_aluno_allowed_educacao_view(user, view_name: str) -> bool:
     if current in _ALUNO_EDUCACAO_ALLOWED_VIEW_NAMES:
         return True
     leaf = current.split(":", 1)[-1] if current else ""
-    return bool(leaf and leaf in _ALUNO_EDUCACAO_ALLOWED_VIEW_NAMES_LEAF)
+    if leaf and leaf in _ALUNO_EDUCACAO_ALLOWED_VIEW_NAMES_LEAF:
+        return True
+    return bool(leaf and leaf.startswith("aluno_ensino_"))
 
 
 def _normalize_host(raw_host: str) -> str:

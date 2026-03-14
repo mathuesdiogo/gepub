@@ -954,6 +954,13 @@ class RenovacaoMatriculaPedido(models.Model):
         null=True,
         blank=True,
     )
+    processo_administrativo = models.ForeignKey(
+        "processos.ProcessoAdministrativo",
+        on_delete=models.SET_NULL,
+        related_name="pedidos_renovacao",
+        null=True,
+        blank=True,
+    )
     status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDENTE, db_index=True)
     observacao_processamento = models.TextField(blank=True, default="")
     processado_em = models.DateTimeField(null=True, blank=True)

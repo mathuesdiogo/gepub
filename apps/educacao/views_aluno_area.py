@@ -14,6 +14,7 @@ from django.utils import timezone
 from apps.core.decorators import require_perm
 from apps.core.models import AlunoArquivo, AlunoAviso
 from apps.core.rbac import scope_filter_matriculas
+from apps.core.services_auditoria import registrar_auditoria
 from apps.nee.models import AcompanhamentoNEE, AlunoNecessidade, ApoioMatricula, PlanoClinicoNEE
 from apps.ouvidoria.models import OuvidoriaCadastro, OuvidoriaResposta
 from apps.processos.models import ProcessoAdministrativo
@@ -470,6 +471,22 @@ def _create_processo_aluno(
         data_abertura=timezone.localdate(),
         criado_por=request.user,
     )
+    registrar_auditoria(
+        municipio=municipio,
+        modulo="EDUCACAO",
+        evento="PROCESSO_ALUNO_CRIADO",
+        entidade="ProcessoAdministrativo",
+        entidade_id=processo.pk,
+        usuario=request.user if getattr(request.user, "is_authenticated", False) else None,
+        depois={
+            "numero": processo.numero,
+            "tipo": processo.tipo,
+            "status": processo.status,
+            "assunto": processo.assunto,
+            "solicitante": processo.solicitante_nome,
+        },
+        observacao="Processo aberto via Área do Aluno.",
+    )
     return processo
 
 
@@ -810,6 +827,48 @@ def aluno_ensino_renovacao(request, codigo: str):
                         "atualizado_em",
                     ]
                 )
+            processo = pedido.processo_administrativo
+            if processo is None:
+                processo = _create_processo_aluno(
+                    request=request,
+                    ctx=ctx,
+                    tipo="RENOVACAO_MATRICULA",
+                    assunto=f"Renovação de matrícula • {renovacao.descricao}",
+                    descricao=(
+                        f"Pedido de renovação para turma {oferta.turma.nome} "
+                        f"(prioridade {pedido.prioridade}). "
+                        f"{(pedido.observacao_aluno or '').strip()}"
+                    ).strip(),
+                )
+                if processo is not None:
+                    pedido.processo_administrativo = processo
+                    pedido.save(update_fields=["processo_administrativo", "atualizado_em"])
+            elif processo.status in {
+                ProcessoAdministrativo.Status.CONCLUIDO,
+                ProcessoAdministrativo.Status.ARQUIVADO,
+            }:
+                processo.status = ProcessoAdministrativo.Status.ABERTO
+                processo.save(update_fields=["status", "atualizado_em"])
+
+            municipio_ref = ctx.get("municipio_ref")
+            if municipio_ref is not None:
+                registrar_auditoria(
+                    municipio=municipio_ref,
+                    modulo="EDUCACAO",
+                    evento="RENOVACAO_PEDIDO_ATUALIZADO" if not created else "RENOVACAO_PEDIDO_CRIADO",
+                    entidade="RenovacaoMatriculaPedido",
+                    entidade_id=pedido.pk,
+                    usuario=request.user if getattr(request.user, "is_authenticated", False) else None,
+                    depois={
+                        "renovacao_id": renovacao.id,
+                        "aluno_id": aluno.id,
+                        "oferta_id": oferta.id,
+                        "prioridade": pedido.prioridade,
+                        "status": pedido.status,
+                        "processo_id": pedido.processo_administrativo_id,
+                    },
+                    observacao="Pedido submetido pela Área do Aluno.",
+                )
             messages.success(request, "Pedido de renovação registrado com sucesso.")
             return redirect(reverse("educacao:aluno_ensino_renovacao", args=[ctx["codigo_canonico"]]))
 
@@ -825,6 +884,26 @@ def aluno_ensino_renovacao(request, codigo: str):
                     renovacao__data_fim__gte=hoje,
                 ).first()
                 if pedido:
+                    if pedido.processo_administrativo_id:
+                        processo = pedido.processo_administrativo
+                        if processo.status != ProcessoAdministrativo.Status.ARQUIVADO:
+                            processo.status = ProcessoAdministrativo.Status.ARQUIVADO
+                            processo.save(update_fields=["status", "atualizado_em"])
+                    municipio_ref = ctx.get("municipio_ref")
+                    if municipio_ref is not None:
+                        registrar_auditoria(
+                            municipio=municipio_ref,
+                            modulo="EDUCACAO",
+                            evento="RENOVACAO_PEDIDO_CANCELADO",
+                            entidade="RenovacaoMatriculaPedido",
+                            entidade_id=pedido.pk,
+                            usuario=request.user if getattr(request.user, "is_authenticated", False) else None,
+                            antes={
+                                "status": pedido.status,
+                                "processo_id": pedido.processo_administrativo_id,
+                            },
+                            observacao="Pedido pendente cancelado pelo aluno.",
+                        )
                     pedido.delete()
                     messages.success(request, "Pedido pendente removido.")
             return redirect(reverse("educacao:aluno_ensino_renovacao", args=[ctx["codigo_canonico"]]))
