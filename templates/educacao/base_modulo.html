@@ -7,17 +7,9 @@
 {% endblock %}
 
 {% block content %}
-  {% with route=request.resolver_match.url_name|default:'' %}
-    <div class="gp-module-shell educacao-module{% if hide_module_menu or is_professor_role or role_code == 'EDU_COORD' or role_code == 'EDU_SECRETARIO' or 'informatica_' in route or 'calendario_' in route %} gp-module-shell--single{% endif %}">
-      {% if not hide_module_menu and not is_professor_role and role_code != 'EDU_COORD' and role_code != 'EDU_SECRETARIO' and 'informatica_' not in route and 'calendario_' not in route %}
-      <aside class="gp-module-shell__aside">
-        {% include "educacao/_menu_modulo.html" %}
-      </aside>
-      {% endif %}
-
-      <main class="gp-module-shell__main">
-        {% block module_content %}{% endblock %}
-      </main>
-    </div>
-  {% endwith %}
+  <div class="gp-module-shell educacao-module gp-module-shell--single">
+    <main class="gp-module-shell__main">
+      {% block module_content %}{% endblock %}
+    </main>
+  </div>
 {% endblock %}
