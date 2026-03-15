@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import unicodedata
 from io import BytesIO
 
 from django.conf import settings
@@ -15,15 +16,21 @@ def _only_digits(s: str) -> str:
     return "".join(ch for ch in (s or "") if ch.isdigit())
 
 
+def _normalize_codigo_base(nome: str) -> str:
+    raw = ((nome or "").strip().split() or [""])[0]
+    normalized = unicodedata.normalize("NFKD", raw)
+    normalized = "".join(ch for ch in normalized if not unicodedata.combining(ch))
+    normalized = re.sub(r"[^A-Za-z0-9]+", "", normalized).upper()
+    return normalized or "USUARIO"
+
+
 def gerar_codigo_acesso(nome: str, ano: int | None = None) -> str:
     """
-    Ex.: "joao.silva-2026"
+    Ex.: "JOAO.2026"
     """
-    base = (nome or "").strip().lower()
-    base = re.sub(r"[^a-z0-9]+", ".", base)
-    base = base.strip(".") or "usuario"
-    ano = ano or timezone.now().year
-    return f"{base}-{ano}"
+    base = _normalize_codigo_base(nome)
+    ano = int(ano or timezone.now().year)
+    return f"{base}.{ano}"
 
 
 class Profile(models.Model):
@@ -167,12 +174,15 @@ class Profile(models.Model):
         # =========================
         if not self.codigo_acesso:
             nome_base = (self.user.get_full_name() or self.user.username or "usuario").strip()
-            base = gerar_codigo_acesso(nome_base)
+            ano_base = None
+            if getattr(self.user, "date_joined", None):
+                ano_base = self.user.date_joined.year
+            base = gerar_codigo_acesso(nome_base, ano=ano_base)
 
             codigo = base
             i = 2
             while Profile.objects.filter(codigo_acesso__iexact=codigo).exclude(pk=self.pk).exists():
-                codigo = f"{base}-{i}"
+                codigo = f"{base}.{i}"
                 i += 1
 
             self.codigo_acesso = codigo

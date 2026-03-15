@@ -1,0 +1,94 @@
+<div class="cc-consent" data-cookie-consent>
+  <section class="cc-banner" role="region" aria-label="Consentimento de cookies" data-cookie-banner hidden>
+    <div class="cc-banner__content">
+      <h2>Privacidade e cookies</h2>
+      <p>
+        Utilizamos cookies necessários para o funcionamento do portal e, com sua autorização, cookies opcionais
+        para desempenho, personalização e comunicação institucional. Você pode aceitar, recusar ou escolher por
+        categoria, e alterar essa decisão a qualquer momento.
+      </p>
+      <p class="cc-banner__links">
+        <a href="{% url 'core:politica_privacidade_public' %}">Política de Privacidade</a>
+        <span>•</span>
+        <a href="{% url 'core:politica_cookies_public' %}">Política de Cookies</a>
+      </p>
+    </div>
+    <div class="cc-banner__actions">
+      <button class="cc-btn cc-btn--ghost" type="button" data-cookie-reject-all>Recusar opcionais</button>
+      <button class="cc-btn cc-btn--soft" type="button" data-cookie-open-modal>Gerenciar escolhas</button>
+      <button class="cc-btn cc-btn--primary" type="button" data-cookie-accept-all>Aceitar todos</button>
+    </div>
+  </section>
+
+  <div class="cc-modal-backdrop" data-cookie-modal-backdrop hidden></div>
+  <section
+    class="cc-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="cookie-modal-title"
+    aria-describedby="cookie-modal-desc"
+    data-cookie-modal
+    hidden
+  >
+    <header class="cc-modal__header">
+      <h3 id="cookie-modal-title">Central de preferências de cookies</h3>
+      <button class="cc-icon-btn" type="button" aria-label="Fechar preferências de cookies" data-cookie-close-modal>
+        <span aria-hidden="true">×</span>
+      </button>
+    </header>
+
+    <p id="cookie-modal-desc" class="cc-modal__intro">
+      Selecione quais categorias opcionais você autoriza. Cookies estritamente necessários permanecem ativos para
+      autenticação, segurança e funcionamento do portal.
+    </p>
+
+    <div class="cc-modal__groups">
+      <article class="cc-group">
+        <div class="cc-group__head">
+          <h4>Estritamente necessários</h4>
+          <span class="cc-pill cc-pill--locked">Sempre ativo</span>
+        </div>
+        <p>Essenciais para login, segurança de sessão, proteção contra abuso e disponibilidade dos serviços.</p>
+      </article>
+
+      <article class="cc-group">
+        <div class="cc-group__head">
+          <h4>Desempenho e análise</h4>
+          <label class="cc-switch">
+            <input type="checkbox" data-cookie-pref="analytics" />
+            <span></span>
+          </label>
+        </div>
+        <p>Ajuda a entender uso de páginas e desempenho para evolução contínua da experiência.</p>
+      </article>
+
+      <article class="cc-group">
+        <div class="cc-group__head">
+          <h4>Funcionalidade</h4>
+          <label class="cc-switch">
+            <input type="checkbox" data-cookie-pref="functional" />
+            <span></span>
+          </label>
+        </div>
+        <p>Permite lembrar preferências de interface e ajustes de navegação em visitas futuras.</p>
+      </article>
+
+      <article class="cc-group">
+        <div class="cc-group__head">
+          <h4>Comunicação e campanhas</h4>
+          <label class="cc-switch">
+            <input type="checkbox" data-cookie-pref="marketing" />
+            <span></span>
+          </label>
+        </div>
+        <p>Utilizado para mensuração de campanhas institucionais e comunicações digitais, quando habilitado.</p>
+      </article>
+    </div>
+
+    <footer class="cc-modal__actions">
+      <button class="cc-btn cc-btn--ghost" type="button" data-cookie-reject-all-modal>Recusar opcionais</button>
+      <button class="cc-btn cc-btn--soft" type="button" data-cookie-save-prefs>Salvar preferências</button>
+      <button class="cc-btn cc-btn--primary" type="button" data-cookie-accept-all-modal>Aceitar todos</button>
+    </footer>
+  </section>
+</div>

@@ -1,0 +1,27 @@
+<header class="lp-header">
+  <div class="lp-wrap lp-header__inner">
+    <a class="lp-brand" href="{{ header_brand_href|default:cta_home }}">
+      <span class="lp-brand__mark">
+        {% if header_logo_url %}
+          <img src="{{ header_logo_url }}" alt="{{ header_marca_nome|default:'GEPUB' }}">
+        {% else %}
+          <i class="fa-solid fa-burst"></i>
+        {% endif %}
+      </span>
+      <span class="lp-brand__name">{{ header_marca_nome|default:"GEPUB" }}</span>
+    </a>
+
+    <nav class="lp-nav" id="lp-main-nav" aria-label="Navegação principal">
+      <a href="{{ cta_contato }}">Fale conosco</a>
+      <a href="{{ cta_ajuda|default:cta_documentacao }}">Ajuda</a>
+      <a href="{{ cta_login }}">Iniciar sessão</a>
+    </nav>
+
+    <button class="lp-header__menu-toggle" type="button" aria-label="Abrir menu" aria-controls="lp-main-nav" aria-expanded="false" data-nav-toggle>
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+  <button class="lp-header__backdrop" type="button" aria-label="Fechar menu" data-nav-backdrop hidden></button>
+</header>

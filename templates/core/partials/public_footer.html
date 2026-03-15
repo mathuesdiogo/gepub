@@ -1,0 +1,40 @@
+{% load static %}
+
+<footer class="lp-footer">
+  <div class="lp-wrap lp-footer__grid">
+    <article>
+      <h3>{{ footer_marca_nome|default:"GEPUB" }}</h3>
+      <p>Soluções inteligentes para gestão pública digital.</p>
+      <div class="lp-footer__social">
+        <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+        <a href="#" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
+      </div>
+    </article>
+    <article>
+      <h4>Recursos</h4>
+      <a href="{{ cta_home }}#modulos">Módulos principais</a>
+      <a href="{{ cta_home }}#funcionalidades">Funcionalidades</a>
+      <a href="{{ cta_home }}#tecnologia">Tecnologia</a>
+      <a href="{% url 'core:blog_public' %}">Blog</a>
+      <a href="{% url 'core:documentacao_public' %}">Documentação</a>
+      <a href="{% url 'core:validar_documento_public' %}">Validação de Documento</a>
+    </article>
+    <article>
+      <h4>Políticas</h4>
+      <a href="{{ cta_home }}#inicio">Início</a>
+      <a href="{% url 'core:politica_privacidade_public' %}">Política de Privacidade</a>
+      <a href="{% url 'core:politica_cookies_public' %}">Política de Cookies</a>
+      <a href="{% url 'core:termos_servico_public' %}">Termos de Serviço</a>
+    </article>
+    <article>
+      <h4>Suporte</h4>
+      <a href="{{ cta_contato }}">Solicitar demonstração</a>
+      <a href="{{ cta_login }}">Acesso ao sistema</a>
+      <a href="{{ cta_transparencia }}">Transparência</a>
+    </article>
+  </div>
+  <div class="lp-wrap lp-footer__copy">
+    <p>© {% now "Y" %} {{ footer_marca_nome|default:"GEPUB" }}. Todos os direitos reservados.</p>
+  </div>
+</footer>

@@ -13,71 +13,56 @@
 {% endblock %}
 
 {% block content %}
+{% include "core/partials/public_header.html" with header_logo_url=marca_logo_url header_marca_nome=marca_nome %}
 <div class="ps-page" id="topo">
-  <header class="ps-header">
-    <a class="ps-brand" href="{{ cta_home }}">
-      <span class="ps-brand__badge">
-        {% if marca_logo_url %}
-          <img src="{{ marca_logo_url }}" alt="{{ marca_nome|default:'GEPUB' }}">
-        {% else %}
-          <i class="fa-solid fa-burst"></i>
-        {% endif %}
-      </span>
-      <span>{{ marca_nome|default:"GEPUB" }}</span>
-    </a>
-
-    <nav class="ps-nav" aria-label="Navegação pública">
-      <a href="{{ cta_home }}">Institucional</a>
-      <a href="{{ cta_blog }}">Blog</a>
-      <a href="{{ cta_documentacao }}">Documentação</a>
-      <a href="{{ cta_validacao_documentos }}">Validação</a>
-      <a href="{{ cta_privacidade }}">Privacidade</a>
-      <a href="{{ cta_cookies }}">Cookies</a>
-      <a href="{{ cta_termos }}">Termos</a>
-    </nav>
-
-    <div class="ps-header__actions">
-      <a class="ps-btn ps-btn--dark" href="{{ cta_login }}">Acesso ao sistema</a>
-    </div>
-  </header>
-
   <main class="ps-main">
     {% block public_page_content %}{% endblock %}
   </main>
-
-  <footer class="ps-footer">
-    <div class="ps-footer__grid">
-      <article>
-        <h3>{{ marca_nome|default:"GEPUB" }}</h3>
-        <p>Plataforma de gestão pública com foco em operação municipal integrada.</p>
-      </article>
-
-      <article>
-        <h4>Conteúdo</h4>
-        <a href="{{ cta_blog }}">Blog</a>
-        <a href="{{ cta_documentacao }}">Documentação</a>
-        <a href="{{ cta_validacao_documentos }}">Validação de Documento</a>
-        <a href="{{ cta_transparencia }}">Transparência</a>
-      </article>
-
-      <article>
-        <h4>Políticas</h4>
-        <a href="{{ cta_privacidade }}">Política de Privacidade</a>
-        <a href="{{ cta_cookies }}">Política de Cookies</a>
-        <a href="{{ cta_termos }}">Termos de Serviço</a>
-      </article>
-
-      <article>
-        <h4>Atalhos</h4>
-        <a href="{{ cta_home }}">Página Institucional</a>
-        <a href="{{ cta_validacao_documentos }}">Validar Documento</a>
-        <a href="{{ cta_login }}">Entrar no sistema</a>
-      </article>
-    </div>
-
-    <div class="ps-footer__copy">
-      <p>© {% now "Y" %} {{ marca_nome|default:"GEPUB" }}. Todos os direitos reservados.</p>
-    </div>
-  </footer>
 </div>
+{% include "core/partials/public_footer.html" %}
+{% endblock %}
+
+{% block extra_js %}
+  {{ block.super }}
+  <script>
+    (() => {
+      const header = document.querySelector(".lp-header");
+      const navToggle = document.querySelector("[data-nav-toggle]");
+      const navBackdrop = document.querySelector("[data-nav-backdrop]");
+      const navLinks = Array.from(document.querySelectorAll(".lp-nav a"));
+
+      if (!header || !navToggle || !navBackdrop) return;
+
+      const closeHeaderMenu = () => {
+        header.classList.remove("is-menu-open");
+        navToggle.setAttribute("aria-expanded", "false");
+        navToggle.setAttribute("aria-label", "Abrir menu");
+        navBackdrop.hidden = true;
+        document.body.classList.remove("lp-no-scroll");
+      };
+
+      const openHeaderMenu = () => {
+        header.classList.add("is-menu-open");
+        navToggle.setAttribute("aria-expanded", "true");
+        navToggle.setAttribute("aria-label", "Fechar menu");
+        navBackdrop.hidden = false;
+        document.body.classList.add("lp-no-scroll");
+      };
+
+      navToggle.addEventListener("click", () => {
+        if (header.classList.contains("is-menu-open")) {
+          closeHeaderMenu();
+          return;
+        }
+        openHeaderMenu();
+      });
+
+      navBackdrop.addEventListener("click", closeHeaderMenu);
+      navLinks.forEach((link) => link.addEventListener("click", closeHeaderMenu));
+
+      window.addEventListener("resize", () => {
+        if (window.innerWidth > 760) closeHeaderMenu();
+      });
+    })();
+  </script>
 {% endblock %}

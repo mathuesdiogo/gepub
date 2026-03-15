@@ -8,23 +8,36 @@
   <small class="ps-updated">Última atualização: {{ last_update }}</small>
 </section>
 
-<section class="ps-section ps-legal">
-  {% for section in sections %}
-    <article class="ps-card ps-legal__item">
-      <h2>{{ section.title }}</h2>
+<section class="ps-section ps-legal-plain">
+  <header class="ps-section__head">
+    <h2>Documento Institucional</h2>
+    <p>Conteúdo organizado por seções com redação formal, subtítulos operacionais e pontos de referência.</p>
+    {% if page_title == "Política de Cookies" %}
+      <button class="ps-btn ps-btn--light cc-inline-trigger" type="button" data-cookie-open-preferences>
+        Gerenciar preferências de cookies
+      </button>
+    {% endif %}
+  </header>
 
-      {% for paragraph in section.paragraphs %}
-        <p>{{ paragraph }}</p>
-      {% endfor %}
+  <div class="ps-legal-text">
+    {% for section in sections %}
+      <article class="ps-legal-text__section">
+        <h2>{{ section.title }}</h2>
 
-      {% if section.items %}
-        <ul>
-          {% for item in section.items %}
-            <li>{{ item }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    </article>
-  {% endfor %}
+        {% for paragraph in section.paragraphs %}
+          <p>{{ paragraph }}</p>
+        {% endfor %}
+
+        {% if section.items %}
+          <h3 class="ps-legal-text__subtitle">Pontos-chave</h3>
+          <ul>
+            {% for item in section.items %}
+              <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </article>
+    {% endfor %}
+  </div>
 </section>
 {% endblock %}

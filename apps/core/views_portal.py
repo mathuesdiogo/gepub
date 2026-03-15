@@ -42,6 +42,14 @@ from apps.core.models import (
     PortalPaginaPublica,
     TransparenciaEventoPublico,
 )
+from apps.core.legal_contents import (
+    TERMS_OF_SERVICE_LAST_UPDATE,
+    TERMS_OF_SERVICE_SECTIONS,
+    PRIVACY_POLICY_LAST_UPDATE,
+    PRIVACY_POLICY_SECTIONS,
+    COOKIES_POLICY_LAST_UPDATE,
+    COOKIES_POLICY_SECTIONS,
+)
 from apps.core.portal_public_utils import build_menu_items
 from apps.core.portal_specs import (
     DEFAULT_INSTITUTIONAL_SERVICES,
@@ -898,6 +906,7 @@ def institucional_public(request):
 
     context = {
         "content": content,
+        "footer_marca_nome": content.get("marca_nome") or "GEPUB",
         "slides": slides,
         "method_steps": method_steps,
         "service_cards": service_cards,
@@ -905,8 +914,15 @@ def institucional_public(request):
         "form": form,
         "simulacao": simulacao,
         "faq_items": faq_items,
+        "cta_home": reverse("core:institucional_public"),
         "cta_login": _app_login_url(request),
         "cta_contato": cta_contato,
+        "cta_blog": reverse("core:blog_public"),
+        "cta_documentacao": reverse("core:documentacao_public"),
+        "cta_validacao_documentos": reverse("core:validar_documento_public"),
+        "cta_privacidade": reverse("core:politica_privacidade_public"),
+        "cta_cookies": reverse("core:politica_cookies_public"),
+        "cta_termos": reverse("core:termos_servico_public"),
         "cta_docs": reverse("core:documentacao_public"),
         "cta_transparencia": reverse("core:transparencia_public"),
         "preview_mode": preview_mode,
@@ -929,11 +945,18 @@ def por_que_usar_public(request):
 def _public_site_context(request, content: dict | None = None) -> dict:
     base = content or {}
     marca_nome = base.get("marca_nome") or "GEPUB"
+    cta_contato = (base.get("servicos_cta_link") or "").strip()
+    if not cta_contato or cta_contato == "#simulador":
+        cta_contato = "#contato"
+    if cta_contato.startswith("#"):
+        cta_contato = f'{reverse("core:institucional_public")}{cta_contato}'
     return {
         "marca_nome": marca_nome,
+        "footer_marca_nome": marca_nome,
         "marca_logo_url": base.get("marca_logo_url", ""),
         "cta_home": reverse("core:institucional_public"),
         "cta_login": _app_login_url(request),
+        "cta_contato": cta_contato,
         "cta_blog": reverse("core:blog_public"),
         "cta_documentacao": reverse("core:documentacao_public"),
         "cta_validacao_documentos": reverse("core:validar_documento_public"),
@@ -1032,44 +1055,9 @@ def politica_privacidade_public(request):
         "core/legal_public.html",
         {
             "page_title": "Política de Privacidade",
-            "page_subtitle": "Diretrizes sobre coleta, uso, armazenamento e proteção de dados na plataforma GEPUB.",
-            "last_update": "12 de março de 2026",
-            "sections": [
-                {
-                    "title": "1. Dados coletados",
-                    "paragraphs": [
-                        "Coletamos dados cadastrais e operacionais necessários para autenticação, suporte técnico e execução dos serviços contratados.",
-                        "Os dados tratados variam conforme os módulos habilitados, sempre respeitando finalidade e minimização.",
-                    ],
-                    "items": [
-                        "Dados de identificação institucional e de usuários autorizados",
-                        "Registros de acesso, trilhas de auditoria e logs operacionais",
-                        "Dados transacionais vinculados às rotinas administrativas",
-                    ],
-                },
-                {
-                    "title": "2. Finalidade e base legal",
-                    "paragraphs": [
-                        "O tratamento ocorre para prestação do serviço, segurança da informação, cumprimento contratual e atendimento a obrigações legais.",
-                    ],
-                    "items": [
-                        "Execução de contrato com o ente público contratante",
-                        "Legítimo interesse em segurança, continuidade e melhoria do serviço",
-                        "Cumprimento de deveres legais e regulatórios",
-                    ],
-                },
-                {
-                    "title": "3. Direitos dos titulares",
-                    "paragraphs": [
-                        "A prefeitura e os usuários autorizados podem solicitar informações sobre tratamento, correção, atualização e outros direitos aplicáveis pela LGPD.",
-                    ],
-                    "items": [
-                        "Confirmação e acesso aos dados",
-                        "Correção de dados incompletos ou desatualizados",
-                        "Revisão de tratamento e solicitações ao encarregado",
-                    ],
-                },
-            ],
+            "page_subtitle": "Diretrizes institucionais sobre tratamento de dados pessoais, transparência e conformidade com a LGPD no ecossistema GEPUB.",
+            "last_update": PRIVACY_POLICY_LAST_UPDATE,
+            "sections": PRIVACY_POLICY_SECTIONS,
         },
     )
 
@@ -1080,43 +1068,9 @@ def politica_cookies_public(request):
         "core/legal_public.html",
         {
             "page_title": "Política de Cookies",
-            "page_subtitle": "Uso de cookies e tecnologias similares para autenticação, desempenho e experiência de navegação.",
-            "last_update": "12 de março de 2026",
-            "sections": [
-                {
-                    "title": "1. O que são cookies",
-                    "paragraphs": [
-                        "Cookies são arquivos de texto armazenados no navegador para manter sessão, preferências e segurança da aplicação.",
-                    ],
-                    "items": [
-                        "Cookies essenciais de autenticação e segurança",
-                        "Cookies funcionais para preferências de interface",
-                        "Cookies analíticos para métricas agregadas de uso",
-                    ],
-                },
-                {
-                    "title": "2. Como utilizamos",
-                    "paragraphs": [
-                        "Utilizamos cookies para manter login, prevenir uso indevido, melhorar desempenho e aprimorar a usabilidade do sistema.",
-                    ],
-                    "items": [
-                        "Persistência de sessão e controle de acesso",
-                        "Prevenção de fraude e monitoramento técnico",
-                        "Análise de estabilidade e performance da plataforma",
-                    ],
-                },
-                {
-                    "title": "3. Controle pelo usuário",
-                    "paragraphs": [
-                        "O usuário pode configurar o navegador para bloquear cookies não essenciais, ciente de que partes do sistema podem ter funcionalidade reduzida.",
-                    ],
-                    "items": [
-                        "Gerenciamento no navegador (Chrome, Firefox, Edge, Safari)",
-                        "Remoção de cookies salvos anteriormente",
-                        "Ajuste de consentimento conforme política vigente",
-                    ],
-                },
-            ],
+            "page_subtitle": "Regras de utilização de cookies e tecnologias correlatas para autenticação, segurança, desempenho e experiência de uso.",
+            "last_update": COOKIES_POLICY_LAST_UPDATE,
+            "sections": COOKIES_POLICY_SECTIONS,
         },
     )
 
@@ -1127,43 +1081,9 @@ def termos_servico_public(request):
         "core/legal_public.html",
         {
             "page_title": "Termos de Serviço",
-            "page_subtitle": "Condições de uso da plataforma GEPUB para órgãos municipais, secretarias e usuários autorizados.",
-            "last_update": "12 de março de 2026",
-            "sections": [
-                {
-                    "title": "1. Objeto",
-                    "paragraphs": [
-                        "A plataforma GEPUB fornece recursos de gestão pública digital, conforme módulos contratados e regras de acesso definidas pelo ente municipal.",
-                    ],
-                    "items": [
-                        "Disponibilização em modelo SaaS",
-                        "Configuração por município, secretaria e unidade",
-                        "Suporte, manutenção e evolução contínua",
-                    ],
-                },
-                {
-                    "title": "2. Responsabilidades",
-                    "paragraphs": [
-                        "O contratante é responsável pela governança de perfis, qualidade dos dados inseridos e conformidade dos processos administrativos.",
-                    ],
-                    "items": [
-                        "Gerenciar credenciais e permissões de usuários",
-                        "Garantir legitimidade das informações registradas",
-                        "Cumprir normas internas e legislação aplicável",
-                    ],
-                },
-                {
-                    "title": "3. Segurança e disponibilidade",
-                    "paragraphs": [
-                        "Adotamos controles técnicos e organizacionais para proteção de dados, continuidade da operação e rastreabilidade de eventos críticos.",
-                    ],
-                    "items": [
-                        "Logs de auditoria e trilhas de acesso",
-                        "Rotinas de backup e monitoramento",
-                        "Políticas de atualização e resposta a incidentes",
-                    ],
-                },
-            ],
+            "page_subtitle": "Condições institucionais de acesso e uso da plataforma GEPUB por órgãos públicos, secretarias e usuários autorizados.",
+            "last_update": TERMS_OF_SERVICE_LAST_UPDATE,
+            "sections": TERMS_OF_SERVICE_SECTIONS,
         },
     )
 

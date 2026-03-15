@@ -33,7 +33,7 @@ class UsuarioPrefeituraOnboardingForm(forms.Form):
         label="Código de acesso (opcional)",
         max_length=60,
         required=False,
-        help_text="Se vazio, o sistema gera automaticamente.",
+        help_text="Se vazio, o sistema gera automaticamente no padrão PRIMEIRONOME.ANO (ex.: MARIA.2026).",
     )
     senha_inicial = forms.CharField(
         label="Senha inicial (opcional)",
@@ -43,7 +43,7 @@ class UsuarioPrefeituraOnboardingForm(forms.Form):
     )
 
     def clean_codigo_acesso(self):
-        value = (self.cleaned_data.get("codigo_acesso") or "").strip().lower()
+        value = (self.cleaned_data.get("codigo_acesso") or "").strip().upper()
         if not value:
             return ""
         if not all(ch.isalnum() or ch in {".", "-", "_"} for ch in value):

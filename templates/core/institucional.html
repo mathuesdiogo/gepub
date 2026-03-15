@@ -20,40 +20,18 @@
     </div>
   {% endif %}
 
-  <header class="lp-header">
-    <div class="lp-wrap lp-header__inner">
-      <a class="lp-brand" href="#inicio">
-        <span class="lp-brand__mark">
-          {% if content.marca_logo_url %}
-            <img src="{{ content.marca_logo_url }}" alt="{{ content.marca_nome|default:'GEPUB' }}">
-          {% else %}
-            <i class="fa-solid fa-burst"></i>
-          {% endif %}
-        </span>
-        <span class="lp-brand__name">{{ content.marca_nome|default:'GEPUB' }}</span>
-      </a>
-
-      <nav class="lp-nav" aria-label="Navegação principal">
-        <a href="{% url 'core:blog_public' %}">Blog</a>
-        <a href="{% url 'core:documentacao_public' %}">Documentação</a>
-        <a href="{% url 'core:validar_documento_public' %}">Validação</a>
-        <a href="{% url 'core:politica_privacidade_public' %}">Privacidade</a>
-        <a href="{% url 'core:politica_cookies_public' %}">Cookies</a>
-        <a href="{% url 'core:termos_servico_public' %}">Termos</a>
-      </nav>
-
-      <a class="lp-btn lp-btn--dark lp-header__cta" href="{{ cta_contato }}">Solicitar Demonstração</a>
-    </div>
-  </header>
+  {% include "core/partials/public_header.html" with header_brand_href="#inicio" header_logo_url=content.marca_logo_url header_marca_nome=content.marca_nome %}
 
   <main>
     <section class="lp-hero" aria-labelledby="hero-title">
       <div class="lp-wrap lp-hero__inner">
-        <p class="lp-eyebrow">Plataforma completa para gestão pública</p>
-        <h1 id="hero-title">Gestão Estratégica Pública</h1>
-        <div class="lp-hero__actions">
-          <a class="lp-btn lp-btn--dark" href="#modulos">Começar agora</a>
-          <a class="lp-btn lp-btn--glass" href="{{ cta_contato }}">Ver demonstração</a>
+        <div class="lp-hero__window">
+          <p class="lp-eyebrow">Plataforma completa para gestão pública</p>
+          <h1 id="hero-title">Gestão Estratégica Pública</h1>
+          <div class="lp-hero__actions">
+            <a class="lp-btn lp-btn--dark" href="#modulos">Começar agora</a>
+            <a class="lp-btn lp-btn--glass" href="{{ cta_contato }}">Ver demonstração</a>
+          </div>
         </div>
       </div>
     </section>
@@ -1641,44 +1619,7 @@
     </section>
   </main>
 
-  <footer class="lp-footer">
-    <div class="lp-wrap lp-footer__grid">
-      <article>
-        <h3>Gepub.com.br</h3>
-        <p>Soluções inteligentes para gestão pública digital.</p>
-        <div class="lp-footer__social">
-          <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-          <a href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
-          <a href="#" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
-        </div>
-      </article>
-      <article>
-        <h4>Recursos</h4>
-        <a href="#modulos">Módulos principais</a>
-        <a href="#funcionalidades">Funcionalidades</a>
-        <a href="#tecnologia">Tecnologia</a>
-        <a href="{% url 'core:blog_public' %}">Blog</a>
-        <a href="{% url 'core:documentacao_public' %}">Documentação</a>
-        <a href="{% url 'core:validar_documento_public' %}">Validação de Documento</a>
-      </article>
-      <article>
-        <h4>Políticas</h4>
-        <a href="#inicio">Início</a>
-        <a href="{% url 'core:politica_privacidade_public' %}">Política de Privacidade</a>
-        <a href="{% url 'core:politica_cookies_public' %}">Política de Cookies</a>
-        <a href="{% url 'core:termos_servico_public' %}">Termos de Serviço</a>
-      </article>
-      <article>
-        <h4>Suporte</h4>
-        <a href="{{ cta_contato }}">Solicitar demonstração</a>
-        <a href="{{ cta_login }}">Acesso ao sistema</a>
-        <a href="{{ cta_transparencia }}">Transparência</a>
-      </article>
-    </div>
-    <div class="lp-wrap lp-footer__copy">
-      <p>© {% now "Y" %} {{ content.marca_nome|default:'GEPUB' }}. Todos os direitos reservados.</p>
-    </div>
-  </footer>
+  {% include "core/partials/public_footer.html" %}
 </div>
 {% endblock %}
 
@@ -1687,6 +1628,10 @@
   (() => {
     const tabs = Array.from(document.querySelectorAll('.lp-theme-tab'));
     const panels = Array.from(document.querySelectorAll('.lp-theme-panel'));
+    const header = document.querySelector('.lp-header');
+    const navToggle = document.querySelector('[data-nav-toggle]');
+    const navBackdrop = document.querySelector('[data-nav-backdrop]');
+    const navLinks = Array.from(document.querySelectorAll('.lp-nav a'));
     const accordionGroups = Array.from(document.querySelectorAll('[data-accordion]'));
     const roleApps = Array.from(document.querySelectorAll('.lp-role-app'));
     const roleScreens = Array.from(document.querySelectorAll('.lp-role-screen'));
@@ -1696,6 +1641,45 @@
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     const cleanTitleText = (value) => value.replace(/\s+/g, ' ').trim();
+
+    const closeHeaderMenu = () => {
+      if (!header || !navToggle || !navBackdrop) return;
+      header.classList.remove('is-menu-open');
+      navToggle.setAttribute('aria-expanded', 'false');
+      navToggle.setAttribute('aria-label', 'Abrir menu');
+      navBackdrop.hidden = true;
+      document.body.classList.remove('lp-no-scroll');
+    };
+
+    const openHeaderMenu = () => {
+      if (!header || !navToggle || !navBackdrop) return;
+      header.classList.add('is-menu-open');
+      navToggle.setAttribute('aria-expanded', 'true');
+      navToggle.setAttribute('aria-label', 'Fechar menu');
+      navBackdrop.hidden = false;
+      document.body.classList.add('lp-no-scroll');
+    };
+
+    if (header && navToggle && navBackdrop) {
+      navToggle.addEventListener('click', () => {
+        if (header.classList.contains('is-menu-open')) {
+          closeHeaderMenu();
+          return;
+        }
+        openHeaderMenu();
+      });
+
+      navBackdrop.addEventListener('click', closeHeaderMenu);
+      navLinks.forEach((link) => link.addEventListener('click', closeHeaderMenu));
+
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > 760) closeHeaderMenu();
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeHeaderMenu();
+      });
+    }
 
     const lockTitleHeight = (el) => {
       const height = el.getBoundingClientRect().height;

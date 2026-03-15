@@ -22,7 +22,7 @@ from apps.core.rbac import (
 )
 
 from .forms import UsuarioCreateForm, UsuarioPrefeituraOnboardingForm, UsuarioUpdateForm
-from .models import PasswordHistory, Profile, UserManagementAudit
+from .models import PasswordHistory, Profile, UserManagementAudit, gerar_codigo_acesso
 from .views_users_common import (
     User,
     can_manage_users,
@@ -66,15 +66,11 @@ def _assign_scope_by_actor_or_form(*, actor, profile: Profile, form_cleaned: dic
 
 
 def _build_onboarding_codigo(seed_name: str) -> str:
-    base = "".join(ch.lower() if ch.isalnum() else "." for ch in (seed_name or "").strip())
-    base = ".".join(part for part in base.split(".") if part)
-    if not base:
-        base = "prefeitura"
-    year = datetime.now().year
-    candidate = f"{base}-{year}"
+    base = gerar_codigo_acesso(seed_name, datetime.now().year)
+    candidate = base
     i = 2
     while Profile.objects.filter(codigo_acesso__iexact=candidate).exists():
-        candidate = f"{base}-{year}-{i}"
+        candidate = f"{base}.{i}"
         i += 1
     return candidate[:60]
 
@@ -218,7 +214,7 @@ def usuario_prefeitura_onboarding_create(request):
     if request.method == "POST" and form.is_valid():
         nome_responsavel = (form.cleaned_data["nome_responsavel"] or "").strip()
         email = (form.cleaned_data.get("email") or "").strip().lower()
-        codigo = (form.cleaned_data.get("codigo_acesso") or "").strip().lower() or _build_onboarding_codigo(nome_responsavel)
+        codigo = (form.cleaned_data.get("codigo_acesso") or "").strip() or _build_onboarding_codigo(nome_responsavel)
         senha = (form.cleaned_data.get("senha_inicial") or "").strip() or _generate_temp_password()
 
         if Profile.objects.filter(codigo_acesso__iexact=codigo).exists():

@@ -4,53 +4,50 @@
 {% block title %}Acesso • GEPUB{% endblock %}
 
 {% block extra_head %}
+<link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
 <link rel="stylesheet" href="{% static 'css/pages/login.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="gepub-login-page">
-  <div class="gepub-login-page__accent" aria-hidden="true"></div>
+<section class="gauth-page" aria-label="Acesso ao sistema GEPUB">
+  <main class="gauth-main">
+    <div class="gauth-shell">
+      <aside class="gauth-intro">
+        <p class="gauth-kicker">GEPUB Sistema</p>
+        <h1 class="gauth-title">Acesso institucional</h1>
+        <p class="gauth-subtitle">
+          Entre com seu código de acesso e senha para operar os módulos da prefeitura com trilha de auditoria e
+          permissões por perfil.
+        </p>
 
-  <main class="gepub-login" aria-label="Acesso institucional GEPUB">
-    <aside class="gepub-login__intro">
-      <div class="gepub-mark">
-        <span class="gepub-mark__dot gepub-mark__dot--a"></span>
-        <span class="gepub-mark__dot gepub-mark__dot--b"></span>
-        <span class="gepub-mark__dot gepub-mark__dot--c"></span>
-      </div>
+        <ul class="gauth-list">
+          <li>Código de acesso individual para cada usuário.</li>
+          <li>Controle por secretaria, unidade e função.</li>
+          <li>Acesso seguro para rotinas administrativas e educacionais.</li>
+        </ul>
 
-      <p class="gepub-login__eyebrow">GEPUB</p>
-      <h1 class="gepub-login__title">Portal de Login</h1>
-      <p class="gepub-login__subtitle">Gestão Estratégica Pública com controle, transparência e operação integrada.</p>
+        <p class="gauth-note">
+          Em caso de primeiro acesso, utilize a senha inicial cadastrada pela equipe gestora e altere após entrar.
+        </p>
+      </aside>
 
-      <ul class="gepub-login__bullets">
-        <li>Autenticação por código de acesso com rastreabilidade.</li>
-        <li>Permissões por escopo municipal, secretaria e unidade.</li>
-        <li>Módulos unificados para administração pública.</li>
-      </ul>
-
-      <nav class="gepub-login__links" aria-label="Acesso rápido público">
-        <a href="{% url 'core:institucional_public' %}">Institucional</a>
-        <a href="{% url 'core:documentacao_public' %}">Documentação</a>
-      </nav>
-    </aside>
-
-    <section class="gepub-login__frame">
-      <div class="gepub-login__form-panel">
-        <header class="gepub-auth__head">
-          <p class="gepub-auth__brand">GEPUB Network</p>
-          <h2 class="gepub-auth__title">Entrar na conta</h2>
+      <section class="gauth-card" aria-labelledby="gauth-login-title">
+        <header class="gauth-card__head">
+          <p class="gauth-card__brand">GEPUB</p>
+          <h2 id="gauth-login-title" class="gauth-card__title">Iniciar sessão</h2>
+          <p class="gauth-card__subtitle">Preencha as informações de login para continuar.</p>
         </header>
 
         {% if error %}
-          <div class="gepub-auth__alert" role="alert">{{ error }}</div>
+          <div class="gauth-alert" role="alert">{{ error }}</div>
         {% endif %}
 
-        <form method="post" class="gepub-auth__form">
+        <form method="post" class="gauth-form">
           {% csrf_token %}
 
           <label for="id_codigo_acesso">Código de acesso</label>
-          <div class="gepub-auth__field">
+          <div class="gauth-field">
+            <i class="fa-solid fa-id-card" aria-hidden="true"></i>
             <input
               id="id_codigo_acesso"
               type="text"
@@ -58,15 +55,13 @@
               value="{{ form.codigo_acesso.value|default:'' }}"
               required
               autocomplete="username"
-              placeholder="ex: joao.silva-2026"
+              placeholder="ex: USUARIO.2026"
             >
-            <span class="gepub-auth__field-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" focusable="false"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5v-9Zm2.5-.5a.5.5 0 0 0-.5.5v.8l6 3.4 6-3.4v-.8a.5.5 0 0 0-.5-.5h-11Zm11.5 3.5-4.9 2.8a2 2 0 0 1-2 0L6 10.5v6a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5v-6Z"/></svg>
-            </span>
           </div>
 
           <label for="id_password">Senha</label>
-          <div class="gepub-auth__field">
+          <div class="gauth-field">
+            <i class="fa-solid fa-lock" aria-hidden="true"></i>
             <input
               id="id_password"
               type="password"
@@ -75,35 +70,17 @@
               autocomplete="current-password"
               placeholder="Digite sua senha"
             >
-            <span class="gepub-auth__field-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" focusable="false"><path d="M7 10V8a5 5 0 1 1 10 0v2h.5A2.5 2.5 0 0 1 20 12.5v7a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 19.5v-7A2.5 2.5 0 0 1 6.5 10H7Zm2 0h6V8a3 3 0 1 0-6 0v2Zm3 4a1.5 1.5 0 0 0-.75 2.8V18a.75.75 0 0 0 1.5 0v-1.2A1.5 1.5 0 0 0 12 14Z"/></svg>
-            </span>
           </div>
 
-          <button type="submit" class="gepub-auth__submit">Acessar agora</button>
+          <button type="submit" class="gauth-submit">Entrar no sistema</button>
         </form>
 
-        <p class="gepub-auth__help">Primeira senha padrão: CPF. Após o primeiro acesso, a troca de senha é obrigatória.</p>
-
-        <div class="gepub-auth__separator"><span>ou</span></div>
-
-        <a class="gepub-auth__secondary" href="{% url 'core:institucional_public' %}">Conhecer o portal público</a>
-      </div>
-
-      <div class="gepub-login__visual" aria-hidden="true">
-        <div class="gepub-visual-card">
-          <div class="gepub-visual-card__phone">
-            <div class="gepub-visual-card__notch"></div>
-            <div class="gepub-visual-card__line"></div>
-            <div class="gepub-visual-card__line gepub-visual-card__line--short"></div>
-            <div class="gepub-visual-card__line"></div>
-            <div class="gepub-visual-card__btn"></div>
-          </div>
-          <div class="gepub-visual-card__badge"></div>
-          <div class="gepub-visual-card__shape"></div>
+        <div class="gauth-actions">
+          <a href="{% url 'core:documentacao_public' %}">Ajuda de acesso</a>
+          <a href="{% url 'core:institucional_public' %}">Voltar ao institucional</a>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   </main>
-</div>
+</section>
 {% endblock %}

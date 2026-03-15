@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}GEPUB{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/cookie-consent.css' %}">
   {% block extra_head %}{% endblock %}
 </head>
 <body class="public-body">
@@ -25,6 +26,9 @@
 
   {% block content %}{% endblock %}
 
+  {% include "core/partials/cookie_consent.html" %}
+
+  <script src="{% static 'js/cookie-consent.js' %}"></script>
   {% block extra_js %}{% endblock %}
 </body>
 </html>
