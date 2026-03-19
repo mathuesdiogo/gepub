@@ -168,6 +168,104 @@ class UsuarioCreateFormScopeTestCase(TestCase):
         self.assertIn("secretaria", form.errors)
 
 
+@patch.dict(
+    "os.environ",
+    {
+        "DJANGO_CPF_HASH_KEY": "hash-key-tests",
+        "DJANGO_CPF_ENCRYPTION_KEY": "enc-key-tests",
+    },
+    clear=False,
+)
+class UsuarioSenhaCpfFlowTestCase(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_superuser(
+            username="admin_password_policy",
+            email="admin.password.policy@example.com",
+            password="123456",
+        )
+        admin_profile = self.admin.profile
+        admin_profile.role = "ADMIN"
+        admin_profile.must_change_password = False
+        admin_profile.ativo = True
+        admin_profile.bloqueado = False
+        admin_profile.save(update_fields=["role", "must_change_password", "ativo", "bloqueado"])
+
+    def test_usuario_create_sets_initial_password_as_cpf_digits(self):
+        self.client.force_login(self.admin)
+        response = self.client.post(
+            reverse("accounts:usuario_create"),
+            {
+                "first_name": "TesteCpf",
+                "last_name": "Usuario",
+                "email": "",
+                "cpf": "123.456.789-01",
+                "role": "LEITURA",
+                "municipio": "",
+                "secretaria": "",
+                "unidade": "",
+                "setor": "",
+                "ativo": "on",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+
+        profile = Profile.objects.select_related("user").filter(user__first_name="TesteCpf").latest("id")
+        self.assertTrue(profile.user.check_password("12345678901"))
+        self.assertTrue(profile.must_change_password)
+
+    def test_usuario_reset_senha_sets_password_as_cpf_digits(self):
+        target = User.objects.create_user(
+            username="target_reset_cpf",
+            first_name="Reset",
+            last_name="Cpf",
+            password="SenhaAntiga@123",
+        )
+        profile = target.profile
+        profile.cpf = "987.654.321-00"
+        profile.must_change_password = False
+        profile.save()
+
+        self.client.force_login(self.admin)
+        response = self.client.post(reverse("accounts:usuario_reset_senha", args=[target.id]))
+        self.assertEqual(response.status_code, 302)
+
+        target.refresh_from_db()
+        profile.refresh_from_db()
+        self.assertTrue(target.check_password("98765432100"))
+        self.assertTrue(profile.must_change_password)
+        self.assertTrue(
+            UserManagementAudit.objects.filter(
+                target=target,
+                action=UserManagementAudit.Action.RESET_PASSWORD,
+            ).exists()
+        )
+
+    def test_usuario_reset_senha_requires_valid_cpf(self):
+        target = User.objects.create_user(
+            username="target_reset_sem_cpf",
+            first_name="Reset",
+            last_name="SemCpf",
+            password="SenhaOriginal@123",
+        )
+        profile = target.profile
+        profile.cpf = ""
+        profile.must_change_password = False
+        profile.save()
+
+        self.client.force_login(self.admin)
+        response = self.client.post(
+            reverse("accounts:usuario_reset_senha", args=[target.id]),
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "usuário sem CPF válido")
+
+        target.refresh_from_db()
+        profile.refresh_from_db()
+        self.assertTrue(target.check_password("SenhaOriginal@123"))
+        self.assertFalse(profile.must_change_password)
+
+
 class LoginSecurityViewTestCase(TestCase):
     def setUp(self):
         cache.clear()

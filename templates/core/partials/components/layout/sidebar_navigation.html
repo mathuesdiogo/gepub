@@ -648,7 +648,7 @@
     <span class="menu__label">Alterar Senha</span>
   </a>
 
-  <a class="menu__item {% if ns == 'core' and route == 'design_system_docs' %}is-active{% endif %}" href="{% url 'core:design_system_docs' %}" title="Design System">
+  <a class="menu__item {% if ns == 'core' and route == 'design_system_docs' or ns == 'core' and route == 'design_system_components' or ns == 'core' and route == 'design_system_themes' or ns == 'core' and route == 'design_system_brand' %}is-active{% endif %}" href="{% url 'core:design_system_docs' %}" title="Design System">
     <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-pen-nib"></i></span>
     <span class="menu__label">Design System</span>
   </a>

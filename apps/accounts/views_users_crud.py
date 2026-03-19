@@ -14,6 +14,7 @@ from django.views.decorators.http import require_http_methods
 
 from apps.billing.services import MetricaLimite, verificar_limite_municipio
 from apps.core.decorators import require_perm
+from apps.core.security import normalize_cpf
 from apps.core.rbac import (
     allowed_roles_for_manager_role,
     get_profile,
@@ -48,6 +49,18 @@ def _safe_next(request, fallback: str) -> str:
     if next_url and url_has_allowed_host_and_scheme(next_url, {request.get_host()}):
         return next_url
     return fallback
+
+
+def _cpf_password_from_raw(raw_cpf: str | None) -> str:
+    digits = normalize_cpf(raw_cpf)
+    return digits if len(digits) == 11 else ""
+
+
+def _cpf_password_from_profile(profile: Profile | None) -> str:
+    if not profile:
+        return ""
+    digits = profile.cpf_digits
+    return digits if len(digits) == 11 else ""
 
 
 def _assign_scope_by_actor_or_form(*, actor, profile: Profile, form_cleaned: dict):
@@ -123,8 +136,12 @@ def usuario_create(request):
             email=form.cleaned_data["email"] or "",
         )
 
-        temp_password = _generate_temp_password()
-        user.set_password(temp_password)
+        cpf_password = _cpf_password_from_raw(form.cleaned_data.get("cpf"))
+        if not cpf_password:
+            messages.error(request, "CPF inválido para definir senha inicial. Informe um CPF com 11 dígitos.")
+            return redirect("accounts:usuarios_list")
+
+        user.set_password(cpf_password)
         user.is_active = True
         user.save()
         PasswordHistory.objects.create(user=user, password_hash=user.password)
@@ -160,7 +177,7 @@ def usuario_create(request):
                         "Seu acesso foi criado no GEPUB.\n\n"
                         f"Código de acesso: {prof.codigo_acesso}\n"
                         f"Usuário: {user.username}\n"
-                        f"Senha temporária: {temp_password}\n\n"
+                        "Senha inicial: CPF do usuário (apenas números)\n\n"
                         "No primeiro login, você será obrigado a criar uma nova senha."
                     ),
                     from_email=None,
@@ -169,19 +186,19 @@ def usuario_create(request):
                 )
                 messages.success(
                     request,
-                    f"Usuário criado. Código de acesso: {prof.codigo_acesso}. Senha temporária enviada por e-mail.",
+                    f"Usuário criado. Código de acesso: {prof.codigo_acesso}. Senha inicial definida como CPF (apenas números).",
                 )
             except Exception:
                 messages.success(
                     request,
-                    f"Usuário criado. Código de acesso: {prof.codigo_acesso}. Senha temporária: {temp_password}",
+                    f"Usuário criado. Código de acesso: {prof.codigo_acesso}. Senha inicial: CPF (apenas números).",
                 )
         else:
             messages.success(
                 request,
                 (
                     f"Usuário criado. Código de acesso: {prof.codigo_acesso}. "
-                    f"Usuário sem e-mail cadastrado. Senha temporária: {temp_password}"
+                    "Usuário sem e-mail cadastrado. Senha inicial: CPF (apenas números)."
                 ),
             )
         return redirect("accounts:usuarios_list")
@@ -554,8 +571,15 @@ def usuario_reset_senha(request, pk: int):
     user = get_object_or_404(scope_users_queryset(request), pk=pk)
     prof, _ = Profile.objects.get_or_create(user=user, defaults={"ativo": True})
 
-    temp_password = _generate_temp_password()
-    user.set_password(temp_password)
+    cpf_password = _cpf_password_from_profile(prof)
+    if not cpf_password:
+        messages.error(
+            request,
+            "Não foi possível redefinir senha: usuário sem CPF válido. Atualize o CPF e tente novamente.",
+        )
+        return redirect(_safe_next(request, reverse("accounts:usuarios_list")))
+
+    user.set_password(cpf_password)
     user.save(update_fields=["password"])
     PasswordHistory.objects.create(user=user, password_hash=user.password)
 
@@ -571,23 +595,29 @@ def usuario_reset_senha(request, pk: int):
                     "Sua senha foi redefinida.\n\n"
                     f"Código de acesso: {prof.codigo_acesso}\n"
                     f"Usuário: {user.username}\n"
-                    f"Senha temporária: {temp_password}\n"
+                    "Senha redefinida: CPF do usuário (apenas números)\n"
                     "No primeiro login, você será obrigado a criar uma nova senha."
                 ),
                 from_email=None,
                 recipient_list=[user.email],
                 fail_silently=True,
             )
-            messages.success(request, "Senha redefinida. E-mail enviado (se o servidor de e-mail estiver configurado).")
+            messages.success(
+                request,
+                "Senha redefinida para o CPF do usuário. E-mail enviado (se o servidor de e-mail estiver configurado).",
+            )
         except Exception:
-            messages.success(request, f"Senha redefinida. (Não foi possível enviar e-mail agora.) Senha temporária: {temp_password}")
+            messages.success(
+                request,
+                "Senha redefinida para o CPF do usuário. (Não foi possível enviar e-mail agora.)",
+            )
     else:
-        messages.success(request, f"Senha redefinida. Usuário sem e-mail cadastrado. Senha temporária: {temp_password}")
+        messages.success(request, "Senha redefinida para o CPF do usuário.")
 
     log_user_action(
         actor=request.user,
         target=user,
         action=UserManagementAudit.Action.RESET_PASSWORD,
-        details="reset senha para senha temporaria",
+        details="reset senha para cpf",
     )
     return redirect(_safe_next(request, reverse("accounts:usuarios_list")))

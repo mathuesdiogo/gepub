@@ -24,6 +24,9 @@
     radial-gradient(1080px 520px at 90% 20%, rgba(198, 214, 233, 0.42) 0%, rgba(198, 214, 233, 0) 68%),
     linear-gradient(180deg, #e7edf4 0%, #e4ebf2 44%, #e9eff5 100%);
   font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .ps-page {
