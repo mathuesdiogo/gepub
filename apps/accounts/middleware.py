@@ -31,6 +31,7 @@ class ForcePasswordChangeMiddleware:
             role = ((getattr(p, "role", None) or "") + "").strip().upper()
             is_municipal = bool(p and getattr(p, "ativo", True) and role == "MUNICIPAL")
             onboarding_prefix = "/org/onboarding/"
+            onboarding_completed = self._onboarding_completed(request.user) if is_municipal else True
 
             if p and getattr(p, "password_expires_days", 0) and getattr(p, "password_changed_at", None):
                 expires_at = p.password_changed_at + timezone.timedelta(days=int(p.password_expires_days))
@@ -51,11 +52,13 @@ class ForcePasswordChangeMiddleware:
                         and not path.startswith(onboarding_prefix)
                         and not path.startswith("/admin/")
                     ):
+                        if onboarding_completed:
+                            return redirect("accounts:alterar_senha")
                         return redirect("org:onboarding_wizard_step", step=1)
                 elif path not in allowed and not path.startswith("/admin/"):
                     return redirect("accounts:alterar_senha")
 
-            if is_municipal and not self._onboarding_completed(request.user):
+            if is_municipal and not onboarding_completed:
                 allowed_paths = {
                     reverse("accounts:login"),
                     reverse("accounts:logout"),

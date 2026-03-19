@@ -331,6 +331,64 @@ class LoginSecurityViewTestCase(TestCase):
         self.assertIn(reverse("core:dashboard"), ok.url)
 
 
+class MunicipalPasswordRedirectFlowTestCase(TestCase):
+    def setUp(self):
+        self.municipio = Municipio.objects.create(nome="Muni Loop", uf="MA")
+        self.user = User.objects.create_user(username="muni_loop_user", password="Senha@123")
+        self.profile = self.user.profile
+        self.profile.role = "MUNICIPAL"
+        self.profile.ativo = True
+        self.profile.municipio = self.municipio
+        self.profile.must_change_password = True
+        self.profile.save(update_fields=["role", "ativo", "municipio", "must_change_password"])
+        self.client.force_login(self.user)
+
+    def test_completed_onboarding_redirects_to_alterar_senha(self):
+        MunicipioOnboardingWizard.objects.update_or_create(
+            user=self.user,
+            defaults={
+                "municipio": self.municipio,
+                "current_step": 9,
+                "total_steps": 9,
+                "completed_at": timezone.now(),
+            },
+        )
+
+        response = self.client.get(reverse("core:dashboard"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("accounts:alterar_senha"))
+
+    def test_pending_onboarding_redirects_to_onboarding_step_1(self):
+        MunicipioOnboardingWizard.objects.update_or_create(
+            user=self.user,
+            defaults={
+                "municipio": self.municipio,
+                "current_step": 1,
+                "total_steps": 9,
+                "completed_at": None,
+            },
+        )
+
+        response = self.client.get(reverse("core:dashboard"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("org:onboarding_wizard_step", kwargs={"step": 1}))
+
+    def test_completed_onboarding_allows_opening_step_1_when_password_expired(self):
+        MunicipioOnboardingWizard.objects.update_or_create(
+            user=self.user,
+            defaults={
+                "municipio": self.municipio,
+                "current_step": 9,
+                "total_steps": 9,
+                "completed_at": timezone.now(),
+            },
+        )
+
+        response = self.client.get(reverse("org:onboarding_wizard_step", kwargs={"step": 1}))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Nova senha")
+
+
 class PasswordHistoryTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="senha_hist", password="Senha@123")

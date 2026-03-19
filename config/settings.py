@@ -109,6 +109,28 @@ GEPUB_RESERVED_SUBDOMAINS = _env_list(
     "GEPUB_RESERVED_SUBDOMAINS",
     default=["app", "www", "admin", "api", "static", "media"],
 )
+GEPUB_INSTITUCIONAL_NEXT_ENABLED = _env_bool(
+    "GEPUB_INSTITUCIONAL_NEXT_ENABLED",
+    default=True,
+)
+GEPUB_INSTITUCIONAL_NEXT_URL = (
+    os.getenv(
+        "GEPUB_INSTITUCIONAL_NEXT_URL",
+        "http://127.0.0.1:3000" if DEBUG else "",
+    )
+    or ""
+).strip()
+GEPUB_INSTITUCIONAL_NEXT_HEALTHCHECK = _env_bool(
+    "GEPUB_INSTITUCIONAL_NEXT_HEALTHCHECK",
+    default=False,
+)
+_default_next_timeout = "6.0" if DEBUG else "0.35"
+try:
+    GEPUB_INSTITUCIONAL_NEXT_TIMEOUT_SECONDS = float(
+        (os.getenv("GEPUB_INSTITUCIONAL_NEXT_TIMEOUT_SECONDS", _default_next_timeout) or _default_next_timeout).strip()
+    )
+except Exception:
+    GEPUB_INSTITUCIONAL_NEXT_TIMEOUT_SECONDS = 6.0 if DEBUG else 0.35
 
 if not DEBUG and "*" in ALLOWED_HOSTS:
     raise ImproperlyConfigured("Em produção, DJANGO_ALLOWED_HOSTS não pode conter '*'.")
@@ -253,6 +275,7 @@ STORAGES = {
 }
 WHITENOISE_USE_FINDERS = DEBUG
 WHITENOISE_AUTOREFRESH = DEBUG
+WHITENOISE_MAX_AGE = _env_int("DJANGO_WHITENOISE_MAX_AGE", 0 if DEBUG else 60 * 60 * 24)
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

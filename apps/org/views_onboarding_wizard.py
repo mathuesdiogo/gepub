@@ -317,7 +317,8 @@ def onboarding_wizard(request):
     if not profile:
         profile, _ = Profile.objects.get_or_create(user=request.user, defaults={"ativo": True})
 
-    if wizard.is_completed:
+    profile_must_change_password = bool(getattr(profile, "must_change_password", False))
+    if wizard.is_completed and not profile_must_change_password:
         return redirect("core:dashboard")
 
     next_step = _first_pending_step(wizard, profile)
@@ -337,7 +338,8 @@ def onboarding_wizard_step(request, step: int):
     profile = get_profile(request.user)
     if not profile:
         profile, _ = Profile.objects.get_or_create(user=request.user, defaults={"ativo": True})
-    if wizard.is_completed:
+    profile_must_change_password = bool(getattr(profile, "must_change_password", False))
+    if wizard.is_completed and not profile_must_change_password:
         return redirect("core:dashboard")
 
     first_pending = _first_pending_step(wizard, profile)
