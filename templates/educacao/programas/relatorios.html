@@ -1,0 +1,196 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}{{ title }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-page-stack">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="gp-card">
+    <div class="gp-card__body">
+      <form method="get" class="gp-form gp-form--inline">
+        <label for="id_programa">Programa</label>
+        <select id="id_programa" name="programa">
+          <option value="">Todos</option>
+          {% for programa in programas %}
+            <option value="{{ programa.id }}" {% if programa_id == programa.id|stringformat:"s" %}selected{% endif %}>{{ programa.nome }}</option>
+          {% endfor %}
+        </select>
+
+        <label for="id_unidade">Unidade</label>
+        <select id="id_unidade" name="unidade">
+          <option value="">Todas</option>
+          {% for unidade in unidades %}
+            <option value="{{ unidade.id }}" {% if unidade_id == unidade.id|stringformat:"s" %}selected{% endif %}>{{ unidade.nome }}</option>
+          {% endfor %}
+        </select>
+
+        <label for="id_ano_letivo">Ano letivo</label>
+        <select id="id_ano_letivo" name="ano_letivo">
+          <option value="">Todos</option>
+          {% for ano in anos_letivos %}
+            <option value="{{ ano }}" {% if ano_letivo == ano|stringformat:"s" %}selected{% endif %}>{{ ano }}</option>
+          {% endfor %}
+        </select>
+
+        <label for="id_tipo">Tipo</label>
+        <select id="id_tipo" name="tipo">
+          <option value="">Todos</option>
+          {% for key, label in tipos_programa %}
+            <option value="{{ key }}" {% if tipo == key %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+
+        <label for="id_status">Status</label>
+        <select id="id_status" name="status">
+          <option value="">Todos</option>
+          <option value="ATIVO" {% if status == "ATIVO" %}selected{% endif %}>Ativo</option>
+          <option value="PRE_INSCRITO" {% if status == "PRE_INSCRITO" %}selected{% endif %}>Pré-inscrito</option>
+          <option value="AGUARDANDO_VAGA" {% if status == "AGUARDANDO_VAGA" %}selected{% endif %}>Aguardando vaga</option>
+          <option value="CONCLUIDO" {% if status == "CONCLUIDO" %}selected{% endif %}>Concluído</option>
+          <option value="TRANSFERIDO" {% if status == "TRANSFERIDO" %}selected{% endif %}>Transferido</option>
+          <option value="CANCELADO" {% if status == "CANCELADO" %}selected{% endif %}>Cancelado</option>
+          <option value="DESLIGADO" {% if status == "DESLIGADO" %}selected{% endif %}>Desligado</option>
+          <option value="SUSPENSO" {% if status == "SUSPENSO" %}selected{% endif %}>Suspenso</option>
+        </select>
+
+        <label for="id_frequencia_limite">Limite baixa frequência (%)</label>
+        <input id="id_frequencia_limite" type="text" name="frequencia_limite" value="{{ frequencia_limite }}" />
+
+        <button type="submit" class="gp-button gp-button--primary">Aplicar filtros</button>
+        <a href="{{ export_url }}" class="gp-button gp-button--outline">Exportar CSV</a>
+      </form>
+    </div>
+  </div>
+
+  <div class="gp-grid gp-grid--4">
+    <article class="gp-card"><div class="gp-card__body"><strong>{{ kpis.total_participacoes }}</strong><p>Participações (filtro atual)</p></div></article>
+    <article class="gp-card"><div class="gp-card__body"><strong>{{ kpis.participacoes_ativas }}</strong><p>Participações ativas</p></div></article>
+    <article class="gp-card"><div class="gp-card__body"><strong>{{ kpis.participacoes_concluidas }}</strong><p>Participações concluídas</p></div></article>
+    <article class="gp-card"><div class="gp-card__body"><strong>{{ kpis.ofertas_ativas }}</strong><p>Ofertas ativas</p></div></article>
+  </div>
+
+  <div class="gp-grid gp-grid--2">
+    <article class="gp-card">
+      <div class="gp-card__body">
+        <h3>Alunos em múltiplos programas</h3>
+        <table class="gp-table">
+          <thead>
+            <tr>
+              <th>Aluno</th>
+              <th>Matrícula</th>
+              <th>Programas</th>
+              <th>Ofertas</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in alunos_multiplos_programas %}
+              <tr>
+                <td>{{ item.aluno__nome }}</td>
+                <td>{{ item.matricula_institucional__numero_matricula }}</td>
+                <td>{{ item.total_programas }}</td>
+                <td>{{ item.total_ofertas }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4">Sem alunos ativos em múltiplos programas para o filtro atual.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="gp-card">
+      <div class="gp-card__body">
+        <h3>Baixa frequência (&lt; {{ frequencia_limite }}%)</h3>
+        <table class="gp-table">
+          <thead>
+            <tr>
+              <th>Aluno</th>
+              <th>Programa</th>
+              <th>Oferta</th>
+              <th>Frequência</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in baixa_frequencia %}
+              <tr>
+                <td>{{ p.aluno.nome }}</td>
+                <td>{{ p.programa.nome }}</td>
+                <td>{{ p.oferta.codigo }} • {{ p.oferta.nome }}</td>
+                <td>{{ p.percentual_frequencia_relatorio|floatformat:1 }}%</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4">Nenhum caso de baixa frequência no recorte atual.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </div>
+
+  <article class="gp-card">
+    <div class="gp-card__body">
+      <h3>Ocupação por oferta</h3>
+      <table class="gp-table">
+        <thead>
+          <tr>
+            <th>Programa</th>
+            <th>Oferta</th>
+            <th>Unidade</th>
+            <th>Ativos</th>
+            <th>Capacidade</th>
+            <th>Vagas disponíveis</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for oferta in ocupacao_ofertas %}
+            <tr>
+              <td>{{ oferta.programa.nome }}</td>
+              <td>{{ oferta.codigo }} • {{ oferta.nome }}</td>
+              <td>{{ oferta.unidade.nome }}</td>
+              <td>{{ oferta.participacoes_ativas }}</td>
+              <td>{{ oferta.capacidade_maxima }}</td>
+              <td>{{ oferta.vagas_disponiveis_relatorio }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6">Sem ofertas encontradas para os filtros informados.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <article class="gp-card">
+    <div class="gp-card__body">
+      <h3>Participações recentes no recorte</h3>
+      <table class="gp-table">
+        <thead>
+          <tr>
+            <th>Aluno</th>
+            <th>Matrícula</th>
+            <th>Programa</th>
+            <th>Oferta</th>
+            <th>Status</th>
+            <th>Ingresso</th>
+            <th>Frequência</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in participacoes_relatorio %}
+            <tr>
+              <td>{{ p.aluno.nome }}</td>
+              <td>{{ p.matricula_institucional.numero_matricula }}</td>
+              <td>{{ p.programa.nome }}</td>
+              <td>{{ p.oferta.codigo }} • {{ p.oferta.nome }}</td>
+              <td>{{ p.get_status_display }}</td>
+              <td>{{ p.data_ingresso|date:"d/m/Y" }}</td>
+              <td>{% if p.percentual_frequencia_relatorio is not None %}{{ p.percentual_frequencia_relatorio|floatformat:1 }}%{% else %}—{% endif %}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="7">Sem participações para os filtros selecionados.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+</section>
+{% endblock %}

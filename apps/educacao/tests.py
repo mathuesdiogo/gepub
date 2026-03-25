@@ -17,6 +17,7 @@ from apps.almoxarifado.models import AlmoxarifadoCadastro
 from apps.core.models import AuditoriaEvento, TransparenciaEventoPublico
 from apps.educacao.forms_horarios import AulaHorarioForm
 from apps.educacao.forms_diario import AulaForm
+from apps.educacao.forms_programas import ProgramaComplementarParticipacaoCreateForm
 from apps.educacao.models import (
     Aluno,
     AlunoCertificado,
@@ -73,6 +74,23 @@ from apps.educacao.models_informatica import (
     InformaticaPlanoEnsinoProfessor,
     InformaticaTurma,
 )
+from apps.educacao.models_biblioteca import (
+    BibliotecaBloqueio,
+    BibliotecaEmprestimo,
+    BibliotecaEscolar,
+    BibliotecaExemplar,
+    BibliotecaLivro,
+    BibliotecaReserva,
+    MatriculaInstitucional,
+)
+from apps.educacao.models_programas import (
+    ProgramaComplementar,
+    ProgramaComplementarHorario,
+    ProgramaComplementarOferta,
+    ProgramaComplementarParticipacao,
+)
+from apps.educacao.services_biblioteca import LibraryLoanService
+from apps.educacao.services_programas import ProgramasComplementaresService
 from apps.educacao.services_matricula import (
     aplicar_movimentacao_matricula,
     desfazer_movimentacao_matricula,
@@ -83,11 +101,14 @@ from apps.educacao.services_requisitos import (
     avaliar_requisitos_matricula,
     registrar_override_requisitos_matricula,
 )
+from apps.educacao.services_schedule_conflicts import ScheduleConflictService
+from apps.educacao.services_matricula_institucional import InstitutionalEnrollmentService
 from apps.educacao.services_turma_setup import (
     clonar_matriz_para_ano,
     preencher_componentes_base_matriz,
 )
 from apps.educacao.views_renovacao import _processar_pedidos_renovacao
+from apps.educacao.models_schedule_conflicts import ScheduleConflictOverride, ScheduleConflictSetting
 from apps.org.models import Municipio, Secretaria, Unidade
 from apps.processos.models import ProcessoAdministrativo
 from apps.ouvidoria.models import OuvidoriaCadastro
@@ -132,6 +153,14 @@ class EducacaoRoutesSmokeTestCase(TestCase):
         self.assertIn("/periodos/fechamento-lote/", reverse("educacao:fechamento_periodo_lote"))
         self.assertIn("/alunos/operacoes-lote/", reverse("educacao:operacoes_lote"))
         self.assertIn("/minicursos/", reverse("educacao:minicurso_dashboard"))
+        self.assertIn("/biblioteca/", reverse("educacao:biblioteca_dashboard"))
+        self.assertIn("/biblioteca/emprestimos/novo/", reverse("educacao:biblioteca_emprestimo_create"))
+        self.assertIn("/biblioteca/reservas/", reverse("educacao:biblioteca_reserva_list"))
+        self.assertIn("/biblioteca/relatorios/", reverse("educacao:biblioteca_relatorios"))
+        self.assertIn("/programas/", reverse("educacao:programas_dashboard"))
+        self.assertIn("/programas/relatorios/", reverse("educacao:programa_complementar_relatorios"))
+        self.assertIn("/programas/participacoes/nova/", reverse("educacao:programa_complementar_participacao_create"))
+        self.assertIn("/aluno/aln1/ensino/programas/", reverse("educacao:aluno_ensino_programas", args=["aln1"]))
         self.assertIn("/aluno/aln1/ensino/renovacao-matricula/", reverse("educacao:aluno_ensino_renovacao", args=["aln1"]))
 
 
@@ -1156,6 +1185,652 @@ class HorarioConflitosFormTestCase(TestCase):
         payload["fim"] = "10:50"
         form = AulaHorarioForm(data=payload, grade=self.grade_a)
         self.assertTrue(form.is_valid(), form.errors)
+
+
+class ScheduleConflictServiceTestCase(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.admin = User.objects.create_superuser(
+            username="schedule_admin",
+            password="123456",
+            email="schedule.admin@example.com",
+        )
+
+        municipio = Municipio.objects.create(nome="Cidade Agenda", uf="MA")
+        secretaria = Secretaria.objects.create(municipio=municipio, nome="Secretaria Educação")
+        self.unidade = Unidade.objects.create(secretaria=secretaria, nome="Escola Agenda", tipo=Unidade.Tipo.EDUCACAO)
+        self.aluno = Aluno.objects.create(nome="Aluno Agenda")
+
+        self.turma_base = self._create_turma_with_slot("Turma Base", time(8, 0), time(9, 0))
+        self.turma_conflito = self._create_turma_with_slot("Turma Conflito", time(8, 30), time(9, 30))
+        self.turma_encostada = self._create_turma_with_slot("Turma Encostada", time(9, 0), time(10, 0))
+
+        Matricula.objects.create(
+            aluno=self.aluno,
+            turma=self.turma_base,
+            data_matricula=date(2026, 2, 1),
+            situacao=Matricula.Situacao.ATIVA,
+        )
+
+    def _create_turma_with_slot(self, nome: str, inicio: time, fim: time) -> Turma:
+        turma = Turma.objects.create(
+            unidade=self.unidade,
+            nome=nome,
+            ano_letivo=2026,
+            turno=Turma.Turno.MANHA,
+        )
+        grade = GradeHorario.objects.create(turma=turma)
+        AulaHorario.objects.create(
+            grade=grade,
+            dia=AulaHorario.Dia.TER,
+            inicio=inicio,
+            fim=fim,
+            disciplina="Oficina",
+        )
+        return turma
+
+    def test_detecta_conflito_entre_matriculas_ativas(self):
+        result = ScheduleConflictService.validate_regular_enrollment(
+            aluno=self.aluno,
+            turma=self.turma_conflito,
+            data_matricula=date(2026, 2, 10),
+        )
+
+        self.assertTrue(result.has_conflict)
+        self.assertEqual(result.blocking_mode, "block")
+        self.assertGreaterEqual(len(result.conflicts), 1)
+
+    def test_permite_intervalos_encostados_por_padrao(self):
+        result = ScheduleConflictService.validate_regular_enrollment(
+            aluno=self.aluno,
+            turma=self.turma_encostada,
+            data_matricula=date(2026, 2, 10),
+        )
+        self.assertFalse(result.has_conflict)
+
+    def test_permite_override_com_auditoria(self):
+        result = ScheduleConflictService.ensure_regular_enrollment_allowed(
+            aluno=self.aluno,
+            turma=self.turma_conflito,
+            data_matricula=date(2026, 2, 10),
+            allow_override=True,
+            override_justificativa="Ajuste pedagógico excepcional.",
+            usuario=self.admin,
+            contexto="TESTE_OVERRIDE",
+            ip_origem="127.0.0.1",
+        )
+
+        self.assertTrue(result.has_conflict)
+        self.assertEqual(ScheduleConflictOverride.objects.count(), 1)
+        override = ScheduleConflictOverride.objects.first()
+        self.assertEqual(override.contexto, "TESTE_OVERRIDE")
+        self.assertEqual(override.usuario, self.admin)
+
+    def test_modo_warn_nao_bloqueia_fluxo(self):
+        ScheduleConflictSetting.objects.create(
+            nome="Warn",
+            modo_validacao=ScheduleConflictSetting.ValidationMode.WARN,
+            ativo=True,
+        )
+        result = ScheduleConflictService.ensure_regular_enrollment_allowed(
+            aluno=self.aluno,
+            turma=self.turma_conflito,
+            data_matricula=date(2026, 2, 10),
+            allow_override=False,
+            usuario=self.admin,
+            contexto="TESTE_WARN",
+        )
+
+        self.assertTrue(result.has_conflict)
+        self.assertEqual(result.blocking_mode, "warn")
+        self.assertEqual(ScheduleConflictOverride.objects.count(), 0)
+
+
+class MatriculaInstitucionalBibliotecaTestCase(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.admin = User.objects.create_superuser(
+            username="biblioteca_admin",
+            password="123456",
+            email="biblioteca.admin@example.com",
+        )
+
+        self.municipio = Municipio.objects.create(nome="Cidade Biblioteca", uf="MA")
+        self.secretaria = Secretaria.objects.create(
+            municipio=self.municipio,
+            nome="Secretaria Educação Biblioteca",
+            sigla="GNF",
+        )
+        self.unidade = Unidade.objects.create(
+            secretaria=self.secretaria,
+            nome="Escola Biblioteca",
+            tipo=Unidade.Tipo.EDUCACAO,
+        )
+        self.turma = Turma.objects.create(
+            unidade=self.unidade,
+            nome="8A",
+            ano_letivo=2026,
+            turno=Turma.Turno.MANHA,
+        )
+        self.aluno = Aluno.objects.create(nome="Aluno Biblioteca")
+        self.biblioteca = BibliotecaEscolar.objects.create(
+            unidade=self.unidade,
+            nome="Biblioteca Central",
+            status=BibliotecaEscolar.Status.ATIVA,
+            limite_emprestimos_ativos=2,
+            dias_prazo_emprestimo=7,
+        )
+        self.livro = BibliotecaLivro.objects.create(
+            biblioteca=self.biblioteca,
+            titulo="Dom Casmurro",
+            autor="Machado de Assis",
+        )
+        self.exemplar = BibliotecaExemplar.objects.create(
+            livro=self.livro,
+            codigo_exemplar="EX-0001",
+            status=BibliotecaExemplar.Status.DISPONIVEL,
+        )
+
+    def test_matricula_ativa_gera_matricula_institucional(self):
+        Matricula.objects.create(
+            aluno=self.aluno,
+            turma=self.turma,
+            data_matricula=date(2026, 2, 1),
+            situacao=Matricula.Situacao.ATIVA,
+        )
+        enrollment = MatriculaInstitucional.objects.get(aluno=self.aluno)
+        self.assertTrue(enrollment.numero_matricula.startswith("GNF-2026-"))
+        self.assertEqual(enrollment.status, MatriculaInstitucional.Status.ATIVA)
+
+    def test_fluxo_emprestimo_e_devolucao(self):
+        Matricula.objects.create(aluno=self.aluno, turma=self.turma, situacao=Matricula.Situacao.ATIVA)
+        loan = LibraryLoanService.create_loan(
+            biblioteca=self.biblioteca,
+            aluno=self.aluno,
+            exemplar=self.exemplar,
+            usuario=self.admin,
+        )
+        self.exemplar.refresh_from_db()
+        self.assertEqual(loan.status, BibliotecaEmprestimo.Status.ATIVO)
+        self.assertEqual(self.exemplar.status, BibliotecaExemplar.Status.EMPRESTADO)
+
+        loan = LibraryLoanService.register_return(
+            emprestimo=loan,
+            usuario=self.admin,
+            data_devolucao=date.today(),
+        )
+        self.exemplar.refresh_from_db()
+        self.assertEqual(loan.status, BibliotecaEmprestimo.Status.DEVOLVIDO)
+        self.assertEqual(self.exemplar.status, BibliotecaExemplar.Status.DISPONIVEL)
+
+    def test_renovacao_incrementa_prazo(self):
+        Matricula.objects.create(aluno=self.aluno, turma=self.turma, situacao=Matricula.Situacao.ATIVA)
+        loan = LibraryLoanService.create_loan(
+            biblioteca=self.biblioteca,
+            aluno=self.aluno,
+            exemplar=self.exemplar,
+            usuario=self.admin,
+        )
+        due_before = loan.data_prevista_devolucao
+        loan = LibraryLoanService.renew_loan(
+            emprestimo=loan,
+            usuario=self.admin,
+            dias_adicionais=5,
+            observacoes="Renovação pedagógica.",
+        )
+        self.assertEqual(loan.status, BibliotecaEmprestimo.Status.RENOVADO)
+        self.assertEqual(loan.renovacoes, 1)
+        self.assertEqual(loan.data_prevista_devolucao, due_before + timedelta(days=5))
+
+    def test_bloqueio_ativo_impede_emprestimo(self):
+        enrollment = InstitutionalEnrollmentService.ensure_for_student(
+            aluno=self.aluno,
+            unidade=self.unidade,
+            ano_referencia=2026,
+        )
+        BibliotecaBloqueio.objects.create(
+            biblioteca=self.biblioteca,
+            aluno=self.aluno,
+            matricula_institucional=enrollment,
+            motivo="Atraso de devolução",
+            status=BibliotecaBloqueio.Status.ATIVO,
+        )
+        with self.assertRaisesMessage(ValueError, "bloqueio ativo"):
+            LibraryLoanService.create_loan(
+                biblioteca=self.biblioteca,
+                aluno=self.aluno,
+                exemplar=self.exemplar,
+                usuario=self.admin,
+            )
+
+    def test_matricula_institucional_nao_ativa_impede_emprestimo(self):
+        enrollment = InstitutionalEnrollmentService.ensure_for_student(
+            aluno=self.aluno,
+            unidade=self.unidade,
+            ano_referencia=2026,
+        )
+        enrollment.status = MatriculaInstitucional.Status.BLOQUEADA
+        enrollment.save(update_fields=["status", "atualizado_em"])
+
+        with self.assertRaisesMessage(ValueError, "não está ativa"):
+            LibraryLoanService.create_loan(
+                biblioteca=self.biblioteca,
+                aluno=self.aluno,
+                exemplar=self.exemplar,
+                usuario=self.admin,
+            )
+
+    def test_reserva_do_mesmo_aluno_e_marcada_como_atendida_ao_emprestar(self):
+        Matricula.objects.create(aluno=self.aluno, turma=self.turma, situacao=Matricula.Situacao.ATIVA)
+        reserva = LibraryLoanService.create_reservation(
+            biblioteca=self.biblioteca,
+            aluno=self.aluno,
+            livro=self.livro,
+            usuario=self.admin,
+            dias_validade=4,
+        )
+        self.assertEqual(reserva.status, BibliotecaReserva.Status.ATIVA)
+
+        LibraryLoanService.create_loan(
+            biblioteca=self.biblioteca,
+            aluno=self.aluno,
+            exemplar=self.exemplar,
+            usuario=self.admin,
+        )
+        reserva.refresh_from_db()
+        self.assertEqual(reserva.status, BibliotecaReserva.Status.ATENDIDA)
+
+    def test_reserva_ativa_de_outro_aluno_impede_renovacao(self):
+        Matricula.objects.create(aluno=self.aluno, turma=self.turma, situacao=Matricula.Situacao.ATIVA)
+        loan = LibraryLoanService.create_loan(
+            biblioteca=self.biblioteca,
+            aluno=self.aluno,
+            exemplar=self.exemplar,
+            usuario=self.admin,
+        )
+
+        outro_aluno = Aluno.objects.create(nome="Aluno Reserva")
+        Matricula.objects.create(aluno=outro_aluno, turma=self.turma, situacao=Matricula.Situacao.ATIVA)
+        LibraryLoanService.create_reservation(
+            biblioteca=self.biblioteca,
+            aluno=outro_aluno,
+            livro=self.livro,
+            usuario=self.admin,
+            dias_validade=5,
+        )
+
+        with self.assertRaisesMessage(ValueError, "reserva ativa"):
+            LibraryLoanService.renew_loan(
+                emprestimo=loan,
+                usuario=self.admin,
+                dias_adicionais=3,
+            )
+
+
+class ProgramasComplementaresTestCase(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.admin = User.objects.create_superuser(
+            username="programas_admin",
+            password="123456",
+            email="programas.admin@example.com",
+        )
+        self.prof = User.objects.create_user(
+            username="programas_prof",
+            password="123456",
+            email="programas.prof@example.com",
+        )
+        admin_profile = getattr(self.admin, "profile", None)
+        if admin_profile:
+            admin_profile.must_change_password = False
+            admin_profile.ativo = True
+            admin_profile.save(update_fields=["must_change_password", "ativo"])
+
+        self.municipio = Municipio.objects.create(nome="Cidade Programas", uf="MA")
+        self.secretaria = Secretaria.objects.create(
+            municipio=self.municipio,
+            nome="Secretaria Programas",
+            sigla="GPR",
+        )
+        self.unidade = Unidade.objects.create(
+            secretaria=self.secretaria,
+            nome="Escola Programas",
+            tipo=Unidade.Tipo.EDUCACAO,
+        )
+        self.turma_regular = Turma.objects.create(
+            unidade=self.unidade,
+            nome="7A",
+            ano_letivo=2026,
+            turno=Turma.Turno.MANHA,
+        )
+        self.aluno = Aluno.objects.create(
+            nome="Aluno Programas",
+            data_nascimento=date(2013, 5, 10),
+        )
+        Matricula.objects.create(
+            aluno=self.aluno,
+            turma=self.turma_regular,
+            data_matricula=date(2026, 2, 10),
+            situacao=Matricula.Situacao.ATIVA,
+        )
+
+        self.programa = ProgramaComplementar.objects.create(
+            nome="Ballet Municipal",
+            tipo=ProgramaComplementar.Tipo.BALLET,
+            slug="ballet-municipal-programas",
+            status=ProgramaComplementar.Status.ATIVO,
+            secretaria_responsavel=self.secretaria,
+            unidade_gestora=self.unidade,
+            faixa_etaria_min=8,
+            faixa_etaria_max=16,
+        )
+        self.oferta = ProgramaComplementarOferta.objects.create(
+            programa=self.programa,
+            unidade=self.unidade,
+            ano_letivo=2026,
+            codigo="BAL-A-01",
+            nome="Ballet A",
+            turno=ProgramaComplementarOferta.Turno.MANHA,
+            capacidade_maxima=20,
+            status=ProgramaComplementarOferta.Status.ATIVA,
+            exige_vinculo_escolar_ativo=True,
+            data_inicio=date(2026, 2, 1),
+            data_fim=date(2026, 12, 10),
+            responsavel=self.prof,
+        )
+        ProgramaComplementarHorario.objects.create(
+            oferta=self.oferta,
+            dia_semana=ProgramaComplementarHorario.DiaSemana.SEGUNDA,
+            hora_inicio=time(8, 0),
+            hora_fim=time(9, 0),
+            frequencia_tipo=ProgramaComplementarHorario.FrequenciaTipo.SEMANAL,
+            turno=ProgramaComplementarOferta.Turno.MANHA,
+            ativo=True,
+        )
+
+    def test_cria_participacao_programa_com_matricula_institucional(self):
+        participacao = ProgramasComplementaresService.create_participation(
+            aluno=self.aluno,
+            oferta=self.oferta,
+            usuario=self.admin,
+            data_ingresso=date(2026, 3, 1),
+            status=ProgramaComplementarParticipacao.Status.ATIVO,
+        )
+        self.assertEqual(participacao.programa, self.programa)
+        self.assertEqual(participacao.oferta, self.oferta)
+        self.assertEqual(participacao.status, ProgramaComplementarParticipacao.Status.ATIVO)
+        self.assertTrue(participacao.matricula_institucional.numero_matricula.startswith("GPR-2026-"))
+
+    def test_bloqueia_participacao_com_conflito_de_horario(self):
+        ProgramasComplementaresService.create_participation(
+            aluno=self.aluno,
+            oferta=self.oferta,
+            usuario=self.admin,
+            data_ingresso=date(2026, 3, 1),
+            status=ProgramaComplementarParticipacao.Status.ATIVO,
+        )
+        programa_reforco = ProgramaComplementar.objects.create(
+            nome="Reforço Matemática",
+            tipo=ProgramaComplementar.Tipo.REFORCO,
+            slug="reforco-matematica-programas",
+            status=ProgramaComplementar.Status.ATIVO,
+            secretaria_responsavel=self.secretaria,
+            unidade_gestora=self.unidade,
+            faixa_etaria_min=8,
+            faixa_etaria_max=16,
+        )
+        oferta_reforco = ProgramaComplementarOferta.objects.create(
+            programa=programa_reforco,
+            unidade=self.unidade,
+            ano_letivo=2026,
+            codigo="REF-MAT-01",
+            nome="Reforço MAT 01",
+            turno=ProgramaComplementarOferta.Turno.MANHA,
+            capacidade_maxima=20,
+            status=ProgramaComplementarOferta.Status.ATIVA,
+            exige_vinculo_escolar_ativo=True,
+            data_inicio=date(2026, 2, 1),
+            data_fim=date(2026, 12, 10),
+            responsavel=self.prof,
+        )
+        ProgramaComplementarHorario.objects.create(
+            oferta=oferta_reforco,
+            dia_semana=ProgramaComplementarHorario.DiaSemana.SEGUNDA,
+            hora_inicio=time(8, 30),
+            hora_fim=time(9, 30),
+            frequencia_tipo=ProgramaComplementarHorario.FrequenciaTipo.SEMANAL,
+            turno=ProgramaComplementarOferta.Turno.MANHA,
+            ativo=True,
+        )
+
+        with self.assertRaisesMessage(ValueError, "Conflito de horário"):
+            ProgramasComplementaresService.create_participation(
+                aluno=self.aluno,
+                oferta=oferta_reforco,
+                usuario=self.admin,
+                data_ingresso=date(2026, 3, 1),
+                status=ProgramaComplementarParticipacao.Status.ATIVO,
+            )
+
+    def test_sync_informatica_cria_programa_e_participacao(self):
+        laboratorio = InformaticaLaboratorio.objects.create(
+            nome="Lab Programas",
+            unidade=self.unidade,
+            quantidade_computadores=12,
+            capacidade_operacional=12,
+            status=InformaticaLaboratorio.Status.ATIVO,
+        )
+        curso = InformaticaCurso.objects.create(
+            municipio=self.municipio,
+            nome="Informática Programas",
+            aulas_por_semana=2,
+            duracao_bloco_minutos=60,
+            minutos_aula_efetiva=45,
+            minutos_intervalo_tecnico=15,
+            max_alunos_por_turma=12,
+        )
+        grade = InformaticaGradeHorario.objects.create(
+            nome="Grade Programas",
+            codigo="GRD-PRG-01",
+            tipo_grade=InformaticaGradeHorario.TipoGrade.PADRAO_SEMANAL,
+            laboratorio=laboratorio,
+            turno=InformaticaGradeHorario.Turno.MANHA,
+            dia_semana_1=InformaticaGradeHorario.DiaSemana.TERCA,
+            dia_semana_2=InformaticaGradeHorario.DiaSemana.QUINTA,
+            hora_inicio=time(10, 0),
+            hora_fim=time(11, 0),
+            duracao_total_minutos=60,
+            duracao_aula_minutos=45,
+            duracao_intervalo_minutos=15,
+            capacidade_maxima=12,
+            status=InformaticaGradeHorario.Status.ATIVA,
+            professor_principal=self.prof,
+        )
+        turma_info = InformaticaTurma.objects.create(
+            curso=curso,
+            grade_horario=grade,
+            laboratorio=laboratorio,
+            codigo="INF-PRG-01",
+            instrutor=self.prof,
+            ano_letivo=2026,
+            max_vagas=12,
+            status=InformaticaTurma.Status.ATIVA,
+        )
+        InformaticaEncontroSemanal.objects.create(
+            turma=turma_info,
+            grade_horario=grade,
+            dia_semana=InformaticaEncontroSemanal.DiaSemana.TERCA,
+            hora_inicio=time(10, 0),
+            hora_fim=time(11, 0),
+            minutos_aula_efetiva=45,
+            minutos_intervalo_tecnico=15,
+            ativo=True,
+        )
+        InformaticaEncontroSemanal.objects.create(
+            turma=turma_info,
+            grade_horario=grade,
+            dia_semana=InformaticaEncontroSemanal.DiaSemana.QUINTA,
+            hora_inicio=time(10, 0),
+            hora_fim=time(11, 0),
+            minutos_aula_efetiva=45,
+            minutos_intervalo_tecnico=15,
+            ativo=True,
+        )
+        matricula_info = InformaticaMatricula.objects.create(
+            aluno=self.aluno,
+            escola_origem=self.unidade,
+            curso=curso,
+            turma=turma_info,
+            data_matricula=date(2026, 3, 10),
+            status=InformaticaMatricula.Status.MATRICULADO,
+            criado_por=self.admin,
+        )
+
+        participacao = ProgramaComplementarParticipacao.objects.get(legacy_informatica_matricula=matricula_info)
+        self.assertEqual(participacao.programa.tipo, ProgramaComplementar.Tipo.INFORMATICA)
+        self.assertEqual(participacao.oferta.legacy_informatica_turma, turma_info)
+        self.assertEqual(participacao.oferta.horarios.count(), 2)
+
+    def test_override_de_conflito_exige_permissao_de_perfil(self):
+        ProgramasComplementaresService.create_participation(
+            aluno=self.aluno,
+            oferta=self.oferta,
+            usuario=self.admin,
+            data_ingresso=date(2026, 3, 1),
+            status=ProgramaComplementarParticipacao.Status.ATIVO,
+        )
+
+        programa_choque = ProgramaComplementar.objects.create(
+            nome="Oficina de Teatro",
+            tipo=ProgramaComplementar.Tipo.CULTURA,
+            slug="oficina-teatro-programas",
+            status=ProgramaComplementar.Status.ATIVO,
+            secretaria_responsavel=self.secretaria,
+            unidade_gestora=self.unidade,
+        )
+        oferta_choque = ProgramaComplementarOferta.objects.create(
+            programa=programa_choque,
+            unidade=self.unidade,
+            ano_letivo=2026,
+            codigo="TEA-01",
+            nome="Teatro Turma 01",
+            turno=ProgramaComplementarOferta.Turno.MANHA,
+            capacidade_maxima=20,
+            status=ProgramaComplementarOferta.Status.ATIVA,
+            exige_vinculo_escolar_ativo=True,
+            data_inicio=date(2026, 2, 1),
+            data_fim=date(2026, 12, 10),
+            responsavel=self.prof,
+        )
+        ProgramaComplementarHorario.objects.create(
+            oferta=oferta_choque,
+            dia_semana=ProgramaComplementarHorario.DiaSemana.SEGUNDA,
+            hora_inicio=time(8, 30),
+            hora_fim=time(9, 30),
+            frequencia_tipo=ProgramaComplementarHorario.FrequenciaTipo.SEMANAL,
+            turno=ProgramaComplementarOferta.Turno.MANHA,
+            ativo=True,
+        )
+
+        with self.assertRaisesMessage(ValueError, "não possui permissão"):
+            ProgramasComplementaresService.create_participation(
+                aluno=self.aluno,
+                oferta=oferta_choque,
+                usuario=self.prof,
+                data_ingresso=date(2026, 3, 5),
+                status=ProgramaComplementarParticipacao.Status.ATIVO,
+                allow_override_conflict=True,
+                override_justificativa="Necessidade de ajuste excepcional",
+            )
+
+    def test_form_de_participacao_oculta_campos_de_override_sem_permissao(self):
+        form_sem_override = ProgramaComplementarParticipacaoCreateForm(user=self.admin, allow_override=False)
+        self.assertNotIn("allow_override_conflict", form_sem_override.fields)
+        self.assertNotIn("override_justificativa", form_sem_override.fields)
+
+        form_com_override = ProgramaComplementarParticipacaoCreateForm(user=self.admin, allow_override=True)
+        self.assertIn("allow_override_conflict", form_com_override.fields)
+        self.assertIn("override_justificativa", form_com_override.fields)
+
+    def test_relatorios_programas_carrega_e_exporta_csv(self):
+        self.client.force_login(self.admin)
+        ProgramasComplementaresService.create_participation(
+            aluno=self.aluno,
+            oferta=self.oferta,
+            usuario=self.admin,
+            data_ingresso=date(2026, 3, 1),
+            status=ProgramaComplementarParticipacao.Status.ATIVO,
+        )
+
+        response = self.client.get(reverse("educacao:programa_complementar_relatorios"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Relatórios de Programas")
+
+        csv_response = self.client.get(reverse("educacao:programa_complementar_relatorios"), {"export": "csv"})
+        self.assertEqual(csv_response.status_code, 200)
+        self.assertIn("text/csv", csv_response["Content-Type"])
+        self.assertIn("programas_relatorios.csv", csv_response["Content-Disposition"])
+
+    def test_area_aluno_programas_aplica_filtro_concluidos(self):
+        ProgramasComplementaresService.create_participation(
+            aluno=self.aluno,
+            oferta=self.oferta,
+            usuario=self.admin,
+            data_ingresso=date(2026, 3, 1),
+            status=ProgramaComplementarParticipacao.Status.ATIVO,
+        )
+
+        programa_concluido = ProgramaComplementar.objects.create(
+            nome="Música Escolar",
+            tipo=ProgramaComplementar.Tipo.CULTURA,
+            slug="musica-escolar-programas",
+            status=ProgramaComplementar.Status.ATIVO,
+            secretaria_responsavel=self.secretaria,
+            unidade_gestora=self.unidade,
+        )
+        oferta_concluida = ProgramaComplementarOferta.objects.create(
+            programa=programa_concluido,
+            unidade=self.unidade,
+            ano_letivo=2026,
+            codigo="MUS-01",
+            nome="Música Turma 01",
+            turno=ProgramaComplementarOferta.Turno.TARDE,
+            capacidade_maxima=20,
+            status=ProgramaComplementarOferta.Status.ATIVA,
+            exige_vinculo_escolar_ativo=True,
+            data_inicio=date(2026, 2, 1),
+            data_fim=date(2026, 12, 10),
+            responsavel=self.prof,
+        )
+        ProgramaComplementarHorario.objects.create(
+            oferta=oferta_concluida,
+            dia_semana=ProgramaComplementarHorario.DiaSemana.QUARTA,
+            hora_inicio=time(14, 0),
+            hora_fim=time(15, 0),
+            frequencia_tipo=ProgramaComplementarHorario.FrequenciaTipo.SEMANAL,
+            turno=ProgramaComplementarOferta.Turno.TARDE,
+            ativo=True,
+        )
+        ProgramasComplementaresService.create_participation(
+            aluno=self.aluno,
+            oferta=oferta_concluida,
+            usuario=self.admin,
+            data_ingresso=date(2026, 3, 2),
+            status=ProgramaComplementarParticipacao.Status.CONCLUIDO,
+        )
+
+        self.client.force_login(self.admin)
+        response = self.client.get(
+            reverse("educacao:aluno_ensino_programas", args=[str(self.aluno.id)]),
+            {"filtro": "concluidos"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["filtro_programas"], "concluidos")
+        self.assertEqual(len(response.context["participacoes_visiveis"]), 1)
+        self.assertEqual(
+            response.context["participacoes_visiveis"][0].status,
+            ProgramaComplementarParticipacao.Status.CONCLUIDO,
+        )
 
 
 class CensoEscolarViewTestCase(TestCase):

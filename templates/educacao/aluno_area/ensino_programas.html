@@ -1,0 +1,87 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}Ensino • Programas Complementares • {{ aluno.nome }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-student-stage">
+  {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
+
+  <div class="gp-grid-2 gp-student-stage__grid">
+    <article class="gp-student-stage__card">
+      <h3>Resumo</h3>
+      <p>Programas ativos: <strong>{{ ativos_count }}</strong></p>
+      <p>Programas concluídos: <strong>{{ concluidos_count }}</strong></p>
+      <p>Participações encerradas: <strong>{{ encerrados_count }}</strong></p>
+      <p>
+        Frequência média geral:
+        <strong>{% if frequencia_media_geral is not None %}{{ frequencia_media_geral|floatformat:1 }}%{% else %}—{% endif %}</strong>
+      </p>
+    </article>
+    <article class="gp-student-stage__card">
+      <h3>Identidade Institucional</h3>
+      <p>Aluno: <strong>{{ aluno.nome }}</strong></p>
+      <p>
+        Matrícula institucional:
+        <strong>{% if aluno.matricula_institucional %}{{ aluno.matricula_institucional.numero_matricula }}{% else %}Não gerada{% endif %}</strong>
+      </p>
+      <p>Unidade de referência: <strong>{% if unidade_ref %}{{ unidade_ref.nome }}{% else %}—{% endif %}</strong></p>
+    </article>
+  </div>
+
+  <article class="gp-student-stage__card">
+    <h3>Programas Complementares</h3>
+    <div class="gp-action-bar" style="margin-bottom: 12px;">
+      <a class="gp-button {% if filtro_programas == 'ativos' %}gp-button--primary{% else %}gp-button--outline{% endif %}" href="?filtro=ativos">
+        Ativos ({{ ativos_count }})
+      </a>
+      <a class="gp-button {% if filtro_programas == 'concluidos' %}gp-button--primary{% else %}gp-button--outline{% endif %}" href="?filtro=concluidos">
+        Concluídos ({{ concluidos_count }})
+      </a>
+      <a class="gp-button {% if filtro_programas == 'encerrados' %}gp-button--primary{% else %}gp-button--outline{% endif %}" href="?filtro=encerrados">
+        Encerrados ({{ encerrados_count }})
+      </a>
+      <a class="gp-button {% if filtro_programas == 'todos' %}gp-button--primary{% else %}gp-button--outline{% endif %}" href="?filtro=todos">
+        Todos ({{ participacoes|length }})
+      </a>
+    </div>
+    <p style="margin-top: 0;">Exibindo <strong>{{ participacoes_visiveis_count }}</strong> participação(ões).</p>
+    <div class="gp-table gp-table--responsive"><div class="gp-table__body">
+      <table class="gp-table__native">
+        <thead>
+          <tr>
+            <th>Programa</th>
+            <th>Tipo</th>
+            <th>Oferta</th>
+            <th>Unidade</th>
+            <th>Status</th>
+            <th>Ingresso</th>
+            <th>Frequência</th>
+            <th>Horários</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in participacoes_visiveis %}
+            <tr>
+              <td>{{ p.programa.nome }}</td>
+              <td>{{ p.programa.get_tipo_display }}</td>
+              <td>{{ p.oferta.codigo }} • {{ p.oferta.nome }}</td>
+              <td>{{ p.oferta.unidade.nome }}</td>
+              <td>{{ p.get_status_display }}</td>
+              <td>{{ p.data_ingresso|date:"d/m/Y" }}</td>
+              <td>{% if p.percentual_frequencia is not None %}{{ p.percentual_frequencia|floatformat:1 }}%{% else %}—{% endif %}</td>
+              <td>
+                {% for h in p.oferta.horarios.all %}
+                  {{ h.get_dia_semana_display }} {{ h.hora_inicio|time:"H:i" }}-{{ h.hora_fim|time:"H:i" }}{% if not forloop.last %} • {% endif %}
+                {% empty %}
+                  —
+                {% endfor %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="8">Nenhuma participação registrada em programas complementares.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </article>
+</section>
+{% endblock %}

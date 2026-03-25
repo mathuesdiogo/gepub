@@ -37,6 +37,7 @@ from .models_beneficios import (
     BeneficioEntrega,
     BeneficioTipo,
 )
+from .models_biblioteca import BibliotecaEmprestimo
 from .models_calendario import CalendarioEducacionalEvento
 from .models_diario import Aula, Frequencia, JustificativaFaltaPedido, Nota
 from .models_horarios import AulaHorario
@@ -50,6 +51,7 @@ from .models_informatica import (
     InformaticaNota,
     InformaticaTurma,
 )
+from .models_programas import ProgramaComplementarParticipacao
 from .models_periodos import PeriodoLetivo
 from .services_academico import classify_resultado
 from .views_portal import _codigo_aluno_canonico, _resolve_aluno_by_codigo
@@ -247,9 +249,9 @@ class CadastroSolicitacaoForm(forms.Form):
     tipo = forms.ChoiceField(
         label="Solicitação cadastral",
         choices=[
-            ("ATUALIZAR_DADOS", "Atualizar dados"),
-            ("ATUALIZAR_ENDERECO", "Atualizar endereço"),
-            ("ATUALIZAR_RESPONSAVEL", "Atualizar responsável"),
+            ("ATUALIZAR_DADOS", "Editar dados"),
+            ("ATUALIZAR_ENDERECO", "Editar endereço"),
+            ("ATUALIZAR_RESPONSAVEL", "Editar responsável"),
         ],
     )
     descricao = forms.CharField(label="Descrição", widget=forms.Textarea(attrs={"rows": 2}), required=True)
@@ -405,13 +407,13 @@ def _base_context(ctx: dict, *, page_title: str, page_subtitle: str, nav_key: st
             "label": "Meu perfil",
             "url": reverse("accounts:meu_perfil"),
             "icon": "fa-solid fa-user",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
         {
             "label": "Histórico completo",
             "url": reverse("educacao:historico_aluno", args=[aluno.pk]),
             "icon": "fa-solid fa-scroll",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
     ]
     return {
@@ -458,7 +460,7 @@ def _create_processo_aluno(
 ):
     municipio = ctx["municipio_ref"]
     if municipio is None:
-        messages.error(request, "Não foi possível identificar o município do aluno para abrir o processo.")
+        messages.error(request, "Não foi possível identificar o município do aluno para iniciar o processo.")
         return None
 
     numero = _next_numero_processo(municipio, "ALUNO")
@@ -724,12 +726,23 @@ def aluno_ensino(request, codigo: str):
 
 
 def _ensino_page_base_context(ctx: dict, *, subtitle: str):
-    return _base_context(
+    context = _base_context(
         ctx,
         page_title="Ensino",
         page_subtitle=subtitle,
         nav_key="ensino",
     )
+    actions = list(context.get("actions", []))
+    actions.append(
+        {
+            "label": "Programas Complementares",
+            "url": reverse("educacao:aluno_ensino_programas", args=[ctx["codigo_canonico"]]),
+            "icon": "fa-solid fa-shapes",
+            "variant": "gp-button--outline",
+        }
+    )
+    context["actions"] = actions
+    return context
 
 
 @login_required
@@ -1512,16 +1525,103 @@ def aluno_ensino_mensagens(request, codigo: str):
 @require_perm("educacao.view")
 def aluno_ensino_biblioteca(request, codigo: str):
     ctx = _resolve_contexto_aluno(request, codigo)
+    aluno = ctx["aluno"]
     arquivos = list(_scoped_arquivos_aluno(ctx)[:60])
+    emprestimos = list(
+        BibliotecaEmprestimo.objects.select_related(
+            "biblioteca",
+            "livro",
+            "exemplar",
+            "matricula_institucional",
+        )
+        .filter(aluno=aluno)
+        .order_by("-id")[:80]
+    )
+    emprestimos_ativos = [
+        e for e in emprestimos if e.status in {BibliotecaEmprestimo.Status.ATIVO, BibliotecaEmprestimo.Status.RENOVADO, BibliotecaEmprestimo.Status.ATRASADO}
+    ]
+    emprestimos_atrasados = [e for e in emprestimos_ativos if e.em_atraso or e.status == BibliotecaEmprestimo.Status.ATRASADO]
+    matricula_institucional = getattr(aluno, "matricula_institucional", None)
 
     context = {
         **_ensino_page_base_context(
             ctx,
-            subtitle="Materiais, anexos e arquivos educacionais disponibilizados para você.",
+            subtitle="Acompanhe seu histórico de biblioteca e materiais educacionais.",
         ),
+        "matricula_institucional": matricula_institucional,
         "arquivos": arquivos,
+        "emprestimos": emprestimos,
+        "emprestimos_ativos_count": len(emprestimos_ativos),
+        "emprestimos_atrasados_count": len(emprestimos_atrasados),
     }
     return render(request, "educacao/aluno_area/ensino_biblioteca.html", context)
+
+
+@login_required
+@require_perm("educacao.view")
+def aluno_ensino_programas(request, codigo: str):
+    ctx = _resolve_contexto_aluno(request, codigo)
+    aluno = ctx["aluno"]
+    filtro_programas = (request.GET.get("filtro") or "ativos").strip().lower()
+    if filtro_programas not in {"ativos", "concluidos", "encerrados", "todos"}:
+        filtro_programas = "ativos"
+    participacoes = list(
+        ProgramaComplementarParticipacao.objects.select_related(
+            "programa",
+            "oferta",
+            "oferta__unidade",
+            "matricula_institucional",
+            "legacy_informatica_matricula",
+        )
+        .prefetch_related("frequencias", "oferta__horarios")
+        .filter(aluno=aluno)
+        .order_by("-id")[:120]
+    )
+    ativos = [p for p in participacoes if p.status == ProgramaComplementarParticipacao.Status.ATIVO]
+    concluidos = [p for p in participacoes if p.status == ProgramaComplementarParticipacao.Status.CONCLUIDO]
+    encerrados = [
+        p
+        for p in participacoes
+        if p.status
+        in {
+            ProgramaComplementarParticipacao.Status.CANCELADO,
+            ProgramaComplementarParticipacao.Status.DESLIGADO,
+            ProgramaComplementarParticipacao.Status.SUSPENSO,
+            ProgramaComplementarParticipacao.Status.TRANSFERIDO,
+        }
+    ]
+    participacoes_visiveis = participacoes
+    if filtro_programas == "ativos":
+        participacoes_visiveis = ativos
+    elif filtro_programas == "concluidos":
+        participacoes_visiveis = concluidos
+    elif filtro_programas == "encerrados":
+        participacoes_visiveis = encerrados
+
+    percentuais = [p.percentual_frequencia for p in participacoes if p.percentual_frequencia is not None]
+    frequencia_media_geral = None
+    if percentuais:
+        frequencia_media_geral = float(sum(percentuais) / len(percentuais))
+
+    context = {
+        **_ensino_page_base_context(
+            ctx,
+            subtitle=(
+                "Acompanhe os programas complementares vinculados ao seu cadastro institucional "
+                "(Informática, Ballet, Reforço e demais atividades)."
+            ),
+        ),
+        "unidade_ref": ctx.get("unidade_ref"),
+        "participacoes": participacoes,
+        "participacoes_visiveis": participacoes_visiveis,
+        "filtro_programas": filtro_programas,
+        "ativos_count": len(ativos),
+        "concluidos_count": len(concluidos),
+        "encerrados_count": len(encerrados),
+        "participacoes_visiveis_count": len(participacoes_visiveis),
+        "frequencia_media_geral": frequencia_media_geral,
+    }
+    return render(request, "educacao/aluno_area/ensino_programas.html", context)
 
 
 @login_required
@@ -1788,7 +1888,7 @@ def aluno_central_servicos(request, codigo: str):
             "descricao": "Use Ensino ou Pesquisa para se inscrever nos editais com critérios publicados.",
         },
         {
-            "titulo": "Como abrir chamado",
+            "titulo": "Como registrar chamado",
             "descricao": "Registre o chamado nesta tela e acompanhe respostas pelo protocolo.",
         },
     ]
@@ -1797,7 +1897,7 @@ def aluno_central_servicos(request, codigo: str):
         **_base_context(
             ctx,
             page_title="Central de Serviços",
-            page_subtitle="Abrir chamados, consultar base de conhecimento e enviar solicitações cadastrais.",
+            page_subtitle="Registrar chamados, consultar base de conhecimento e enviar solicitações cadastrais.",
             nav_key="servicos",
         ),
         "chamado_form": chamado_form,

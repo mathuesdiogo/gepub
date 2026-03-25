@@ -27,6 +27,8 @@ from . import views_lotes
 from . import views_fechamento_lote
 from . import views_operacoes_lote
 from . import views_minicursos
+from . import views_biblioteca
+from . import views_programas
 from .views_turmas_list import TurmaListView
 from .views_alunos_list import AlunoListView
 from .views_diarios_list import DiarioListView
@@ -100,6 +102,7 @@ urlpatterns = [
     path("aluno/<str:codigo>/ensino/disciplinas/", views_aluno_area.aluno_ensino_disciplinas, name="aluno_ensino_disciplinas"),
     path("aluno/<str:codigo>/ensino/horarios/", views_aluno_area.aluno_ensino_horarios, name="aluno_ensino_horarios"),
     path("aluno/<str:codigo>/ensino/mensagens/", views_aluno_area.aluno_ensino_mensagens, name="aluno_ensino_mensagens"),
+    path("aluno/<str:codigo>/ensino/programas/", views_aluno_area.aluno_ensino_programas, name="aluno_ensino_programas"),
     path("aluno/<str:codigo>/ensino/biblioteca/", views_aluno_area.aluno_ensino_biblioteca, name="aluno_ensino_biblioteca"),
     path("aluno/<str:codigo>/ensino/apoio/", views_aluno_area.aluno_ensino_apoio, name="aluno_ensino_apoio"),
     path("aluno/<str:codigo>/ensino/processos-seletivos/", views_aluno_area.aluno_ensino_seletivos, name="aluno_ensino_seletivos"),
@@ -188,6 +191,67 @@ urlpatterns = [
     path("assistencia/transporte-registros/novo/", views_assistencia.assist_transporte_registro_create, name="assist_transporte_registro_create"),
     path("assistencia/transporte-registros/<int:pk>/", views_assistencia.assist_transporte_registro_detail, name="assist_transporte_registro_detail"),
     path("assistencia/transporte-registros/<int:pk>/editar/", views_assistencia.assist_transporte_registro_update, name="assist_transporte_registro_update"),
+
+    # ======================
+    # BIBLIOTECA ESCOLAR
+    # ======================
+    path("biblioteca/", views_biblioteca.biblioteca_dashboard, name="biblioteca_dashboard"),
+    path("biblioteca/nova/", views_biblioteca.biblioteca_create, name="biblioteca_create"),
+    path("biblioteca/acervo/", views_biblioteca.biblioteca_livro_list, name="biblioteca_livro_list"),
+    path("biblioteca/acervo/novo/", views_biblioteca.biblioteca_livro_create, name="biblioteca_livro_create"),
+    path("biblioteca/exemplares/novo/", views_biblioteca.biblioteca_exemplar_create, name="biblioteca_exemplar_create"),
+    path("biblioteca/emprestimos/", views_biblioteca.biblioteca_emprestimo_list, name="biblioteca_emprestimo_list"),
+    path("biblioteca/emprestimos/novo/", views_biblioteca.biblioteca_emprestimo_create, name="biblioteca_emprestimo_create"),
+    path("biblioteca/reservas/", views_biblioteca.biblioteca_reserva_list, name="biblioteca_reserva_list"),
+    path("biblioteca/reservas/nova/", views_biblioteca.biblioteca_reserva_create, name="biblioteca_reserva_create"),
+    path(
+        "biblioteca/reservas/<int:pk>/cancelar/",
+        views_biblioteca.biblioteca_reserva_cancel,
+        name="biblioteca_reserva_cancel",
+    ),
+    path(
+        "biblioteca/emprestimos/<int:pk>/devolver/",
+        views_biblioteca.biblioteca_emprestimo_devolver,
+        name="biblioteca_emprestimo_devolver",
+    ),
+    path(
+        "biblioteca/emprestimos/<int:pk>/renovar/",
+        views_biblioteca.biblioteca_emprestimo_renovar,
+        name="biblioteca_emprestimo_renovar",
+    ),
+    path("biblioteca/bloqueios/", views_biblioteca.biblioteca_bloqueio_list, name="biblioteca_bloqueio_list"),
+    path("biblioteca/bloqueios/novo/", views_biblioteca.biblioteca_bloqueio_create, name="biblioteca_bloqueio_create"),
+    path("biblioteca/relatorios/", views_biblioteca.biblioteca_relatorios, name="biblioteca_relatorios"),
+
+    # ======================
+    # PROGRAMAS COMPLEMENTARES
+    # ======================
+    path("programas/", views_programas.programas_dashboard, name="programas_dashboard"),
+    path(
+        "programas/relatorios/",
+        views_programas.programa_complementar_relatorios,
+        name="programa_complementar_relatorios",
+    ),
+    path("programas/catalogo/", views_programas.programa_complementar_list, name="programa_complementar_list"),
+    path("programas/catalogo/novo/", views_programas.programa_complementar_create, name="programa_complementar_create"),
+    path("programas/ofertas/", views_programas.programa_complementar_oferta_list, name="programa_complementar_oferta_list"),
+    path("programas/ofertas/nova/", views_programas.programa_complementar_oferta_create, name="programa_complementar_oferta_create"),
+    path("programas/horarios/novo/", views_programas.programa_complementar_horario_create, name="programa_complementar_horario_create"),
+    path(
+        "programas/participacoes/",
+        views_programas.programa_complementar_participacao_list,
+        name="programa_complementar_participacao_list",
+    ),
+    path(
+        "programas/participacoes/nova/",
+        views_programas.programa_complementar_participacao_create,
+        name="programa_complementar_participacao_create",
+    ),
+    path(
+        "programas/participacoes/<int:pk>/frequencia/",
+        views_programas.programa_complementar_frequencia_registrar,
+        name="programa_complementar_frequencia_registrar",
+    ),
 
     # ======================
     # BENEFÍCIOS E ENTREGAS
