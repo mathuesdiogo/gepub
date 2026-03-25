@@ -14,6 +14,9 @@ def normalize_role(role: str | None) -> str:
 def get_profile(user):
     if not user or not getattr(user, "is_authenticated", False):
         return None
+    preview_profile = getattr(user, "_gepub_preview_profile", None)
+    if preview_profile is not None:
+        return preview_profile
     return getattr(user, "profile", None)
 
 

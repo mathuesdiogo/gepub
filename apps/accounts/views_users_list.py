@@ -325,6 +325,22 @@ def usuarios_list(request):
                     "variant": "gp-button--ghost",
                 }
             )
+            actions.append(
+                {
+                    "label": "Mapa de perfis",
+                    "url": reverse("accounts:acessos_matriz"),
+                    "icon": "fa-solid fa-network-wired",
+                    "variant": "gp-button--ghost",
+                }
+            )
+            actions.append(
+                {
+                    "label": "Visualizar como perfil",
+                    "url": reverse("accounts:acessos_simular"),
+                    "icon": "fa-solid fa-eye",
+                    "variant": "gp-button--ghost",
+                }
+            )
     actions.extend(
         [
             {

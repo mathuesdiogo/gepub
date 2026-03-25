@@ -168,6 +168,7 @@ Rotas iniciais:
 - Departamentalização e skills por app/módulo: `docs/gepub_departamentalizacao_apps_modulos_skills_2026-03-07.md`
 - Catálogo de owners por app/skill: `docs/gepub_owners_catalogo_2026-03-07.csv`
 - Guia operacional de uso das skills: `docs/gepub_skills_operacao_2026-03-07.md`
+- Mapa institucional de perfis/acessos por app: `docs/gepub_mapa_acessos_2026-03-25.md`
 
 ## Skills do ecossistema GEPUB
 - Skills estão em `skills/` (uma skill por pasta, com `SKILL.md`, `agents/openai.yaml` e `references/`).

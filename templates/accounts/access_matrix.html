@@ -1,0 +1,73 @@
+{% extends "core/base.html" %}
+
+{% block title %}Mapa de Acessos • GEPUB{% endblock %}
+{% block header %}Mapa de Acessos{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'accounts:usuarios_list' %}">Usuários</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">Mapa de Acessos</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="card gp-card">
+  <div class="card__body gp-card__body">
+    {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+    <form method="get" class="filter-bar gp-card" style="margin-bottom: 1rem; padding: 1rem;">
+      <div class="filter-bar__left" style="display:grid; gap:.75rem; grid-template-columns: repeat(auto-fit, minmax(210px,1fr)); width:100%;">
+        <div class="filter-bar__field">
+          <label class="small" for="id_q">Busca</label>
+          <input id="id_q" class="gp-input" type="text" name="q" value="{{ q }}" placeholder="Perfil, código, categoria, escopo...">
+        </div>
+        <div class="filter-bar__field">
+          <label class="small" for="id_category">Categoria</label>
+          <select id="id_category" class="gp-input" name="category">
+            <option value="">Todas</option>
+            {% for key, label in category_options %}
+              <option value="{{ key }}" {% if category == key %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="filter-bar__field">
+          <label class="small" for="id_app">App</label>
+          <select id="id_app" class="gp-input" name="app">
+            <option value="">Todos</option>
+            {% for key, label in app_options %}
+              <option value="{{ key }}" {% if app == key %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="filter-bar__actions" style="margin-top: .75rem;">
+        <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
+        <a class="gp-button gp-button--ghost" href="{% url 'accounts:acessos_matriz' %}">Limpar</a>
+      </div>
+    </form>
+
+    {% if app_cards %}
+      <section class="users-groups" style="margin-bottom:1rem;">
+        <div class="users-groups__grid">
+          {% for item in app_cards %}
+            <article class="users-group-card gp-card">
+              <header class="users-group-card__head">
+                <h3 class="users-group-card__title">{{ item.app_label }}</h3>
+                <span class="status info">{{ item.roles_count }} perfis</span>
+              </header>
+              <div class="users-group-card__meta">
+                <span class="status success">Gestores atribuidores: {{ item.managers_count }}</span>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj empty_title="Nenhum perfil encontrado" empty_text="Ajuste os filtros para exibir os perfis e permissões." %}
+  </div>
+</div>
+{% endblock %}

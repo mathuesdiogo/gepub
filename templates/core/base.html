@@ -108,6 +108,22 @@
         </div>
       </header>
 
+      {% if access_preview_active %}
+        <section class="content gp-content" style="padding-bottom:0;">
+          <div class="alert gp-alert alert--warning">
+            Você está visualizando o sistema como <strong>{{ access_preview_role|default:"perfil simulado" }}</strong>
+            {% if access_preview_target %}
+              para o usuário <strong>{{ access_preview_target }}</strong>
+            {% endif %}
+            {% if access_preview_scope %}
+              no escopo <strong>{{ access_preview_scope }}</strong>
+            {% endif %}
+            (modo: {{ access_preview_mode|default:"simulação" }}).
+            <a href="{% url 'accounts:acessos_simular_encerrar' %}?next={{ request.get_full_path|urlencode }}">Encerrar visualização</a>
+          </div>
+        </section>
+      {% endif %}
+
       <section class="content gp-content">
         {% if messages %}
           <div class="alert-stack gp-alert">

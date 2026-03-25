@@ -21,6 +21,9 @@ urlpatterns = [
     path("usuarios/<int:pk>/toggle-bloqueio/", views_users.usuario_toggle_bloqueio, name="usuario_toggle_bloqueio"),
     path("usuarios/<int:pk>/reset-codigo/", views_users.usuario_reset_codigo, name="usuario_reset_codigo"),
     path("usuarios/<int:pk>/reset-senha/", views_users.usuario_reset_senha, name="usuario_reset_senha"),
+    path("usuarios/acessos/matriz/", views_users.acessos_matriz, name="acessos_matriz"),
+    path("usuarios/acessos/simular/", views_users.acessos_simular, name="acessos_simular"),
+    path("usuarios/acessos/simular/encerrar/", views_users.acessos_simular_encerrar, name="acessos_simular_encerrar"),
     path("api/users-suggest/", views_users.users_autocomplete, name="users_autocomplete"),
 
 

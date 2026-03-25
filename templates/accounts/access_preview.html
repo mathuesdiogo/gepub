@@ -1,0 +1,114 @@
+{% extends "core/base.html" %}
+
+{% block title %}Visualização Administrativa • GEPUB{% endblock %}
+{% block header %}Visualização Administrativa{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'accounts:usuarios_list' %}">Usuários</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">Visualização Administrativa</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="card gp-card">
+  <div class="card__body gp-card__body">
+    {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+    {% if current_payload.active %}
+      <div class="alert gp-alert alert--warning" style="margin-bottom:1rem;">
+        Visualização ativa em modo leitura: <strong>{{ current_payload.role_label }}</strong>
+        {% if current_payload.target_user_label %}
+          para o usuário <strong>{{ current_payload.target_user_label }}</strong>
+        {% endif %}
+        (escopo: {{ current_payload.scope_type|default:"global" }}).
+      </div>
+    {% endif %}
+
+    <form method="post" class="gp-card" style="padding: 1rem; margin-bottom: 1rem;">
+      {% csrf_token %}
+      {{ form.next }}
+      <div style="display:grid; gap:.75rem; grid-template-columns: repeat(auto-fit, minmax(220px,1fr));">
+        <div>
+          <label class="small" for="id_mode">Modo</label>
+          {{ form.mode }}
+          {% if form.mode.errors %}<div class="small" style="color:#b91c1c;">{{ form.mode.errors|striptags }}</div>{% endif %}
+        </div>
+        <div>
+          <label class="small" for="id_role">Perfil/Função</label>
+          {{ form.role }}
+          {% if form.role.errors %}<div class="small" style="color:#b91c1c;">{{ form.role.errors|striptags }}</div>{% endif %}
+        </div>
+        <div>
+          <label class="small" for="id_target_user">Usuário alvo</label>
+          {{ form.target_user }}
+          <div class="small">{{ form.target_user.help_text }}</div>
+          {% if form.target_user.errors %}<div class="small" style="color:#b91c1c;">{{ form.target_user.errors|striptags }}</div>{% endif %}
+        </div>
+        <div>
+          <label class="small" for="id_municipio">Município</label>
+          {{ form.municipio }}
+        </div>
+        <div>
+          <label class="small" for="id_secretaria">Secretaria</label>
+          {{ form.secretaria }}
+        </div>
+        <div>
+          <label class="small" for="id_unidade">Unidade</label>
+          {{ form.unidade }}
+        </div>
+        <div>
+          <label class="small" for="id_setor">Setor</label>
+          {{ form.setor }}
+        </div>
+        <div>
+          <label class="small" for="id_local_estrutural">Local estrutural</label>
+          {{ form.local_estrutural }}
+        </div>
+      </div>
+      <div style="display:flex; gap:.5rem; margin-top:1rem;">
+        <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-eye"></i> Iniciar visualização</button>
+        <a class="gp-button gp-button--danger" href="{% url 'accounts:acessos_simular_encerrar' %}"><i class="fa-solid fa-power-off"></i> Encerrar visualização</a>
+      </div>
+      {% if form.non_field_errors %}
+        <div class="small" style="color:#b91c1c; margin-top:.5rem;">{{ form.non_field_errors|striptags }}</div>
+      {% endif %}
+    </form>
+
+    <h3 class="page-head__title" style="font-size:1.05rem; margin-top:0;">Auditoria recente de visualizações</h3>
+    <div class="table-shell table-responsive gp-table gp-table--responsive gp-table--striped gp-table--hover">
+      <table class="gp-table__native table">
+        <thead>
+          <tr>
+            <th>Quando</th>
+            <th>Ação</th>
+            <th>Tipo</th>
+            <th>Perfil</th>
+            <th>Usuário alvo</th>
+            <th>Escopo</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in recent_logs %}
+            <tr>
+              <td>{{ item.created_at|date:"d/m/Y H:i" }}</td>
+              <td>{{ item.get_action_display }}</td>
+              <td>{{ item.get_preview_type_display }}</td>
+              <td>{{ item.target_role|default:"-" }}</td>
+              <td>{% if item.target_user %}{{ item.target_user.get_full_name|default:item.target_user.username }}{% else %}-{% endif %}</td>
+              <td>{{ item.scope_type|default:"global" }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6">Nenhum registro de visualização administrativa encontrado.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

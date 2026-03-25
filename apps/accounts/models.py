@@ -309,3 +309,49 @@ class PasswordHistory(models.Model):
 
     def __str__(self) -> str:
         return f"{self.user} • {self.created_at:%d/%m/%Y %H:%M}"
+
+
+class AccessPreviewLog(models.Model):
+    class Action(models.TextChoices):
+        START = "START", "Início"
+        STOP = "STOP", "Encerramento"
+
+    class PreviewType(models.TextChoices):
+        PROFILE = "PROFILE", "Visualizar como perfil"
+        USER = "USER", "Visualizar como usuário"
+        CONTEXT = "CONTEXT", "Visualizar função em contexto"
+
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="access_preview_actor_logs",
+    )
+    action = models.CharField(max_length=20, choices=Action.choices)
+    preview_type = models.CharField(max_length=20, choices=PreviewType.choices)
+    target_role = models.CharField(max_length=40, blank=True, default="")
+    target_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="access_preview_target_logs",
+    )
+    scope_type = models.CharField(max_length=40, blank=True, default="")
+    scope_payload = models.JSONField(default=dict, blank=True)
+    read_only = models.BooleanField(default=True)
+    notes = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Auditoria de visualização administrativa"
+        verbose_name_plural = "Auditoria de visualizações administrativas"
+        ordering = ["-created_at", "-id"]
+        indexes = [
+            models.Index(fields=["actor", "created_at"]),
+            models.Index(fields=["target_user", "created_at"]),
+            models.Index(fields=["preview_type", "action"]),
+        ]
+
+    def __str__(self) -> str:
+        target = self.target_user or "-"
+        return f"{self.get_action_display()} • {self.get_preview_type_display()} • {target} • {self.created_at:%d/%m/%Y %H:%M}"

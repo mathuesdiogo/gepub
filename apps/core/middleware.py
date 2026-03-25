@@ -1,6 +1,7 @@
 # apps/core/middleware.py
 from __future__ import annotations
 
+from types import SimpleNamespace
 from urllib.parse import urlparse
 
 from django.conf import settings
@@ -12,6 +13,7 @@ from apps.core.module_access import module_enabled_for_user
 from apps.org.models import Municipio
 from .rbac import (
     can,
+    normalize_role,
     role_scope_base,
     PERM_ORG,
     PERM_EDU,
@@ -264,6 +266,186 @@ class TenantHostMiddleware:
             if target_host and current_host and target_host == current_host:
                 return self.get_response(request)
             return redirect(login_target or "/accounts/login/")
+
+        return self.get_response(request)
+
+
+class AccessPreviewMiddleware:
+    """
+    Simulação administrativa de perfil/contexto:
+    - Injeta um perfil virtual para regras RBAC e escopo.
+    - Mantém modo leitura (bloqueio de métodos mutáveis).
+    - Disponibiliza contexto para banner de visualização.
+    """
+
+    SESSION_KEY = "gepub_access_preview"
+    SAFE_METHODS = {"GET", "HEAD", "OPTIONS", "TRACE"}
+    PREVIEW_BYPASS_VIEW_NAMES = {
+        "accounts:acessos_matriz",
+        "accounts:acessos_simular",
+        "accounts:acessos_simular_encerrar",
+    }
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    @staticmethod
+    def _to_int(value):
+        if value in ("", None):
+            return None
+        try:
+            return int(value)
+        except Exception:
+            return None
+
+    @staticmethod
+    def _can_use_preview(user) -> bool:
+        profile = getattr(user, "profile", None)
+        role = normalize_role(getattr(profile, "role", None) if profile else None)
+        return bool(getattr(user, "is_superuser", False) or role == "ADMIN")
+
+    def _build_preview_profile(self, payload: dict):
+        from apps.accounts.models import Profile
+        from django.contrib.auth import get_user_model
+        from apps.org.models import LocalEstrutural, Municipio, Secretaria, Setor, Unidade
+
+        mode = (payload.get("mode") or "").strip().lower()
+        role = normalize_role(payload.get("role"))
+        scope = payload.get("scope") or {}
+        target_user_id = self._to_int(payload.get("target_user_id"))
+
+        profile_source = None
+        if mode == "user" and target_user_id:
+            user_model = get_user_model()
+            target = (
+                user_model.objects.select_related("profile")
+                .filter(pk=target_user_id)
+                .first()
+            )
+            profile_source = getattr(target, "profile", None) if target else None
+            if not profile_source:
+                return None
+            role = normalize_role(getattr(profile_source, "role", None))
+            scope = {
+                "municipio_id": getattr(profile_source, "municipio_id", None),
+                "secretaria_id": getattr(profile_source, "secretaria_id", None),
+                "unidade_id": getattr(profile_source, "unidade_id", None),
+                "setor_id": getattr(profile_source, "setor_id", None),
+                "local_estrutural_id": getattr(profile_source, "local_estrutural_id", None),
+                "aluno_id": getattr(profile_source, "aluno_id", None),
+            }
+
+        municipio_id = self._to_int(scope.get("municipio_id"))
+        secretaria_id = self._to_int(scope.get("secretaria_id"))
+        unidade_id = self._to_int(scope.get("unidade_id"))
+        setor_id = self._to_int(scope.get("setor_id"))
+        local_estrutural_id = self._to_int(scope.get("local_estrutural_id"))
+        aluno_id = self._to_int(scope.get("aluno_id"))
+
+        preview_profile = SimpleNamespace(
+            role=role,
+            ativo=True,
+            bloqueado=False,
+            municipio_id=municipio_id,
+            secretaria_id=secretaria_id,
+            unidade_id=unidade_id,
+            setor_id=setor_id,
+            local_estrutural_id=local_estrutural_id,
+            aluno_id=aluno_id,
+            codigo_acesso=getattr(profile_source, "codigo_acesso", ""),
+        )
+
+        preview_profile.municipio = Municipio.objects.filter(pk=municipio_id).first() if municipio_id else None
+        preview_profile.secretaria = Secretaria.objects.filter(pk=secretaria_id).first() if secretaria_id else None
+        preview_profile.unidade = Unidade.objects.filter(pk=unidade_id).first() if unidade_id else None
+        preview_profile.setor = Setor.objects.filter(pk=setor_id).first() if setor_id else None
+        preview_profile.local_estrutural = (
+            LocalEstrutural.objects.filter(pk=local_estrutural_id).first() if local_estrutural_id else None
+        )
+
+        # Compatibilidade com comportamento de Profile.
+        preview_profile.get_role_display = lambda: dict(Profile.Role.choices).get(role, role)
+        return preview_profile
+
+    @staticmethod
+    def _scope_label(payload: dict) -> str:
+        scope = payload.get("scope") or {}
+        if scope.get("local_estrutural_id"):
+            return "local estrutural"
+        if scope.get("setor_id"):
+            return "setor"
+        if scope.get("unidade_id"):
+            return "unidade"
+        if scope.get("secretaria_id"):
+            return "secretaria"
+        if scope.get("municipio_id"):
+            return "município"
+        return "global"
+
+    @staticmethod
+    def _mode_label(payload: dict) -> str:
+        mode = (payload.get("mode") or "").strip().lower()
+        if mode == "user":
+            return "visualizar como usuário"
+        if mode == "context":
+            return "visualizar função em contexto"
+        return "visualizar como perfil"
+
+    def __call__(self, request):
+        request.access_preview_context = {"active": False}
+        path = request.path or ""
+
+        static_url = getattr(settings, "STATIC_URL", "/static/")
+        media_url = getattr(settings, "MEDIA_URL", "/media/")
+        if path.startswith(static_url) or path.startswith(media_url):
+            return self.get_response(request)
+
+        user = getattr(request, "user", None)
+        if not user or not getattr(user, "is_authenticated", False):
+            return self.get_response(request)
+
+        payload = request.session.get(self.SESSION_KEY)
+        if not isinstance(payload, dict) or not payload.get("active"):
+            return self.get_response(request)
+
+        if not self._can_use_preview(user):
+            request.session.pop(self.SESSION_KEY, None)
+            request.session.modified = True
+            return self.get_response(request)
+
+        # Endpoints de gestão da própria visualização usam perfil real.
+        try:
+            match = resolve(path)
+            view_name = (match.view_name or "").strip()
+        except Exception:
+            view_name = ""
+
+        preview_context = {
+            "active": True,
+            "role_label": payload.get("role_label", ""),
+            "mode_label": self._mode_label(payload),
+            "scope_label": self._scope_label(payload),
+            "target_user_label": payload.get("target_user_label", ""),
+        }
+        request.access_preview_context = preview_context
+
+        if view_name in self.PREVIEW_BYPASS_VIEW_NAMES:
+            return self.get_response(request)
+
+        preview_profile = self._build_preview_profile(payload)
+        if not preview_profile:
+            request.session.pop(self.SESSION_KEY, None)
+            request.session.modified = True
+            request.access_preview_context = {"active": False}
+            return self.get_response(request)
+
+        request.user._gepub_preview_profile = preview_profile
+        request.user._gepub_preview_payload = payload
+
+        if payload.get("read_only", True) and request.method not in self.SAFE_METHODS:
+            return HttpResponseForbidden(
+                "Modo de visualização administrativa está ativo em leitura. Encerre para executar alterações."
+            )
 
         return self.get_response(request)
 

@@ -9,6 +9,11 @@ from .views_users_crud import (
     usuario_reset_codigo,
     usuario_reset_senha,
 )
+from .views_access import (
+    acessos_matriz,
+    acessos_simular,
+    acessos_simular_encerrar,
+)
 
 __all__ = [
     "usuarios_list",
@@ -21,4 +26,7 @@ __all__ = [
     "usuario_toggle_bloqueio",
     "usuario_reset_codigo",
     "usuario_reset_senha",
+    "acessos_matriz",
+    "acessos_simular",
+    "acessos_simular_encerrar",
 ]

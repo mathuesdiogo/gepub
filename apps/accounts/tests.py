@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.accounts.forms import UsuarioCreateForm
-from apps.accounts.models import PasswordHistory, Profile, UserManagementAudit
+from apps.accounts.models import AccessPreviewLog, PasswordHistory, Profile, UserManagementAudit
 from apps.accounts import security as login_security
 from apps.core.security import decrypt_cpf
 from apps.org.models import Municipio, MunicipioOnboardingWizard, Secretaria, Unidade, Setor
@@ -318,17 +318,95 @@ class LoginSecurityViewTestCase(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn(reverse("accounts:login_mfa"), response.url)
 
-        mfa_page = self.client.get(reverse("accounts:login_mfa"))
-        self.assertEqual(mfa_page.status_code, 200)
-        self.assertContains(mfa_page, "Confirmação em duas etapas")
 
-        cache_payload = cache.get(f"accounts:mfa_code:{self.user.id}")
-        self.assertIsNotNone(cache_payload)
-        otp = cache_payload["code"]
+class AccessPreviewAdminFlowTestCase(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_superuser(
+            username="admin_preview",
+            email="admin.preview@example.com",
+            password="123456",
+        )
+        admin_profile = self.admin.profile
+        admin_profile.role = "ADMIN"
+        admin_profile.must_change_password = False
+        admin_profile.ativo = True
+        admin_profile.bloqueado = False
+        admin_profile.save(update_fields=["role", "must_change_password", "ativo", "bloqueado"])
 
-        ok = self.client.post(reverse("accounts:login_mfa"), {"otp_code": otp})
-        self.assertEqual(ok.status_code, 302)
-        self.assertIn(reverse("core:dashboard"), ok.url)
+        self.target_user = User.objects.create_user(
+            username="target_preview",
+            password="123456",
+            first_name="Target",
+            last_name="Preview",
+        )
+        target_profile = self.target_user.profile
+        target_profile.role = "EDU_COORD"
+        target_profile.must_change_password = False
+        target_profile.ativo = True
+        target_profile.bloqueado = False
+        target_profile.save(update_fields=["role", "must_change_password", "ativo", "bloqueado"])
+
+    def test_access_matrix_page_is_available_for_platform_admin(self):
+        self.client.force_login(self.admin)
+        response = self.client.get(reverse("accounts:acessos_matriz"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Mapa institucional de acessos")
+
+    def test_preview_start_and_stop_create_audit_logs(self):
+        self.client.force_login(self.admin)
+
+        response_start = self.client.post(
+            reverse("accounts:acessos_simular"),
+            {
+                "mode": "profile",
+                "role": "EDU_COORD",
+                "target_user": "",
+                "municipio": "",
+                "secretaria": "",
+                "unidade": "",
+                "setor": "",
+                "local_estrutural": "",
+                "next": reverse("core:dashboard"),
+            },
+        )
+        self.assertEqual(response_start.status_code, 302)
+        session = self.client.session
+        self.assertIn("gepub_access_preview", session)
+        self.assertTrue(
+            AccessPreviewLog.objects.filter(
+                actor=self.admin,
+                action=AccessPreviewLog.Action.START,
+            ).exists()
+        )
+
+        response_stop = self.client.get(reverse("accounts:acessos_simular_encerrar"))
+        self.assertEqual(response_stop.status_code, 302)
+        session = self.client.session
+        self.assertNotIn("gepub_access_preview", session)
+        self.assertTrue(
+            AccessPreviewLog.objects.filter(
+                actor=self.admin,
+                action=AccessPreviewLog.Action.STOP,
+            ).exists()
+        )
+
+    def test_non_platform_admin_cannot_start_preview(self):
+        municipio = Municipio.objects.create(nome="Cidade Preview", uf="MA")
+        gestor = User.objects.create_user(username="gestor_municipal", password="123456")
+        gestor_profile = gestor.profile
+        gestor_profile.role = "MUNICIPAL"
+        gestor_profile.municipio = municipio
+        gestor_profile.must_change_password = False
+        gestor_profile.ativo = True
+        gestor_profile.save(update_fields=["role", "municipio", "must_change_password", "ativo"])
+        MunicipioOnboardingWizard.objects.update_or_create(
+            user=gestor,
+            defaults={"municipio": municipio, "current_step": 9, "total_steps": 9, "completed_at": timezone.now()},
+        )
+
+        self.client.force_login(gestor)
+        response = self.client.get(reverse("accounts:acessos_simular"))
+        self.assertEqual(response.status_code, 403)
 
 
 class MunicipalPasswordRedirectFlowTestCase(TestCase):

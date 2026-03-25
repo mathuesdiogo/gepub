@@ -6,7 +6,7 @@ from django.urls import reverse
 from apps.billing.services import PlanoApp, municipio_has_plan_app
 from apps.core.design_system import THEME_OPTIONS, resolve_admin_theme_context, token_overrides_to_style
 from apps.core.module_access import module_enabled_for_user
-from apps.core.rbac import can, role_scope_base
+from apps.core.rbac import can, get_profile, role_scope_base
 
 
 def permissions(request):
@@ -15,9 +15,10 @@ def permissions(request):
     Mantém as chaves esperadas pelo seu base.html e telas de Educação.
     """
     u = getattr(request, "user", None)
-    role = getattr(getattr(u, "profile", None), "role", "")
+    profile = get_profile(u)
+    role = getattr(profile, "role", "")
     role_code = ((role or "") + "").strip().upper()
-    municipio = getattr(getattr(u, "profile", None), "municipio", None)
+    municipio = getattr(profile, "municipio", None)
     role_base = role_scope_base(role)
     is_professor_role = role_base == "PROFESSOR"
     plan_portal_enabled = bool(getattr(u, "is_superuser", False)) or municipio_has_plan_app(municipio, PlanoApp.PORTAL)
@@ -74,7 +75,7 @@ def permissions(request):
     aluno_atividades_url = ""
     aluno_saude_url = ""
     aluno_comunicacao_url = ""
-    profile = getattr(u, "profile", None)
+    access_preview = getattr(request, "access_preview_context", {}) or {}
     aluno_id = getattr(profile, "aluno_id", None)
     if aluno_id:
         codigo_aluno = (
@@ -231,4 +232,9 @@ def permissions(request):
         "aluno_atividades_url": aluno_atividades_url,
         "aluno_saude_url": aluno_saude_url,
         "aluno_comunicacao_url": aluno_comunicacao_url,
+        "access_preview_active": bool(access_preview.get("active")),
+        "access_preview_role": access_preview.get("role_label", ""),
+        "access_preview_scope": access_preview.get("scope_label", ""),
+        "access_preview_mode": access_preview.get("mode_label", ""),
+        "access_preview_target": access_preview.get("target_user_label", ""),
     }

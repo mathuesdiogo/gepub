@@ -199,6 +199,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     
     "apps.accounts.middleware.ForcePasswordChangeMiddleware",
+    "apps.core.middleware.AccessPreviewMiddleware",
     "apps.core.middleware.RBACMiddleware",
 
 
