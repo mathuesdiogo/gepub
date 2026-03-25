@@ -1,0 +1,3977 @@
+[
+  {
+    "role_code": "ADMIN",
+    "role_label": "Admin (Sistema)",
+    "category": "Administração e Governança",
+    "scope_base": "ADMIN",
+    "apps": [
+      {
+        "app_key": "accounts",
+        "app_label": "Contas e Acessos",
+        "actions": [
+          "manage_users",
+          "view"
+        ],
+        "action_labels": [
+          "manage users",
+          "ver"
+        ],
+        "action_summary": "manage users, ver"
+      },
+      {
+        "app_key": "org",
+        "app_label": "Organização",
+        "actions": [
+          "manage_municipio",
+          "manage_secretaria",
+          "manage_unidade",
+          "view"
+        ],
+        "action_labels": [
+          "manage municipio",
+          "manage secretaria",
+          "manage unidade",
+          "ver"
+        ],
+        "action_summary": "manage municipio, manage secretaria, manage unidade, ver"
+      },
+      {
+        "app_key": "educacao",
+        "app_label": "Educação",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "avaliacoes",
+        "app_label": "Avaliações",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "nee",
+        "app_label": "NEE",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "saude",
+        "app_label": "Saúde",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "financeiro",
+        "app_label": "Financeiro",
+        "actions": [
+          "contabilidade",
+          "manage",
+          "tesouraria",
+          "view"
+        ],
+        "action_labels": [
+          "contabilidade",
+          "operar",
+          "tesouraria",
+          "ver"
+        ],
+        "action_summary": "contabilidade, operar, tesouraria, ver"
+      },
+      {
+        "app_key": "processos",
+        "app_label": "Processos",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "compras",
+        "app_label": "Compras",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "contratos",
+        "app_label": "Contratos",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "rh",
+        "app_label": "RH",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "ponto",
+        "app_label": "Ponto",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "folha",
+        "app_label": "Folha",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "patrimonio",
+        "app_label": "Patrimônio",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "almoxarifado",
+        "app_label": "Almoxarifado",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "frota",
+        "app_label": "Frota",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "ouvidoria",
+        "app_label": "Ouvidoria",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "tributos",
+        "app_label": "Tributos",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "camara",
+        "app_label": "Câmara",
+        "actions": [
+          "manage",
+          "cms.manage",
+          "proposicoes.manage",
+          "sessoes.manage",
+          "transmissoes.manage",
+          "transparencia.manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "operar cms",
+          "operar proposicoes",
+          "operar sessoes",
+          "operar transmissoes",
+          "operar transparencia",
+          "ver"
+        ],
+        "action_summary": "operar, operar cms, operar proposicoes, operar sessoes, operar transmissoes, operar transparencia, ver"
+      },
+      {
+        "app_key": "integracoes",
+        "app_label": "Integrações",
+        "actions": [
+          "admin",
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "administrar",
+          "operar",
+          "ver"
+        ],
+        "action_summary": "administrar, operar, ver"
+      },
+      {
+        "app_key": "comunicacao",
+        "app_label": "Comunicação",
+        "actions": [
+          "admin",
+          "audit",
+          "send",
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "administrar",
+          "auditar",
+          "enviar",
+          "operar",
+          "ver"
+        ],
+        "action_summary": "administrar, auditar, enviar, operar, ver"
+      },
+      {
+        "app_key": "paineis",
+        "app_label": "Painéis BI",
+        "actions": [
+          "manage",
+          "publish",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "publicar",
+          "ver"
+        ],
+        "action_summary": "operar, publicar, ver"
+      },
+      {
+        "app_key": "conversor",
+        "app_label": "Ferramentas PDF",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "billing",
+        "app_label": "Plano e Assinatura",
+        "actions": [
+          "admin",
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "administrar",
+          "operar",
+          "ver"
+        ],
+        "action_summary": "administrar, operar, ver"
+      },
+      {
+        "app_key": "reports",
+        "app_label": "Relatórios",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "system",
+        "app_label": "Sistema",
+        "actions": [
+          "admin_django"
+        ],
+        "action_labels": [
+          "admin django"
+        ],
+        "action_summary": "admin django"
+      }
+    ],
+    "permissions": [
+      "accounts.manage_users",
+      "accounts.view",
+      "almoxarifado.manage",
+      "almoxarifado.view",
+      "avaliacoes.manage",
+      "avaliacoes.view",
+      "billing.admin",
+      "billing.manage",
+      "billing.view",
+      "camara.cms.manage",
+      "camara.manage",
+      "camara.proposicoes.manage",
+      "camara.sessoes.manage",
+      "camara.transmissoes.manage",
+      "camara.transparencia.manage",
+      "camara.view",
+      "compras.manage",
+      "compras.view",
+      "comunicacao.admin",
+      "comunicacao.audit",
+      "comunicacao.manage",
+      "comunicacao.send",
+      "comunicacao.view",
+      "contratos.manage",
+      "contratos.view",
+      "conversor.manage",
+      "conversor.view",
+      "educacao.manage",
+      "educacao.view",
+      "financeiro.contabilidade",
+      "financeiro.manage",
+      "financeiro.tesouraria",
+      "financeiro.view",
+      "folha.manage",
+      "folha.view",
+      "frota.manage",
+      "frota.view",
+      "integracoes.admin",
+      "integracoes.manage",
+      "integracoes.view",
+      "nee.manage",
+      "nee.view",
+      "org.manage_municipio",
+      "org.manage_secretaria",
+      "org.manage_unidade",
+      "org.view",
+      "ouvidoria.manage",
+      "ouvidoria.view",
+      "paineis.manage",
+      "paineis.publish",
+      "paineis.view",
+      "patrimonio.manage",
+      "patrimonio.view",
+      "ponto.manage",
+      "ponto.view",
+      "processos.manage",
+      "processos.view",
+      "reports.view",
+      "rh.manage",
+      "rh.view",
+      "saude.manage",
+      "saude.view",
+      "system.admin_django",
+      "tributos.manage",
+      "tributos.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "AUDITORIA",
+    "role_label": "Controladoria / Auditoria",
+    "category": "Administração e Governança",
+    "scope_base": "MUNICIPAL",
+    "apps": [
+      {
+        "app_key": "org",
+        "app_label": "Organização",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "educacao",
+        "app_label": "Educação",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "avaliacoes",
+        "app_label": "Avaliações",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "nee",
+        "app_label": "NEE",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "saude",
+        "app_label": "Saúde",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "financeiro",
+        "app_label": "Financeiro",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "processos",
+        "app_label": "Processos",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "compras",
+        "app_label": "Compras",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "contratos",
+        "app_label": "Contratos",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "rh",
+        "app_label": "RH",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "ponto",
+        "app_label": "Ponto",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "folha",
+        "app_label": "Folha",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "patrimonio",
+        "app_label": "Patrimônio",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "almoxarifado",
+        "app_label": "Almoxarifado",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "frota",
+        "app_label": "Frota",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "ouvidoria",
+        "app_label": "Ouvidoria",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "tributos",
+        "app_label": "Tributos",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "camara",
+        "app_label": "Câmara",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "integracoes",
+        "app_label": "Integrações",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "comunicacao",
+        "app_label": "Comunicação",
+        "actions": [
+          "audit",
+          "view"
+        ],
+        "action_labels": [
+          "auditar",
+          "ver"
+        ],
+        "action_summary": "auditar, ver"
+      },
+      {
+        "app_key": "paineis",
+        "app_label": "Painéis BI",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "conversor",
+        "app_label": "Ferramentas PDF",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "reports",
+        "app_label": "Relatórios",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "almoxarifado.view",
+      "avaliacoes.view",
+      "camara.view",
+      "compras.view",
+      "comunicacao.audit",
+      "comunicacao.view",
+      "contratos.view",
+      "conversor.view",
+      "educacao.view",
+      "financeiro.view",
+      "folha.view",
+      "frota.view",
+      "integracoes.view",
+      "nee.view",
+      "org.view",
+      "ouvidoria.view",
+      "paineis.view",
+      "patrimonio.view",
+      "ponto.view",
+      "processos.view",
+      "reports.view",
+      "rh.view",
+      "saude.view",
+      "tributos.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "CAD_GESTOR",
+    "role_label": "Gestor de Cadastros",
+    "category": "Administração e Governança",
+    "scope_base": "MUNICIPAL",
+    "apps": [
+      {
+        "app_key": "accounts",
+        "app_label": "Contas e Acessos",
+        "actions": [
+          "manage_users"
+        ],
+        "action_labels": [
+          "manage users"
+        ],
+        "action_summary": "manage users"
+      },
+      {
+        "app_key": "org",
+        "app_label": "Organização",
+        "actions": [
+          "manage_secretaria",
+          "manage_unidade",
+          "view"
+        ],
+        "action_labels": [
+          "manage secretaria",
+          "manage unidade",
+          "ver"
+        ],
+        "action_summary": "manage secretaria, manage unidade, ver"
+      }
+    ],
+    "permissions": [
+      "accounts.manage_users",
+      "org.manage_secretaria",
+      "org.manage_unidade",
+      "org.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "SECRETARIA",
+    "role_label": "Gestor de Secretaria",
+    "category": "Administração e Governança",
+    "scope_base": "SECRETARIA",
+    "apps": [
+      {
+        "app_key": "accounts",
+        "app_label": "Contas e Acessos",
+        "actions": [
+          "manage_users",
+          "view"
+        ],
+        "action_labels": [
+          "manage users",
+          "ver"
+        ],
+        "action_summary": "manage users, ver"
+      },
+      {
+        "app_key": "org",
+        "app_label": "Organização",
+        "actions": [
+          "manage_unidade",
+          "view"
+        ],
+        "action_labels": [
+          "manage unidade",
+          "ver"
+        ],
+        "action_summary": "manage unidade, ver"
+      },
+      {
+        "app_key": "educacao",
+        "app_label": "Educação",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "avaliacoes",
+        "app_label": "Avaliações",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "nee",
+        "app_label": "NEE",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "saude",
+        "app_label": "Saúde",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "financeiro",
+        "app_label": "Financeiro",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "processos",
+        "app_label": "Processos",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "compras",
+        "app_label": "Compras",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "contratos",
+        "app_label": "Contratos",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "rh",
+        "app_label": "RH",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "ponto",
+        "app_label": "Ponto",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "folha",
+        "app_label": "Folha",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "patrimonio",
+        "app_label": "Patrimônio",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "almoxarifado",
+        "app_label": "Almoxarifado",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "frota",
+        "app_label": "Frota",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "ouvidoria",
+        "app_label": "Ouvidoria",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "tributos",
+        "app_label": "Tributos",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "camara",
+        "app_label": "Câmara",
+        "actions": [
+          "cms.manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar cms",
+          "ver"
+        ],
+        "action_summary": "operar cms, ver"
+      },
+      {
+        "app_key": "integracoes",
+        "app_label": "Integrações",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "comunicacao",
+        "app_label": "Comunicação",
+        "actions": [
+          "audit",
+          "send",
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "auditar",
+          "enviar",
+          "operar",
+          "ver"
+        ],
+        "action_summary": "auditar, enviar, operar, ver"
+      },
+      {
+        "app_key": "paineis",
+        "app_label": "Painéis BI",
+        "actions": [
+          "manage",
+          "publish",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "publicar",
+          "ver"
+        ],
+        "action_summary": "operar, publicar, ver"
+      },
+      {
+        "app_key": "conversor",
+        "app_label": "Ferramentas PDF",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "reports",
+        "app_label": "Relatórios",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "accounts.manage_users",
+      "accounts.view",
+      "almoxarifado.view",
+      "avaliacoes.manage",
+      "avaliacoes.view",
+      "camara.cms.manage",
+      "camara.view",
+      "compras.manage",
+      "compras.view",
+      "comunicacao.audit",
+      "comunicacao.manage",
+      "comunicacao.send",
+      "comunicacao.view",
+      "contratos.manage",
+      "contratos.view",
+      "conversor.manage",
+      "conversor.view",
+      "educacao.manage",
+      "educacao.view",
+      "financeiro.view",
+      "folha.manage",
+      "folha.view",
+      "frota.view",
+      "integracoes.manage",
+      "integracoes.view",
+      "nee.manage",
+      "nee.view",
+      "org.manage_unidade",
+      "org.view",
+      "ouvidoria.manage",
+      "ouvidoria.view",
+      "paineis.manage",
+      "paineis.publish",
+      "paineis.view",
+      "patrimonio.view",
+      "ponto.manage",
+      "ponto.view",
+      "processos.manage",
+      "processos.view",
+      "reports.view",
+      "rh.manage",
+      "rh.view",
+      "saude.manage",
+      "saude.view",
+      "tributos.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "UNIDADE",
+    "role_label": "Gestor de Unidade",
+    "category": "Administração e Governança",
+    "scope_base": "UNIDADE",
+    "apps": [
+      {
+        "app_key": "accounts",
+        "app_label": "Contas e Acessos",
+        "actions": [
+          "manage_users",
+          "view"
+        ],
+        "action_labels": [
+          "manage users",
+          "ver"
+        ],
+        "action_summary": "manage users, ver"
+      },
+      {
+        "app_key": "org",
+        "app_label": "Organização",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "educacao",
+        "app_label": "Educação",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "avaliacoes",
+        "app_label": "Avaliações",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "nee",
+        "app_label": "NEE",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "saude",
+        "app_label": "Saúde",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "financeiro",
+        "app_label": "Financeiro",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "processos",
+        "app_label": "Processos",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "compras",
+        "app_label": "Compras",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "contratos",
+        "app_label": "Contratos",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "rh",
+        "app_label": "RH",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "ponto",
+        "app_label": "Ponto",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "folha",
+        "app_label": "Folha",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "patrimonio",
+        "app_label": "Patrimônio",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "almoxarifado",
+        "app_label": "Almoxarifado",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "frota",
+        "app_label": "Frota",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "ouvidoria",
+        "app_label": "Ouvidoria",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "tributos",
+        "app_label": "Tributos",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "camara",
+        "app_label": "Câmara",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "integracoes",
+        "app_label": "Integrações",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "comunicacao",
+        "app_label": "Comunicação",
+        "actions": [
+          "send",
+          "view"
+        ],
+        "action_labels": [
+          "enviar",
+          "ver"
+        ],
+        "action_summary": "enviar, ver"
+      },
+      {
+        "app_key": "paineis",
+        "app_label": "Painéis BI",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "conversor",
+        "app_label": "Ferramentas PDF",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "reports",
+        "app_label": "Relatórios",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "accounts.manage_users",
+      "accounts.view",
+      "almoxarifado.view",
+      "avaliacoes.manage",
+      "avaliacoes.view",
+      "camara.view",
+      "compras.view",
+      "comunicacao.send",
+      "comunicacao.view",
+      "contratos.view",
+      "conversor.view",
+      "educacao.manage",
+      "educacao.view",
+      "financeiro.view",
+      "folha.view",
+      "frota.view",
+      "integracoes.view",
+      "nee.manage",
+      "nee.view",
+      "org.view",
+      "ouvidoria.view",
+      "paineis.view",
+      "patrimonio.view",
+      "ponto.view",
+      "processos.view",
+      "reports.view",
+      "rh.view",
+      "saude.view",
+      "tributos.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "MUNICIPAL",
+    "role_label": "Gestor Municipal",
+    "category": "Administração e Governança",
+    "scope_base": "MUNICIPAL",
+    "apps": [
+      {
+        "app_key": "accounts",
+        "app_label": "Contas e Acessos",
+        "actions": [
+          "manage_users",
+          "view"
+        ],
+        "action_labels": [
+          "manage users",
+          "ver"
+        ],
+        "action_summary": "manage users, ver"
+      },
+      {
+        "app_key": "org",
+        "app_label": "Organização",
+        "actions": [
+          "manage_secretaria",
+          "manage_unidade",
+          "view"
+        ],
+        "action_labels": [
+          "manage secretaria",
+          "manage unidade",
+          "ver"
+        ],
+        "action_summary": "manage secretaria, manage unidade, ver"
+      },
+      {
+        "app_key": "educacao",
+        "app_label": "Educação",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "avaliacoes",
+        "app_label": "Avaliações",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "nee",
+        "app_label": "NEE",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "saude",
+        "app_label": "Saúde",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "financeiro",
+        "app_label": "Financeiro",
+        "actions": [
+          "contabilidade",
+          "manage",
+          "tesouraria",
+          "view"
+        ],
+        "action_labels": [
+          "contabilidade",
+          "operar",
+          "tesouraria",
+          "ver"
+        ],
+        "action_summary": "contabilidade, operar, tesouraria, ver"
+      },
+      {
+        "app_key": "processos",
+        "app_label": "Processos",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "compras",
+        "app_label": "Compras",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "contratos",
+        "app_label": "Contratos",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "rh",
+        "app_label": "RH",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "ponto",
+        "app_label": "Ponto",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "folha",
+        "app_label": "Folha",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "patrimonio",
+        "app_label": "Patrimônio",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "almoxarifado",
+        "app_label": "Almoxarifado",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "frota",
+        "app_label": "Frota",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "ouvidoria",
+        "app_label": "Ouvidoria",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "tributos",
+        "app_label": "Tributos",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "camara",
+        "app_label": "Câmara",
+        "actions": [
+          "manage",
+          "cms.manage",
+          "proposicoes.manage",
+          "sessoes.manage",
+          "transmissoes.manage",
+          "transparencia.manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "operar cms",
+          "operar proposicoes",
+          "operar sessoes",
+          "operar transmissoes",
+          "operar transparencia",
+          "ver"
+        ],
+        "action_summary": "operar, operar cms, operar proposicoes, operar sessoes, operar transmissoes, operar transparencia, ver"
+      },
+      {
+        "app_key": "integracoes",
+        "app_label": "Integrações",
+        "actions": [
+          "admin",
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "administrar",
+          "operar",
+          "ver"
+        ],
+        "action_summary": "administrar, operar, ver"
+      },
+      {
+        "app_key": "comunicacao",
+        "app_label": "Comunicação",
+        "actions": [
+          "admin",
+          "audit",
+          "send",
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "administrar",
+          "auditar",
+          "enviar",
+          "operar",
+          "ver"
+        ],
+        "action_summary": "administrar, auditar, enviar, operar, ver"
+      },
+      {
+        "app_key": "paineis",
+        "app_label": "Painéis BI",
+        "actions": [
+          "manage",
+          "publish",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "publicar",
+          "ver"
+        ],
+        "action_summary": "operar, publicar, ver"
+      },
+      {
+        "app_key": "conversor",
+        "app_label": "Ferramentas PDF",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "billing",
+        "app_label": "Plano e Assinatura",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "reports",
+        "app_label": "Relatórios",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "accounts.manage_users",
+      "accounts.view",
+      "almoxarifado.manage",
+      "almoxarifado.view",
+      "avaliacoes.manage",
+      "avaliacoes.view",
+      "billing.manage",
+      "billing.view",
+      "camara.cms.manage",
+      "camara.manage",
+      "camara.proposicoes.manage",
+      "camara.sessoes.manage",
+      "camara.transmissoes.manage",
+      "camara.transparencia.manage",
+      "camara.view",
+      "compras.manage",
+      "compras.view",
+      "comunicacao.admin",
+      "comunicacao.audit",
+      "comunicacao.manage",
+      "comunicacao.send",
+      "comunicacao.view",
+      "contratos.manage",
+      "contratos.view",
+      "conversor.manage",
+      "conversor.view",
+      "educacao.manage",
+      "educacao.view",
+      "financeiro.contabilidade",
+      "financeiro.manage",
+      "financeiro.tesouraria",
+      "financeiro.view",
+      "folha.manage",
+      "folha.view",
+      "frota.manage",
+      "frota.view",
+      "integracoes.admin",
+      "integracoes.manage",
+      "integracoes.view",
+      "nee.manage",
+      "nee.view",
+      "org.manage_secretaria",
+      "org.manage_unidade",
+      "org.view",
+      "ouvidoria.manage",
+      "ouvidoria.view",
+      "paineis.manage",
+      "paineis.publish",
+      "paineis.view",
+      "patrimonio.manage",
+      "patrimonio.view",
+      "ponto.manage",
+      "ponto.view",
+      "processos.manage",
+      "processos.view",
+      "reports.view",
+      "rh.manage",
+      "rh.view",
+      "saude.manage",
+      "saude.view",
+      "tributos.manage",
+      "tributos.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "CAD_OPER",
+    "role_label": "Operador de Cadastros",
+    "category": "Administração e Governança",
+    "scope_base": "SECRETARIA",
+    "apps": [
+      {
+        "app_key": "org",
+        "app_label": "Organização",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "org.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "LEITURA",
+    "role_label": "Somente leitura",
+    "category": "Administração e Governança",
+    "scope_base": "LEITURA",
+    "apps": [
+      {
+        "app_key": "accounts",
+        "app_label": "Contas e Acessos",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "financeiro",
+        "app_label": "Financeiro",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "processos",
+        "app_label": "Processos",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "compras",
+        "app_label": "Compras",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "contratos",
+        "app_label": "Contratos",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "camara",
+        "app_label": "Câmara",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "comunicacao",
+        "app_label": "Comunicação",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "paineis",
+        "app_label": "Painéis BI",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "conversor",
+        "app_label": "Ferramentas PDF",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "reports",
+        "app_label": "Relatórios",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "accounts.view",
+      "camara.view",
+      "compras.view",
+      "comunicacao.view",
+      "contratos.view",
+      "conversor.view",
+      "financeiro.view",
+      "paineis.view",
+      "processos.view",
+      "reports.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor de Unidade",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "NEE_COORD_MUN",
+    "role_label": "Coordenador Municipal NEE",
+    "category": "Educação",
+    "scope_base": "MUNICIPAL",
+    "apps": [
+      {
+        "app_key": "educacao",
+        "app_label": "Educação",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "nee",
+        "app_label": "NEE",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "saude",
+        "app_label": "Saúde",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "reports",
+        "app_label": "Relatórios",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "educacao.view",
+      "nee.manage",
+      "nee.view",
+      "reports.view",
+      "saude.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "NEE_COORD_ESC",
+    "role_label": "Coordenador NEE da Escola",
+    "category": "Educação",
+    "scope_base": "UNIDADE",
+    "apps": [
+      {
+        "app_key": "educacao",
+        "app_label": "Educação",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "nee",
+        "app_label": "NEE",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      }
+    ],
+    "permissions": [
+      "educacao.view",
+      "nee.manage",
+      "nee.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor de Unidade",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "EDU_COORD",
+    "role_label": "Coordenador Pedagógico",
+    "category": "Educação",
+    "scope_base": "UNIDADE",
+    "apps": [
+      {
+        "app_key": "educacao",
+        "app_label": "Educação",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "avaliacoes",
+        "app_label": "Avaliações",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "nee",
+        "app_label": "NEE",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "comunicacao",
+        "app_label": "Comunicação",
+        "actions": [
+          "send",
+          "view"
+        ],
+        "action_labels": [
+          "enviar",
+          "ver"
+        ],
+        "action_summary": "enviar, ver"
+      }
+    ],
+    "permissions": [
+      "avaliacoes.manage",
+      "avaliacoes.view",
+      "comunicacao.send",
+      "comunicacao.view",
+      "educacao.manage",
+      "educacao.view",
+      "nee.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "EDU_DIRETOR",
+    "role_label": "Diretor Escolar",
+    "category": "Educação",
+    "scope_base": "UNIDADE",
+    "apps": [
+      {
+        "app_key": "educacao",
+        "app_label": "Educação",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "avaliacoes",
+        "app_label": "Avaliações",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "nee",
+        "app_label": "NEE",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "comunicacao",
+        "app_label": "Comunicação",
+        "actions": [
+          "send",
+          "view"
+        ],
+        "action_labels": [
+          "enviar",
+          "ver"
+        ],
+        "action_summary": "enviar, ver"
+      }
+    ],
+    "permissions": [
+      "avaliacoes.manage",
+      "avaliacoes.view",
+      "comunicacao.send",
+      "comunicacao.view",
+      "educacao.manage",
+      "educacao.view",
+      "nee.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "NEE_TECNICO",
+    "role_label": "Equipe Técnica NEE",
+    "category": "Educação",
+    "scope_base": "UNIDADE",
+    "apps": [
+      {
+        "app_key": "educacao",
+        "app_label": "Educação",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "nee",
+        "app_label": "NEE",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "saude",
+        "app_label": "Saúde",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "educacao.view",
+      "nee.manage",
+      "nee.view",
+      "saude.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor de Unidade",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "NEE_MEDIADOR",
+    "role_label": "Mediador / Apoio NEE",
+    "category": "Educação",
+    "scope_base": "UNIDADE",
+    "apps": [
+      {
+        "app_key": "educacao",
+        "app_label": "Educação",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "nee",
+        "app_label": "NEE",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      }
+    ],
+    "permissions": [
+      "educacao.view",
+      "nee.manage",
+      "nee.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor de Unidade",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "PROFESSOR",
+    "role_label": "Professor",
+    "category": "Educação",
+    "scope_base": "PROFESSOR",
+    "apps": [
+      {
+        "app_key": "educacao",
+        "app_label": "Educação",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "avaliacoes",
+        "app_label": "Avaliações",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      }
+    ],
+    "permissions": [
+      "avaliacoes.manage",
+      "avaliacoes.view",
+      "educacao.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor de Unidade",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "EDU_PROF",
+    "role_label": "Professor (Educação)",
+    "category": "Educação",
+    "scope_base": "PROFESSOR",
+    "apps": [
+      {
+        "app_key": "educacao",
+        "app_label": "Educação",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "avaliacoes",
+        "app_label": "Avaliações",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      }
+    ],
+    "permissions": [
+      "avaliacoes.manage",
+      "avaliacoes.view",
+      "educacao.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor de Unidade",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "EDU_SECRETARIA",
+    "role_label": "Secretaria Escolar",
+    "category": "Educação",
+    "scope_base": "UNIDADE",
+    "apps": [
+      {
+        "app_key": "educacao",
+        "app_label": "Educação",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "comunicacao",
+        "app_label": "Comunicação",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "comunicacao.view",
+      "educacao.manage",
+      "educacao.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor de Unidade",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "EDU_SECRETARIO",
+    "role_label": "Secretário de Educação",
+    "category": "Educação",
+    "scope_base": "SECRETARIA",
+    "apps": [
+      {
+        "app_key": "org",
+        "app_label": "Organização",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "educacao",
+        "app_label": "Educação",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "avaliacoes",
+        "app_label": "Avaliações",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "nee",
+        "app_label": "NEE",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "comunicacao",
+        "app_label": "Comunicação",
+        "actions": [
+          "send",
+          "view"
+        ],
+        "action_labels": [
+          "enviar",
+          "ver"
+        ],
+        "action_summary": "enviar, ver"
+      },
+      {
+        "app_key": "paineis",
+        "app_label": "Painéis BI",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "reports",
+        "app_label": "Relatórios",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "avaliacoes.view",
+      "comunicacao.send",
+      "comunicacao.view",
+      "educacao.manage",
+      "educacao.view",
+      "nee.view",
+      "org.view",
+      "paineis.view",
+      "reports.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "EDU_TRANSPORTE",
+    "role_label": "Transporte Escolar",
+    "category": "Educação",
+    "scope_base": "UNIDADE",
+    "apps": [
+      {
+        "app_key": "educacao",
+        "app_label": "Educação",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "educacao.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor de Unidade",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "NEE",
+    "role_label": "Técnico NEE",
+    "category": "Educação",
+    "scope_base": "NEE",
+    "apps": [
+      {
+        "app_key": "accounts",
+        "app_label": "Contas e Acessos",
+        "actions": [
+          "manage_users",
+          "view"
+        ],
+        "action_labels": [
+          "manage users",
+          "ver"
+        ],
+        "action_summary": "manage users, ver"
+      },
+      {
+        "app_key": "nee",
+        "app_label": "NEE",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "saude",
+        "app_label": "Saúde",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "financeiro",
+        "app_label": "Financeiro",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "processos",
+        "app_label": "Processos",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "paineis",
+        "app_label": "Painéis BI",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "reports",
+        "app_label": "Relatórios",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "accounts.manage_users",
+      "accounts.view",
+      "financeiro.view",
+      "nee.manage",
+      "nee.view",
+      "paineis.view",
+      "processos.view",
+      "reports.view",
+      "saude.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor de Unidade",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "SAU_ACS",
+    "role_label": "ACS",
+    "category": "Saúde",
+    "scope_base": "UNIDADE",
+    "apps": [
+      {
+        "app_key": "saude",
+        "app_label": "Saúde",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "saude.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor de Unidade",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "SAU_COORD",
+    "role_label": "Coordenador de Saúde",
+    "category": "Saúde",
+    "scope_base": "UNIDADE",
+    "apps": [
+      {
+        "app_key": "saude",
+        "app_label": "Saúde",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "comunicacao",
+        "app_label": "Comunicação",
+        "actions": [
+          "send",
+          "view"
+        ],
+        "action_labels": [
+          "enviar",
+          "ver"
+        ],
+        "action_summary": "enviar, ver"
+      }
+    ],
+    "permissions": [
+      "comunicacao.send",
+      "comunicacao.view",
+      "saude.manage",
+      "saude.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "SAU_DIRETOR",
+    "role_label": "Diretor de Unidade de Saúde",
+    "category": "Saúde",
+    "scope_base": "UNIDADE",
+    "apps": [
+      {
+        "app_key": "saude",
+        "app_label": "Saúde",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "comunicacao",
+        "app_label": "Comunicação",
+        "actions": [
+          "send",
+          "view"
+        ],
+        "action_labels": [
+          "enviar",
+          "ver"
+        ],
+        "action_summary": "enviar, ver"
+      },
+      {
+        "app_key": "reports",
+        "app_label": "Relatórios",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "comunicacao.send",
+      "comunicacao.view",
+      "reports.view",
+      "saude.manage",
+      "saude.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "SAU_ENFERMEIRO",
+    "role_label": "Enfermeiro",
+    "category": "Saúde",
+    "scope_base": "UNIDADE",
+    "apps": [
+      {
+        "app_key": "saude",
+        "app_label": "Saúde",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      }
+    ],
+    "permissions": [
+      "saude.manage",
+      "saude.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor de Unidade",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "SAU_FARMACIA",
+    "role_label": "Farmácia",
+    "category": "Saúde",
+    "scope_base": "UNIDADE",
+    "apps": [
+      {
+        "app_key": "saude",
+        "app_label": "Saúde",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "saude.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor de Unidade",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "SAU_MEDICO",
+    "role_label": "Médico",
+    "category": "Saúde",
+    "scope_base": "UNIDADE",
+    "apps": [
+      {
+        "app_key": "saude",
+        "app_label": "Saúde",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      }
+    ],
+    "permissions": [
+      "saude.manage",
+      "saude.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor de Unidade",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "SAU_RECEPCAO",
+    "role_label": "Recepção de Saúde",
+    "category": "Saúde",
+    "scope_base": "UNIDADE",
+    "apps": [
+      {
+        "app_key": "saude",
+        "app_label": "Saúde",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "saude.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor de Unidade",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "SAU_REGULACAO",
+    "role_label": "Regulação de Saúde",
+    "category": "Saúde",
+    "scope_base": "UNIDADE",
+    "apps": [
+      {
+        "app_key": "saude",
+        "app_label": "Saúde",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      }
+    ],
+    "permissions": [
+      "saude.manage",
+      "saude.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor de Unidade",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "SAU_SECRETARIO",
+    "role_label": "Secretário de Saúde",
+    "category": "Saúde",
+    "scope_base": "SECRETARIA",
+    "apps": [
+      {
+        "app_key": "saude",
+        "app_label": "Saúde",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "comunicacao",
+        "app_label": "Comunicação",
+        "actions": [
+          "send",
+          "view"
+        ],
+        "action_labels": [
+          "enviar",
+          "ver"
+        ],
+        "action_summary": "enviar, ver"
+      },
+      {
+        "app_key": "paineis",
+        "app_label": "Painéis BI",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "reports",
+        "app_label": "Relatórios",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "comunicacao.send",
+      "comunicacao.view",
+      "paineis.view",
+      "reports.view",
+      "saude.manage",
+      "saude.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "SAU_TEC_ENF",
+    "role_label": "Técnico de Enfermagem",
+    "category": "Saúde",
+    "scope_base": "UNIDADE",
+    "apps": [
+      {
+        "app_key": "saude",
+        "app_label": "Saúde",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "saude.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor de Unidade",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "PROTOCOLO",
+    "role_label": "Protocolo / Atendimento Geral",
+    "category": "Operação Administrativa",
+    "scope_base": "SECRETARIA",
+    "apps": [
+      {
+        "app_key": "processos",
+        "app_label": "Processos",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "ouvidoria",
+        "app_label": "Ouvidoria",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "comunicacao",
+        "app_label": "Comunicação",
+        "actions": [
+          "send",
+          "view"
+        ],
+        "action_labels": [
+          "enviar",
+          "ver"
+        ],
+        "action_summary": "enviar, ver"
+      }
+    ],
+    "permissions": [
+      "comunicacao.send",
+      "comunicacao.view",
+      "ouvidoria.manage",
+      "ouvidoria.view",
+      "processos.manage",
+      "processos.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "RH_GESTOR",
+    "role_label": "RH / Gestão de Pessoas",
+    "category": "Operação Administrativa",
+    "scope_base": "MUNICIPAL",
+    "apps": [
+      {
+        "app_key": "org",
+        "app_label": "Organização",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "rh",
+        "app_label": "RH",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "ponto",
+        "app_label": "Ponto",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "folha",
+        "app_label": "Folha",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "reports",
+        "app_label": "Relatórios",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "folha.manage",
+      "folha.view",
+      "org.view",
+      "ponto.manage",
+      "ponto.view",
+      "reports.view",
+      "rh.manage",
+      "rh.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "PORTAL_ADMIN",
+    "role_label": "Admin Portal",
+    "category": "Portais e Conteúdo",
+    "scope_base": "MUNICIPAL",
+    "apps": [
+      {
+        "app_key": "org",
+        "app_label": "Organização",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "org.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "PORTAL_APROV",
+    "role_label": "Aprovador de Conteúdo",
+    "category": "Portais e Conteúdo",
+    "scope_base": "SECRETARIA",
+    "apps": [
+      {
+        "app_key": "org",
+        "app_label": "Organização",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "comunicacao",
+        "app_label": "Comunicação",
+        "actions": [
+          "audit",
+          "view"
+        ],
+        "action_labels": [
+          "auditar",
+          "ver"
+        ],
+        "action_summary": "auditar, ver"
+      }
+    ],
+    "permissions": [
+      "comunicacao.audit",
+      "comunicacao.view",
+      "org.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "CAMARA_ADMIN",
+    "role_label": "Camara Admin",
+    "category": "Portais e Conteúdo",
+    "scope_base": "MUNICIPAL",
+    "apps": [
+      {
+        "app_key": "camara",
+        "app_label": "Câmara",
+        "actions": [
+          "manage",
+          "cms.manage",
+          "proposicoes.manage",
+          "sessoes.manage",
+          "transmissoes.manage",
+          "transparencia.manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "operar cms",
+          "operar proposicoes",
+          "operar sessoes",
+          "operar transmissoes",
+          "operar transparencia",
+          "ver"
+        ],
+        "action_summary": "operar, operar cms, operar proposicoes, operar sessoes, operar transmissoes, operar transparencia, ver"
+      }
+    ],
+    "permissions": [
+      "camara.cms.manage",
+      "camara.manage",
+      "camara.proposicoes.manage",
+      "camara.sessoes.manage",
+      "camara.transmissoes.manage",
+      "camara.transparencia.manage",
+      "camara.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": false
+  },
+  {
+    "role_code": "CAMARA_AUDITOR",
+    "role_label": "Camara Auditor",
+    "category": "Portais e Conteúdo",
+    "scope_base": "MUNICIPAL",
+    "apps": [
+      {
+        "app_key": "camara",
+        "app_label": "Câmara",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "camara.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": false
+  },
+  {
+    "role_code": "CAMARA_COMUNICACAO",
+    "role_label": "Camara Comunicacao",
+    "category": "Portais e Conteúdo",
+    "scope_base": "SECRETARIA",
+    "apps": [
+      {
+        "app_key": "camara",
+        "app_label": "Câmara",
+        "actions": [
+          "cms.manage",
+          "transmissoes.manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar cms",
+          "operar transmissoes",
+          "ver"
+        ],
+        "action_summary": "operar cms, operar transmissoes, ver"
+      }
+    ],
+    "permissions": [
+      "camara.cms.manage",
+      "camara.transmissoes.manage",
+      "camara.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": false
+  },
+  {
+    "role_code": "CAMARA_SECRETARIA",
+    "role_label": "Camara Secretaria",
+    "category": "Portais e Conteúdo",
+    "scope_base": "SECRETARIA",
+    "apps": [
+      {
+        "app_key": "camara",
+        "app_label": "Câmara",
+        "actions": [
+          "proposicoes.manage",
+          "sessoes.manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar proposicoes",
+          "operar sessoes",
+          "ver"
+        ],
+        "action_summary": "operar proposicoes, operar sessoes, ver"
+      }
+    ],
+    "permissions": [
+      "camara.proposicoes.manage",
+      "camara.sessoes.manage",
+      "camara.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": false
+  },
+  {
+    "role_code": "CAMARA_TRANSPARENCIA",
+    "role_label": "Camara Transparencia",
+    "category": "Portais e Conteúdo",
+    "scope_base": "SECRETARIA",
+    "apps": [
+      {
+        "app_key": "camara",
+        "app_label": "Câmara",
+        "actions": [
+          "transparencia.manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar transparencia",
+          "ver"
+        ],
+        "action_summary": "operar transparencia, ver"
+      }
+    ],
+    "permissions": [
+      "camara.transparencia.manage",
+      "camara.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": false
+  },
+  {
+    "role_code": "CAMARA_VEREADOR",
+    "role_label": "Camara Vereador",
+    "category": "Portais e Conteúdo",
+    "scope_base": "MUNICIPAL",
+    "apps": [
+      {
+        "app_key": "camara",
+        "app_label": "Câmara",
+        "actions": [
+          "proposicoes.manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar proposicoes",
+          "ver"
+        ],
+        "action_summary": "operar proposicoes, ver"
+      }
+    ],
+    "permissions": [
+      "camara.proposicoes.manage",
+      "camara.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": false
+  },
+  {
+    "role_code": "PORTAL_DESIGN",
+    "role_label": "Designer / Tema",
+    "category": "Portais e Conteúdo",
+    "scope_base": "SECRETARIA",
+    "apps": [
+      {
+        "app_key": "org",
+        "app_label": "Organização",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "org.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "PORTAL_EDITOR",
+    "role_label": "Editor de Conteúdo",
+    "category": "Portais e Conteúdo",
+    "scope_base": "SECRETARIA",
+    "apps": [
+      {
+        "app_key": "org",
+        "app_label": "Organização",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "comunicacao",
+        "app_label": "Comunicação",
+        "actions": [
+          "send",
+          "view"
+        ],
+        "action_labels": [
+          "enviar",
+          "ver"
+        ],
+        "action_summary": "enviar, ver"
+      }
+    ],
+    "permissions": [
+      "comunicacao.send",
+      "comunicacao.view",
+      "org.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "INT_GESTAO",
+    "role_label": "Admin Gestão (Integrações)",
+    "category": "Integrações e TI",
+    "scope_base": "MUNICIPAL",
+    "apps": [
+      {
+        "app_key": "integracoes",
+        "app_label": "Integrações",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "reports",
+        "app_label": "Relatórios",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "integracoes.manage",
+      "integracoes.view",
+      "reports.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "INT_TI",
+    "role_label": "Admin TI (Integrações)",
+    "category": "Integrações e TI",
+    "scope_base": "MUNICIPAL",
+    "apps": [
+      {
+        "app_key": "integracoes",
+        "app_label": "Integrações",
+        "actions": [
+          "admin",
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "administrar",
+          "operar",
+          "ver"
+        ],
+        "action_summary": "administrar, operar, ver"
+      },
+      {
+        "app_key": "reports",
+        "app_label": "Relatórios",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "integracoes.admin",
+      "integracoes.manage",
+      "integracoes.view",
+      "reports.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "INT_LEITOR",
+    "role_label": "Leitor (Integrações)",
+    "category": "Integrações e TI",
+    "scope_base": "MUNICIPAL",
+    "apps": [
+      {
+        "app_key": "integracoes",
+        "app_label": "Integrações",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "reports",
+        "app_label": "Relatórios",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "integracoes.view",
+      "reports.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "DADOS_ANALISTA",
+    "role_label": "Analista Setorial",
+    "category": "Dados e BI",
+    "scope_base": "SECRETARIA",
+    "apps": [
+      {
+        "app_key": "comunicacao",
+        "app_label": "Comunicação",
+        "actions": [
+          "audit",
+          "view"
+        ],
+        "action_labels": [
+          "auditar",
+          "ver"
+        ],
+        "action_summary": "auditar, ver"
+      },
+      {
+        "app_key": "paineis",
+        "app_label": "Painéis BI",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "conversor",
+        "app_label": "Ferramentas PDF",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      },
+      {
+        "app_key": "reports",
+        "app_label": "Relatórios",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "comunicacao.audit",
+      "comunicacao.view",
+      "conversor.view",
+      "paineis.view",
+      "reports.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "DADOS_GESTOR",
+    "role_label": "Gestor de Dados / BI",
+    "category": "Dados e BI",
+    "scope_base": "MUNICIPAL",
+    "apps": [
+      {
+        "app_key": "comunicacao",
+        "app_label": "Comunicação",
+        "actions": [
+          "audit",
+          "view"
+        ],
+        "action_labels": [
+          "auditar",
+          "ver"
+        ],
+        "action_summary": "auditar, ver"
+      },
+      {
+        "app_key": "paineis",
+        "app_label": "Painéis BI",
+        "actions": [
+          "manage",
+          "publish",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "publicar",
+          "ver"
+        ],
+        "action_summary": "operar, publicar, ver"
+      },
+      {
+        "app_key": "conversor",
+        "app_label": "Ferramentas PDF",
+        "actions": [
+          "manage",
+          "view"
+        ],
+        "action_labels": [
+          "operar",
+          "ver"
+        ],
+        "action_summary": "operar, ver"
+      },
+      {
+        "app_key": "reports",
+        "app_label": "Relatórios",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "comunicacao.audit",
+      "comunicacao.view",
+      "conversor.manage",
+      "conversor.view",
+      "paineis.manage",
+      "paineis.publish",
+      "paineis.view",
+      "reports.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "ALUNO",
+    "role_label": "Aluno",
+    "category": "Portais do Cidadão",
+    "scope_base": "ALUNO",
+    "apps": [
+      {
+        "app_key": "accounts",
+        "app_label": "Contas e Acessos",
+        "actions": [
+          "view"
+        ],
+        "action_labels": [
+          "ver"
+        ],
+        "action_summary": "ver"
+      }
+    ],
+    "permissions": [
+      "accounts.view"
+    ],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor de Unidade",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "CIDADAO",
+    "role_label": "Cidadão (Portal)",
+    "category": "Portais do Cidadão",
+    "scope_base": "ALUNO",
+    "apps": [],
+    "permissions": [],
+    "managed_by": [
+      "Admin (Sistema)",
+      "Gestor de Secretaria",
+      "Gestor de Unidade",
+      "Gestor Municipal"
+    ],
+    "is_profile_choice": true
+  },
+  {
+    "role_code": "VISUALIZACAO",
+    "role_label": "Visualizacao",
+    "category": "Outros",
+    "scope_base": "LEITURA",
+    "apps": [],
+    "permissions": [],
+    "managed_by": [
+      "Admin (Sistema)"
+    ],
+    "is_profile_choice": false
+  }
+]
