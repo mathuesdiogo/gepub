@@ -34,6 +34,7 @@ urlpatterns = [
     path("transparencia/", views.transparencia_public, name="transparencia_public"),
     path("", views.institucional_public, name="home"),
     path("dashboard/", views.dashboard_view, name="dashboard"),
+    path("sistema/explorar-modulos/", views.portal, name="portal"),
     path(
         "dashboard/educacao/secretaria/visao-geral/",
         views.secretaria_educacao_visao_geral,

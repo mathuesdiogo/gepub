@@ -249,6 +249,8 @@
     <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-right-from-bracket"></i></span>
     <span class="menu__label">Sair</span>
   </a>
+  {% elif role_scope_base == 'ADMIN' or request.user.is_superuser %}
+    {% include "core/partials/components/layout/sidebar_navigation_admin.html" %}
   {% else %}
   <div class="menu__section">Acessos Rápidos</div>
 

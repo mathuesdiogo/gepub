@@ -1,0 +1,177 @@
+<div class="menu__section">Acessos Rápidos</div>
+
+<a class="menu__item menu__item--primary {% if ns == 'core' and route == 'dashboard' %}is-active{% endif %}" href="{% url 'core:dashboard' %}" title="Dashboard">
+  <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-gauge-high"></i></span>
+  <span class="menu__label">Visão Geral</span>
+</a>
+
+<div class="menu__section">Administração</div>
+
+<details class="menu__group" {% if ns == 'accounts' or ns == 'org' or ns == 'core' and route == 'sistema_exclusoes' or ns == 'core' and route == 'sistema_exclusoes_confirmar' or ns == 'core' and route == 'validar_documento_public' or ns == 'core' and route == 'validar_documento' or ns == 'core' and route == 'validar_documento_codigo' or ns == 'core' and route == 'validar_documento_codigo_public' %}open{% endif %}>
+  <summary class="menu__group-summary menu__item {% if ns == 'accounts' or ns == 'org' or ns == 'core' and route == 'sistema_exclusoes' or ns == 'core' and route == 'sistema_exclusoes_confirmar' or ns == 'core' and route == 'validar_documento_public' or ns == 'core' and route == 'validar_documento' or ns == 'core' and route == 'validar_documento_codigo' or ns == 'core' and route == 'validar_documento_codigo_public' %}is-active{% endif %}">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-users-gear"></i></span>
+    <span class="menu__label">Usuários e Acessos</span>
+    <span class="menu__caret" aria-hidden="true"><i class="fa-solid fa-chevron-down"></i></span>
+  </summary>
+  <div class="menu__submenu">
+    {% if can_users %}
+      <a class="menu__subitem {% if ns == 'accounts' and route == 'usuarios_list' %}is-active{% endif %}" href="{% url 'accounts:usuarios_list' %}"><i class="fa-solid fa-users"></i><span>Usuários</span></a>
+    {% endif %}
+    <a class="menu__subitem {% if ns == 'core' and route == 'validar_documento_public' or ns == 'core' and route == 'validar_documento' or ns == 'core' and route == 'validar_documento_codigo' or ns == 'core' and route == 'validar_documento_codigo_public' %}is-active{% endif %}" href="{% url 'core:validar_documento_public' %}"><i class="fa-solid fa-certificate"></i><span>Validar Documento</span></a>
+    {% if can_exclusoes %}
+      <a class="menu__subitem {% if ns == 'core' and route == 'sistema_exclusoes' or ns == 'core' and route == 'sistema_exclusoes_confirmar' %}is-active{% endif %}" href="{% url 'core:sistema_exclusoes' %}"><i class="fa-solid fa-trash-can"></i><span>Exclusões</span></a>
+    {% endif %}
+  </div>
+</details>
+
+<details class="menu__group" {% if ns == 'org' and route == 'municipio_list' or ns == 'org' and route == 'secretaria_list' or ns == 'org' and route == 'unidade_list' or ns == 'org' and route == 'setor_list' or ns == 'org' and route == 'onboarding_painel' %}open{% endif %}>
+  <summary class="menu__group-summary menu__item {% if ns == 'org' and route == 'municipio_list' or ns == 'org' and route == 'secretaria_list' or ns == 'org' and route == 'unidade_list' or ns == 'org' and route == 'setor_list' or ns == 'org' and route == 'onboarding_painel' %}is-active{% endif %}">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-sitemap"></i></span>
+    <span class="menu__label">Estrutura da Plataforma</span>
+    <span class="menu__caret" aria-hidden="true"><i class="fa-solid fa-chevron-down"></i></span>
+  </summary>
+  <div class="menu__submenu">
+    {% if can_org_municipios %}
+      <a class="menu__subitem {% if ns == 'org' and route == 'municipio_list' %}is-active{% endif %}" href="{% url 'org:municipio_list' %}"><i class="fa-solid fa-city"></i><span>Prefeituras / Contas</span></a>
+    {% endif %}
+    {% if can_org %}
+      <a class="menu__subitem {% if ns == 'org' and route == 'secretaria_list' %}is-active{% endif %}" href="{% url 'org:secretaria_list' %}"><i class="fa-solid fa-building-columns"></i><span>Secretarias</span></a>
+      <a class="menu__subitem {% if ns == 'org' and route == 'unidade_list' %}is-active{% endif %}" href="{% url 'org:unidade_list' %}"><i class="fa-solid fa-school"></i><span>Unidades</span></a>
+      <a class="menu__subitem {% if ns == 'org' and route == 'setor_list' %}is-active{% endif %}" href="{% url 'org:setor_list' %}"><i class="fa-solid fa-diagram-project"></i><span>Setores</span></a>
+      {% if request.user.is_superuser or role_code == 'ADMIN' %}
+        <a class="menu__subitem {% if ns == 'org' and route == 'onboarding_painel' %}is-active{% endif %}" href="{% url 'org:onboarding_painel' %}"><i class="fa-solid fa-cubes-stacked"></i><span>Módulos</span></a>
+      {% endif %}
+    {% endif %}
+  </div>
+</details>
+
+<div class="menu__section">Monitoramento</div>
+
+<details class="menu__group" {% if ns == 'paineis' or ns == 'core' and route == 'guia_telas' %}open{% endif %}>
+  <summary class="menu__group-summary menu__item {% if ns == 'paineis' or ns == 'core' and route == 'guia_telas' %}is-active{% endif %}">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-chart-line"></i></span>
+    <span class="menu__label">Governança e Indicadores</span>
+    <span class="menu__caret" aria-hidden="true"><i class="fa-solid fa-chevron-down"></i></span>
+  </summary>
+  <div class="menu__submenu">
+    {% if can_paineis %}
+      <a class="menu__subitem {% if ns == 'paineis' %}is-active{% endif %}" href="{% url 'paineis:dataset_list' %}"><i class="fa-solid fa-chart-simple"></i><span>Indicadores da Plataforma</span></a>
+    {% endif %}
+    <a class="menu__subitem {% if ns == 'core' and route == 'guia_telas' %}is-active{% endif %}" href="{% url 'core:guia_telas' %}"><i class="fa-solid fa-compass"></i><span>Mapa de Telas</span></a>
+  </div>
+</details>
+
+{% if can_conversor or can_integracoes or can_comunicacao %}
+  <div class="menu__section">Ferramentas</div>
+
+  <details class="menu__group" {% if ns == 'conversor' or ns == 'integracoes' or ns == 'comunicacao' %}open{% endif %}>
+    <summary class="menu__group-summary menu__item {% if ns == 'conversor' or ns == 'integracoes' or ns == 'comunicacao' %}is-active{% endif %}">
+      <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-screwdriver-wrench"></i></span>
+      <span class="menu__label">Ferramentas Administrativas</span>
+      <span class="menu__caret" aria-hidden="true"><i class="fa-solid fa-chevron-down"></i></span>
+    </summary>
+    <div class="menu__submenu">
+      {% if can_conversor %}
+        <a class="menu__subitem {% if ns == 'conversor' %}is-active{% endif %}" href="{% url 'conversor:index' %}"><i class="fa-solid fa-file-pdf"></i><span>Gerenciador de PDFs</span></a>
+      {% endif %}
+      {% if can_integracoes %}
+        <a class="menu__subitem {% if ns == 'integracoes' %}is-active{% endif %}" href="{% url 'integracoes:index' %}"><i class="fa-solid fa-plug-circle-bolt"></i><span>Integrações</span></a>
+      {% endif %}
+      {% if can_comunicacao %}
+        <a class="menu__subitem {% if ns == 'comunicacao' %}is-active{% endif %}" href="{% url 'comunicacao:index' %}"><i class="fa-solid fa-paper-plane"></i><span>Comunicação</span></a>
+      {% endif %}
+    </div>
+  </details>
+{% endif %}
+
+{% if can_publicacoes_admin or can_system_admin or can_camara %}
+  <div class="menu__section">Portais e Conteúdo</div>
+
+  <details class="menu__group" {% if ns == 'core' and 'publicacoes' in route or ns == 'core' and route == 'institutional_admin' or ns == 'core' and route == 'publicacoes_theme_editor' or ns == 'camara' %}open{% endif %}>
+    <summary class="menu__group-summary menu__item {% if ns == 'core' and 'publicacoes' in route or ns == 'core' and route == 'institutional_admin' or ns == 'core' and route == 'publicacoes_theme_editor' or ns == 'camara' %}is-active{% endif %}">
+      <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-pen-ruler"></i></span>
+      <span class="menu__label">Editor de Portais</span>
+      <span class="menu__caret" aria-hidden="true"><i class="fa-solid fa-chevron-down"></i></span>
+    </summary>
+    <div class="menu__submenu">
+      {% if can_publicacoes_admin %}
+        <a class="menu__subitem {% if ns == 'core' and 'publicacoes' in route and request.GET.portal == 'todos' or ns == 'core' and 'publicacoes' in route and not request.GET.portal %}is-active{% endif %}" href="{% url 'core:publicacoes_admin' %}?portal=todos"><i class="fa-solid fa-layer-group"></i><span>Hub de Portais</span></a>
+        <a class="menu__subitem {% if ns == 'core' and 'publicacoes' in route and request.GET.portal == 'prefeitura' %}is-active{% endif %}" href="{% url 'core:publicacoes_admin' %}?portal=prefeitura"><i class="fa-solid fa-building"></i><span>Portal da Prefeitura</span></a>
+        {% if plan_transparencia_enabled %}
+          <a class="menu__subitem {% if ns == 'core' and 'publicacoes' in route and request.GET.portal == 'transparencia' %}is-active{% endif %}" href="{% url 'core:publicacoes_admin' %}?portal=transparencia"><i class="fa-solid fa-scale-balanced"></i><span>Portal da Transparência</span></a>
+        {% endif %}
+      {% endif %}
+      {% if can_camara %}
+        <a class="menu__subitem {% if ns == 'camara' %}is-active{% endif %}" href="{% url 'camara:index' %}"><i class="fa-solid fa-landmark-dome"></i><span>Portal da Câmara</span></a>
+      {% endif %}
+      {% if can_system_admin %}
+        <a class="menu__subitem {% if ns == 'core' and route == 'publicacoes_theme_editor' %}is-active{% endif %}" href="{% url 'core:publicacoes_theme_editor' %}"><i class="fa-solid fa-palette"></i><span>Editar Tema</span></a>
+        <a class="menu__subitem {% if ns == 'core' and route == 'institutional_admin' %}is-active{% endif %}" href="{% url 'core:institutional_admin' %}"><i class="fa-solid fa-pen-to-square"></i><span>Editor Institucional</span></a>
+      {% endif %}
+    </div>
+  </details>
+{% endif %}
+
+{% if can_billing or can_billing_admin %}
+  <div class="menu__section">Plano e Assinatura</div>
+
+  <details class="menu__group" {% if ns == 'billing' %}open{% endif %}>
+    <summary class="menu__group-summary menu__item {% if ns == 'billing' %}is-active{% endif %}">
+      <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-credit-card"></i></span>
+      <span class="menu__label">Plano</span>
+      <span class="menu__caret" aria-hidden="true"><i class="fa-solid fa-chevron-down"></i></span>
+    </summary>
+    <div class="menu__submenu">
+      {% if can_billing %}
+        <a class="menu__subitem {% if ns == 'billing' and route == 'meu_plano' %}is-active{% endif %}" href="{% url 'billing:meu_plano' %}"><i class="fa-solid fa-file-contract"></i><span>Meu Plano</span></a>
+      {% endif %}
+      {% if can_billing_admin %}
+        <a class="menu__subitem {% if ns == 'billing' and route == 'assinaturas_admin' or ns == 'billing' and route == 'assinatura_admin_detail' %}is-active{% endif %}" href="{% url 'billing:assinaturas_admin' %}"><i class="fa-solid fa-building-shield"></i><span>Assinaturas</span></a>
+        <a class="menu__subitem {% if ns == 'billing' and route == 'planos_admin' or ns == 'billing' and route == 'plano_admin_create' or ns == 'billing' and route == 'plano_admin_detail' %}is-active{% endif %}" href="{% url 'billing:planos_admin' %}"><i class="fa-solid fa-layer-group"></i><span>Planos</span></a>
+      {% endif %}
+    </div>
+  </details>
+{% endif %}
+
+<div class="menu__section">Avançado</div>
+
+<details class="menu__group" {% if ns == 'core' and route == 'design_system_docs' or ns == 'core' and route == 'design_system_components' or ns == 'core' and route == 'design_system_themes' or ns == 'core' and route == 'frontend_lab' %}open{% endif %}>
+  <summary class="menu__group-summary menu__item {% if ns == 'core' and route == 'design_system_docs' or ns == 'core' and route == 'design_system_components' or ns == 'core' and route == 'design_system_themes' or ns == 'core' and route == 'frontend_lab' %}is-active{% endif %}">
+    <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-shield-halved"></i></span>
+    <span class="menu__label">Acesso Técnico</span>
+    <span class="menu__caret" aria-hidden="true"><i class="fa-solid fa-chevron-down"></i></span>
+  </summary>
+  <div class="menu__submenu">
+    {% if can_system_admin %}
+      <a class="menu__subitem" href="/admin/"><i class="fa-solid fa-lock"></i><span>Admin Django</span></a>
+    {% endif %}
+    <a class="menu__subitem {% if ns == 'core' and route == 'design_system_docs' or ns == 'core' and route == 'design_system_components' or ns == 'core' and route == 'design_system_themes' %}is-active{% endif %}" href="{% url 'core:design_system_docs' %}"><i class="fa-solid fa-pen-nib"></i><span>Design System</span></a>
+    {% if can_system_admin %}
+      <a class="menu__subitem {% if ns == 'core' and route == 'frontend_lab' %}is-active{% endif %}" href="{% url 'core:frontend_lab' %}"><i class="fa-solid fa-flask"></i><span>Frontend Lab</span></a>
+    {% endif %}
+  </div>
+</details>
+
+<div class="menu__section">Operação</div>
+
+<a class="menu__item {% if ns == 'core' and route == 'portal' %}is-active{% endif %}" href="{% url 'core:portal' %}" title="Explorar módulos">
+  <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-table-cells-large"></i></span>
+  <span class="menu__label">Explorar Módulos</span>
+</a>
+
+<div class="menu__section">Conta</div>
+
+<a class="menu__item {% if ns == 'accounts' and route == 'meu_perfil' %}is-active{% endif %}" href="{% url 'accounts:meu_perfil' %}" title="Meu perfil">
+  <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-user"></i></span>
+  <span class="menu__label">Meu Perfil</span>
+</a>
+
+<a class="menu__item {% if ns == 'accounts' and route == 'alterar_senha' %}is-active{% endif %}" href="{% url 'accounts:alterar_senha' %}" title="Alterar senha">
+  <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-key"></i></span>
+  <span class="menu__label">Alterar Senha</span>
+</a>
+
+<a class="menu__item" href="{% url 'accounts:logout' %}" title="Sair">
+  <span class="menu__icon" aria-hidden="true"><i class="fa-solid fa-right-from-bracket"></i></span>
+  <span class="menu__label">Sair</span>
+</a>
