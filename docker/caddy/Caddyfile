@@ -1,3 +1,7 @@
+{
+    auto_https disable_redirects
+}
+
 http://{$APP_DOMAIN}, http:// {
     encode gzip zstd
 
