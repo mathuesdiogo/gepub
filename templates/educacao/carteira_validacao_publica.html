@@ -16,7 +16,7 @@
     </section>
 
     <section class="carteira-public__search">
-      <form class="gp-form" method="get" action="{% url 'educacao:carteira_verificar_lookup' %}">
+      <form class="gp-form form-shell" method="get" action="{% url 'educacao:carteira_verificar_lookup' %}">
         <input
           class="gp-input"
           type="text"
@@ -49,7 +49,7 @@
             {% endif %}
           </div>
           <div>
-            <h2 style="margin:0 0 10px;">{{ carteira.aluno.nome }}</h2>
+            <h2 class="u-m-0 u-mb-10">{{ carteira.aluno.nome }}</h2>
             <div class="carteira-kv">
               <article><span>Código do Estudante</span><strong>{{ carteira.codigo_estudante }}</strong></article>
               <article><span>Código de Verificação</span><strong>{{ carteira.codigo_verificacao }}</strong></article>

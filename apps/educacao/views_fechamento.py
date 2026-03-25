@@ -115,8 +115,8 @@ def fechamento_turma_periodo(request, pk: int):
         messages.error(request, "Corrija os erros do fechamento.")
 
     actions = [
-        {"label": "Voltar", "url": reverse("educacao:turma_detail", args=[turma.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-        {"label": "Boletim do Período", "url": reverse("educacao:boletim_turma_periodo", args=[turma.pk]) + f"?periodo={periodo.pk}", "icon": "fa-solid fa-clipboard-list", "variant": "btn--ghost"},
+        {"label": "Voltar", "url": reverse("educacao:turma_detail", args=[turma.pk]), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+        {"label": "Boletim do Período", "url": reverse("educacao:boletim_turma_periodo", args=[turma.pk]) + f"?periodo={periodo.pk}", "icon": "fa-solid fa-clipboard-list", "variant": "gp-button--ghost"},
     ]
 
     periodo_options = format_html_join(

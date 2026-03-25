@@ -2,12 +2,12 @@
 {% block module_title %}NEE • Capacidade{% endblock %}
 
 {% block module_content %}
-<div class="card"><div class="card__body">
+<div class="card gp-card"><div class="card__body gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title="Relatório — Capacidade de atendimento" subtitle="Alunos NEE ativos por profissional com acompanhamento nos últimos 90 dias." actions=actions %}
 
   {% if items %}
-    <div class="table-shell">
-      <table class="table">
+    <div class="table-shell gp-table gp-table--responsive">
+      <table class="gp-table__native table">
         <thead>
           <tr>
             <th>Município</th>

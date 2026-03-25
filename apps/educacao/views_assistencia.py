@@ -92,10 +92,10 @@ def assistencia_index(request):
         "educacao/assistencia_index.html",
         {
             "actions": [
-                {"label": "Cardápios", "url": reverse("educacao:assist_cardapio_list"), "icon": "fa-solid fa-utensils", "variant": "btn--ghost"},
-                {"label": "Refeições", "url": reverse("educacao:assist_refeicao_list"), "icon": "fa-solid fa-bowl-rice", "variant": "btn--ghost"},
-                {"label": "Rotas", "url": reverse("educacao:assist_rota_list"), "icon": "fa-solid fa-route", "variant": "btn--ghost"},
-                {"label": "Registros de Transporte", "url": reverse("educacao:assist_transporte_registro_list"), "icon": "fa-solid fa-bus", "variant": "btn--ghost"},
+                {"label": "Cardápios", "url": reverse("educacao:assist_cardapio_list"), "icon": "fa-solid fa-utensils", "variant": "gp-button--ghost"},
+                {"label": "Refeições", "url": reverse("educacao:assist_refeicao_list"), "icon": "fa-solid fa-bowl-rice", "variant": "gp-button--ghost"},
+                {"label": "Rotas", "url": reverse("educacao:assist_rota_list"), "icon": "fa-solid fa-route", "variant": "gp-button--ghost"},
+                {"label": "Registros de Transporte", "url": reverse("educacao:assist_transporte_registro_list"), "icon": "fa-solid fa-bus", "variant": "gp-button--ghost"},
             ],
             "total_cardapios": cardapios.count(),
             "total_refeicoes": refeicoes.aggregate(total=Sum("total_servidas")).get("total") or 0,
@@ -134,8 +134,8 @@ def assist_cardapio_list(request):
         title="Cardápios Escolares",
         subtitle="Planejamento de merenda por unidade/turno",
         actions=[
-            {"label": "Assistência", "url": reverse("educacao:assistencia_index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-            {"label": "Novo Cardápio", "url": reverse("educacao:assist_cardapio_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"},
+            {"label": "Assistência", "url": reverse("educacao:assistencia_index"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+            {"label": "Novo Cardápio", "url": reverse("educacao:assist_cardapio_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"},
         ],
         headers=[{"label": "Unidade"}, {"label": "Data", "width": "130px"}, {"label": "Turno", "width": "120px"}, {"label": "Ativo", "width": "100px"}],
         rows=rows,
@@ -186,7 +186,7 @@ def assist_cardapio_update(request, pk: int):
         subtitle=f"{obj.unidade.nome} • {obj.data:%d/%m/%Y}",
         form=form,
         cancel_url=reverse("educacao:assist_cardapio_list"),
-        submit_label="Atualizar",
+        submit_label="Editar",
         action_url=reverse("educacao:assist_cardapio_update", args=[obj.pk]),
     )
 
@@ -200,8 +200,8 @@ def assist_cardapio_detail(request, pk: int):
         title="Detalhe do Cardápio Escolar",
         subtitle=f"{obj.unidade.nome} • {obj.data:%d/%m/%Y}",
         actions=[
-            {"label": "Voltar", "url": reverse("educacao:assist_cardapio_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-            {"label": "Editar", "url": reverse("educacao:assist_cardapio_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"},
+            {"label": "Voltar", "url": reverse("educacao:assist_cardapio_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+            {"label": "Editar", "url": reverse("educacao:assist_cardapio_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"},
         ],
         fields=[
             {"label": "Unidade", "value": obj.unidade.nome},
@@ -242,8 +242,8 @@ def assist_refeicao_list(request):
         title="Refeições Servidas",
         subtitle="Registro diário de refeições por unidade",
         actions=[
-            {"label": "Assistência", "url": reverse("educacao:assistencia_index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-            {"label": "Novo Registro", "url": reverse("educacao:assist_refeicao_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"},
+            {"label": "Assistência", "url": reverse("educacao:assistencia_index"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+            {"label": "Novo Registro", "url": reverse("educacao:assist_refeicao_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"},
         ],
         headers=[{"label": "Unidade"}, {"label": "Data", "width": "130px"}, {"label": "Turno", "width": "120px"}, {"label": "Total", "width": "100px"}],
         rows=rows,
@@ -294,7 +294,7 @@ def assist_refeicao_update(request, pk: int):
         subtitle=f"{obj.unidade.nome} • {obj.data:%d/%m/%Y}",
         form=form,
         cancel_url=reverse("educacao:assist_refeicao_list"),
-        submit_label="Atualizar",
+        submit_label="Editar",
         action_url=reverse("educacao:assist_refeicao_update", args=[obj.pk]),
     )
 
@@ -308,8 +308,8 @@ def assist_refeicao_detail(request, pk: int):
         title="Detalhe do Registro de Refeição",
         subtitle=f"{obj.unidade.nome} • {obj.data:%d/%m/%Y}",
         actions=[
-            {"label": "Voltar", "url": reverse("educacao:assist_refeicao_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-            {"label": "Editar", "url": reverse("educacao:assist_refeicao_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"},
+            {"label": "Voltar", "url": reverse("educacao:assist_refeicao_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+            {"label": "Editar", "url": reverse("educacao:assist_refeicao_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"},
         ],
         fields=[
             {"label": "Unidade", "value": obj.unidade.nome},
@@ -350,8 +350,8 @@ def assist_rota_list(request):
         title="Rotas de Transporte Escolar",
         subtitle="Gestão de rotas, veículos e motoristas",
         actions=[
-            {"label": "Assistência", "url": reverse("educacao:assistencia_index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-            {"label": "Nova Rota", "url": reverse("educacao:assist_rota_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"},
+            {"label": "Assistência", "url": reverse("educacao:assistencia_index"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+            {"label": "Nova Rota", "url": reverse("educacao:assist_rota_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"},
         ],
         headers=[{"label": "Unidade"}, {"label": "Rota"}, {"label": "Turno", "width": "120px"}, {"label": "Veículo"}, {"label": "Ativo", "width": "100px"}],
         rows=rows,
@@ -402,7 +402,7 @@ def assist_rota_update(request, pk: int):
         subtitle=f"{obj.nome} • {obj.unidade.nome}",
         form=form,
         cancel_url=reverse("educacao:assist_rota_list"),
-        submit_label="Atualizar",
+        submit_label="Editar",
         action_url=reverse("educacao:assist_rota_update", args=[obj.pk]),
     )
 
@@ -416,8 +416,8 @@ def assist_rota_detail(request, pk: int):
         title="Detalhe da Rota de Transporte",
         subtitle=f"{obj.nome} • {obj.unidade.nome}",
         actions=[
-            {"label": "Voltar", "url": reverse("educacao:assist_rota_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-            {"label": "Editar", "url": reverse("educacao:assist_rota_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"},
+            {"label": "Voltar", "url": reverse("educacao:assist_rota_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+            {"label": "Editar", "url": reverse("educacao:assist_rota_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"},
         ],
         fields=[
             {"label": "Unidade", "value": obj.unidade.nome},
@@ -463,8 +463,8 @@ def assist_transporte_registro_list(request):
         title="Registros de Transporte Escolar",
         subtitle="Controle de alunos transportados por rota",
         actions=[
-            {"label": "Assistência", "url": reverse("educacao:assistencia_index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-            {"label": "Novo Registro", "url": reverse("educacao:assist_transporte_registro_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"},
+            {"label": "Assistência", "url": reverse("educacao:assistencia_index"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+            {"label": "Novo Registro", "url": reverse("educacao:assist_transporte_registro_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"},
         ],
         headers=[{"label": "Data", "width": "130px"}, {"label": "Rota"}, {"label": "Unidade"}, {"label": "Previsto", "width": "110px"}, {"label": "Transportados", "width": "130px"}],
         rows=rows,
@@ -518,7 +518,7 @@ def assist_transporte_registro_update(request, pk: int):
         subtitle=f"{obj.rota.nome} • {obj.data:%d/%m/%Y}",
         form=form,
         cancel_url=reverse("educacao:assist_transporte_registro_list"),
-        submit_label="Atualizar",
+        submit_label="Editar",
         action_url=reverse("educacao:assist_transporte_registro_update", args=[obj.pk]),
     )
 
@@ -532,8 +532,8 @@ def assist_transporte_registro_detail(request, pk: int):
         title="Detalhe do Registro de Transporte",
         subtitle=f"{obj.rota.nome} • {obj.data:%d/%m/%Y}",
         actions=[
-            {"label": "Voltar", "url": reverse("educacao:assist_transporte_registro_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-            {"label": "Editar", "url": reverse("educacao:assist_transporte_registro_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"},
+            {"label": "Voltar", "url": reverse("educacao:assist_transporte_registro_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+            {"label": "Editar", "url": reverse("educacao:assist_transporte_registro_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"},
         ],
         fields=[
             {"label": "Data", "value": obj.data.strftime("%d/%m/%Y")},

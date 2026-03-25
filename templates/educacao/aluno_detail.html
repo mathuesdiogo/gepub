@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load gepub_design_system %}
 {% block title %}{{ aluno.nome }} • Alunos • Educação • GEPUB{% endblock %}
 {% block header %}Educação{% endblock %}
 
@@ -25,7 +26,7 @@
 
   <div class="aluno-flow-layout">
     <aside class="aluno-flow-side">
-      <article class="aluno-profile-card">
+      <article class="aluno-profile-card gp-card">
         <div class="aluno-profile-card__avatar">
           {% if aluno.foto %}
             <img src="{{ aluno.foto.url }}" alt="{{ aluno.nome }}">
@@ -79,7 +80,7 @@
         </header>
         <div class="aluno-kv-grid">
           {% for item in fields %}
-            <article class="aluno-kv-card">
+            <article class="aluno-kv-card gp-card">
               <span>{{ item.label }}</span>
               <strong>{{ item.value }}</strong>
             </article>
@@ -102,19 +103,19 @@
           <div class="aluno-stage__forms">
             <details class="aluno-form-panel">
               <summary><i class="fa-solid fa-plus"></i>Adicionar matrícula</summary>
-              <form class="gp-form" method="post">
+              <form class="gp-form form-shell" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="_action" value="add_matricula">
-                {{ form_matricula.as_p }}
+                {% render_form form_matricula %}
                 <button type="submit" class="gp-button gp-button--primary">Salvar matrícula</button>
               </form>
             </details>
             <details class="aluno-form-panel">
               <summary><i class="fa-solid fa-shuffle"></i>Movimentar matrícula</summary>
-              <form class="gp-form" method="post">
+              <form class="gp-form form-shell" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="_action" value="mov_matricula">
-                {{ form_movimentacao.as_p }}
+                {% render_form form_movimentacao %}
                 <button type="submit" class="gp-button gp-button--primary">Executar movimentação</button>
               </form>
             </details>
@@ -179,10 +180,10 @@
           {% if can_edu_manage %}
             <details class="aluno-form-panel">
               <summary><i class="fa-solid fa-book-open-reader"></i>Matricular em curso</summary>
-              <form class="gp-form" method="post">
+              <form class="gp-form form-shell" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="_action" value="add_matricula_curso">
-                {{ form_matricula_curso.as_p }}
+                {% render_form form_matricula_curso %}
                 <button type="submit" class="gp-button gp-button--primary">Salvar matrícula em curso</button>
               </form>
             </details>
@@ -198,13 +199,13 @@
             </div>
           </header>
 
-          <div class="gp-pills aluno-chip-list">
+          <ul class="pills aluno-chip-list">
             {% for n in necessidades %}
-              <span class="gp-pills__item">{{ n.tipo.nome }}</span>
+              <li><span>{{ n.tipo.nome }}</span></li>
             {% empty %}
-              <span class="aluno-empty-line">Nenhuma necessidade vinculada.</span>
+              <li class="aluno-empty-line">Nenhuma necessidade vinculada.</li>
             {% endfor %}
-          </div>
+          </ul>
 
           <div class="aluno-listing">
             {% for a in apoios %}
@@ -221,19 +222,19 @@
             <div class="aluno-stage__forms">
               <details class="aluno-form-panel">
                 <summary><i class="fa-solid fa-hand-holding-medical"></i>Adicionar necessidade NEE</summary>
-                <form class="gp-form" method="post">
+                <form class="gp-form form-shell" method="post">
                   {% csrf_token %}
                   <input type="hidden" name="_action" value="add_nee">
-                  {{ form_nee.as_p }}
+                  {% render_form form_nee %}
                   <button type="submit" class="gp-button gp-button--primary">Salvar necessidade</button>
                 </form>
               </details>
               <details class="aluno-form-panel">
                 <summary><i class="fa-solid fa-people-arrows-left-right"></i>Registrar apoio</summary>
-                <form class="gp-form" method="post">
+                <form class="gp-form form-shell" method="post">
                   {% csrf_token %}
                   <input type="hidden" name="_action" value="add_apoio">
-                  {{ form_apoio.as_p }}
+                  {% render_form form_apoio %}
                   <button type="submit" class="gp-button gp-button--primary">Salvar apoio</button>
                 </form>
               </details>
@@ -250,10 +251,10 @@
             </div>
           </header>
 
-          <div class="gp-pills aluno-chip-list">
-            <span class="gp-pills__item">Atendimentos: {{ atendimentos_saude|length }}</span>
-            <span class="gp-pills__item">Agendamentos: {{ agendamentos_saude|length }}</span>
-          </div>
+          <ul class="pills aluno-chip-list">
+            <li><span>Atendimentos: {{ atendimentos_saude|length }}</span></li>
+            <li><span>Agendamentos: {{ agendamentos_saude|length }}</span></li>
+          </ul>
 
           <div class="aluno-dual-list">
             <div>
@@ -294,10 +295,10 @@
             </div>
           </header>
 
-          <div class="gp-pills aluno-chip-list">
-            <span class="gp-pills__item">Entregas: {{ beneficios_entregas|length }}</span>
-            <span class="gp-pills__item">Inscrições em editais: {{ beneficios_inscricoes|length }}</span>
-          </div>
+          <ul class="pills aluno-chip-list">
+            <li><span>Entregas: {{ beneficios_entregas|length }}</span></li>
+            <li><span>Inscrições em editais: {{ beneficios_inscricoes|length }}</span></li>
+          </ul>
 
           <div class="aluno-dual-list">
             <div>
@@ -348,7 +349,7 @@
                     Nº {{ doc.numero_documento|default:"—" }} • Emissão:
                     {% if doc.data_emissao %}{{ doc.data_emissao|date:"d/m/Y" }}{% else %}—{% endif %}
                     {% if doc.arquivo %}
-                      • <a href="{{ doc.arquivo.url }}" target="_blank" rel="noopener">Abrir arquivo</a>
+                      • <a href="{{ doc.arquivo.url }}" target="_blank" rel="noopener">Visualizar arquivo</a>
                     {% endif %}
                   </p>
                 </article>
@@ -368,7 +369,7 @@
                     Código: {{ cert.codigo_verificacao }} • Emissão: {{ cert.data_emissao|date:"d/m/Y" }}
                     {% if cert.curso %} • Curso: {{ cert.curso.nome }}{% endif %}
                     {% if cert.arquivo_pdf %}
-                      • <a class="gp-anchor-link" href="{{ cert.arquivo_pdf.url }}" target="_blank" rel="noopener">Abrir PDF</a>
+                      • <a class="gp-anchor-link" href="{{ cert.arquivo_pdf.url }}" target="_blank" rel="noopener">Visualizar PDF</a>
                     {% endif %}
                   </p>
                 </article>
@@ -405,7 +406,7 @@
             {% if can_edu_manage %}
               <div class="aluno-stage__cta">
                 <a class="gp-button gp-button--primary" href="{% url 'educacao:carteira_emitir_pdf' aluno.pk %}">
-                  <i class="fa-solid fa-id-card"></i> Emitir carteira estudantil (PDF)
+                  <i class="fa-solid fa-id-card gp-card"></i> Emitir carteira estudantil (PDF)
                 </a>
               </div>
             {% endif %}
@@ -415,19 +416,19 @@
             <div class="aluno-stage__forms">
               <details class="aluno-form-panel">
                 <summary><i class="fa-solid fa-folder-plus"></i>Adicionar documento</summary>
-                <form class="gp-form" method="post" enctype="multipart/form-data">
+                <form class="gp-form form-shell" method="post" enctype="multipart/form-data">
                   {% csrf_token %}
                   <input type="hidden" name="_action" value="add_documento">
-                  {{ form_documento.as_p }}
+                  {% render_form form_documento %}
                   <button type="submit" class="gp-button gp-button--primary">Salvar documento</button>
                 </form>
               </details>
               <details class="aluno-form-panel">
                 <summary><i class="fa-solid fa-certificate"></i>Emitir/registrar certificado</summary>
-                <form class="gp-form" method="post" enctype="multipart/form-data">
+                <form class="gp-form form-shell" method="post" enctype="multipart/form-data">
                   {% csrf_token %}
                   <input type="hidden" name="_action" value="add_certificado">
-                  {{ form_certificado.as_p }}
+                  {% render_form form_certificado %}
                   <button type="submit" class="gp-button gp-button--primary">Salvar certificado</button>
                 </form>
               </details>

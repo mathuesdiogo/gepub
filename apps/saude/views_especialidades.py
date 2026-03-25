@@ -26,7 +26,7 @@ def especialidade_list(request):
     can_manage = can(request.user, "saude.manage")
     actions = []
     if can_manage:
-        actions.append({"label": "Nova Especialidade", "url": reverse("saude:especialidade_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+        actions.append({"label": "Nova Especialidade", "url": reverse("saude:especialidade_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
 
     headers = [
         {"label": "Nome"},
@@ -123,9 +123,9 @@ def especialidade_update(request, pk: int):
 def especialidade_detail(request, pk: int):
     obj = get_object_or_404(EspecialidadeSaude, pk=pk)
 
-    actions = [{"label": "Voltar", "url": reverse("saude:especialidade_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+    actions = [{"label": "Voltar", "url": reverse("saude:especialidade_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
     if can(request.user, "saude.manage"):
-        actions.append({"label": "Editar", "url": reverse("saude:especialidade_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+        actions.append({"label": "Editar", "url": reverse("saude:especialidade_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
 
     fields = [
         {"label": "CBO", "value": obj.cbo or "—"},

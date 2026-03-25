@@ -7,6 +7,13 @@
   margin-bottom: var(--space-4);
 }
 
+.search-and-filters{
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: end;
+}
+
 .filter-bar__field{
   min-width: 260px;
   flex: 1 1 320px;
@@ -34,4 +41,3 @@
   flex: 1;
   min-width: 260px;
 }
-

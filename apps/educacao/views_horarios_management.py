@@ -103,7 +103,7 @@ def horario_duplicar_select_impl(request, turma_id: int):
             "label": "Voltar",
             "url": reverse("educacao:horario_turma", args=[turma_destino.pk]),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
     ]
 

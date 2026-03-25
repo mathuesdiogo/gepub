@@ -12,6 +12,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
+from django.db import OperationalError, ProgrammingError
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -196,11 +197,15 @@ def login_view(request):
             error = "Muitas tentativas. Aguarde alguns minutos e tente novamente."
             return render(request, "accounts/login.html", {"form": form, "error": error})
 
-        profile = (
-            Profile.objects.select_related("user")
-            .filter(codigo_acesso__iexact=codigo, ativo=True, bloqueado=False)
-            .first()
-        )
+        try:
+            profile = (
+                Profile.objects.select_related("user")
+                .filter(codigo_acesso__iexact=codigo, ativo=True, bloqueado=False)
+                .first()
+            )
+        except (OperationalError, ProgrammingError):
+            error = "Banco desatualizado. Execute `python manage.py migrate` e tente novamente."
+            return render(request, "accounts/login.html", {"form": form, "error": error})
         if not profile:
             register_failure(ip, codigo)
             error = _invalid_credentials_error()
@@ -252,11 +257,15 @@ def login_mfa_view(request):
     if not pending_user_id:
         return redirect("accounts:login")
 
-    profile = (
-        Profile.objects.select_related("user")
-        .filter(user_id=pending_user_id, ativo=True, bloqueado=False)
-        .first()
-    )
+    try:
+        profile = (
+            Profile.objects.select_related("user")
+            .filter(user_id=pending_user_id, ativo=True, bloqueado=False)
+            .first()
+        )
+    except (OperationalError, ProgrammingError):
+        messages.error(request, "Banco desatualizado. Execute `python manage.py migrate`.")
+        return redirect("accounts:login")
     if not profile:
         request.session.pop(MFA_SESSION_USER_KEY, None)
         request.session.pop(MFA_SESSION_CODE_KEY, None)
@@ -504,6 +513,7 @@ def meu_perfil(request):
             ("secretaria", "Secretaria"),
             ("unidade", "Unidade"),
             ("setor", "Setor"),
+            ("local_estrutural", "Local estrutural"),
         ):
             value = (parsed.get(key) or "").strip()
             if value and value.lower() not in {"none", "null", "n/a"}:

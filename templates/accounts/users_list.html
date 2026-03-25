@@ -12,8 +12,8 @@
 {% endblock %}
 
 {% block content %}
-<div class="card">
-  <div class="card__body">
+<div class="card gp-card">
+  <div class="card__body gp-card__body">
 {% include "core/partials/components/layout/page_head.html" with title="Usuários" subtitle="Gestão de contas, perfis, escopos e segurança" actions=actions %}
 {% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Buscar por nome, username, e-mail ou código..." action_url=action_url clear_url=clear_url extra_filters=extra_filters has_filters=has_filters input_attrs=input_attrs %}
 
@@ -21,15 +21,15 @@
   <section class="users-groups">
     <div class="users-groups__grid">
       {% for g in grouped_cards %}
-        <article class="users-group-card">
+        <article class="users-group-card gp-card">
           <header class="users-group-card__head">
             <h3 class="users-group-card__title">{{ g.title }}</h3>
             <span class="status info">{{ g.total }} usuários</span>
           </header>
           <div class="users-group-card__meta">
-            <span class="status success">Ativos: {{ g.ativos }}</span>
-            <span class="status default">Inativos: {{ g.inativos }}</span>
-            <span class="status danger">Bloqueados: {{ g.bloqueados }}</span>
+            <span class="status success gp-button--success">Ativos: {{ g.ativos }}</span>
+            <span class="status default gp-button--default">Inativos: {{ g.inativos }}</span>
+            <span class="status danger gp-button--danger">Bloqueados: {{ g.bloqueados }}</span>
           </div>
           <ul class="users-group-card__list">
             {% for u in g.users %}

@@ -18,6 +18,15 @@ table td {
   vertical-align: middle;
 }
 
+.gp-table caption,
+table caption {
+  caption-side: top;
+  text-align: left;
+  padding: var(--gp-space-2) var(--gp-space-3);
+  color: var(--gp-text-secondary);
+  font-size: 0.82rem;
+}
+
 .gp-table thead th,
 table thead th {
   background: color-mix(in srgb, var(--gp-primary) 10%, var(--gp-surface));
@@ -33,6 +42,39 @@ table tbody tr:nth-child(even) {
 .gp-table--hover tbody tr:hover,
 table tbody tr:hover {
   background: color-mix(in srgb, var(--gp-primary) 8%, var(--gp-surface));
+}
+
+/* Estados de linha (padrão legado DS) */
+.gp-table tbody tr.highlight td,
+table tbody tr.highlight td {
+  background: color-mix(in srgb, #fff5a8 72%, var(--gp-surface));
+}
+
+.gp-table tbody tr.error td,
+table tbody tr.error td {
+  background: color-mix(in srgb, #ffd0d0 70%, var(--gp-surface));
+}
+
+.gp-table tbody tr.extra td,
+table tbody tr.extra td {
+  background: color-mix(in srgb, #ffdcb3 72%, var(--gp-surface));
+}
+
+.gp-table tbody tr.disabled td,
+table tbody tr.disabled td {
+  color: color-mix(in srgb, var(--gp-text-secondary) 78%, #7f8893);
+  opacity: 0.82;
+}
+
+.gp-table tbody tr.total td,
+table tbody tr.total td {
+  font-weight: 700;
+  text-align: right;
+}
+
+.gp-table tbody tr.total td:first-child,
+table tbody tr.total td:first-child {
+  text-align: left;
 }
 
 .gp-table--sortable th[aria-sort],
@@ -204,4 +246,45 @@ table tbody tr:hover {
 
 .table-shell tbody tr:hover td {
   background: color-mix(in srgb, var(--gp-primary) 6%, transparent);
+}
+
+.text.hint {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  border-bottom: 1px dashed color-mix(in srgb, var(--gp-primary) 50%, var(--gp-border));
+  cursor: help;
+}
+
+.text.hint::after {
+  content: attr(aria-label);
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 8px);
+  min-width: 180px;
+  max-width: 320px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--gp-border);
+  background: var(--gp-surface);
+  color: var(--gp-text-primary);
+  box-shadow: var(--gp-shadow-2);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--gp-transition-fast);
+  pointer-events: none;
+  z-index: var(--gp-z-tooltip, 95);
+}
+
+.text.hint.bottom::after {
+  top: calc(100% + 8px);
+  bottom: auto;
+}
+
+.text.hint:hover::after,
+.text.hint:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
 }

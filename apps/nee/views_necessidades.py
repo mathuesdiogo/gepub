@@ -109,15 +109,15 @@ class AlunoNecessidadeListView(BaseListViewGepub):
         aluno = getattr(self, "_aluno", None)
         actions = [
             {"label": "Voltar", "url": reverse("nee:aluno_hub", args=[aluno.pk]) if aluno else reverse("nee:buscar_aluno"),
-             "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+             "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
         ]
 
         if aluno:
             actions.append({
-                "label": "Abrir aluno",
+                "label": "Visualizar aluno",
                 "url": reverse("educacao:aluno_detail", args=[aluno.pk]),
                 "icon": "fa-solid fa-user",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             })
 
         if can(self.request.user, "nee.manage") and aluno:
@@ -125,21 +125,21 @@ class AlunoNecessidadeListView(BaseListViewGepub):
                 "label": "Nova necessidade",
                 "url": reverse("nee:necessidade_create", args=[aluno.pk]),
                 "icon": "fa-solid fa-plus",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             })
 
         actions.append({
             "label": "Exportar CSV",
             "url": f"{self.request.path}?q={escape(q)}&export=csv",
             "icon": "fa-solid fa-file-csv",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         })
 
         actions.append({
             "label": "Exportar PDF",
             "url": f"{self.request.path}?q={escape(q)}&export=pdf",
             "icon": "fa-solid fa-file-pdf",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         })
 
         return actions
@@ -191,7 +191,7 @@ class AlunoNecessidadeCreateView(BaseCreateViewGepub):
             "label": "Voltar",
             "url": reverse("nee:aluno_necessidades", args=[aluno_id]),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }]
 
     def get_success_url(self, request, obj=None):
@@ -207,7 +207,7 @@ class AlunoNecessidadeUpdateView(BaseUpdateViewGepub):
     form_class = AlunoNecessidadeForm
     model = AlunoNecessidade
     title = "Editar necessidade"
-    subtitle = "Atualizar vínculo do aluno"
+    subtitle = "Editar vínculo do aluno"
     manage_perm = "nee.manage"
 
     def get_actions(self, q: str = "", obj=None, **kwargs):
@@ -215,7 +215,7 @@ class AlunoNecessidadeUpdateView(BaseUpdateViewGepub):
             "label": "Voltar",
             "url": reverse("nee:necessidade_detail", args=[obj.pk]),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }]
 
     def get_success_url(self, request, obj=None):
@@ -238,12 +238,12 @@ class AlunoNecessidadeDetailView(BaseDetailViewGepub):
             {"label": "Voltar",
              "url": reverse("nee:aluno_necessidades", args=[obj.aluno_id]),
              "icon": "fa-solid fa-arrow-left",
-             "variant": "btn--ghost"},
+             "variant": "gp-button--ghost"},
 
-            {"label": "Abrir aluno",
+            {"label": "Visualizar aluno",
              "url": reverse("educacao:aluno_detail", args=[obj.aluno_id]),
              "icon": "fa-solid fa-user",
-             "variant": "btn--ghost"},
+             "variant": "gp-button--ghost"},
         ]
 
         if can(self.request.user, "nee.manage"):
@@ -251,7 +251,7 @@ class AlunoNecessidadeDetailView(BaseDetailViewGepub):
                 "label": "Editar",
                 "url": reverse("nee:necessidade_update", args=[obj.pk]),
                 "icon": "fa-solid fa-pen",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             })
 
         return actions

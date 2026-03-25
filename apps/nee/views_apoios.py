@@ -33,11 +33,11 @@ class ApoioListView(BaseListViewGepub):
 
     def get_actions(self, q: str = "", **kwargs):
         aluno = getattr(self, "_aluno", None)
-        actions = [{"label": "Voltar", "url": reverse("nee:aluno_hub", args=[aluno.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+        actions = [{"label": "Voltar", "url": reverse("nee:aluno_hub", args=[aluno.pk]), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
         if can(self.request.user, "nee.manage"):
-            actions.append({"label": "Novo apoio", "url": reverse("nee:apoio_create", args=[aluno.pk]), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
-        actions.append({"label": "Exportar CSV", "url": f"{self.request.path}?q={escape(q)}&export=csv", "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"})
-        actions.append({"label": "Exportar PDF", "url": f"{self.request.path}?q={escape(q)}&export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"})
+            actions.append({"label": "Novo apoio", "url": reverse("nee:apoio_create", args=[aluno.pk]), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
+        actions.append({"label": "Exportar CSV", "url": f"{self.request.path}?q={escape(q)}&export=csv", "icon": "fa-solid fa-file-csv", "variant": "gp-button--ghost"})
+        actions.append({"label": "Exportar PDF", "url": f"{self.request.path}?q={escape(q)}&export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"})
         return actions
 
     def get_headers(self, *args, **kwargs):
@@ -101,7 +101,7 @@ class ApoioCreateView(BaseCreateViewGepub):
 
     def get_actions(self, q: str = "", **kwargs):
         aluno_id = int(self.kwargs["aluno_id"])
-        return [{"label": "Voltar", "url": reverse("nee:aluno_apoios", args=[aluno_id]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+        return [{"label": "Voltar", "url": reverse("nee:aluno_apoios", args=[aluno_id]), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
 
     def get_form(self, request, *args, **kwargs):
         aluno = get_scoped_aluno(request.user, int(self.kwargs["aluno_id"]))
@@ -120,11 +120,11 @@ class ApoioUpdateView(BaseUpdateViewGepub):
     form_class = ApoioMatriculaForm
     model = ApoioMatricula
     title = "Editar apoio"
-    subtitle = "Atualizar apoio"
+    subtitle = "Editar apoio"
     manage_perm = "nee.manage"
 
     def get_actions(self, q: str = "", obj=None, **kwargs):
-        return [{"label": "Voltar", "url": reverse("nee:apoio_detail", args=[obj.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+        return [{"label": "Voltar", "url": reverse("nee:apoio_detail", args=[obj.pk]), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
 
     def get_form(self, request, *args, **kwargs):
         form = super().get_form(request, *args, **kwargs)
@@ -147,11 +147,11 @@ class ApoioDetailView(BaseDetailViewGepub):
     def get_actions(self, q: str = "", obj=None, **kwargs):
         aluno_id = obj.matricula.aluno_id
         actions = [
-            {"label": "Voltar", "url": reverse("nee:aluno_apoios", args=[aluno_id]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-            {"label": "Abrir aluno", "url": reverse("educacao:aluno_detail", args=[aluno_id]), "icon": "fa-solid fa-user", "variant": "btn--ghost"},
+            {"label": "Voltar", "url": reverse("nee:aluno_apoios", args=[aluno_id]), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+            {"label": "Visualizar aluno", "url": reverse("educacao:aluno_detail", args=[aluno_id]), "icon": "fa-solid fa-user", "variant": "gp-button--ghost"},
         ]
         if can(self.request.user, "nee.manage"):
-            actions.append({"label": "Editar", "url": reverse("nee:apoio_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+            actions.append({"label": "Editar", "url": reverse("nee:apoio_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
         return actions
 
     def get_fields(self, request, obj):

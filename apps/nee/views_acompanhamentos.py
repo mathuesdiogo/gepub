@@ -32,11 +32,11 @@ class AcompanhamentoListView(BaseListViewGepub):
 
     def get_actions(self, q: str = "", **kwargs):
         aluno = getattr(self, "_aluno", None)
-        actions = [{"label": "Voltar", "url": reverse("nee:aluno_hub", args=[aluno.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+        actions = [{"label": "Voltar", "url": reverse("nee:aluno_hub", args=[aluno.pk]), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
         if can(self.request.user, "nee.manage"):
-            actions.append({"label": "Novo evento", "url": reverse("nee:acompanhamento_create", args=[aluno.pk]), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
-        actions.append({"label": "Exportar CSV", "url": f"{self.request.path}?q={escape(q)}&export=csv", "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"})
-        actions.append({"label": "Exportar PDF", "url": f"{self.request.path}?q={escape(q)}&export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"})
+            actions.append({"label": "Novo evento", "url": reverse("nee:acompanhamento_create", args=[aluno.pk]), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
+        actions.append({"label": "Exportar CSV", "url": f"{self.request.path}?q={escape(q)}&export=csv", "icon": "fa-solid fa-file-csv", "variant": "gp-button--ghost"})
+        actions.append({"label": "Exportar PDF", "url": f"{self.request.path}?q={escape(q)}&export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"})
         return actions
 
     def get_headers(self, *args, **kwargs):
@@ -95,7 +95,7 @@ class AcompanhamentoCreateView(BaseCreateViewGepub):
             "label": "Voltar",
             "url": reverse("nee:aluno_acompanhamentos", args=[aluno_id]),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }]
 
     def form_valid(self, request, form):
@@ -117,11 +117,11 @@ class AcompanhamentoUpdateView(BaseUpdateViewGepub):
     form_class = AcompanhamentoNEEForm
     model = AcompanhamentoNEE
     title = "Editar evento"
-    subtitle = "Atualizar acompanhamento"
+    subtitle = "Editar acompanhamento"
     manage_perm = "nee.manage"
 
     def get_actions(self, q: str = "", obj=None, **kwargs):
-        return [{"label": "Voltar", "url": reverse("nee:acompanhamento_detail", args=[obj.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+        return [{"label": "Voltar", "url": reverse("nee:acompanhamento_detail", args=[obj.pk]), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
 
     def post(self, request, pk: int, *args, **kwargs):
         # autor não é editável no form — mantém
@@ -140,11 +140,11 @@ class AcompanhamentoDetailView(BaseDetailViewGepub):
 
     def get_actions(self, q: str = "", obj=None, **kwargs):
         actions = [
-            {"label": "Voltar", "url": reverse("nee:aluno_acompanhamentos", args=[obj.aluno_id]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-            {"label": "Abrir aluno", "url": reverse("nee:aluno_hub", args=[obj.aluno_id]), "icon": "fa-solid fa-user", "variant": "btn--ghost"},
+            {"label": "Voltar", "url": reverse("nee:aluno_acompanhamentos", args=[obj.aluno_id]), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+            {"label": "Visualizar aluno", "url": reverse("nee:aluno_hub", args=[obj.aluno_id]), "icon": "fa-solid fa-user", "variant": "gp-button--ghost"},
         ]
         if can(self.request.user, "nee.manage"):
-            actions.append({"label": "Editar", "url": reverse("nee:acompanhamento_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+            actions.append({"label": "Editar", "url": reverse("nee:acompanhamento_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
         return actions
 
     def get_fields(self, request, obj):

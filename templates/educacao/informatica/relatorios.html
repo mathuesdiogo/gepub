@@ -19,7 +19,7 @@
       <div class="gp-card__body">
         <h3 class="section__title u-mb-8">Atendimento por tipo de grade</h3>
         <div class="gp-table">
-          <table>
+          <table class="gp-table__native">
             <thead><tr><th>Tipo</th><th>Total</th></tr></thead>
             <tbody>
               {% for row in por_tipo_grade %}
@@ -40,7 +40,7 @@
       <div class="gp-card__body">
         <h3 class="section__title u-mb-8">Atendimento por escola de origem</h3>
         <div class="gp-table">
-          <table>
+          <table class="gp-table__native">
             <thead><tr><th>Escola</th><th>Total</th></tr></thead>
             <tbody>
               {% for row in por_escola %}
@@ -58,7 +58,7 @@
       <div class="gp-card__body">
         <h3 class="section__title u-mb-8">Atendimento por laboratório</h3>
         <div class="gp-table">
-          <table>
+          <table class="gp-table__native">
             <thead><tr><th>Laboratório</th><th>Total</th></tr></thead>
             <tbody>
               {% for row in por_laboratorio %}
@@ -76,7 +76,7 @@
       <div class="gp-card__body">
         <h3 class="section__title u-mb-8">Ocupação por turma</h3>
         <div class="gp-table">
-          <table>
+          <table class="gp-table__native">
             <thead><tr><th>Turma</th><th>Curso</th><th>Laboratório</th><th>Total</th></tr></thead>
             <tbody>
               {% for row in por_turma %}
@@ -96,7 +96,7 @@
       <h3 class="section__title u-mb-8">Alertas de frequência</h3>
       <p class="section__meta u-mb-10">Acompanhe faltas consecutivas e baixa frequência para ação preventiva da coordenação.</p>
       <div class="gp-table">
-        <table>
+        <table class="gp-table__native">
           <thead><tr><th>Turma</th><th>Aluno</th><th>Tipo</th><th>Frequência</th><th>Faltas consec.</th></tr></thead>
           <tbody>
             {% for a in alertas %}

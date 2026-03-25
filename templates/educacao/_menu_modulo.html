@@ -178,6 +178,18 @@
           </a>
         </li>
         <li class="module-menu__item">
+          <a class="module-menu__link {% if 'programa_complementar_' in route or route == 'programas_dashboard' %}is-active{% endif %}" href="{% url 'educacao:programas_dashboard' %}">
+            <i class="fa-solid fa-shapes" aria-hidden="true"></i>
+            <span>Programas Complementares</span>
+          </a>
+        </li>
+        <li class="module-menu__item">
+          <a class="module-menu__link {% if 'biblioteca_' in route %}is-active{% endif %}" href="{% url 'educacao:biblioteca_dashboard' %}">
+            <i class="fa-solid fa-book-bookmark" aria-hidden="true"></i>
+            <span>Biblioteca Escolar</span>
+          </a>
+        </li>
+        <li class="module-menu__item">
           <a class="module-menu__link {% if route == 'informatica_grade_list' or route == 'informatica_grade_create' or route == 'informatica_grade_update' %}is-active{% endif %}" href="{% url 'educacao:informatica_grade_list' %}">
             <i class="fa-solid fa-calendar-week" aria-hidden="true"></i>
             <span>Informática: Grades</span>

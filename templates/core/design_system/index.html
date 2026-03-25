@@ -10,10 +10,10 @@
     <div class="gp-action-bar gp-justify-between gp-align-center gp-flex-wrap">
       <div>
         <h2>GEPUB DS 2.0</h2>
-        <p class="gp-caption">Arquitetura oficial da administração interna, multi-tenant e versionada.</p>
+        <p class="gp-caption">Guia base da reestruturação do Design System.</p>
       </div>
       <div class="gp-action-bar">
-        <label class="gp-form-label" for="themeSwitcher">Tema de preview</label>
+        <label class="gp-form-label form-shell" for="themeSwitcher">Tema de preview</label>
         <select id="themeSwitcher" class="gp-select" data-gp-theme-switch>
           {% for theme in theme_options %}
             <option value="{{ theme }}" {% if gepub_active_theme == theme %}selected{% endif %}>{{ theme|title }}</option>
@@ -25,41 +25,135 @@
   </div>
 </section>
 
-<section class="gp-grid gp-mb-4">
-  <article class="gp-card gp-col-4"><div class="gp-card__body"><h3>Componentes</h3><p>Catálogo completo de botões, formulários, tabelas, feedback, indicadores e layout.</p><a class="gp-anchor-link" href="{% url 'core:design_system_components' %}">Abrir catálogo</a></div></article>
-  <article class="gp-card gp-col-4"><div class="gp-card__body"><h3>Temas</h3><p>Temas `kassya`, `inclusao` e `institucional`, com regras por tenant.</p><a class="gp-anchor-link" href="{% url 'core:design_system_themes' %}">Ver temas</a></div></article>
-  <article class="gp-card gp-col-4"><div class="gp-card__body"><h3>Versionamento</h3><p><strong>{{ ds_version }}</strong><br>Compatível com evolução para v2.1 e v3.0.</p><span class="gp-badge gp-badge--success">Oficial</span></div></article>
-  <article class="gp-card gp-col-4"><div class="gp-card__body"><h3>Frontend Lab</h3><p>Sandbox React com Query, Table, Forms, Radix, Charts e editor visual integrado ao backend.</p><a class="gp-anchor-link" href="{% url 'core:frontend_lab' %}">Abrir laboratório</a></div></article>
+<section class="gp-card gp-mb-4">
+  <div class="gp-card__body">
+    <ul class="nav nav-tabs gp-tabs" aria-label="Seções da documentação">
+      <li class="active"><a class="gp-tabs__item is-active" href="#" aria-current="page">Geral <span class="tabs__badge">4</span></a></li>
+      <li><a class="gp-tabs__item" href="{% url 'core:design_system_components' %}">Componentes</a></li>
+      <li><a class="gp-tabs__item" href="{% url 'core:design_system_themes' %}">Temas</a></li>
+      <li><a class="gp-tabs__item" href="{% url 'core:frontend_lab' %}">Frontend Lab</a></li>
+    </ul>
+  </div>
 </section>
 
 <section class="gp-card gp-mb-4">
-  <header class="gp-card__header"><h3>Tokens universais</h3></header>
+  <header class="gp-card__header"><h3>Padrões web</h3></header>
   <div class="gp-card__body">
-    <div class="gp-grid">
-      <div class="gp-col-6">
-        <ul class="gp-link-list">
-          <li><code>--gp-primary</code></li>
-          <li><code>--gp-primary-hover</code></li>
-          <li><code>--gp-secondary</code></li>
-          <li><code>--gp-background</code></li>
-          <li><code>--gp-surface</code></li>
-          <li><code>--gp-border</code></li>
-          <li><code>--gp-text-primary</code></li>
-          <li><code>--gp-text-secondary</code></li>
-        </ul>
-      </div>
-      <div class="gp-col-6">
-        <ul class="gp-link-list">
-          <li><code>--gp-success</code></li>
-          <li><code>--gp-warning</code></li>
-          <li><code>--gp-danger</code></li>
-          <li><code>--gp-info</code></li>
-          <li><code>--gp-radius</code></li>
-          <li><code>--gp-spacing-unit</code></li>
-          <li><code>--gp-shadow-1</code></li>
-          <li><code>--gp-shadow-2</code> / <code>--gp-shadow-3</code></li>
-        </ul>
-      </div>
+    <ol class="gp-link-list">
+      {% for rule in web_standards_rules %}
+        <li>{{ rule }}</li>
+      {% endfor %}
+    </ol>
+
+    <h4 class="gp-mt-3">HTML semântico</h4>
+    <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover">
+      <table class="gp-table__native">
+        <thead>
+          <tr>
+            <th>Tag</th>
+            <th>Descrição</th>
+            <th>Utilizar em</th>
+            <th>Exemplo</th>
+            <th>Código</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in semantic_html_tags %}
+            <tr>
+              <td><code>{{ row.tag }}</code></td>
+              <td>{{ row.descricao }}</td>
+              <td>{{ row.usar_em }}</td>
+              <td>{{ row.exemplo }}</td>
+              <td><code>{{ row.codigo }}</code></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="gp-card gp-mb-4">
+  <header class="gp-card__header"><h3>Nomenclaturas</h3></header>
+  <div class="gp-card__body">
+    <ol class="gp-link-list">
+      {% for rule in nomenclature_guidelines %}
+        <li>{{ rule }}</li>
+      {% endfor %}
+    </ol>
+
+    <h4 class="gp-mt-3">Recomendações</h4>
+    <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover">
+      <table class="gp-table__native">
+        <thead>
+          <tr>
+            <th>Recomendado</th>
+            <th>Não recomendado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in nomenclature_recommendations %}
+            <tr>
+              <td>{{ row.recomendado }}</td>
+              <td>{{ row.nao_recomendado }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="gp-card gp-mb-4">
+  <header class="gp-card__header"><h3>Template Filters</h3></header>
+  <div class="gp-card__body">
+    <p class="gp-caption">Biblioteca: <code>{% templatetag openblock %} load gepub_design_system {% templatetag closeblock %}</code></p>
+    <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover">
+      <table class="gp-table__native">
+        <thead>
+          <tr>
+            <th>Filter</th>
+            <th>Descrição</th>
+            <th>Código</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in template_filter_specs %}
+            <tr>
+              <td><code>{{ row.nome }}</code></td>
+              <td>{{ row.descricao }}</td>
+              <td><code>{{ row.codigo }}</code></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="gp-card gp-mb-4">
+  <header class="gp-card__header"><h3>Template Tags</h3></header>
+  <div class="gp-card__body">
+    <p class="gp-caption">Biblioteca: <code>{% templatetag openblock %} load gepub_design_system {% templatetag closeblock %}</code></p>
+    <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover">
+      <table class="gp-table__native">
+        <thead>
+          <tr>
+            <th>Tag</th>
+            <th>Descrição</th>
+            <th>Como utilizar</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in template_tag_specs %}
+            <tr>
+              <td><code>{{ row.nome }}</code></td>
+              <td>{{ row.descricao }}</td>
+              <td><code>{{ row.codigo }}</code></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
   </div>
 </section>

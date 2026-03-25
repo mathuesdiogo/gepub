@@ -24,11 +24,11 @@ class TurmaDetailView(View):
 
         # Actions
         actions = [
-            {"label": "Voltar", "url": reverse("educacao:turma_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+            {"label": "Voltar", "url": reverse("educacao:turma_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
         ]
         if can(request.user, "educacao.manage"):
-            actions.append({"label": "Editar", "url": reverse("educacao:turma_update", args=[turma.pk]), "icon": "fa-solid fa-pen", "variant": "btn--ghost"})
-            actions.append({"label": "Matricular", "url": reverse("educacao:matricula_create"), "icon": "fa-solid fa-id-card", "variant": "btn--ghost"})
+            actions.append({"label": "Editar", "url": reverse("educacao:turma_update", args=[turma.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--ghost"})
+            actions.append({"label": "Matricular", "url": reverse("educacao:matricula_create"), "icon": "fa-solid fa-id-card", "variant": "gp-button--ghost"})
 
         # Alunos via Matrícula (correto no seu models.py)
         matriculas = (

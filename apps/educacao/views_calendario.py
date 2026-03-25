@@ -361,13 +361,13 @@ def calendario_index(request):
             "label": "PDF do Mês",
             "url": f"{reverse('educacao:calendario_index')}?{base_query}&export=pdf_mes",
             "icon": "fa-solid fa-file-pdf",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
         {
             "label": "PDF Anual",
             "url": f"{reverse('educacao:calendario_index')}?ano={ano}&export=pdf_ano",
             "icon": "fa-solid fa-file-pdf",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
     ]
     if can_manage_calendar:
@@ -377,7 +377,7 @@ def calendario_index(request):
                 "label": "Novo Evento",
                 "url": reverse("educacao:calendario_evento_create"),
                 "icon": "fa-solid fa-plus",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             },
         )
 
@@ -470,7 +470,7 @@ def calendario_evento_update(request, pk: int):
             "mode": "update",
             "evento": evento,
             "cancel_url": reverse("educacao:calendario_index"),
-            "submit_label": "Atualizar evento",
+            "submit_label": "Editar evento",
             "action_url": reverse("educacao:calendario_evento_update", args=[evento.pk]),
         },
     )

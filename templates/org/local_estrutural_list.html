@@ -1,0 +1,22 @@
+{% extends "core/base.html" %}
+{% block title %}Locais Estruturais • Organização • GEPUB{% endblock %}
+{% block header %}Organização{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="{% url 'core:dashboard' %}">Início</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a class="breadcrumbs__link" href="{% url 'org:index' %}">Organização</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span class="breadcrumbs__current">Locais estruturais</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="card org-page gp-card"><div class="card__body gp-card__body">
+{% include "core/partials/components/layout/page_head.html" with title="Locais Estruturais" subtitle="Estrutura interna por secretaria, unidade e sublocal" actions=actions %}
+{% include "org/partials/nav_tabs.html" %}
+{% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Nome, código, responsável, unidade ou secretaria..." action_url=action_url clear_url=clear_url extra_filters=extra_filters has_filters=has_filters input_attrs=input_attrs %}
+{% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows page_obj=page_obj q=q empty_title="Nenhum local estrutural encontrado" empty_text="Tente ajustar sua busca e/ou filtros." %}
+</div></div>
+{% endblock %}

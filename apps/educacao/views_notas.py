@@ -124,11 +124,11 @@ def avaliacao_list(request, pk: int):
         )
 
     actions = [
-        {"label": "Voltar", "url": reverse("educacao:diario_detail", args=[diario.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-        {"label": "Imprimir PDF", "url": reverse("educacao:avaliacao_list", args=[diario.pk]) + "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
+        {"label": "Voltar", "url": reverse("educacao:diario_detail", args=[diario.pk]), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+        {"label": "Imprimir PDF", "url": reverse("educacao:avaliacao_list", args=[diario.pk]) + "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"},
     ]
     if can_edit:
-        actions.append({"label": "Nova Avaliação", "url": reverse("educacao:avaliacao_create", args=[diario.pk]), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+        actions.append({"label": "Nova Avaliação", "url": reverse("educacao:avaliacao_create", args=[diario.pk]), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
 
     stats_map = {
         row["avaliacao_id"]: row["lancadas"]
@@ -241,7 +241,7 @@ def avaliacao_update(request, pk: int, avaliacao_id: int):
         return HttpResponseForbidden("403 — Você não tem permissão para acessar este diário.")
 
     if not _can_edit_diario(request.user, diario):
-        return HttpResponseForbidden("403 — Somente o professor responsável pode alterar a configuração.")
+        return HttpResponseForbidden("403 — Somente o professor responsável pode editar a configuração.")
 
     avaliacao = get_object_or_404(Avaliacao, pk=avaliacao_id, diario=diario)
     if request.method == "POST":
@@ -261,7 +261,7 @@ def avaliacao_update(request, pk: int, avaliacao_id: int):
         "mode": "update",
         "cancel_url": reverse("educacao:avaliacao_list", args=[diario.pk]),
         "action_url": reverse("educacao:avaliacao_update", args=[diario.pk, avaliacao.pk]),
-        "submit_label": "Atualizar configuração",
+        "submit_label": "Editar configuração",
     })
 
 
@@ -356,13 +356,13 @@ def notas_lancar(request, pk: int):
             "label": "Voltar",
             "url": reverse("educacao:avaliacao_list", args=[diario.pk]),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
         {
             "label": "Imprimir PDF",
             "url": reverse("educacao:notas_lancar", args=[avaliacao.pk]) + "?export=pdf",
             "icon": "fa-solid fa-file-pdf",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
     ]
     if can_edit:
@@ -371,7 +371,7 @@ def notas_lancar(request, pk: int):
                 "label": "Salvar conceitos" if is_modo_conceito else "Salvar notas",
                 "url": "#notas-form",
                 "icon": "fa-solid fa-check",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             }
         )
 

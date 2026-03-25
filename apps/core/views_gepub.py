@@ -40,7 +40,7 @@ class GepubViewMixin:
     # - get_actions(self)
     def get_actions(self, q: str = "", **kwargs) -> List[Dict[str, Any]]:
         return [
-            {"label": "Voltar", "url": self.get_back_url(), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+            {"label": "Voltar", "url": self.get_back_url(), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
         ]
 
 
@@ -230,7 +230,7 @@ class BaseUpdateViewGepub(GepubViewMixin, View):
     template_name: str = "core/form_base.html"
     form_class = None
     model = None
-    submit_label: str = "Atualizar"
+    submit_label: str = "Editar"
 
     def get_object(self, request: HttpRequest, pk: int):
         if not self.model:

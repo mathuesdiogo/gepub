@@ -425,25 +425,25 @@ def index(request):
                     "label": "Institucional",
                     "url": reverse("camara:module_list", args=["config"]) + _q_municipio(municipio),
                     "icon": "fa-solid fa-building-columns",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Sessões",
                     "url": reverse("camara:module_list", args=["sessoes"]) + _q_municipio(municipio),
                     "icon": "fa-solid fa-gavel",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "Proposições",
                     "url": reverse("camara:module_list", args=["proposicoes"]) + _q_municipio(municipio),
                     "icon": "fa-solid fa-file-signature",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Transparência",
                     "url": reverse("camara:module_list", args=["transparencia"]) + _q_municipio(municipio),
                     "icon": "fa-solid fa-scale-balanced",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -501,13 +501,13 @@ def module_list(request, module_key: str):
                     "label": "Voltar ao app Câmara",
                     "url": reverse("camara:index") + _q_municipio(municipio),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Novo registro" if not spec.singleton else "Editar configuração",
                     "url": create_url,
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
             ],
         },
@@ -521,11 +521,11 @@ def module_create(request, module_key: str):
     spec = _spec_or_404(module_key)
 
     if not _module_allowed(request, spec, manage=True):
-        return HttpResponseForbidden("403 — Perfil sem permissão para cadastrar neste módulo da Câmara.")
+        return HttpResponseForbidden("403 — Perfil sem permissão para adicionar neste módulo da Câmara.")
 
     municipio = _resolve_municipio(request, require_selected=True)
     if not municipio:
-        messages.error(request, "Selecione um município para cadastrar.")
+        messages.error(request, "Selecione um município para adicionar.")
         return redirect(reverse("camara:module_list", args=[spec.key]))
     denied = _ensure_plan_access(municipio)
     if denied:

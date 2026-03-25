@@ -6,21 +6,21 @@
 
 {% block page_content %}
 <section class="pp-grid pp-grid--3 pp-section-space">
-  <article class="pp-card pp-kpi-card">
+  <article class="pp-card pp-kpi-card gp-card">
     <h3>Total de processos</h3>
     <p class="pp-kpi-value">{{ indicadores.total }}</p>
   </article>
-  <article class="pp-card pp-kpi-card pp-kpi-card--deep">
+  <article class="pp-card pp-kpi-card pp-kpi-card--deep gp-card">
     <h3>Em curso</h3>
     <p class="pp-kpi-value">{{ indicadores.em_curso }}</p>
   </article>
-  <article class="pp-card pp-kpi-card pp-kpi-card--green">
+  <article class="pp-card pp-kpi-card pp-kpi-card--green gp-card">
     <h3>Homologados</h3>
     <p class="pp-kpi-value">{{ indicadores.homologado }}</p>
   </article>
 </section>
 
-<section class="pp-card pp-section-space">
+<section class="pp-card pp-section-space gp-card">
   <form method="get" class="pp-form-inline">
     <div>
       <label for="id_q">Busca</label>
@@ -47,14 +47,14 @@
     <div>
       <label>&nbsp;</label>
       <div class="pp-actions">
-        <button class="pp-btn pp-btn--primary" type="submit">Filtrar</button>
-        <a class="pp-btn pp-btn--soft" href="{% url 'core:portal_licitacoes_public' %}">Limpar</a>
+        <button class="pp-btn pp-btn--primary gp-button gp-button--primary" type="submit">Filtrar</button>
+        <a class="pp-btn pp-btn--soft gp-button" href="{% url 'core:portal_licitacoes_public' %}">Limpar</a>
       </div>
     </div>
   </form>
 
   <div class="pp-table-wrap pp-section-space">
-    <table class="pp-table">
+    <table class="gp-table__native pp-table">
       <thead>
         <tr>
           <th>Número</th>

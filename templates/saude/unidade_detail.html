@@ -7,14 +7,14 @@
 
   {% include "core/partials/components/layout/detail_summary.html" with fields=fields pills=pills %}
 
-  <div class="section mt-3">
+  <div class="section gp-mt-3">
     <div class="section__header">
       <div class="section__title">Ações rápidas</div>
       <div class="section__meta">Operações</div>
     </div>
 
     <div class="actions-row">
-      <a class="gp-button gp-button--primary" href="{% url 'saude:unidade_list' %}"><i class="fa-solid fa-hospital"></i><span>Ver Unidades</span></a>
+      <a class="gp-button gp-button--primary" href="{% url 'saude:unidade_list' %}"><i class="fa-solid fa-hospital"></i><span>Visualizar Unidades</span></a>
       <a class="gp-button gp-button--ghost" href="{% url 'saude:profissional_list' %}?unidade={{ unidade.id }}"><i class="fa-solid fa-user-doctor"></i><span>Profissionais</span></a>
       <a class="gp-button gp-button--ghost" href="{% url 'saude:atendimento_list' %}?unidade={{ unidade.id }}"><i class="fa-solid fa-notes-medical"></i><span>Atendimentos</span></a>
       {% if can_edu_manage or perms.saude.manage %}
@@ -22,7 +22,7 @@
       {% endif %}
     </div>
 
-    <div class="small mt-2">Dica: use os filtros nas listas para ver somente esta unidade.</div>
+    <div class="small gp-mt-2">Dica: use os filtros nas listas para visualizar somente esta unidade.</div>
   </div>
 
 </div></div>

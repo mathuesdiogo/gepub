@@ -1,12 +1,12 @@
 {% extends "core/base.html" %}
-{% load static %}
+{% load static gepub_design_system %}
 
 {% block content %}
-<div class="card billing-page billing-page--admin-detalhe"><div class="card__body billing-page__body">
+<div class="card billing-page billing-page--admin-detalhe gp-card"><div class="card__body billing-page__body gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
   <section class="billing-section billing-section--compact">
-    <form method="post" class="inline-action-form">
+    <form method="post" class="inline-action-form u-inline-form">
       {% csrf_token %}
       <input type="hidden" name="action" value="gerar_fatura">
       <button type="submit" class="gp-button gp-button--primary"><i class="fa-solid fa-file-invoice-dollar"></i> Gerar fatura mensal</button>
@@ -20,13 +20,13 @@
     </div>
     <div class="billing-metrics-grid billing-metrics-grid--soft">
       {% for item in metricas %}
-        <article class="billing-metric-card">
+        <article class="billing-metric-card gp-card">
           <div class="billing-metric-card__head">
             <strong>{{ item.label }}</strong>
             <span>{{ item.usado }}{% if item.limite is not None %} / {{ item.limite }}{% else %} / ilimitado{% endif %}</span>
           </div>
           {% if item.percentual is not None %}
-            <div class="billing-progress billing-progress--{{ item.classe }}"><span style="width: {{ item.percentual }}%"></span></div>
+            <div class="billing-progress billing-progress--{{ item.classe }}"><span data-style-width-pct="{{ item.percentual }}"></span></div>
           {% else %}
             <div class="small">Sem limite contratual.</div>
           {% endif %}
@@ -43,7 +43,7 @@
     <form method="post" class="form-shell">
       {% csrf_token %}
       <input type="hidden" name="action" value="save_assinatura">
-      <div class="form-shell__fields">{{ assinatura_form.as_p }}</div>
+      <div class="form-shell__fields">{% render_form assinatura_form %}</div>
       <div class="form-shell__actions"><button type="submit" class="gp-button gp-button--primary">Salvar assinatura</button></div>
     </form>
   </section>
@@ -56,7 +56,7 @@
     <form method="post" class="form-shell">
       {% csrf_token %}
       <input type="hidden" name="action" value="bonus_quota">
-      <div class="form-shell__fields">{{ bonus_form.as_p }}</div>
+      <div class="form-shell__fields">{% render_form bonus_form %}</div>
       <div class="form-shell__actions"><button type="submit" class="gp-button gp-button--outline">Conceder bônus</button></div>
     </form>
   </section>
@@ -66,8 +66,8 @@
       <h3>Solicitações</h3>
       <p>Fluxo de aprovação e recusa de upgrades pendentes.</p>
     </div>
-    <div class="table-shell billing-table-shell">
-      <table class="table">
+    <div class="table-shell billing-table-shell gp-table gp-table--responsive">
+      <table class="gp-table__native table">
         <thead>
           <tr>
             <th>Data</th>
@@ -88,7 +88,7 @@
               <td>{{ s.get_status_display }}</td>
               <td>
                 {% if s.status == "SOLICITADO" or s.status == "RASCUNHO" %}
-                  <form method="post" class="inline-action-form">
+                  <form method="post" class="inline-action-form u-inline-form">
                     {% csrf_token %}
                     <input type="hidden" name="solicitacao_id" value="{{ s.pk }}">
                     <button type="submit" name="action" value="approve_upgrade" class="gp-button gp-button--outline">Aprovar</button>
@@ -112,8 +112,8 @@
       <h3>Faturas</h3>
       <p>Consulta de competências e emissão de documentos.</p>
     </div>
-    <div class="table-shell billing-table-shell">
-      <table class="table">
+    <div class="table-shell billing-table-shell gp-table gp-table--responsive">
+      <table class="gp-table__native table">
         <thead>
           <tr>
             <th>Competência</th>

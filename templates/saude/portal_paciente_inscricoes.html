@@ -5,11 +5,11 @@
 <div class="gp-card"><div class="gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title="Portal de Editais do Paciente" subtitle=paciente.nome actions=actions %}
 
-  <div class="gp-pills">
-    <span class="gp-pills__item">Paciente: {{ paciente.nome }}</span>
-    <span class="gp-pills__item">Unidade: {{ paciente.unidade_referencia.nome }}</span>
-    <span class="gp-pills__item">Inscrições: {{ inscricoes|length }}</span>
-  </div>
+  <ul class="pills">
+    <li><span>Paciente: {{ paciente.nome }}</span></li>
+    <li><span>Unidade: {{ paciente.unidade_referencia.nome }}</span></li>
+    <li><span>Inscrições: {{ inscricoes|length }}</span></li>
+  </ul>
 
   {% if not paciente.aluno_id %}
     <p>Este paciente ainda não está vinculado a um aluno/cidadão para acompanhamento de editais.</p>

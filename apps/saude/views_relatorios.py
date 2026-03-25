@@ -191,7 +191,7 @@ def relatorio_mensal(request):
             "label": "Exportar PDF",
             "url": qjoin("export=pdf"),
             "icon": "fa-solid fa-file-pdf",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }
     ]
 

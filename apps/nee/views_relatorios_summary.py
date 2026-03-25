@@ -18,7 +18,7 @@ from .views_relatorios_common import get_municipio_from_unidade
 
 @login_required
 def relatorios_index(request):
-    actions = [{"label": "Voltar", "url": reverse("nee:index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+    actions = [{"label": "Voltar", "url": reverse("nee:index"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
     cards = [
         {"title": "Por tipo", "description": "Distribuição de alunos por tipo de necessidade.", "icon": "fa-solid fa-tags", "url": reverse("nee:relatorios_por_tipo")},
         {"title": "Por município", "description": "Distribuição por município (com base nas unidades/turmas).", "icon": "fa-solid fa-city", "url": reverse("nee:relatorios_por_municipio")},
@@ -108,9 +108,9 @@ def relatorios_por_tipo(request):
         )
 
     actions = [
-        {"label": "Voltar", "url": reverse("nee:relatorios_index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-        {"label": "Exportar CSV", "url": reverse("nee:relatorios_por_tipo") + "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
-        {"label": "Exportar PDF", "url": reverse("nee:relatorios_por_tipo") + "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
+        {"label": "Voltar", "url": reverse("nee:relatorios_index"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+        {"label": "Exportar CSV", "url": reverse("nee:relatorios_por_tipo") + "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "gp-button--ghost"},
+        {"label": "Exportar PDF", "url": reverse("nee:relatorios_por_tipo") + "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"},
     ]
     return render(request, "nee/relatorios/por_tipo_enterprise.html", {"items": items, "actions": actions})
 
@@ -181,9 +181,9 @@ def relatorios_por_unidade(request):
         )
 
     actions = [
-        {"label": "Voltar", "url": reverse("nee:relatorios_index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-        {"label": "Exportar CSV", "url": reverse("nee:relatorios_por_unidade") + "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
-        {"label": "Exportar PDF", "url": reverse("nee:relatorios_por_unidade") + "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
+        {"label": "Voltar", "url": reverse("nee:relatorios_index"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+        {"label": "Exportar CSV", "url": reverse("nee:relatorios_por_unidade") + "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "gp-button--ghost"},
+        {"label": "Exportar PDF", "url": reverse("nee:relatorios_por_unidade") + "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"},
     ]
     return render(request, "nee/relatorios/por_unidade_enterprise.html", {"items": items, "actions": actions})
 
@@ -250,9 +250,9 @@ def relatorios_por_municipio(request):
         )
 
     actions = [
-        {"label": "Voltar", "url": reverse("nee:relatorios_index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-        {"label": "Exportar CSV", "url": reverse("nee:relatorios_por_municipio") + "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
-        {"label": "Exportar PDF", "url": reverse("nee:relatorios_por_municipio") + "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
+        {"label": "Voltar", "url": reverse("nee:relatorios_index"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+        {"label": "Exportar CSV", "url": reverse("nee:relatorios_por_municipio") + "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "gp-button--ghost"},
+        {"label": "Exportar PDF", "url": reverse("nee:relatorios_por_municipio") + "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"},
     ]
     return render(request, "nee/relatorios/por_municipio_enterprise.html", {"items": items, "actions": actions})
 
@@ -278,7 +278,7 @@ def relatorios_capacidade(request):
                         "label": "Voltar",
                         "url": reverse("nee:relatorios_index"),
                         "icon": "fa-solid fa-arrow-left",
-                        "variant": "btn--ghost",
+                        "variant": "gp-button--ghost",
                     }
                 ],
             },
@@ -360,8 +360,8 @@ def relatorios_capacidade(request):
         )
 
     actions = [
-        {"label": "Voltar", "url": reverse("nee:relatorios_index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-        {"label": "Exportar CSV", "url": reverse("nee:relatorios_capacidade") + "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
-        {"label": "Exportar PDF", "url": reverse("nee:relatorios_capacidade") + "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
+        {"label": "Voltar", "url": reverse("nee:relatorios_index"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+        {"label": "Exportar CSV", "url": reverse("nee:relatorios_capacidade") + "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "gp-button--ghost"},
+        {"label": "Exportar PDF", "url": reverse("nee:relatorios_capacidade") + "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"},
     ]
     return render(request, "nee/relatorios/capacidade_enterprise.html", {"items": items, "actions": actions})

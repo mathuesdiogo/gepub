@@ -4,7 +4,7 @@
     <a class="gp-button gp-button--primary" href="{% url 'educacao:informatica_grade_list' %}"><i class="fa-solid fa-calendar-week"></i> Grades e Horários</a>
     <a class="gp-button gp-button--primary" href="{% url 'educacao:informatica_agenda' %}"><i class="fa-solid fa-calendar-days"></i> Agenda dos Laboratórios</a>
     <a class="gp-button gp-button--primary" href="{% url 'educacao:calendario_index' %}"><i class="fa-solid fa-calendar-check"></i> Calendário da Informática</a>
-    <a class="gp-button gp-button--outline" href="{% url 'educacao:informatica_matricula_list' %}"><i class="fa-solid fa-id-card-clip"></i> Matrículas</a>
+    <a class="gp-button gp-button--outline" href="{% url 'educacao:informatica_matricula_list' %}"><i class="fa-solid fa-id-card-clip gp-card"></i> Matrículas</a>
     <a class="gp-button gp-button--outline" href="{% url 'educacao:informatica_relatorios' %}"><i class="fa-solid fa-chart-column"></i> Relatórios</a>
   </div>
 
@@ -58,7 +58,7 @@
       </div>
       {% if coordenacao_informatica.turmas_ocupacao_rows %}
         <div class="admin-table-wrap">
-          <table class="admin-table">
+          <table class="gp-table__native admin-table">
             <thead>
               <tr>
                 <th>Turma</th>
@@ -95,7 +95,7 @@
       </div>
       {% if coordenacao_informatica.proximas_aulas %}
         <div class="admin-table-wrap">
-          <table class="admin-table">
+          <table class="gp-table__native admin-table">
             <thead>
               <tr>
                 <th>Data</th>
@@ -135,12 +135,12 @@
         <p class="admin-panel__sub">Distribuição dos alunos atendidos por escola</p>
       </div>
       <a class="gp-button gp-button--outline" href="{% url 'educacao:informatica_relatorios' %}">
-        <i class="fa-solid fa-file-arrow-down"></i> Abrir relatórios completos
+        <i class="fa-solid fa-file-arrow-down"></i> Visualizar relatórios completos
       </a>
     </div>
     {% if coordenacao_informatica.censo_por_escola %}
       <div class="admin-table-wrap">
-        <table class="admin-table">
+        <table class="gp-table__native admin-table">
           <thead>
             <tr>
               <th>Escola de origem</th>

@@ -14,21 +14,21 @@
 {% endblock %}
 
 {% block content %}
-<div class="card">
-  <div class="card__body">
+<div class="card gp-card">
+  <div class="card__body gp-card__body">
     {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-    <div class="alert alert--info" style="margin-bottom: 12px;">
+    <div class="alert alert--info u-mb-12 gp-alert">
       Essa conta é exclusiva para <strong>primeiro acesso da prefeitura</strong> no onboarding.
       No primeiro login, o usuário define nome/código/senha finais e cria o cadastro da prefeitura no onboarding.
     </div>
 
     {% if generated %}
-      <div class="alert alert--success" style="margin-bottom: 12px;">
+      <div class="alert alert--success u-mb-12 gp-alert">
         <strong>Conta criada com sucesso.</strong>
       </div>
-      <div class="card" style="margin-bottom: 16px; border: 1px dashed #b7c8e2;">
-        <div class="card__body">
+      <div class="card u-mb-16 u-border-dashed-muted gp-card">
+        <div class="card__body gp-card__body">
           <p><strong>Nome:</strong> {{ generated.nome }}</p>
           <p><strong>E-mail:</strong> {{ generated.email }}</p>
           <p><strong>Código de acesso:</strong> <code>{{ generated.codigo_acesso }}</code></p>
@@ -38,10 +38,10 @@
       </div>
     {% endif %}
 
-    <form method="post" class="form-vertical">
+    <form method="post" class="form-vertical form-shell">
       {% csrf_token %}
       {% include "core/partials/components/forms/form_shell.html" with form=form %}
-      <div class="form-actions" style="display:flex; gap:8px; margin-top:12px;">
+      <div class="form-actions u-flex u-gap-8 u-mt-12">
         <button class="gp-button gp-button--primary" type="submit">Gerar usuário onboarding</button>
         <a class="gp-button gp-button--outline" href="{% url 'accounts:usuarios_list' %}">Cancelar</a>
       </div>

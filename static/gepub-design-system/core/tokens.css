@@ -32,6 +32,33 @@
   --gp-space-5: calc(var(--gp-spacing-unit) * 3);
   --gp-space-6: calc(var(--gp-spacing-unit) * 4);
 
+  /* Global layout rhythm (page -> section -> block -> inline) */
+  --gp-rhythm-page: var(--gp-space-4);
+  --gp-rhythm-section: var(--gp-space-3);
+  --gp-rhythm-block: var(--gp-space-3);
+  --gp-rhythm-inline: var(--gp-space-2);
+
+  /* Component sizing rhythm (boxes / items / tables) */
+  --gp-size-item-sm: 2rem;        /* 32px */
+  --gp-size-item-md: 2.5rem;      /* 40px */
+  --gp-size-item-lg: 3rem;        /* 48px */
+
+  --gp-size-box-radius: 14px;
+  --gp-size-box-header-px: clamp(14px, 1.4vw, 20px);
+  --gp-size-box-header-py: clamp(10px, 1vw, 14px);
+  --gp-size-box-body-px: clamp(14px, 1.5vw, 22px);
+  --gp-size-box-body-py: clamp(12px, 1.2vw, 18px);
+  --gp-size-box-gap: clamp(8px, 1vw, 14px);
+
+  --gp-size-item-px: clamp(10px, 1vw, 14px);
+  --gp-size-item-py: clamp(8px, 0.9vw, 12px);
+
+  --gp-size-table-head-px: clamp(12px, 1vw, 16px);
+  --gp-size-table-head-py: clamp(10px, 0.95vw, 13px);
+  --gp-size-table-cell-px: clamp(12px, 1vw, 16px);
+  --gp-size-table-cell-py: clamp(10px, 0.95vw, 13px);
+  --gp-size-table-row-min: 42px;
+
   --gp-border-focus: 0 0 0 3px color-mix(in srgb, var(--gp-primary) 35%, transparent);
   --gp-transition-fast: 150ms ease;
   --gp-transition-base: 220ms ease;

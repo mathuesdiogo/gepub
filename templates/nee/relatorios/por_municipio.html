@@ -1,12 +1,12 @@
 {% extends "nee/base_modulo.html" %}
 {% block module_title %}Relatório por Município • NEE{% endblock %}
 {% block module_content %}
-<div class="card"><div class="card__body">
+<div class="card gp-card"><div class="card__body gp-card__body">
 {% include "core/partials/components/layout/page_head.html" with title="Relatório por Município" subtitle="Totalizações por município" actions=actions %}
 <div class="actions-bar">
   <a class="gp-button gp-button--outline" href="?export=csv"><i class="fa-solid fa-file-csv"></i> Exportar CSV</a>
 </div>
-<table class="table-shell">
+<table class="gp-table__native table-shell gp-table gp-table--responsive">
   <thead><tr><th>Município</th><th class="u-w-140">Total</th></tr></thead>
   <tbody>
   {% for d in data %}

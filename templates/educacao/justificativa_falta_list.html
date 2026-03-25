@@ -5,9 +5,9 @@
 <div class="gp-card"><div class="gp-card__body">
 {% include "core/partials/components/layout/page_head.html" with title="Justificativas de Falta" subtitle=subtitle actions=actions %}
 
-<form method="get" class="gp-form gp-form--smart gp-mb-3">
-  <div class="gp-form-group">
-    <label class="gp-form-label" for="id_status">Status</label>
+<form method="get" class="gp-form gp-form--smart gp-mb-3 form-shell">
+  <div class="gp-form-group form-shell">
+    <label class="gp-form-label form-shell" for="id_status">Status</label>
     <select id="id_status" name="status" class="gp-select">
       <option value="" {% if not status_filter %}selected{% endif %}>Todos</option>
       <option value="PENDENTE" {% if status_filter == "PENDENTE" %}selected{% endif %}>Pendente</option>
@@ -15,12 +15,12 @@
       <option value="INDEFERIDO" {% if status_filter == "INDEFERIDO" %}selected{% endif %}>Indeferido</option>
     </select>
   </div>
-  <div class="gp-form-group">
-    <label class="gp-form-label" for="id_q">Busca</label>
+  <div class="gp-form-group form-shell">
+    <label class="gp-form-label form-shell" for="id_q">Busca</label>
     <input id="id_q" class="gp-input" type="text" name="q" value="{{ q }}" placeholder="Aluno, turma, componente..." />
   </div>
-  <div class="gp-form-group">
-    <label class="gp-form-label">&nbsp;</label>
+  <div class="gp-form-group form-shell">
+    <label class="gp-form-label form-shell">&nbsp;</label>
     <button type="submit" class="gp-button gp-button--primary"><i class="fa-solid fa-filter"></i> Filtrar</button>
   </div>
 </form>

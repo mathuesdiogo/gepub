@@ -186,7 +186,7 @@ def operacoes_lote(request):
             "label": "Voltar ao módulo",
             "url": reverse("educacao:index"),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }
     ]
 

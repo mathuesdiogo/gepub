@@ -14,13 +14,13 @@
 {% endblock %}
 
 {% block content %}
-<div class="card">
-  <div class="card__body">
+<div class="card gp-card">
+  <div class="card__body gp-card__body">
     {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
     <form method="post" class="form-shell">
       {% csrf_token %}
-      {% if form.non_field_errors %}<div class="alert alert--danger">{{ form.non_field_errors }}</div>{% endif %}
+      {% if form.non_field_errors %}<div class="alert alert--danger gp-alert">{{ form.non_field_errors }}</div>{% endif %}
       <div class="form-shell__fields users-form-grid">
         <p>
           {{ form.first_name.label_tag }}
@@ -70,6 +70,11 @@
           {{ form.setor }}
           {% if form.setor.errors %}<span class="small u-text-danger">{{ form.setor.errors|striptags }}</span>{% endif %}
         </p>
+        <p>
+          {{ form.local_estrutural.label_tag }}
+          {{ form.local_estrutural }}
+          {% if form.local_estrutural.errors %}<span class="small u-text-danger">{{ form.local_estrutural.errors|striptags }}</span>{% endif %}
+        </p>
 
         <p id="turmas-wrap" class="users-form-grid__full users-form__turmas">
           {{ form.turmas.label_tag }}
@@ -95,7 +100,7 @@
     {% if mode == "update" and u %}
       <p class="small u-mt-12">
         <strong>Código de acesso:</strong> {{ u.profile.codigo_acesso }}
-        {% if u.profile.must_change_password %}<span class="status warning">Troca de senha pendente</span>{% endif %}
+        {% if u.profile.must_change_password %}<span class="status warning gp-button--warning">Troca de senha pendente</span>{% endif %}
       </p>
     {% endif %}
   </div>
@@ -126,7 +131,8 @@
   const secretariaSelect = document.getElementById("id_secretaria");
   const unidadeSelect = document.getElementById("id_unidade");
   const setorSelect = document.getElementById("id_setor");
-  if (!municipioSelect || !secretariaSelect || !unidadeSelect || !setorSelect) return;
+  const localSelect = document.getElementById("id_local_estrutural");
+  if (!municipioSelect || !secretariaSelect || !unidadeSelect || !setorSelect || !localSelect) return;
 
   const secretariasData = [
     {% for secretaria in form.fields.secretaria.queryset %}
@@ -141,6 +147,11 @@
   const setoresData = [
     {% for setor in form.fields.setor.queryset %}
       {id: "{{ setor.id }}", nome: "{{ setor.nome|escapejs }}", unidadeId: "{{ setor.unidade_id }}", secretariaId: "{{ setor.unidade.secretaria_id }}", municipioId: "{{ setor.unidade.secretaria.municipio_id }}"},
+    {% endfor %}
+  ];
+  const locaisData = [
+    {% for local in form.fields.local_estrutural.queryset %}
+      {id: "{{ local.id }}", nome: "{{ local.nome|escapejs }}", unidadeId: "{{ local.unidade_id }}", secretariaId: "{{ local.secretaria_id }}", municipioId: "{{ local.municipio_id }}"},
     {% endfor %}
   ];
 
@@ -172,6 +183,7 @@
     const previousSecretaria = secretariaSelect.value;
     const previousUnidade = unidadeSelect.value;
     const previousSetor = setorSelect.value;
+    const previousLocal = localSelect.value;
 
     const secretariasFiltradas = municipioId
       ? secretariasData.filter((item) => String(item.municipioId) === municipioId)
@@ -216,6 +228,25 @@
         previousSetor,
         unidadeId
           ? "Selecione um setor"
+          : (secretariaId
+              ? "Selecione uma unidade"
+              : (municipioId ? "Selecione uma secretaria" : "Selecione um município primeiro"))
+      );
+    }
+
+    const locaisFiltrados = unidadeId
+      ? locaisData.filter((item) => String(item.unidadeId) === unidadeId)
+      : (secretariaId
+          ? locaisData.filter((item) => String(item.secretariaId) === secretariaId)
+          : (municipioId ? locaisData.filter((item) => String(item.municipioId) === municipioId) : []));
+
+    if (!localSelect.disabled) {
+      repopulateSelect(
+        localSelect,
+        locaisFiltrados,
+        previousLocal,
+        unidadeId
+          ? "Selecione um local"
           : (secretariaId
               ? "Selecione uma unidade"
               : (municipioId ? "Selecione uma secretaria" : "Selecione um município primeiro"))

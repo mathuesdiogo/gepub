@@ -76,19 +76,19 @@ def index(request):
                     "label": "Novo veículo",
                     "url": reverse("frota:veiculo_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "Viagens",
                     "url": reverse("frota:viagem_list") + _q_municipio(municipio),
                     "icon": "fa-solid fa-route",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Manutenções",
                     "url": reverse("frota:manutencao_list") + _q_municipio(municipio),
                     "icon": "fa-solid fa-screwdriver-wrench",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -153,19 +153,19 @@ def veiculo_list(request):
                     "label": "Novo veículo",
                     "url": reverse("frota:veiculo_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "CSV",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&situacao={situacao}&export=csv",
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "PDF",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&situacao={situacao}&export=pdf",
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -177,7 +177,7 @@ def veiculo_list(request):
 def veiculo_create(request):
     municipio = _resolve_municipio(request, require_selected=True)
     if not municipio:
-        messages.error(request, "Selecione um município para cadastrar veículo.")
+        messages.error(request, "Selecione um município para adicionar veículo.")
         return redirect("frota:veiculo_list")
     form = FrotaCadastroForm(request.POST or None, municipio=municipio)
     if request.method == "POST" and form.is_valid():
@@ -280,19 +280,19 @@ def abastecimento_list(request):
                     "label": "Novo abastecimento",
                     "url": reverse("frota:abastecimento_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "CSV",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&export=csv",
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "PDF",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&export=pdf",
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -386,19 +386,19 @@ def manutencao_list(request):
                     "label": "Nova manutenção",
                     "url": reverse("frota:manutencao_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "CSV",
                     "url": request.path + f"?municipio={municipio.pk}&status={status}&export=csv",
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "PDF",
                     "url": request.path + f"?municipio={municipio.pk}&status={status}&export=pdf",
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -509,19 +509,19 @@ def viagem_list(request):
                     "label": "Nova viagem",
                     "url": reverse("frota:viagem_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "CSV",
                     "url": request.path + f"?municipio={municipio.pk}&status={status}&export=csv",
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "PDF",
                     "url": request.path + f"?municipio={municipio.pk}&status={status}&export=pdf",
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },

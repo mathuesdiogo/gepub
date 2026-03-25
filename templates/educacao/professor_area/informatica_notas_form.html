@@ -12,47 +12,47 @@
       <span class="gp-badge gp-badge--neutral">Curso: {{ turma_informatica.curso.nome }}</span>
     </div>
 
-    <form method="post" class="gp-form gp-form--smart">
+    <form method="post" class="gp-form gp-form--smart form-shell">
       {% csrf_token %}
 
       {% if form.non_field_errors %}
-        <p class="gp-form-error">{{ form.non_field_errors|join:", " }}</p>
+        <p class="gp-form-error form-shell">{{ form.non_field_errors|join:", " }}</p>
       {% endif %}
 
-      <div class="gp-form-group">
-        <label class="gp-form-label" for="id_tipo">Tipo de avaliação</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell" for="id_tipo">Tipo de avaliação</label>
         {{ form.tipo }}
       </div>
-      <div class="gp-form-group">
-        <label class="gp-form-label" for="id_sigla">Sigla</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell" for="id_sigla">Sigla</label>
         {{ form.sigla }}
       </div>
-      <div class="gp-form-group gp-field--full">
-        <label class="gp-form-label" for="id_titulo">Título</label>
+      <div class="gp-form-group gp-field--full form-shell">
+        <label class="gp-form-label form-shell" for="id_titulo">Título</label>
         {{ form.titulo }}
       </div>
-      <div class="gp-form-group gp-field--full">
-        <label class="gp-form-label" for="id_descricao">Descrição</label>
+      <div class="gp-form-group gp-field--full form-shell">
+        <label class="gp-form-label form-shell" for="id_descricao">Descrição</label>
         {{ form.descricao }}
       </div>
-      <div class="gp-form-group">
-        <label class="gp-form-label" for="id_data">Data</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell" for="id_data">Data</label>
         {{ form.data }}
       </div>
-      <div class="gp-form-group">
-        <label class="gp-form-label" for="id_modo_registro">Modo de registro</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell" for="id_modo_registro">Modo de registro</label>
         {{ form.modo_registro }}
       </div>
-      <div class="gp-form-group">
-        <label class="gp-form-label" for="id_peso">Peso</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell" for="id_peso">Peso</label>
         {{ form.peso }}
       </div>
-      <div class="gp-form-group">
-        <label class="gp-form-label" for="id_nota_maxima">Nota máxima</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell" for="id_nota_maxima">Nota máxima</label>
         {{ form.nota_maxima }}
       </div>
-      <div class="gp-form-group gp-form-group--check">
-        <label class="gp-form-label" for="id_ativo">Ativa</label>
+      <div class="gp-form-group gp-form-group--check form-shell">
+        <label class="gp-form-label form-shell" for="id_ativo">Ativa</label>
         {{ form.ativo }}
       </div>
 

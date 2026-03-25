@@ -6,25 +6,25 @@
   {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
 
   <article class="gp-student-stage__card">
-    <form method="get" class="gp-form gp-form--smart gp-professor-filter-row gp-professor-filter-row--wide">
-      <div class="gp-form-group gp-field--full">
-        <label class="gp-form-label" for="id_q">Busca</label>
+    <form method="get" class="gp-form gp-form--smart gp-professor-filter-row gp-professor-filter-row--wide form-shell search-and-filters">
+      <div class="gp-form-group gp-field--full form-shell">
+        <label class="gp-form-label form-shell" for="id_q">Busca</label>
         <input id="id_q" type="text" class="gp-input" name="q" value="{{ q }}" placeholder="Avaliação, turma ou período" />
       </div>
-      <div class="gp-form-group">
-        <label class="gp-form-label" for="id_inicio">De</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell" for="id_inicio">De</label>
         <input id="id_inicio" type="date" class="gp-input" name="inicio" value="{{ inicio }}" />
       </div>
-      <div class="gp-form-group">
-        <label class="gp-form-label" for="id_fim">Até</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell" for="id_fim">Até</label>
         <input id="id_fim" type="date" class="gp-input" name="fim" value="{{ fim }}" />
       </div>
-      <div class="gp-form-group gp-form-group--check">
-        <label class="gp-form-label" for="id_pendentes">Somente pendências</label>
+      <div class="gp-form-group gp-form-group--check form-shell">
+        <label class="gp-form-label form-shell" for="id_pendentes">Somente pendências</label>
         <input id="id_pendentes" type="checkbox" class="gp-checkbox" name="pendentes" {% if somente_pendentes %}checked{% endif %} />
       </div>
-      <div class="gp-form-group">
-        <label class="gp-form-label">&nbsp;</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell">&nbsp;</label>
         <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
       </div>
     </form>

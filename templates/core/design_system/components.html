@@ -13,89 +13,923 @@
 </section>
 
 <section class="gp-card gp-mb-4">
+  <div class="gp-card__body">
+    <ul class="nav nav-tabs gp-tabs" aria-label="Categorias do design system">
+      <li><a href="{% url 'core:design_system_docs' %}"><span class="tabs__label">Geral</span><span class="tabs__badge">4</span></a></li>
+      <li><a href="#botoes-acoes"><span class="tabs__label">Botões e ações</span><span class="tabs__badge">3</span></a></li>
+      <li><a href="#tabelas-listas"><span class="tabs__label">Tabelas e listas</span><span class="tabs__badge">4</span></a></li>
+      <li><a href="#formularios"><span class="tabs__label">Formulários</span><span class="tabs__badge">5</span></a></li>
+      <li><a href="#mensagens"><span class="tabs__label">Mensagens</span><span class="tabs__badge">3</span></a></li>
+      <li><a href="#navegacao"><span class="tabs__label">Navegação</span><span class="tabs__badge">3</span></a></li>
+      <li><a href="#caixas-sessoes"><span class="tabs__label">Caixas/Seções</span><span class="tabs__badge">11</span></a></li>
+      <li><a href="#componentes"><span class="tabs__label">Componentes</span><span class="tabs__badge">9</span></a></li>
+    </ul>
+  </div>
+</section>
+
+<section class="gp-card gp-mb-4" id="botoes-acoes">
   <header class="gp-card__header"><h3>Botões</h3></header>
   <div class="gp-card__body">
-    <div class="gp-button-group">
-      {% gp_button "Primário" "#" "primary" %}
-      {% gp_button "Secundário" "#" "secondary" %}
-      {% gp_button "Outline" "#" "outline" %}
-      {% gp_button "Ghost" "#" "ghost" %}
-      {% gp_button "Sucesso" "#" "success" %}
-      {% gp_button "Perigo" "#" "danger" %}
-      <button class="gp-button gp-button--icon" aria-label="Configurações"><i class="fa-solid fa-gear"></i></button>
-      <button class="gp-button gp-button--primary gp-button--loading" aria-label="Carregando">Carregando</button>
-    </div>
-  </div>
-</section>
-
-<section class="gp-card gp-mb-4">
-  <header class="gp-card__header"><h3>Formulários</h3></header>
-  <div class="gp-card__body">
-    <form class="gp-form">
-      <div class="gp-grid">
-        <div class="gp-col-6 gp-form-group"><label class="gp-form-label">Input</label><input class="gp-input" placeholder="Digite..."></div>
-        <div class="gp-col-6 gp-form-group"><label class="gp-form-label">Select</label><select class="gp-select"><option>Opção A</option><option>Opção B</option></select></div>
-        <div class="gp-col-12 gp-form-group"><label class="gp-form-label">Textarea</label><textarea class="gp-textarea" rows="3"></textarea><span class="gp-form-help">Ajuda contextual</span></div>
-      </div>
-      <div class="gp-action-bar">
-        <label class="gp-checkbox"><input type="checkbox"> Checkbox</label>
-        <label class="gp-radio"><input type="radio" name="r"> Radio</label>
-        <label class="gp-switch"><input type="checkbox"> Switch</label>
-      </div>
-    </form>
-    <hr class="gp-mt-2 gp-mb-2">
-    <h4>Smart Form Grid (novo padrão)</h4>
-    <form class="gp-form gp-form-grid gp-form-grid--smart">
-      <div class="gp-form-group">
-        <label class="gp-form-label">Nome</label>
-        <input class="gp-input" placeholder="Nome completo">
-      </div>
-      <div class="gp-form-group">
-        <label class="gp-form-label">CPF</label>
-        <input class="gp-input" placeholder="000.000.000-00">
-      </div>
-      <div class="gp-form-group gp-field--third">
-        <label class="gp-form-label">Data Nasc.</label>
-        <input class="gp-input" type="date">
-      </div>
-      <div class="gp-form-group gp-field--third">
-        <label class="gp-form-label">Sexo</label>
-        <select class="gp-select"><option>Selecione</option></select>
-      </div>
-      <div class="gp-form-group gp-field--third">
-        <label class="gp-form-label">UF</label>
-        <select class="gp-select"><option>SP</option><option>MG</option></select>
-      </div>
-      <div class="gp-form-group gp-field--full">
-        <label class="gp-form-label">Observações</label>
-        <textarea class="gp-textarea"></textarea>
-      </div>
-    </form>
-  </div>
-</section>
-
-<section class="gp-card gp-mb-4">
-  <header class="gp-card__header"><h3>Tabelas</h3></header>
-  <div class="gp-card__body">
-    <div class="gp-table__filters">
-      <input class="gp-input" placeholder="Busca integrada" data-gp-table-search="table-demo">
-      <button class="gp-button gp-button--outline" type="button">Exportar</button>
-    </div>
-    <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover gp-table--sortable gp-table--paginated gp-table--selectable">
-      <table id="table-demo">
+    <h4>Listagem de botões disponíveis</h4>
+    <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover">
+      <table class="gp-table__native">
         <thead>
           <tr>
-            <th><input type="checkbox" data-gp-select-all="rows"></th>
-            <th>Nome</th>
-            <th>Status</th>
-            <th>Ações</th>
+            <th>Botão</th>
+            <th>Descrição</th>
+            <th>Classe</th>
           </tr>
         </thead>
         <tbody>
-          <tr><td><input type="checkbox" data-gp-select="rows"></td><td>Secretaria de Educação</td><td><span class="gp-badge gp-badge--success">Ativo</span></td><td><div class="gp-table__actions"><button class="gp-button gp-button--icon"><i class="fa-solid fa-eye"></i></button></div></td></tr>
-          <tr><td><input type="checkbox" data-gp-select="rows"></td><td>Secretaria de Saúde</td><td><span class="gp-badge gp-badge--warning">Pendente</span></td><td><div class="gp-table__actions"><button class="gp-button gp-button--icon"><i class="fa-solid fa-eye"></i></button></div></td></tr>
+          <tr>
+            <td><a class="gp-button btn success gp-button--success" href="#">Confirmação</a></td>
+            <td>Para ações do fluxo principal, como adicionar/aceitar/receber/confirmar/enviar.</td>
+            <td><code>btn success</code></td>
+          </tr>
+          <tr>
+            <td><a class="gp-button btn primary gp-button--primary" href="#">Edição</a></td>
+            <td>Para ações de edição/atualização/alteração.</td>
+            <td><code>btn primary</code></td>
+          </tr>
+          <tr>
+            <td><a class="gp-button btn" href="#">Ações secundárias</a></td>
+            <td>Para ações secundárias, como imprimir/gerar relatório/exportar.</td>
+            <td><code>btn</code></td>
+          </tr>
+          <tr>
+            <td><a class="gp-button btn default gp-button--default" href="#">Informações</a></td>
+            <td>Para visualização de informações.</td>
+            <td><code>btn default</code></td>
+          </tr>
+          <tr>
+            <td><a class="gp-button btn danger gp-button--danger" href="#">Remoção</a></td>
+            <td>Para ações com função de remoção (pode usar confirmação prévia).</td>
+            <td><code>btn danger</code></td>
+          </tr>
+          <tr>
+            <td><a class="gp-button btn warning gp-button--warning" href="#">Atenção</a></td>
+            <td>Para ações que exigem cautela do usuário.</td>
+            <td><code>btn warning</code></td>
+          </tr>
         </tbody>
       </table>
+    </div>
+
+    <h4 class="gp-mt-3">Outros comportamentos de botões</h4>
+    <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover">
+      <table class="gp-table__native">
+        <thead>
+          <tr>
+            <th>Botão</th>
+            <th>Descrição</th>
+            <th>Estrutura HTML</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a class="gp-button btn disable_on_click" data-href="#" href="#">Desabilitar no clique</a></td>
+            <td>Impede clique repetido e usa <code>data-href</code> para redirecionar.</td>
+            <td><code>&lt;button class="gp-button btn disable_on_click" data-href="#"&gt;LABEL&lt;/button&gt;</code></td>
+          </tr>
+          <tr>
+            <td><a class="gp-button btn disabled" href="#" aria-disabled="true">Desabilitado</a></td>
+            <td>Exibe o botão como indisponível.</td>
+            <td><code>&lt;a class="gp-button btn disabled" href="#"&gt;LABEL&lt;/a&gt;</code></td>
+          </tr>
+          <tr>
+            <td><a class="gp-button btn" href="#">{% icone "home" %} Início</a></td>
+            <td>Botão com ícone e texto.</td>
+            <td><code>&lt;a class="gp-button btn" href="#"&gt;{% templatetag openblock %} icone "home" {% templatetag closeblock %} LABEL&lt;/a&gt;</code></td>
+          </tr>
+          <tr>
+            <td><a class="gp-button btn" href="#">{% icone "home" %}<span class="visually-hidden">Início</span></a></td>
+            <td>Botão somente com ícone (use texto oculto para acessibilidade).</td>
+            <td><code>&lt;a class="gp-button btn" href="#"&gt;{% templatetag openblock %} icone "home" {% templatetag closeblock %}&lt;span class="visually-hidden"&gt;LABEL&lt;/span&gt;&lt;/a&gt;</code></td>
+          </tr>
+          <tr>
+            <td><a class="gp-button btn popup" href="#">Popup</a></td>
+            <td>Abre o destino em popup/janela dedicada.</td>
+            <td><code>&lt;a class="gp-button btn popup" href="#"&gt;LABEL&lt;/a&gt;</code></td>
+          </tr>
+          <tr>
+            <td><a class="gp-button btn confirm" data-confirm="Mensagem personalizada (opcional)" href="#">Confirmação prévia</a></td>
+            <td>Exige confirmação antes da ação.</td>
+            <td><code>&lt;a class="gp-button btn confirm" href="#" data-confirm="Mensagem personalizada (opcional)"&gt;LABEL&lt;/a&gt;</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 class="gp-mt-3">Barra de ações</h4>
+    <p class="gp-caption">A barra de ações principal da página deve ser usada dentro de <code>action-bar</code>.</p>
+    <ul class="action-bar gp-mb-2 gp-action-bar">
+      <li><a class="gp-button btn primary gp-button--primary" href="#">Primary</a></li>
+      <li class="child">
+        <a class="gp-button btn success gp-button--success" href="#">Success</a>
+        <ul class="child">
+          <li><a href="#">Suboption 1</a></li>
+          <li><a href="#">Suboption 2</a></li>
+          <li><a href="#">Suboption 3</a></li>
+        </ul>
+      </li>
+      <li><a class="gp-button btn warning gp-button--warning" href="#">Warning</a></li>
+      <li><a class="gp-button btn" href="#">Action</a></li>
+      <li><a class="gp-button btn default gp-button--default" href="#">View</a></li>
+      <li><a class="gp-button btn danger gp-button--danger" href="#">Danger</a></li>
+    </ul>
+    <pre><code>&lt;ul class="action-bar"&gt;
+    &lt;li&gt;&lt;a class="gp-button btn primary" href="#"&gt;primary&lt;/a&gt;&lt;/li&gt;
+    &lt;li class="child"&gt;
+        &lt;a class="gp-button btn success" href="#"&gt;success&lt;/a&gt;
+        &lt;ul class="child"&gt;
+            &lt;li&gt;&lt;a href="#"&gt;suboption 1&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href="#"&gt;suboption 2&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href="#"&gt;suboption 3&lt;/a&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href="#" class="gp-button btn"&gt;default&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a class="gp-button btn default" href="#"&gt;info&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a class="gp-button btn danger" href="#"&gt;danger&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+
+    <h4 class="gp-mt-3">Ícones de ações</h4>
+    <div class="gp-button-group gp-mb-2">
+      {% icon "view" "#" %}
+      {% icon "edit" "#" %}
+      {% icon "delete" "#" "" "" "Confirma a remoção?" %}
+    </div>
+    <pre><code>{% templatetag openblock %} icon "view" "url" "title" "extra_class" "confirm" {% templatetag closeblock %}
+{% templatetag openblock %} icon "edit" "url" "title" "extra_class" "confirm" {% templatetag closeblock %}
+{% templatetag openblock %} icon "delete" "url" "title" "extra_class" "confirm" {% templatetag closeblock %}</code></pre>
+    <p class="gp-caption">Os parâmetros <code>title</code>, <code>extra_class</code> e <code>confirm</code> são opcionais.</p>
+  </div>
+</section>
+
+<section class="gp-card gp-mb-4" id="formularios">
+  <header class="gp-card__header"><h3>Formulários</h3></header>
+  <div class="gp-card__body">
+    <p>Utilizar preferencialmente o <code>{% templatetag openblock %} render_form form {% templatetag closeblock %}</code>.</p>
+
+    <hr class="gp-mt-2 gp-mb-2">
+    <h4>Avaliação com estrelas</h4>
+    <ul class="stars gp-mb-2" aria-label="Avaliação com estrelas">
+      <li><a href="#"><span class="fa-solid fa-star" aria-hidden="true"></span><span class="visually-hidden">1 estrela</span></a></li>
+      <li><a href="#"><span class="fa-solid fa-star" aria-hidden="true"></span><span class="visually-hidden">2 estrelas</span></a></li>
+      <li><a href="#"><span class="fa-solid fa-star" aria-hidden="true"></span><span class="visually-hidden">3 estrelas</span></a></li>
+      <li><a href="#"><span class="fa-solid fa-star disabled" aria-hidden="true"></span><span class="visually-hidden">4 estrelas</span></a></li>
+      <li><a href="#"><span class="fa-solid fa-star disabled" aria-hidden="true"></span><span class="visually-hidden">5 estrelas</span></a></li>
+    </ul>
+    <pre><code>&lt;ul class="stars"&gt;
+    &lt;li&gt;&lt;a href="#"&gt;&lt;span class="fas fa-star"&gt;&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="#"&gt;&lt;span class="fas fa-star"&gt;&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="#"&gt;&lt;span class="fas fa-star"&gt;&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="#"&gt;&lt;span class="fas fa-star disabled"&gt;&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="#"&gt;&lt;span class="fas fa-star disabled"&gt;&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Barra de busca e filtros</h4>
+    <form class="search-and-filters gp-mb-2" method="get">
+      <div class="filter">
+        <label class="gp-form-label form-shell">Buscar</label>
+        <input class="gp-input" type="text" placeholder="Digite para buscar">
+      </div>
+      <div class="filter">
+        <label class="gp-form-label form-shell">Campus</label>
+        <select class="gp-select">
+          <option>Todos os campi</option>
+          <option>DG/AP</option>
+          <option>DG/ZN</option>
+        </select>
+      </div>
+      <div class="filter">
+        <label class="gp-form-label form-shell">Tipo</label>
+        <select class="gp-select">
+          <option>Todos os tipos</option>
+          <option>Ativo</option>
+          <option>Inativo</option>
+        </select>
+      </div>
+      <div class="filter">
+        <button class="gp-button gp-button--outline" type="submit">Ir</button>
+      </div>
+    </form>
+    <pre><code>&lt;div class="search-and-filters OPTIONAL_CLASS_PARENT"&gt;
+    &lt;div class="filter OPTIONAL_CLASS_CHILD"&gt;
+        &lt;label&gt;Campus:&lt;/label&gt;
+        &lt;select&gt;...&lt;/select&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+    <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover gp-mt-2">
+      <table class="gp-table__native">
+        <thead><tr><th>Parâmetro</th><th>Código</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td>OPTIONAL_CLASS_PARENT</td><td><code>.large-filters</code></td><td>Aumenta a largura padrão de todos os filtros.</td></tr>
+          <tr><td>OPTIONAL_CLASS_CHILD</td><td><code>.large</code></td><td>Aumenta a largura de um filtro específico.</td></tr>
+          <tr><td>OPTIONAL_CLASS_CHILD</td><td><code>.separator</code></td><td>Exibe separador visual entre filtros.</td></tr>
+          <tr><td>OPTIONAL_CLASS_CHILD</td><td><code>.show-condition-or</code></td><td>Exibe o texto "ou" entre filtros.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Botão: Switch</h4>
+    <label class="switch gp-mb-2">
+      <input type="checkbox">
+      <span class="slider"></span>
+    </label>
+    <pre><code>&lt;label class="switch"&gt;
+    &lt;input type="checkbox"&gt;
+    &lt;span class="slider"&gt;&lt;/span&gt;
+&lt;/label&gt;</code></pre>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Checkbox: Marcar todos</h4>
+    <div class="markall-container gp-mb-2">
+      <label for="markall-demo">Marcar todos</label>
+      <input type="checkbox" id="markall-demo" data-markall-target=".markall-item">
+    </div>
+    <div class="gp-action-bar">
+      <label class="gp-checkbox"><input class="markall-item" type="checkbox"> Item A</label>
+      <label class="gp-checkbox"><input class="markall-item" type="checkbox"> Item B</label>
+      <label class="gp-checkbox"><input class="markall-item" type="checkbox"> Item C</label>
+    </div>
+    <pre><code>&lt;div class="markall-container"&gt;
+    &lt;label for="markall"&gt;Marcar todos&lt;/label&gt;
+    &lt;input type="checkbox" id="markall"&gt;
+&lt;/div&gt;</code></pre>
+  </div>
+</section>
+
+<section class="gp-card gp-mb-4" id="tabelas-listas">
+  <header class="gp-card__header"><h3>Tabelas e listas</h3></header>
+  <div class="gp-card__body">
+    <h4>Formatação comum de tabelas</h4>
+    <div class="table-responsive gp-mb-2 gp-table gp-table--responsive">
+      <table id="table-demo" class="gp-table__native">
+        <caption>Formatação comum de tabelas</caption>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th><span class="text hint bottom" aria-label="Comentário do cabeçalho">Lorem ipsum</span></th>
+            <th>Dolor sit</th>
+            <th>Consectetur</th>
+            <th>Adipiscing</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>Adipiscing</td>
+            <td>Elit</td>
+            <td>Maecenas</td>
+            <td class="text-right">250</td>
+          </tr>
+          <tr class="highlight">
+            <td>2</td>
+            <td>F N elit</td>
+            <td>Convallis</td>
+            <td>Nunc luctus</td>
+            <td class="text-right">100</td>
+          </tr>
+          <tr class="error">
+            <td>3</td>
+            <td>In lobendum</td>
+            <td>Malesuada</td>
+            <td>Integer mollis</td>
+            <td class="text-right">50</td>
+          </tr>
+          <tr class="extra">
+            <td>4</td>
+            <td>In bibendum</td>
+            <td>Malesuada</td>
+            <td>Integer mollis</td>
+            <td class="text-right">50</td>
+          </tr>
+          <tr class="disabled">
+            <td>5</td>
+            <td>In bibendum</td>
+            <td>Malesuada</td>
+            <td>Integer mollis</td>
+            <td class="text-right">0</td>
+          </tr>
+          <tr class="total">
+            <td colspan="4">Total:</td>
+            <td>450</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <pre><code>&lt;div class="table-responsive"&gt;
+    &lt;table&gt;
+        &lt;thead&gt;
+            &lt;tr&gt;
+                &lt;th&gt;&lt;div class="text hint bottom" aria-label="Comentário"&gt;Lorem ipsum&lt;/div&gt;&lt;/th&gt;
+            &lt;/tr&gt;
+        &lt;/thead&gt;
+        &lt;tbody&gt;
+            &lt;tr class="highlight"&gt;...&lt;/tr&gt;
+            &lt;tr class="error"&gt;...&lt;/tr&gt;
+            &lt;tr class="extra"&gt;...&lt;/tr&gt;
+            &lt;tr class="disabled"&gt;...&lt;/tr&gt;
+            &lt;tr class="total"&gt;...&lt;/tr&gt;
+        &lt;/tbody&gt;
+    &lt;/table&gt;
+&lt;/div&gt;</code></pre>
+    <ol class="gp-caption gp-mt-2">
+      <li><code>tr.total</code> aplica negrito e alinhamento à direita.</li>
+      <li>Comentários em cabeçalho usam <code>text hint bottom</code> com <code>aria-label</code>.</li>
+    </ol>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Lista de definições</h4>
+    <dl class="definition-list gp-mb-2">
+      <dt>Nome completo:</dt><dd>João da Silva</dd>
+      <dt>Nome usual:</dt><dd>João de Silva</dd>
+      <dt>Nome social:</dt><dd>João de Silva</dd>
+    </dl>
+    <pre><code>&lt;dl class="definition-list OPTIONAL_CLASS_PARENT"&gt;
+    &lt;dt&gt;Nome Completo:&lt;/dt&gt;
+    &lt;dd&gt;João da Silva&lt;/dd&gt;
+&lt;/dl&gt;</code></pre>
+    <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover gp-mt-2">
+      <table class="gp-table__native">
+        <thead><tr><th>Parâmetro</th><th>Código</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td>OPTIONAL_CLASS_PARENT</td><td><code>.inline</code></td><td>Renderiza em formato de tabela/linha contínua.</td></tr>
+          <tr><td>OPTIONAL_CLASS_PARENT</td><td><code>.compact</code></td><td>Reduz espaçamentos internos.</td></tr>
+          <tr><td>OPTIONAL_CLASS_PARENT</td><td><code>.large</code></td><td>Aumenta o destaque tipográfico.</td></tr>
+          <tr><td>OPTIONAL_CLASS_PARENT</td><td><code>.small-items</code></td><td>Restringe largura mínima dos itens.</td></tr>
+          <tr><td>OPTIONAL_CLASS_CHILD</td><td><code>.xs-cols-100</code>, <code>.sm-cols-50</code>, <code>.md-cols-50</code>, <code>.lg-cols-33</code></td><td>Controla largura de cada item.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Listas de links</h4>
+    <ol class="counter-container gp-mb-2">
+      <li class="counter-item"><a href="#">Item a</a></li>
+      <li class="counter-item"><a href="#">Item x</a></li>
+      <li class="counter-item"><a href="#">Item c</a></li>
+      <li class="counter-item"><a href="#">Item b</a></li>
+      <li class="counter-item"><a href="#">Item y</a></li>
+    </ol>
+    <pre><code>&lt;ol class="counter-container"&gt;
+    &lt;li class="counter-item"&gt;&lt;a href="#"&gt;Item&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;</code></pre>
+
+    <ol class="numbered-list gp-mt-3">
+      <li class="list-item"><a href="#">{% icone "file-alt" %} Item a</a></li>
+      <li class="list-item"><a href="#">{% icone "file-alt" %} Item x</a></li>
+      <li class="list-item"><a href="#">{% icone "file-alt" %} Item c</a></li>
+      <li class="list-item"><a href="#">{% icone "file-alt" %} Item b</a></li>
+      <li class="list-item"><a href="#">{% icone "file-alt" %} Item y</a></li>
+    </ol>
+    <pre class="gp-mt-2"><code>&lt;ol class="numbered-list"&gt;
+    &lt;li class="list-item"&gt;&lt;a href="#"&gt;{% templatetag openblock %} icone "file-alt" {% templatetag closeblock %} Item&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;</code></pre>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Lista com botão de ação</h4>
+    <p class="gp-caption">Usar preferencialmente dentro de tabelas.</p>
+    <ul class="action-list">
+      <li><span>João da Silva</span><a class="gp-button gp-button--primary gp-button--sm" href="#">Substituir</a></li>
+      <li><span>Maria da Silva</span><a class="gp-button gp-button--primary gp-button--sm" href="#">Substituir</a></li>
+    </ul>
+    <pre class="gp-mt-2"><code>&lt;ul class="action-list"&gt;
+    &lt;li&gt;João da Silva &lt;a href="#" class="gp-button btn primary"&gt;Substituir&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+  </div>
+</section>
+
+<section class="gp-card gp-mb-4" id="navegacao">
+  <header class="gp-card__header"><h3>Navegação</h3></header>
+  <div class="gp-card__body">
+    <h4>Abas</h4>
+    <p class="gp-caption">Formato padrão</p>
+    <ul class="nav nav-tabs gp-mb-2" aria-label="Exemplo de abas">
+      <li class="active"><a href="#tab-nav-jan" class="is-active" aria-current="page"><span class="tabs__label">Janeiro</span></a></li>
+      <li><a href="#tab-nav-fev"><span class="tabs__label">Fevereiro</span></a></li>
+      <li><a href="#tab-nav-mar"><span class="tabs__label">Março</span><span class="tabs__badge">99</span></a></li>
+      <li><a href="#tab-nav-abr"><span class="tabs__label">Abril</span></a></li>
+    </ul>
+    <div class="tab-pane" id="tab-nav-jan">Conteúdo da aba Janeiro.</div>
+    <pre class="gp-mt-2"><code>&lt;ul class="nav nav-tabs OPTIONAL_CLASS_PARENT"&gt;
+    &lt;li class="active"&gt;&lt;a href="#tab-1"&gt;Janeiro&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="#tab-2"&gt;Fevereiro&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="#tab-3"&gt;Março&lt;span class="tabs__badge"&gt;99&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+    <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover gp-mt-2">
+      <table class="gp-table__native">
+        <thead><tr><th>Parâmetro</th><th>Código</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td>OPTIONAL_CLASS_PARENT</td><td><code>disabled</code></td><td>Desabilita as abas, mantendo a aba com classe <code>active</code> ativa.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <p class="gp-caption">Formato dinâmico (geração automática via <code>data-title</code> ou <code>data-title-tab</code>)</p>
+    <div data-tabs-aria-label="Abas dinâmicas de exemplo">
+      <div class="tab-pane" data-title-tab="Aguardando recebimento" data-tab="recebimento" data-counter="5" data-checked="true">
+        Conteúdo da aba de recebimento.
+      </div>
+      <div class="tab-pane" data-title-tab="Aguardando encaminhamento" data-tab="encaminhamento" data-counter="2" data-checked="false">
+        Conteúdo da aba de encaminhamento.
+      </div>
+      <div class="tab-pane" data-title-tab="Caixa de saída" data-tab="saida" data-counter="0" data-hide-tab-on-counter-zero="true">
+        Conteúdo da aba de saída.
+      </div>
+    </div>
+    <pre class="gp-mt-2"><code>&lt;div class="tab-pane" data-title="Título" data-tab="slug-opcional"&gt;...&lt;/div&gt;</code></pre>
+    <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover gp-mt-2">
+      <table class="gp-table__native">
+        <thead><tr><th>Atributo</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td><code>data-title</code> / <code>data-title-tab</code></td><td>Obrigatório para exibir o título da aba.</td></tr>
+          <tr><td><code>data-tab</code></td><td>Slug opcional para id/hash da aba.</td></tr>
+          <tr><td><code>data-counter</code></td><td>Exibe contador na aba.</td></tr>
+          <tr><td><code>data-checked</code></td><td>Se <code>true</code>, indicador verde; se <code>false</code>, indicador vermelho.</td></tr>
+          <tr><td><code>data-hide-tab-on-counter-zero</code></td><td>Oculta a aba quando <code>data-counter</code> for zero.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Âncoras</h4>
+    <p class="gp-caption">As âncoras devem ser usadas para navegação dentro da mesma página.</p>
+    <ul class="ancoras three-digits gp-mb-2">
+      <li><a href="#id_1">Caixa de entrada</a>
+        <ul>
+          <li><a href="#id_2">Aguardando recebimento</a></li>
+          <li><a href="#id_3">Aguardando encaminhamento</a></li>
+        </ul>
+      </li>
+      <li><a href="#id_4">Caixa de saída</a></li>
+    </ul>
+    <pre><code>&lt;ul class="ancoras OPTIONAL_CLASS_PARENT"&gt;
+    &lt;li&gt;&lt;a href="#id_1"&gt;Caixa de Entrada&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+    <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover gp-mt-2">
+      <table class="gp-table__native">
+        <thead><tr><th>Parâmetro</th><th>Código</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td>OPTIONAL_CLASS_PARENT</td><td><code>three-digits</code></td><td>Exibe contador com 3 dígitos (001, 002, 003...).</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="gp-caption gp-mt-2">Regra: use âncoras no bloco lateral (asideright) quando a página tiver navegação interna longa.</p>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Pills</h4>
+    <ul class="pills">
+      <li><a href="#pill-jan">Janeiro</a></li>
+      <li><a href="#pill-fev">Fevereiro</a></li>
+      <li class="active"><a href="#pill-mar" class="is-active" aria-current="page">Março</a></li>
+      <li><a href="#pill-abr">Abril</a></li>
+      <li><a href="#pill-mai">Maio</a></li>
+      <li><a href="#pill-jun">Junho</a></li>
+    </ul>
+    <pre class="gp-mt-2"><code>&lt;ul class="pills"&gt;
+    &lt;li&gt;&lt;a href="#"&gt;Janeiro&lt;/a&gt;&lt;/li&gt;
+    &lt;li class="active"&gt;&lt;a href="#" class="is-active"&gt;Março&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+  </div>
+</section>
+
+<section class="gp-card gp-mb-4" id="mensagens">
+  <header class="gp-card__header"><h3>Mensagens</h3></header>
+  <div class="gp-card__body">
+    <h4>Alertas</h4>
+    <div class="alert gp-alert gp-alert--warning warning gp-mb-2 gp-button--warning"><strong>Atenção:</strong> inscrições para fiscais do concurso abertas.</div>
+    <div class="alert gp-alert gp-alert--error danger gp-mb-2 gp-button--danger"><strong>Atenção:</strong> inscrição expira em 2 dias.</div>
+    <div class="alert gp-alert gp-alert--info info gp-mb-2"><strong>Informação:</strong> inscrições prorrogadas até 23/06/2012.</div>
+    <div class="alert gp-alert gp-alert--info light"><strong>Atenção:</strong> esta é uma mensagem neutra.</div>
+    <pre class="gp-mt-2"><code>&lt;div class="alert alert-CLASS_PARENT"&gt;...&lt;/div&gt;</code></pre>
+    <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover gp-mt-2">
+      <table class="gp-table__native">
+        <thead><tr><th>Parâmetro</th><th>Código</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td>CLASS_PARENT</td><td><code>warning</code></td><td>Barra amarela de atenção.</td></tr>
+          <tr><td>CLASS_PARENT</td><td><code>danger</code></td><td>Barra vermelha de erro/risco.</td></tr>
+          <tr><td>CLASS_PARENT</td><td><code>light</code></td><td>Barra neutra, com ícone de dúvida.</td></tr>
+          <tr><td>CLASS_PARENT</td><td><code>info</code></td><td>Barra azul para mensagem informativa.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Estilo tooltip</h4>
+    <p>
+      <span class="text hint top" aria-label="Mensagem exibida acima">Informação acima</span>
+    </p>
+    <p>
+      <span class="text hint bottom" aria-label="Mensagem exibida abaixo">Informação abaixo</span>
+    </p>
+    <pre><code>&lt;span class="text hint POSITION" aria-label="Mensagem"&gt;Informação&lt;/span&gt;</code></pre>
+    <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover gp-mt-2">
+      <table class="gp-table__native">
+        <thead><tr><th>Parâmetro</th><th>Código</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td>POSITION</td><td><code>top</code></td><td>Exibe a informação em tooltip acima.</td></tr>
+          <tr><td>POSITION</td><td><code>bottom</code></td><td>Exibe a informação em tooltip abaixo.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Situações</h4>
+    <div class="gp-action-bar gp-mb-2">
+      <span class="status info">Informação</span>
+      <span class="status alert gp-alert">Alerta</span>
+      <span class="status success gp-button--success">Sucesso</span>
+      <span class="status error">Erro</span>
+      <span class="status default gp-button--default">Normal</span>
+      <span class="status final">Final</span>
+      <span class="status extra">Extra 1</span>
+      <span class="status extra2">Extra 2</span>
+      <span class="status extra3">Extra 3</span>
+      <span class="status extra4">Extra 4</span>
+      <span class="status extra5">Extra 5</span>
+      <span class="status extra6">Extra 6</span>
+      <span class="status extra7">Extra 7</span>
+      <span class="status disabled" aria-label="Situação desabilitada">Desabilitado</span>
+    </div>
+    <pre><code>&lt;span class="status status-CLASS" ATTR&gt;Situação&lt;/span&gt;</code></pre>
+  </div>
+</section>
+
+<section class="gp-card gp-mb-4" id="componentes">
+  <header class="gp-card__header"><h3>Badges e Indicadores</h3></header>
+  <div class="gp-card__body">
+    <h4>Badges</h4>
+    <p><span class="badge gp-badge">12</span></p>
+    <pre><code>&lt;span class="badge"&gt;12&lt;/span&gt;</code></pre>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Barra de carregamento</h4>
+    <p class="gp-caption">Barra para página inteira:</p>
+    <div class="page-loader" aria-hidden="true"></div>
+    <pre><code>&lt;div class="page-loader"&gt;&lt;/div&gt;</code></pre>
+    <p class="gp-caption gp-mt-2">Loader para container:</p>
+    <div class="loader" aria-hidden="true"></div>
+    <pre><code>&lt;div class="loader"&gt;&lt;/div&gt;</code></pre>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Barra de progresso</h4>
+    <div class="progress progress-warning"><span>70%</span><div class="progress-bar" data-style-width-pct="70"></div></div>
+    <div class="progress progress-success"><span>100%</span><div class="progress-bar" data-style-width-pct="100"></div></div>
+    <div class="progress progress-info"><span>43%</span><div class="progress-bar" data-style-width-pct="43"></div></div>
+    <div class="progress progress-danger"><span>11%</span><div class="progress-bar" data-style-width-pct="11"></div></div>
+    <p class="progress-description">Descrição opcional</p>
+    <pre><code>&lt;div class="progress progress-warning"&gt;&lt;span&gt;70%&lt;/span&gt;&lt;div class="progress-bar" data-style-width-pct="70"&gt;&lt;/div&gt;&lt;/div&gt;</code></pre>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Calendários</h4>
+    <div class="calendario gp-mb-2">
+      <table class="gp-table__native">
+        <caption>Julho — Formato anual</caption>
+        <thead>
+          <tr>
+            <th class="semana">Dom</th><th class="semana">Seg</th><th class="semana">Ter</th><th class="semana">Qua</th><th class="semana">Qui</th><th class="semana">Sex</th><th class="semana">Sáb</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="vazio"></td><td class="vazio"></td><td class="fds"><span>1</span></td><td><span>2</span></td><td class="recesso"><span>3</span></td><td><span>4</span></td><td class="feriado"><span>5</span></td>
+          </tr>
+          <tr>
+            <td><span>6</span></td><td class="evento"><span>7</span></td><td><span>8</span></td><td><span>9</span></td><td><span>10</span></td><td><span>11</span></td><td class="fds"><span>12</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <ul class="legenda">
+        <li class="hoje">Hoje</li>
+        <li class="ferias">Férias</li>
+        <li class="recesso">Recesso</li>
+        <li class="evento">Evento</li>
+        <li class="feriado">Feriado</li>
+      </ul>
+    </div>
+    <div class="calendario calendario-mensal">
+      <table class="gp-table__native">
+        <caption>Julho — Formato mensal</caption>
+        <thead>
+          <tr>
+            <th class="semana">Dom</th><th class="semana">Seg</th><th class="semana">Ter</th><th class="semana">Qua</th><th class="semana">Qui</th><th class="semana">Sex</th><th class="semana">Sáb</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="vazio"></td>
+            <td><span>1</span></td>
+            <td>
+              <span>2</span>
+              <ul class="calendario-eventos">
+                <li class="success gp-button--success"><strong>08:00</strong>Evento deferido</li>
+              </ul>
+            </td>
+            <td>
+              <span>3</span>
+              <ul class="calendario-eventos">
+                <li class="error"><strong>10:00</strong>Evento cancelado</li>
+              </ul>
+            </td>
+            <td><span>4</span></td>
+            <td><span>5</span></td>
+            <td class="fds"><span>6</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Checklist</h4>
+    <p class="checklist success gp-button--success">Fazer tal ação <strong>Concluído</strong></p>
+    <p class="checklist error">Fazer tal ação <strong>Não Concluído</strong></p>
+    <pre><code>&lt;p class="checklist success"&gt;...&lt;strong&gt;Concluído&lt;/strong&gt;&lt;/p&gt;</code></pre>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Foto de Pessoa</h4>
+    <div class="gp-action-bar gp-mb-2">
+      <div class="photo-circle"><img src="/static/common/img/default.jpg" alt="Nome da pessoa"></div>
+      <div class="photo-circle sm"><img src="/static/common/img/default.jpg" alt="Nome da pessoa"></div>
+      <div class="photo-circle medium"><img src="/static/common/img/default.jpg" alt="Nome da pessoa"></div>
+    </div>
+    <div class="person gp-mt-2">
+      <div class="photo-circle sm"><img src="/static/common/img/default.jpg" alt="Nome da pessoa"></div>
+      <dl>
+        <dt>Nome</dt><dd>Nome da pessoa</dd>
+        <dt>Matrícula</dt><dd>0000000-0</dd>
+      </dl>
+    </div>
+    <pre class="gp-mt-2"><code>&lt;div class="photo-circle"&gt;&lt;img src="/static/common/img/default.jpg" alt="Nome"&gt;&lt;/div&gt;</code></pre>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Gráficos</h4>
+    <div class="flex-container">
+      <div class="grafico-item">Gráfico 1</div>
+      <div class="grafico-item">Gráfico 2</div>
+      <div class="grafico-item flex-basis-100">Gráfico 3 (100%)</div>
+    </div>
+    <pre><code>&lt;div class="grafico-item CLASS"&gt;&lt;/div&gt;</code></pre>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Passos</h4>
+    <ul class="steps">
+      <li><span class="step-info">Aberta</span></li>
+      <li><span class="step-alert active">Em andamento</span></li>
+      <li><span class="step-default">Em finalização</span></li>
+      <li><span class="step-success">Finalizada</span></li>
+    </ul>
+    <pre><code>&lt;ul class="steps"&gt;&lt;li&gt;&lt;span class="step-alert active"&gt;Em andamento&lt;/span&gt;&lt;/li&gt;&lt;/ul&gt;</code></pre>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Timeline</h4>
+    <ul class="timeline">
+      <li class="success gp-button--success">
+        <div class="timeline-date">14/02/2012</div>
+        <div class="timeline-icon"></div>
+        <div class="timeline-content">
+          <h4>Lorem ipsum</h4>
+          <p>Lorem ipsum dolor sit amet.</p>
+        </div>
+      </li>
+      <li class="default gp-button--default">
+        <div class="timeline-date">14/02/2012</div>
+        <div class="timeline-icon"></div>
+        <div class="timeline-content">
+          <h4>Lorem ipsum</h4>
+          <p>Conteúdo padrão da timeline.</p>
+        </div>
+      </li>
+      <li class="alert gp-alert">
+        <div class="timeline-date">Hoje</div>
+        <div class="timeline-icon"></div>
+        <div class="timeline-content">
+          <h4>Lorem ipsum</h4>
+          <p>Evento em atenção.</p>
+        </div>
+      </li>
+    </ul>
+    <div class="table-responsive gp-mt-2 gp-table gp-table--responsive">
+      <table class="timeline-horizontal gp-table__native">
+        <thead>
+          <tr>
+            <th>Histórico</th>
+            <th><span class="marker">02/06</span></th>
+            <th><span class="marker">04/06</span></th>
+            <th><span class="marker">06/06</span></th>
+            <th><span class="marker">08/06</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>COSINF</td>
+            <td class="default gp-button--default"></td>
+            <td></td>
+            <td class="default gp-button--default"></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>RETORNO</td>
+            <td></td>
+            <td class="default gp-button--default"></td>
+            <td></td>
+            <td class="final"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="gp-card gp-mb-4" id="caixas-sessoes">
+  <header class="gp-card__header"><h3>Caixas e Seções</h3></header>
+  <div class="gp-card__body">
+    <h4>Accordion/Box</h4>
+    <div class="accordion gp-mb-2">
+      <details class="accordion__item" open>
+        <summary class="accordion__summary">
+          <div class="accordion__head">
+            <div class="accordion__title">Accordion de exemplo</div>
+            <div class="accordion__meta">Atualizado em 30/10/2025</div>
+          </div>
+          <span class="accordion__chev" aria-hidden="true"><i class="fa-solid fa-chevron-down"></i></span>
+        </summary>
+        <div class="accordion__body">Caixas de informações retráteis.</div>
+      </details>
+    </div>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Board</h4>
+    <div class="board-container">
+      <section class="board">
+        <h5>Board #1</h5>
+        <div class="box">Título A</div>
+        <div class="box gp-mt-2">Título B</div>
+      </section>
+      <section class="board">
+        <h5>Board #2</h5>
+        <div class="box">Título A</div>
+        <div class="box gp-mt-2">Título B</div>
+      </section>
+    </div>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Caixa Links</h4>
+    <div class="flex-container">
+      <div class="link-box"><a href="#"><i class="fa-solid fa-lock"></i><div>Link 1</div></a></div>
+      <div class="link-box"><a href="#"><i class="fa-solid fa-lock"></i><div>Link 2</div></a></div>
+      <div class="link-box"><a href="#"><i class="fa-solid fa-lock"></i><div>Link 3</div></a></div>
+    </div>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Caixa Indicadores</h4>
+    <div class="flex-container">
+      <article class="indicator-box"><strong>5</strong><small>Documentos</small></article>
+      <article class="indicator-box"><strong>5</strong><small>Título opcional</small></article>
+      <article class="indicator-box"><strong>5</strong><small>Documentos</small></article>
+    </div>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Caixa Textos</h4>
+    <div class="flex-container">
+      <article class="text-box"><strong>Lorem ipsum</strong><p>Texto de apoio para comunicação institucional.</p></article>
+      <article class="text-box"><strong>Lorem ipsum</strong><p>Texto de apoio para comunicação institucional.</p></article>
+      <article class="text-box"><strong>Lorem ipsum</strong><p>Texto de apoio para comunicação institucional.</p></article>
+    </div>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Caixa Geral</h4>
+    <div class="flex-container">
+      <article class="service-box">
+        <div class="service-box__header"><strong>Serviço 1</strong><span class="status alert gp-alert">Em andamento</span></div>
+        <ul class="service-box__links">
+          <li>Link interessante</li>
+          <li>Outro link interessante</li>
+          <li>Mais um link interessante</li>
+        </ul>
+      </article>
+      <article class="service-box">
+        <div class="service-box__header"><strong>Serviço 2</strong><span class="status success gp-button--success">Concluído</span></div>
+        <ul class="service-box__links">
+          <li>Link interessante</li>
+          <li>Outro link interessante</li>
+          <li>Mais um link interessante</li>
+        </ul>
+      </article>
+    </div>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Card</h4>
+    <div class="flex-container">
+      <article class="card gp-card">
+        <div class="card__body">
+          <div class="person">
+            <div class="photo-circle sm"><img src="/static/common/img/default.jpg" alt="Nome da pessoa"></div>
+            <dl>
+              <dt>Nome</dt><dd>Nome da pessoa</dd>
+              <dt>Matrícula</dt><dd>0000000-0</dd>
+            </dl>
+          </div>
+          <p class="gp-mt-2">Lorem ipsum dolor sit amet.</p>
+          <ul class="action-bar gp-action-bar">
+            <li><a class="btn success gp-button gp-button--success" href="#">Adicionar</a></li>
+            <li><a class="btn primary gp-button gp-button--primary" href="#">Editar</a></li>
+            <li><a class="btn danger gp-button gp-button--danger" href="#">Excluir</a></li>
+          </ul>
+        </div>
+      </article>
+    </div>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Farol</h4>
+    <div class="farol">
+      <div class="farol__item">
+        <span class="farol__dot farol__dot--success" aria-hidden="true"></span>
+        <span>Título do farol</span>
+        <div class="farol__meter"><span style="width: 100%"></span></div>
+      </div>
+      <div class="farol__item">
+        <span class="farol__dot farol__dot--warning" aria-hidden="true"></span>
+        <span>Título do farol</span>
+        <div class="farol__meter"><span style="width: 60%"></span></div>
+      </div>
+      <div class="farol__item">
+        <span class="farol__dot farol__dot--danger" aria-hidden="true"></span>
+        <span>Título do farol</span>
+        <div class="farol__meter"><span style="width: 23%"></span></div>
+      </div>
+    </div>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Fotos</h4>
+    <div class="gallery">
+      <article class="gallery-item">
+        <div class="gp-action-bar gp-justify-between">
+          <strong>Foto 1</strong>
+          <a class="btn danger gp-button gp-button--danger gp-button--sm" href="#">Remover</a>
+        </div>
+        <img src="/static/common/img/placeholder.png" alt="Descrição da foto">
+      </article>
+      <article class="gallery-item">
+        <div class="gp-action-bar gp-justify-between">
+          <strong>Foto 2</strong>
+          <a class="btn danger gp-button gp-button--danger gp-button--sm" href="#">Remover</a>
+        </div>
+        <img src="/static/common/img/placeholder.png" alt="Descrição da foto">
+      </article>
+      <article class="gallery-item">
+        <div class="gp-action-bar gp-justify-between">
+          <strong>Foto 3</strong>
+          <a class="btn danger gp-button gp-button--danger gp-button--sm" href="#">Remover</a>
+        </div>
+        <img src="/static/common/img/placeholder.png" alt="Descrição da foto">
+      </article>
+    </div>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>General Box</h4>
+    <article class="general-box gp-mb-2">
+      <div class="primary-info">
+        <div class="gp-action-bar gp-justify-between">
+          <div>
+            <span class="status alert gp-alert">Suspenso</span>
+            <h5 class="gp-mt-1">#414 Dados gerais</h5>
+          </div>
+          <ul class="action-bar gp-action-bar">
+            <li><a class="btn success gp-button gp-button--success gp-button--sm" href="#">Aprovar</a></li>
+            <li><a class="btn danger gp-button gp-button--danger gp-button--sm" href="#">Rejeitar</a></li>
+          </ul>
+        </div>
+        <p>Suspendisse natoque per ullamcorper eu praesent pretium vestibulum eros.</p>
+        <ul class="status-list">
+          <li>pendências <strong>17</strong></li>
+          <li>pendências <strong>17</strong></li>
+          <li>pendências <strong>17</strong></li>
+        </ul>
+      </div>
+    </article>
+
+    <hr class="gp-mt-3 gp-mb-3">
+    <h4>Totalizadores</h4>
+    <div class="total-container">
+      <a class="total-item" href="#">
+        <i class="fa-solid fa-file-lines" aria-hidden="true"></i>
+        <span><small>Processos a receber</small><br><strong>34</strong></span>
+        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a class="total-item" href="#">
+        <i class="fa-solid fa-file-lines" aria-hidden="true"></i>
+        <span><small>Processos a receber</small><br><strong>34</strong></span>
+        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a class="total-item" href="#">
+        <i class="fa-solid fa-file-lines" aria-hidden="true"></i>
+        <span><small>Processos a receber</small><br><strong>34</strong></span>
+        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+      </a>
     </div>
   </div>
 </section>

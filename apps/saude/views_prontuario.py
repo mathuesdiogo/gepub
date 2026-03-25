@@ -99,7 +99,7 @@ def prontuario_hub(request, pk: int):
 
     if request.method == "POST":
         if not can(request.user, "saude.manage"):
-            messages.error(request, "Você não tem permissão para alterar dados clínicos.")
+            messages.error(request, "Você não tem permissão para editar dados clínicos.")
             return redirect("saude:prontuario_hub", pk=atendimento.pk)
 
         action = (request.POST.get("_action") or "").strip()
@@ -112,7 +112,7 @@ def prontuario_hub(request, pk: int):
                     messages.error(request, "Janela de edição clínica expirada para esta triagem.")
                     return redirect("saude:prontuario_hub", pk=atendimento.pk)
                 if triagem_obj and form.has_changed() and not justificativa:
-                    messages.error(request, "Informe justificativa para alterar uma triagem já registrada.")
+                    messages.error(request, "Informe justificativa para editar uma triagem já registrada.")
                     return redirect("saude:prontuario_hub", pk=atendimento.pk)
                 triagem = form.save(commit=False)
                 triagem.atendimento = atendimento
@@ -224,7 +224,7 @@ def prontuario_hub(request, pk: int):
                         messages.error(request, "Janela de edição clínica expirada para este resultado.")
                         return redirect("saude:prontuario_hub", pk=atendimento.pk)
                     if instance and form.has_changed() and not justificativa:
-                        messages.error(request, "Informe justificativa para alterar um resultado já registrado.")
+                        messages.error(request, "Informe justificativa para editar um resultado já registrado.")
                         return redirect("saude:prontuario_hub", pk=atendimento.pk)
                     res = form.save(commit=False)
                     res.pedido = pedido
@@ -262,7 +262,7 @@ def prontuario_hub(request, pk: int):
             "label": "Voltar",
             "url": reverse("saude:atendimento_detail", args=[atendimento.pk]),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }
     ]
 

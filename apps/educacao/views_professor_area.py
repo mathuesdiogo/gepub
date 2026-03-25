@@ -558,13 +558,13 @@ def _base_context(*, request, professor_user, codigo: str, page_title: str, page
             "label": "Meu perfil",
             "url": reverse("accounts:meu_perfil"),
             "icon": "fa-solid fa-user",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
         {
             "label": "Dashboard",
             "url": reverse("core:dashboard"),
             "icon": "fa-solid fa-chart-line",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
     ]
     has_regular_access = _professor_diarios_qs(request.user, professor_user).exists()
@@ -711,7 +711,7 @@ def professor_inicio(request, codigo: str):
             )
 
         actions_html = _actions_group(
-            _link_button(reverse("educacao:diario_detail", args=[diario.id]), "Abrir diário", "fa-solid fa-book-open"),
+            _link_button(reverse("educacao:diario_detail", args=[diario.id]), "Visualizar diário", "fa-solid fa-book-open"),
             _link_button(reverse("educacao:aula_create", args=[diario.id]), "Nova aula", "fa-solid fa-plus"),
             frequencia_btn,
             notas_btn,
@@ -944,7 +944,7 @@ def professor_diarios(request, codigo: str):
         latest_aula_id = info_stats["latest_aula"].get(turma.id)
 
         botoes = [
-            _link_button(url_diario, "Abrir diário", "fa-solid fa-book-open"),
+            _link_button(url_diario, "Visualizar diário", "fa-solid fa-book-open"),
             _link_button(
                 reverse("educacao:informatica_aula_update", args=[proxima_aula_id])
                 if proxima_aula_id
@@ -1813,7 +1813,7 @@ def professor_horarios(request, codigo: str):
                         "html": _actions_group(
                             _link_button(
                                 reverse("educacao:horario_turma", args=[item.grade.turma_id]),
-                                "Abrir grade",
+                                "Visualizar grade",
                                 "fa-solid fa-table-cells-large",
                             )
                         )
@@ -1855,7 +1855,7 @@ def professor_horarios(request, codigo: str):
                         "html": _actions_group(
                             _link_button(
                                 reverse("educacao:informatica_turma_detail", args=[item.turma_id]),
-                                "Abrir turma",
+                                "Visualizar turma",
                                 "fa-solid fa-laptop-code",
                             )
                         )
@@ -2030,7 +2030,7 @@ def professor_planos_ensino(request, codigo: str):
                         "html": _actions_group(
                             _link_button(
                                 plano_url,
-                                "Abrir plano",
+                                "Visualizar plano",
                                 "fa-solid fa-pen-to-square",
                             )
                         )
@@ -2147,7 +2147,7 @@ def professor_planos_ensino(request, codigo: str):
                         "html": _actions_group(
                             _link_button(
                                 plano_url,
-                                "Abrir plano",
+                                "Visualizar plano",
                                 "fa-solid fa-pen-to-square",
                             )
                         )
@@ -2597,7 +2597,7 @@ def plano_ensino_fluxo_list(request):
             "label": "Painel Educação",
             "url": reverse("educacao:index"),
             "icon": "fa-solid fa-chart-line",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }
     ]
 
@@ -3087,9 +3087,9 @@ def professor_materiais(request, codigo: str):
             )
         ]
         if item.arquivo:
-            botoes.append(_link_button(item.arquivo.url, "Abrir arquivo", "fa-solid fa-file-arrow-down"))
+            botoes.append(_link_button(item.arquivo.url, "Visualizar arquivo", "fa-solid fa-file-arrow-down"))
         elif item.link_externo:
-            botoes.append(_link_button(item.link_externo, "Abrir link", "fa-solid fa-arrow-up-right-from-square"))
+            botoes.append(_link_button(item.link_externo, "Visualizar link", "fa-solid fa-arrow-up-right-from-square"))
 
         rows.append(
             {
@@ -3345,7 +3345,7 @@ def professor_justificativas(request, codigo: str):
                         "html": _actions_group(
                             _link_button(
                                 reverse("educacao:informatica_frequencia_aula", args=[item.aula_id]),
-                                "Abrir aula",
+                                "Visualizar aula",
                                 "fa-solid fa-user-check",
                             )
                         )
@@ -3539,7 +3539,7 @@ def professor_fechamento(request, codigo: str):
                         "html": _actions_group(
                             _link_button(
                                 reverse("educacao:informatica_turma_detail", args=[turma.id]),
-                                "Abrir turma",
+                                "Visualizar turma",
                                 "fa-solid fa-laptop-code",
                             ),
                             _link_button(

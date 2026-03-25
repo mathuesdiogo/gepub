@@ -5,6 +5,7 @@ from .models import (
     Secretaria,
     Unidade,
     Setor,
+    LocalEstrutural,
     SecretariaTemplate,
     SecretariaConfiguracao,
     SecretariaCadastroBase,
@@ -162,6 +163,92 @@ class SetorForm(forms.ModelForm):
         widgets = {
             "nome": forms.TextInput(attrs={"placeholder": "Ex.: Secretaria Escolar"}),
         }
+
+
+class LocalEstruturalForm(forms.ModelForm):
+    class Meta:
+        model = LocalEstrutural
+        fields = [
+            "municipio",
+            "secretaria",
+            "unidade",
+            "local_pai",
+            "nome",
+            "tipo_local",
+            "codigo",
+            "responsavel",
+            "observacoes",
+            "status",
+        ]
+        widgets = {
+            "nome": forms.TextInput(attrs={"placeholder": "Ex.: Laboratório de Informática"}),
+            "codigo": forms.TextInput(attrs={"placeholder": "Ex.: LAB-INFO-01"}),
+            "responsavel": forms.TextInput(attrs={"placeholder": "Nome do responsável (opcional)"}),
+            "observacoes": forms.Textarea(attrs={"rows": 3, "placeholder": "Observações do local (opcional)"}),
+        }
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if user is None or not getattr(user, "is_authenticated", False):
+            return
+
+        from apps.core.rbac import is_admin, get_profile
+
+        profile = get_profile(user)
+        if not is_admin(user) and profile and getattr(profile, "municipio_id", None):
+            self.fields["municipio"].queryset = Municipio.objects.filter(id=profile.municipio_id)
+            self.fields["municipio"].initial = profile.municipio_id
+            self.fields["municipio"].disabled = True
+
+            self.fields["secretaria"].queryset = Secretaria.objects.filter(
+                municipio_id=profile.municipio_id,
+                ativo=True,
+            ).order_by("nome")
+            self.fields["unidade"].queryset = Unidade.objects.filter(
+                secretaria__municipio_id=profile.municipio_id,
+                ativo=True,
+            ).order_by("nome")
+            self.fields["local_pai"].queryset = LocalEstrutural.objects.filter(
+                municipio_id=profile.municipio_id,
+                status=LocalEstrutural.Status.ATIVO,
+            ).select_related("unidade").order_by("unidade__nome", "nome")
+
+        if profile and getattr(profile, "secretaria_id", None):
+            self.fields["secretaria"].queryset = self.fields["secretaria"].queryset.filter(id=profile.secretaria_id)
+            self.fields["secretaria"].initial = profile.secretaria_id
+            self.fields["secretaria"].disabled = True
+            self.fields["unidade"].queryset = self.fields["unidade"].queryset.filter(secretaria_id=profile.secretaria_id)
+            self.fields["local_pai"].queryset = self.fields["local_pai"].queryset.filter(secretaria_id=profile.secretaria_id)
+
+        if profile and getattr(profile, "unidade_id", None):
+            self.fields["unidade"].queryset = self.fields["unidade"].queryset.filter(id=profile.unidade_id)
+            self.fields["unidade"].initial = profile.unidade_id
+            self.fields["unidade"].disabled = True
+            self.fields["local_pai"].queryset = self.fields["local_pai"].queryset.filter(unidade_id=profile.unidade_id)
+
+        if profile and getattr(profile, "local_estrutural_id", None):
+            self.fields["local_pai"].queryset = self.fields["local_pai"].queryset.filter(
+                id=profile.local_estrutural_id
+            )
+            self.fields["local_pai"].initial = profile.local_estrutural_id
+            self.fields["local_pai"].disabled = True
+
+    def clean(self):
+        cleaned = super().clean()
+        municipio = cleaned.get("municipio")
+        secretaria = cleaned.get("secretaria")
+        unidade = cleaned.get("unidade")
+        local_pai = cleaned.get("local_pai")
+
+        if secretaria and municipio and secretaria.municipio_id != municipio.id:
+            self.add_error("secretaria", "A secretaria deve pertencer ao município selecionado.")
+        if unidade and secretaria and unidade.secretaria_id != secretaria.id:
+            self.add_error("unidade", "A unidade deve pertencer à secretaria selecionada.")
+        if local_pai and unidade and local_pai.unidade_id != unidade.id:
+            self.add_error("local_pai", "O local pai deve pertencer à mesma unidade.")
+
+        return cleaned
 
 class MunicipioContatoForm(forms.ModelForm):
     class Meta:

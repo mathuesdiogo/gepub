@@ -5,7 +5,7 @@
 <div class="gp-card"><div class="gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <form method="get" class="gp-form gp-table__filters">
+  <form method="get" class="gp-form gp-table__filters search-and-filters form-shell">
     <input class="gp-input" name="q" value="{{ q }}" placeholder="Título/número">
     <select class="gp-input" name="status">
       <option value="">Status</option>

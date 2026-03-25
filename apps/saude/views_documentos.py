@@ -30,7 +30,7 @@ def documento_list(request, atendimento_id: int):
             "label": "Voltar",
             "url": reverse("saude:atendimento_detail", args=[atendimento.pk]),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }
     ]
     if can(request.user, "saude.manage"):
@@ -39,7 +39,7 @@ def documento_list(request, atendimento_id: int):
                 "label": "Novo Documento",
                 "url": reverse("saude:documento_create", args=[atendimento.pk]),
                 "icon": "fa-solid fa-plus",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             }
         )
 
@@ -144,7 +144,7 @@ def documento_detail(request, pk: int):
             "label": "Voltar",
             "url": reverse("saude:documento_list", args=[obj.atendimento_id]),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }
     ]
 

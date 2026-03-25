@@ -91,8 +91,8 @@ class AlunoListView(BaseListViewGepub):
             return f"?{base_q}&{extra}"
 
         actions = [
-            {"label": "Exportar CSV", "url": _u("export=csv"), "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
-            {"label": "Exportar PDF", "url": _u("export=pdf"), "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
+            {"label": "Exportar CSV", "url": _u("export=csv"), "icon": "fa-solid fa-file-csv", "variant": "gp-button--ghost"},
+            {"label": "Exportar PDF", "url": _u("export=pdf"), "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"},
         ]
 
         if can_edu_manage:
@@ -101,7 +101,7 @@ class AlunoListView(BaseListViewGepub):
                     "label": "Operações em Lote",
                     "url": reverse("educacao:operacoes_lote"),
                     "icon": "fa-solid fa-layer-group",
-                    "variant": "btn--outline",
+                    "variant": "gp-button--outline",
                 }
             )
             actions.append(
@@ -109,17 +109,17 @@ class AlunoListView(BaseListViewGepub):
                     "label": "Evasão em Lote",
                     "url": reverse("educacao:evasao_lote"),
                     "icon": "fa-solid fa-user-minus",
-                    "variant": "btn--outline",
+                    "variant": "gp-button--outline",
                 }
             )
-            actions.append({"label": "Novo Aluno", "url": reverse("educacao:aluno_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+            actions.append({"label": "Novo Aluno", "url": reverse("educacao:aluno_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
         return actions
 
     def get_extra_filters_html(self, request, **kwargs) -> str:
         checked = "checked" if self._flag_only_nee() else ""
         # HTML simples e compatível com filter_bar (renderiza extra_filters)
         return (
-            '<label class="check" style="display:inline-flex;gap:8px;align-items:center;">'
+            '<label class="check u-inline-flex u-gap-8 u-items-center">'
             f'<input type="checkbox" name="nee" value="1" {checked} onchange="this.form.submit()">'
             '<span>Somente com NEE</span>'
             '</label>'

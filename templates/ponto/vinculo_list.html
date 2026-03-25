@@ -1,28 +1,28 @@
 {% extends "core/base.html" %}
 
 {% block content %}
-<div class="card"><div class="card__body">
+<div class="card gp-card"><div class="card__body gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+  <form method="get" class="filter-bar u-mb-12 search-and-filters">
     {% if municipios and municipios|length %}
-      <select name="municipio" class="gp-input" style="max-width:240px;">
+      <select name="municipio" class="gp-input u-maxw-240">
         {% for m in municipios %}
           <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
         {% endfor %}
       </select>
     {% endif %}
-    <select name="ativo" class="gp-input" style="max-width:180px;">
+    <select name="ativo" class="gp-input u-maxw-180">
       <option value="">Todos</option>
       <option value="1" {% if ativo == "1" %}selected{% endif %}>Ativos</option>
       <option value="0" {% if ativo == "0" %}selected{% endif %}>Inativos</option>
     </select>
-    <input name="q" value="{{ q }}" class="gp-input" placeholder="Servidor, escala ou código" style="max-width:320px;">
+    <input name="q" value="{{ q }}" class="gp-input u-maxw-320" placeholder="Servidor, escala ou código">
     <button class="gp-button gp-button--outline gp-button--sm" type="submit">Filtrar</button>
   </form>
 
-  <div class="table-shell"><div class="table-shell__body">
-    <table class="table">
+  <div class="table-shell gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+    <table class="gp-table__native table">
       <thead><tr><th>Servidor</th><th>Escala</th><th>Início</th><th>Fim</th><th>Status</th><th></th></tr></thead>
       <tbody>
         {% for item in items %}
@@ -33,9 +33,9 @@
             <td>{{ item.data_fim|date:"d/m/Y"|default:"-" }}</td>
             <td>{% if item.ativo %}Ativo{% else %}Inativo{% endif %}</td>
             <td>
-              <form method="post" action="{% url 'ponto:vinculo_toggle' item.pk %}?municipio={{ municipio.pk }}" style="display:inline;">
+              <form method="post" action="{% url 'ponto:vinculo_toggle' item.pk %}?municipio={{ municipio.pk }}" class="u-inline-form">
                 {% csrf_token %}
-                <button class="gp-button gp-button--sm {% if item.ativo %}gp-button--outline{% else %}gp-button--primary{% endif %}" type="submit">
+                <button class="gp-button gp-button--sm {% if item.ativo %}gp-button--outline{% else %}gp-button--primary{% endif %} gp-button--primary gp-button--outline" type="submit">
                   {% if item.ativo %}Inativar{% else %}Reativar{% endif %}
                 </button>
               </form>

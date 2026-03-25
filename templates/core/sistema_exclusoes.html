@@ -7,13 +7,13 @@
   <div class="card__body gp-card__body">
     {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-    <div class="alert gp-alert alert--warning" style="margin: 12px 0 16px;">
+    <div class="alert gp-alert alert--warning u-my-12-16">
       Use esta área com cuidado. A exclusão é permanente e pode ser bloqueada quando houver vínculos.
     </div>
 
-    <form method="get" style="display:grid; grid-template-columns:minmax(220px,1fr) auto auto; gap:10px; align-items:end; margin-bottom: 14px;">
-      <div class="gp-form-group" style="margin:0;">
-        <label class="gp-form-label" for="id_q">Buscar</label>
+    <form method="get" class="u-grid-inline-filter u-mb-14 form-shell search-and-filters">
+      <div class="gp-form-group u-m-0 form-shell">
+        <label class="gp-form-label form-shell" for="id_q">Buscar</label>
         <input id="id_q" name="q" class="gp-input" type="search" value="{{ q }}" placeholder="Nome, sigla, e-mail, código..." autocomplete="off">
       </div>
       <button type="submit" class="gp-button gp-button--primary">Filtrar</button>
@@ -22,15 +22,15 @@
 
     {% if not has_any_section %}
       <div class="alert gp-alert alert--danger">
-        Você não possui permissão para excluir secretarias, unidades ou usuários.
+        Você não possui permissão para remover secretarias, unidades ou usuários.
       </div>
     {% endif %}
 
     {% if can_manage_secretarias %}
-      <section style="margin-top: 14px;">
-        <h2 style="font-size:1.05rem; margin-bottom:8px;">Secretarias</h2>
+      <section class="u-mt-14">
+        <h2 class="u-fs-105 u-mb-8">Secretarias</h2>
         <div class="table-shell gp-table gp-table--responsive gp-table--striped gp-table--hover">
-          <table class="table">
+          <table class="gp-table__native table">
             <thead>
               <tr>
                 <th>Nome</th>
@@ -54,7 +54,7 @@
                   </td>
                   <td>
                     {% if row.can_delete %}
-                      <a class="gp-button gp-button--danger gp-button--sm" href="{{ row.confirm_url }}?next={{ request.get_full_path|urlencode }}">Excluir</a>
+                      <a class="gp-button gp-button--danger gp-button--sm" href="{{ row.confirm_url }}?next={{ request.get_full_path|urlencode }}">Remover</a>
                     {% else %}
                       <span class="gp-caption">Remova os vínculos antes</span>
                     {% endif %}
@@ -72,10 +72,10 @@
     {% endif %}
 
     {% if can_manage_unidades %}
-      <section style="margin-top: 18px;">
-        <h2 style="font-size:1.05rem; margin-bottom:8px;">Unidades</h2>
+      <section class="u-mt-18">
+        <h2 class="u-fs-105 u-mb-8">Unidades</h2>
         <div class="table-shell gp-table gp-table--responsive gp-table--striped gp-table--hover">
-          <table class="table">
+          <table class="gp-table__native table">
             <thead>
               <tr>
                 <th>Nome</th>
@@ -98,7 +98,7 @@
                   </td>
                   <td>
                     {% if row.can_delete %}
-                      <a class="gp-button gp-button--danger gp-button--sm" href="{{ row.confirm_url }}?next={{ request.get_full_path|urlencode }}">Excluir</a>
+                      <a class="gp-button gp-button--danger gp-button--sm" href="{{ row.confirm_url }}?next={{ request.get_full_path|urlencode }}">Remover</a>
                     {% else %}
                       <span class="gp-caption">Remova os vínculos antes</span>
                     {% endif %}
@@ -116,10 +116,10 @@
     {% endif %}
 
     {% if can_manage_usuarios %}
-      <section style="margin-top: 18px;">
-        <h2 style="font-size:1.05rem; margin-bottom:8px;">Usuários</h2>
+      <section class="u-mt-18">
+        <h2 class="u-fs-105 u-mb-8">Usuários</h2>
         <div class="table-shell gp-table gp-table--responsive gp-table--striped gp-table--hover">
-          <table class="table">
+          <table class="gp-table__native table">
             <thead>
               <tr>
                 <th>Nome</th>
@@ -142,7 +142,7 @@
                   <td>{{ row.status }}</td>
                   <td>
                     {% if row.can_delete %}
-                      <a class="gp-button gp-button--danger gp-button--sm" href="{{ row.confirm_url }}?next={{ request.get_full_path|urlencode }}">Excluir</a>
+                      <a class="gp-button gp-button--danger gp-button--sm" href="{{ row.confirm_url }}?next={{ request.get_full_path|urlencode }}">Remover</a>
                     {% else %}
                       <span class="gp-caption">{{ row.block_reason|default:"Exclusão não permitida" }}</span>
                     {% endif %}

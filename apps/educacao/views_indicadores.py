@@ -83,8 +83,8 @@ def indicadores_gerenciais(request):
         )
 
     actions = [
-        {"label": "Relatório Mensal", "url": reverse("educacao:relatorio_mensal"), "icon": "fa-solid fa-chart-column", "variant": "btn--ghost"},
-        {"label": "Censo Escolar", "url": reverse("educacao:censo_escolar"), "icon": "fa-solid fa-database", "variant": "btn--ghost"},
+        {"label": "Relatório Mensal", "url": reverse("educacao:relatorio_mensal"), "icon": "fa-solid fa-chart-column", "variant": "gp-button--ghost"},
+        {"label": "Censo Escolar", "url": reverse("educacao:censo_escolar"), "icon": "fa-solid fa-database", "variant": "gp-button--ghost"},
     ]
 
     return render(

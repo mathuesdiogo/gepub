@@ -1,4 +1,5 @@
 {% extends "educacao/base_modulo.html" %}
+{% load gepub_design_system %}
 {% block title %}{{ title }} • Educação • GEPUB{% endblock %}
 
 {% block module_content %}
@@ -6,9 +7,9 @@
   <div class="gp-card__body">
     {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-    <form method="post" class="gp-form gp-form--smart">
+    <form method="post" class="gp-form gp-form--smart form-shell">
       {% csrf_token %}
-      {{ form.as_p }}
+      {% render_form form %}
       <div class="form-shell__actions gp-action-bar">
         <button type="submit" class="gp-button gp-button--primary">
           <i class="fa-solid fa-check"></i>

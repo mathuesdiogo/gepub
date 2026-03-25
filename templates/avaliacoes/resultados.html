@@ -1,11 +1,11 @@
 {% extends "core/base.html" %}
 
 {% block content %}
-<div class="card"><div class="card__body">
+<div class="card gp-card"><div class="card__body gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <div class="card" style="margin-top:12px;"><div class="card__body">
-    <h3 style="margin-top:0;">Distribuição de notas</h3>
+  <div class="card u-mt-12 gp-card"><div class="card__body gp-card__body">
+    <h3 class="u-mt-0">Distribuição de notas</h3>
     <div class="detail-summary">
       {% for faixa in faixas_distribuicao %}
         <div><strong>{{ faixa.label }}:</strong> {{ faixa.total }}</div>
@@ -13,10 +13,10 @@
     </div>
   </div></div>
 
-  <div class="card" style="margin-top:12px;"><div class="card__body">
-    <h3 style="margin-top:0;">Ranking</h3>
-    <div class="table-shell"><div class="table-shell__body">
-      <table class="table">
+  <div class="card u-mt-12 gp-card"><div class="card__body gp-card__body">
+    <h3 class="u-mt-0">Ranking</h3>
+    <div class="table-shell gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+      <table class="gp-table__native table">
         <thead><tr><th>#</th><th>Aluno</th><th>Nota</th><th>Percentual</th></tr></thead>
         <tbody>
           {% for app in ranking %}
@@ -34,10 +34,10 @@
     </div></div>
   </div></div>
 
-  <div class="card" style="margin-top:12px;"><div class="card__body">
-    <h3 style="margin-top:0;">Análise por questão</h3>
-    <div class="table-shell"><div class="table-shell__body">
-      <table class="table">
+  <div class="card u-mt-12 gp-card"><div class="card__body gp-card__body">
+    <h3 class="u-mt-0">Análise por questão</h3>
+    <div class="table-shell gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+      <table class="gp-table__native table">
         <thead>
           <tr>
             <th>Questão</th>

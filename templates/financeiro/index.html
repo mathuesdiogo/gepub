@@ -4,7 +4,7 @@
 <div class="gp-card"><div class="gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <form method="get" class="gp-table__filters">
+  <form method="get" class="gp-table__filters search-and-filters">
     {% if municipios and municipios|length %}
       <select name="municipio" class="gp-input">
         {% for m in municipios %}
@@ -23,16 +23,16 @@
     <button class="gp-button gp-button--sm" type="submit">Aplicar</button>
   </form>
 
-  <div class="kpi-grid" style="margin-bottom:16px;">
+  <div class="kpi-grid u-mb-16">
     {% for kpi in kpis %}
-      <article class="kpi-card">
+      <article class="kpi-card gp-card">
         <div class="kpi-card__label">{{ kpi.label }}</div>
         <div class="kpi-card__value">R$ {{ kpi.value }}</div>
       </article>
     {% endfor %}
   </div>
 
-  <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover" style="margin-bottom:14px;">
+  <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover u-mb-14">
     <div class="gp-table__head"><h3>Empenhos recentes</h3></div>
     <div class="gp-table__body">
       <table class="gp-table__native">
@@ -45,7 +45,7 @@
               <td>{{ item.unidade_gestora.codigo }}</td>
               <td>R$ {{ item.valor_empenhado }}</td>
               <td>{{ item.get_status_display }}</td>
-              <td><a class="gp-anchor-link" href="{% url 'financeiro:empenho_detail' item.id %}?municipio={{ municipio.id }}">ver</a></td>
+              <td><a class="gp-anchor-link" href="{% url 'financeiro:empenho_detail' item.id %}?municipio={{ municipio.id }}">visualizar</a></td>
             </tr>
           {% empty %}
             <tr><td colspan="6">Nenhum empenho no filtro atual.</td></tr>

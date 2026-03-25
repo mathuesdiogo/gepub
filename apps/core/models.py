@@ -164,7 +164,7 @@ class InstitutionalPageConfig(models.Model):
     )
     hero_cta_primario_label = models.CharField(max_length=50, default="SIMULAR PLANO")
     hero_cta_primario_link = models.CharField(max_length=120, default="#simulador")
-    hero_cta_secundario_label = models.CharField(max_length=50, default="VER PLANOS")
+    hero_cta_secundario_label = models.CharField(max_length=50, default="VISUALIZAR PLANOS")
     hero_cta_secundario_link = models.CharField(max_length=120, default="#planos")
 
     oferta_tag = models.CharField(max_length=140, default="ESTRUTURA PRONTA PARA LICITAÇÃO")

@@ -2,7 +2,7 @@
 {% block title %}Estágio #{{ estagio.pk }} • Educação • GEPUB{% endblock %}
 
 {% block module_content %}
-<div class="gp-card"><div class="gp-card__body">
+<div class="gp-card"><div class="gp-card__body edu-detail-flow">
 {% include "core/partials/components/layout/page_head.html" with title="Detalhe do Estágio" subtitle=estagio.aluno.nome actions=actions %}
 {% include "core/partials/components/layout/detail_summary.html" with fields=fields pills=pills %}
 </div></div>

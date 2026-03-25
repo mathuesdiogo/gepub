@@ -15,7 +15,7 @@ class ListAction:
     label: str
     url: str
     icon: str | None = None
-    variant: str = "btn--ghost"  # seu page_head usa "variant" tipo btn-primary
+    variant: str = "gp-button--ghost"
 
 
 @dataclass
@@ -142,7 +142,7 @@ class BaseListViewGepub(LoginRequiredMixin, TemplateView):
                 "label": "Novo",
                 "url": reverse(self.url_create_name),
                 "icon": "fa-solid fa-plus",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             })
         return actions
 

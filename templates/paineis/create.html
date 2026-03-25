@@ -7,7 +7,7 @@
 
   <section class="bi-source-grid">
     {% for source in source_cards %}
-      <button type="button" class="bi-source-card bi-source-card--{{ source.tone }}" data-bi-set-fonte="{{ source.tipo }}">
+      <button type="button" class="bi-source-card bi-source-card--{{ source.tone }} gp-card" data-bi-set-fonte="{{ source.tipo }}">
         <span class="bi-source-card__icon"><i class="{{ source.icon }}"></i></span>
         <span class="bi-source-card__title">{{ source.titulo }}</span>
         <span class="bi-source-card__desc">{{ source.descricao }}</span>
@@ -16,7 +16,7 @@
   </section>
 
   <section class="bi-panel">
-    <form method="post" enctype="multipart/form-data" class="bi-create-form">
+    <form method="post" enctype="multipart/form-data" class="bi-create-form form-shell">
       {% csrf_token %}
 
       <div class="bi-form-grid">

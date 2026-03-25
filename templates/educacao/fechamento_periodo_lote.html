@@ -1,4 +1,5 @@
 {% extends "educacao/base_modulo.html" %}
+{% load gepub_design_system %}
 {% block title %}Fechamento em Lote • Educação • GEPUB{% endblock %}
 
 {% block module_content %}
@@ -6,9 +7,9 @@
   <div class="gp-card__body">
     {% include "core/partials/components/layout/page_head.html" with title="Fechamento/Reabertura em Lote" subtitle="Execute fechamento de período por secretaria/unidade com pré-visualização e opção de reabrir." actions=actions %}
 
-    <form method="post" class="gp-form gp-form--smart">
+    <form method="post" class="gp-form gp-form--smart form-shell">
       {% csrf_token %}
-      {{ form.as_p }}
+      {% render_form form %}
       <div class="form-shell__actions gp-action-bar">
         <button type="submit" name="_action" value="preview" class="gp-button gp-button--outline">
           <i class="fa-solid fa-eye"></i>
@@ -27,7 +28,7 @@
 
     {% if preview_rows %}
       <div class="u-mt-16">
-        <h3 class="page-head__title" style="font-size:1.1rem;">Prévia do lote ({{ preview_total }})</h3>
+        <h3 class="page-head__title u-fs-11">Prévia do lote ({{ preview_total }})</h3>
         {% include "core/partials/components/data/table_shell.html" with headers=preview_headers rows=preview_rows page_obj=None empty_title="Sem turmas elegíveis" empty_text="Nenhuma turma foi encontrada para os filtros informados." %}
       </div>
     {% endif %}

@@ -65,7 +65,7 @@ def justificativa_falta_list_impl(request):
             "label": "Meus Diários",
             "url": reverse("educacao:meus_diarios"),
             "icon": "fa-solid fa-book",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
     ]
     if can(request.user, "educacao.manage"):
@@ -135,7 +135,7 @@ def justificativa_falta_detail_impl(request, pk: int):
             "label": "Voltar",
             "url": reverse("educacao:justificativa_falta_list"),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
     ]
     return render(

@@ -278,7 +278,7 @@ def fechamento_periodo_lote(request):
                     "label": "Voltar para períodos",
                     "url": reverse("educacao:periodo_list"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
         },

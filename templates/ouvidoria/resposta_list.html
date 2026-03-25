@@ -1,20 +1,20 @@
 {% extends "core/base.html" %}
 
 {% block content %}
-<div class="card"><div class="card__body">
+<div class="card gp-card"><div class="card__body gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
-  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+  <form method="get" class="filter-bar u-mb-12 search-and-filters">
     {% if municipios and municipios|length %}
-      <select name="municipio" class="gp-input" style="max-width:240px;">
+      <select name="municipio" class="gp-input u-maxw-240">
         {% for m in municipios %}
           <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
         {% endfor %}
       </select>
     {% endif %}
-    <button class="gp-button gp-button--outline gp-button--sm" type="submit">Atualizar</button>
+    <button class="gp-button gp-button--outline gp-button--sm" type="submit">Editar</button>
   </form>
-  <div class="table-shell"><div class="table-shell__body">
-    <table class="table">
+  <div class="table-shell gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+    <table class="gp-table__native table">
       <thead><tr><th>Data</th><th>Protocolo</th><th>Responsável</th><th>Pública</th><th>Resumo</th></tr></thead>
       <tbody>
         {% for item in items %}

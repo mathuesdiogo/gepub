@@ -138,7 +138,7 @@ class UnidadeListView(BaseListViewGepub):
             create_url = reverse("org:unidade_create")
             if create_params:
                 create_url = f"{create_url}?{urlencode(create_params)}"
-            actions.insert(0, {"label": "Nova unidade", "url": create_url, "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+            actions.insert(0, {"label": "Nova unidade", "url": create_url, "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
         return actions
 
     def get_headers(self, request):
@@ -214,7 +214,7 @@ class UnidadeUpdateView(BaseUpdateViewGepub):
     back_url_name = "org:unidade_list"
     form_class = UnidadeForm
     model = Unidade
-    submit_label = "Atualizar unidade"
+    submit_label = "Editar unidade"
 
     def dispatch(self, request, *args, **kwargs):
         if not can(request.user, "org.manage_unidade"):
@@ -252,9 +252,9 @@ class UnidadeDetailView(BaseDetailViewGepub):
 
         setores_qs = Setor.objects.filter(unidade_id=unidade.id)
 
-        actions = [{"label": "Voltar", "url": reverse("org:unidade_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+        actions = [{"label": "Voltar", "url": reverse("org:unidade_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
         if can(request.user, "org.manage_unidade"):
-            actions.append({"label": "Editar", "url": reverse("org:unidade_update", args=[unidade.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+            actions.append({"label": "Editar", "url": reverse("org:unidade_update", args=[unidade.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
 
         municipio = unidade.secretaria.municipio if unidade.secretaria else None
 
@@ -300,10 +300,16 @@ class UnidadeDetailView(BaseDetailViewGepub):
             "pills": pills,
             "links": [
                 {
-                    "label": "Ver setores",
+                    "label": "Visualizar setores",
                     "url": reverse("org:setor_list") + f"?unidade={unidade.id}",
                     "meta": f"{setores_qs.count()} registros",
                     "icon": "fa-solid fa-sitemap",
+                },
+                {
+                    "label": "Visualizar locais estruturais",
+                    "url": reverse("org:local_estrutural_list") + f"?unidade={unidade.id}",
+                    "meta": "Estrutura interna em árvore",
+                    "icon": "fa-solid fa-folder-tree",
                 },
             ],
             "location_entity_type": Address.EntityType.UNIDADE,

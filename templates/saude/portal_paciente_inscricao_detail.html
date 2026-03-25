@@ -8,12 +8,12 @@
   {% if not inscricao %}
     <p>Paciente sem vínculo de inscrição em editais da Saúde.</p>
   {% else %}
-    <div class="gp-pills">
-      <span class="gp-pills__item">Edital: {{ edital.numero_ano }}</span>
-      <span class="gp-pills__item">Benefício: {{ edital.beneficio.nome }}</span>
-      <span class="gp-pills__item">Status inscrição: {{ inscricao.get_status_display }}</span>
-      <span class="gp-pills__item">Pontuação: {{ inscricao.pontuacao }}</span>
-    </div>
+    <ul class="pills">
+      <li><span>Edital: {{ edital.numero_ano }}</span></li>
+      <li><span>Benefício: {{ edital.beneficio.nome }}</span></li>
+      <li><span>Status inscrição: {{ inscricao.get_status_display }}</span></li>
+      <li><span>Pontuação: {{ inscricao.pontuacao }}</span></li>
+    </ul>
 
     <div class="saude-portal-grid">
       <div class="gp-card"><div class="gp-card__body">
@@ -64,7 +64,7 @@
               {% else %}Em análise
               {% endif %}
             </td>
-            <td>{% if d.arquivo %}<a class="gp-button gp-button--outline gp-button--sm" href="{{ d.arquivo.url }}" target="_blank" rel="noopener">Abrir</a>{% else %}—{% endif %}</td>
+            <td>{% if d.arquivo %}<a class="gp-button gp-button--outline gp-button--sm" href="{{ d.arquivo.url }}" target="_blank" rel="noopener">Visualizar</a>{% else %}—{% endif %}</td>
           </tr>
           {% empty %}
           <tr><td colspan="4">Nenhum documento anexado.</td></tr>

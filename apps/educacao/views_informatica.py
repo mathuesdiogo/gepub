@@ -52,6 +52,7 @@ from .models_informatica import (
 )
 from .models_periodos import PeriodoLetivo
 from .services_informatica_matricula import registrar_movimentacao_informatica
+from .services_schedule_conflicts import ScheduleConflictService
 
 
 INFORMATICA_INICIO_PADRAO_MUNICIPIO_ANO = {
@@ -629,7 +630,7 @@ def informatica_curso_list(request):
                 "label": "Novo curso",
                 "url": reverse("educacao:informatica_curso_create"),
                 "icon": "fa-solid fa-plus",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             }
         )
 
@@ -687,7 +688,7 @@ def informatica_curso_create(request):
                     "label": "Voltar",
                     "url": reverse("educacao:informatica_curso_list"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
         },
@@ -726,7 +727,7 @@ def informatica_curso_update(request, pk: int):
                     "label": "Voltar",
                     "url": reverse("educacao:informatica_curso_list"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
         },
@@ -774,7 +775,7 @@ def informatica_laboratorio_list(request):
                 "label": "Novo laboratório",
                 "url": reverse("educacao:informatica_laboratorio_create"),
                 "icon": "fa-solid fa-plus",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             }
         )
 
@@ -827,7 +828,7 @@ def informatica_laboratorio_create(request):
                     "label": "Voltar",
                     "url": reverse("educacao:informatica_laboratorio_list"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
         },
@@ -865,7 +866,7 @@ def informatica_laboratorio_update(request, pk: int):
                     "label": "Voltar",
                     "url": reverse("educacao:informatica_laboratorio_list"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
         },
@@ -982,7 +983,7 @@ def informatica_grade_list(request):
                     "label": "Nova grade",
                     "url": reverse("educacao:informatica_grade_create"),
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 }
             ]
             if can_manage
@@ -1032,7 +1033,7 @@ def informatica_grade_create(request):
                     "label": "Voltar",
                     "url": reverse("educacao:informatica_grade_list"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
         },
@@ -1049,6 +1050,28 @@ def informatica_grade_update(request, pk: int):
     form = InformaticaGradeHorarioForm(request.POST or None, instance=obj, user=request.user)
     if request.method == "POST" and form.is_valid():
         obj = form.save(commit=False)
+        impact = ScheduleConflictService.validate_informatica_grade_change(grade=obj)
+        if impact.has_conflict and impact.blocking_mode == "block":
+            form.add_error(None, impact.message)
+            for item in impact.impacted_students[:3]:
+                form.add_error(None, f"{item['aluno_nome']} (turma {item.get('turma_codigo', '—')})")
+            return render(
+                request,
+                "educacao/informatica/grade_form.html",
+                {
+                    "form": form,
+                    "mode": "update",
+                    "grade": obj,
+                    "actions": [
+                        {
+                            "label": "Voltar",
+                            "url": reverse("educacao:informatica_grade_list"),
+                            "icon": "fa-solid fa-arrow-left",
+                            "variant": "gp-button--ghost",
+                        }
+                    ],
+                },
+            )
         try:
             with transaction.atomic():
                 obj.full_clean()
@@ -1059,6 +1082,8 @@ def informatica_grade_update(request, pk: int):
         except ValidationError as exc:
             form.add_error(None, exc)
         else:
+            if impact.has_conflict and impact.blocking_mode in {"warn", "allow"}:
+                messages.warning(request, impact.message)
             messages.success(request, "Grade de horário atualizada com sucesso.")
             return redirect("educacao:informatica_grade_list")
 
@@ -1074,7 +1099,7 @@ def informatica_grade_update(request, pk: int):
                     "label": "Voltar",
                     "url": reverse("educacao:informatica_grade_list"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
         },
@@ -1188,7 +1213,7 @@ def informatica_turma_list(request):
                     {"text": turma.get_status_display()},
                     {
                         "html": format_html(
-                            '<a class="gp-button gp-button--outline" href="{}">Abrir</a>{}',
+                            '<a class="gp-button gp-button--outline" href="{}">Visualizar</a>{}',
                             reverse("educacao:informatica_turma_detail", args=[turma.pk]),
                             format_html(
                                 ' <a class="gp-button gp-button--ghost" href="{}">Editar</a>',
@@ -1209,7 +1234,7 @@ def informatica_turma_list(request):
                 "label": "Nova turma",
                 "url": reverse("educacao:informatica_turma_create"),
                 "icon": "fa-solid fa-plus",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             }
         )
 
@@ -1274,7 +1299,7 @@ def informatica_turma_create(request):
                     "label": "Voltar",
                     "url": reverse("educacao:informatica_turma_list"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
         },
@@ -1315,7 +1340,7 @@ def informatica_turma_update(request, pk: int):
                     "label": "Voltar",
                     "url": reverse("educacao:informatica_turma_detail", args=[turma.pk]),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
         },
@@ -1446,7 +1471,7 @@ def informatica_solicitacao_list(request):
                     "label": "Nova solicitação",
                     "url": reverse("educacao:informatica_solicitacao_create"),
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 }
             ]
             if can_manage
@@ -1513,7 +1538,7 @@ def informatica_solicitacao_create(request):
                     "label": "Voltar",
                     "url": reverse("educacao:informatica_solicitacao_list"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
         },
@@ -1632,7 +1657,7 @@ def informatica_matricula_list(request):
                 "label": "Nova matrícula",
                 "url": reverse("educacao:informatica_matricula_create"),
                 "icon": "fa-solid fa-user-plus",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             }
         )
 
@@ -1731,42 +1756,62 @@ def informatica_matricula_create(request):
             if not (obj.origem_indicacao or "").strip():
                 obj.origem_indicacao = origem_auto
 
+        conflict_result = None
         try:
-            obj.full_clean()
-            obj.save()
-        except ValidationError as exc:
-            form.add_error(None, exc)
-        else:
-            motivo_criacao = "Matrícula criada pela tela do módulo de informática."
-            if solicitacao:
-                motivo_criacao = f"Matrícula criada a partir da solicitação #{solicitacao.id}."
-            elif lista_item:
-                motivo_criacao = f"Matrícula criada por convocação da lista de espera #{lista_item.id}."
-
-            registrar_movimentacao_informatica(
-                matricula=obj,
-                tipo=InformaticaMatriculaMovimentacao.Tipo.CRIACAO,
+            conflict_result = ScheduleConflictService.ensure_informatica_enrollment_allowed(
+                aluno=obj.aluno,
+                turma=obj.turma,
+                data_matricula=obj.data_matricula,
+                allow_override=False,
                 usuario=request.user,
-                turma_destino=obj.turma,
-                status_novo=obj.status,
-                motivo=motivo_criacao,
+                contexto="INFORMATICA_MATRICULA_CREATE",
+                ip_origem=(request.META.get("REMOTE_ADDR") or ""),
             )
-            if solicitacao:
-                solicitacao.status = InformaticaSolicitacaoVaga.Status.APROVADA
-                solicitacao.save(update_fields=["status"])
-            if lista_item:
-                lista_item.status = InformaticaListaEspera.Status.ENCERRADA
-                lista_item.save(update_fields=["status"])
-                _renumber_lista_espera(lista_item.curso_id)
-            messages.success(request, "Matrícula registrada com sucesso.")
-            return redirect("educacao:informatica_matricula_list")
+        except ValueError as exc:
+            form.add_error("aluno", str(exc))
+
+        if form.errors:
+            pass
+        else:
+            try:
+                obj.full_clean()
+                obj.save()
+            except ValidationError as exc:
+                form.add_error(None, exc)
+            else:
+                if conflict_result and conflict_result.has_conflict and conflict_result.blocking_mode in {"warn", "allow"}:
+                    for line in ScheduleConflictService.describe_conflicts(conflict_result):
+                        messages.warning(request, line)
+                motivo_criacao = "Matrícula criada pela tela do módulo de informática."
+                if solicitacao:
+                    motivo_criacao = f"Matrícula criada a partir da solicitação #{solicitacao.id}."
+                elif lista_item:
+                    motivo_criacao = f"Matrícula criada por convocação da lista de espera #{lista_item.id}."
+
+                registrar_movimentacao_informatica(
+                    matricula=obj,
+                    tipo=InformaticaMatriculaMovimentacao.Tipo.CRIACAO,
+                    usuario=request.user,
+                    turma_destino=obj.turma,
+                    status_novo=obj.status,
+                    motivo=motivo_criacao,
+                )
+                if solicitacao:
+                    solicitacao.status = InformaticaSolicitacaoVaga.Status.APROVADA
+                    solicitacao.save(update_fields=["status"])
+                if lista_item:
+                    lista_item.status = InformaticaListaEspera.Status.ENCERRADA
+                    lista_item.save(update_fields=["status"])
+                    _renumber_lista_espera(lista_item.curso_id)
+                messages.success(request, "Matrícula registrada com sucesso.")
+                return redirect("educacao:informatica_matricula_list")
 
     actions = [
         {
             "label": "Voltar",
             "url": reverse("educacao:informatica_matricula_list"),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }
     ]
     if _can_manage_or_professor_informatica(request.user):
@@ -1778,7 +1823,7 @@ def informatica_matricula_create(request):
                 "label": "Novo aluno",
                 "url": novo_aluno_url,
                 "icon": "fa-solid fa-user-plus",
-                "variant": "btn--outline",
+                "variant": "gp-button--outline",
             }
         )
 
@@ -1833,7 +1878,7 @@ def informatica_aluno_create(request):
                     "label": "Voltar",
                     "url": back_url,
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
         },
@@ -1874,6 +1919,16 @@ def informatica_matricula_remanejar(request, pk: int):
 
         try:
             with transaction.atomic():
+                ScheduleConflictService.ensure_informatica_enrollment_allowed(
+                    aluno=mat.aluno,
+                    turma=turma_destino,
+                    data_matricula=mat.data_matricula,
+                    exclude_informatica_matricula_id=mat.pk,
+                    allow_override=False,
+                    usuario=request.user,
+                    contexto="INFORMATICA_MATRICULA_REMANEJAR",
+                    ip_origem=(request.META.get("REMOTE_ADDR") or ""),
+                )
                 mat.turma = turma_destino
                 mat.curso_id = turma_destino.curso_id
                 if motivo:
@@ -1917,7 +1972,7 @@ def informatica_matricula_remanejar(request, pk: int):
                     "label": "Voltar",
                     "url": reverse("educacao:informatica_matricula_list"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
         },
@@ -2149,7 +2204,7 @@ def informatica_aula_list(request):
                     "label": "Nova aula",
                     "url": reverse("educacao:informatica_aula_create"),
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 }
             ]
             if can_execute
@@ -2205,7 +2260,7 @@ def informatica_aula_create(request):
                     "label": "Voltar",
                     "url": reverse("educacao:informatica_frequencia"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
         },
@@ -2257,7 +2312,7 @@ def informatica_aula_update(request, pk: int):
                     "label": "Voltar",
                     "url": reverse("educacao:informatica_frequencia"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
         },
@@ -2417,7 +2472,7 @@ def informatica_agenda(request):
                     {"text": instrutor},
                     {
                         "html": format_html(
-                            '<a class="gp-button gp-button--outline" href="{}">Abrir turma</a>',
+                            '<a class="gp-button gp-button--outline" href="{}">Visualizar turma</a>',
                             reverse("educacao:informatica_turma_detail", args=[e.turma_id]),
                         )
                     },
@@ -2481,7 +2536,7 @@ def informatica_professor_agenda(request):
                 "label": "Novo aluno",
                 "url": reverse("educacao:informatica_aluno_create"),
                 "icon": "fa-solid fa-user-plus",
-                "variant": "btn--outline",
+                "variant": "gp-button--outline",
             }
         )
         actions.append(
@@ -2489,7 +2544,7 @@ def informatica_professor_agenda(request):
                 "label": "Nova matrícula",
                 "url": reverse("educacao:informatica_matricula_create"),
                 "icon": "fa-solid fa-id-card",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             }
         )
 

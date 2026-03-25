@@ -1,8 +1,12 @@
-<nav class="gp-student-area-nav gp-pills" aria-label="Navegação da área do aluno">
-  {% for item in student_nav %}
-    <a class="gp-pills__item {% if student_nav_active == item.key %}is-active{% endif %}" href="{{ item.url }}">
-      <i class="{{ item.icon }}" aria-hidden="true"></i>
-      <span>{{ item.label }}</span>
-    </a>
-  {% endfor %}
+<nav class="gp-student-area-nav" aria-label="Navegação da área do aluno">
+  <ul class="pills">
+    {% for item in student_nav %}
+      <li class="{% if student_nav_active == item.key %}active{% endif %}">
+        <a class="{% if student_nav_active == item.key %}is-active{% endif %}" href="{{ item.url }}" {% if student_nav_active == item.key %}aria-current="page"{% endif %}>
+          <i class="{{ item.icon }}" aria-hidden="true"></i>
+          <span>{{ item.label }}</span>
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
 </nav>

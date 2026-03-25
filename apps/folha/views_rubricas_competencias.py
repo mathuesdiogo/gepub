@@ -37,19 +37,19 @@ def index(request):
                     "label": "Nova competência",
                     "url": reverse("folha:competencia_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-calendar-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "Rubricas",
                     "url": reverse("folha:rubrica_list") + _q_municipio(municipio),
                     "icon": "fa-solid fa-list-check",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Lançamentos",
                     "url": reverse("folha:lancamento_list") + _q_municipio(municipio),
                     "icon": "fa-solid fa-file-invoice-dollar",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -118,25 +118,25 @@ def rubrica_list(request):
                     "label": "Nova rubrica",
                     "url": reverse("folha:rubrica_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "CSV",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&tipo={tipo}&status={status}&export=csv",
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "PDF",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&tipo={tipo}&status={status}&export=pdf",
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Painel folha",
                     "url": reverse("folha:index") + _q_municipio(municipio),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -259,25 +259,25 @@ def competencia_list(request):
                     "label": "Nova competência",
                     "url": reverse("folha:competencia_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "CSV",
                     "url": request.path + f"?municipio={municipio.pk}&status={status}&export=csv",
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "PDF",
                     "url": request.path + f"?municipio={municipio.pk}&status={status}&export=pdf",
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Lançamentos",
                     "url": reverse("folha:lancamento_list") + _q_municipio(municipio),
                     "icon": "fa-solid fa-file-invoice-dollar",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -288,7 +288,7 @@ def competencia_list(request):
 def competencia_create(request):
     municipio = _resolve_municipio(request, require_selected=True)
     if not municipio:
-        messages.error(request, "Selecione um município para abrir competência.")
+        messages.error(request, "Selecione um município para iniciar competência.")
         return redirect("folha:competencia_list")
     form = FolhaCompetenciaForm(request.POST or None)
     if request.method == "POST" and form.is_valid():

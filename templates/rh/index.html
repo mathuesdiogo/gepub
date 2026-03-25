@@ -4,7 +4,7 @@
 <div class="gp-card"><div class="gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <form method="get" class="gp-table__filters">
+  <form method="get" class="gp-table__filters search-and-filters">
     {% if municipios and municipios|length %}
       <select name="municipio" class="gp-input" onchange="this.form.submit()">
         {% for m in municipios %}
@@ -14,7 +14,7 @@
     {% endif %}
   </form>
 
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:12px 0 18px;">
+  <div class="u-kpi-grid-190">
     {% for card in cards %}
       {% include "core/partials/components/data/kpi_card.html" with label=card.label value=card.value %}
     {% endfor %}
@@ -32,7 +32,7 @@
             <td>{{ item.get_status_display }}</td>
             <td>
               {% if item.status == "PENDENTE" %}
-                <form method="post" action="{% url 'rh:movimentacao_aprovar' item.pk %}?municipio={{ municipio.pk }}" style="display:inline;">
+                <form method="post" action="{% url 'rh:movimentacao_aprovar' item.pk %}?municipio={{ municipio.pk }}" class="u-inline-form">
                   {% csrf_token %}
                   <button class="gp-button gp-button--sm gp-button--primary" type="submit">Aprovar</button>
                 </form>
@@ -58,7 +58,7 @@
             <td>{{ item.data_documento|date:"d/m/Y" }}</td>
             <td>
               {% if item.arquivo %}
-                <a class="gp-button gp-button--sm gp-button--ghost" href="{{ item.arquivo.url }}" target="_blank" rel="noopener">Abrir</a>
+                <a class="gp-button gp-button--sm gp-button--ghost" href="{{ item.arquivo.url }}" target="_blank" rel="noopener">Visualizar</a>
               {% else %}
                 -
               {% endif %}

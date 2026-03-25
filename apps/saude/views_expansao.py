@@ -51,7 +51,7 @@ def procedimento_list(request):
     can_manage = can(request.user, "saude.manage")
     actions = []
     if can_manage:
-        actions.append({"label": "Novo Procedimento", "url": reverse("saude:procedimento_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+        actions.append({"label": "Novo Procedimento", "url": reverse("saude:procedimento_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
 
     headers = [{"label": "Paciente"}, {"label": "Procedimento"}, {"label": "Data/Hora"}, {"label": "Unidade"}]
     rows = []
@@ -144,9 +144,9 @@ def procedimento_detail(request, pk: int):
         pk=pk,
     )
     can_manage = can(request.user, "saude.manage")
-    actions = [{"label": "Voltar", "url": reverse("saude:procedimento_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+    actions = [{"label": "Voltar", "url": reverse("saude:procedimento_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
     if can_manage:
-        actions.append({"label": "Editar", "url": reverse("saude:procedimento_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+        actions.append({"label": "Editar", "url": reverse("saude:procedimento_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
     fields = [
         {"label": "Paciente", "value": obj.atendimento.paciente_nome},
         {"label": "Atendimento", "value": f"#{obj.atendimento.id} • {obj.atendimento.get_tipo_display()}"},
@@ -176,7 +176,7 @@ def vacinacao_list(request):
     can_manage = can(request.user, "saude.manage")
     actions = []
     if can_manage:
-        actions.append({"label": "Nova Vacinação", "url": reverse("saude:vacinacao_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+        actions.append({"label": "Nova Vacinação", "url": reverse("saude:vacinacao_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
 
     headers = [{"label": "Paciente"}, {"label": "Vacina"}, {"label": "Dose/Lote"}, {"label": "Aplicação"}]
     rows = []
@@ -271,9 +271,9 @@ def vacinacao_detail(request, pk: int):
         pk=pk,
     )
     can_manage = can(request.user, "saude.manage")
-    actions = [{"label": "Voltar", "url": reverse("saude:vacinacao_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+    actions = [{"label": "Voltar", "url": reverse("saude:vacinacao_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
     if can_manage:
-        actions.append({"label": "Editar", "url": reverse("saude:vacinacao_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+        actions.append({"label": "Editar", "url": reverse("saude:vacinacao_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
     fields = [
         {"label": "Paciente", "value": obj.atendimento.paciente_nome},
         {"label": "Vacina", "value": obj.vacina},
@@ -314,7 +314,7 @@ def encaminhamento_list(request):
     can_manage = can(request.user, "saude.manage")
     actions = []
     if can_manage:
-        actions.append({"label": "Novo Encaminhamento", "url": reverse("saude:encaminhamento_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+        actions.append({"label": "Novo Encaminhamento", "url": reverse("saude:encaminhamento_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
 
     headers = [{"label": "Paciente"}, {"label": "Origem"}, {"label": "Destino"}, {"label": "Prioridade"}, {"label": "Status"}]
     rows = []
@@ -435,9 +435,9 @@ def encaminhamento_detail(request, pk: int):
         pk=pk,
     )
     can_manage = can(request.user, "saude.manage")
-    actions = [{"label": "Voltar", "url": reverse("saude:encaminhamento_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+    actions = [{"label": "Voltar", "url": reverse("saude:encaminhamento_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
     if can_manage:
-        actions.append({"label": "Editar", "url": reverse("saude:encaminhamento_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+        actions.append({"label": "Editar", "url": reverse("saude:encaminhamento_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
     fields = [
         {"label": "Paciente", "value": obj.atendimento.paciente_nome},
         {"label": "Unidade origem", "value": obj.unidade_origem.nome},

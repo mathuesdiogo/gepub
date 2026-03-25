@@ -50,7 +50,7 @@ class RecursoListView(BaseListViewGepub):
             "label": "Voltar",
             "url": reverse("nee:aluno_hub", args=[aluno.pk]) if aluno else reverse("nee:buscar_aluno"),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }]
 
         if can(self.request.user, "nee.manage") and aluno:
@@ -58,21 +58,21 @@ class RecursoListView(BaseListViewGepub):
                 "label": "Novo recurso",
                 "url": reverse("nee:recurso_create", args=[aluno.pk]),
                 "icon": "fa-solid fa-plus",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             })
 
         actions.append({
             "label": "Exportar CSV",
             "url": f"{self.request.path}?q={escape(q)}&export=csv",
             "icon": "fa-solid fa-file-csv",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         })
 
         actions.append({
             "label": "Exportar PDF",
             "url": f"{self.request.path}?q={escape(q)}&export=pdf",
             "icon": "fa-solid fa-file-pdf",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         })
 
         return actions
@@ -148,7 +148,7 @@ class RecursoCreateView(BaseCreateViewGepub):
     template_name = "nee/recurso_form.html"
     form_class = RecursoNEEForm
     title = "Novo recurso"
-    subtitle = "Cadastrar recurso/adaptação"
+    subtitle = "Adicionar recurso/adaptação"
     manage_perm = "nee.manage"
 
     # 👇 ESSA É A FORMA CORRETA
@@ -163,7 +163,7 @@ class RecursoCreateView(BaseCreateViewGepub):
             "label": "Voltar",
             "url": reverse("nee:aluno_recursos", args=[aluno_id]),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }]
 
     def get_success_url(self, request, obj=None):
@@ -179,7 +179,7 @@ class RecursoUpdateView(BaseUpdateViewGepub):
     form_class = RecursoNEEForm
     model = RecursoNEE
     title = "Editar recurso"
-    subtitle = "Atualizar recurso/adaptação"
+    subtitle = "Editar recurso/adaptação"
     manage_perm = "nee.manage"
 
     def get_actions(self, q: str = "", obj=None, **kwargs):
@@ -187,7 +187,7 @@ class RecursoUpdateView(BaseUpdateViewGepub):
             "label": "Voltar",
             "url": reverse("nee:recurso_detail", args=[obj.pk]),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }]
 
     def get_success_url(self, request, obj=None):
@@ -212,15 +212,15 @@ class RecursoDetailView(BaseDetailViewGepub):
             "label": "Voltar",
             "url": reverse("nee:aluno_hub", args=[aluno.pk]),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }]
 
         if aluno:
             actions.append({
-                "label": "Abrir aluno",
+                "label": "Visualizar aluno",
                 "url": reverse("nee:aluno_hub", args=[aluno.pk]),
                 "icon": "fa-solid fa-user",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             })
 
         if can(self.request.user, "nee.manage"):
@@ -228,21 +228,21 @@ class RecursoDetailView(BaseDetailViewGepub):
                 "label": "Novo recurso",
                 "url": reverse("nee:recurso_create", args=[aluno.pk]),
                 "icon": "fa-solid fa-plus",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             })
 
         actions.append({
             "label": "Exportar CSV",
             "url": f"{self.request.path}?q={escape(q)}&export=csv",
             "icon": "fa-solid fa-file-csv",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         })
 
         actions.append({
             "label": "Exportar PDF",
             "url": f"{self.request.path}?q={escape(q)}&export=pdf",
             "icon": "fa-solid fa-file-pdf",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         })
 
         return actions

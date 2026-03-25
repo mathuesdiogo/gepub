@@ -329,13 +329,13 @@ def censo_escolar(request):
             "label": "Exportar CSV",
             "url": qjoin(export="csv"),
             "icon": "fa-solid fa-file-csv",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
         {
             "label": "Exportar XLSX",
             "url": qjoin(export="xlsx"),
             "icon": "fa-solid fa-file-excel",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
     ]
 

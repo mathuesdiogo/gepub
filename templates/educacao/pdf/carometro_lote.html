@@ -56,7 +56,7 @@
 
   <section class="grid">
     {% for aluno in alunos %}
-      <article class="card">
+      <article class="card gp-card">
         {% if aluno.foto_url %}
           <img src="{{ aluno.foto_url }}" alt="{{ aluno.nome }}" class="photo">
         {% else %}

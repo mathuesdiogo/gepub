@@ -15,7 +15,7 @@
 
   <div class="ps-post-grid">
     {% for post in posts %}
-      <article class="ps-card ps-post-card">
+      <article class="ps-card ps-post-card gp-card">
         <div class="ps-post-card__meta">
           <span>{{ post.categoria }}</span>
           <small>{{ post.tempo_leitura }} • {{ post.data }}</small>
@@ -32,8 +32,8 @@
   <h2>Quer aprofundar a visão técnica da plataforma?</h2>
   <p>Acesse documentação completa de módulos, fluxos e integrações.</p>
   <div class="ps-cta__actions">
-    <a class="ps-btn ps-btn--dark" href="{{ cta_documentacao }}">Abrir documentação</a>
-    <a class="ps-btn ps-btn--light" href="{{ cta_home }}#contato">Falar com especialista</a>
+    <a class="ps-btn ps-btn--dark gp-button" href="{{ cta_documentacao }}">Visualizar documentação</a>
+    <a class="ps-btn ps-btn--light gp-button" href="{{ cta_home }}#contato">Falar com especialista</a>
   </div>
 </section>
 {% endblock %}

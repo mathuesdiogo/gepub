@@ -1,12 +1,12 @@
-<section class="admin-panel" style="margin-bottom: 16px;">
+<section class="admin-panel u-mb-16">
   <div class="admin-panel__head">
     <div>
       <h3 class="admin-panel__title">Central de pendências</h3>
       <p class="admin-panel__sub">{{ total }} alerta(s) com impacto operacional.</p>
     </div>
   </div>
-  <div class="table-shell"><div class="table-shell__body">
-    <table class="table">
+  <div class="table-shell gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+    <table class="gp-table__native table">
       <thead>
         <tr>
           <th>Prioridade</th>
@@ -23,7 +23,7 @@
             <td>{{ item.titulo }}</td>
             <td>{{ item.valor }}</td>
             <td>{{ item.descricao }}</td>
-            <td><a href="{{ item.url }}">Abrir</a></td>
+            <td><a href="{{ item.url }}">Visualizar</a></td>
           </tr>
         {% endfor %}
       </tbody>

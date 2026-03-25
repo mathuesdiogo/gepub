@@ -323,7 +323,7 @@ TEMPLATE_DEFINITIONS: list[dict] = [
         "onboarding": [
             {
                 "codigo": "cadastro_unidades",
-                "titulo": "Cadastrar escolas e unidades educacionais",
+                "titulo": "Adicionar escolas e unidades educacionais",
                 "descricao": "Garanta pelo menos 1 unidade educacional ativa.",
                 "url_name": "org:unidade_create",
                 "ordem": 1,
@@ -387,14 +387,14 @@ TEMPLATE_DEFINITIONS: list[dict] = [
         "onboarding": [
             {
                 "codigo": "cadastro_unidades_saude",
-                "titulo": "Cadastrar UBS e unidades de saúde",
+                "titulo": "Adicionar UBS e unidades de saúde",
                 "descricao": "Mantenha pelo menos 1 unidade de saúde ativa.",
                 "url_name": "org:unidade_create",
                 "ordem": 1,
             },
             {
                 "codigo": "cadastro_profissionais",
-                "titulo": "Cadastrar profissionais",
+                "titulo": "Adicionar profissionais",
                 "descricao": "Adicione profissionais e vincule especialidades.",
                 "url_name": "saude:profissional_create",
                 "ordem": 2,
@@ -602,7 +602,7 @@ TEMPLATE_DEFINITIONS: list[dict] = [
         ],
         "onboarding": _onboarding_padrao(
             codigo_manual="primeiro_processo_licenciamento",
-            titulo_manual="Abrir primeiro processo de licenciamento",
+            titulo_manual="Visualizar primeiro processo de licenciamento",
             descricao_manual="Inicie um processo ambiental para validar fluxos e prazos de análise.",
             url_manual="processos:list",
         ),
@@ -680,7 +680,7 @@ TEMPLATE_DEFINITIONS: list[dict] = [
         ],
         "onboarding": _onboarding_padrao(
             codigo_manual="primeiro_evento_cadastrado",
-            titulo_manual="Cadastrar primeiro evento oficial",
+            titulo_manual="Adicionar primeiro evento oficial",
             descricao_manual="Registre um evento com local e estimativa de público para iniciar calendário.",
             url_manual="processos:list",
         ),

@@ -51,7 +51,7 @@ def horarios_index(request):
             "label": "Voltar",
             "url": reverse("educacao:index"),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }
     ]
 
@@ -73,7 +73,7 @@ def horarios_index(request):
                 {"text": t.get_turno_display() if hasattr(t, "get_turno_display") else (getattr(t, "turno", "") or "—")},
                 {"text": getattr(getattr(t, "unidade", None), "nome", "—")},
                 {"text": getattr(getattr(getattr(t, "unidade", None), "secretaria", None), "nome", "—")},
-                {"text": "Abrir horário", "url": reverse("educacao:horario_turma", args=[t.pk])},
+                {"text": "Visualizar horário", "url": reverse("educacao:horario_turma", args=[t.pk])},
             ],
             "can_edit": False,
             "edit_url": "",

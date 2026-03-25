@@ -6,13 +6,13 @@
   {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
 
   <article class="gp-student-stage__card">
-    <form method="get" class="gp-form gp-form--smart gp-professor-filter-row">
-      <div class="gp-form-group gp-field--full">
-        <label class="gp-form-label" for="id_q">Buscar plano</label>
+    <form method="get" class="gp-form gp-form--smart gp-professor-filter-row form-shell search-and-filters">
+      <div class="gp-form-group gp-field--full form-shell">
+        <label class="gp-form-label form-shell" for="id_q">Buscar plano</label>
         <input id="id_q" type="text" class="gp-input" name="q" value="{{ q }}" placeholder="Turma, laboratório, unidade ou ano" />
       </div>
-      <div class="gp-form-group">
-        <label class="gp-form-label" for="id_status">Status</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell" for="id_status">Status</label>
         <select id="id_status" class="gp-select" name="status">
           <option value="todos" {% if status_filter == "todos" %}selected{% endif %}>Todos</option>
           <option value="editaveis" {% if status_filter == "editaveis" %}selected{% endif %}>Em edição / devolvidos</option>
@@ -21,8 +21,8 @@
           <option value="devolvidos" {% if status_filter == "devolvidos" %}selected{% endif %}>Devolvidos</option>
         </select>
       </div>
-      <div class="gp-form-group">
-        <label class="gp-form-label">&nbsp;</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell">&nbsp;</label>
         <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
       </div>
     </form>

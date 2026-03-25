@@ -106,7 +106,7 @@ class BaseAlunoListView(BaseAlunoMixin, BaseListViewGepub):
                 "label": "Voltar",
                 "url": self._reverse_aluno(self.back_url_name, aluno_id),
                 "icon": "fa-solid fa-arrow-left",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             }
         ]
 
@@ -142,7 +142,7 @@ class BaseAlunoCreateView(BaseAlunoMixin, BaseCreateViewGepub):
                 "label": "Voltar",
                 "url": self._reverse_aluno(self.back_url_name, aluno_id),
                 "icon": "fa-solid fa-arrow-left",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             }
         ]
 
@@ -162,7 +162,7 @@ class BaseAlunoUpdateView(BaseAlunoMixin, BaseUpdateViewGepub):
                 "label": "Voltar",
                 "url": self._reverse_aluno(self.back_url_name, aluno_id),
                 "icon": "fa-solid fa-arrow-left",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             }
         ]
 
@@ -181,6 +181,6 @@ class BaseAlunoDetailView(BaseAlunoMixin, BaseDetailViewGepub):
                 "label": "Voltar",
                 "url": self._reverse_aluno(self.back_url_name, aluno_id),
                 "icon": "fa-solid fa-arrow-left",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             }
         ]

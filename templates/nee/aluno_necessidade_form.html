@@ -1,7 +1,7 @@
 {% extends "nee/base_modulo.html" %}
 {% block module_title %}{% if mode == 'update' %}Editar Necessidade{% else %}Nova Necessidade{% endif %} • {{ aluno.nome }}{% endblock %}
 {% block module_content %}
-<div class="card"><div class="card__body">
+<div class="card gp-card"><div class="card__body gp-card__body">
 {% include "core/partials/components/layout/page_head.html" with title="Necessidade do Aluno" subtitle=aluno.nome actions=actions %}
 {% url 'nee:aluno_necessidades' aluno.pk as back_url %}
 {% if actions and actions.0.url %}

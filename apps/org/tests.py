@@ -3,6 +3,7 @@ import json
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
+from django.core.exceptions import ValidationError
 from unittest.mock import patch
 
 from apps.billing.models import AssinaturaMunicipio, PlanoMunicipal, SolicitacaoUpgrade
@@ -22,6 +23,7 @@ from apps.org.models import (
     SecretariaCadastroBase,
     SecretariaConfiguracao,
     Unidade,
+    LocalEstrutural,
     MunicipioModuloAtivo,
     SecretariaModuloAtivo,
     OnboardingStep,
@@ -328,6 +330,57 @@ class OrgOnboardingProvisioningTestCase(TestCase):
         self.assertTrue(
             Secretaria.objects.filter(municipio=self.municipio, tipo_modelo="saude").exists()
         )
+
+
+class LocalEstruturalModelTestCase(TestCase):
+    def setUp(self):
+        self.municipio = Municipio.objects.create(nome="Cidade Local", uf="MA")
+        self.secretaria = Secretaria.objects.create(municipio=self.municipio, nome="Educação")
+        self.unidade = Unidade.objects.create(
+            secretaria=self.secretaria,
+            nome="Escola Central",
+            tipo=Unidade.Tipo.EDUCACAO,
+            tipo_educacional=Unidade.TipoEducacional.ESCOLA,
+        )
+
+    def test_caminho_e_nivel(self):
+        bloco = LocalEstrutural.objects.create(
+            municipio=self.municipio,
+            secretaria=self.secretaria,
+            unidade=self.unidade,
+            nome="Bloco A",
+            tipo_local=LocalEstrutural.TipoLocal.BLOCO,
+        )
+        sala = LocalEstrutural.objects.create(
+            municipio=self.municipio,
+            secretaria=self.secretaria,
+            unidade=self.unidade,
+            local_pai=bloco,
+            nome="Sala 01",
+            tipo_local=LocalEstrutural.TipoLocal.SALA,
+        )
+        self.assertEqual(sala.nivel, 1)
+        self.assertEqual(sala.caminho, "Bloco A / Sala 01")
+
+    def test_nao_permite_ciclo(self):
+        raiz = LocalEstrutural.objects.create(
+            municipio=self.municipio,
+            secretaria=self.secretaria,
+            unidade=self.unidade,
+            nome="Setor Administrativo",
+            tipo_local=LocalEstrutural.TipoLocal.SETOR,
+        )
+        filho = LocalEstrutural.objects.create(
+            municipio=self.municipio,
+            secretaria=self.secretaria,
+            unidade=self.unidade,
+            local_pai=raiz,
+            nome="Arquivo",
+            tipo_local=LocalEstrutural.TipoLocal.SALA,
+        )
+        raiz.local_pai = filho
+        with self.assertRaises(ValidationError):
+            raiz.full_clean()
 
 
 class OrgAddressMapsTestCase(TestCase):

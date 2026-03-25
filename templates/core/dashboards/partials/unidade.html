@@ -2,7 +2,7 @@
   <div class="dash-actions admin-dash__actions">
     <a class="gp-button gp-button--primary" href="{% url 'educacao:turma_list' %}"><i class="fa-solid fa-people-group"></i> Turmas</a>
     <a class="gp-button gp-button--primary" href="{% url 'educacao:aluno_list' %}"><i class="fa-solid fa-user-graduate"></i> Alunos</a>
-    <a class="gp-button gp-button--primary" href="{% url 'educacao:matricula_create' %}"><i class="fa-solid fa-id-card-clip"></i> Nova matrícula</a>
+    <a class="gp-button gp-button--primary" href="{% url 'educacao:matricula_create' %}"><i class="fa-solid fa-id-card-clip gp-card"></i> Nova matrícula</a>
   </div>
 
   <div class="dash-kpi-grid">
@@ -25,7 +25,7 @@
     </div>
 
     <div class="admin-kpi admin-kpi--green">
-      <div class="admin-kpi__icon"><i class="fa-solid fa-id-card-clip"></i></div>
+      <div class="admin-kpi__icon"><i class="fa-solid fa-id-card-clip gp-card"></i></div>
       <div class="admin-kpi__content">
         <div class="admin-kpi__label">Matrículas</div>
         <div class="admin-kpi__value">{{ matriculas_total|default:0 }}</div>
@@ -83,12 +83,12 @@
         <h3 class="admin-panel__title">Turmas da unidade</h3>
         <p class="admin-panel__sub">Lista das turmas disponíveis para acompanhamento</p>
       </div>
-      <a class="gp-button gp-button--outline" href="{% url 'educacao:turma_list' %}"><i class="fa-solid fa-list"></i> Ver todas</a>
+      <a class="gp-button gp-button--outline" href="{% url 'educacao:turma_list' %}"><i class="fa-solid fa-list"></i> Visualizar todas</a>
     </div>
 
     {% if turmas %}
       <div class="admin-table-wrap">
-        <table class="admin-table">
+        <table class="gp-table__native admin-table">
           <thead>
             <tr>
               <th>Turma</th>
@@ -101,7 +101,7 @@
               <tr>
                 <td>{{ t.nome }}</td>
                 <td>{{ t.ano_letivo|default:"—" }}</td>
-                <td><a class="gp-button gp-button--outline" href="{% url 'educacao:turma_detail' t.pk %}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir</a></td>
+                <td><a class="gp-button gp-button--outline" href="{% url 'educacao:turma_detail' t.pk %}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Visualizar</a></td>
               </tr>
             {% endfor %}
           </tbody>

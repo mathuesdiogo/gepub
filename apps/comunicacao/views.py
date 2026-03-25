@@ -480,43 +480,43 @@ def index(request):
                     "label": "Templates (API)",
                     "url": reverse("comunicacao:templates_api") + _q_municipio(municipio),
                     "icon": "fa-solid fa-file-lines",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "Config canais (API)",
                     "url": reverse("comunicacao:channels_config_api") + _q_municipio(municipio),
                     "icon": "fa-solid fa-gears",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Catálogo eventos (API)",
                     "url": reverse("comunicacao:events_catalog_api") + _q_municipio(municipio),
                     "icon": "fa-solid fa-list-check",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "CSV jobs",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&channel={channel}&status={status}&event_key={event_key}&scope=jobs&export=csv",
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "CSV logs",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&channel={channel}&status={status}&event_key={event_key}&scope=logs&export=csv",
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "PDF jobs",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&channel={channel}&status={status}&event_key={event_key}&scope=jobs&export=pdf",
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "PDF logs",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&channel={channel}&status={status}&event_key={event_key}&scope=logs&export=pdf",
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
             "can_manage": can(request.user, "comunicacao.manage"),
@@ -967,7 +967,7 @@ def tenant_settings_api(request):
         )
 
     if not can(request.user, "comunicacao.admin"):
-        return HttpResponseForbidden("403 — Somente admin pode atualizar a configuração da prefeitura.")
+        return HttpResponseForbidden("403 — Somente admin pode editar a configuração da prefeitura.")
 
     data = _request_data(request)
     parse_error = _input_error(data)

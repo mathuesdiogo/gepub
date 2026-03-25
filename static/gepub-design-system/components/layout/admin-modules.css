@@ -1663,7 +1663,7 @@ a.sec-kpi:focus-visible {
 .comms-kpi--dead { --_kpi-tone: var(--gp-secondary); }
 .comms-kpi--neutral { --_kpi-tone: var(--gp-primary); }
 
-.comms-tabs {
+.comms-tabs.nav.nav-tabs {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1672,6 +1672,14 @@ a.sec-kpi:focus-visible {
   border-radius: var(--gp-radius-md);
   background: color-mix(in srgb, var(--gp-primary) 6%, var(--gp-surface));
   padding: 4px;
+  margin: 0;
+  list-style: none;
+}
+
+.comms-tabs.nav.nav-tabs > li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .comms-tab {

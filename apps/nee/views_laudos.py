@@ -48,16 +48,16 @@ class LaudoListView(LoginRequiredMixin, BaseListViewGepub):
                 "label": "Voltar",
                 "url": reverse("nee:aluno_hub", args=[aluno_id]),
                 "icon": "fa-solid fa-arrow-left",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             },
         ]
         if aluno:
             actions.append(
                 {
-                    "label": "Abrir aluno",
+                    "label": "Visualizar aluno",
                     "url": reverse("educacao:aluno_detail", args=[aluno.pk]),
                     "icon": "fa-solid fa-user",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             )
         actions.append(
@@ -65,20 +65,20 @@ class LaudoListView(LoginRequiredMixin, BaseListViewGepub):
                 "label": "Novo laudo",
                 "url": reverse("nee:laudo_create", args=[aluno_id]),
                 "icon": "fa-solid fa-plus",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             }
         )
         actions.append({
             "label": "Exportar CSV",
             "url": f"{self.request.path}?q={escape(q)}&export=csv",
             "icon": "fa-solid fa-file-csv",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         })
         actions.append({
             "label": "Exportar PDF",
             "url": f"{self.request.path}?q={escape(q)}&export=pdf",
             "icon": "fa-solid fa-file-pdf",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         })
         return actions
 
@@ -156,7 +156,7 @@ class LaudoCreateView(LoginRequiredMixin, BaseCreateViewGepub):
     template_name = "nee/laudo_form.html"
     form_class = LaudoNEEForm
     title = "Novo laudo"
-    subtitle = "Cadastrar laudo para o aluno"
+    subtitle = "Adicionar laudo para o aluno"
     manage_perm = "nee.manage"
 
     def form_valid(self, request, form):
@@ -172,7 +172,7 @@ class LaudoCreateView(LoginRequiredMixin, BaseCreateViewGepub):
                 "label": "Voltar",
                 "url": reverse("nee:aluno_laudos", args=[aluno_id]),
                 "icon": "fa-solid fa-arrow-left",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             },
         ]
 
@@ -186,7 +186,7 @@ class LaudoUpdateView(LoginRequiredMixin, BaseUpdateViewGepub):
     form_class = LaudoNEEForm
     model = LaudoNEE
     title = "Editar laudo"
-    subtitle = "Atualizar laudo do aluno"
+    subtitle = "Editar laudo do aluno"
     manage_perm = "nee.manage"
 
     def get_context_data(self, **kwargs):
@@ -205,7 +205,7 @@ class LaudoUpdateView(LoginRequiredMixin, BaseUpdateViewGepub):
                 "label": "Voltar",
                 "url": reverse("nee:laudo_detail", args=[obj.pk]),
                 "icon": "fa-solid fa-arrow-left",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             },
         ]
 
@@ -226,18 +226,18 @@ class LaudoDetailView(LoginRequiredMixin, BaseDetailViewGepub):
                 "label": "Voltar",
                 "url": reverse("nee:aluno_laudos", args=[obj.aluno_id]),
                 "icon": "fa-solid fa-arrow-left",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             },
             {
-                "label": "Abrir aluno",
+                "label": "Visualizar aluno",
                 "url": reverse("educacao:aluno_detail", args=[obj.aluno_id]),
                 "icon": "fa-solid fa-user",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             },
             {
                 "label": "Editar",
                 "url": reverse("nee:laudo_update", args=[obj.pk]),
                 "icon": "fa-solid fa-pen",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             },
         ]

@@ -165,13 +165,13 @@ def portal_professor(request):
                     {"text": str(aulas_count)},
                     {"text": str(avaliacoes_count)},
                     {"text": str(pendencias)},
-                    {"text": "Abrir avaliações", "url": reverse("educacao:avaliacao_list", args=[d.pk])},
+                    {"text": "Visualizar avaliações", "url": reverse("educacao:avaliacao_list", args=[d.pk])},
                 ]
             }
         )
 
     actions = [
-        {"label": "Diário de Classe", "url": reverse("educacao:meus_diarios"), "icon": "fa-solid fa-book", "variant": "btn--ghost"},
+        {"label": "Diário de Classe", "url": reverse("educacao:meus_diarios"), "icon": "fa-solid fa-book", "variant": "gp-button--ghost"},
     ]
 
     return render(
@@ -258,7 +258,7 @@ def portal_aluno_edital_detail(request, pk: int, inscricao_id: int):
     hide_module_menu = role_scope_base(getattr(getattr(request.user, "profile", None), "role", None)) == "ALUNO"
 
     actions = [
-        {"label": "Voltar aos meus dados", "url": reverse("educacao:aluno_meus_dados", args=[codigo_aluno]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+        {"label": "Voltar aos meus dados", "url": reverse("educacao:aluno_meus_dados", args=[codigo_aluno]), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
     ]
     return render(
         request,
@@ -361,8 +361,8 @@ def aluno_meus_dados(request, codigo: str):
         aluno_email = aluno.email or ""
 
     actions = [
-        {"label": "Meu perfil", "url": reverse("accounts:meu_perfil"), "icon": "fa-solid fa-user", "variant": "btn--ghost"},
-        {"label": "Histórico completo", "url": reverse("educacao:historico_aluno", args=[aluno.pk]), "icon": "fa-solid fa-scroll", "variant": "btn--ghost"},
+        {"label": "Meu perfil", "url": reverse("accounts:meu_perfil"), "icon": "fa-solid fa-user", "variant": "gp-button--ghost"},
+        {"label": "Histórico completo", "url": reverse("educacao:historico_aluno", args=[aluno.pk]), "icon": "fa-solid fa-scroll", "variant": "gp-button--ghost"},
     ]
 
     return render(

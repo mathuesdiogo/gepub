@@ -51,12 +51,12 @@
           <h3 class="admin-panel__title">Resumo por município</h3>
           <p class="admin-panel__sub">Secretarias e unidades com maior volume</p>
         </div>
-        <a class="gp-button gp-button--outline" href="{% url 'org:municipio_list' %}"><i class="fa-solid fa-list"></i> Ver todos</a>
+        <a class="gp-button gp-button--outline" href="{% url 'org:municipio_list' %}"><i class="fa-solid fa-list"></i> Visualizar todos</a>
       </div>
 
       {% if top_municipios %}
         <div class="admin-table-wrap">
-          <table class="admin-table">
+          <table class="gp-table__native admin-table">
             <thead>
               <tr>
                 <th>Município</th>
@@ -85,7 +85,7 @@
                     {% elif m.secretarias >= 1 %}
                       <span class="admin-status admin-status--progress">Em expansão</span>
                     {% else %}
-                      <span class="admin-status admin-status--alert">Inicial</span>
+                      <span class="admin-status admin-status--alert gp-alert">Inicial</span>
                     {% endif %}
                   </td>
                 </tr>
@@ -136,7 +136,7 @@
           <h3 class="admin-panel__title">Top unidades por turmas</h3>
           <p class="admin-panel__sub">Ranking das 10 unidades com mais turmas</p>
         </div>
-        <a class="gp-button gp-button--outline" href="{% url 'org:unidade_list' %}"><i class="fa-solid fa-list"></i> Ver todas</a>
+        <a class="gp-button gp-button--outline" href="{% url 'org:unidade_list' %}"><i class="fa-solid fa-list"></i> Visualizar todas</a>
       </div>
 
       {% if top_unidades %}

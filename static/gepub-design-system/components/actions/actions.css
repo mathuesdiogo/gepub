@@ -18,6 +18,13 @@
   transition: transform var(--gp-transition-fast), background var(--gp-transition-fast), color var(--gp-transition-fast), border-color var(--gp-transition-fast);
 }
 
+/* Legacy SUAP-like default for `.btn` while keeping `.gp-button` neutral */
+.btn {
+  --_bg: color-mix(in srgb, var(--gp-secondary) 84%, #1f2328);
+  --_fg: var(--gp-on-secondary, #fff);
+  --_bd: color-mix(in srgb, var(--gp-secondary) 86%, #1f2328);
+}
+
 .gp-button:hover,
 .btn:hover {
   transform: translateY(-1px);
@@ -30,6 +37,7 @@
 
 .gp-button:disabled,
 .gp-button[aria-disabled="true"],
+.gp-button.disabled,
 .btn.disabled,
 .btn:disabled {
   opacity: 0.6;
@@ -58,10 +66,17 @@
 }
 
 .gp-button--outline,
-.btn.default {
+.btn.outline {
   --_bg: transparent;
   --_fg: var(--gp-primary);
   --_bd: var(--gp-primary);
+}
+
+.gp-button--default,
+.btn.default {
+  --_bg: color-mix(in srgb, var(--gp-border) 62%, var(--gp-surface));
+  --_fg: color-mix(in srgb, var(--gp-text-primary) 86%, #2e3237);
+  --_bd: color-mix(in srgb, var(--gp-border) 78%, #aab4c0);
 }
 
 .gp-button--ghost,
@@ -83,6 +98,13 @@
   --_bg: var(--gp-success);
   --_fg: var(--gp-on-success, var(--gp-surface));
   --_bd: var(--gp-success);
+}
+
+.gp-button--warning,
+.btn.warning {
+  --_bg: var(--gp-warning);
+  --_fg: var(--gp-on-warning, var(--gp-surface));
+  --_bd: var(--gp-warning);
 }
 
 .gp-button--icon {
@@ -115,11 +137,68 @@
 }
 
 .gp-button-group,
-.action-bar {
+.action-bar,
+.gp-action-bar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--gp-space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.action-bar > li,
+.gp-action-bar > li {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+.action-bar > li > ul.child,
+.gp-action-bar > li > ul.child {
+  position: absolute;
+  top: calc(100% + var(--gp-space-1));
+  left: 0;
+  min-width: 180px;
+  list-style: none;
+  margin: 0;
+  padding: var(--gp-space-1);
+  border-radius: var(--gp-radius-sm);
+  border: 1px solid var(--gp-border);
+  background: var(--gp-surface);
+  box-shadow: var(--gp-shadow-2);
+  z-index: var(--gp-z-dropdown);
+  display: none;
+}
+
+.action-bar > li > ul.child > li,
+.gp-action-bar > li > ul.child > li {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.action-bar > li > ul.child > li > a,
+.gp-action-bar > li > ul.child > li > a {
+  display: block;
+  padding: var(--gp-space-1) var(--gp-space-2);
+  border-radius: var(--gp-radius-sm);
+  color: var(--gp-text-primary);
+  text-decoration: none;
+}
+
+.action-bar > li > ul.child > li > a:hover,
+.gp-action-bar > li > ul.child > li > a:hover {
+  background: color-mix(in srgb, var(--gp-primary) 8%, var(--gp-surface));
+}
+
+.action-bar > li.child:hover > ul.child,
+.gp-action-bar > li.child:hover > ul.child,
+.action-bar > li.child:focus-within > ul.child,
+.gp-action-bar > li.child:focus-within > ul.child {
+  display: block;
 }
 
 .gp-button-dropdown {
@@ -152,6 +231,21 @@
 
 .gp-button-dropdown__menu a:hover {
   background: color-mix(in srgb, var(--gp-primary) 8%, var(--gp-surface));
+}
+
+.btn.disable_on_click,
+.gp-button.disable_on_click {
+  cursor: wait;
+}
+
+.btn.confirm,
+.gp-button.confirm {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gp-warning) 48%, var(--_bd));
+}
+
+.btn.popup,
+.gp-button.popup {
+  text-decoration: none;
 }
 
 @keyframes gp-spin {

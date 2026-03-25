@@ -75,7 +75,7 @@ def buscar_aluno(request):
         )
 
     actions = [
-        {"label": "Voltar", "url": reverse("nee:index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+        {"label": "Voltar", "url": reverse("nee:index"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
     ]
 
     return render(

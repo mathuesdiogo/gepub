@@ -2,13 +2,13 @@
 {% block module_title %}NEE • Alertas{% endblock %}
 
 {% block module_content %}
-<div class="card"><div class="card__body">
+<div class="card gp-card"><div class="card__body gp-card__body">
 
 {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
 {% if rows %}
-  <div class="table-shell">
-    <table class="table">
+  <div class="table-shell gp-table gp-table--responsive">
+    <table class="gp-table__native table">
       <thead>
         <tr>
           {% for h in headers %}

@@ -3,7 +3,16 @@ from __future__ import annotations
 from apps.core.exports import export_csv, export_pdf_table
 
 from .views_common import *
-from .views_common import _aplicar_movimento_estoque, _municipios_admin, _q_municipio, _resolve_municipio, _to_dec
+from .views_common import (
+    _aplicar_movimento_estoque,
+    _apply_scope_filters,
+    _municipios_admin,
+    _q_municipio,
+    _q_scope,
+    _resolve_municipio,
+    _scope_context,
+    _to_dec,
+)
 
 @login_required
 @require_perm("almoxarifado.view")
@@ -11,9 +20,18 @@ def requisicao_list(request):
     municipio = _resolve_municipio(request)
     if not municipio:
         return redirect("core:dashboard")
+    scope_ctx = _scope_context(request, municipio)
+    scope_qs = _q_scope(request)
     status = (request.GET.get("status") or "").strip()
     q = (request.GET.get("q") or "").strip()
-    qs = AlmoxarifadoRequisicao.objects.filter(municipio=municipio).select_related("item", "secretaria_solicitante")
+    qs = _apply_scope_filters(
+        request,
+        AlmoxarifadoRequisicao.objects.filter(municipio=municipio).select_related("item", "secretaria_solicitante"),
+        secretaria_field="secretaria_solicitante",
+        unidade_field="unidade_solicitante",
+        setor_field="setor_solicitante",
+        local_field="local_solicitante",
+    )
     if status:
         qs = qs.filter(status=status)
     if q:
@@ -61,23 +79,30 @@ def requisicao_list(request):
             "actions": [
                 {
                     "label": "Nova requisição",
-                    "url": reverse("almoxarifado:requisicao_create") + _q_municipio(municipio),
+                    "url": reverse("almoxarifado:requisicao_create") + _q_municipio(municipio) + scope_qs,
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "CSV",
-                    "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&export=csv",
+                    "url": request.path + f"?municipio={municipio.pk}{scope_qs}&q={q}&status={status}&export=csv",
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "PDF",
-                    "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&export=pdf",
+                    "url": request.path + f"?municipio={municipio.pk}{scope_qs}&q={q}&status={status}&export=pdf",
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
+                },
+                {
+                    "label": "Relatórios",
+                    "url": reverse("almoxarifado:relatorios") + _q_municipio(municipio) + scope_qs,
+                    "icon": "fa-solid fa-chart-column",
+                    "variant": "gp-button--ghost",
                 },
             ],
+            **scope_ctx,
         },
     )
 
@@ -105,7 +130,7 @@ def requisicao_create(request):
             publico=False,
         )
         messages.success(request, "Requisição criada.")
-        return redirect(reverse("almoxarifado:requisicao_list") + _q_municipio(municipio))
+        return redirect(reverse("almoxarifado:requisicao_list") + _q_municipio(municipio) + _q_scope(request))
     return render(
         request,
         "core/form_base.html",
@@ -114,7 +139,7 @@ def requisicao_create(request):
             "subtitle": f"{municipio.nome}/{municipio.uf}",
             "actions": [],
             "form": form,
-            "cancel_url": reverse("almoxarifado:requisicao_list") + _q_municipio(municipio),
+            "cancel_url": reverse("almoxarifado:requisicao_list") + _q_municipio(municipio) + _q_scope(request),
             "submit_label": "Salvar requisição",
         },
     )
@@ -129,13 +154,13 @@ def requisicao_aprovar(request, pk: int):
     obj = get_object_or_404(AlmoxarifadoRequisicao, pk=pk, municipio=municipio)
     if obj.status != AlmoxarifadoRequisicao.Status.PENDENTE:
         messages.warning(request, "Requisição não está pendente.")
-        return redirect(reverse("almoxarifado:requisicao_list") + _q_municipio(municipio))
+        return redirect(reverse("almoxarifado:requisicao_list") + _q_municipio(municipio) + _q_scope(request))
     obj.status = AlmoxarifadoRequisicao.Status.APROVADA
     obj.aprovado_por = request.user
     obj.aprovado_em = timezone.now()
     obj.save(update_fields=["status", "aprovado_por", "aprovado_em", "atualizado_em"])
     messages.success(request, "Requisição aprovada.")
-    return redirect(reverse("almoxarifado:requisicao_list") + _q_municipio(municipio))
+    return redirect(reverse("almoxarifado:requisicao_list") + _q_municipio(municipio) + _q_scope(request))
 
 @login_required
 @require_perm("almoxarifado.manage")
@@ -147,10 +172,10 @@ def requisicao_atender(request, pk: int):
     obj = get_object_or_404(AlmoxarifadoRequisicao, pk=pk, municipio=municipio)
     if obj.status not in {AlmoxarifadoRequisicao.Status.APROVADA, AlmoxarifadoRequisicao.Status.PENDENTE}:
         messages.warning(request, "Requisição não pode ser atendida no status atual.")
-        return redirect(reverse("almoxarifado:requisicao_list") + _q_municipio(municipio))
+        return redirect(reverse("almoxarifado:requisicao_list") + _q_municipio(municipio) + _q_scope(request))
     if _to_dec(obj.item.saldo_atual) < _to_dec(obj.quantidade):
         messages.error(request, "Saldo insuficiente para atender a requisição.")
-        return redirect(reverse("almoxarifado:requisicao_list") + _q_municipio(municipio))
+        return redirect(reverse("almoxarifado:requisicao_list") + _q_municipio(municipio) + _q_scope(request))
 
     mov = AlmoxarifadoMovimento.objects.create(
         municipio=municipio,
@@ -180,4 +205,4 @@ def requisicao_atender(request, pk: int):
         depois={"numero": obj.numero, "item": obj.item.codigo, "quantidade": str(obj.quantidade)},
     )
     messages.success(request, "Requisição atendida e estoque atualizado.")
-    return redirect(reverse("almoxarifado:requisicao_list") + _q_municipio(municipio))
+    return redirect(reverse("almoxarifado:requisicao_list") + _q_municipio(municipio) + _q_scope(request))

@@ -1,20 +1,21 @@
 {% extends "educacao/base_modulo.html" %}
+{% load gepub_design_system %}
 {% block title %}{{ inscricao.aluno.nome }} • Inscrição • Educação • GEPUB{% endblock %}
 
 {% block module_content %}
-<div class="gp-card"><div class="gp-card__body">
+<div class="gp-card"><div class="gp-card__body edu-detail-flow">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <div class="gp-pills">
-    <span class="gp-pills__item">Status: {{ inscricao.get_status_display }}</span>
-    <span class="gp-pills__item">Pontuação: {{ inscricao.pontuacao }}</span>
-    <span class="gp-pills__item">Aluno: {{ inscricao.aluno.nome }}</span>
-    <span class="gp-pills__item">Edital: {{ edital.numero_ano }}</span>
-  </div>
+  <ul class="pills">
+    <li><span>Status: {{ inscricao.get_status_display }}</span></li>
+    <li><span>Pontuação: {{ inscricao.pontuacao }}</span></li>
+    <li><span>Aluno: {{ inscricao.aluno.nome }}</span></li>
+    <li><span>Edital: {{ edital.numero_ano }}</span></li>
+  </ul>
 
   {% if can_manage %}
   <div class="gp-flex-wrap-row gp-mb-3">
-    <form class="gp-form" method="post" action="{% url 'educacao:beneficio_edital_inscricao_reprocessar' edital.pk inscricao.pk %}?municipio={{ municipio.id }}">
+    <form class="gp-form form-shell" method="post" action="{% url 'educacao:beneficio_edital_inscricao_reprocessar' edital.pk inscricao.pk %}?municipio={{ municipio.id }}">
       {% csrf_token %}
       <button class="gp-button gp-button--ghost" type="submit"><i class="fa-solid fa-arrows-rotate"></i> Reprocessar pontuação</button>
     </form>
@@ -82,7 +83,7 @@
           {% endif %}
         </td>
         <td>
-          {% if d.arquivo %}<a href="{{ d.arquivo.url }}" target="_blank" rel="noopener">Abrir</a>{% else %}—{% endif %}
+          {% if d.arquivo %}<a href="{{ d.arquivo.url }}" target="_blank" rel="noopener">Visualizar</a>{% else %}—{% endif %}
         </td>
       </tr>
       {% empty %}
@@ -95,9 +96,9 @@
   {% if can_manage %}
   <details class="aluno-form-panel">
     <summary><i class="fa-solid fa-clipboard-check"></i>Análise manual da inscrição</summary>
-    <form class="gp-form" method="post" action="{% url 'educacao:beneficio_edital_inscricao_analisar' edital.pk inscricao.pk %}?municipio={{ municipio.id }}">
+    <form class="gp-form form-shell" method="post" action="{% url 'educacao:beneficio_edital_inscricao_analisar' edital.pk inscricao.pk %}?municipio={{ municipio.id }}">
       {% csrf_token %}
-      {{ form_analise.as_p }}
+      {% render_form form_analise %}
       <button class="gp-button gp-button--primary" type="submit">Salvar análise</button>
     </form>
   </details>

@@ -6,7 +6,7 @@
     <div class="gp-card__body">
       {% include "core/partials/components/layout/page_head.html" with title="Lista de espera" subtitle="Fila de atendimento por curso e prioridade" actions=None %}
 
-      <form method="get" class="gp-form gp-form--inline u-mb-10">
+      <form method="get" class="gp-form gp-form--inline u-mb-10 form-shell">
         <select class="gp-input" name="curso">
           <option value="">Todos os cursos</option>
           {% for c in cursos %}

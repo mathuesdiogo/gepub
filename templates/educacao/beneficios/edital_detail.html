@@ -1,20 +1,20 @@
 {% extends "educacao/base_modulo.html" %}
-{% load gepub_ui %}
+{% load gepub_ui gepub_design_system %}
 {% block title %}{{ obj.numero_ano }} • Edital • Educação • GEPUB{% endblock %}
 
 {% block module_content %}
-<div class="gp-card"><div class="gp-card__body">
+<div class="gp-card"><div class="gp-card__body edu-detail-flow">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <div class="gp-pills">
-    <span class="gp-pills__item">{{ obj.get_status_display }}</span>
-    <span class="gp-pills__item">{{ obj.beneficio.nome }}</span>
-    <span class="gp-pills__item">{{ obj.get_abrangencia_display }}</span>
-    <span class="gp-pills__item">{{ obj.get_publico_alvo_display }}</span>
-  </div>
+  <ul class="pills">
+    <li><span>{{ obj.get_status_display }}</span></li>
+    <li><span>{{ obj.beneficio.nome }}</span></li>
+    <li><span>{{ obj.get_abrangencia_display }}</span></li>
+    <li><span>{{ obj.get_publico_alvo_display }}</span></li>
+  </ul>
 
   {% if can_manage and obj.status == 'RASCUNHO' %}
-  <form class="gp-form" method="post" action="{% url 'educacao:beneficio_edital_publicar' obj.pk %}?municipio={{ municipio.id }}">
+  <form class="gp-form form-shell" method="post" action="{% url 'educacao:beneficio_edital_publicar' obj.pk %}?municipio={{ municipio.id }}">
     {% csrf_token %}
     <button class="gp-button gp-button--primary" type="submit">Publicar edital</button>
   </form>
@@ -39,9 +39,9 @@
       {% if can_manage %}
       <details class="aluno-form-panel">
         <summary>Adicionar critério</summary>
-        <form class="gp-form" method="post" action="{% url 'educacao:beneficio_edital_criterio_add' obj.pk %}?municipio={{ municipio.id }}">
+        <form class="gp-form form-shell" method="post" action="{% url 'educacao:beneficio_edital_criterio_add' obj.pk %}?municipio={{ municipio.id }}">
           {% csrf_token %}
-          {{ form_criterio.as_p }}
+          {% render_form form_criterio %}
           <button class="gp-button gp-button--primary" type="submit">Adicionar</button>
         </form>
       </details>
@@ -60,9 +60,9 @@
       {% if can_manage %}
       <details class="aluno-form-panel">
         <summary>Adicionar documento</summary>
-        <form class="gp-form" method="post" action="{% url 'educacao:beneficio_edital_documento_add' obj.pk %}?municipio={{ municipio.id }}">
+        <form class="gp-form form-shell" method="post" action="{% url 'educacao:beneficio_edital_documento_add' obj.pk %}?municipio={{ municipio.id }}">
           {% csrf_token %}
-          {{ form_documento.as_p }}
+          {% render_form form_documento %}
           <button class="gp-button gp-button--primary" type="submit">Adicionar</button>
         </form>
       </details>
@@ -97,7 +97,7 @@
   {% if can_manage %}
   <details class="aluno-form-panel">
     <summary><i class="fa-solid fa-user-plus"></i>Adicionar inscrição</summary>
-    <form class="gp-form" method="post" enctype="multipart/form-data" action="{% url 'educacao:beneficio_edital_inscricao_add' obj.pk %}?municipio={{ municipio.id }}">
+    <form class="gp-form form-shell" method="post" enctype="multipart/form-data" action="{% url 'educacao:beneficio_edital_inscricao_add' obj.pk %}?municipio={{ municipio.id }}">
       {% csrf_token %}
       {% for hidden in form_inscricao.hidden_fields %}{{ hidden }}{% endfor %}
       {{ form_inscricao.non_field_errors }}

@@ -19,7 +19,7 @@ from apps.accounts.views_users_common import scope_users_queryset
 from apps.core.rbac import can, get_profile, is_admin
 from apps.org.models import Address, Secretaria, Setor, Unidade
 
-DELETE_CONFIRM_TEXT = "EXCLUIR"
+DELETE_CONFIRM_TEXT = "REMOVER"
 
 
 def _can_manage_secretarias(user) -> bool:
@@ -114,17 +114,17 @@ def _scope_unidades_queryset(user):
 
 def _user_delete_guard(actor, target, target_profile: Profile | None) -> tuple[bool, str]:
     if target.pk == actor.pk:
-        return False, "Não é permitido excluir o próprio usuário logado."
+        return False, "Não é permitido remover o próprio usuário logado."
     if target.is_superuser:
-        return False, "Superusuário não pode ser excluído por esta tela."
+        return False, "Superusuário não pode ser removido por esta tela."
     if target.is_staff and not is_admin(actor):
-        return False, "Usuário da equipe técnica só pode ser excluído por administrador."
+        return False, "Usuário da equipe técnica só pode ser removido por administrador."
     if (
         target_profile
         and getattr(target_profile, "role", "") == Profile.Role.ADMIN
         and not is_admin(actor)
     ):
-        return False, "Somente administrador pode excluir usuário com perfil ADMIN."
+        return False, "Somente administrador pode remover usuário com perfil ADMIN."
     return True, ""
 
 
@@ -163,7 +163,7 @@ def _format_protected_error(exc: ProtectedError) -> str:
 
 def _build_secretaria_delete_payload(request: HttpRequest, pk: int) -> dict[str, Any]:
     if not _can_manage_secretarias(request.user):
-        raise PermissionError("Sem permissão para excluir secretarias.")
+        raise PermissionError("Sem permissão para remover secretarias.")
 
     obj = get_object_or_404(_scope_secretarias_queryset(request.user), pk=pk)
     deps = {
@@ -193,13 +193,13 @@ def _build_secretaria_delete_payload(request: HttpRequest, pk: int) -> dict[str,
         "dependencies": deps,
         "blockers": blockers,
         "can_delete": len(blockers) == 0,
-        "success_message": f"Secretaria '{obj.nome}' excluída com sucesso.",
+        "success_message": f"Secretaria '{obj.nome}' removida com sucesso.",
     }
 
 
 def _build_unidade_delete_payload(request: HttpRequest, pk: int) -> dict[str, Any]:
     if not _can_manage_unidades(request.user):
-        raise PermissionError("Sem permissão para excluir unidades.")
+        raise PermissionError("Sem permissão para remover unidades.")
 
     obj = get_object_or_404(_scope_unidades_queryset(request.user), pk=pk)
     deps = {
@@ -227,13 +227,13 @@ def _build_unidade_delete_payload(request: HttpRequest, pk: int) -> dict[str, An
         "dependencies": deps,
         "blockers": blockers,
         "can_delete": len(blockers) == 0,
-        "success_message": f"Unidade '{obj.nome or obj.pk}' excluída com sucesso.",
+        "success_message": f"Unidade '{obj.nome or obj.pk}' removida com sucesso.",
     }
 
 
 def _build_usuario_delete_payload(request: HttpRequest, pk: int) -> dict[str, Any]:
     if not _can_manage_usuarios(request.user):
-        raise PermissionError("Sem permissão para excluir usuários.")
+        raise PermissionError("Sem permissão para remover usuários.")
 
     obj = get_object_or_404(scope_users_queryset(request), pk=pk)
     profile = getattr(obj, "profile", None)
@@ -249,7 +249,7 @@ def _build_usuario_delete_payload(request: HttpRequest, pk: int) -> dict[str, An
         "dependencies": {},
         "blockers": blockers,
         "can_delete": can_delete,
-        "success_message": f"Usuário '{obj.get_full_name() or obj.username}' excluído com sucesso.",
+        "success_message": f"Usuário '{obj.get_full_name() or obj.username}' removido com sucesso.",
     }
 
 
@@ -414,7 +414,7 @@ def sistema_exclusoes(request: HttpRequest) -> HttpResponse:
         "title": "Central de Exclusões",
         "subtitle": "Exclusão controlada de secretarias, unidades e usuários.",
         "actions": [
-            {"label": "Voltar", "url": reverse("core:dashboard"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+            {"label": "Voltar", "url": reverse("core:dashboard"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
         ],
         "q": q,
         "can_manage_secretarias": can_secretarias,
@@ -449,7 +449,7 @@ def sistema_exclusoes_confirmar(request: HttpRequest, entity_type: str, pk: int)
 
         if not payload["can_delete"]:
             blockers = payload.get("blockers") or []
-            msg = "Não foi possível excluir: há vínculos ativos."
+            msg = "Não foi possível remover: há vínculos ativos."
             if blockers:
                 msg = f"{msg} {' '.join(blockers)}"
             messages.error(request, msg)
@@ -479,13 +479,13 @@ def sistema_exclusoes_confirmar(request: HttpRequest, entity_type: str, pk: int)
             details = _format_protected_error(exc)
             messages.error(
                 request,
-                f"Não foi possível excluir {target_label.lower()}: existem vínculos em {details}.",
+                f"Não foi possível remover {target_label.lower()}: existem vínculos em {details}.",
             )
             return redirect(back_url)
         except Exception:
             messages.error(
                 request,
-                f"Falha ao excluir {target_label.lower()}. Tente novamente ou revise os vínculos.",
+                f"Falha ao remover {target_label.lower()}. Tente novamente ou revise os vínculos.",
             )
             return redirect(back_url)
 
@@ -493,10 +493,10 @@ def sistema_exclusoes_confirmar(request: HttpRequest, entity_type: str, pk: int)
         return redirect(back_url)
 
     context = {
-        "title": f"Confirmar exclusão de {payload['entity_label'].lower()}",
+        "title": f"Confirmar remoção de {payload['entity_label'].lower()}",
         "subtitle": "Esta ação não pode ser desfeita.",
         "actions": [
-            {"label": "Voltar", "url": back_url, "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+            {"label": "Voltar", "url": back_url, "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
         ],
         "entity_label": payload["entity_label"],
         "entity_title": payload["title"],

@@ -73,10 +73,10 @@ class SetorListView(BaseListViewGepub):
     def get_actions(self, request, **kwargs):
         actions = super().get_actions(**kwargs)
         if is_admin(request.user):
-            actions.insert(0, {"label": "Novo setor", "url": reverse("org:setor_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+            actions.insert(0, {"label": "Novo setor", "url": reverse("org:setor_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
         # export
-        actions.append({"label": "CSV", "url": request.path + "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"})
-        actions.append({"label": "PDF", "url": request.path + "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"})
+        actions.append({"label": "CSV", "url": request.path + "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "gp-button--ghost"})
+        actions.append({"label": "PDF", "url": request.path + "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"})
         return actions
 
     def get_headers(self, request):
@@ -155,7 +155,7 @@ class SetorUpdateView(BaseUpdateViewGepub):
     back_url_name = "org:setor_list"
     form_class = SetorForm
     model = Setor
-    submit_label = "Atualizar setor"
+    submit_label = "Editar setor"
 
     def dispatch(self, request, *args, **kwargs):
         if not is_admin(request.user):
@@ -177,9 +177,9 @@ class SetorDetailView(BaseDetailViewGepub):
         setor = get_object_or_404(Setor.objects.select_related("unidade__secretaria__municipio"), pk=pk)
         muni = setor.unidade.secretaria.municipio if setor.unidade and setor.unidade.secretaria else None
 
-        actions = [{"label": "Voltar", "url": reverse("org:setor_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+        actions = [{"label": "Voltar", "url": reverse("org:setor_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
         if is_admin(request.user):
-            actions.append({"label": "Editar", "url": reverse("org:setor_update", args=[setor.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+            actions.append({"label": "Editar", "url": reverse("org:setor_update", args=[setor.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
 
         fields = [
             {"label": "Nome", "value": setor.nome},
@@ -198,13 +198,13 @@ class SetorDetailView(BaseDetailViewGepub):
             "pills": [],
             "links": [
                 {
-                    "label": "Ver unidade",
+                    "label": "Visualizar unidade",
                     "url": reverse("org:unidade_detail", args=[setor.unidade_id]),
                     "meta": setor.unidade.nome if setor.unidade else "—",
                     "icon": "fa-solid fa-school",
                 },
                 {
-                    "label": "Ver secretaria",
+                    "label": "Visualizar secretaria",
                     "url": (
                         reverse("org:secretaria_detail", args=[setor.unidade.secretaria_id])
                         if setor.unidade and setor.unidade.secretaria_id

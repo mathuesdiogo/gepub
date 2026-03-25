@@ -6,7 +6,38 @@
   {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
 
   <article class="gp-student-stage__card">
-    <h3>Biblioteca / Materiais</h3>
+    <h3>Biblioteca Institucional</h3>
+    <p>
+      Matrícula institucional:
+      <strong>{% if matricula_institucional %}{{ matricula_institucional.numero_matricula }}{% else %}Não gerada{% endif %}</strong>
+    </p>
+    <p>
+      Empréstimos ativos: <strong>{{ emprestimos_ativos_count }}</strong> •
+      Em atraso: <strong>{{ emprestimos_atrasados_count }}</strong>
+    </p>
+    <ul class="gp-student-list">
+      {% for emp in emprestimos %}
+        <li class="gp-student-list__item">
+          <strong>{{ emp.livro.titulo }} • Exemplar {{ emp.exemplar.codigo_exemplar }}</strong>
+          <p>
+            Biblioteca: {{ emp.biblioteca.nome }} •
+            Empréstimo: {{ emp.data_emprestimo|date:"d/m/Y" }} •
+            Previsto: {{ emp.data_prevista_devolucao|date:"d/m/Y" }} •
+            Status: {{ emp.get_status_display }}
+            {% if emp.em_atraso %}<span class="gp-chip gp-chip--warning">Atrasado</span>{% endif %}
+          </p>
+          {% if emp.data_devolucao_real %}
+            <small>Devolvido em {{ emp.data_devolucao_real|date:"d/m/Y" }}</small>
+          {% endif %}
+        </li>
+      {% empty %}
+        <li class="gp-student-empty">Nenhum empréstimo registrado até o momento.</li>
+      {% endfor %}
+    </ul>
+  </article>
+
+  <article class="gp-student-stage__card">
+    <h3>Materiais publicados</h3>
     <ul class="gp-student-list">
       {% for arq in arquivos %}
         <li class="gp-student-list__item">

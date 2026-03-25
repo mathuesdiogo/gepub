@@ -406,6 +406,142 @@ class Setor(models.Model):
         return f"{self.nome} ({self.unidade})"
 
 
+class LocalEstrutural(models.Model):
+    class TipoLocal(models.TextChoices):
+        SETOR = "SETOR", "Setor"
+        SALA = "SALA", "Sala"
+        LABORATORIO = "LABORATORIO", "Laboratório"
+        DEPOSITO = "DEPOSITO", "Depósito"
+        ALMOXARIFADO = "ALMOXARIFADO", "Almoxarifado interno"
+        SECRETARIA = "SECRETARIA", "Secretaria interna"
+        COORDENACAO = "COORDENACAO", "Coordenação"
+        CONSULTORIO = "CONSULTORIO", "Consultório"
+        RECEPCAO = "RECEPCAO", "Recepção"
+        BLOCO = "BLOCO", "Bloco"
+        OUTRO = "OUTRO", "Outro"
+
+    class Status(models.TextChoices):
+        ATIVO = "ATIVO", "Ativo"
+        INATIVO = "INATIVO", "Inativo"
+
+    municipio = models.ForeignKey(
+        Municipio,
+        on_delete=models.PROTECT,
+        related_name="locais_estruturais",
+    )
+    secretaria = models.ForeignKey(
+        Secretaria,
+        on_delete=models.PROTECT,
+        related_name="locais_estruturais",
+    )
+    unidade = models.ForeignKey(
+        Unidade,
+        on_delete=models.PROTECT,
+        related_name="locais_estruturais",
+    )
+    local_pai = models.ForeignKey(
+        "self",
+        on_delete=models.PROTECT,
+        related_name="filhos",
+        null=True,
+        blank=True,
+    )
+
+    nome = models.CharField(max_length=160)
+    tipo_local = models.CharField(max_length=30, choices=TipoLocal.choices, default=TipoLocal.SETOR)
+    codigo = models.CharField(max_length=40, blank=True, default="")
+    responsavel = models.CharField(max_length=180, blank=True, default="")
+    observacoes = models.TextField(blank=True, default="")
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.ATIVO)
+
+    # Campo opcional para migração assistida dos setores legados para locais estruturais.
+    legacy_setor = models.OneToOneField(
+        "org.Setor",
+        on_delete=models.SET_NULL,
+        related_name="local_estrutural",
+        null=True,
+        blank=True,
+    )
+
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Local estrutural"
+        verbose_name_plural = "Locais estruturais"
+        ordering = ["unidade__nome", "nome"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["unidade", "local_pai", "nome"],
+                name="uniq_local_estrutural_unidade_pai_nome",
+            ),
+            models.UniqueConstraint(
+                fields=["municipio", "codigo"],
+                condition=~models.Q(codigo=""),
+                name="uniq_local_estrutural_codigo_municipio",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["municipio", "secretaria", "unidade"]),
+            models.Index(fields=["tipo_local", "status"]),
+            models.Index(fields=["nome"]),
+            models.Index(fields=["codigo"]),
+            models.Index(fields=["local_pai"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.nome} ({self.unidade})"
+
+    @property
+    def nivel(self) -> int:
+        level = 0
+        current = self.local_pai
+        while current:
+            level += 1
+            current = current.local_pai
+        return level
+
+    @property
+    def caminho(self) -> str:
+        nomes: list[str] = [self.nome]
+        current = self.local_pai
+        while current:
+            nomes.append(current.nome)
+            current = current.local_pai
+        return " / ".join(reversed(nomes))
+
+    def clean(self):
+        errors: dict[str, str] = {}
+
+        if self.unidade_id and self.secretaria_id and self.unidade.secretaria_id != self.secretaria_id:
+            errors["unidade"] = "A unidade deve pertencer à secretaria selecionada."
+
+        if self.secretaria_id and self.municipio_id and self.secretaria.municipio_id != self.municipio_id:
+            errors["secretaria"] = "A secretaria deve pertencer ao município selecionado."
+
+        if self.local_pai_id:
+            if self.pk and self.local_pai_id == self.pk:
+                errors["local_pai"] = "Um local não pode ser pai de si mesmo."
+            elif self.local_pai.unidade_id != self.unidade_id:
+                errors["local_pai"] = "O local pai deve pertencer à mesma unidade."
+
+            ancestor = self.local_pai
+            visited: set[int] = {self.pk} if self.pk else set()
+            while ancestor:
+                if ancestor.pk in visited:
+                    errors["local_pai"] = "Hierarquia inválida: ciclo detectado."
+                    break
+                visited.add(ancestor.pk)
+                ancestor = ancestor.local_pai
+
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+
 class SecretariaTemplate(models.Model):
     class Modulo(models.TextChoices):
         EDUCACAO = "educacao", "Educação"

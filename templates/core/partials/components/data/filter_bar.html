@@ -1,6 +1,6 @@
-<form method="get" class="filter-bar gp-table__filters" action="{{ action_url|default:'' }}">
-  <div class="filter-bar__field gp-form-group">
-    <label class="small gp-form-label">Buscar</label>
+<form method="get" class="filter-bar search-and-filters gp-table__filters {{ parent_class|default:'' }}" action="{{ action_url|default:'' }}">
+  <div class="filter-bar__field filter gp-form-group {{ child_class|default:'' }} form-shell">
+    <label class="small gp-form-label form-shell">Buscar</label>
     <input
     class="gp-input"
     name="q"
@@ -17,7 +17,7 @@
     {{ extra_filters|safe }}
   {% endif %}
 
-  <div class="filter-bar__actions">
+  <div class="filter-bar__actions filter {{ child_actions_class|default:'' }}">
     <button class="gp-button gp-button--primary" type="submit">
       <i class="fa-solid fa-filter" aria-hidden="true"></i>
       <span>Filtrar</span>

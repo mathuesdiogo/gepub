@@ -1,4 +1,5 @@
 {% extends "educacao/base_modulo.html" %}
+{% load gepub_design_system %}
 
 {% block title %}
   {% if mode == "create" %}
@@ -26,7 +27,7 @@
         {% endif %}
 
         <div class="form-shell__fields">
-          {{ form.as_p }}
+          {% render_form form %}
         </div>
 
         {% if mode == "create" and componente_form %}
@@ -34,7 +35,7 @@
           <div class="section__title">Primeiro componente (opcional)</div>
           <div class="small">Você pode incluir o primeiro componente agora. Os demais podem ser adicionados depois.</div>
           <div class="u-mt-10">
-            {{ componente_form.as_p }}
+            {% render_form componente_form %}
           </div>
         {% endif %}
 
@@ -50,7 +51,7 @@
           <div class="section__title">Ações rápidas da matriz</div>
           <div class="small">Use para acelerar o modelo anual infantil/fundamental antes de criar turmas.</div>
           <div class="u-mt-10 u-flex u-gap-12 u-wrap">
-            <form class="gp-form u-inline-flex u-gap-8 u-items-center" method="post">
+            <form class="gp-form u-inline-flex u-gap-8 u-items-center form-shell" method="post">
               {% csrf_token %}
               <input type="hidden" name="_action" value="gerar_componentes_base">
               <label class="u-inline-flex u-items-center u-gap-6">
@@ -61,7 +62,7 @@
                 Gerar base automática
               </button>
             </form>
-            <form class="gp-form u-inline-flex u-gap-8 u-items-center" method="post">
+            <form class="gp-form u-inline-flex u-gap-8 u-items-center form-shell" method="post">
               {% csrf_token %}
               <input type="hidden" name="_action" value="clonar_proximo_ano">
               <label class="small">Ano destino</label>
@@ -71,8 +72,7 @@
                 step="1"
                 name="ano_destino"
                 value="{{ next_year_default }}"
-                class="gp-input"
-                style="max-width: 120px;"
+                class="gp-input u-maxw-120"
               >
               <button type="submit" class="gp-button gp-button--ghost">Clonar matriz para novo ano</button>
             </form>
@@ -105,7 +105,7 @@
                   <td>{% if item.obrigatoria %}Sim{% else %}Não{% endif %}</td>
                   <td>{% if item.ativo %}Sim{% else %}Não{% endif %}</td>
                   <td>
-                    <form class="gp-form" method="post">
+                    <form class="gp-form form-shell" method="post">
                       {% csrf_token %}
                       <input type="hidden" name="_action" value="remove_componente">
                       <input type="hidden" name="componente_id" value="{{ item.pk }}">
@@ -123,10 +123,10 @@
 
           <div class="form-section u-mt-12">
             <div class="form-section__title">Adicionar componente</div>
-            <form class="gp-form" method="post">
+            <form class="gp-form form-shell" method="post">
               {% csrf_token %}
               <input type="hidden" name="_action" value="add_componente">
-              {{ componente_form.as_p }}
+              {% render_form componente_form %}
               <button type="submit" class="gp-button gp-button--primary">Adicionar na matriz</button>
             </form>
           </div>
@@ -159,7 +159,7 @@
                   <td>{{ rel.destino.ordem }} • {{ rel.destino.componente.nome }}</td>
                   <td>{% if rel.ativo %}Sim{% else %}Não{% endif %}</td>
                   <td>
-                    <form class="gp-form" method="post">
+                    <form class="gp-form form-shell" method="post">
                       {% csrf_token %}
                       <input type="hidden" name="_action" value="remove_relacao">
                       <input type="hidden" name="relacao_id" value="{{ rel.pk }}">
@@ -177,10 +177,10 @@
 
           <div class="form-section u-mt-12">
             <div class="form-section__title">Adicionar relação</div>
-            <form class="gp-form" method="post">
+            <form class="gp-form form-shell" method="post">
               {% csrf_token %}
               <input type="hidden" name="_action" value="add_relacao">
-              {{ relacao_form.as_p }}
+              {% render_form relacao_form %}
               <button type="submit" class="gp-button gp-button--primary">Adicionar relação</button>
             </form>
           </div>

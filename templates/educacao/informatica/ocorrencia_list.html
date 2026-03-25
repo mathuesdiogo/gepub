@@ -6,7 +6,7 @@
     <div class="gp-card__body">
       {% include "core/partials/components/layout/page_head.html" with title="Ocorrências" subtitle="Registros operacionais e pedagógicos" actions=None %}
 
-      <table class="table gp-table--striped gp-table--hover">
+      <table class="gp-table__native table gp-table--striped gp-table--hover">
         <thead><tr><th>Data</th><th>Turma</th><th>Tipo</th><th>Aluno</th><th>Descrição</th></tr></thead>
         <tbody>
           {% for item in page_obj %}

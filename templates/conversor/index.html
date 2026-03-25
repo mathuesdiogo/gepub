@@ -51,7 +51,7 @@
     </div>
     <div class="cv-tools__grid">
       {% for tool in tool_cards %}
-        <button type="button" class="cv-tool-card cv-tool-card--{{ tool.tone }}" data-set-tipo="{{ tool.tipo }}">
+        <button type="button" class="cv-tool-card cv-tool-card--{{ tool.tone }} gp-card" data-set-tipo="{{ tool.tipo }}">
           <span class="cv-tool-card__icon"><i class="{{ tool.icon }}"></i></span>
           <span class="cv-tool-card__title">{{ tool.titulo }}</span>
           <span class="cv-tool-card__desc">{{ tool.descricao }}</span>
@@ -69,7 +69,7 @@
         <p class="cv-panel__a4">Padrão de saída adotado: formato A4.</p>
       </div>
 
-      <form method="post" enctype="multipart/form-data" class="cv-form">
+      <form method="post" enctype="multipart/form-data" class="cv-form form-shell">
         {% csrf_token %}
 
         <label class="cv-field" for="{{ form.tipo.id_for_label }}">
@@ -148,28 +148,28 @@
         <p>Acesso rápido ao histórico por categoria de arquivo.</p>
       </div>
       <div class="cv-folder-grid">
-        <div class="cv-folder-card cv-folder-card--pdf">
+        <div class="cv-folder-card cv-folder-card--pdf gp-card">
           <i class="fa-solid fa-folder"></i>
           <div>
             <strong>PDFs</strong>
             <small>Merge, split, extração e download</small>
           </div>
         </div>
-        <div class="cv-folder-card cv-folder-card--word">
+        <div class="cv-folder-card cv-folder-card--word gp-card">
           <i class="fa-solid fa-folder"></i>
           <div>
             <strong>Word</strong>
             <small>DOC/DOCX para PDF</small>
           </div>
         </div>
-        <div class="cv-folder-card cv-folder-card--excel">
+        <div class="cv-folder-card cv-folder-card--excel gp-card">
           <i class="fa-solid fa-folder"></i>
           <div>
             <strong>Excel</strong>
             <small>XLS/XLSX para PDF</small>
           </div>
         </div>
-        <div class="cv-folder-card cv-folder-card--image">
+        <div class="cv-folder-card cv-folder-card--image gp-card">
           <i class="fa-solid fa-folder"></i>
           <div>
             <strong>Imagens</strong>
@@ -187,7 +187,7 @@
         <p>Lista dos últimos processamentos com download direto.</p>
       </div>
 
-      <form method="get" class="cv-filters">
+      <form method="get" class="cv-filters form-shell search-and-filters">
         <select name="tipo" class="cv-file-input">
           <option value="">Todos os tipos</option>
           {% for key,label in tipo_choices %}
@@ -207,8 +207,8 @@
       </form>
     </div>
 
-    <div class="table-shell"><div class="table-shell__body">
-      <table class="table cv-table">
+    <div class="table-shell gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+      <table class="gp-table__native table cv-table">
         <thead>
           <tr>
             <th>Arquivo</th>

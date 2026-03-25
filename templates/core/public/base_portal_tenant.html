@@ -12,7 +12,11 @@
 {% endblock %}
 
 {% block content %}
-<div class="pp-page" style="--portal-primary: {{ cor_primaria|default:'#4F46E5' }}; --portal-secondary: {{ cor_secundaria|default:'#7C3AED' }};">
+<div
+  class="pp-page"
+  data-style-var-portal-primary="{{ cor_primaria|default:'#4F46E5' }}"
+  data-style-var-portal-secondary="{{ cor_secundaria|default:'#7C3AED' }}"
+>
   <header class="pp-header-shell">
     <div class="pp-accessibility">
       <div class="pp-wrap pp-accessibility__inner">
@@ -23,7 +27,7 @@
           <button type="button" data-font-size="reset" aria-label="Fonte padrão">A</button>
           <button type="button" data-contrast-toggle aria-label="Alto contraste"><i class="fa-regular fa-eye"></i> Alto Contraste</button>
         </div>
-        <a class="pp-login-btn" href="{{ cta_login }}" target="_blank" rel="noopener">
+        <a class="pp-login-btn gp-button" href="{{ cta_login }}" target="_blank" rel="noopener">
           <i class="fa-solid fa-arrow-right-to-bracket"></i> Login
         </a>
       </div>

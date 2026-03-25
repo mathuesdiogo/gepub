@@ -5,6 +5,7 @@ from .models import (
     Unidade,
     Address,
     Setor,
+    LocalEstrutural,
     SecretariaTemplate,
     SecretariaTemplateItem,
     SecretariaProvisionamento,
@@ -41,6 +42,13 @@ class SetorAdmin(admin.ModelAdmin):
     list_display = ("nome", "unidade", "ativo")
     search_fields = ("nome", "unidade__nome")
     list_filter = ("ativo", "unidade")
+
+
+@admin.register(LocalEstrutural)
+class LocalEstruturalAdmin(admin.ModelAdmin):
+    list_display = ("nome", "tipo_local", "unidade", "secretaria", "municipio", "local_pai", "status")
+    search_fields = ("nome", "codigo", "responsavel", "unidade__nome", "secretaria__nome", "municipio__nome")
+    list_filter = ("status", "tipo_local", "municipio", "secretaria", "unidade")
 
 
 @admin.register(Address)

@@ -53,11 +53,11 @@ def horario_turma(request, pk: int):
         )
 
     actions = [
-        {"label": "Voltar", "url": reverse("educacao:turma_detail", args=[turma.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-        {"label": "Imprimir PDF", "url": reverse("educacao:horario_turma", args=[turma.pk]) + "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
+        {"label": "Voltar", "url": reverse("educacao:turma_detail", args=[turma.pk]), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+        {"label": "Imprimir PDF", "url": reverse("educacao:horario_turma", args=[turma.pk]) + "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"},
     ]
     if can_edit:
-        actions.append({"label": "Adicionar Aula", "url": reverse("educacao:horario_aula_create", args=[turma.pk]), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+        actions.append({"label": "Adicionar Aula", "url": reverse("educacao:horario_aula_create", args=[turma.pk]), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
 
     headers = [
         {"label": "Dia", "width": "140px"},
@@ -162,6 +162,6 @@ def horario_aula_update(request, pk: int, aula_id: int):
         "aula": aula,
         "cancel_url": reverse("educacao:horario_turma", args=[turma.pk]),
         "action_url": reverse("educacao:horario_aula_update", args=[turma.pk, aula.pk]),
-        "submit_label": "Atualizar",
+        "submit_label": "Editar",
         "dias": AulaHorario.Dia.choices,
     })

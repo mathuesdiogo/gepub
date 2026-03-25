@@ -5,6 +5,7 @@ from collections import defaultdict
 from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
@@ -276,13 +277,18 @@ def _garantir_matricula_destino(*, pedido: RenovacaoMatriculaPedido, usuario):
         matricula_ativa_ano.refresh_from_db()
         return matricula_ativa_ano
 
-    nova_matricula = Matricula.objects.create(
+    nova_matricula = Matricula(
         aluno=aluno,
         turma=turma_destino,
         data_matricula=hoje,
         situacao=Matricula.Situacao.ATIVA,
         observacao=f"Matrícula criada automaticamente por renovação: {renovacao.descricao}",
     )
+    try:
+        nova_matricula.full_clean()
+    except ValidationError as exc:
+        raise ValueError("; ".join(exc.messages)) from exc
+    nova_matricula.save()
     registrar_movimentacao(
         matricula=nova_matricula,
         tipo=MatriculaMovimentacao.Tipo.CRIACAO,
@@ -372,10 +378,30 @@ def _processar_pedidos_renovacao(
                 rejeitados += 1
             continue
 
-        matricula_resultante = _garantir_matricula_destino(
-            pedido=pedido_escolhido,
-            usuario=usuario,
-        )
+        try:
+            matricula_resultante = _garantir_matricula_destino(
+                pedido=pedido_escolhido,
+                usuario=usuario,
+            )
+        except ValueError as exc:
+            pedido_escolhido.status = RenovacaoMatriculaPedido.Status.REJEITADO
+            pedido_escolhido.observacao_processamento = (
+                f"Pedido rejeitado por conflito de horário na matrícula de destino: {str(exc)[:400]}"
+            )
+            pedido_escolhido.processado_em = timezone.now()
+            pedido_escolhido.processado_por = usuario if getattr(usuario, "is_authenticated", False) else None
+            pedido_escolhido.save(
+                update_fields=[
+                    "status",
+                    "observacao_processamento",
+                    "processado_em",
+                    "processado_por",
+                    "atualizado_em",
+                ]
+            )
+            _sincronizar_processo_pedido(pedido=pedido_escolhido, aprovado=False, usuario=usuario)
+            rejeitados += 1
+            continue
         pedido_escolhido.status = RenovacaoMatriculaPedido.Status.APROVADO
         pedido_escolhido.observacao_processamento = "Pedido aprovado e matrícula processada automaticamente."
         pedido_escolhido.processado_em = timezone.now()
@@ -552,7 +578,7 @@ def renovacao_matricula_list(request):
             "label": "Voltar",
             "url": reverse("educacao:index"),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }
     ]
 
@@ -778,7 +804,7 @@ def renovacao_matricula_detail(request, pk: int):
             "label": "Voltar",
             "url": reverse("educacao:renovacao_matricula_list"),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }
     ]
 

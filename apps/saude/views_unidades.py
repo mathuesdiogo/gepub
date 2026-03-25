@@ -76,11 +76,11 @@ def unidade_list(request):
         return f"?{base_query + ('&' if base_query else '')}{extra}"
 
     actions = [
-        {"label": "Exportar CSV", "url": qjoin("export=csv"), "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
-        {"label": "Exportar PDF", "url": qjoin("export=pdf"), "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
+        {"label": "Exportar CSV", "url": qjoin("export=csv"), "icon": "fa-solid fa-file-csv", "variant": "gp-button--ghost"},
+        {"label": "Exportar PDF", "url": qjoin("export=pdf"), "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"},
     ]
     if can_manage:
-        actions.append({"label": "Nova Unidade", "url": reverse("saude:unidade_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+        actions.append({"label": "Nova Unidade", "url": reverse("saude:unidade_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
 
     headers = [
         {"label": "Unidade"},
@@ -144,9 +144,9 @@ def unidade_detail(request, pk: int):
 
     can_manage = can(request.user, "saude.manage")
 
-    actions = [{"label": "Voltar", "url": reverse("saude:unidade_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+    actions = [{"label": "Voltar", "url": reverse("saude:unidade_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
     if can_manage:
-        actions.append({"label": "Editar", "url": reverse("saude:unidade_update", args=[unidade.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+        actions.append({"label": "Editar", "url": reverse("saude:unidade_update", args=[unidade.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
 
     fields = [
         {"label": "Secretaria", "value": getattr(unidade.secretaria, "nome", "—")},

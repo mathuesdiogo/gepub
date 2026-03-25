@@ -24,7 +24,7 @@
         data-is-primary="{% if location_address and location_address.is_primary %}1{% else %}0{% endif %}"
         data-is-public="{% if location_address and location_address.is_public %}1{% else %}0{% endif %}"
       >
-        {% if location_address %}Editar endereço{% else %}Cadastrar endereço{% endif %}
+        {% if location_address %}Editar endereço{% else %}Adicionar endereço{% endif %}
       </button>
     {% endif %}
   </div>
@@ -68,10 +68,10 @@
 
       <div class="org-location__actions">
         {% if location_address.maps_url %}
-          <a class="gp-button gp-button--outline gp-button--sm" href="{{ location_address.maps_url }}" target="_blank" rel="noopener">Abrir no Maps</a>
+          <a class="gp-button gp-button--outline gp-button--sm" href="{{ location_address.maps_url }}" target="_blank" rel="noopener">Visualizar no Maps</a>
           <button type="button" class="gp-button gp-button--outline gp-button--sm" data-copy-text="{{ location_address.maps_url|escape }}">Copiar link</button>
         {% endif %}
-        <a class="gp-button gp-button--outline gp-button--sm" href="{{ location_address.directions_url }}" target="_blank" rel="noopener">Ver rota</a>
+        <a class="gp-button gp-button--outline gp-button--sm" href="{{ location_address.directions_url }}" target="_blank" rel="noopener">Visualizar rota</a>
         <button type="button" class="gp-button gp-button--outline gp-button--sm" data-copy-text="{{ location_address.formatted_address|escape }}">Copiar endereço</button>
         {% if location_can_edit and location_address %}
           <button type="button" class="gp-button gp-button--outline gp-button--sm" data-location-geocode data-address-id="{{ location_address.id }}">Reprocessar geocode</button>
@@ -82,7 +82,7 @@
     <div class="org-location__content">
       <p class="org-location__address">{{ legacy_address_text }}</p>
       <div class="org-location__actions">
-        <a class="gp-button gp-button--outline gp-button--sm" href="https://www.google.com/maps/search/?api=1&query={{ legacy_address_text|urlencode }}" target="_blank" rel="noopener">Abrir no Maps</a>
+        <a class="gp-button gp-button--outline gp-button--sm" href="https://www.google.com/maps/search/?api=1&query={{ legacy_address_text|urlencode }}" target="_blank" rel="noopener">Visualizar no Maps</a>
         <button type="button" class="gp-button gp-button--outline gp-button--sm" data-copy-text="{{ legacy_address_text|escape }}">Copiar endereço</button>
       </div>
     </div>
@@ -100,7 +100,7 @@
         <button type="button" class="gp-button gp-button--outline gp-button--sm" data-location-close>Fechar</button>
       </div>
 
-      <form class="org-location-form" data-location-form>
+      <form class="org-location-form form-shell" data-location-form>
         <input type="hidden" name="address_id" value="{% if location_address %}{{ location_address.id }}{% endif %}">
 
         <div class="form-grid">

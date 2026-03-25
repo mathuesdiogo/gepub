@@ -132,8 +132,8 @@ def boletim_turma_periodo(request, pk: int):
         )
 
     actions = [
-        {"label": "Voltar", "url": reverse("educacao:boletim_turma", args=[turma.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-        {"label": "Imprimir PDF", "url": reverse("educacao:boletim_turma_periodo", args=[turma.pk]) + f"?periodo={periodo.pk}&export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
+        {"label": "Voltar", "url": reverse("educacao:boletim_turma", args=[turma.pk]), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+        {"label": "Imprimir PDF", "url": reverse("educacao:boletim_turma_periodo", args=[turma.pk]) + f"?periodo={periodo.pk}&export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"},
     ]
 
     return render(request, "educacao/boletim_turma_periodo.html", {

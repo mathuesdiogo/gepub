@@ -186,13 +186,13 @@ class TurmaListView(BaseListViewGepub):
                 "label": "Exportar CSV",
                 "url": f"?{base_qs + ('&' if base_qs else '')}export=csv",
                 "icon": "fa-solid fa-file-csv",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             },
             {
                 "label": "Exportar PDF",
                 "url": f"?{base_qs + ('&' if base_qs else '')}export=pdf",
                 "icon": "fa-solid fa-file-pdf",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             },
         ]
 
@@ -201,13 +201,13 @@ class TurmaListView(BaseListViewGepub):
                 "label": "Gerar Turmas em Lote",
                 "url": reverse("educacao:turma_geracao_lote"),
                 "icon": "fa-solid fa-wand-magic-sparkles",
-                "variant": "btn--outline",
+                "variant": "gp-button--outline",
             })
             actions.append({
                 "label": "Nova Turma",
                 "url": reverse("educacao:turma_create"),
                 "icon": "fa-solid fa-plus",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             })
         return actions
 

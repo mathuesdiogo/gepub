@@ -6,13 +6,13 @@
   {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
 
   <article class="gp-student-stage__card">
-    <form method="get" class="gp-form gp-form--smart gp-professor-filter-row">
-      <div class="gp-form-group gp-field--full">
-        <label class="gp-form-label" for="id_q">Buscar diário</label>
+    <form method="get" class="gp-form gp-form--smart gp-professor-filter-row form-shell search-and-filters">
+      <div class="gp-form-group gp-field--full form-shell">
+        <label class="gp-form-label form-shell" for="id_q">Buscar diário</label>
         <input id="id_q" type="text" class="gp-input" name="q" value="{{ q }}" placeholder="Turma, unidade ou ano" />
       </div>
-      <div class="gp-form-group">
-        <label class="gp-form-label" for="id_ano">Ano letivo</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell" for="id_ano">Ano letivo</label>
         <select id="id_ano" name="ano" class="gp-select">
           <option value="">Todos</option>
           {% for ano in anos_disponiveis %}
@@ -20,8 +20,8 @@
           {% endfor %}
         </select>
       </div>
-      <div class="gp-form-group">
-        <label class="gp-form-label">&nbsp;</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell">&nbsp;</label>
         <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
       </div>
     </form>

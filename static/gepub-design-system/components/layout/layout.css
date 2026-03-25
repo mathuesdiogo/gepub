@@ -322,6 +322,9 @@
 .gp-content,
 .content {
   padding: var(--gp-space-4);
+  display: grid;
+  gap: var(--gp-rhythm-section);
+  align-content: start;
 }
 
 .gp-module-shell {
@@ -335,8 +338,12 @@
 }
 
 .gp-module-shell__main,
-.gp-module-content {
+.gp-module-content,
+.module-content {
   min-width: 0;
+  display: grid;
+  gap: var(--gp-rhythm-page);
+  align-content: start;
 }
 
 .gp-module-shell--single {

@@ -136,6 +136,13 @@ class Profile(models.Model):
         blank=True,
         related_name="profiles",
     )
+    local_estrutural = models.ForeignKey(
+        "org.LocalEstrutural",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="profiles",
+    )
 
     ativo = models.BooleanField(default=True)
     bloqueado = models.BooleanField(default=False)

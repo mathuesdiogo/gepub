@@ -48,7 +48,7 @@
       </div>
     </aside>
 
-    <form method="post" enctype="{{ enctype }}" class="ia-editor-form">
+    <form method="post" enctype="{{ enctype }}" class="ia-editor-form form-shell">
       {% csrf_token %}
 
       {% if form.non_field_errors %}

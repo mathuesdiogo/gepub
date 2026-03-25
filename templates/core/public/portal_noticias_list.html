@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block page_content %}
-<section class="pp-card pp-section-space">
+<section class="pp-card pp-section-space gp-card">
   <form method="get" class="pp-form-inline pp-form-inline--3">
     <div>
       <label for="id_q">Busca</label>
@@ -23,8 +23,8 @@
     <div>
       <label>&nbsp;</label>
       <div class="pp-actions">
-        <button class="pp-btn pp-btn--primary" type="submit">Filtrar</button>
-        <a class="pp-btn pp-btn--soft" href="{% url 'core:portal_noticias_public' %}">Limpar</a>
+        <button class="pp-btn pp-btn--primary gp-button gp-button--primary" type="submit">Filtrar</button>
+        <a class="pp-btn pp-btn--soft gp-button" href="{% url 'core:portal_noticias_public' %}">Limpar</a>
       </div>
     </div>
   </form>
@@ -33,13 +33,13 @@
 {% if banners %}
 <section class="pp-grid pp-grid--3 pp-news-banners">
   {% for banner in banners %}
-    <article class="pp-card pp-news-banner-card">
+    <article class="pp-card pp-news-banner-card gp-card">
       <h3>{{ banner.titulo }}</h3>
       {% if banner.subtitulo %}<p class="pp-meta">{{ banner.subtitulo }}</p>{% endif %}
       {% if banner.imagem %}<img src="{{ banner.imagem.url }}" alt="{{ banner.titulo }}">{% endif %}
       {% if banner.link %}
         <p>
-          <a class="pp-btn pp-btn--soft" href="{{ banner.link }}" target="_blank" rel="noopener">Acessar</a>
+          <a class="pp-btn pp-btn--soft gp-button" href="{{ banner.link }}" target="_blank" rel="noopener">Acessar</a>
         </p>
       {% endif %}
     </article>
@@ -55,8 +55,8 @@
         <h3><a class="pp-link-reset" href="{% url 'core:portal_noticia_detail_public' item.slug %}">{{ item.titulo }}</a></h3>
         {% if item.resumo %}<p>{{ item.resumo }}</p>{% endif %}
         <div class="pp-actions">
-          <a class="pp-btn pp-btn--soft" href="{% url 'core:portal_noticia_detail_public' item.slug %}">Ler notícia</a>
-          {% if item.destaque %}<span class="pp-badge"><i class="fa-solid fa-star"></i>Destaque</span>{% endif %}
+          <a class="pp-btn pp-btn--soft gp-button" href="{% url 'core:portal_noticia_detail_public' item.slug %}">Ler notícia</a>
+          {% if item.destaque %}<span class="pp-badge gp-badge"><i class="fa-solid fa-star"></i>Destaque</span>{% endif %}
         </div>
       </li>
     {% empty %}

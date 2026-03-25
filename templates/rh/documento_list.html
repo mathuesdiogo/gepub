@@ -4,7 +4,7 @@
 <div class="gp-card"><div class="gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <form method="get" class="gp-table__filters">
+  <form method="get" class="gp-table__filters search-and-filters">
     {% if municipios and municipios|length %}
       <select name="municipio" class="gp-input">
         {% for m in municipios %}
@@ -34,7 +34,7 @@
             <td>{{ item.data_documento|date:"d/m/Y" }}</td>
             <td>
               {% if item.arquivo %}
-                <a class="gp-button gp-button--sm gp-button--ghost" href="{{ item.arquivo.url }}" target="_blank" rel="noopener">Abrir</a>
+                <a class="gp-button gp-button--sm gp-button--ghost" href="{{ item.arquivo.url }}" target="_blank" rel="noopener">Visualizar</a>
               {% else %}
                 -
               {% endif %}

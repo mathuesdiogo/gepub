@@ -2,11 +2,11 @@
 {% load static %}
 
 {% block content %}
-<div class="card billing-page billing-page--admin-planos"><div class="card__body billing-page__body">
+<div class="card billing-page billing-page--admin-planos gp-card"><div class="card__body billing-page__body gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
   <section class="billing-section billing-section--compact">
-    <form method="get" class="billing-filter-form">
+    <form method="get" class="billing-filter-form form-shell search-and-filters">
       <label class="small" for="id_q">Buscar plano</label>
       <input id="id_q" type="search" name="q" value="{{ q }}" class="gp-input" placeholder="Nome ou código">
       <button type="submit" class="gp-button gp-button--outline">Filtrar</button>
@@ -47,8 +47,8 @@
       <h3>Catálogo de planos</h3>
       <p>Lista de planos com status, adoção e documentação.</p>
     </div>
-    <div class="table-shell billing-table-shell">
-      <table class="table">
+    <div class="table-shell billing-table-shell gp-table gp-table--responsive">
+      <table class="gp-table__native table">
         <thead>
           <tr>
             <th>Plano</th>

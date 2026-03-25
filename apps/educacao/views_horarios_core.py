@@ -88,13 +88,13 @@ def horario_turma_impl(request, turma_id: int):
             "label": "Voltar",
             "url": reverse("educacao:horarios_index"),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
         {
             "label": "Imprimir PDF",
             "url": reverse("educacao:horario_turma", args=[turma.pk]) + "?export=pdf",
             "icon": "fa-solid fa-file-pdf",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
     ]
 
@@ -105,25 +105,25 @@ def horario_turma_impl(request, turma_id: int):
                     "label": "Gerar Padrão",
                     "url": reverse("educacao:horario_gerar_padrao", args=[turma.pk]),
                     "icon": "fa-solid fa-wand-magic-sparkles",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Duplicar horário",
                     "url": reverse("educacao:horario_duplicar_select", args=[turma.pk]),
                     "icon": "fa-solid fa-copy",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Limpar horário",
                     "url": reverse("educacao:horario_limpar", args=[turma.pk]),
                     "icon": "fa-solid fa-trash",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Adicionar Aula",
                     "url": reverse("educacao:horario_aula_create", args=[turma.pk]),
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
             ]
         )
@@ -181,6 +181,9 @@ def horario_aula_create_impl(request, turma_id: int):
     if request.method == "POST":
         form = AulaHorarioForm(request.POST, grade=grade)
         if form.is_valid():
+            impact = getattr(form, "schedule_edit_impact", None)
+            if impact and impact.has_conflict and impact.blocking_mode in {"warn", "allow"}:
+                messages.warning(request, impact.message)
             aula = form.save(commit=False)
             aula.grade = grade
             aula.save()
@@ -217,6 +220,9 @@ def horario_aula_update_impl(request, turma_id: int, aula_id: int):
     if request.method == "POST":
         form = AulaHorarioForm(request.POST, instance=aula, grade=grade)
         if form.is_valid():
+            impact = getattr(form, "schedule_edit_impact", None)
+            if impact and impact.has_conflict and impact.blocking_mode in {"warn", "allow"}:
+                messages.warning(request, impact.message)
             form.save()
             messages.success(request, "Horário atualizado.")
             return redirect("educacao:horario_turma", turma_id=turma.pk)
@@ -234,6 +240,6 @@ def horario_aula_update_impl(request, turma_id: int, aula_id: int):
             "form": form,
             "cancel_url": reverse("educacao:horario_turma", args=[turma.pk]),
             "action_url": reverse("educacao:horario_aula_update", args=[turma.pk, aula.pk]),
-            "submit_label": "Atualizar",
+            "submit_label": "Editar",
         },
     )

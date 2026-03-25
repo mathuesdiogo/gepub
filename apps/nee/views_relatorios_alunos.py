@@ -193,9 +193,9 @@ def relatorios_alunos(request):
         return base_path + "?" + q.urlencode()
 
     actions = [
-        {"label": "Voltar", "url": reverse("nee:relatorios_index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-        {"label": "Exportar CSV", "url": _with_export("csv"), "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
-        {"label": "Exportar PDF", "url": _with_export("pdf"), "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
+        {"label": "Voltar", "url": reverse("nee:relatorios_index"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+        {"label": "Exportar CSV", "url": _with_export("csv"), "icon": "fa-solid fa-file-csv", "variant": "gp-button--ghost"},
+        {"label": "Exportar PDF", "url": _with_export("pdf"), "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"},
     ]
 
     filtro_txt = ""

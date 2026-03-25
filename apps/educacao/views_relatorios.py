@@ -85,7 +85,7 @@ def relatorio_mensal(request):
         return f"?{base_query + ('&' if base_query else '')}{extra}"
 
     actions = [
-        {"label": "Exportar PDF", "url": qjoin("export=pdf"), "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
+        {"label": "Exportar PDF", "url": qjoin("export=pdf"), "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"},
     ]
 
     # extra_filters (filter_bar)

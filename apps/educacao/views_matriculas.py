@@ -2,6 +2,7 @@ from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -19,6 +20,7 @@ from .services_requisitos import (
     avaliar_requisitos_matricula,
     registrar_override_requisitos_matricula,
 )
+from .services_schedule_conflicts import ScheduleConflictService
 
 
 @login_required
@@ -95,10 +97,10 @@ def matricula_create(request):
                 messages.warning(request, "Esse aluno já possui matrícula nessa turma.")
                 return redirect(reverse("educacao:matricula_create") + f"?aluno={matricula.aluno_id}")
 
+            wants_override = bool(form.cleaned_data.get("override_requisitos"))
+            justificativa = (form.cleaned_data.get("override_justificativa") or "").strip()
             avaliacao_requisitos = avaliar_requisitos_matricula(aluno=matricula.aluno, turma=matricula.turma)
             if avaliacao_requisitos.bloqueado:
-                wants_override = bool(form.cleaned_data.get("override_requisitos"))
-                justificativa = (form.cleaned_data.get("override_justificativa") or "").strip()
                 if wants_override and justificativa:
                     registrar_override_requisitos_matricula(
                         usuario=request.user,
@@ -115,6 +117,30 @@ def matricula_create(request):
                     return redirect(reverse("educacao:matricula_create") + f"?aluno={matricula.aluno_id}")
             for aviso in avaliacao_requisitos.avisos:
                 messages.warning(request, aviso)
+
+            try:
+                conflict_result = ScheduleConflictService.ensure_regular_enrollment_allowed(
+                    aluno=matricula.aluno,
+                    turma=matricula.turma,
+                    data_matricula=matricula.data_matricula,
+                    allow_override=wants_override,
+                    override_justificativa=justificativa,
+                    usuario=request.user,
+                    contexto="MATRICULA_RAPIDA",
+                    ip_origem=(request.META.get("REMOTE_ADDR") or ""),
+                )
+            except ValueError as exc:
+                for line in str(exc).splitlines():
+                    if line.strip():
+                        messages.error(request, line.strip())
+                return redirect(reverse("educacao:matricula_create") + f"?aluno={matricula.aluno_id}")
+
+            if conflict_result.has_conflict:
+                if conflict_result.blocking_mode == "block" and wants_override and justificativa:
+                    messages.warning(request, "Matrícula liberada por exceção de conflito de horário com auditoria.")
+                elif conflict_result.blocking_mode in {"warn", "allow"}:
+                    for line in ScheduleConflictService.describe_conflicts(conflict_result):
+                        messages.warning(request, line)
 
             municipio_id = (
                 Turma.objects.filter(pk=matricula.turma_id)
@@ -154,6 +180,12 @@ def matricula_create(request):
             if not matricula.data_matricula:
                 matricula.data_matricula = timezone.localdate()
 
+            try:
+                matricula.full_clean()
+            except ValidationError as exc:
+                for line in exc.messages:
+                    messages.error(request, line)
+                return redirect(reverse("educacao:matricula_create") + f"?aluno={matricula.aluno_id}")
             matricula.save()
             registrar_movimentacao(
                 matricula=matricula,
@@ -173,7 +205,7 @@ def matricula_create(request):
             "label": "Voltar",
             "url": reverse("educacao:index"),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
     ]
 

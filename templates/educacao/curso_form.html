@@ -1,4 +1,5 @@
 {% extends "educacao/base_modulo.html" %}
+{% load gepub_design_system %}
 
 {% block title %}
   {% if mode == "create" %}
@@ -26,7 +27,7 @@
         {% endif %}
 
         <div class="form-shell__fields">
-          {{ form.as_p }}
+          {% render_form form %}
         </div>
 
         {% if mode == "create" and grade_form %}
@@ -34,7 +35,7 @@
           <div class="section__title">Grade da Atividade (Opcional)</div>
           <div class="small">Você pode adicionar o primeiro componente agora e complementar depois.</div>
           <div class="u-mt-10">
-            {{ grade_form.as_p }}
+            {% render_form grade_form %}
           </div>
         {% endif %}
 
@@ -69,7 +70,7 @@
                   <td>{{ d.carga_horaria }}h</td>
                   <td>{% if d.obrigatoria %}Sim{% else %}Não{% endif %}</td>
                   <td>
-                    <form class="gp-form" method="post">
+                    <form class="gp-form form-shell" method="post">
                       {% csrf_token %}
                       <input type="hidden" name="_action" value="remove_disciplina">
                       <input type="hidden" name="disciplina_id" value="{{ d.pk }}">
@@ -87,10 +88,10 @@
 
           <div class="form-section u-mt-12">
             <div class="form-section__title">Adicionar disciplina</div>
-            <form class="gp-form" method="post">
+            <form class="gp-form form-shell" method="post">
               {% csrf_token %}
               <input type="hidden" name="_action" value="add_disciplina">
-              {{ grade_form.as_p }}
+              {% render_form grade_form %}
               <button type="submit" class="gp-button gp-button--primary">Adicionar na grade</button>
             </form>
           </div>

@@ -1,6 +1,6 @@
-<div class="card" style="margin-top:12px;"><div class="card__body">
-  <h3 style="margin-top:0;">Checklist de conformidade</h3>
-  <ul style="margin:8px 0 0 18px;">
+<div class="card u-mt-12 gp-card"><div class="card__body gp-card__body">
+  <h3 class="u-mt-0">Checklist de conformidade</h3>
+  <ul class="u-mt-8 u-ml-18">
     {% for item in checklist_conformidade %}
       <li>
         {% if item.ok %}OK{% else %}PENDENTE{% endif %} - {{ item.label }}
@@ -11,32 +11,32 @@
   </ul>
 </div></div>
 
-<div class="card" style="margin-top:12px;"><div class="card__body">
-  <h3 style="margin-top:0;">Tags</h3>
-  <p style="margin:0 0 8px 0;">
+<div class="card u-mt-12 gp-card"><div class="card__body gp-card__body">
+  <h3 class="u-mt-0">Tags</h3>
+  <p class="u-m-0 u-mb-8">
     {% for item in registro_tags %}
-      <span class="badge" style="margin-right:6px;">{{ item.tag }}</span>
+      <span class="badge u-mr-6 gp-badge">{{ item.tag }}</span>
     {% empty %}
       <span class="small">Sem tags.</span>
     {% endfor %}
   </p>
-  <form method="post" action="{% url 'core:registro_tag_create' %}">
+  <form method="post" action="{% url 'core:registro_tag_create' %}" class="form-shell">
     {% csrf_token %}
     <input type="hidden" name="next" value="{{ request.get_full_path }}">
     <input type="hidden" name="modulo" value="{{ registro_modulo }}">
     <input type="hidden" name="entidade" value="{{ registro_entidade }}">
     <input type="hidden" name="entidade_id" value="{{ registro_entidade_id }}">
-    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+    <div class="u-flex u-gap-8 u-flex-wrap">
       <input class="gp-input" type="text" name="tag" placeholder="Nova tag" maxlength="50" required>
       <button type="submit" class="gp-button gp-button--outline">Adicionar tag</button>
     </div>
   </form>
 </div></div>
 
-<div class="card" style="margin-top:12px;"><div class="card__body">
-  <h3 style="margin-top:0;">Anexos</h3>
-  <div class="table-shell"><div class="table-shell__body">
-    <table class="table">
+<div class="card u-mt-12 gp-card"><div class="card__body gp-card__body">
+  <h3 class="u-mt-0">Anexos</h3>
+  <div class="table-shell gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+    <table class="gp-table__native table">
       <thead><tr><th>Quando</th><th>Tipo</th><th>Titulo</th><th>Arquivo</th><th>Usuario</th></tr></thead>
       <tbody>
         {% for item in registro_anexos %}
@@ -44,7 +44,7 @@
             <td>{{ item.criado_em|date:"d/m/Y H:i" }}</td>
             <td>{{ item.tipo|default:"-" }}</td>
             <td>{{ item.titulo|default:"-" }}</td>
-            <td><a class="gp-anchor-link" href="{{ item.arquivo.url }}" target="_blank" rel="noopener">abrir</a></td>
+            <td><a class="gp-anchor-link" href="{{ item.arquivo.url }}" target="_blank" rel="noopener">visualizar</a></td>
             <td>{{ item.criado_por|default:"-" }}</td>
           </tr>
         {% empty %}
@@ -53,28 +53,28 @@
       </tbody>
     </table>
   </div></div>
-  <form method="post" action="{% url 'core:registro_anexo_create' %}" enctype="multipart/form-data" style="margin-top:8px;">
+  <form method="post" action="{% url 'core:registro_anexo_create' %}" enctype="multipart/form-data" class="u-mt-8 form-shell">
     {% csrf_token %}
     <input type="hidden" name="next" value="{{ request.get_full_path }}">
     <input type="hidden" name="modulo" value="{{ registro_modulo }}">
     <input type="hidden" name="entidade" value="{{ registro_entidade }}">
     <input type="hidden" name="entidade_id" value="{{ registro_entidade_id }}">
-    <div style="display:grid; gap:8px; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));">
+    <div class="u-grid-auto-180">
       <input class="gp-input" type="text" name="tipo" placeholder="Tipo (ex.: parecer)">
       <input class="gp-input" type="text" name="titulo" placeholder="Titulo">
       <input class="gp-input" type="text" name="observacao" placeholder="Observacao">
       <input class="gp-input" type="file" name="arquivo" required>
     </div>
-    <div style="margin-top:8px;">
+    <div class="u-mt-8">
       <button type="submit" class="gp-button gp-button--outline">Enviar anexo</button>
     </div>
   </form>
 </div></div>
 
-<div class="card" style="margin-top:12px;"><div class="card__body">
-  <h3 style="margin-top:0;">Comentarios</h3>
-  <div class="table-shell"><div class="table-shell__body">
-    <table class="table">
+<div class="card u-mt-12 gp-card"><div class="card__body gp-card__body">
+  <h3 class="u-mt-0">Comentarios</h3>
+  <div class="table-shell gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+    <table class="gp-table__native table">
       <thead><tr><th>Quando</th><th>Tipo</th><th>Comentario</th><th>Usuario</th></tr></thead>
       <tbody>
         {% for item in registro_comentarios %}
@@ -90,13 +90,13 @@
       </tbody>
     </table>
   </div></div>
-  <form method="post" action="{% url 'core:registro_comentario_create' %}" style="margin-top:8px;">
+  <form method="post" action="{% url 'core:registro_comentario_create' %}" class="u-mt-8 form-shell">
     {% csrf_token %}
     <input type="hidden" name="next" value="{{ request.get_full_path }}">
     <input type="hidden" name="modulo" value="{{ registro_modulo }}">
     <input type="hidden" name="entidade" value="{{ registro_entidade }}">
     <input type="hidden" name="entidade_id" value="{{ registro_entidade_id }}">
-    <div style="display:grid; gap:8px;">
+    <div class="u-grid-gap-8">
       <textarea class="gp-input" name="comentario" rows="3" placeholder="Adicionar comentario" required></textarea>
       <label class="small"><input type="checkbox" name="interno" checked> Comentario interno</label>
       <button type="submit" class="gp-button gp-button--primary">Salvar comentario</button>
@@ -104,10 +104,10 @@
   </form>
 </div></div>
 
-<div class="card" style="margin-top:12px;"><div class="card__body">
-  <h3 style="margin-top:0;">Timeline</h3>
-  <div class="table-shell"><div class="table-shell__body">
-    <table class="table">
+<div class="card u-mt-12 gp-card"><div class="card__body gp-card__body">
+  <h3 class="u-mt-0">Timeline</h3>
+  <div class="table-shell gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+    <table class="gp-table__native table">
       <thead><tr><th>Quando</th><th>Tipo</th><th>Evento</th><th>Descricao</th><th>Usuario</th></tr></thead>
       <tbody>
         {% for item in registro_timeline %}

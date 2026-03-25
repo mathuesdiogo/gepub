@@ -16,7 +16,7 @@ class HorariosIndexView(BaseListViewGepub):
     url_name = "educacao:horarios_index"
 
     page_title = "Horários"
-    page_subtitle = "Selecione uma turma para ver/editar a grade"
+    page_subtitle = "Selecione uma turma para visualizar/editar a grade"
 
     paginate_by = 20
     default_ano = timezone.now().year

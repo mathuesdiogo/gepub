@@ -6,7 +6,7 @@
 
 {% block page_content %}
 <section class="pp-grid pp-grid--2 pp-section-space">
-  <article class="pp-card">
+  <article class="pp-card gp-card">
     <h2>Novo atendimento</h2>
     <form method="post" class="pp-form-stack pp-section-space">
       {% csrf_token %}
@@ -17,11 +17,11 @@
           {% if field.errors %}<p class="pp-error-text">{{ field.errors|striptags }}</p>{% endif %}
         </div>
       {% endfor %}
-      <button class="pp-btn pp-btn--primary" type="submit">Registrar solicitação</button>
+      <button class="pp-btn pp-btn--primary gp-button gp-button--primary" type="submit">Registrar solicitação</button>
     </form>
   </article>
 
-  <article class="pp-card">
+  <article class="pp-card gp-card">
     <h2>Acompanhar protocolo</h2>
     <form method="get" class="pp-form-inline pp-form-inline--3 pp-section-space">
       <div>
@@ -31,14 +31,14 @@
       <div>
         <label>&nbsp;</label>
         <div class="pp-actions">
-          <button class="pp-btn pp-btn--primary" type="submit">Consultar</button>
-          <a class="pp-btn pp-btn--soft" href="{% url 'core:portal_ouvidoria_public' %}">Limpar</a>
+          <button class="pp-btn pp-btn--primary gp-button gp-button--primary" type="submit">Consultar</button>
+          <a class="pp-btn pp-btn--soft gp-button" href="{% url 'core:portal_ouvidoria_public' %}">Limpar</a>
         </div>
       </div>
     </form>
 
     {% if acompanhamento %}
-      <div class="pp-list__item pp-query-card">
+      <div class="pp-list__item pp-query-card gp-card">
         <p class="pp-meta">{{ acompanhamento.protocolo }} • {{ acompanhamento.get_tipo_display }}</p>
         <h3>{{ acompanhamento.assunto }}</h3>
         <p>Status: <strong>{{ acompanhamento.get_status_display }}</strong></p>
@@ -63,10 +63,10 @@
   </article>
 </section>
 
-<section class="pp-card pp-section-space">
+<section class="pp-card pp-section-space gp-card">
   <h3>Solicitações recentes</h3>
   <div class="pp-table-wrap pp-section-space">
-    <table class="pp-table pp-table--narrow">
+    <table class="gp-table__native pp-table pp-table--narrow">
       <thead>
         <tr>
           <th>Protocolo</th>

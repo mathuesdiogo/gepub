@@ -108,25 +108,25 @@ def index(request):
                     "label": "Nova ocorrência",
                     "url": reverse("ponto:ocorrencia_create") + _qs_municipio_suffix(municipio),
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "Nova competência",
                     "url": reverse("ponto:competencia_create") + _qs_municipio_suffix(municipio),
                     "icon": "fa-solid fa-calendar-plus",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Escalas/Turnos",
                     "url": reverse("ponto:escala_list") + _qs_municipio_suffix(municipio),
                     "icon": "fa-solid fa-business-time",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Vínculos",
                     "url": reverse("ponto:vinculo_list") + _qs_municipio_suffix(municipio),
                     "icon": "fa-solid fa-users-gear",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -138,7 +138,7 @@ def index(request):
 def escala_create(request):
     municipio = _resolve_municipio(request, require_selected=True)
     if not municipio:
-        messages.error(request, "Selecione um município para cadastrar escala.")
+        messages.error(request, "Selecione um município para adicionar escala.")
         return redirect("ponto:escala_list")
 
     form = PontoCadastroForm(request.POST or None, municipio=municipio)
@@ -256,25 +256,25 @@ def escala_list(request):
                     "label": "Nova escala",
                     "url": reverse("ponto:escala_create") + _qs_municipio_suffix(municipio),
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "CSV",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&turno={turno}&export=csv",
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "PDF",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&turno={turno}&export=pdf",
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Voltar ao painel",
                     "url": reverse("ponto:index") + _qs_municipio_suffix(municipio),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -346,25 +346,25 @@ def vinculo_list(request):
                     "label": "Novo vínculo",
                     "url": reverse("ponto:vinculo_create") + _qs_municipio_suffix(municipio),
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "CSV",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&ativo={ativo}&export=csv",
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "PDF",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&ativo={ativo}&export=pdf",
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Escalas",
                     "url": reverse("ponto:escala_list") + _qs_municipio_suffix(municipio),
                     "icon": "fa-solid fa-business-time",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -376,7 +376,7 @@ def vinculo_list(request):
 def vinculo_create(request):
     municipio = _resolve_municipio(request, require_selected=True)
     if not municipio:
-        messages.error(request, "Selecione um município para cadastrar vínculo.")
+        messages.error(request, "Selecione um município para adicionar vínculo.")
         return redirect("ponto:vinculo_list")
 
     form = PontoVinculoEscalaForm(request.POST or None, municipio=municipio)
@@ -502,25 +502,25 @@ def ocorrencia_list(request):
                     "label": "Nova ocorrência",
                     "url": reverse("ponto:ocorrencia_create") + _qs_municipio_suffix(municipio),
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "CSV",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&tipo={tipo}&competencia={competencia}&export=csv",
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "PDF",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&tipo={tipo}&competencia={competencia}&export=pdf",
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Competências",
                     "url": reverse("ponto:competencia_list") + _qs_municipio_suffix(municipio),
                     "icon": "fa-solid fa-calendar-days",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -647,25 +647,25 @@ def competencia_list(request):
                     "label": "Nova competência",
                     "url": reverse("ponto:competencia_create") + _qs_municipio_suffix(municipio),
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "CSV",
                     "url": request.path + f"?municipio={municipio.pk}&status={status}&export=csv",
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "PDF",
                     "url": request.path + f"?municipio={municipio.pk}&status={status}&export=pdf",
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Ocorrências",
                     "url": reverse("ponto:ocorrencia_list") + _qs_municipio_suffix(municipio),
                     "icon": "fa-solid fa-triangle-exclamation",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -677,7 +677,7 @@ def competencia_list(request):
 def competencia_create(request):
     municipio = _resolve_municipio(request, require_selected=True)
     if not municipio:
-        messages.error(request, "Selecione um município para abrir competência.")
+        messages.error(request, "Selecione um município para iniciar competência.")
         return redirect("ponto:competencia_list")
 
     form = PontoFechamentoCompetenciaForm(request.POST or None)
@@ -699,12 +699,12 @@ def competencia_create(request):
         request,
         "core/form_base.html",
         {
-            "title": "Abrir competência",
+            "title": "Iniciar competência",
             "subtitle": f"{municipio.nome}/{municipio.uf}",
             "actions": [],
             "form": form,
             "cancel_url": reverse("ponto:competencia_list") + _qs_municipio_suffix(municipio),
-            "submit_label": "Abrir competência",
+            "submit_label": "Iniciar competência",
         },
     )
 

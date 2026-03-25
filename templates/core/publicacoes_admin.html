@@ -4,8 +4,8 @@
 {% block header %}Portais Públicos{% endblock %}
 
 {% block content %}
-<div class="card publicacoes-admin-card">
-  <div class="card__body">
+<div class="card publicacoes-admin-card gp-card">
+  <div class="card__body gp-card__body">
     {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
     <section class="publicacoes-admin-hero">
@@ -21,8 +21,8 @@
       </div>
     </section>
 
-    <section class="publicacoes-admin-toolbar" style="margin-top:10px;">
-      <div class="publicacoes-admin-toolbar__actions" style="display:flex;gap:8px;flex-wrap:wrap;">
+    <section class="publicacoes-admin-toolbar u-mt-10">
+      <div class="publicacoes-admin-toolbar__actions u-flex u-gap-8 u-flex-wrap">
         <a class="gp-button gp-button--outline gp-button--sm {% if portal_focus == 'prefeitura' %}is-active{% endif %}" href="{% url 'core:publicacoes_admin' %}?municipio={{ municipio.pk }}&portal=prefeitura">Portal Prefeitura</a>
         {% if plan_flags.camara %}
           <a class="gp-button gp-button--outline gp-button--sm" href="{% url 'camara:index' %}?municipio={{ municipio.pk }}">Portal Câmara</a>
@@ -35,9 +35,9 @@
     </section>
 
     {% if municipios %}
-      <form method="get" class="publicacoes-filter">
-        <div class="gp-form-group">
-          <label class="gp-form-label" for="id_municipio">Município</label>
+      <form method="get" class="publicacoes-filter search-and-filters">
+        <div class="gp-form-group form-shell">
+          <label class="gp-form-label form-shell" for="id_municipio">Município</label>
           <select id="id_municipio" class="gp-select" name="municipio" onchange="this.form.submit()">
             {% for m in municipios %}
               <option value="{{ m.pk }}" {% if m.pk == municipio.pk %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
@@ -65,12 +65,12 @@
     </section>
 
     <section class="publicacoes-admin-toolbar">
-      <div class="gp-form-group">
-        <label class="gp-form-label" for="publicacoesSearch">Buscar seção</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell" for="publicacoesSearch">Buscar seção</label>
         <input id="publicacoesSearch" class="gp-input" type="search" placeholder="Ex.: notícias, diário, concursos..." autocomplete="off">
       </div>
-      <div class="gp-form-group">
-        <label class="gp-form-label" for="publicacoesScope">Escopo</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell" for="publicacoesScope">Escopo</label>
         <select id="publicacoesScope" class="gp-select">
           <option value="all" {% if portal_focus_scope == 'all' %}selected{% endif %}>Todos os módulos</option>
           <option value="conteudo" {% if portal_focus_scope == 'conteudo' %}selected{% endif %}>Portal e conteúdo</option>
@@ -84,11 +84,11 @@
     </section>
 
     <section class="publicacoes-grid" id="publicacoesGrid">
-      <article class="publicacoes-card" data-publicacoes-card data-scope="conteudo">
+      <article class="publicacoes-card gp-card" data-publicacoes-card data-scope="conteudo">
         <div class="publicacoes-card__head">
           <h3>Notícias</h3>
           <div class="publicacoes-card__actions">
-            <a class="publicacoes-btn" href="{% url 'core:noticia_create' %}?municipio={{ municipio.pk }}">Nova notícia</a>
+            <a class="publicacoes-btn gp-button" href="{% url 'core:noticia_create' %}?municipio={{ municipio.pk }}">Nova notícia</a>
           </div>
         </div>
         <ul class="publicacoes-list">
@@ -97,10 +97,10 @@
               <h4>{{ item.titulo }}</h4>
               <p>{{ item.get_categoria_display }} • {{ item.publicado_em|date:"d/m/Y H:i" }}</p>
               <div class="publicacoes-item__actions">
-                <a class="publicacoes-btn" href="{% url 'core:noticia_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
-                <form method="post" action="{% url 'core:noticia_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover notícia?');">
+                <a class="publicacoes-btn gp-button" href="{% url 'core:noticia_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
+                <form method="post" action="{% url 'core:noticia_delete' item.pk %}?municipio={{ municipio.pk }}" class="u-inline-form">
                   {% csrf_token %}
-                  <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
+                  <button class="publicacoes-btn publicacoes-btn--danger gp-button gp-button--danger confirm" data-confirm="Remover notícia?" type="submit">Remover</button>
                 </form>
               </div>
             </li>
@@ -110,11 +110,11 @@
         </ul>
       </article>
 
-      <article class="publicacoes-card" data-publicacoes-card data-scope="conteudo">
+      <article class="publicacoes-card gp-card" data-publicacoes-card data-scope="conteudo">
         <div class="publicacoes-card__head">
           <h3>Banners</h3>
           <div class="publicacoes-card__actions">
-            <a class="publicacoes-btn" href="{% url 'core:banner_create' %}?municipio={{ municipio.pk }}">Novo banner</a>
+            <a class="publicacoes-btn gp-button" href="{% url 'core:banner_create' %}?municipio={{ municipio.pk }}">Novo banner</a>
           </div>
         </div>
         <ul class="publicacoes-list">
@@ -123,10 +123,10 @@
               <h4>{{ item.titulo }}</h4>
               <p>Ordem {{ item.ordem }} • {% if item.ativo %}Ativo{% else %}Inativo{% endif %}</p>
               <div class="publicacoes-item__actions">
-                <a class="publicacoes-btn" href="{% url 'core:banner_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
-                <form method="post" action="{% url 'core:banner_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover banner?');">
+                <a class="publicacoes-btn gp-button" href="{% url 'core:banner_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
+                <form method="post" action="{% url 'core:banner_delete' item.pk %}?municipio={{ municipio.pk }}" class="u-inline-form">
                   {% csrf_token %}
-                  <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
+                  <button class="publicacoes-btn publicacoes-btn--danger gp-button gp-button--danger confirm" data-confirm="Remover banner?" type="submit">Remover</button>
                 </form>
               </div>
             </li>
@@ -136,11 +136,11 @@
         </ul>
       </article>
 
-      <article class="publicacoes-card" data-publicacoes-card data-scope="conteudo">
+      <article class="publicacoes-card gp-card" data-publicacoes-card data-scope="conteudo">
         <div class="publicacoes-card__head">
           <h3>Páginas públicas</h3>
           <div class="publicacoes-card__actions">
-            <a class="publicacoes-btn" href="{% url 'core:pagina_create' %}?municipio={{ municipio.pk }}">Nova página</a>
+            <a class="publicacoes-btn gp-button" href="{% url 'core:pagina_create' %}?municipio={{ municipio.pk }}">Nova página</a>
           </div>
         </div>
         <ul class="publicacoes-list">
@@ -149,10 +149,10 @@
               <h4>{{ item.titulo }}</h4>
               <p>/paginas/{{ item.slug }}/ • {% if item.publicado %}Publicado{% else %}Rascunho{% endif %}</p>
               <div class="publicacoes-item__actions">
-                <a class="publicacoes-btn" href="{% url 'core:pagina_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
-                <form method="post" action="{% url 'core:pagina_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover página pública?');">
+                <a class="publicacoes-btn gp-button" href="{% url 'core:pagina_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
+                <form method="post" action="{% url 'core:pagina_delete' item.pk %}?municipio={{ municipio.pk }}" class="u-inline-form">
                   {% csrf_token %}
-                  <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
+                  <button class="publicacoes-btn publicacoes-btn--danger gp-button gp-button--danger confirm" data-confirm="Remover página pública?" type="submit">Remover</button>
                 </form>
               </div>
             </li>
@@ -162,11 +162,11 @@
         </ul>
       </article>
 
-      <article class="publicacoes-card" data-publicacoes-card data-scope="conteudo">
+      <article class="publicacoes-card gp-card" data-publicacoes-card data-scope="conteudo">
         <div class="publicacoes-card__head">
           <h3>Menu do portal</h3>
           <div class="publicacoes-card__actions">
-            <a class="publicacoes-btn" href="{% url 'core:menu_create' %}?municipio={{ municipio.pk }}">Novo item</a>
+            <a class="publicacoes-btn gp-button" href="{% url 'core:menu_create' %}?municipio={{ municipio.pk }}">Novo item</a>
           </div>
         </div>
         <ul class="publicacoes-list">
@@ -175,10 +175,10 @@
               <h4>{{ item.titulo }}</h4>
               <p>{{ item.get_posicao_display }} • {{ item.get_tipo_destino_display }} • ordem {{ item.ordem }}</p>
               <div class="publicacoes-item__actions">
-                <a class="publicacoes-btn" href="{% url 'core:menu_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
-                <form method="post" action="{% url 'core:menu_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover item de menu?');">
+                <a class="publicacoes-btn gp-button" href="{% url 'core:menu_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
+                <form method="post" action="{% url 'core:menu_delete' item.pk %}?municipio={{ municipio.pk }}" class="u-inline-form">
                   {% csrf_token %}
-                  <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
+                  <button class="publicacoes-btn publicacoes-btn--danger gp-button gp-button--danger confirm" data-confirm="Remover item de menu?" type="submit">Remover</button>
                 </form>
               </div>
             </li>
@@ -188,11 +188,11 @@
         </ul>
       </article>
 
-      <article class="publicacoes-card" data-publicacoes-card data-scope="conteudo">
+      <article class="publicacoes-card gp-card" data-publicacoes-card data-scope="conteudo">
         <div class="publicacoes-card__head">
           <h3>Blocos da home</h3>
           <div class="publicacoes-card__actions">
-            <a class="publicacoes-btn" href="{% url 'core:home_bloco_create' %}?municipio={{ municipio.pk }}">Novo bloco</a>
+            <a class="publicacoes-btn gp-button" href="{% url 'core:home_bloco_create' %}?municipio={{ municipio.pk }}">Novo bloco</a>
           </div>
         </div>
         <ul class="publicacoes-list">
@@ -201,10 +201,10 @@
               <h4>{{ item.titulo }}</h4>
               <p>Ordem {{ item.ordem }} • {% if item.ativo %}Ativo{% else %}Inativo{% endif %}</p>
               <div class="publicacoes-item__actions">
-                <a class="publicacoes-btn" href="{% url 'core:home_bloco_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
-                <form method="post" action="{% url 'core:home_bloco_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover bloco da home?');">
+                <a class="publicacoes-btn gp-button" href="{% url 'core:home_bloco_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
+                <form method="post" action="{% url 'core:home_bloco_delete' item.pk %}?municipio={{ municipio.pk }}" class="u-inline-form">
                   {% csrf_token %}
-                  <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
+                  <button class="publicacoes-btn publicacoes-btn--danger gp-button gp-button--danger confirm" data-confirm="Remover bloco da home?" type="submit">Remover</button>
                 </form>
               </div>
             </li>
@@ -214,11 +214,11 @@
         </ul>
       </article>
 
-      <article class="publicacoes-card" data-publicacoes-card data-scope="conteudo">
+      <article class="publicacoes-card gp-card" data-publicacoes-card data-scope="conteudo">
         <div class="publicacoes-card__head">
           <h3>Diário Oficial</h3>
           <div class="publicacoes-card__actions">
-            <a class="publicacoes-btn" href="{% url 'core:diario_create' %}?municipio={{ municipio.pk }}">Nova edição</a>
+            <a class="publicacoes-btn gp-button" href="{% url 'core:diario_create' %}?municipio={{ municipio.pk }}">Nova edição</a>
           </div>
         </div>
         <ul class="publicacoes-list">
@@ -227,10 +227,10 @@
               <h4>Edição {{ item.numero }}</h4>
               <p>{{ item.data_publicacao|date:"d/m/Y" }} • {% if item.publicado %}Publicado{% else %}Rascunho{% endif %}</p>
               <div class="publicacoes-item__actions">
-                <a class="publicacoes-btn" href="{% url 'core:diario_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
-                <form method="post" action="{% url 'core:diario_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover edição?');">
+                <a class="publicacoes-btn gp-button" href="{% url 'core:diario_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
+                <form method="post" action="{% url 'core:diario_delete' item.pk %}?municipio={{ municipio.pk }}" class="u-inline-form">
                   {% csrf_token %}
-                  <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
+                  <button class="publicacoes-btn publicacoes-btn--danger gp-button gp-button--danger confirm" data-confirm="Remover edição?" type="submit">Remover</button>
                 </form>
               </div>
             </li>
@@ -240,11 +240,11 @@
         </ul>
       </article>
 
-      <article class="publicacoes-card" data-publicacoes-card data-scope="conteudo">
+      <article class="publicacoes-card gp-card" data-publicacoes-card data-scope="conteudo">
         <div class="publicacoes-card__head">
           <h3>Concursos</h3>
           <div class="publicacoes-card__actions">
-            <a class="publicacoes-btn" href="{% url 'core:concurso_create' %}?municipio={{ municipio.pk }}">Novo concurso</a>
+            <a class="publicacoes-btn gp-button" href="{% url 'core:concurso_create' %}?municipio={{ municipio.pk }}">Novo concurso</a>
           </div>
         </div>
         <ul class="publicacoes-list">
@@ -253,11 +253,11 @@
               <h4>{{ item.titulo }}</h4>
               <p>{{ item.get_tipo_display }} • {{ item.get_status_display }}</p>
               <div class="publicacoes-item__actions">
-                <a class="publicacoes-btn" href="{% url 'core:concurso_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
-                <a class="publicacoes-btn" href="{% url 'core:concurso_etapa_create' item.pk %}?municipio={{ municipio.pk }}">Nova etapa</a>
-                <form method="post" action="{% url 'core:concurso_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover concurso?');">
+                <a class="publicacoes-btn gp-button" href="{% url 'core:concurso_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
+                <a class="publicacoes-btn gp-button" href="{% url 'core:concurso_etapa_create' item.pk %}?municipio={{ municipio.pk }}">Nova etapa</a>
+                <form method="post" action="{% url 'core:concurso_delete' item.pk %}?municipio={{ municipio.pk }}" class="u-inline-form">
                   {% csrf_token %}
-                  <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
+                  <button class="publicacoes-btn publicacoes-btn--danger gp-button gp-button--danger confirm" data-confirm="Remover concurso?" type="submit">Remover</button>
                 </form>
               </div>
               {% if item.etapas.all %}
@@ -267,9 +267,9 @@
                       <h4>{{ etapa.titulo }}</h4>
                       <p>{{ etapa.data_inicio|date:"d/m/Y"|default:"—" }} até {{ etapa.data_fim|date:"d/m/Y"|default:"—" }}</p>
                       <div class="publicacoes-item__actions">
-                        <form method="post" action="{% url 'core:concurso_etapa_delete' etapa.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover etapa?');">
+                        <form method="post" action="{% url 'core:concurso_etapa_delete' etapa.pk %}?municipio={{ municipio.pk }}" class="u-inline-form">
                           {% csrf_token %}
-                          <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover etapa</button>
+                          <button class="publicacoes-btn publicacoes-btn--danger gp-button gp-button--danger confirm" data-confirm="Remover etapa?" type="submit">Remover etapa</button>
                         </form>
                       </div>
                     </li>
@@ -284,11 +284,11 @@
       </article>
 
       {% if plan_flags.transparencia %}
-        <article class="publicacoes-card" data-publicacoes-card data-scope="transparencia">
+        <article class="publicacoes-card gp-card" data-publicacoes-card data-scope="transparencia">
           <div class="publicacoes-card__head">
             <h3>Arquivos de Transparência</h3>
             <div class="publicacoes-card__actions">
-              <a class="publicacoes-btn" href="{% url 'core:transparencia_arquivo_create' %}?municipio={{ municipio.pk }}">Novo arquivo</a>
+              <a class="publicacoes-btn gp-button" href="{% url 'core:transparencia_arquivo_create' %}?municipio={{ municipio.pk }}">Novo arquivo</a>
             </div>
           </div>
           <ul class="publicacoes-list">
@@ -297,10 +297,10 @@
                 <h4>{{ item.titulo }}</h4>
                 <p>{{ item.get_categoria_display }} • {{ item.get_formato_display }} • {% if item.publico %}Publicado{% else %}Rascunho{% endif %}</p>
                 <div class="publicacoes-item__actions">
-                  <a class="publicacoes-btn" href="{% url 'core:transparencia_arquivo_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
-                  <form method="post" action="{% url 'core:transparencia_arquivo_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover arquivo de transparência?');">
+                  <a class="publicacoes-btn gp-button" href="{% url 'core:transparencia_arquivo_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
+                  <form method="post" action="{% url 'core:transparencia_arquivo_delete' item.pk %}?municipio={{ municipio.pk }}" class="u-inline-form">
                     {% csrf_token %}
-                    <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
+                    <button class="publicacoes-btn publicacoes-btn--danger gp-button gp-button--danger confirm" data-confirm="Remover arquivo de transparência?" type="submit">Remover</button>
                   </form>
                 </div>
               </li>
@@ -312,12 +312,12 @@
       {% endif %}
 
       {% if plan_flags.camara %}
-        <article class="publicacoes-card" data-publicacoes-card data-scope="camara">
+        <article class="publicacoes-card gp-card" data-publicacoes-card data-scope="camara">
           <div class="publicacoes-card__head">
             <h3>Matérias da Câmara (legado)</h3>
             <div class="publicacoes-card__actions">
-              <a class="publicacoes-btn" href="{% url 'camara:index' %}?municipio={{ municipio.pk }}">Abrir App Câmara</a>
-              <a class="publicacoes-btn" href="{% url 'core:camara_materia_create' %}?municipio={{ municipio.pk }}">Nova matéria</a>
+              <a class="publicacoes-btn gp-button" href="{% url 'camara:index' %}?municipio={{ municipio.pk }}">Visualizar App Câmara</a>
+              <a class="publicacoes-btn gp-button" href="{% url 'core:camara_materia_create' %}?municipio={{ municipio.pk }}">Nova matéria</a>
             </div>
           </div>
           <ul class="publicacoes-list">
@@ -326,10 +326,10 @@
                 <h4>{{ item.get_tipo_display }} {{ item.numero }}/{{ item.ano }}</h4>
                 <p>{{ item.get_status_display }} • {{ item.data_publicacao|date:"d/m/Y" }}</p>
                 <div class="publicacoes-item__actions">
-                  <a class="publicacoes-btn" href="{% url 'core:camara_materia_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
-                  <form method="post" action="{% url 'core:camara_materia_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover matéria?');">
+                  <a class="publicacoes-btn gp-button" href="{% url 'core:camara_materia_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
+                  <form method="post" action="{% url 'core:camara_materia_delete' item.pk %}?municipio={{ municipio.pk }}" class="u-inline-form">
                     {% csrf_token %}
-                    <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
+                    <button class="publicacoes-btn publicacoes-btn--danger gp-button gp-button--danger confirm" data-confirm="Remover matéria?" type="submit">Remover</button>
                   </form>
                 </div>
               </li>
@@ -339,12 +339,12 @@
           </ul>
         </article>
 
-        <article class="publicacoes-card" data-publicacoes-card data-scope="camara">
+        <article class="publicacoes-card gp-card" data-publicacoes-card data-scope="camara">
           <div class="publicacoes-card__head">
             <h3>Sessões da Câmara (legado)</h3>
             <div class="publicacoes-card__actions">
-              <a class="publicacoes-btn" href="{% url 'camara:index' %}?municipio={{ municipio.pk }}">Abrir App Câmara</a>
-              <a class="publicacoes-btn" href="{% url 'core:camara_sessao_create' %}?municipio={{ municipio.pk }}">Nova sessão</a>
+              <a class="publicacoes-btn gp-button" href="{% url 'camara:index' %}?municipio={{ municipio.pk }}">Visualizar App Câmara</a>
+              <a class="publicacoes-btn gp-button" href="{% url 'core:camara_sessao_create' %}?municipio={{ municipio.pk }}">Nova sessão</a>
             </div>
           </div>
           <ul class="publicacoes-list">
@@ -353,10 +353,10 @@
                 <h4>{{ item.titulo }}</h4>
                 <p>{{ item.data_sessao|date:"d/m/Y" }} • {% if item.publicado %}Publicado{% else %}Rascunho{% endif %}</p>
                 <div class="publicacoes-item__actions">
-                  <a class="publicacoes-btn" href="{% url 'core:camara_sessao_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
-                  <form method="post" action="{% url 'core:camara_sessao_delete' item.pk %}?municipio={{ municipio.pk }}" onsubmit="return confirm('Remover sessão?');">
+                  <a class="publicacoes-btn gp-button" href="{% url 'core:camara_sessao_update' item.pk %}?municipio={{ municipio.pk }}">Editar</a>
+                  <form method="post" action="{% url 'core:camara_sessao_delete' item.pk %}?municipio={{ municipio.pk }}" class="u-inline-form">
                     {% csrf_token %}
-                    <button class="publicacoes-btn publicacoes-btn--danger" type="submit">Remover</button>
+                    <button class="publicacoes-btn publicacoes-btn--danger gp-button gp-button--danger confirm" data-confirm="Remover sessão?" type="submit">Remover</button>
                   </form>
                 </div>
               </li>

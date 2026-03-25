@@ -31,7 +31,7 @@
         </p>
       </aside>
 
-      <section class="gauth-card" aria-labelledby="gauth-login-title">
+      <section class="gauth-card gp-card" aria-labelledby="gauth-login-title">
         <header class="gauth-card__head">
           <p class="gauth-card__brand">GEPUB</p>
           <h2 id="gauth-login-title" class="gauth-card__title">Iniciar sessão</h2>
@@ -39,15 +39,15 @@
         </header>
 
         {% if error %}
-          <div class="gauth-alert" role="alert">{{ error }}</div>
+          <div class="gauth-alert gp-alert" role="alert">{{ error }}</div>
         {% endif %}
 
-        <form method="post" class="gauth-form">
+        <form method="post" class="gauth-form form-shell">
           {% csrf_token %}
 
           <label for="id_codigo_acesso">Código de acesso</label>
           <div class="gauth-field">
-            <i class="fa-solid fa-id-card" aria-hidden="true"></i>
+            <i class="fa-solid fa-id-card gp-card" aria-hidden="true"></i>
             <input
               id="id_codigo_acesso"
               type="text"

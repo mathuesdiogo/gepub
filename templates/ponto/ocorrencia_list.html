@@ -1,41 +1,41 @@
 {% extends "core/base.html" %}
 
 {% block content %}
-<div class="card"><div class="card__body">
+<div class="card gp-card"><div class="card__body gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+  <form method="get" class="filter-bar u-mb-12 search-and-filters">
     {% if municipios and municipios|length %}
-      <select name="municipio" class="gp-input" style="max-width:240px;">
+      <select name="municipio" class="gp-input u-maxw-240">
         {% for m in municipios %}
           <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
         {% endfor %}
       </select>
     {% endif %}
-    <select name="status" class="gp-input" style="max-width:220px;">
+    <select name="status" class="gp-input u-maxw-220">
       <option value="">Todos status</option>
       {% for key,label in status_choices %}
         <option value="{{ key }}" {% if status == key %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
-    <select name="tipo" class="gp-input" style="max-width:220px;">
+    <select name="tipo" class="gp-input u-maxw-220">
       <option value="">Todos tipos</option>
       {% for key,label in tipo_choices %}
         <option value="{{ key }}" {% if tipo == key %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
-    <select name="competencia" class="gp-input" style="max-width:170px;">
+    <select name="competencia" class="gp-input u-maxw-170">
       <option value="">Competência</option>
       {% for comp in competencias %}
         <option value="{{ comp }}" {% if competencia == comp %}selected{% endif %}>{{ comp }}</option>
       {% endfor %}
     </select>
-    <input name="q" value="{{ q }}" class="gp-input" placeholder="Servidor ou descrição" style="max-width:280px;">
+    <input name="q" value="{{ q }}" class="gp-input u-maxw-280" placeholder="Servidor ou descrição">
     <button class="gp-button gp-button--outline gp-button--sm" type="submit">Filtrar</button>
   </form>
 
-  <div class="table-shell"><div class="table-shell__body">
-    <table class="table">
+  <div class="table-shell gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+    <table class="gp-table__native table">
       <thead><tr><th>Data</th><th>Servidor</th><th>Tipo</th><th>Minutos</th><th>Competência</th><th>Status</th><th></th></tr></thead>
       <tbody>
         {% for item in items %}
@@ -48,11 +48,11 @@
             <td>{{ item.get_status_display }}</td>
             <td>
               {% if item.status == "PENDENTE" %}
-                <form method="post" action="{% url 'ponto:ocorrencia_aprovar' item.pk %}?municipio={{ municipio.pk }}" style="display:inline;">
+                <form method="post" action="{% url 'ponto:ocorrencia_aprovar' item.pk %}?municipio={{ municipio.pk }}" class="u-inline-form">
                   {% csrf_token %}
                   <button class="gp-button gp-button--primary gp-button--sm" type="submit">Aprovar</button>
                 </form>
-                <form method="post" action="{% url 'ponto:ocorrencia_recusar' item.pk %}?municipio={{ municipio.pk }}" style="display:inline;">
+                <form method="post" action="{% url 'ponto:ocorrencia_recusar' item.pk %}?municipio={{ municipio.pk }}" class="u-inline-form">
                   {% csrf_token %}
                   <button class="gp-button gp-button--outline gp-button--sm" type="submit">Recusar</button>
                 </form>

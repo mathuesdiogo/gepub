@@ -52,13 +52,13 @@ def periodo_list(request):
             "label": "Gerar 4 Bimestres",
             "url": reverse("educacao:periodo_gerar_bimestres") + f"?ano={ano or ''}",
             "icon": "fa-solid fa-wand-magic-sparkles",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         })
         actions.append({
             "label": "Novo Período",
             "url": reverse("educacao:periodo_create"),
             "icon": "fa-solid fa-plus",
-            "variant": "btn-primary",
+            "variant": "gp-button--primary",
         })
 
 
@@ -149,7 +149,7 @@ def periodo_update(request, pk: int):
         "mode": "update",
         "periodo": periodo,
         "cancel_url": reverse("educacao:periodo_list"),
-        "submit_label": "Atualizar",
+        "submit_label": "Editar",
         "action_url": reverse("educacao:periodo_update", args=[periodo.pk]),
     })
 

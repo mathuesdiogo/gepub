@@ -111,9 +111,9 @@ def timeline_unificada(request, aluno_id: int):
         ev.pop("_dt", None)
 
     actions = [
-        {"label": "Voltar", "url": reverse("nee:aluno_hub", args=[aluno.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+        {"label": "Voltar", "url": reverse("nee:aluno_hub", args=[aluno.pk]), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
     ]
     if can(request.user, "nee.manage"):
-        actions.append({"label": "Novo evento", "url": reverse("nee:acompanhamento_create", args=[aluno.pk]), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+        actions.append({"label": "Novo evento", "url": reverse("nee:acompanhamento_create", args=[aluno.pk]), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
 
     return render(request, "nee/timeline_unificada.html", {"aluno": aluno, "eventos": eventos, "actions": actions})

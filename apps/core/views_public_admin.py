@@ -454,19 +454,19 @@ def publicacoes_admin(request):
                     "label": "Editor visual do tema",
                     "url": reverse("core:publicacoes_theme_editor") + _q_municipio(municipio),
                     "icon": "fa-solid fa-wand-magic-sparkles",
-                    "variant": "btn--primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "Configuração do portal",
                     "url": reverse("core:publicacoes_config_edit") + _q_municipio(municipio),
                     "icon": "fa-solid fa-sliders",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
-                    "label": "Ver portal público",
+                    "label": "Visualizar portal público",
                     "url": _portal_public_url(request, municipio),
                     "icon": "fa-solid fa-arrow-up-right-from-square",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
             "counts": {
@@ -574,7 +574,7 @@ def publicacoes_theme_editor(request):
                     "label": "Voltar para central",
                     "url": reverse("core:publicacoes_admin") + _q_municipio(municipio),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
             "modulos_links": (

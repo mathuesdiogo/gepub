@@ -1,4 +1,5 @@
 {% extends "educacao/base_modulo.html" %}
+{% load gepub_design_system %}
 {% block title %}Equivalências da Matriz • Educação • GEPUB{% endblock %}
 
 {% block module_content %}
@@ -10,10 +11,10 @@
         <div class="section">
           <div class="section__title">Novo grupo</div>
           <div class="small">Cadastre grupos para validar componentes equivalentes na mesma matriz.</div>
-          <form method="post" class="gp-form u-mt-10">
+          <form method="post" class="gp-form u-mt-10 form-shell">
             {% csrf_token %}
             <input type="hidden" name="_action" value="add_grupo">
-            {{ grupo_form.as_p }}
+            {% render_form grupo_form %}
             <button type="submit" class="gp-button gp-button--primary">Adicionar grupo</button>
           </form>
         </div>
@@ -21,7 +22,7 @@
         <div class="section">
           <div class="section__title">Vincular componente ao grupo</div>
           <div class="small">Selecione o grupo e o componente da matriz para montar a equivalência.</div>
-          <form method="post" class="gp-form u-mt-10">
+          <form method="post" class="gp-form u-mt-10 form-shell">
             {% csrf_token %}
             <input type="hidden" name="_action" value="add_item">
             <p>
@@ -35,7 +36,7 @@
                 {% endfor %}
               </select>
             </p>
-            {{ item_form.as_p }}
+            {% render_form item_form %}
             <button type="submit" class="gp-button gp-button--primary">Adicionar componente</button>
           </form>
         </div>
@@ -69,12 +70,12 @@
                 <td>
                   {% with itens=grupo.itens.all %}
                     {% if itens %}
-                      <ul style="margin:0; padding-left: 18px;">
+                      <ul class="u-m-0 u-pl-18">
                         {% for item in itens %}
                           <li class="u-mb-6">
                             {{ item.ordem }} • {{ item.componente.componente.nome }}
                             {% if not item.ativo %}(inativo){% endif %}
-                            <form method="post" class="gp-form gp-inline-form" style="display:inline; margin-left:8px;">
+                            <form method="post" class="gp-form gp-inline-form u-inline-form u-ml-8 form-shell">
                               {% csrf_token %}
                               <input type="hidden" name="_action" value="remove_item">
                               <input type="hidden" name="item_id" value="{{ item.pk }}">
@@ -89,11 +90,11 @@
                   {% endwith %}
                 </td>
                 <td>
-                  <form method="post" class="gp-form">
+                  <form method="post" class="gp-form form-shell">
                     {% csrf_token %}
                     <input type="hidden" name="_action" value="remove_grupo">
                     <input type="hidden" name="grupo_id" value="{{ grupo.pk }}">
-                    <button type="submit" class="gp-button gp-button--danger">Excluir</button>
+                    <button type="submit" class="gp-button gp-button--danger">Remover</button>
                   </form>
                 </td>
               </tr>

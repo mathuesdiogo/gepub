@@ -7,9 +7,9 @@
 
   {% if has_regular_access %}
   <article class="gp-student-stage__card">
-    <form method="get" class="gp-form gp-form--smart gp-professor-filter-row gp-professor-filter-row--wide">
-      <div class="gp-form-group">
-        <label class="gp-form-label" for="id_turma">Turma</label>
+    <form method="get" class="gp-form gp-form--smart gp-professor-filter-row gp-professor-filter-row--wide form-shell search-and-filters">
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell" for="id_turma">Turma</label>
         <select id="id_turma" name="turma" class="gp-select">
           <option value="">Todas</option>
           {% for turma in turmas_filtro %}
@@ -17,8 +17,8 @@
           {% endfor %}
         </select>
       </div>
-      <div class="gp-form-group">
-        <label class="gp-form-label" for="id_dia">Dia da semana</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell" for="id_dia">Dia da semana</label>
         <select id="id_dia" name="dia" class="gp-select">
           <option value="">Todos</option>
           {% for value, label in dias_choices %}
@@ -26,8 +26,8 @@
           {% endfor %}
         </select>
       </div>
-      <div class="gp-form-group">
-        <label class="gp-form-label">&nbsp;</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell">&nbsp;</label>
         <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
       </div>
     </form>
@@ -49,9 +49,9 @@
   {% if has_informatica_access %}
   <article class="gp-student-stage__card">
     <h3>Locais e Horários do Curso de Informática</h3>
-    <form method="get" class="gp-form gp-form--smart gp-professor-filter-row gp-professor-filter-row--wide">
-      <div class="gp-form-group">
-        <label class="gp-form-label" for="id_turma_informatica">Turma de Informática</label>
+    <form method="get" class="gp-form gp-form--smart gp-professor-filter-row gp-professor-filter-row--wide form-shell search-and-filters">
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell" for="id_turma_informatica">Turma de Informática</label>
         <select id="id_turma_informatica" name="turma_informatica" class="gp-select">
           <option value="">Todas</option>
           {% for turma in turmas_informatica_filtro %}
@@ -59,8 +59,8 @@
           {% endfor %}
         </select>
       </div>
-      <div class="gp-form-group">
-        <label class="gp-form-label" for="id_dia_info">Dia da semana</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell" for="id_dia_info">Dia da semana</label>
         <select id="id_dia_info" name="dia_info" class="gp-select">
           <option value="">Todos</option>
           {% for value, label in dias_choices_informatica %}
@@ -68,8 +68,8 @@
           {% endfor %}
         </select>
       </div>
-      <div class="gp-form-group">
-        <label class="gp-form-label">&nbsp;</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell">&nbsp;</label>
         <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
       </div>
     </form>

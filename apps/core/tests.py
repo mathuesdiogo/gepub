@@ -1,4 +1,5 @@
 from django.test import TestCase, override_settings
+from django.template import Context, Template
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpResponse
@@ -807,3 +808,48 @@ class DesignSystemThemeResolutionTestCase(TestCase):
 
         user.profile.refresh_from_db()
         self.assertEqual(user.profile.ui_theme, "inclusao")
+
+
+class DesignSystemTemplateAPITestCase(TestCase):
+    def test_filter_format_com_data(self):
+        tpl = Template("{% load gepub_design_system %}{{ valor|format }}")
+        html = tpl.render(Context({"valor": timezone.datetime(2026, 1, 15)}))
+        self.assertEqual(html, "15/01/2026")
+
+    def test_filter_status_renderiza_span_slug(self):
+        tpl = Template("{% load gepub_design_system %}{{ valor|status }}")
+        html = tpl.render(Context({"valor": "Em manutenção"}))
+        self.assertIn('class="span span--em-manutencao"', html)
+        self.assertIn("Em manutenção", html)
+
+    def test_filter_text_small_envolve_com_small(self):
+        tpl = Template("{% load gepub_design_system %}{{ valor|text_small }}")
+        html = tpl.render(Context({"valor": "Comentário lateral"}))
+        self.assertEqual(html, "<small>Comentário lateral</small>")
+
+    def test_tag_icon_e_icone(self):
+        tpl = Template(
+            "{% load gepub_design_system %}"
+            "{% icon 'view' '/detalhe/' %}"
+            "{% icone 'user' %}"
+        )
+        html = tpl.render(Context({}))
+        self.assertIn('href="/detalhe/"', html)
+        self.assertIn("fa-solid fa-eye", html)
+        self.assertIn("fa-solid fa-user", html)
+
+    def test_docs_geral_exibe_secao_de_padroes_web(self):
+        user = User.objects.create_user(username="ds_docs_admin", password="x")
+        profile = user.profile
+        profile.role = "ADMIN"
+        profile.ativo = True
+        profile.must_change_password = False
+        profile.save(update_fields=["role", "ativo", "must_change_password"])
+
+        self.client.force_login(user)
+        response = self.client.get(reverse("core:design_system_docs"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Padrões web")
+        self.assertContains(response, "Nomenclaturas")
+        self.assertContains(response, "Template Filters")
+        self.assertContains(response, "Template Tags")

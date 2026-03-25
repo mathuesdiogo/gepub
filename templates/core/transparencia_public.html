@@ -14,25 +14,25 @@
 
 {% block page_content %}
 <section class="pp-grid pp-grid--3 pp-section-space">
-  <article class="pp-card tp-kpi-card tp-kpi-card--blue">
+  <article class="pp-card tp-kpi-card tp-kpi-card--blue gp-card">
     <h3>Eventos listados</h3>
     <p class="pp-kpi-value">{{ total_eventos }}</p>
     <p class="pp-meta">Registros públicos no resultado atual</p>
   </article>
-  <article class="pp-card tp-kpi-card tp-kpi-card--navy">
+  <article class="pp-card tp-kpi-card tp-kpi-card--navy gp-card">
     <h3>Valor financeiro somado</h3>
     <p class="pp-kpi-value">R$ {{ total_valor|floatformat:2 }}</p>
     <p class="pp-meta">Somatório de eventos com valor informado</p>
   </article>
-  <article class="pp-card tp-kpi-card tp-kpi-card--green">
+  <article class="pp-card tp-kpi-card tp-kpi-card--green gp-card">
     <h3>Arquivos publicados</h3>
     <p class="pp-kpi-value">{{ total_arquivos_publicos }}</p>
     <p class="pp-meta">Acervo público por categoria</p>
   </article>
 </section>
 
-<section class="pp-card pp-section-space">
-  <form method="get" class="tp-filter-form">
+<section class="pp-card pp-section-space gp-card">
+  <form method="get" class="tp-filter-form form-shell search-and-filters">
     <input class="pp-input" type="text" name="q" value="{{ filtro_q }}" placeholder="Buscar por título, referência ou município">
 
     <select class="pp-select" name="municipio" {% if lock_municipio %}disabled{% endif %}>
@@ -64,14 +64,14 @@
     <input class="pp-input" type="date" name="inicio" value="{{ filtro_inicio }}">
     <input class="pp-input" type="date" name="fim" value="{{ filtro_fim }}">
 
-    <button class="pp-btn pp-btn--primary" type="submit">Filtrar</button>
+    <button class="pp-btn pp-btn--primary gp-button gp-button--primary" type="submit">Filtrar</button>
   </form>
 </section>
 
 {% if secoes_transparencia %}
 <section class="tp-sections pp-section-space">
   {% for secao in secoes_transparencia %}
-    <article class="pp-card tp-section">
+    <article class="pp-card tp-section gp-card">
       <header class="tp-section__header">
         <div>
           <p class="tp-section__kicker">Módulo</p>
@@ -104,10 +104,10 @@
             <p class="tp-item__meta"><span>Cobertura:</span> {{ item.detalhe }}</p>
             <div class="tp-item__actions">
               {% if item.url_publica %}
-                <a class="pp-btn pp-btn--soft" href="{{ item.url_publica }}">Abrir módulo público</a>
+                <a class="pp-btn pp-btn--soft gp-button" href="{{ item.url_publica }}">Visualizar módulo público</a>
               {% endif %}
               {% if item.categoria_filtro %}
-                <a class="pp-btn pp-btn--soft" href="?categoria={{ item.categoria_filtro }}{% if filtro_municipio %}&municipio={{ filtro_municipio }}{% endif %}">Ver publicações</a>
+                <a class="pp-btn pp-btn--soft gp-button" href="?categoria={{ item.categoria_filtro }}{% if filtro_municipio %}&municipio={{ filtro_municipio }}{% endif %}">Visualizar publicações</a>
               {% endif %}
             </div>
           </article>
@@ -119,14 +119,14 @@
 {% endif %}
 
 {% if arquivos_publicos %}
-<section class="pp-card pp-section-space">
+<section class="pp-card pp-section-space gp-card">
   <div class="pp-card__subhead">
     <h2>Arquivos públicos</h2>
-    <span class="pp-badge">{{ total_arquivos_publicos }} arquivo(s)</span>
+    <span class="pp-badge gp-badge">{{ total_arquivos_publicos }} arquivo(s)</span>
   </div>
 
   <div class="pp-table-wrap pp-section-space">
-    <table class="pp-table">
+    <table class="gp-table__native pp-table">
       <thead>
         <tr>
           <th>Categoria</th>
@@ -150,9 +150,9 @@
             <td>{{ item.competencia|default:"—" }}</td>
             <td>
               {% if item.arquivo %}
-                <a class="pp-btn pp-btn--soft" href="{{ item.arquivo.url }}" target="_blank" rel="noopener">Abrir arquivo</a>
+                <a class="pp-btn pp-btn--soft gp-button" href="{{ item.arquivo.url }}" target="_blank" rel="noopener">Visualizar arquivo</a>
               {% elif item.link_externo %}
-                <a class="pp-btn pp-btn--soft" href="{{ item.link_externo }}" target="_blank" rel="noopener">Abrir link</a>
+                <a class="pp-btn pp-btn--soft gp-button" href="{{ item.link_externo }}" target="_blank" rel="noopener">Visualizar link</a>
               {% else %}
                 -
               {% endif %}
@@ -166,14 +166,14 @@
 {% endif %}
 
 {% if eventos %}
-<section class="pp-card pp-section-space">
+<section class="pp-card pp-section-space gp-card">
   <div class="pp-card__subhead">
     <h2>Eventos públicos</h2>
-    <span class="pp-badge">{{ total_eventos }} evento(s)</span>
+    <span class="pp-badge gp-badge">{{ total_eventos }} evento(s)</span>
   </div>
 
   <div class="pp-table-wrap pp-section-space">
-    <table class="pp-table">
+    <table class="gp-table__native pp-table">
       <thead>
         <tr>
           <th>Data</th>
@@ -205,7 +205,7 @@
   </div>
 </section>
 {% else %}
-<section class="pp-card pp-section-space pp-empty-state">
+<section class="pp-card pp-section-space pp-empty-state gp-card">
   <i class="fa-regular fa-folder-open"></i>
   <h3>Nenhum evento público encontrado.</h3>
   <p class="pp-meta">Ajuste os filtros para ampliar a pesquisa.</p>

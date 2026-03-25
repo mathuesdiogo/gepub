@@ -111,13 +111,13 @@ def meu_plano(request):
             "label": "Solicitar upgrade",
             "url": reverse("billing:solicitar_upgrade") + f"?municipio={municipio.pk}",
             "icon": "fa-solid fa-arrow-up-right-dots",
-            "variant": "btn-primary",
+            "variant": "gp-button--primary",
         },
         {
             "label": "Simular novo plano",
             "url": reverse("billing:simulador"),
             "icon": "fa-solid fa-calculator",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
     ]
 
@@ -128,7 +128,7 @@ def meu_plano(request):
                 "label": "Assinaturas",
                 "url": reverse("billing:assinaturas_admin"),
                 "icon": "fa-solid fa-building-shield",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             },
         )
 
@@ -205,7 +205,7 @@ def solicitar_upgrade(request):
             "label": "Voltar",
             "url": reverse("billing:meu_plano") + f"?municipio={municipio.pk}",
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }
     ]
 
@@ -269,7 +269,7 @@ def simulador(request):
             "label": "Meu plano",
             "url": reverse("billing:meu_plano"),
             "icon": "fa-solid fa-file-contract",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }
     ]
     return render(

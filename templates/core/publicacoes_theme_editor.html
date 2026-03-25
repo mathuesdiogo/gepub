@@ -4,8 +4,8 @@
 {% block header %}Editor Visual do Tema{% endblock %}
 
 {% block content %}
-<div class="card theme-editor-card">
-  <div class="card__body theme-editor-card__body">
+<div class="card theme-editor-card gp-card">
+  <div class="card__body theme-editor-card__body gp-card__body">
     {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
     <section class="theme-editor-intro">
@@ -26,9 +26,9 @@
     </section>
 
     {% if municipios %}
-      <form method="get" class="theme-editor-filter" action="{% url 'core:publicacoes_theme_editor' %}">
-        <div class="gp-form-group">
-          <label class="gp-form-label" for="id_municipio">Município em edição</label>
+      <form method="get" class="theme-editor-filter form-shell search-and-filters" action="{% url 'core:publicacoes_theme_editor' %}">
+        <div class="gp-form-group form-shell">
+          <label class="gp-form-label form-shell" for="id_municipio">Município em edição</label>
           <select id="id_municipio" class="gp-select" name="municipio" onchange="this.form.submit()">
             {% for m in municipios %}
               <option value="{{ m.pk }}" {% if m.pk == municipio.pk %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
@@ -39,7 +39,7 @@
     {% endif %}
 
     <div class="theme-editor-shell">
-      <form id="themeEditorForm" class="theme-editor-panel gp-form gp-form--stacked" method="post" enctype="multipart/form-data">
+      <form id="themeEditorForm" class="theme-editor-panel gp-form gp-form--stacked form-shell" method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
         <div class="theme-editor-panel__head">
@@ -95,12 +95,12 @@
           </header>
 
           <div class="theme-editor-grid2">
-            <div class="gp-form-group">
-              <label class="gp-form-label">Intervalo automático (ms)</label>
+            <div class="gp-form-group form-shell">
+              <label class="gp-form-label form-shell">Intervalo automático (ms)</label>
               <input class="gp-input" type="number" min="1500" step="100" name="slider_interval_ms" data-field="slider_interval_ms" value="{{ theme_builder.slider_interval_ms|default:5500 }}">
             </div>
-            <div class="gp-form-group">
-              <label class="gp-form-label">Autoplay</label>
+            <div class="gp-form-group form-shell">
+              <label class="gp-form-label form-shell">Autoplay</label>
               <select class="gp-select" name="slider_autoplay" data-field="slider_autoplay">
                 <option value="1" {% if theme_builder.slider_autoplay %}selected{% endif %}>Ativado</option>
                 <option value="0" {% if not theme_builder.slider_autoplay %}selected{% endif %}>Desativado</option>
@@ -109,15 +109,15 @@
           </div>
 
           <div class="theme-editor-grid2">
-            <div class="gp-form-group">
-              <label class="gp-form-label">Setas de navegação</label>
+            <div class="gp-form-group form-shell">
+              <label class="gp-form-label form-shell">Setas de navegação</label>
               <select class="gp-select" name="slider_show_arrows" data-field="slider_show_arrows">
                 <option value="1" {% if theme_builder.slider_show_arrows %}selected{% endif %}>Mostrar</option>
                 <option value="0" {% if not theme_builder.slider_show_arrows %}selected{% endif %}>Ocultar</option>
               </select>
             </div>
-            <div class="gp-form-group">
-              <label class="gp-form-label">Indicadores (dots)</label>
+            <div class="gp-form-group form-shell">
+              <label class="gp-form-label form-shell">Indicadores (dots)</label>
               <select class="gp-select" name="slider_show_dots" data-field="slider_show_dots">
                 <option value="1" {% if theme_builder.slider_show_dots %}selected{% endif %}>Mostrar</option>
                 <option value="0" {% if not theme_builder.slider_show_dots %}selected{% endif %}>Ocultar</option>
@@ -125,14 +125,14 @@
             </div>
           </div>
 
-          <div class="theme-editor-card-grid">
+          <div class="theme-editor-card-grid gp-card">
             {% for slide in slides_editor %}
               <article class="theme-editor-block-row">
                 <h5>Slide {{ forloop.counter }}</h5>
                 <input type="hidden" name="slide_{{ slide.idx }}_id" value="{{ slide.id }}" data-field="slide_{{ slide.idx }}_id">
 
-                <div class="gp-form-group">
-                  <label class="gp-form-label">Título</label>
+                <div class="gp-form-group form-shell">
+                  <label class="gp-form-label form-shell">Título</label>
                   <input
                     class="gp-input"
                     type="text"
@@ -143,8 +143,8 @@
                   >
                 </div>
 
-                <div class="gp-form-group">
-                  <label class="gp-form-label">Subtítulo</label>
+                <div class="gp-form-group form-shell">
+                  <label class="gp-form-label form-shell">Subtítulo</label>
                   <input
                     class="gp-input"
                     type="text"
@@ -156,8 +156,8 @@
                 </div>
 
                 <div class="theme-editor-grid2">
-                  <div class="gp-form-group">
-                    <label class="gp-form-label">Link</label>
+                  <div class="gp-form-group form-shell">
+                    <label class="gp-form-label form-shell">Link</label>
                     <input
                       class="gp-input"
                       type="text"
@@ -167,25 +167,25 @@
                       placeholder="/pagina ou https://..."
                     >
                   </div>
-                  <div class="gp-form-group">
-                    <label class="gp-form-label">Ordem</label>
+                  <div class="gp-form-group form-shell">
+                    <label class="gp-form-label form-shell">Ordem</label>
                     <input class="gp-input" type="number" min="1" name="slide_{{ slide.idx }}_ordem" data-field="slide_{{ slide.idx }}_ordem" value="{{ slide.ordem|default:forloop.counter }}">
                   </div>
                 </div>
 
                 <div class="theme-editor-grid2">
-                  <div class="gp-form-group">
-                    <label class="gp-form-label">Ativo</label>
+                  <div class="gp-form-group form-shell">
+                    <label class="gp-form-label form-shell">Ativo</label>
                     <select class="gp-select" name="slide_{{ slide.idx }}_ativo" data-field="slide_{{ slide.idx }}_ativo">
                       <option value="1" {% if slide.ativo %}selected{% endif %}>Sim</option>
                       <option value="0" {% if not slide.ativo %}selected{% endif %}>Não</option>
                     </select>
                   </div>
-                  <div class="gp-form-group">
-                    <label class="gp-form-label">Imagem</label>
+                  <div class="gp-form-group form-shell">
+                    <label class="gp-form-label form-shell">Imagem</label>
                     <input class="gp-input" type="file" name="slide_{{ slide.idx }}_imagem" id="id_slide_{{ slide.idx }}_imagem" accept="image/*" data-field="slide_{{ slide.idx }}_imagem">
                     {% if slide.tem_imagem %}
-                      <small class="gp-form-help">Slide já possui imagem publicada.</small>
+                      <small class="gp-form-help form-shell">Slide já possui imagem publicada.</small>
                     {% endif %}
                   </div>
                 </div>
@@ -200,35 +200,35 @@
             <p>Defina conteúdo, ícone e link dos atalhos principais.</p>
           </header>
 
-          <div class="theme-editor-card-grid">
+          <div class="theme-editor-card-grid gp-card">
             {% for item in blocos_editor %}
               <article class="theme-editor-block-row">
                 <h5>Card {{ forloop.counter }}</h5>
                 <input type="hidden" name="bloco_{{ item.idx }}_id" value="{{ item.id }}" data-field="bloco_{{ item.idx }}_id">
 
-                <div class="gp-form-group">
-                  <label class="gp-form-label">Título</label>
+                <div class="gp-form-group form-shell">
+                  <label class="gp-form-label form-shell">Título</label>
                   <input class="gp-input" type="text" name="bloco_{{ item.idx }}_titulo" data-field="bloco_{{ item.idx }}_titulo" value="{{ item.titulo }}">
                 </div>
 
-                <div class="gp-form-group">
-                  <label class="gp-form-label">Descrição</label>
+                <div class="gp-form-group form-shell">
+                  <label class="gp-form-label form-shell">Descrição</label>
                   <textarea class="gp-textarea" name="bloco_{{ item.idx }}_descricao" data-field="bloco_{{ item.idx }}_descricao" rows="2">{{ item.descricao }}</textarea>
                 </div>
 
                 <div class="theme-editor-grid2">
-                  <div class="gp-form-group">
-                    <label class="gp-form-label">Ícone (Font Awesome)</label>
+                  <div class="gp-form-group form-shell">
+                    <label class="gp-form-label form-shell">Ícone (Font Awesome)</label>
                     <input class="gp-input" type="text" name="bloco_{{ item.idx }}_icone" data-field="bloco_{{ item.idx }}_icone" value="{{ item.icone }}">
                   </div>
-                  <div class="gp-form-group">
-                    <label class="gp-form-label">Link</label>
+                  <div class="gp-form-group form-shell">
+                    <label class="gp-form-label form-shell">Link</label>
                     <input class="gp-input" type="text" name="bloco_{{ item.idx }}_link" data-field="bloco_{{ item.idx }}_link" value="{{ item.link }}">
                   </div>
                 </div>
 
-                <div class="gp-form-group">
-                  <label class="gp-form-label">Ativo</label>
+                <div class="gp-form-group form-shell">
+                  <label class="gp-form-label form-shell">Ativo</label>
                   <select class="gp-select" name="bloco_{{ item.idx }}_ativo" data-field="bloco_{{ item.idx }}_ativo">
                     <option value="1" {% if item.ativo %}selected{% endif %}>Sim</option>
                     <option value="0" {% if not item.ativo %}selected{% endif %}>Não</option>
@@ -246,39 +246,39 @@
           </header>
 
           <div class="theme-editor-grid2">
-            <div class="gp-form-group">
-              <label class="gp-form-label">Título do portal</label>
+            <div class="gp-form-group form-shell">
+              <label class="gp-form-label form-shell">Título do portal</label>
               <input class="gp-input" type="text" name="titulo_portal" data-field="titulo_portal" value="{{ cfg.titulo_portal }}">
             </div>
-            <div class="gp-form-group">
-              <label class="gp-form-label">Subtítulo</label>
+            <div class="gp-form-group form-shell">
+              <label class="gp-form-label form-shell">Subtítulo</label>
               <input class="gp-input" type="text" name="subtitulo_portal" data-field="subtitulo_portal" value="{{ cfg.subtitulo_portal }}">
             </div>
           </div>
 
-          <div class="gp-form-group">
-            <label class="gp-form-label">Mensagem de boas-vindas</label>
+          <div class="gp-form-group form-shell">
+            <label class="gp-form-label form-shell">Mensagem de boas-vindas</label>
             <textarea class="gp-textarea" name="mensagem_boas_vindas" data-field="mensagem_boas_vindas" rows="4">{{ cfg.mensagem_boas_vindas }}</textarea>
           </div>
 
           <div class="theme-editor-grid2">
-            <div class="gp-form-group">
-              <label class="gp-form-label">Cor primária</label>
+            <div class="gp-form-group form-shell">
+              <label class="gp-form-label form-shell">Cor primária</label>
               <input class="gp-input" type="color" name="cor_primaria" data-field="cor_primaria" value="{{ cfg.cor_primaria|default:'#0E4A7E' }}">
             </div>
-            <div class="gp-form-group">
-              <label class="gp-form-label">Cor secundária</label>
+            <div class="gp-form-group form-shell">
+              <label class="gp-form-label form-shell">Cor secundária</label>
               <input class="gp-input" type="color" name="cor_secundaria" data-field="cor_secundaria" value="{{ cfg.cor_secundaria|default:'#2F6EA9' }}">
             </div>
           </div>
 
           <div class="theme-editor-grid2">
-            <div class="gp-form-group">
-              <label class="gp-form-label">Logo (cabeçalho)</label>
+            <div class="gp-form-group form-shell">
+              <label class="gp-form-label form-shell">Logo (cabeçalho)</label>
               <input class="gp-input" type="file" name="logo" accept="image/*" data-field="logo" id="id_logo">
             </div>
-            <div class="gp-form-group">
-              <label class="gp-form-label">Brasão</label>
+            <div class="gp-form-group form-shell">
+              <label class="gp-form-label form-shell">Brasão</label>
               <input class="gp-input" type="file" name="brasao" accept="image/*" data-field="brasao">
             </div>
           </div>
@@ -286,28 +286,28 @@
 
         <section class="theme-editor-group" data-mode="config">
           <header class="theme-editor-group__head">
-            <h4><i class="fa-solid fa-address-card"></i> Rodapé e governança</h4>
+            <h4><i class="fa-solid fa-address-card gp-card"></i> Rodapé e governança</h4>
             <p>Dados públicos de contato exibidos no rodapé do portal.</p>
           </header>
 
-          <div class="gp-form-group">
-            <label class="gp-form-label">Endereço</label>
+          <div class="gp-form-group form-shell">
+            <label class="gp-form-label form-shell">Endereço</label>
             <input class="gp-input" type="text" name="endereco" data-field="endereco" value="{{ cfg.endereco }}">
           </div>
 
           <div class="theme-editor-grid2">
-            <div class="gp-form-group">
-              <label class="gp-form-label">Telefone</label>
+            <div class="gp-form-group form-shell">
+              <label class="gp-form-label form-shell">Telefone</label>
               <input class="gp-input" type="text" name="telefone" data-field="telefone" value="{{ cfg.telefone }}">
             </div>
-            <div class="gp-form-group">
-              <label class="gp-form-label">E-mail</label>
+            <div class="gp-form-group form-shell">
+              <label class="gp-form-label form-shell">E-mail</label>
               <input class="gp-input" type="email" name="email" data-field="email" value="{{ cfg.email }}">
             </div>
           </div>
 
-          <div class="gp-form-group">
-            <label class="gp-form-label">Horário de atendimento</label>
+          <div class="gp-form-group form-shell">
+            <label class="gp-form-label form-shell">Horário de atendimento</label>
             <input class="gp-input" type="text" name="horario_atendimento" data-field="horario_atendimento" value="{{ cfg.horario_atendimento }}">
           </div>
         </section>
@@ -329,7 +329,7 @@
             <i class="fa-solid fa-floppy-disk"></i> Salvar e publicar versão
           </button>
           <a class="gp-button gp-button--outline" target="_blank" rel="noopener" href="{{ preview_url }}">
-            <i class="fa-solid fa-up-right-from-square"></i> Abrir preview em nova aba
+            <i class="fa-solid fa-up-right-from-square"></i> Visualizar preview em nova aba
           </a>
         </div>
       </form>

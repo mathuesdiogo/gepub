@@ -1,17 +1,18 @@
 {% extends "educacao/base_modulo.html" %}
+{% load gepub_design_system %}
 {% block title %}{{ obj.nome }} • Benefícios • Educação • GEPUB{% endblock %}
 
 {% block module_content %}
-<div class="gp-card"><div class="gp-card__body">
+<div class="gp-card"><div class="gp-card__body edu-detail-flow">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <div class="gp-pills">
-    <span class="gp-pills__item">{{ obj.get_area_display }}</span>
-    <span class="gp-pills__item">{{ obj.get_categoria_display }}</span>
-    <span class="gp-pills__item">{{ obj.get_publico_alvo_display }}</span>
-    <span class="gp-pills__item">{{ obj.get_periodicidade_display }}</span>
-    <span class="gp-pills__item">{{ obj.get_status_display }}</span>
-  </div>
+  <ul class="pills">
+    <li><span>{{ obj.get_area_display }}</span></li>
+    <li><span>{{ obj.get_categoria_display }}</span></li>
+    <li><span>{{ obj.get_publico_alvo_display }}</span></li>
+    <li><span>{{ obj.get_periodicidade_display }}</span></li>
+    <li><span>{{ obj.get_status_display }}</span></li>
+  </ul>
 
   <div class="gp-table gp-table--responsive gp-table--striped gp-table--hover"><div class="gp-table__head"><h3>Composição do kit/benefício</h3></div><div class="gp-table__body">
     <table class="gp-table__native">
@@ -26,7 +27,7 @@
           <td>{% if item.permite_substituicao %}Sim{% else %}Não{% endif %}</td>
           <td>
             {% if can_manage %}
-            <form class="gp-form" method="post" action="{% url 'educacao:beneficio_tipo_item_remove' obj.pk item.pk %}?municipio={{ municipio.id }}">
+            <form class="gp-form form-shell" method="post" action="{% url 'educacao:beneficio_tipo_item_remove' obj.pk item.pk %}?municipio={{ municipio.id }}">
               {% csrf_token %}
               <button class="gp-button gp-button--ghost gp-button--sm" type="submit">Remover</button>
             </form>
@@ -43,9 +44,9 @@
   {% if can_manage %}
   <details class="aluno-form-panel" open>
     <summary><i class="fa-solid fa-plus"></i>Adicionar item à composição</summary>
-    <form class="gp-form" method="post" action="{% url 'educacao:beneficio_tipo_item_add' obj.pk %}?municipio={{ municipio.id }}">
+    <form class="gp-form form-shell" method="post" action="{% url 'educacao:beneficio_tipo_item_add' obj.pk %}?municipio={{ municipio.id }}">
       {% csrf_token %}
-      {{ form_item.as_p }}
+      {% render_form form_item %}
       <button class="gp-button gp-button--primary" type="submit">Adicionar item</button>
     </form>
   </details>

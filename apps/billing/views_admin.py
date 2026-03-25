@@ -64,25 +64,25 @@ def assinaturas_admin(request):
             "label": "Planos (Admin)",
             "url": reverse("billing:planos_admin"),
             "icon": "fa-solid fa-layer-group",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
         {
             "label": "Simulador",
             "url": reverse("billing:simulador"),
             "icon": "fa-solid fa-calculator",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
         {
             "label": "CSV",
             "url": reverse("billing:assinaturas_admin") + f"?q={q}&status={status}&export=csv",
             "icon": "fa-solid fa-file-csv",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
         {
             "label": "PDF",
             "url": reverse("billing:assinaturas_admin") + f"?q={q}&status={status}&export=pdf",
             "icon": "fa-solid fa-file-pdf",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
     ]
 
@@ -158,19 +158,19 @@ def planos_admin(request):
             "label": "Novo plano",
             "url": reverse("billing:plano_admin_create"),
             "icon": "fa-solid fa-plus",
-            "variant": "btn-primary",
+            "variant": "gp-button--primary",
         },
         {
             "label": "Assinaturas",
             "url": reverse("billing:assinaturas_admin"),
             "icon": "fa-solid fa-building-shield",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
         {
             "label": "Simulador",
             "url": reverse("billing:simulador"),
             "icon": "fa-solid fa-calculator",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
     ]
 
@@ -221,7 +221,7 @@ def plano_admin_create(request):
                     "label": "Voltar",
                     "url": reverse("billing:planos_admin"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
             "is_new": True,
@@ -316,13 +316,13 @@ def plano_admin_detail(request, plano_id: int):
                     "label": "Voltar",
                     "url": reverse("billing:planos_admin"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Assinaturas",
                     "url": reverse("billing:assinaturas_admin"),
                     "icon": "fa-solid fa-building-shield",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
             "is_new": False,
@@ -406,13 +406,13 @@ def assinatura_admin_detail(request, assinatura_id: int):
             "label": "Voltar",
             "url": reverse("billing:assinaturas_admin"),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
         {
             "label": "Planos (Admin)",
             "url": reverse("billing:planos_admin"),
             "icon": "fa-solid fa-layer-group",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
     ]
 

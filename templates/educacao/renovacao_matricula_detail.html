@@ -1,21 +1,22 @@
 {% extends "educacao/base_modulo.html" %}
+{% load gepub_design_system %}
 {% block title %}{{ renovacao.descricao }} • Renovação de Matrícula • Educação • GEPUB{% endblock %}
 
 {% block module_content %}
-<div class="gp-card"><div class="gp-card__body">
+<div class="gp-card"><div class="gp-card__body edu-detail-flow">
   {% include "core/partials/components/layout/page_head.html" with title=renovacao.descricao subtitle="Detalhes operacionais da renovação." actions=actions %}
 
-  <div class="gp-pills u-mb-12">
-    <span class="gp-pills__item is-active">Etapa: {{ etapa_label }}</span>
-    <span class="gp-pills__item">Ano: {{ renovacao.ano_letivo }}</span>
-    <span class="gp-pills__item">Secretaria: {{ renovacao.secretaria.nome }}</span>
-    <span class="gp-pills__item">Janela: {{ renovacao.data_inicio|date:"d/m/Y" }} até {{ renovacao.data_fim|date:"d/m/Y" }}</span>
-    <span class="gp-pills__item">Pendentes: {{ pendentes }}</span>
-    <span class="gp-pills__item">Aprovados: {{ aprovados }}</span>
-    <span class="gp-pills__item">Rejeitados: {{ rejeitados }}</span>
-  </div>
+  <ul class="pills u-mb-12">
+    <li><span>Etapa: {{ etapa_label }}</span></li>
+    <li><span>Ano: {{ renovacao.ano_letivo }}</span></li>
+    <li><span>Secretaria: {{ renovacao.secretaria.nome }}</span></li>
+    <li><span>Janela: {{ renovacao.data_inicio|date:"d/m/Y" }} até {{ renovacao.data_fim|date:"d/m/Y" }}</span></li>
+    <li><span>Pendentes: {{ pendentes }}</span></li>
+    <li><span>Aprovados: {{ aprovados }}</span></li>
+    <li><span>Rejeitados: {{ rejeitados }}</span></li>
+  </ul>
 
-  <form method="post" class="gp-inline-form u-mb-12" style="display: inline-flex; gap: 8px; flex-wrap: wrap;">
+  <form method="post" class="gp-inline-form u-mb-12 u-inline-flex u-gap-8 u-flex-wrap">
     {% csrf_token %}
     <input type="hidden" name="_action" value="toggle_ativo">
     <button class="gp-button gp-button--outline" type="submit">
@@ -24,10 +25,10 @@
   </form>
 
   {% if can_processar %}
-    <form method="post" class="gp-inline-form u-mb-12" style="display: inline-flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+    <form method="post" class="gp-inline-form u-mb-12 u-inline-flex u-gap-8 u-items-center u-flex-wrap">
       {% csrf_token %}
       <input type="hidden" name="_action" value="processar">
-      <label for="id_chamada_prioridade" style="font-size: 0.85rem; color: #4d5f7a;">Processar chamada</label>
+      <label for="id_chamada_prioridade" class="small">Processar chamada</label>
       <select id="id_chamada_prioridade" name="chamada_prioridade" class="gp-select">
         <option value="">Todas as prioridades</option>
         <option value="1">1ª chamada (prioridade 1)</option>
@@ -41,10 +42,10 @@
   <section class="u-mb-12">
     <h3>Turmas ofertadas</h3>
 
-    <form method="post" class="gp-form gp-form--smart u-mb-12">
+    <form method="post" class="gp-form gp-form--smart u-mb-12 form-shell">
       {% csrf_token %}
       <input type="hidden" name="_action" value="add_oferta">
-      {{ oferta_form.as_p }}
+      {% render_form oferta_form %}
       <button class="gp-button gp-button--outline" type="submit">Adicionar oferta</button>
     </form>
 

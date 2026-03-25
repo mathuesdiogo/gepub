@@ -66,7 +66,7 @@ ROLE_REPORT_SECTIONS: list[dict[str, object]] = [
                     "Administracao tecnica de integracoes e seguranca",
                 ],
                 atribuicoes=[
-                    "Pode ver, criar, editar, excluir, publicar e configurar modulos",
+                    "Pode visualizar, criar, editar, remover, publicar e configurar modulos",
                     "Pode gerenciar qualquer usuario e permissao",
                     "Acompanha auditoria e indicadores de todos os modulos",
                 ],
@@ -293,7 +293,7 @@ ROLE_REPORT_SECTIONS: list[dict[str, object]] = [
                 funcoes=[
                     "Executar registros tecnicos permitidos",
                     "Apoiar atendimento diario",
-                    "Atualizar informacoes assistenciais basicas",
+                    "Editar informacoes assistenciais basicas",
                 ],
                 atribuicoes=[
                     "Acesso restrito a campos autorizados",
@@ -308,7 +308,7 @@ ROLE_REPORT_SECTIONS: list[dict[str, object]] = [
                 funcoes=[
                     "Acompanhar familias da microarea",
                     "Registrar visitas e ocorrencias",
-                    "Atualizar dados basicos de acompanhamento",
+                    "Editar dados basicos de acompanhamento",
                 ],
                 atribuicoes=[
                     "Acesso territorial restrito",
@@ -322,7 +322,7 @@ ROLE_REPORT_SECTIONS: list[dict[str, object]] = [
                 dashboard="Dashboard Saude (atendimento)",
                 funcoes=[
                     "Recepcionar e organizar fluxo de pacientes",
-                    "Atualizar cadastro basico",
+                    "Editar cadastro basico",
                     "Controlar agenda/check-in",
                 ],
                 atribuicoes=[
@@ -447,7 +447,7 @@ ROLE_REPORT_SECTIONS: list[dict[str, object]] = [
                 dashboard="Dashboard Educacao (cadastro/matricula)",
                 funcoes=[
                     "Executar matricula e documentacao escolar",
-                    "Atualizar cadastro de aluno",
+                    "Editar cadastro de aluno",
                     "Apoiar fluxo administrativo da escola",
                 ],
                 atribuicoes=[
@@ -641,7 +641,7 @@ ROLE_REPORT_SECTIONS: list[dict[str, object]] = [
                     "Apoiar monitoramento institucional",
                 ],
                 atribuicoes=[
-                    "Sem permissao de alterar conectores",
+                    "Sem permissao de editar conectores",
                     "Acesso apenas de consulta",
                     "Escopo definido por governanca",
                 ],
@@ -712,7 +712,7 @@ ROLE_REPORT_SECTIONS: list[dict[str, object]] = [
                 dashboard="Portal do cidadao",
                 funcoes=[
                     "Consultar conteudo e servicos publicos",
-                    "Abrir solicitacoes quando habilitado",
+                    "Visualizar solicitacoes quando habilitado",
                     "Acompanhar protocolos no proprio contexto",
                 ],
                 atribuicoes=[
@@ -912,7 +912,7 @@ def build_role_report_markdown() -> str:
     lines.append("")
     lines.append("- Mesma dashboard por modulo, com visao filtrada por papel e escopo.")
     lines.append("- Escopo minimo necessario: municipio, secretaria, unidade e atribuicao pessoal.")
-    lines.append("- Acoes-base consideradas: ver, criar, editar, excluir, aprovar/homologar, exportar, configurar.")
+    lines.append("- Acoes-base consideradas: visualizar, criar, editar, remover, aprovar/homologar, exportar, configurar.")
     lines.append("- Gestao de usuarios e relatorios depende de permissao especifica por perfil.")
     lines.append("")
     lines.append("## Perfis por area")

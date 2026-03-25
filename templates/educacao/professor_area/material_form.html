@@ -6,69 +6,69 @@
   {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
 
   <article class="gp-student-stage__card">
-    <form method="post" enctype="multipart/form-data" class="gp-form gp-form--smart gp-form--teacher-material">
+    <form method="post" enctype="multipart/form-data" class="gp-form gp-form--smart gp-form--teacher-material form-shell">
       {% csrf_token %}
 
-      <div class="gp-form-group gp-field--full">
-        <label class="gp-form-label" for="id_titulo">Título</label>
+      <div class="gp-form-group gp-field--full form-shell">
+        <label class="gp-form-label form-shell" for="id_titulo">Título</label>
         {{ form.titulo }}
-        {% if form.titulo.errors %}<p class="gp-form-error">{{ form.titulo.errors|join:", " }}</p>{% endif %}
+        {% if form.titulo.errors %}<p class="gp-form-error form-shell">{{ form.titulo.errors|join:", " }}</p>{% endif %}
       </div>
 
-      <div class="gp-form-group gp-field--full">
-        <label class="gp-form-label" for="id_descricao">Descrição</label>
+      <div class="gp-form-group gp-field--full form-shell">
+        <label class="gp-form-label form-shell" for="id_descricao">Descrição</label>
         {{ form.descricao }}
-        {% if form.descricao.errors %}<p class="gp-form-error">{{ form.descricao.errors|join:", " }}</p>{% endif %}
+        {% if form.descricao.errors %}<p class="gp-form-error form-shell">{{ form.descricao.errors|join:", " }}</p>{% endif %}
       </div>
 
-      <div class="gp-form-group">
-        <label class="gp-form-label" for="id_diario">Diário</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell" for="id_diario">Diário</label>
         {{ form.diario }}
-        {% if form.diario.errors %}<p class="gp-form-error">{{ form.diario.errors|join:", " }}</p>{% endif %}
+        {% if form.diario.errors %}<p class="gp-form-error form-shell">{{ form.diario.errors|join:", " }}</p>{% endif %}
       </div>
 
-      <div class="gp-form-group">
-        <label class="gp-form-label" for="id_aula">Aula (opcional)</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell" for="id_aula">Aula (opcional)</label>
         {{ form.aula }}
-        {% if form.aula.errors %}<p class="gp-form-error">{{ form.aula.errors|join:", " }}</p>{% endif %}
+        {% if form.aula.errors %}<p class="gp-form-error form-shell">{{ form.aula.errors|join:", " }}</p>{% endif %}
       </div>
 
-      <div class="gp-form-group">
-        <label class="gp-form-label" for="id_turma_informatica">Turma de Informática (opcional)</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell" for="id_turma_informatica">Turma de Informática (opcional)</label>
         {{ form.turma_informatica }}
-        {% if form.turma_informatica.errors %}<p class="gp-form-error">{{ form.turma_informatica.errors|join:", " }}</p>{% endif %}
+        {% if form.turma_informatica.errors %}<p class="gp-form-error form-shell">{{ form.turma_informatica.errors|join:", " }}</p>{% endif %}
       </div>
 
-      <div class="gp-form-group">
-        <label class="gp-form-label" for="id_aula_informatica">Aula de Informática (opcional)</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell" for="id_aula_informatica">Aula de Informática (opcional)</label>
         {{ form.aula_informatica }}
-        {% if form.aula_informatica.errors %}<p class="gp-form-error">{{ form.aula_informatica.errors|join:", " }}</p>{% endif %}
+        {% if form.aula_informatica.errors %}<p class="gp-form-error form-shell">{{ form.aula_informatica.errors|join:", " }}</p>{% endif %}
       </div>
 
-      <div class="gp-form-group">
-        <label class="gp-form-label" for="id_arquivo">Arquivo</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell" for="id_arquivo">Arquivo</label>
         {{ form.arquivo }}
-        {% if form.arquivo.errors %}<p class="gp-form-error">{{ form.arquivo.errors|join:", " }}</p>{% endif %}
+        {% if form.arquivo.errors %}<p class="gp-form-error form-shell">{{ form.arquivo.errors|join:", " }}</p>{% endif %}
       </div>
 
-      <div class="gp-form-group">
-        <label class="gp-form-label" for="id_link_externo">Link externo</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell" for="id_link_externo">Link externo</label>
         {{ form.link_externo }}
-        {% if form.link_externo.errors %}<p class="gp-form-error">{{ form.link_externo.errors|join:", " }}</p>{% endif %}
+        {% if form.link_externo.errors %}<p class="gp-form-error form-shell">{{ form.link_externo.errors|join:", " }}</p>{% endif %}
       </div>
 
-      <div class="gp-form-group gp-form-group--check">
-        <label class="gp-form-label" for="id_publico_alunos">Visível aos alunos</label>
+      <div class="gp-form-group gp-form-group--check form-shell">
+        <label class="gp-form-label form-shell" for="id_publico_alunos">Visível aos alunos</label>
         {{ form.publico_alunos }}
       </div>
 
-      <div class="gp-form-group gp-form-group--check">
-        <label class="gp-form-label" for="id_ativo">Material ativo</label>
+      <div class="gp-form-group gp-form-group--check form-shell">
+        <label class="gp-form-label form-shell" for="id_ativo">Material ativo</label>
         {{ form.ativo }}
       </div>
 
       {% if form.non_field_errors %}
-        <p class="gp-form-error">{{ form.non_field_errors|join:", " }}</p>
+        <p class="gp-form-error form-shell">{{ form.non_field_errors|join:", " }}</p>
       {% endif %}
 
       <div class="gp-professor-inline-actions">

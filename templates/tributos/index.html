@@ -1,12 +1,12 @@
 {% extends "core/base.html" %}
 
 {% block content %}
-<div class="card"><div class="card__body">
+<div class="card gp-card"><div class="card__body gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+  <form method="get" class="filter-bar u-mb-12 search-and-filters">
     {% if municipios and municipios|length %}
-      <select name="municipio" class="gp-input" style="max-width:240px;" onchange="this.form.submit()">
+      <select name="municipio" class="gp-input u-maxw-240" onchange="this.form.submit()">
         {% for m in municipios %}
           <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
         {% endfor %}
@@ -14,14 +14,14 @@
     {% endif %}
   </form>
 
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:12px 0 18px;">
+  <div class="u-kpi-grid-190">
     {% for card in cards %}
       {% include "core/partials/components/data/kpi_card.html" with label=card.label value=card.value %}
     {% endfor %}
   </div>
 
-  <div class="table-shell"><div class="table-shell__body">
-    <table class="table">
+  <div class="table-shell gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+    <table class="gp-table__native table">
       <thead><tr><th>Contribuinte</th><th>Tributo</th><th>Exercício</th><th>Total</th><th>Status</th></tr></thead>
       <tbody>
         {% for item in latest_lanc %}

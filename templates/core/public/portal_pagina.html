@@ -5,9 +5,9 @@
 {% endblock %}
 
 {% block page_content %}
-<section class="pp-card">
+<section class="pp-card gp-card">
   <h2>{{ item.titulo }}</h2>
-  {% if item.resumo %}<p style="font-size:1rem;font-weight:600;color:#2b587f;">{{ item.resumo }}</p>{% endif %}
-  <div style="margin-top:8px;color:#4a6d8d;line-height:1.6;white-space:pre-line;">{{ item.conteudo }}</div>
+  {% if item.resumo %}<p class="pp-content-lead">{{ item.resumo }}</p>{% endif %}
+  <div class="pp-content-text">{{ item.conteudo }}</div>
 </section>
 {% endblock %}

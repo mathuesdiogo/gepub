@@ -6,28 +6,28 @@
 
 {% block page_content %}
 <section class="pp-grid pp-grid--3">
-  <article class="pp-card">
+  <article class="pp-card gp-card">
     <h3>Unidades escolares</h3>
     <p class="pp-kpi-value">{{ indicadores.unidades }}</p>
   </article>
-  <article class="pp-card">
+  <article class="pp-card gp-card">
     <h3>Turmas ativas</h3>
     <p class="pp-kpi-value">{{ indicadores.turmas }}</p>
   </article>
-  <article class="pp-card">
+  <article class="pp-card gp-card">
     <h3>Cursos cadastrados</h3>
     <p class="pp-kpi-value">{{ indicadores.cursos }}</p>
   </article>
-  <article class="pp-card">
+  <article class="pp-card gp-card">
     <h3>Matrículas</h3>
     <p class="pp-kpi-value">{{ indicadores.matriculas }}</p>
   </article>
 </section>
 
-<section class="pp-grid pp-grid--2" style="margin-top:10px;">
-  <article class="pp-card">
+<section class="pp-grid pp-grid--2 u-mt-10">
+  <article class="pp-card gp-card">
     <h2>Unidades</h2>
-    <ul class="pp-list" style="margin-top:8px;">
+    <ul class="pp-list u-mt-8">
       {% for item in unidades %}
         <li class="pp-list__item">
           <h3>{{ item.nome }}</h3>
@@ -40,9 +40,9 @@
     </ul>
   </article>
 
-  <article class="pp-card">
+  <article class="pp-card gp-card">
     <h2>Próximos eventos do calendário</h2>
-    <ul class="pp-list" style="margin-top:8px;">
+    <ul class="pp-list u-mt-8">
       {% for evento in eventos %}
         <li class="pp-list__item">
           <p class="pp-meta">{{ evento.data_inicio|date:"d/m/Y" }}{% if evento.data_fim %} até {{ evento.data_fim|date:"d/m/Y" }}{% endif %}</p>
@@ -56,10 +56,10 @@
   </article>
 </section>
 
-<section class="pp-grid pp-grid--2" style="margin-top:10px;">
-  <article class="pp-card">
+<section class="pp-grid pp-grid--2 u-mt-10">
+  <article class="pp-card gp-card">
     <h2>Cursos ofertados</h2>
-    <ul class="pp-list" style="margin-top:8px;">
+    <ul class="pp-list u-mt-8">
       {% for curso in cursos %}
         <li class="pp-list__item">
           <h3>{{ curso.nome }}</h3>
@@ -72,13 +72,13 @@
     </ul>
   </article>
 
-  <article class="pp-card">
+  <article class="pp-card gp-card">
     <h2>Notícias da educação</h2>
-    <ul class="pp-list" style="margin-top:8px;">
+    <ul class="pp-list u-mt-8">
       {% for item in noticias %}
         <li class="pp-list__item">
           <p class="pp-meta">{{ item.publicado_em|date:"d/m/Y" }}</p>
-          <h3><a href="{% url 'core:portal_noticia_detail_public' item.slug %}" style="text-decoration:none;color:inherit;">{{ item.titulo }}</a></h3>
+          <h3><a href="{% url 'core:portal_noticia_detail_public' item.slug %}" class="u-link-reset">{{ item.titulo }}</a></h3>
           {% if item.resumo %}<p>{{ item.resumo }}</p>{% endif %}
         </li>
       {% empty %}
@@ -88,11 +88,11 @@
   </article>
 </section>
 
-<section class="pp-card" style="margin-top:10px;">
+<section class="pp-card u-mt-10 gp-card">
   <h2>Listagens públicas da educação</h2>
-  <p class="pp-meta" style="margin-top:6px;">Solicitações de matrícula, lista de espera de creche e lista de alunos.</p>
-  <div class="pp-table-wrap" style="margin-top:10px;">
-    <table class="pp-table" style="min-width:640px;">
+  <p class="pp-meta u-mt-6">Solicitações de matrícula, lista de espera de creche e lista de alunos.</p>
+  <div class="pp-table-wrap u-mt-10">
+    <table class="gp-table__native pp-table u-minw-640">
       <thead>
         <tr>
           <th>Título</th>
@@ -114,9 +114,9 @@
             <td>{{ item.publicado_em|date:"d/m/Y H:i" }}</td>
             <td>
               {% if item.arquivo %}
-                <a class="pp-btn pp-btn--soft" href="{{ item.arquivo.url }}" target="_blank" rel="noopener">Abrir</a>
+                <a class="pp-btn pp-btn--soft gp-button" href="{{ item.arquivo.url }}" target="_blank" rel="noopener">Visualizar</a>
               {% elif item.link_externo %}
-                <a class="pp-btn pp-btn--soft" href="{{ item.link_externo }}" target="_blank" rel="noopener">Abrir link</a>
+                <a class="pp-btn pp-btn--soft gp-button" href="{{ item.link_externo }}" target="_blank" rel="noopener">Visualizar link</a>
               {% else %}
                 —
               {% endif %}

@@ -198,7 +198,7 @@ def alertas_index(request):
         )
 
     actions = [
-        {"label": "Voltar", "url": reverse("nee:index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+        {"label": "Voltar", "url": reverse("nee:index"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
     ]
 
     return render(
@@ -220,7 +220,7 @@ def alertas_lista(request, kind: str):
             request,
             "nee/alertas/alunos_list.html",
             {
-                "actions": [{"label": "Voltar", "url": reverse("nee:alertas_index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}],
+                "actions": [{"label": "Voltar", "url": reverse("nee:alertas_index"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}],
                 "title": "Alerta",
                 "subtitle": "Tipo de alerta inválido.",
                 "headers": [{"label": "Aluno"}],
@@ -251,14 +251,14 @@ def alertas_lista(request, kind: str):
                     {"text": a.nome, "url": reverse("nee:aluno_hub", args=[a.pk])},
                     {"text": getattr(a, "cpf", None) or "—"},
                     {"text": getattr(a, "nis", None) or "—"},
-                    {"text": "Abrir", "url": reverse("nee:aluno_hub", args=[a.pk])},
+                    {"text": "Visualizar", "url": reverse("nee:aluno_hub", args=[a.pk])},
                 ],
                 "can_edit": False,
             }
         )
 
     actions = [
-        {"label": "Voltar", "url": reverse("nee:alertas_index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+        {"label": "Voltar", "url": reverse("nee:alertas_index"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
     ]
 
     return render(

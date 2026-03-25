@@ -6,21 +6,21 @@
 
 {% block page_content %}
 <section class="pp-grid pp-grid--3">
-  <article class="pp-card">
+  <article class="pp-card gp-card">
     <h3>Total de edições publicadas</h3>
     <p class="pp-kpi-value">{{ total_edicoes }}</p>
   </article>
-  <article class="pp-card">
+  <article class="pp-card gp-card">
     <h3>Edições com PDF</h3>
     <p class="pp-kpi-value">{{ total_com_pdf }}</p>
   </article>
-  <article class="pp-card">
+  <article class="pp-card gp-card">
     <h3>Última publicação</h3>
     <p class="pp-kpi-value">{% if ultima_edicao %}{{ ultima_edicao.data_publicacao|date:"d/m/Y" }}{% else %}—{% endif %}</p>
   </article>
 </section>
 
-<section class="pp-card">
+<section class="pp-card gp-card">
   <form method="get" class="pp-form-inline">
     <div>
       <label for="id_q">Busca</label>
@@ -57,8 +57,8 @@
     <div>
       <label>&nbsp;</label>
       <div class="pp-actions">
-        <button class="pp-btn pp-btn--primary" type="submit">Filtrar</button>
-        <a class="pp-btn pp-btn--soft" href="{% url 'core:portal_diario_public' %}">Limpar</a>
+        <button class="pp-btn pp-btn--primary gp-button gp-button--primary" type="submit">Filtrar</button>
+        <a class="pp-btn pp-btn--soft gp-button" href="{% url 'core:portal_diario_public' %}">Limpar</a>
       </div>
     </div>
   </form>
@@ -68,29 +68,29 @@
 </section>
 
 {% if edicao_atual %}
-  <section class="pp-card pp-card--diario-atual">
+  <section class="pp-card pp-card--diario-atual gp-card">
     <div class="pp-card__subhead">
       <h2>Edição Atual</h2>
-      <span class="pp-badge">Edição {{ edicao_atual.numero }}</span>
+      <span class="pp-badge gp-badge">Edição {{ edicao_atual.numero }}</span>
     </div>
     <p class="pp-meta">Publicada em {{ edicao_atual.data_publicacao|date:"d/m/Y" }}{% if edicao_atual.criado_em %} • Cadastrada em {{ edicao_atual.criado_em|date:"d/m/Y H:i" }}{% endif %}</p>
     <h3 class="pp-diario-title">Diário Oficial {{ edicao_atual.numero }}</h3>
     {% if edicao_atual.resumo %}<p>{{ edicao_atual.resumo }}</p>{% endif %}
     <div class="pp-actions">
       {% if edicao_atual.arquivo_pdf %}
-        <a class="pp-btn pp-btn--primary" href="{{ edicao_atual.arquivo_pdf.url }}" target="_blank" rel="noopener">Abrir documento</a>
-        <a class="pp-btn pp-btn--soft" href="{{ edicao_atual.arquivo_pdf.url }}" download>Baixar PDF</a>
+        <a class="pp-btn pp-btn--primary gp-button gp-button--primary" href="{{ edicao_atual.arquivo_pdf.url }}" target="_blank" rel="noopener">Visualizar documento</a>
+        <a class="pp-btn pp-btn--soft gp-button" href="{{ edicao_atual.arquivo_pdf.url }}" download>Baixar PDF</a>
       {% else %}
-        <span class="pp-badge">Sem PDF anexado</span>
+        <span class="pp-badge gp-badge">Sem PDF anexado</span>
       {% endif %}
     </div>
   </section>
 {% endif %}
 
-<section class="pp-card">
+<section class="pp-card gp-card">
   <div class="pp-card__subhead">
     <h2>Edições Anteriores</h2>
-    <span class="pp-badge">{{ total_filtrado }} edição(ões) no resultado</span>
+    <span class="pp-badge gp-badge">{{ total_filtrado }} edição(ões) no resultado</span>
   </div>
   <p class="pp-meta">
     {% if primeira_edicao %}
@@ -104,15 +104,15 @@
       <li class="pp-list__item">
         <div class="pp-card__subhead">
           <h3>Diário Oficial {{ item.numero }}</h3>
-          <span class="pp-badge">{{ item.data_publicacao|date:"d/m/Y" }}</span>
+          <span class="pp-badge gp-badge">{{ item.data_publicacao|date:"d/m/Y" }}</span>
         </div>
         {% if item.resumo %}<p>{{ item.resumo }}</p>{% endif %}
         <div class="pp-actions">
           {% if item.arquivo_pdf %}
-            <a class="pp-btn pp-btn--soft" href="{{ item.arquivo_pdf.url }}" target="_blank" rel="noopener">Abrir PDF</a>
-            <a class="pp-btn pp-btn--soft" href="{{ item.arquivo_pdf.url }}" download>Baixar</a>
+            <a class="pp-btn pp-btn--soft gp-button" href="{{ item.arquivo_pdf.url }}" target="_blank" rel="noopener">Visualizar PDF</a>
+            <a class="pp-btn pp-btn--soft gp-button" href="{{ item.arquivo_pdf.url }}" download>Baixar</a>
           {% else %}
-            <span class="pp-badge">Sem PDF anexado</span>
+            <span class="pp-badge gp-badge">Sem PDF anexado</span>
           {% endif %}
         </div>
       </li>

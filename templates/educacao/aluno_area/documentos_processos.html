@@ -8,14 +8,14 @@
   <div class="gp-grid-2 gp-student-stage__grid">
     <article class="gp-student-stage__card">
       <h3>Solicitar Documento</h3>
-      <form method="post" class="gp-form gp-form--smart">
+      <form method="post" class="gp-form gp-form--smart form-shell">
         {% csrf_token %}
         <input type="hidden" name="form_kind" value="documento">
         {% for field in doc_form %}
-          <div class="gp-form-group">
-            <label class="gp-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          <div class="gp-form-group form-shell">
+            <label class="gp-form-label form-shell" for="{{ field.id_for_label }}">{{ field.label }}</label>
             {{ field }}
-            {% if field.errors %}<small class="gp-form-error">{{ field.errors|striptags }}</small>{% endif %}
+            {% if field.errors %}<small class="gp-form-error form-shell">{{ field.errors|striptags }}</small>{% endif %}
           </div>
         {% endfor %}
         <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-paper-plane"></i> Enviar solicitação</button>
@@ -23,18 +23,18 @@
     </article>
 
     <article class="gp-student-stage__card">
-      <h3>Abrir Processo</h3>
-      <form method="post" class="gp-form gp-form--smart">
+      <h3>Adicionar Processo</h3>
+      <form method="post" class="gp-form gp-form--smart form-shell">
         {% csrf_token %}
         <input type="hidden" name="form_kind" value="processo">
         {% for field in proc_form %}
-          <div class="gp-form-group">
-            <label class="gp-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          <div class="gp-form-group form-shell">
+            <label class="gp-form-label form-shell" for="{{ field.id_for_label }}">{{ field.label }}</label>
             {{ field }}
-            {% if field.errors %}<small class="gp-form-error">{{ field.errors|striptags }}</small>{% endif %}
+            {% if field.errors %}<small class="gp-form-error form-shell">{{ field.errors|striptags }}</small>{% endif %}
           </div>
         {% endfor %}
-        <button class="gp-button gp-button--secondary" type="submit"><i class="fa-solid fa-folder-plus"></i> Abrir processo</button>
+        <button class="gp-button gp-button--secondary" type="submit"><i class="fa-solid fa-folder-plus"></i> Adicionar processo</button>
       </form>
     </article>
   </div>

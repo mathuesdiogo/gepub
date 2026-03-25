@@ -2,45 +2,33 @@
 {% block title %}{{ turma.nome }} • Turmas • Educação • GEPUB{% endblock %}
 
 {% block module_content %}
-<div class="gp-card">
-<div class="gp-card__body">
+<div class="gp-card edu-turma-detail">
+<div class="gp-card__body edu-turma-detail__body">
 
 {% include "core/partials/components/layout/page_head.html" with title=turma.nome subtitle=turma.get_modalidade_display actions=actions %}
 
 
 {# ===== SUMMARY PADRÃO CORE ===== #}
 
+<section class="edu-turma-detail__section edu-turma-detail__section--summary" aria-label="Resumo da turma">
 {% include "core/partials/components/layout/detail_summary.html" with fields=fields pills=pills%}
-
-
-<hr class="divider">
-
+</section>
 
 {# ===== ALUNOS ===== #}
-
-<div class="section">
-<div class="section__title">
-Alunos da turma
-</div>
+<section class="edu-turma-detail__section" aria-labelledby="turma-alunos-title">
+<h2 id="turma-alunos-title" class="section__title">Alunos da turma</h2>
 
 {% include "core/partials/components/data/table_shell.html" with headers=headers_alunos rows=rows_alunos page_obj=None empty_title="Nenhum aluno" empty_text="Nenhum aluno matriculado nesta turma."%}
 
-</div>
-
-
-<hr class="divider">
-
+</section>
 
 {# ===== PROFESSORES ===== #}
-
-<div class="section">
-<div class="section__title">
-Professores
-</div>
+<section class="edu-turma-detail__section" aria-labelledby="turma-professores-title">
+<h2 id="turma-professores-title" class="section__title">Professores</h2>
 
 {% include "core/partials/components/data/table_shell.html" with headers=headers_professores rows=rows_professores page_obj=None empty_title="Nenhum professor" empty_text="Nenhum professor vinculado."%}
 
-</div>
+</section>
 
 
 </div>

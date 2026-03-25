@@ -18,6 +18,21 @@ python manage.py migrate
 python manage.py runserver
 ```
 
+## Rodar Django + Institucional juntos (um comando)
+
+```bash
+./scripts/dev_local.sh
+```
+
+O comando `python manage.py runserver` sobe:
+- Django em `127.0.0.1:8000`
+- Next.js (institucional) automaticamente em `127.0.0.1:3000` (quando necessário)
+
+Você acessa só `http://127.0.0.1:8000`.
+
+Se aparecer `Institucional oficial indisponível no momento`, o autostart do Next falhou.
+Verifique o log em `/tmp/gepub-next-autostart.log`.
+
 ## Frontend (React + Vite)
 
 ```bash
@@ -28,6 +43,38 @@ cd frontend
 npm install
 npm run build
 ```
+
+## Institucional oficial (Next.js + Tailwind)
+
+O institucional público (`/` e `/institucional/`) usa oficialmente a nova versão em `web/`.
+O acesso continua no mesmo endereço do Django (`http://127.0.0.1:8000`) via proxy interno, sem redirecionamento no navegador.
+Não existe mais fallback para template legado.
+
+1. (Opcional) Force o roteamento no `.env`:
+
+```bash
+GEPUB_INSTITUCIONAL_NEXT_ENABLED=true
+GEPUB_INSTITUCIONAL_NEXT_URL=http://127.0.0.1:3000
+```
+
+2. Suba o Django (terminal 1):
+
+```bash
+source venv/bin/activate
+python manage.py runserver
+```
+
+3. Suba o Next (terminal 2):
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+Com isso, o Django mantém o sistema interno e encaminha a landing institucional para o Next.
+
+Se o Next não estiver disponível, a rota `/` retorna `503` informando indisponibilidade do institucional oficial.
 
 ## Docker (stack completa)
 
@@ -55,8 +102,12 @@ Endpoints:
 
 Arquivos:
 - `docker-compose.prod.yml`
+- `docker/Dockerfile.next`
 - `docker/caddy/Caddyfile`
 - `.env.docker.prod.example`
+
+No ambiente de produção, o institucional oficial roda em container dedicado `next`
+e o Django (`web`) faz proxy interno para `http://next:3000`.
 
 Passos:
 

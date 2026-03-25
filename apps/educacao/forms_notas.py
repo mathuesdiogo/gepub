@@ -43,7 +43,7 @@ class AvaliacaoForm(forms.ModelForm):
         self.fields["modo_registro"].help_text = "Defina se o lançamento será por nota numérica ou conceito."
         self.fields["periodo"].help_text = "Etapa/bimestre ao qual a avaliação pertence."
         self.fields["nota_maxima"].help_text = "Usado somente para avaliações por nota."
-        self.fields["ativo"].help_text = "Desative para ocultar sem apagar histórico."
+        self.fields["ativo"].help_text = "Desative para ocultar sem remover histórico."
 
         self.fields["periodo"].queryset = PeriodoLetivo.objects.none()
         if self.diario is None:

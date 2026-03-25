@@ -5,25 +5,25 @@
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
   <div class="kpi-grid gp-mb-3">
-    <article class="kpi-card">
+    <article class="kpi-card gp-card">
       <div class="kpi-card__label">Itens importados</div>
       <div class="kpi-card__value">{{ importacao.total_itens }}</div>
     </article>
-    <article class="kpi-card">
+    <article class="kpi-card gp-card">
       <div class="kpi-card__label">Conciliados</div>
       <div class="kpi-card__value">{{ total_conciliados }}</div>
     </article>
-    <article class="kpi-card">
+    <article class="kpi-card gp-card">
       <div class="kpi-card__label">Pendentes</div>
       <div class="kpi-card__value">{{ total_pendentes }}</div>
     </article>
-    <article class="kpi-card">
+    <article class="kpi-card gp-card">
       <div class="kpi-card__label">Saldo do período</div>
       <div class="kpi-card__value">R$ {{ importacao.total_creditos }} - R$ {{ importacao.total_debitos }}</div>
     </article>
   </div>
 
-  <form method="get" class="gp-table__filters">
+  <form method="get" class="gp-table__filters search-and-filters">
     <input type="hidden" name="municipio" value="{{ municipio.id }}">
     <input name="q" value="{{ q }}" class="gp-input" placeholder="Documento, histórico, valor exato">
     <button class="gp-button gp-button--sm" type="submit">Filtrar</button>

@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -12,6 +13,7 @@ from .forms import AlunoCreateComTurmaForm, AlunoForm
 from .models import Aluno, Matricula, MatriculaMovimentacao
 from .services_matricula import registrar_movimentacao
 from .services_requisitos import avaliar_requisitos_matricula
+from .services_schedule_conflicts import ScheduleConflictService
 
 
 def aluno_create(request):
@@ -47,12 +49,37 @@ def aluno_create(request):
                     return redirect("educacao:aluno_list")
                 for aviso in avaliacao_requisitos.avisos:
                     messages.warning(request, aviso)
-                matricula = Matricula.objects.create(
+                try:
+                    ScheduleConflictService.ensure_regular_enrollment_allowed(
+                        aluno=aluno,
+                        turma=turma,
+                        data_matricula=timezone.localdate(),
+                        allow_override=False,
+                        usuario=request.user,
+                        contexto="ALUNO_CREATE",
+                        ip_origem=(request.META.get("REMOTE_ADDR") or ""),
+                    )
+                except ValueError as exc:
+                    for line in str(exc).splitlines():
+                        if line.strip():
+                            messages.error(request, line.strip())
+                    transaction.set_rollback(True)
+                    return redirect("educacao:aluno_list")
+
+                matricula = Matricula(
                     aluno=aluno,
                     turma=turma,
                     data_matricula=timezone.localdate(),
                     situacao=Matricula.Situacao.ATIVA,
                 )
+                try:
+                    matricula.full_clean()
+                except ValidationError as exc:
+                    for line in exc.messages:
+                        messages.error(request, line)
+                    transaction.set_rollback(True)
+                    return redirect("educacao:aluno_list")
+                matricula.save()
 
                 origem_ingresso = (form.cleaned_data.get("origem_ingresso") or "DIRETO").strip().upper()
                 processo = None
@@ -145,7 +172,7 @@ def aluno_create(request):
                     "label": "Voltar",
                     "url": reverse("educacao:aluno_list"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -173,13 +200,13 @@ def aluno_update(request, pk: int):
             "form": form,
             "mode": "update",
             "cancel_url": reverse("educacao:aluno_list"),
-            "submit_label": "Atualizar",
+            "submit_label": "Editar",
             "actions": [
                 {
                     "label": "Voltar",
                     "url": reverse("educacao:aluno_list"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },

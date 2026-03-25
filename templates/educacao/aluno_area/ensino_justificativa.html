@@ -8,14 +8,14 @@
   <article class="gp-student-stage__card">
     <h3>Solicitação de Justificativa de Falta</h3>
     <p class="gp-text-muted">Faltas em aberto para justificativa: <strong>{{ faltas_em_aberto }}</strong></p>
-    <form method="post" enctype="multipart/form-data" class="gp-form gp-form--smart">
+    <form method="post" enctype="multipart/form-data" class="gp-form gp-form--smart form-shell">
       {% csrf_token %}
       <input type="hidden" name="form_kind" value="justificativa">
       {% for field in falta_form %}
-        <div class="gp-form-group">
-          <label class="gp-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        <div class="gp-form-group form-shell">
+          <label class="gp-form-label form-shell" for="{{ field.id_for_label }}">{{ field.label }}</label>
           {{ field }}
-          {% if field.errors %}<small class="gp-form-error">{{ field.errors|striptags }}</small>{% endif %}
+          {% if field.errors %}<small class="gp-form-error form-shell">{{ field.errors|striptags }}</small>{% endif %}
         </div>
       {% endfor %}
       <button class="gp-button gp-button--secondary" type="submit"><i class="fa-solid fa-file-circle-check"></i> Enviar justificativa</button>
@@ -28,14 +28,14 @@
       Faltas da Informática em aberto: <strong>{{ faltas_informatica_em_aberto }}</strong> •
       Justificadas: <strong>{{ faltas_informatica_justificadas }}</strong>
     </p>
-    <form method="post" class="gp-form gp-form--smart">
+    <form method="post" class="gp-form gp-form--smart form-shell">
       {% csrf_token %}
       <input type="hidden" name="form_kind" value="justificativa_informatica">
       {% for field in falta_info_form %}
-        <div class="gp-form-group">
-          <label class="gp-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        <div class="gp-form-group form-shell">
+          <label class="gp-form-label form-shell" for="{{ field.id_for_label }}">{{ field.label }}</label>
           {{ field }}
-          {% if field.errors %}<small class="gp-form-error">{{ field.errors|striptags }}</small>{% endif %}
+          {% if field.errors %}<small class="gp-form-error form-shell">{{ field.errors|striptags }}</small>{% endif %}
         </div>
       {% endfor %}
       <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-laptop-code"></i> Enviar justificativa (Informática)</button>

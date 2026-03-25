@@ -504,9 +504,19 @@
   align-items: start;
 }
 
-.ps-doc-tabs {
+.ps-doc-tabs.nav.nav-tabs {
   display: grid;
   gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 0;
+}
+
+.ps-doc-tabs.nav.nav-tabs > li {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .ps-doc-tab {
@@ -523,6 +533,7 @@
   gap: 10px;
   padding: 10px;
   cursor: pointer;
+  text-decoration: none;
   transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -547,23 +558,23 @@
   box-shadow: 0 12px 24px rgba(39, 63, 95, 0.14);
 }
 
-.ps-doc-tab:nth-child(1) {
+.ps-doc-tabs > li:nth-child(1) .ps-doc-tab {
   --doc-tab-accent: #3d5f8f;
 }
 
-.ps-doc-tab:nth-child(2) {
+.ps-doc-tabs > li:nth-child(2) .ps-doc-tab {
   --doc-tab-accent: #2c6a95;
 }
 
-.ps-doc-tab:nth-child(3) {
+.ps-doc-tabs > li:nth-child(3) .ps-doc-tab {
   --doc-tab-accent: #2f7e66;
 }
 
-.ps-doc-tab:nth-child(4) {
+.ps-doc-tabs > li:nth-child(4) .ps-doc-tab {
   --doc-tab-accent: #7857a7;
 }
 
-.ps-doc-tab:nth-child(5) {
+.ps-doc-tabs > li:nth-child(5) .ps-doc-tab {
   --doc-tab-accent: #2f7a80;
 }
 

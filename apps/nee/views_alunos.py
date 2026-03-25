@@ -26,7 +26,7 @@ def aluno_search(request):
     alunos = list(qs[:50])
 
     actions = [
-        {"label": "Voltar", "url": reverse("nee:index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+        {"label": "Voltar", "url": reverse("nee:index"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
     ]
 
     rows = []

@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block page_content %}
-<section class="pp-card">
+<section class="pp-card gp-card">
   <form method="get" class="pp-form-inline pp-form-inline--3">
     <div>
       <label for="id_q">Busca</label>
@@ -23,30 +23,30 @@
     <div>
       <label>&nbsp;</label>
       <div class="pp-actions">
-        <button class="pp-btn pp-btn--primary" type="submit">Filtrar</button>
-        <a class="pp-btn pp-btn--soft" href="{% url 'core:portal_concursos_public' %}">Limpar</a>
+        <button class="pp-btn pp-btn--primary gp-button gp-button--primary" type="submit">Filtrar</button>
+        <a class="pp-btn pp-btn--soft gp-button" href="{% url 'core:portal_concursos_public' %}">Limpar</a>
       </div>
     </div>
   </form>
 </section>
 
-<section class="pp-grid pp-grid--2" style="margin-top:10px;">
+<section class="pp-grid pp-grid--2 u-mt-10">
   {% for item in items %}
-    <article class="pp-card">
+    <article class="pp-card gp-card">
       <p class="pp-meta">{{ item.get_tipo_display }} • {{ item.get_status_display }}</p>
       <h3>{{ item.titulo }}</h3>
       {% if item.descricao %}<p>{{ item.descricao }}</p>{% endif %}
       <p class="pp-meta">
         Inscrições: {{ item.inicio_inscricao|date:"d/m/Y"|default:"—" }} até {{ item.fim_inscricao|date:"d/m/Y"|default:"—" }}
       </p>
-      <div class="pp-actions" style="margin-top:8px;">
+      <div class="pp-actions u-mt-8">
         {% if item.edital_arquivo %}
-          <a class="pp-btn pp-btn--soft" href="{{ item.edital_arquivo.url }}" target="_blank" rel="noopener">Ver edital</a>
+          <a class="pp-btn pp-btn--soft gp-button" href="{{ item.edital_arquivo.url }}" target="_blank" rel="noopener">Visualizar edital</a>
         {% endif %}
       </div>
       {% if item.etapas.all %}
-        <h4 style="margin:10px 0 0;">Etapas</h4>
-        <ul class="pp-list" style="margin-top:8px;">
+        <h4 class="u-mt-10 u-mb-0">Etapas</h4>
+        <ul class="pp-list u-mt-8">
           {% for etapa in item.etapas.all %}
             {% if etapa.publicado %}
               <li class="pp-list__item">
@@ -54,7 +54,7 @@
                 <h3>{{ etapa.titulo }}</h3>
                 {% if etapa.descricao %}<p>{{ etapa.descricao }}</p>{% endif %}
                 {% if etapa.arquivo %}
-                  <a class="pp-btn pp-btn--soft" href="{{ etapa.arquivo.url }}" target="_blank" rel="noopener">Documento da etapa</a>
+                  <a class="pp-btn pp-btn--soft gp-button" href="{{ etapa.arquivo.url }}" target="_blank" rel="noopener">Documento da etapa</a>
                 {% endif %}
               </li>
             {% endif %}
@@ -63,7 +63,7 @@
       {% endif %}
     </article>
   {% empty %}
-    <article class="pp-card">
+    <article class="pp-card gp-card">
       <h3>Nenhum concurso publicado</h3>
       <p>No momento não há concursos/processos seletivos para os filtros informados.</p>
     </article>

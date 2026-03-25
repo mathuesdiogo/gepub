@@ -112,7 +112,7 @@ def portal_inscritos_list(request):
             "label": "Pacientes",
             "url": reverse("saude:paciente_list"),
             "icon": "fa-solid fa-user-injured",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }
     ]
 
@@ -179,7 +179,7 @@ def portal_paciente_inscricoes(request, pk: int):
             "label": "Voltar ao paciente",
             "url": reverse("saude:paciente_detail", args=[paciente.pk]),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }
     ]
 
@@ -220,7 +220,7 @@ def portal_paciente_inscricao_detail(request, pk: int, inscricao_id: int):
                         "label": "Voltar",
                         "url": reverse("saude:portal_paciente_inscricoes", args=[paciente.pk]),
                         "icon": "fa-solid fa-arrow-left",
-                        "variant": "btn--ghost",
+                        "variant": "gp-button--ghost",
                     }
                 ],
                 "timeline_etapas": [],
@@ -251,7 +251,7 @@ def portal_paciente_inscricao_detail(request, pk: int, inscricao_id: int):
                     "label": "Voltar",
                     "url": reverse("saude:portal_paciente_inscricoes", args=[paciente.pk]),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
             "timeline_etapas": _timeline_etapas(inscricao.edital),

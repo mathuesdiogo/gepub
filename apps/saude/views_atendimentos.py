@@ -82,11 +82,11 @@ def atendimento_list(request):
     base_q = f"q={q}" if q else ""
     join = "&" if base_q else ""
     actions = [
-        {"label": "Exportar CSV", "url": f"?{base_q}{join}export=csv", "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
-        {"label": "Exportar PDF", "url": f"?{base_q}{join}export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
+        {"label": "Exportar CSV", "url": f"?{base_q}{join}export=csv", "icon": "fa-solid fa-file-csv", "variant": "gp-button--ghost"},
+        {"label": "Exportar PDF", "url": f"?{base_q}{join}export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"},
     ]
     if can_manage:
-        actions.append({"label": "Novo Atendimento", "url": reverse("saude:atendimento_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+        actions.append({"label": "Novo Atendimento", "url": reverse("saude:atendimento_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
 
     headers = [
         {"label": "Paciente"},
@@ -145,11 +145,11 @@ def atendimento_detail(request, pk: int):
 
     can_manage = can(request.user, "saude.manage")
 
-    actions = [{"label": "Voltar", "url": reverse("saude:atendimento_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+    actions = [{"label": "Voltar", "url": reverse("saude:atendimento_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
     if can_manage:
-        actions.append({"label": "Editar", "url": reverse("saude:atendimento_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
-        actions.append({"label": "Documentos", "url": reverse("saude:documento_list", args=[obj.pk]), "icon": "fa-solid fa-file-medical", "variant": "btn--ghost"})
-        actions.append({"label": "Prontuário", "url": reverse("saude:prontuario_hub", args=[obj.pk]), "icon": "fa-solid fa-notes-medical", "variant": "btn--ghost"})
+        actions.append({"label": "Editar", "url": reverse("saude:atendimento_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
+        actions.append({"label": "Documentos", "url": reverse("saude:documento_list", args=[obj.pk]), "icon": "fa-solid fa-file-medical", "variant": "gp-button--ghost"})
+        actions.append({"label": "Prontuário", "url": reverse("saude:prontuario_hub", args=[obj.pk]), "icon": "fa-solid fa-notes-medical", "variant": "gp-button--ghost"})
 
     fields = [
         {"label": "Data", "value": obj.data.strftime("%d/%m/%Y") if obj.data else "—"},

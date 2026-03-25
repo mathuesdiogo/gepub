@@ -17,7 +17,7 @@
   <div class="calendar-grid">
 
     {% for day in days %}
-      <div class="calendar-day {% if day.is_today %}is-today{% endif %} {% if day.has_event %}has-event{% endif %}">
+      <div class="calendar-day {% if day.is_today %}is-today{% endif %} day.has_event %}has-event{%">
         
         <span class="calendar-number">
           {{ day.number }}

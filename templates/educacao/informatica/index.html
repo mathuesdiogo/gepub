@@ -90,50 +90,50 @@
       </section>
 
       <section class="gp-link-grid u-mb-16">
-        <a class="gp-link-box edu-link-card" href="{% url 'educacao:informatica_curso_list' %}">
+        <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:informatica_curso_list' %}">
           <div><div class="gp-link-box__title">Cursos</div><div class="gp-link-box__meta">Regras da oferta</div></div>
           <i class="fa-solid fa-arrow-right"></i>
         </a>
-        <a class="gp-link-box edu-link-card" href="{% url 'educacao:informatica_laboratorio_list' %}">
+        <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:informatica_laboratorio_list' %}">
           <div><div class="gp-link-box__title">Laboratórios</div><div class="gp-link-box__meta">Capacidade e status</div></div>
           <i class="fa-solid fa-arrow-right"></i>
         </a>
-        <a class="gp-link-box edu-link-card" href="{% url 'educacao:informatica_grade_list' %}">
+        <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:informatica_grade_list' %}">
           <div><div class="gp-link-box__title">Horários / Grades</div><div class="gp-link-box__meta">Estrutura semanal oficial</div></div>
           <i class="fa-solid fa-arrow-right"></i>
         </a>
-        <a class="gp-link-box edu-link-card" href="{% url 'educacao:informatica_turma_list' %}">
+        <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:informatica_turma_list' %}">
           <div><div class="gp-link-box__title">Turmas</div><div class="gp-link-box__meta">2 encontros por semana</div></div>
           <i class="fa-solid fa-arrow-right"></i>
         </a>
-        <a class="gp-link-box edu-link-card" href="{% url 'educacao:informatica_solicitacao_list' %}">
+        <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:informatica_solicitacao_list' %}">
           <div><div class="gp-link-box__title">Solicitações</div><div class="gp-link-box__meta">Entrada de alunos</div></div>
           <i class="fa-solid fa-arrow-right"></i>
         </a>
-        <a class="gp-link-box edu-link-card" href="{% url 'educacao:informatica_matricula_list' %}">
+        <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:informatica_matricula_list' %}">
           <div><div class="gp-link-box__title">Matrículas</div><div class="gp-link-box__meta">Controle de vagas</div></div>
           <i class="fa-solid fa-arrow-right"></i>
         </a>
-        <a class="gp-link-box edu-link-card" href="{% url 'educacao:informatica_lista_espera' %}">
+        <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:informatica_lista_espera' %}">
           <div><div class="gp-link-box__title">Lista de Espera</div><div class="gp-link-box__meta">Convocação por prioridade</div></div>
           <i class="fa-solid fa-arrow-right"></i>
         </a>
         {% if can_view_execucao %}
-          <a class="gp-link-box edu-link-card" href="{% url 'educacao:informatica_frequencia' %}">
+          <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:informatica_frequencia' %}">
             <div><div class="gp-link-box__title">Frequência e Diário</div><div class="gp-link-box__meta">Chamada por aula</div></div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
         {% endif %}
-        <a class="gp-link-box edu-link-card" href="{% url 'educacao:informatica_agenda' %}">
+        <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:informatica_agenda' %}">
           <div><div class="gp-link-box__title">Agenda de Laboratórios</div><div class="gp-link-box__meta">Mapa semanal</div></div>
           <i class="fa-solid fa-arrow-right"></i>
         </a>
-        <a class="gp-link-box edu-link-card" href="{% url 'educacao:informatica_relatorios' %}">
+        <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:informatica_relatorios' %}">
           <div><div class="gp-link-box__title">Relatórios</div><div class="gp-link-box__meta">Gestão e operação</div></div>
           <i class="fa-solid fa-arrow-right"></i>
         </a>
         {% if can_view_execucao %}
-          <a class="gp-link-box edu-link-card" href="{% url 'educacao:informatica_professor_agenda' %}">
+          <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:informatica_professor_agenda' %}">
             <div><div class="gp-link-box__title">Agenda do Professor</div><div class="gp-link-box__meta">Aulas do dia e próximas</div></div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
@@ -142,7 +142,7 @@
 
       <section>
         <h3 class="u-mb-8">Turmas em operação</h3>
-        <table class="table gp-table--striped gp-table--hover">
+        <table class="gp-table__native table gp-table--striped gp-table--hover">
           <thead>
             <tr>
               <th>Turma</th>
@@ -157,7 +157,7 @@
                 <td>{{ turma.codigo }}<br><small>{{ turma.curso.nome }}</small></td>
                 <td>{{ turma.laboratorio.nome }}</td>
                 <td>{% if turma.instrutor %}{{ turma.instrutor.get_full_name|default:turma.instrutor.username }}{% else %}—{% endif %}</td>
-                <td><a class="gp-button gp-button--outline" href="{% url 'educacao:informatica_turma_detail' turma.pk %}">Abrir</a></td>
+                <td><a class="gp-button gp-button--outline" href="{% url 'educacao:informatica_turma_detail' turma.pk %}">Visualizar</a></td>
               </tr>
             {% empty %}
               <tr><td colspan="4">Nenhuma turma ativa no momento.</td></tr>

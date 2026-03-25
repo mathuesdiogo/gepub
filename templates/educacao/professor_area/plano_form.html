@@ -44,7 +44,7 @@
         </div>
       {% endif %}
 
-      <form method="post" class="gp-form gp-form--smart gp-form--teacher-plan edu-plan-form">
+      <form method="post" class="gp-form gp-form--smart gp-form--teacher-plan edu-plan-form form-shell">
         {% csrf_token %}
 
         {% if form.non_field_errors %}
@@ -54,8 +54,8 @@
         <section class="edu-plan-form__group">
           <h3>Identificação</h3>
           <p>Defina um título claro para facilitar o acompanhamento da coordenação.</p>
-          <div class="gp-form-group gp-field--full">
-            <label class="gp-form-label" for="id_titulo">Título</label>
+          <div class="gp-form-group gp-field--full form-shell">
+            <label class="gp-form-label form-shell" for="id_titulo">Título</label>
             {{ form.titulo }}
           </div>
         </section>
@@ -63,16 +63,16 @@
         <section class="edu-plan-form__group">
           <h3>Base pedagógica</h3>
           <p>Registre ementa, objetivos e metodologia que serão usados no período letivo.</p>
-          <div class="gp-form-group gp-field--full">
-            <label class="gp-form-label" for="id_ementa">Ementa</label>
+          <div class="gp-form-group gp-field--full form-shell">
+            <label class="gp-form-label form-shell" for="id_ementa">Ementa</label>
             {{ form.ementa }}
           </div>
-          <div class="gp-form-group gp-field--full">
-            <label class="gp-form-label" for="id_objetivos">Objetivos</label>
+          <div class="gp-form-group gp-field--full form-shell">
+            <label class="gp-form-label form-shell" for="id_objetivos">Objetivos</label>
             {{ form.objetivos }}
           </div>
-          <div class="gp-form-group gp-field--full">
-            <label class="gp-form-label" for="id_metodologia">Metodologia</label>
+          <div class="gp-form-group gp-field--full form-shell">
+            <label class="gp-form-label form-shell" for="id_metodologia">Metodologia</label>
             {{ form.metodologia }}
           </div>
         </section>
@@ -80,16 +80,16 @@
         <section class="edu-plan-form__group">
           <h3>Avaliação e cronograma</h3>
           <p>Informe como o desempenho será medido e como o conteúdo será distribuído no tempo.</p>
-          <div class="gp-form-group gp-field--full">
-            <label class="gp-form-label" for="id_criterios_avaliacao">Critérios de avaliação</label>
+          <div class="gp-form-group gp-field--full form-shell">
+            <label class="gp-form-label form-shell" for="id_criterios_avaliacao">Critérios de avaliação</label>
             {{ form.criterios_avaliacao }}
           </div>
-          <div class="gp-form-group gp-field--full">
-            <label class="gp-form-label" for="id_cronograma">Cronograma</label>
+          <div class="gp-form-group gp-field--full form-shell">
+            <label class="gp-form-label form-shell" for="id_cronograma">Cronograma</label>
             {{ form.cronograma }}
           </div>
-          <div class="gp-form-group gp-field--full">
-            <label class="gp-form-label" for="id_referencias">Referências</label>
+          <div class="gp-form-group gp-field--full form-shell">
+            <label class="gp-form-label form-shell" for="id_referencias">Referências</label>
             {{ form.referencias }}
           </div>
         </section>
@@ -123,7 +123,7 @@
     </div>
 
     <aside class="edu-plan-editor__side">
-      <section class="edu-plan-side-card">
+      <section class="edu-plan-side-card gp-card">
         <h4>Checklist obrigatório</h4>
         <p>Para submeter, complete todos os campos abaixo.</p>
         <ul class="edu-plan-checklist">
@@ -136,7 +136,7 @@
         </ul>
       </section>
 
-      <section class="edu-plan-side-card">
+      <section class="edu-plan-side-card gp-card">
         <h4>Fluxo do plano</h4>
         <ol class="edu-plan-flow">
           {% for step in plano_fluxo %}

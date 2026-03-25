@@ -2,12 +2,12 @@
 {% load static %}
 
 {% block content %}
-<div class="card billing-page billing-page--meu-plano"><div class="card__body billing-page__body">
+<div class="card billing-page billing-page--meu-plano gp-card"><div class="card__body billing-page__body gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
   {% if municipios %}
     <section class="billing-section billing-section--compact">
-      <form method="get" class="billing-filter-form">
+      <form method="get" class="billing-filter-form form-shell search-and-filters">
         <label class="small" for="id_municipio">Município</label>
         <select id="id_municipio" name="municipio" class="gp-select" onchange="this.form.submit()">
           {% for m in municipios %}
@@ -19,7 +19,7 @@
   {% endif %}
 
   <section class="billing-hero-grid">
-    <article class="billing-hero-card">
+    <article class="billing-hero-card gp-card">
       <p class="billing-hero-card__kicker">Plano contratado</p>
       <h2 class="billing-hero-card__title">{{ plano_atual.nome_comercial|default:assinatura.plano.nome }}</h2>
       <p class="billing-hero-card__desc">{{ plano_atual.descricao_comercial }}</p>
@@ -29,7 +29,7 @@
         <span class="billing-pill billing-pill--soft">Reajuste {{ assinatura.indice_reajuste }}</span>
       </div>
     </article>
-    <article class="billing-status-card">
+    <article class="billing-status-card gp-card">
       <div class="billing-status-card__row">
         <div>
           <p class="billing-status-card__label">Vigência</p>
@@ -91,14 +91,14 @@
         <h4 class="billing-subtitle">Limites e consumo</h4>
         <div class="billing-metrics-grid billing-metrics-grid--compact">
           {% for item in metricas %}
-            <article class="billing-metric-card">
+            <article class="billing-metric-card gp-card">
               <div class="billing-metric-card__head">
                 <strong>{{ item.label }}</strong>
                 <span>{{ item.usado }}{% if item.limite is not None %} / {{ item.limite }}{% else %} / ilimitado{% endif %}</span>
               </div>
               {% if item.percentual is not None %}
                 <div class="billing-progress billing-progress--{{ item.classe }}">
-                  <span style="width: {{ item.percentual }}%"></span>
+                  <span data-style-width-pct="{{ item.percentual }}"></span>
                 </div>
                 <div class="small">{{ item.percentual }}% utilizado{% if item.disponivel is not None %} • disponível: {{ item.disponivel }}{% endif %}</div>
               {% else %}
@@ -131,8 +131,8 @@
       <h3>Comparativo e operação financeira</h3>
       <p>Comparação dos planos disponíveis e histórico financeiro sem fragmentação em múltiplos blocos.</p>
     </div>
-    <div class="billing-table-shell billing-compare-shell">
-      <table class="table billing-compare-table">
+    <div class="billing-table-shell billing-compare-shell gp-table gp-table--responsive">
+      <table class="gp-table__native table billing-compare-table">
         <thead>
           <tr>
             <th>Plano</th>
@@ -148,7 +148,7 @@
                 <strong>{{ item.nome_comercial }}</strong>
                 <div class="small">{{ item.descricao_comercial }}</div>
                 {% if item.is_current %}
-                  <span class="billing-plan-badge">Plano atual</span>
+                  <span class="billing-plan-badge gp-badge">Plano atual</span>
                 {% endif %}
               </td>
               <td>
@@ -178,8 +178,8 @@
     <div class="billing-data-grid">
       <article class="billing-box billing-box--stack">
         <h4 class="billing-subtitle">Solicitações de upgrade</h4>
-        <div class="billing-table-shell">
-          <table class="table">
+        <div class="billing-table-shell gp-table gp-table--responsive">
+          <table class="gp-table__native table">
             <thead>
               <tr>
                 <th>Data</th>
@@ -207,8 +207,8 @@
       </article>
       <article class="billing-box billing-box--stack">
         <h4 class="billing-subtitle">Faturas</h4>
-        <div class="billing-table-shell">
-          <table class="table">
+        <div class="billing-table-shell gp-table gp-table--responsive">
+          <table class="gp-table__native table">
             <thead>
               <tr>
                 <th>Competência</th>

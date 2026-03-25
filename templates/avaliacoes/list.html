@@ -1,10 +1,10 @@
 {% extends "core/base.html" %}
 
 {% block content %}
-<div class="card"><div class="card__body">
+<div class="card gp-card"><div class="card__body gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <div class="grid grid--5" style="margin-top:12px;">
+  <div class="grid grid--5 u-mt-12">
     {% include "core/partials/components/data/kpi_card.html" with label="Avaliações" value=kpis.total %}
     {% include "core/partials/components/data/kpi_card.html" with label="Pendentes" value=kpis.pendentes %}
     {% include "core/partials/components/data/kpi_card.html" with label="Parciais" value=kpis.parciais %}
@@ -12,23 +12,23 @@
     {% include "core/partials/components/data/kpi_card.html" with label="Média geral" value=kpis.media_geral|floatformat:2 %}
   </div>
 
-  <form method="get" class="filter-bar" style="margin:12px 0;">
+  <form method="get" class="filter-bar u-my-12 search-and-filters">
     {% if municipios and municipios|length %}
-      <select name="municipio" class="gp-input" style="max-width:240px;">
+      <select name="municipio" class="gp-input u-maxw-240">
         {% for m in municipios %}
           <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
         {% endfor %}
       </select>
     {% endif %}
 
-    <select name="tipo" class="gp-input" style="max-width:220px;">
+    <select name="tipo" class="gp-input u-maxw-220">
       <option value="">Todos os tipos</option>
       {% for key,label in tipo_choices %}
         <option value="{{ key }}" {% if tipo == key %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
 
-    <select name="turma" class="gp-input" style="max-width:260px;">
+    <select name="turma" class="gp-input u-maxw-260">
       <option value="">Todas as turmas</option>
       {% for item in turmas %}
         <option value="{{ item.turma_id }}" {% if turma_id == item.turma_id|stringformat:'s' %}selected{% endif %}>
@@ -37,19 +37,19 @@
       {% endfor %}
     </select>
 
-    <select name="status" class="gp-input" style="max-width:220px;">
+    <select name="status" class="gp-input u-maxw-220">
       <option value="">Todos os status</option>
       {% for key,label in status_choices %}
         <option value="{{ key }}" {% if status == key %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
 
-    <input name="q" value="{{ q }}" class="gp-input" placeholder="Título, disciplina ou turma" style="max-width:300px;">
+    <input name="q" value="{{ q }}" class="gp-input u-maxw-300" placeholder="Título, disciplina ou turma">
     <button class="gp-button gp-button--outline gp-button--sm" type="submit">Filtrar</button>
   </form>
 
-  <div class="table-shell"><div class="table-shell__body">
-    <table class="table">
+  <div class="table-shell gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+    <table class="gp-table__native table">
       <thead>
         <tr>
           <th>Avaliação</th>
@@ -83,7 +83,7 @@
               {% else %}Sem aplicações
               {% endif %}
             </td>
-            <td><a class="gp-anchor-link" href="{% url 'avaliacoes:avaliacao_detail' item.id %}?municipio={{ municipio.id }}">abrir</a></td>
+            <td><a class="gp-anchor-link" href="{% url 'avaliacoes:avaliacao_detail' item.id %}?municipio={{ municipio.id }}">visualizar</a></td>
           </tr>
         {% empty %}
           <tr><td colspan="9">Nenhuma avaliação encontrada.</td></tr>

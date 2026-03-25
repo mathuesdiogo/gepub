@@ -6,7 +6,7 @@
     <div class="gp-card__body">
       {% include "core/partials/components/layout/page_head.html" with title="Horários / Grades" subtitle="Agenda oficial do laboratório para vínculo das turmas" actions=actions %}
 
-      <form method="get" class="gp-form gp-form--inline u-mb-10">
+      <form method="get" class="gp-form gp-form--inline u-mb-10 form-shell">
         <input type="text" class="gp-input" name="q" placeholder="Nome, código ou descrição" value="{{ q }}">
         <select class="gp-input" name="laboratorio">
           <option value="">Todos os laboratórios</option>

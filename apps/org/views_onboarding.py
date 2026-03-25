@@ -599,13 +599,13 @@ def onboarding_primeiro_acesso(request):
                 "label": "Painel de Onboarding",
                 "url": reverse("org:onboarding_painel"),
                 "icon": "fa-solid fa-list-check",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             },
             {
                 "label": "Voltar ao ORG",
                 "url": reverse("org:index"),
                 "icon": "fa-solid fa-arrow-left",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             },
         ],
     }
@@ -675,6 +675,41 @@ def onboarding_painel(request):
         )
 
     credentials = request.session.pop("org_last_provision_credentials", [])
+    credentials_headers = [
+        {"label": "Secretaria"},
+        {"label": "Usuário"},
+        {"label": "Status"},
+    ]
+    credentials_rows = [
+        {
+            "cells": [
+                {"text": c.get("secretaria") or "—"},
+                {"text": c.get("username") or "—"},
+                {"text": c.get("status") or "Credencial gerada"},
+            ]
+        }
+        for c in credentials
+    ]
+
+    provisionamentos_headers = [
+        {"label": "Data"},
+        {"label": "Template"},
+        {"label": "Secretaria"},
+        {"label": "Status"},
+        {"label": "Solicitado por"},
+    ]
+    provisionamentos_rows = [
+        {
+            "cells": [
+                {"text": p.criado_em.strftime("%d/%m/%Y %H:%M")},
+                {"text": p.template.nome if p.template else "—"},
+                {"text": p.secretaria.nome if p.secretaria else "—"},
+                {"text": p.get_status_display()},
+                {"text": p.solicitado_por.username if p.solicitado_por else "—"},
+            ]
+        }
+        for p in provisionamentos
+    ]
 
     context = {
         "title": "Painel de Onboarding Municipal",
@@ -683,7 +718,11 @@ def onboarding_painel(request):
         "modulos_ativos": modulos_ativos,
         "modulo_cards": modulo_cards,
         "provisionamentos": provisionamentos,
+        "provisionamentos_headers": provisionamentos_headers,
+        "provisionamentos_rows": provisionamentos_rows,
         "credentials": credentials,
+        "credentials_headers": credentials_headers,
+        "credentials_rows": credentials_rows,
         "summary": {
             "modulos_ativos": len(modulos_ativos),
             "secretarias_em_implantacao": len({c["secretaria_nome"] for c in modulo_cards}),
@@ -699,13 +738,13 @@ def onboarding_painel(request):
                 "label": "Executar Onboarding",
                 "url": reverse("org:onboarding_primeiro_acesso"),
                 "icon": "fa-solid fa-wand-magic-sparkles",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             },
             {
                 "label": "Voltar ao ORG",
                 "url": reverse("org:index"),
                 "icon": "fa-solid fa-arrow-left",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             },
         ],
     }

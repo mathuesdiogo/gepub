@@ -200,7 +200,7 @@ class SecretariaListView(BaseListViewGepub):
     def get_actions(self, request, **kwargs):
         actions = super().get_actions(**kwargs)
         if can(request.user, "org.manage_secretaria"):
-            actions.insert(0, {"label": "Nova secretaria", "url": reverse("org:secretaria_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+            actions.insert(0, {"label": "Nova secretaria", "url": reverse("org:secretaria_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
         return actions
 
     def get(self, request: HttpRequest, *args, **kwargs):
@@ -317,7 +317,7 @@ class SecretariaUpdateView(BaseUpdateViewGepub):
     back_url_name = "org:secretaria_list"
     form_class = SecretariaForm
     model = Secretaria
-    submit_label = "Atualizar secretaria"
+    submit_label = "Editar secretaria"
 
     def dispatch(self, request, *args, **kwargs):
         if not can(request.user, "org.manage_secretaria"):
@@ -355,9 +355,9 @@ class SecretariaDetailView(BaseDetailViewGepub):
         unidades_qs = Unidade.objects.filter(secretaria_id=secretaria.id)
         setores_qs = Setor.objects.filter(unidade__secretaria_id=secretaria.id)
 
-        actions = [{"label": "Voltar", "url": reverse("org:secretaria_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+        actions = [{"label": "Voltar", "url": reverse("org:secretaria_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
         if can(request.user, "org.manage_secretaria"):
-            actions.append({"label": "Editar", "url": reverse("org:secretaria_update", args=[secretaria.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+            actions.append({"label": "Editar", "url": reverse("org:secretaria_update", args=[secretaria.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
 
         fields = [
             {"label": "Nome", "value": secretaria.nome},
@@ -382,13 +382,13 @@ class SecretariaDetailView(BaseDetailViewGepub):
 
         links = [
             {
-                "label": "Ver unidades",
+                "label": "Visualizar unidades",
                 "url": reverse("org:unidade_list") + f"?municipio={secretaria.municipio_id}",
                 "meta": f"{unidades_qs.count()} registros",
                 "icon": "fa-solid fa-school",
             },
             {
-                "label": "Ver setores",
+                "label": "Visualizar setores",
                 "url": reverse("org:setor_list"),
                 "meta": f"{setores_qs.count()} registros",
                 "icon": "fa-solid fa-sitemap",

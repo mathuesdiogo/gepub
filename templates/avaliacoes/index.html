@@ -1,10 +1,10 @@
 {% extends "core/base.html" %}
 
 {% block content %}
-<div class="card"><div class="card__body">
+<div class="card gp-card"><div class="card__body gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <div class="grid grid--4" style="margin-top:12px;">
+  <div class="grid grid--4 u-mt-12">
     {% include "core/partials/components/data/kpi_card.html" with label="Avaliações" value=kpis.total %}
     {% include "core/partials/components/data/kpi_card.html" with label="Aplicações" value=kpis.aplicacoes %}
     {% include "core/partials/components/data/kpi_card.html" with label="Corrigidas" value=kpis.corrigidas %}
@@ -19,10 +19,10 @@
   </div>
 
   <div class="grid grid--2 u-mt-16">
-    <div class="card"><div class="card__body">
-      <h3 style="margin-top:0;">Evolução mensal</h3>
-      <div class="table-shell"><div class="table-shell__body">
-        <table class="table">
+    <div class="card gp-card"><div class="card__body gp-card__body">
+      <h3 class="u-mt-0">Evolução mensal</h3>
+      <div class="table-shell gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+        <table class="gp-table__native table">
           <thead><tr><th>Mês</th><th>Total</th></tr></thead>
           <tbody>
             {% for row in monthly_rows %}
@@ -35,10 +35,10 @@
       </div></div>
     </div></div>
 
-    <div class="card"><div class="card__body">
-      <h3 style="margin-top:0;">Top turmas</h3>
-      <div class="table-shell"><div class="table-shell__body">
-        <table class="table">
+    <div class="card gp-card"><div class="card__body gp-card__body">
+      <h3 class="u-mt-0">Top turmas</h3>
+      <div class="table-shell gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+        <table class="gp-table__native table">
           <thead><tr><th>Turma</th><th>Avaliações</th></tr></thead>
           <tbody>
             {% for row in top_turmas %}
@@ -52,10 +52,10 @@
     </div></div>
   </div>
 
-  <div class="card u-mt-16"><div class="card__body">
-    <h3 style="margin-top:0;">Últimas avaliações</h3>
-    <div class="table-shell"><div class="table-shell__body">
-      <table class="table">
+  <div class="card u-mt-16 gp-card"><div class="card__body gp-card__body">
+    <h3 class="u-mt-0">Últimas avaliações</h3>
+    <div class="table-shell gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+      <table class="gp-table__native table">
         <thead>
           <tr>
             <th>Avaliação</th>
@@ -70,7 +70,7 @@
               <td>{{ item.titulo }}</td>
               <td>{{ item.turma.nome }}</td>
               <td>{{ item.data_aplicacao|date:"d/m/Y" }}</td>
-              <td><a href="{% url 'avaliacoes:avaliacao_detail' item.pk %}?municipio={{ municipio.pk }}">abrir</a></td>
+              <td><a href="{% url 'avaliacoes:avaliacao_detail' item.pk %}?municipio={{ municipio.pk }}">visualizar</a></td>
             </tr>
           {% empty %}
             <tr><td colspan="4">Nenhuma avaliação cadastrada.</td></tr>

@@ -141,13 +141,39 @@ def _export_users_xlsx(*, rows: list[list[str]]) -> HttpResponse:
     try:
         from openpyxl import Workbook
     except Exception:
-        headers = ["Nome", "Username", "E-mail", "Código", "Função", "Município", "Secretaria", "Unidade", "Setor", "Status"]
+        headers = [
+            "Nome",
+            "Username",
+            "E-mail",
+            "Código",
+            "Função",
+            "Município",
+            "Secretaria",
+            "Unidade",
+            "Setor",
+            "Local estrutural",
+            "Status",
+        ]
         return export_csv("usuarios.xlsx.csv", headers=headers, rows=rows)
 
     wb = Workbook()
     ws = wb.active
     ws.title = "Usuarios"
-    ws.append(["Nome", "Username", "E-mail", "Código", "Função", "Município", "Secretaria", "Unidade", "Setor", "Status"])
+    ws.append(
+        [
+            "Nome",
+            "Username",
+            "E-mail",
+            "Código",
+            "Função",
+            "Município",
+            "Secretaria",
+            "Unidade",
+            "Setor",
+            "Local estrutural",
+            "Status",
+        ]
+    )
     for r in rows:
         ws.append(r)
     buf = BytesIO()
@@ -170,6 +196,7 @@ def usuarios_list(request):
     secretaria = (request.GET.get("secretaria") or "").strip()
     unidade = (request.GET.get("unidade") or "").strip()
     setor = (request.GET.get("setor") or "").strip()
+    local_estrutural = (request.GET.get("local_estrutural") or "").strip()
     status = (request.GET.get("status") or "").strip().upper()
     modo = (request.GET.get("modo") or "lista").strip().lower()
     created_from = (request.GET.get("created_from") or "").strip()
@@ -185,6 +212,7 @@ def usuarios_list(request):
         "secretaria": secretaria,
         "unidade": unidade,
         "setor": setor,
+        "local_estrutural": local_estrutural,
         "status": status,
         "modo": modo,
         "created_from": created_from,
@@ -212,6 +240,8 @@ def usuarios_list(request):
         qs = qs.filter(profile__unidade_id=int(unidade))
     if setor.isdigit():
         qs = qs.filter(profile__setor_id=int(setor))
+    if local_estrutural.isdigit():
+        qs = qs.filter(profile__local_estrutural_id=int(local_estrutural))
 
     created_from_date = _date_or_none(created_from)
     created_to_date = _date_or_none(created_to)
@@ -251,11 +281,24 @@ def usuarios_list(request):
                     str(getattr(p, "secretaria", "") or ""),
                     str(getattr(p, "unidade", "") or ""),
                     str(getattr(p, "setor", "") or ""),
+                    str(getattr(p, "local_estrutural", "") or ""),
                     _status_slug(p, u),
                 ]
             )
         if export == "csv":
-            headers = ["Nome", "Username", "E-mail", "Código", "Função", "Município", "Secretaria", "Unidade", "Setor", "Status"]
+            headers = [
+                "Nome",
+                "Username",
+                "E-mail",
+                "Código",
+                "Função",
+                "Município",
+                "Secretaria",
+                "Unidade",
+                "Setor",
+                "Local estrutural",
+                "Status",
+            ]
             return export_csv("usuarios.csv", headers=headers, rows=rows_export)
         return _export_users_xlsx(rows=rows_export)
 
@@ -270,7 +313,7 @@ def usuarios_list(request):
                 "label": "Novo usuário",
                 "url": reverse("accounts:usuario_create"),
                 "icon": "fa-solid fa-plus",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             }
         )
         if is_admin(request.user):
@@ -279,7 +322,7 @@ def usuarios_list(request):
                     "label": "Gerar usuário prefeitura",
                     "url": reverse("accounts:usuario_prefeitura_onboarding_create"),
                     "icon": "fa-solid fa-building-user",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             )
     actions.extend(
@@ -288,13 +331,13 @@ def usuarios_list(request):
                 "label": "CSV",
                 "url": reverse("accounts:usuarios_list") + "?" + build_querystring(filter_params, export="csv"),
                 "icon": "fa-solid fa-file-csv",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             },
             {
                 "label": "XLSX",
                 "url": reverse("accounts:usuarios_list") + "?" + build_querystring(filter_params, export="xlsx"),
                 "icon": "fa-solid fa-file-excel",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             },
         ]
     )
@@ -307,6 +350,7 @@ def usuarios_list(request):
         {"label": "Secretaria"},
         {"label": "Unidade"},
         {"label": "Setor"},
+        {"label": "Local estrutural"},
         {"label": "Status", "width": "120px"},
     ]
 
@@ -331,6 +375,7 @@ def usuarios_list(request):
                     {"text": str(getattr(p, "secretaria", "") or "—")},
                     {"text": str(getattr(p, "unidade", "") or "—")},
                     {"text": str(getattr(p, "setor", "") or "—")},
+                    {"text": str(getattr(p, "local_estrutural", "") or "—")},
                     {"html": _status_badge_html(p, u), "safe": True},
                 ],
             }
@@ -395,6 +440,13 @@ def usuarios_list(request):
                 selected=setor,
                 all_label="Todos os setores",
             ),
+            _build_select_html(
+                name="local_estrutural",
+                label="Local estrutural",
+                options=scopes["locais_estruturais"],
+                selected=local_estrutural,
+                all_label="Todos os locais",
+            ),
             _build_date_html(name="created_from", label="Criado de", selected=created_from),
             _build_date_html(name="created_to", label="Criado até", selected=created_to),
             _build_date_html(name="last_login_from", label="Login de", selected=last_login_from),
@@ -420,6 +472,7 @@ def usuarios_list(request):
             secretaria,
             unidade,
             setor,
+            local_estrutural,
             status,
             created_from,
             created_to,

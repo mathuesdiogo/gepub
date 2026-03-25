@@ -1,4 +1,5 @@
 {% extends "educacao/base_modulo.html" %}
+{% load gepub_design_system %}
 {% block title %}Modelos de Matrizes • Educação • GEPUB{% endblock %}
 
 {% block module_content %}
@@ -11,10 +12,10 @@
           <div class="section__title">Aplicar modelo oficial da rede</div>
           <div class="small">Gera matrizes anuais de Educação Infantil e Ensino Fundamental para as unidades selecionadas.</div>
 
-          <form method="post" class="gp-form u-mt-12">
+          <form method="post" class="gp-form u-mt-12 form-shell">
             {% csrf_token %}
             <input type="hidden" name="_action" value="aplicar_oficial">
-            {{ oficiais_form.as_p }}
+            {% render_form oficiais_form %}
             <div class="form-shell__actions">
               <button type="submit" class="gp-button gp-button--primary">Aplicar modelo oficial</button>
             </div>
@@ -25,10 +26,10 @@
           <div class="section__title">Importar modelo via CSV</div>
           <div class="small">Formato obrigatório: <code>etapa_base,serie_ano,componente_nome</code>. Campos opcionais: <code>componente_sigla,aulas_semanais,carga_horaria_anual,obrigatoria,ativo,ordem,area_codigo_bncc,matriz_nome</code>.</div>
 
-          <form method="post" enctype="multipart/form-data" class="gp-form u-mt-12">
+          <form method="post" enctype="multipart/form-data" class="gp-form u-mt-12 form-shell">
             {% csrf_token %}
             <input type="hidden" name="_action" value="importar_csv">
-            {{ import_form.as_p }}
+            {% render_form import_form %}
             <div class="form-shell__actions">
               <button type="submit" class="gp-button gp-button--outline">Importar e aplicar CSV</button>
             </div>

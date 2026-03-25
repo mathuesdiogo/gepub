@@ -1,39 +1,43 @@
 {% extends "educacao/base_modulo.html" %}
+{% load gepub_design_system %}
 {% block title %}Renovação de Matrícula • Educação • GEPUB{% endblock %}
 
 {% block module_content %}
 <div class="gp-card"><div class="gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title="Renovação de Matrícula" subtitle="Configure janelas de renovação, acompanhe inscrições e execute o processamento final." actions=actions %}
 
-  <form method="get" class="gp-form gp-form--smart gp-form--inline u-mb-12">
-    <div class="gp-form-group">
-      <label class="gp-form-label" for="ano">Ano letivo</label>
+  <form method="get" class="gp-form gp-form--smart gp-form--inline u-mb-12 form-shell">
+    <div class="gp-form-group form-shell">
+      <label class="gp-form-label form-shell" for="ano">Ano letivo</label>
       <input class="gp-input" id="ano" name="ano" value="{{ ano_filtro }}" placeholder="Ex.: 2026">
     </div>
     <button type="submit" class="gp-button gp-button--outline">Filtrar</button>
     <a href="{{ clear_url }}" class="gp-button gp-button--ghost">Limpar</a>
   </form>
 
-  <div class="gp-pills u-mb-12">
+  <ul class="pills u-mb-12" aria-label="Filtro por etapa">
     {% for etapa in etapas %}
-      <a
-        class="gp-pills__item {% if stage_filter == etapa.code %}is-active{% endif %}"
-        href="{{ action_url }}?etapa={{ etapa.code }}{% if ano_filtro %}&ano={{ ano_filtro }}{% endif %}"
-      >
-        {{ etapa.label }} ({{ etapa.count }})
-      </a>
+      <li class="{% if stage_filter == etapa.code %}active{% endif %}">
+        <a
+          class="{% if stage_filter == etapa.code %}is-active{% endif %}"
+          href="{{ action_url }}?etapa={{ etapa.code }}{% if ano_filtro %}&ano={{ ano_filtro }}{% endif %}"
+          {% if stage_filter == etapa.code %}aria-current="page"{% endif %}
+        >
+          {{ etapa.label }} ({{ etapa.count }})
+        </a>
+      </li>
     {% endfor %}
-  </div>
+  </ul>
 
   <details class="gp-mb-12" {% if form.errors %}open{% endif %}>
-    <summary class="gp-button gp-button--outline" style="display: inline-flex; cursor: pointer;">
+    <summary class="gp-button gp-button--outline u-inline-flex u-cursor-pointer">
       <i class="fa-solid fa-plus"></i>
       <span>Nova configuração de renovação</span>
     </summary>
-    <form method="post" class="gp-form gp-form--smart u-mt-12">
+    <form method="post" class="gp-form gp-form--smart u-mt-12 form-shell">
       {% csrf_token %}
       <input type="hidden" name="_action" value="create">
-      {{ form.as_p }}
+      {% render_form form %}
       <button type="submit" class="gp-button gp-button--primary">Salvar configuração</button>
     </form>
   </details>

@@ -463,7 +463,7 @@ def turma_geracao_lote(request):
                     "label": "Voltar para turmas",
                     "url": reverse("educacao:turma_list"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
         },
@@ -619,7 +619,7 @@ def evasao_lote(request):
                     "label": "Voltar para alunos",
                     "url": reverse("educacao:aluno_list"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
         },

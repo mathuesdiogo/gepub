@@ -12,6 +12,7 @@ urlpatterns = [
     path("bens/<int:pk>/editar/", views.bem_update, name="bem_update"),
     path("movimentacoes/", views.movimentacao_list, name="movimentacao_list"),
     path("movimentacoes/nova/", views.movimentacao_create, name="movimentacao_create"),
+    path("relatorios/", views.relatorios, name="relatorios"),
     path("inventarios/", views.inventario_list, name="inventario_list"),
     path("inventarios/novo/", views.inventario_create, name="inventario_create"),
     path("inventarios/<int:pk>/concluir/", views.inventario_concluir, name="inventario_concluir"),

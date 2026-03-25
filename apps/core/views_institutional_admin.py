@@ -53,16 +53,16 @@ def institutional_admin(request):
             "subtitle": "Gerencie apenas os campos ativos no novo tema institucional",
             "actions": [
                 {
-                    "label": "Ver página pública",
+                    "label": "Visualizar página pública",
                     "url": reverse("core:institucional_public") + "?preview=1",
                     "icon": "fa-solid fa-arrow-up-right-from-square",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Voltar",
                     "url": reverse("core:dashboard"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
             "form": form,
@@ -98,7 +98,7 @@ def institutional_slide_create(request):
                     "label": "Voltar",
                     "url": reverse("core:institutional_admin"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
             "form": form,
@@ -131,7 +131,7 @@ def institutional_slide_update(request, pk: int):
                     "label": "Voltar",
                     "url": reverse("core:institutional_admin"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
             "form": form,
@@ -175,7 +175,7 @@ def institutional_method_step_create(request):
                     "label": "Voltar",
                     "url": reverse("core:institutional_admin"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
             "form": form,
@@ -207,7 +207,7 @@ def institutional_method_step_update(request, pk: int):
                     "label": "Voltar",
                     "url": reverse("core:institutional_admin"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
             "form": form,
@@ -250,7 +250,7 @@ def institutional_service_card_create(request):
                     "label": "Voltar",
                     "url": reverse("core:institutional_admin"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
             "form": form,
@@ -282,7 +282,7 @@ def institutional_service_card_update(request, pk: int):
                     "label": "Voltar",
                     "url": reverse("core:institutional_admin"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
             "form": form,

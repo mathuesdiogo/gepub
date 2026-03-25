@@ -47,7 +47,7 @@ def _rebuild_fields(form: forms.ModelForm, model, field_names: list[str]) -> Non
     """Reconstrói *de verdade* `form.fields` a partir do model.
 
     Motivo: quando `Meta.fields = []`, Django cria `form.fields = {}`.
-    Alterar `form._meta.fields` depois do `super().__init__()` não recria os campos.
+    Editar `form._meta.fields` depois do `super().__init__()` não recria os campos.
     Então a gente seta `_meta.fields` e RECONSTRÓI `form.fields` via `fields_for_model`.
     """
     if model is None:

@@ -58,7 +58,7 @@ STEP_META: dict[int, dict[str, str]] = {
     },
     6: {
         "title": "Estruturas iniciais",
-        "description": "Cadastre escolas, unidades de saúde e setores de gestão. Não é necessário cadastrar unidades por secretaria.",
+        "description": "Adicione escolas, unidades de saúde e setores de gestão. Não é necessário adicionar unidades por secretaria.",
     },
     7: {
         "title": "Módulos e checklist",
@@ -555,7 +555,7 @@ def onboarding_wizard_step(request, step: int):
 
         if request.method == "POST" and action == "continue" and form.is_valid():
             if not wizard.municipio_id:
-                messages.error(request, "Configure os dados da prefeitura antes de cadastrar unidades.")
+                messages.error(request, "Configure os dados da prefeitura antes de adicionar unidades.")
                 return redirect("org:onboarding_wizard_step", step=3)
 
             municipio = wizard.municipio

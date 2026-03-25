@@ -42,7 +42,7 @@
         <p>Mapeamento automático de tipos, papéis analíticos e sensibilidade.</p>
       </div>
       {% if dataset.status != 'PUBLICADO' %}
-        <form method="post" action="{% url 'paineis:dataset_publish' dataset.id %}" class="bi-publish-checklist">
+        <form method="post" action="{% url 'paineis:dataset_publish' dataset.id %}" class="bi-publish-checklist form-shell">
           {% csrf_token %}
           <label class="small">
             <input type="checkbox" name="check_quality" value="1" required>
@@ -64,8 +64,8 @@
       {% endif %}
     </div>
 
-    <div class="table-shell"><div class="table-shell__body">
-      <table class="table">
+    <div class="table-shell gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+      <table class="gp-table__native table">
         <thead><tr><th>Coluna</th><th>Tipo</th><th>Papel</th><th>Sensível</th><th>Amostra</th></tr></thead>
         <tbody>
           {% for col in columns %}
@@ -74,7 +74,7 @@
               <td>{{ col.get_tipo_display }}</td>
               <td>{{ col.get_papel_display }}</td>
               <td>
-                <span class="bi-badge {% if col.sensivel %}bi-badge--danger{% else %}bi-badge--ok{% endif %}">
+                <span class="bi-badge {% if col.sensivel %}bi-badge--danger{% else %}bi-badge--ok{% endif %} gp-badge">
                   {% if col.sensivel %}Sim{% else %}Não{% endif %}
                 </span>
               </td>
@@ -95,8 +95,8 @@
         <p>Amostra dos dados já tratados para o dashboard.</p>
       </div>
 
-      <div class="table-shell"><div class="table-shell__body">
-        <table class="table">
+      <div class="table-shell gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+        <table class="gp-table__native table">
           <thead>
             <tr>
               {% for header in preview_headers %}

@@ -70,12 +70,14 @@ def _assign_scope_by_actor_or_form(*, actor, profile: Profile, form_cleaned: dic
         profile.secretaria_id = getattr(p_me, "secretaria_id", None)
         profile.unidade_id = getattr(p_me, "unidade_id", None)
         profile.setor_id = getattr(p_me, "setor_id", None)
+        profile.local_estrutural_id = getattr(p_me, "local_estrutural_id", None)
         return
 
     profile.municipio = form_cleaned.get("municipio")
     profile.secretaria = form_cleaned.get("secretaria")
     profile.unidade = form_cleaned.get("unidade")
     profile.setor = form_cleaned.get("setor")
+    profile.local_estrutural = form_cleaned.get("local_estrutural")
 
 
 def _build_onboarding_codigo(seed_name: str) -> str:
@@ -166,7 +168,10 @@ def usuario_create(request):
             actor=request.user,
             target=user,
             action=UserManagementAudit.Action.CREATE,
-            details=f"role={prof.role}; municipio={prof.municipio_id}; secretaria={prof.secretaria_id}; unidade={prof.unidade_id}; setor={prof.setor_id}",
+            details=(
+                f"role={prof.role}; municipio={prof.municipio_id}; secretaria={prof.secretaria_id}; "
+                f"unidade={prof.unidade_id}; setor={prof.setor_id}; local_estrutural={prof.local_estrutural_id}"
+            ),
         )
 
         if user.email:
@@ -212,7 +217,7 @@ def usuario_create(request):
             "title": "Novo usuário",
             "subtitle": "Cadastro de conta e lotação organizacional",
             "actions": [
-                {"label": "Voltar", "url": reverse("accounts:usuarios_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+                {"label": "Voltar", "url": reverse("accounts:usuarios_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
             ],
         },
     )
@@ -257,6 +262,7 @@ def usuario_prefeitura_onboarding_create(request):
             profile.secretaria = None
             profile.unidade = None
             profile.setor = None
+            profile.local_estrutural = None
             profile.ativo = True
             profile.bloqueado = False
             profile.must_change_password = True
@@ -299,7 +305,7 @@ def usuario_prefeitura_onboarding_create(request):
             "title": "Gerar usuário de onboarding da prefeitura",
             "subtitle": "Cria conta municipal exclusiva para primeiro acesso e implantação guiada",
             "actions": [
-                {"label": "Voltar", "url": reverse("accounts:usuarios_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+                {"label": "Voltar", "url": reverse("accounts:usuarios_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
             ],
         },
     )
@@ -326,6 +332,7 @@ def usuario_update(request, pk: int):
         "secretaria": prof.secretaria_id,
         "unidade": prof.unidade_id,
         "setor": prof.setor_id,
+        "local_estrutural": prof.local_estrutural_id,
         "ativo": prof.ativo,
         "turmas": user.turmas_ministradas.all(),
     }
@@ -345,7 +352,7 @@ def usuario_update(request, pk: int):
         p_me = get_profile(request.user)
         role_me = (getattr(p_me, "role", None) or "").upper()
         if not is_admin(request.user) and role_new not in allowed_roles_for_manager_role(role_me):
-            messages.error(request, "Você não pode alterar para esse tipo de função.")
+            messages.error(request, "Você não pode editar para esse tipo de função.")
             return redirect("accounts:usuarios_list")
 
         user.first_name = form.cleaned_data["first_name"]
@@ -391,7 +398,11 @@ def usuario_update(request, pk: int):
             actor=request.user,
             target=user,
             action=UserManagementAudit.Action.UPDATE,
-            details=f"role={prof.role}; ativo={prof.ativo}; bloqueado={prof.bloqueado}; municipio={prof.municipio_id}; secretaria={prof.secretaria_id}; unidade={prof.unidade_id}; setor={prof.setor_id}",
+            details=(
+                f"role={prof.role}; ativo={prof.ativo}; bloqueado={prof.bloqueado}; "
+                f"municipio={prof.municipio_id}; secretaria={prof.secretaria_id}; "
+                f"unidade={prof.unidade_id}; setor={prof.setor_id}; local_estrutural={prof.local_estrutural_id}"
+            ),
         )
 
         messages.success(request, "Usuário atualizado.")
@@ -407,8 +418,8 @@ def usuario_update(request, pk: int):
             "title": "Editar usuário",
             "subtitle": "Ajuste de função, lotação e status",
             "actions": [
-                {"label": "Detalhes", "url": reverse("accounts:usuario_detail", args=[user.pk]), "icon": "fa-solid fa-id-card", "variant": "btn--ghost"},
-                {"label": "Voltar", "url": reverse("accounts:usuarios_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+                {"label": "Detalhes", "url": reverse("accounts:usuario_detail", args=[user.pk]), "icon": "fa-solid fa-id-card", "variant": "gp-button--ghost"},
+                {"label": "Voltar", "url": reverse("accounts:usuarios_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
             ],
         },
     )
@@ -437,6 +448,7 @@ def usuario_detail(request, pk: int):
         {"label": "Secretaria", "value": str(prof.secretaria) if prof.secretaria else "—"},
         {"label": "Unidade", "value": str(prof.unidade) if prof.unidade else "—"},
         {"label": "Setor", "value": str(prof.setor) if prof.setor else "—"},
+        {"label": "Local estrutural", "value": str(prof.local_estrutural) if prof.local_estrutural else "—"},
         {"label": "Último login", "value": user.last_login.strftime("%d/%m/%Y %H:%M") if user.last_login else "Nunca"},
     ]
     pills = [
@@ -453,8 +465,8 @@ def usuario_detail(request, pk: int):
             "title": user.get_full_name() or user.username,
             "subtitle": "Detalhes e auditoria da conta",
             "actions": [
-                {"label": "Editar", "url": reverse("accounts:usuario_update", args=[user.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"},
-                {"label": "Voltar", "url": reverse("accounts:usuarios_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+                {"label": "Editar", "url": reverse("accounts:usuario_update", args=[user.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"},
+                {"label": "Voltar", "url": reverse("accounts:usuarios_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
             ],
             "fields": fields,
             "pills": pills,

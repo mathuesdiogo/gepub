@@ -2,7 +2,7 @@
 {% block title %}Análise de Plano de Ensino • Educação • GEPUB{% endblock %}
 
 {% block module_content %}
-<section class="gp-student-stage">
+<section class="gp-student-stage edu-detail-flow">
   {% include "core/partials/components/layout/page_head.html" with title="Análise de Plano de Ensino" subtitle="Fluxo institucional de aprovação e homologação pela coordenação." actions=None %}
 
   <article class="gp-student-stage__card edu-plan-editor">
@@ -70,7 +70,7 @@
               <i class="fa-solid fa-arrow-left"></i> Voltar para fila
             </a>
             {% if plano.status == "SUBMETIDO" %}
-              <form method="post">
+              <form method="post" class="u-inline-form">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="aprovar">
                 <button class="gp-button gp-button--primary" type="submit">
@@ -79,7 +79,7 @@
               </form>
             {% endif %}
             {% if plano.status == "APROVADO" %}
-              <form method="post">
+              <form method="post" class="u-inline-form">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="homologar">
                 <button class="gp-button gp-button--success" type="submit">
@@ -90,11 +90,11 @@
           </div>
 
           {% if plano.status == "SUBMETIDO" or plano.status == "APROVADO" %}
-            <form method="post" class="gp-form gp-form--smart">
+            <form method="post" class="gp-form gp-form--smart form-shell">
               {% csrf_token %}
               <input type="hidden" name="action" value="devolver">
-              <div class="gp-form-group gp-field--full">
-                <label class="gp-form-label" for="id_motivo_devolucao">Devolver para ajustes (motivo obrigatório)</label>
+              <div class="gp-form-group gp-field--full form-shell">
+                <label class="gp-form-label form-shell" for="id_motivo_devolucao">Devolver para ajustes (motivo obrigatório)</label>
                 <textarea id="id_motivo_devolucao" name="motivo_devolucao" class="gp-textarea" rows="3" placeholder="Descreva os ajustes necessários para o professor."></textarea>
               </div>
               <button class="gp-button gp-button--outline" type="submit">
@@ -107,7 +107,7 @@
     </div>
 
     <aside class="edu-plan-editor__side">
-      <section class="edu-plan-side-card">
+      <section class="edu-plan-side-card gp-card">
         <h4>Checklist de preenchimento</h4>
         <ul class="edu-plan-checklist">
           {% for item in plano_checklist.items %}
@@ -119,7 +119,7 @@
         </ul>
       </section>
 
-      <section class="edu-plan-side-card">
+      <section class="edu-plan-side-card gp-card">
         <h4>Fluxo institucional</h4>
         <ol class="edu-plan-flow">
           {% for step in plano_fluxo %}
@@ -131,7 +131,7 @@
         </ol>
       </section>
 
-      <section class="edu-plan-side-card">
+      <section class="edu-plan-side-card gp-card">
         <h4>Histórico de decisão</h4>
         <ul class="edu-plan-admin-history">
           <li><strong>Submetido:</strong> {% if plano.submetido_em %}{{ plano.submetido_em|date:"d/m/Y H:i" }}{% else %}—{% endif %}</li>

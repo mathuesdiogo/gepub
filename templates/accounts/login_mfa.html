@@ -11,7 +11,7 @@
 {% block content %}
 <section class="gauth-page" aria-label="Confirmação de segurança GEPUB">
   <main class="gauth-main gauth-main--compact">
-    <section class="gauth-card gauth-card--compact" aria-labelledby="gauth-mfa-title">
+    <section class="gauth-card gauth-card--compact gp-card" aria-labelledby="gauth-mfa-title">
       <header class="gauth-card__head">
         <p class="gauth-card__brand">GEPUB Security</p>
         <h1 id="gauth-mfa-title" class="gauth-card__title">Confirmação em duas etapas</h1>
@@ -19,10 +19,10 @@
       </header>
 
       {% if error %}
-        <div class="gauth-alert" role="alert">{{ error }}</div>
+        <div class="gauth-alert gp-alert" role="alert">{{ error }}</div>
       {% endif %}
 
-      <form method="post" class="gauth-form">
+      <form method="post" class="gauth-form form-shell">
         {% csrf_token %}
         <label for="id_otp_code">Código de verificação</label>
         <div class="gauth-field">
@@ -40,7 +40,7 @@
         <button type="submit" class="gauth-submit">Validar e entrar</button>
       </form>
 
-      <form method="post" class="gauth-inline-form">
+      <form method="post" class="gauth-inline-form form-shell">
         {% csrf_token %}
         <input type="hidden" name="action" value="resend">
         <button type="submit" class="gauth-button-muted">Reenviar código</button>

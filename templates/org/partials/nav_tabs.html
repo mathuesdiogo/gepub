@@ -12,37 +12,56 @@
     <div class="org-nav-unified">
       <div class="org-nav-unified__group">
         <p class="org-nav-unified__label">Visão e Implantação</p>
-        <nav class="tabs org-tabs org-tabs--flat" aria-label="Navegação geral da organização">
-          <a class="tabs__item {% if url_name == 'index' %}is-active{% endif %}" href="{% url 'org:index' %}" {% if url_name == 'index' %}aria-current="page"{% endif %}>
-            <span class="tabs__label">Visão Geral</span>
-          </a>
-          <a class="tabs__item {% if 'onboarding_' in url_name %}is-active{% endif %}" href="{% url 'org:onboarding_painel' %}" {% if 'onboarding_' in url_name %}aria-current="page"{% endif %}>
-            <span class="tabs__label">Onboarding</span>
-          </a>
-          {% if can_org_manage_secretaria %}
-            <a class="tabs__item {% if 'governanca' in url_name %}is-active{% endif %}" href="{% url 'org:secretaria_governanca_hub' %}" {% if 'governanca' in url_name %}aria-current="page"{% endif %}>
-              <span class="tabs__label">Governança</span>
+        <ul class="nav nav-tabs tabs org-tabs org-tabs--flat" aria-label="Navegação geral da organização">
+          <li class="{% if url_name == 'index' %}active{% endif %}">
+            <a class="tabs__item {% if url_name == 'index' %}is-active{% endif %}" href="{% url 'org:index' %}" {% if url_name == 'index' %}aria-current="page"{% endif %}>
+              <span class="tabs__label">Visão Geral</span>
             </a>
+          </li>
+          <li class="{% if 'onboarding_' in url_name %}active{% endif %}">
+            <a class="tabs__item {% if 'onboarding_' in url_name %}is-active{% endif %}" href="{% url 'org:onboarding_painel' %}" {% if 'onboarding_' in url_name %}aria-current="page"{% endif %}>
+              <span class="tabs__label">Onboarding</span>
+            </a>
+          </li>
+          {% if can_org_manage_secretaria %}
+            <li class="{% if 'governanca' in url_name %}active{% endif %}">
+              <a class="tabs__item {% if 'governanca' in url_name %}is-active{% endif %}" href="{% url 'org:secretaria_governanca_hub' %}" {% if 'governanca' in url_name %}aria-current="page"{% endif %}>
+                <span class="tabs__label">Governança</span>
+              </a>
+            </li>
           {% endif %}
-        </nav>
+        </ul>
       </div>
 
       <div class="org-nav-unified__group">
         <p class="org-nav-unified__label">Estrutura Organizacional</p>
-        <nav class="tabs org-tabs org-tabs--flat" aria-label="Navegação estrutural da organização">
-          <a class="tabs__item {% if 'municipio_' in url_name %}is-active{% endif %}" href="{% url 'org:municipio_list' %}" {% if 'municipio_' in url_name %}aria-current="page"{% endif %}>
-            <span class="tabs__label">Municípios</span>
-          </a>
-          <a class="tabs__item {% if 'secretaria_' in url_name %}is-active{% endif %}" href="{% url 'org:secretaria_list' %}" {% if 'secretaria_' in url_name %}aria-current="page"{% endif %}>
-            <span class="tabs__label">Secretarias</span>
-          </a>
-          <a class="tabs__item {% if 'unidade_' in url_name %}is-active{% endif %}" href="{% url 'org:unidade_list' %}" {% if 'unidade_' in url_name %}aria-current="page"{% endif %}>
-            <span class="tabs__label">Unidades</span>
-          </a>
-          <a class="tabs__item {% if 'setor_' in url_name %}is-active{% endif %}" href="{% url 'org:setor_list' %}" {% if 'setor_' in url_name %}aria-current="page"{% endif %}>
-            <span class="tabs__label">Setores</span>
-          </a>
-        </nav>
+        <ul class="nav nav-tabs tabs org-tabs org-tabs--flat" aria-label="Navegação estrutural da organização">
+          <li class="{% if 'municipio_' in url_name %}active{% endif %}">
+            <a class="tabs__item {% if 'municipio_' in url_name %}is-active{% endif %}" href="{% url 'org:municipio_list' %}" {% if 'municipio_' in url_name %}aria-current="page"{% endif %}>
+              <span class="tabs__label">Municípios</span>
+            </a>
+          </li>
+          <li class="{% if 'secretaria_' in url_name %}active{% endif %}">
+            <a class="tabs__item {% if 'secretaria_' in url_name %}is-active{% endif %}" href="{% url 'org:secretaria_list' %}" {% if 'secretaria_' in url_name %}aria-current="page"{% endif %}>
+              <span class="tabs__label">Secretarias</span>
+            </a>
+          </li>
+          <li class="{% if 'unidade_' in url_name %}active{% endif %}">
+            <a class="tabs__item {% if 'unidade_' in url_name %}is-active{% endif %}" href="{% url 'org:unidade_list' %}" {% if 'unidade_' in url_name %}aria-current="page"{% endif %}>
+              <span class="tabs__label">Unidades</span>
+            </a>
+          </li>
+          <li class="{% if 'setor_' in url_name %}active{% endif %}">
+            <a class="tabs__item {% if 'setor_' in url_name %}is-active{% endif %}" href="{% url 'org:setor_list' %}" {% if 'setor_' in url_name %}aria-current="page"{% endif %}>
+              <span class="tabs__label">Setores</span>
+            </a>
+          </li>
+          <li class="{% if 'local_estrutural_' in url_name %}active{% endif %}">
+            <a class="tabs__item {% if 'local_estrutural_' in url_name %}is-active{% endif %}" href="{% url 'org:local_estrutural_list' %}" {% if 'local_estrutural_' in url_name %}aria-current="page"{% endif %}>
+              <span class="tabs__label">Locais</span>
+            </a>
+          </li>
+        </ul>
       </div>
     </div>
   </div>

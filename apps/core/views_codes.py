@@ -508,7 +508,7 @@ def guia_telas(request):
             "label": "Voltar",
             "url": reverse("core:dashboard"),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }
     ]
 

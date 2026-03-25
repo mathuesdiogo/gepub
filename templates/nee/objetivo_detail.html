@@ -1,7 +1,7 @@
 {% extends "nee/base_modulo.html" %}
 {% block module_title %}Objetivo • NEE{% endblock %}
 {% block module_content %}
-<div class="card"><div class="card__body">
+<div class="card gp-card"><div class="card__body gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
   <div class="section">
     <div class="section-header"><div class="section-title">Informações</div></div>
@@ -15,8 +15,8 @@
   {% if object.evolucoes.all %}
   <div class="section">
     <div class="section-header"><div class="section-title">Evoluções</div></div>
-    <div class="table">
-      <table>
+    <div class="table gp-table gp-table--responsive gp-table--striped gp-table--hover">
+      <table class="gp-table__native">
         <thead><tr><th>Data</th><th>Descrição</th><th>Avaliação</th><th>Profissional</th></tr></thead>
         <tbody>
           {% for e in object.evolucoes.all %}

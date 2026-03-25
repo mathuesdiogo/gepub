@@ -1,3 +1,4 @@
+{% load gepub_design_system %}
 <form method="{{ method|default:'post' }}" action="{{ action_url|default:'' }}" {% if enctype %}enctype="{{ enctype }}"{% endif %} class="form-shell gp-form">
   {% csrf_token %}
 
@@ -9,8 +10,8 @@
     {{ top_extra|safe }}
   {% endif %}
 
-  <div class="form-shell__fields gp-form-grid gp-form-grid--smart">
-    {{ form.as_p }}
+  <div class="form-shell__fields gp-form-grid gp-form-grid--smart form-shell">
+    {% render_form form %}
   </div>
 
   {% if bottom_extra %}

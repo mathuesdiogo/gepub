@@ -4,7 +4,7 @@
 <div class="gp-card"><div class="gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <form method="get" class="gp-table__filters">
+  <form method="get" class="gp-table__filters search-and-filters">
     {% if municipios and municipios|length %}
       <select name="municipio" class="gp-input">
         {% for m in municipios %}
@@ -45,7 +45,7 @@
             <td>R$ {{ item.valor_pago }}</td>
             <td>R$ {{ item.saldo_a_pagar }}</td>
             <td>{{ item.get_status_display }}</td>
-            <td><a class="gp-anchor-link" href="{% url 'financeiro:resto_detail' item.id %}?municipio={{ municipio.id }}">ver</a></td>
+            <td><a class="gp-anchor-link" href="{% url 'financeiro:resto_detail' item.id %}?municipio={{ municipio.id }}">visualizar</a></td>
           </tr>
         {% empty %}
           <tr><td colspan="9">Nenhum resto a pagar encontrado.</td></tr>

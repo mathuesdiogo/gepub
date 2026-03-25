@@ -11,6 +11,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 
 from apps.educacao.models import Aluno, Turma
+from apps.educacao.models_biblioteca import MatriculaInstitucional
 from apps.core.decorators import require_perm
 from apps.core.rbac import can, scope_filter_alunos, scope_filter_turmas
 
@@ -77,11 +78,23 @@ def api_alunos_suggest(request):
 
     alunos_qs = scope_filter_alunos(
         request.user,
-        Aluno.objects.only("id", "nome", "cpf", "nis"),
+        Aluno.objects.select_related("matricula_institucional").only(
+            "id",
+            "nome",
+            "cpf",
+            "nis",
+            "matricula_institucional__numero_matricula",
+        ),
     )
+    matricula_student_ids = MatriculaInstitucional.objects.filter(
+        numero_matricula__icontains=q
+    ).values_list("aluno_id", flat=True)
 
     base_qs = alunos_qs.filter(
-        Q(nome__icontains=q) | Q(cpf__icontains=q) | Q(nis__icontains=q)
+        Q(nome__icontains=q)
+        | Q(cpf__icontains=q)
+        | Q(nis__icontains=q)
+        | Q(id__in=matricula_student_ids)
     ).order_by("nome")
     total = base_qs.count()
     start = (page - 1) * limit
@@ -90,14 +103,17 @@ def api_alunos_suggest(request):
 
     results = []
     for a in qs:
+        numero_matricula = getattr(getattr(a, "matricula_institucional", None), "numero_matricula", "") or ""
+        label = a.nome if not numero_matricula else f"{a.nome} • {numero_matricula}"
         results.append(
             {
                 "id": a.id,
-                "label": a.nome,
-                "text": a.nome,
+                "label": label,
+                "text": label,
                 "nome": a.nome,
                 "cpf": a.cpf or "",
                 "nis": a.nis or "",
+                "matricula_institucional": numero_matricula,
             }
         )
 

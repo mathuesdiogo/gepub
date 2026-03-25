@@ -9,6 +9,7 @@ class AulaHorarioForm(forms.ModelForm):
 
     def __init__(self, *args, grade=None, **kwargs):
         self.grade = grade
+        self.schedule_edit_impact = None
         super().__init__(*args, **kwargs)
 
         if self.grade is None and getattr(self.instance, "pk", None):
@@ -93,6 +94,18 @@ class AulaHorarioForm(forms.ModelForm):
                         f"na turma {turma_nome} ({conflito.inicio:%H:%M} às {conflito.fim:%H:%M})."
                     ),
                 )
+
+        if self.grade and self.grade.turma_id and dia and ini and fim:
+            from .services_schedule_conflicts import ScheduleConflictService
+
+            self.schedule_edit_impact = ScheduleConflictService.validate_regular_turma_slot_change(
+                turma=self.grade.turma,
+                dia_semana_codigo=dia,
+                hora_inicio=ini,
+                hora_fim=fim,
+            )
+            if self.schedule_edit_impact.has_conflict and self.schedule_edit_impact.blocking_mode == "block":
+                self.add_error(None, self.schedule_edit_impact.message)
 
         return cleaned
 

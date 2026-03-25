@@ -1,35 +1,35 @@
 {% extends "core/base.html" %}
 
 {% block content %}
-<div class="card"><div class="card__body">
+<div class="card gp-card"><div class="card__body gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+  <form method="get" class="filter-bar u-mb-12 search-and-filters">
     {% if municipios and municipios|length %}
-      <select name="municipio" class="gp-input" style="max-width:240px;">
+      <select name="municipio" class="gp-input u-maxw-240">
         {% for m in municipios %}
           <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
         {% endfor %}
       </select>
     {% endif %}
-    <select name="status" class="gp-input" style="max-width:200px;">
+    <select name="status" class="gp-input u-maxw-200">
       <option value="">Todos status</option>
       {% for key,label in status_choices %}
         <option value="{{ key }}" {% if status == key %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
-    <select name="turno" class="gp-input" style="max-width:220px;">
+    <select name="turno" class="gp-input u-maxw-220">
       <option value="">Todos turnos</option>
       {% for key,label in turno_choices %}
         <option value="{{ key }}" {% if turno == key %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
-    <input name="q" value="{{ q }}" class="gp-input" placeholder="Código, nome ou observação" style="max-width:320px;">
+    <input name="q" value="{{ q }}" class="gp-input u-maxw-320" placeholder="Código, nome ou observação">
     <button class="gp-button gp-button--outline gp-button--sm" type="submit">Filtrar</button>
   </form>
 
-  <div class="table-shell"><div class="table-shell__body">
-    <table class="table">
+  <div class="table-shell gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+    <table class="gp-table__native table">
       <thead><tr><th>Código</th><th>Escala</th><th>Turno</th><th>Horário</th><th>Dias</th><th>Status</th><th></th></tr></thead>
       <tbody>
         {% for item in items %}

@@ -13,7 +13,7 @@
   {% if plano.observacao %}<p><strong>Observações:</strong> {{ plano.observacao|linebreaksbr }}</p>{% endif %}
 
   <h3>Necessidades</h3>
-  <table>
+  <table class="gp-table__native">
     <thead><tr><th>Tipo</th><th>CID</th><th class="right">Ativo</th><th>Observação</th></tr></thead>
     <tbody>
       {% for n in necessidades %}
@@ -30,7 +30,7 @@
   </table>
 
   <h3>Laudos</h3>
-  <table>
+  <table class="gp-table__native">
     <thead><tr><th>Número</th><th>Profissional</th><th>Emissão</th><th>Validade</th></tr></thead>
     <tbody>
       {% for l in laudos %}
@@ -47,7 +47,7 @@
   </table>
 
   <h3>Recursos</h3>
-  <table>
+  <table class="gp-table__native">
     <thead><tr><th>Nome</th><th>Status</th><th>Observação</th></tr></thead>
     <tbody>
       {% for r in recursos %}
@@ -63,7 +63,7 @@
   </table>
 
   <h3>Apoios</h3>
-  <table>
+  <table class="gp-table__native">
     <thead><tr><th>Profissional</th><th>Área</th><th>Frequência</th><th>Observação</th></tr></thead>
     <tbody>
       {% for a in apoios %}
@@ -80,7 +80,7 @@
   </table>
 
   <h3>Timeline resumida (últimos 25)</h3>
-  <table>
+  <table class="gp-table__native">
     <thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th></tr></thead>
     <tbody>
       {% for e in acompanhamentos %}

@@ -2,13 +2,13 @@
 {% block module_title %}NEE • Alertas{% endblock %}
 
 {% block module_content %}
-<div class="card"><div class="card__body">
+<div class="card gp-card"><div class="card__body gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title="Alertas NEE" subtitle="Pendências e acompanhamentos para ação rápida." actions=actions %}
 
   {% if cards %}
     <div class="grid-cards">
       {% for c in cards %}
-        <a class="link-card" href="{{ c.url }}">
+        <a class="link-card gp-card" href="{{ c.url }}">
           <div class="link-card__title">
             <i class="{{ c.icon }}"></i> {{ c.title }}
           </div>

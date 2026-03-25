@@ -10,6 +10,7 @@ from . import (
     views_secretarias,
     views_setores,
     views_unidades,
+    views_locais,
 )
 
 app_name = "org"
@@ -82,11 +83,18 @@ urlpatterns = [
     path("setores/<int:pk>/", views_setores.SetorDetailView.as_view(), name="setor_detail"),
     path("setores/<int:pk>/editar/", views_setores.SetorUpdateView.as_view(), name="setor_update"),
 
+    # Locais estruturais
+    path("locais/", views_locais.LocalEstruturalListView.as_view(), name="local_estrutural_list"),
+    path("locais/novo/", views_locais.LocalEstruturalCreateView.as_view(), name="local_estrutural_create"),
+    path("locais/<int:pk>/", views_locais.LocalEstruturalDetailView.as_view(), name="local_estrutural_detail"),
+    path("locais/<int:pk>/editar/", views_locais.LocalEstruturalUpdateView.as_view(), name="local_estrutural_update"),
+
     # Autocomplete endpoints
     path("autocomplete/secretarias/", views_secretarias.secretaria_autocomplete, name="secretaria_autocomplete"),
     path("autocomplete/unidades/", views_unidades.unidade_autocomplete, name="unidade_autocomplete"),
     path("autocomplete/municipios/", views_municipios.municipio_autocomplete, name="municipio_autocomplete"),
     path("api/setores-suggest/", views_setores.setor_autocomplete, name="setor_autocomplete"),
+    path("autocomplete/locais/", views_locais.local_estrutural_autocomplete, name="local_estrutural_autocomplete"),
 
     # Endereços & localização (Maps)
     path("addresses/", views_addresses.address_list, name="address_list"),

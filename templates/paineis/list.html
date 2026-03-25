@@ -51,10 +51,10 @@
         <p>Refine por município, status e categoria para acelerar análise.</p>
       </div>
     </div>
-    <form method="get" class="bi-filter-grid">
+    <form method="get" class="bi-filter-grid form-shell search-and-filters">
       {% if municipios and municipios|length %}
-        <label class="gp-form-group">
-          <span class="gp-form-label">Município</span>
+        <label class="gp-form-group form-shell">
+          <span class="gp-form-label form-shell">Município</span>
           <select name="municipio" class="gp-select">
             {% for m in municipios %}
               <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
@@ -63,8 +63,8 @@
         </label>
       {% endif %}
 
-      <label class="gp-form-group">
-        <span class="gp-form-label">Status</span>
+      <label class="gp-form-group form-shell">
+        <span class="gp-form-label form-shell">Status</span>
         <select name="status" class="gp-select">
           <option value="">Todos os status</option>
           {% for key,label in status_choices %}
@@ -73,13 +73,13 @@
         </select>
       </label>
 
-      <label class="gp-form-group">
-        <span class="gp-form-label">Categoria</span>
+      <label class="gp-form-group form-shell">
+        <span class="gp-form-label form-shell">Categoria</span>
         <input name="categoria" value="{{ categoria }}" class="gp-input" placeholder="Ex.: Receita, Educação, Saúde">
       </label>
 
-      <label class="gp-form-group">
-        <span class="gp-form-label">Busca textual</span>
+      <label class="gp-form-group form-shell">
+        <span class="gp-form-label form-shell">Busca textual</span>
         <input name="q" value="{{ q }}" class="gp-input" placeholder="Nome, descrição ou tag do dataset">
       </label>
 
@@ -92,7 +92,7 @@
 
   <section class="bi-dataset-grid">
     {% for item in items %}
-      <article class="bi-dataset-card">
+      <article class="bi-dataset-card gp-card">
         <div class="bi-dataset-card__head">
           <div class="bi-dataset-card__title-wrap">
             <h3>{{ item.nome }}</h3>
@@ -112,7 +112,7 @@
         <div class="bi-dataset-card__footer">
           <small>Atualizado em {{ item.atualizado_em|date:"d/m/Y H:i" }}</small>
           <a class="gp-button gp-button--primary gp-button--sm" href="{% url 'paineis:dataset_detail' item.id %}?municipio={{ municipio.id }}">
-            Abrir dataset
+            Visualizar dataset
           </a>
         </div>
       </article>

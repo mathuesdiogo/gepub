@@ -1,48 +1,69 @@
 {% extends "core/base.html" %}
 
 {% block content %}
-<div class="card"><div class="card__body">
+<div class="card gp-card"><div class="card__body gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
-  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+  <form method="get" class="filter-bar u-mb-12 search-and-filters">
     {% if municipios and municipios|length %}
-      <select name="municipio" class="gp-input" style="max-width:240px;">
+      <select name="municipio" class="gp-input u-maxw-240">
         {% for m in municipios %}
           <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
         {% endfor %}
       </select>
     {% endif %}
-    <select name="status" class="gp-input" style="max-width:220px;">
+    <select name="secretaria" class="gp-input u-maxw-220">
+      <option value="">Todas secretarias</option>
+      {% for s in secretarias %}
+        <option value="{{ s.id }}" {% if secretaria_id == s.id|stringformat:'s' %}selected{% endif %}>{{ s.nome }}</option>
+      {% endfor %}
+    </select>
+    <select name="unidade" class="gp-input u-maxw-220">
+      <option value="">Todas unidades</option>
+      {% for u in unidades %}
+        <option value="{{ u.id }}" {% if unidade_id == u.id|stringformat:'s' %}selected{% endif %}>{{ u.nome }}</option>
+      {% endfor %}
+    </select>
+    <select name="local" class="gp-input u-maxw-240">
+      <option value="">Todos locais</option>
+      {% for l in locais %}
+        <option value="{{ l.id }}" {% if local_id == l.id|stringformat:'s' %}selected{% endif %}>{{ l.nome }}</option>
+      {% endfor %}
+    </select>
+    <select name="status" class="gp-input u-maxw-220">
       <option value="">Todos status</option>
       {% for key,label in status_choices %}
         <option value="{{ key }}" {% if status == key %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
-    <input name="q" value="{{ q }}" class="gp-input" placeholder="Número ou item" style="max-width:280px;">
+    <input name="q" value="{{ q }}" class="gp-input u-maxw-280" placeholder="Número ou item">
     <button class="gp-button gp-button--outline gp-button--sm" type="submit">Filtrar</button>
   </form>
-  <div class="table-shell"><div class="table-shell__body">
-    <table class="table">
-      <thead><tr><th>Número</th><th>Item</th><th>Qtd</th><th>Status</th><th>Solicitante</th><th></th></tr></thead>
+  <div class="table-shell gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+    <table class="gp-table__native table">
+      <thead><tr><th>Número</th><th>Item</th><th>Secretaria</th><th>Unidade</th><th>Local</th><th>Qtd</th><th>Status</th><th>Solicitante</th><th></th></tr></thead>
       <tbody>
         {% for item in items %}
           <tr>
             <td>{{ item.numero }}</td>
             <td>{{ item.item.nome }}</td>
+            <td>{{ item.secretaria_solicitante|default:"-" }}</td>
+            <td>{{ item.unidade_solicitante|default:"-" }}</td>
+            <td>{{ item.local_solicitante|default:item.setor_solicitante|default:"-" }}</td>
             <td>{{ item.quantidade }}</td>
             <td>{{ item.get_status_display }}</td>
             <td>{{ item.secretaria_solicitante|default:"-" }}</td>
             <td>
               {% if item.status == "PENDENTE" %}
-                <form method="post" action="{% url 'almoxarifado:requisicao_aprovar' item.pk %}?municipio={{ municipio.pk }}" style="display:inline;">
+                <form method="post" action="{% url 'almoxarifado:requisicao_aprovar' item.pk %}?municipio={{ municipio.pk }}{% if secretaria_id %}&secretaria={{ secretaria_id }}{% endif %}{% if unidade_id %}&unidade={{ unidade_id }}{% endif %}{% if local_id %}&local={{ local_id }}{% endif %}" class="u-inline-form">
                   {% csrf_token %}
                   <button class="gp-button gp-button--outline gp-button--sm" type="submit">Aprovar</button>
                 </form>
-                <form method="post" action="{% url 'almoxarifado:requisicao_atender' item.pk %}?municipio={{ municipio.pk }}" style="display:inline;">
+                <form method="post" action="{% url 'almoxarifado:requisicao_atender' item.pk %}?municipio={{ municipio.pk }}{% if secretaria_id %}&secretaria={{ secretaria_id }}{% endif %}{% if unidade_id %}&unidade={{ unidade_id }}{% endif %}{% if local_id %}&local={{ local_id }}{% endif %}" class="u-inline-form">
                   {% csrf_token %}
                   <button class="gp-button gp-button--primary gp-button--sm" type="submit">Atender</button>
                 </form>
               {% elif item.status == "APROVADA" %}
-                <form method="post" action="{% url 'almoxarifado:requisicao_atender' item.pk %}?municipio={{ municipio.pk }}" style="display:inline;">
+                <form method="post" action="{% url 'almoxarifado:requisicao_atender' item.pk %}?municipio={{ municipio.pk }}{% if secretaria_id %}&secretaria={{ secretaria_id }}{% endif %}{% if unidade_id %}&unidade={{ unidade_id }}{% endif %}{% if local_id %}&local={{ local_id }}{% endif %}" class="u-inline-form">
                   {% csrf_token %}
                   <button class="gp-button gp-button--primary gp-button--sm" type="submit">Atender</button>
                 </form>
@@ -52,7 +73,7 @@
             </td>
           </tr>
         {% empty %}
-          <tr><td colspan="6">Nenhuma requisição encontrada.</td></tr>
+          <tr><td colspan="9">Nenhuma requisição encontrada.</td></tr>
         {% endfor %}
       </tbody>
     </table>

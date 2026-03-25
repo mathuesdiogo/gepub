@@ -11,3 +11,14 @@
 @import url("./indicators/indicators.css");
 @import url("./utilities/utilities.css");
 @import url("./layout/internal-overrides.css");
+@import url("../../css/components/alerts.css");
+@import url("../../css/components/badges.css");
+@import url("../../css/components/loaders.css");
+@import url("../../css/components/calendar.css");
+@import url("../../css/components/checklist.css");
+@import url("../../css/components/people.css");
+@import url("../../css/components/steps.css");
+@import url("../../css/components/timeline.css");
+@import url("../../css/components/timeline-horizontal.css");
+@import url("../../css/components/boxes-sections.css");
+@import url("./layout/size-system.css");

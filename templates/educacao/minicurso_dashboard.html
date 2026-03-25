@@ -34,7 +34,7 @@
     </section>
 
     <div class="u-mt-16">
-      <h3 class="page-head__title" style="font-size:1.1rem;">Últimos minicursos</h3>
+      <h3 class="page-head__title u-fs-11">Últimos minicursos</h3>
       <ul class="gp-inline-list">
         {% for c in recentes_cursos %}
           <li>{{ c.nome }} • {{ c.get_modalidade_oferta_display }}</li>
@@ -45,7 +45,7 @@
     </div>
 
     <div class="u-mt-16">
-      <h3 class="page-head__title" style="font-size:1.1rem;">Últimas turmas</h3>
+      <h3 class="page-head__title u-fs-11">Últimas turmas</h3>
       <ul class="gp-inline-list">
         {% for t in recentes_turmas %}
           <li>{{ t.nome }} • {{ t.unidade.nome }} • {{ t.ano_letivo }}</li>
@@ -56,7 +56,7 @@
     </div>
 
     <div class="u-mt-16">
-      <h3 class="page-head__title" style="font-size:1.1rem;">Últimas matrículas</h3>
+      <h3 class="page-head__title u-fs-11">Últimas matrículas</h3>
       <ul class="gp-inline-list">
         {% for m in recentes_matriculas %}
           <li>{{ m.aluno.nome }} • {{ m.curso.nome }} • {{ m.get_situacao_display }}</li>
@@ -67,7 +67,7 @@
     </div>
 
     <div class="u-mt-16">
-      <h3 class="page-head__title" style="font-size:1.1rem;">Últimos certificados</h3>
+      <h3 class="page-head__title u-fs-11">Últimos certificados</h3>
       <ul class="gp-inline-list">
         {% for c in recentes_certificados %}
           <li>{{ c.aluno.nome }} • {{ c.curso.nome|default:"—" }} • {{ c.codigo_verificacao }}</li>

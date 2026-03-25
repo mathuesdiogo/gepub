@@ -46,7 +46,7 @@
     </a>
 
     <a class="admin-kpi admin-kpi--slate" href="{% url 'educacao:matricula_create' %}">
-      <div class="admin-kpi__icon"><i class="fa-solid fa-id-card-clip"></i></div>
+      <div class="admin-kpi__icon"><i class="fa-solid fa-id-card-clip gp-card"></i></div>
       <div class="admin-kpi__content">
         <div class="admin-kpi__label">Matrículas</div>
         <div class="admin-kpi__value">{{ matriculas_total|default:0 }}</div>
@@ -109,12 +109,12 @@
           <h3 class="admin-panel__title">Últimas secretarias</h3>
           <p class="admin-panel__sub">Cadastros recentes do município</p>
         </div>
-        <a class="gp-button gp-button--outline" href="{% url 'org:secretaria_list' %}"><i class="fa-solid fa-list"></i> Ver todas</a>
+        <a class="gp-button gp-button--outline" href="{% url 'org:secretaria_list' %}"><i class="fa-solid fa-list"></i> Visualizar todas</a>
       </div>
 
       {% if ultimas_secretarias %}
         <div class="admin-table-wrap">
-          <table class="admin-table">
+          <table class="gp-table__native admin-table">
             <thead>
               <tr>
                 <th>Secretaria</th>
@@ -127,7 +127,7 @@
                 <tr>
                   <td>{{ s.nome }}</td>
                   <td>{{ s.municipio.nome|default:"—" }}</td>
-                  <td><a class="gp-button gp-button--outline" href="{% url 'org:secretaria_detail' s.pk %}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir</a></td>
+                  <td><a class="gp-button gp-button--outline" href="{% url 'org:secretaria_detail' s.pk %}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Visualizar</a></td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -144,12 +144,12 @@
           <h3 class="admin-panel__title">Últimos alunos</h3>
           <p class="admin-panel__sub">Cadastros recentes de alunos</p>
         </div>
-        <a class="gp-button gp-button--outline" href="{% url 'educacao:aluno_list' %}"><i class="fa-solid fa-list"></i> Ver todos</a>
+        <a class="gp-button gp-button--outline" href="{% url 'educacao:aluno_list' %}"><i class="fa-solid fa-list"></i> Visualizar todos</a>
       </div>
 
       {% if ultimos_alunos %}
         <div class="admin-table-wrap">
-          <table class="admin-table">
+          <table class="gp-table__native admin-table">
             <thead>
               <tr>
                 <th>Aluno</th>
@@ -170,7 +170,7 @@
                       —
                     {% endif %}
                   </td>
-                  <td><a class="gp-button gp-button--outline" href="{% url 'educacao:aluno_detail' a.pk %}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir</a></td>
+                  <td><a class="gp-button gp-button--outline" href="{% url 'educacao:aluno_detail' a.pk %}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Visualizar</a></td>
                 </tr>
               {% endfor %}
             </tbody>

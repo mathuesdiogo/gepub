@@ -20,7 +20,7 @@
       {% endif %}
     </div>
 
-    <form method="post" class="gp-form" id="notas-info-form">
+    <form method="post" class="gp-form form-shell" id="notas-info-form">
       {% csrf_token %}
       {% if not can_edit_notas %}
         <div class="gp-alert gp-alert--info u-mb-12">
@@ -29,7 +29,7 @@
         </div>
       {% endif %}
       <div class="gp-table__native">
-        <table>
+        <table class="gp-table__native">
           <thead>
             <tr>
               <th>Aluno</th>

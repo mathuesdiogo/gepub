@@ -1,15 +1,15 @@
 {% extends "core/detail_base.html" %}
 
 {% block detail_sections %}
-<div class="card" style="margin-top:12px;"><div class="card__body">
-  <h3 style="margin-top:0;">Descricao</h3>
-  <p style="margin:0;">{{ obj.descricao|default:"-" }}</p>
+<div class="card u-mt-12 gp-card"><div class="card__body gp-card__body">
+  <h3 class="u-mt-0">Descricao</h3>
+  <p class="u-m-0">{{ obj.descricao|default:"-" }}</p>
 </div></div>
 
-<div class="card" style="margin-top:12px;"><div class="card__body">
-  <h3 style="margin-top:0;">Andamentos</h3>
-  <div class="table-shell"><div class="table-shell__body">
-    <table class="table">
+<div class="card u-mt-12 gp-card"><div class="card__body gp-card__body">
+  <h3 class="u-mt-0">Andamentos</h3>
+  <div class="table-shell gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+    <table class="gp-table__native table">
       <thead><tr><th>Data</th><th>Tipo</th><th>Origem</th><th>Destino</th><th>Despacho</th><th>Usuario</th></tr></thead>
       <tbody>
         {% for item in andamentos %}

@@ -2,17 +2,17 @@
 {% block title %}Validação de Documento • GEPUB{% endblock %}
 
 {% block content %}
-<div class="card">
-  <div class="card__body">
+<div class="card gp-card">
+  <div class="card__body gp-card__body">
 
     <h2>Validação de Documento</h2>
 
     {% if documento.ativo %}
-      <div class="alert alert-success">
+      <div class="alert alert-success gp-alert">
         ✅ Documento válido
       </div>
     {% else %}
-      <div class="alert alert-danger">
+      <div class="alert alert-danger gp-alert">
         ❌ Documento revogado
       </div>
     {% endif %}

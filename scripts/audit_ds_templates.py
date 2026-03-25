@@ -10,6 +10,71 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATES_DIR = ROOT / "templates"
+DS_DOCS_FILES = (
+    ROOT / "templates/core/design_system/index.html",
+    ROOT / "templates/core/design_system/components.html",
+)
+
+REFERENCE_SECTIONS = {
+    "geral": (
+        "Padrões web",
+        "Nomenclaturas",
+        "Template Filters",
+        "Template Tags",
+    ),
+    "botoes_acoes": (
+        "Botões",
+        "Barra de ações",
+        "Ícones de ações",
+    ),
+    "formularios": (
+        "Formulários",
+        "Avaliação com estrelas",
+        "Barra de busca e filtros",
+        "Botão: Switch",
+        "Checkbox: Marcar todos",
+    ),
+    "tabelas_listas": (
+        "Tabelas e listas",
+        "Lista de definições",
+        "Listas de links",
+        "Lista com botão de ação",
+    ),
+    "mensagens": (
+        "Alertas",
+        "Estilo tooltip",
+        "Situações",
+    ),
+    "navegacao": (
+        "Abas",
+        "Âncoras",
+        "Pills",
+    ),
+    "caixas_sessoes": (
+        "Accordion/Box",
+        "Board",
+        "Caixa Links",
+        "Caixa Indicadores",
+        "Caixa Textos",
+        "Caixa Geral",
+        "Card",
+        "Farol",
+        "Fotos",
+        "General Box",
+        "Totalizadores",
+    ),
+    "componentes": (
+        "Badges",
+        "Barra de carregamento",
+        "Barra de progresso",
+        "Calendários",
+        "Checklist",
+        "Foto de Pessoa",
+        "Gráficos",
+        "Passos",
+        "Timeline",
+    ),
+}
 
 CLASS_ATTR_RE = re.compile(r'class="([^"]*)"')
 TABLE_RE = re.compile(r"<table\b", re.IGNORECASE)
@@ -17,6 +82,8 @@ TABLE_RE = re.compile(r"<table\b", re.IGNORECASE)
 
 def iter_class_tokens():
     for path in TEMPLATES_DIR.rglob("*.html"):
+        if "core/design_system/" in path.as_posix():
+            continue
         content = path.read_text(encoding="utf-8")
         for match in CLASS_ATTR_RE.finditer(content):
             tokens = tuple(token for token in match.group(1).split() if token)
@@ -30,6 +97,8 @@ def main() -> int:
     table_with_ds = 0
 
     for path in TEMPLATES_DIR.rglob("*.html"):
+        if "core/design_system/" in path.as_posix():
+            continue
         template_count += 1
         content = path.read_text(encoding="utf-8")
         table_count += len(TABLE_RE.findall(content))
@@ -75,6 +144,18 @@ def main() -> int:
         f"filters_with_ds={metrics['filters_with_ds']}"
     )
     print(f"forms_total={metrics['forms_total']} forms_with_ds={metrics['forms_with_ds']}")
+
+    docs_text = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in DS_DOCS_FILES
+        if path.exists()
+    ).lower()
+    print("section_coverage:")
+    for key, labels in REFERENCE_SECTIONS.items():
+        found = sum(1 for label in labels if label.lower() in docs_text)
+        total = len(labels)
+        pct = round((found / total) * 100, 1) if total else 0.0
+        print(f"  {key}={found}/{total} ({pct}%)")
     return 0
 
 

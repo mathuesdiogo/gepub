@@ -1,7 +1,7 @@
 {% extends "nee/base_modulo.html" %}
 {% block module_title %}{% if mode == 'update' %}Editar Tipo{% else %}Novo Tipo{% endif %} • NEE{% endblock %}
 {% block module_content %}
-<div class="card"><div class="card__body">
+<div class="card gp-card"><div class="card__body gp-card__body">
 {% include "core/partials/components/layout/page_head.html" with title="Tipo de Necessidade" subtitle="Preencha os dados do tipo" actions=actions %}
 {% include "core/partials/components/forms/form_shell.html" with form=form submit_label="Salvar" cancel_url=actions.0.url %}
 </div></div>

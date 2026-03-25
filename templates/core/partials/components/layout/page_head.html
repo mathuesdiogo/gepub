@@ -1,4 +1,5 @@
-<div class="page-head gp-action-bar gp-justify-between gp-align-center gp-flex-wrap">
+{% load gepub_design_system %}
+<div class="page-head gp-justify-between gp-flex-wrap">
   <div class="page-head__titles">
     <h1 class="page-head__title">{{ title }}</h1>
     {% if subtitle %}
@@ -9,12 +10,10 @@
   {% if actions %}
     <div class="page-head__actions gp-button-group">
       {% for a in actions %}
-        {% with action_label=a.label|default:""|lower action_url=a.url|default:""|lower %}
-        <a class="gp-button{% if 'voltar' in action_label %} gp-button--secondary gp-button--back{% elif 'pdf' in action_label %} gp-button--outline gp-button--pdf{% elif 'csv' in action_label %} gp-button--outline gp-button--csv{% elif 'portal' in action_label %} gp-button--secondary gp-button--portal{% elif '/org/' in action_url or '/governanca/' in action_url or '/financeiro/' in action_url or '/processos/' in action_url or '/compras/' in action_url or '/contratos/' in action_url or '/rh/' in action_url or '/ponto/' in action_url or '/folha/' in action_url or '/patrimonio/' in action_url or '/almoxarifado/' in action_url or '/frota/' in action_url or '/ouvidoria/' in action_url or '/tributos/' in action_url or 'arrecadar receita' in action_label or 'dotações' in action_label or 'dotacoes' in action_label or 'créditos adicionais' in action_label or 'creditos adicionais' in action_label or 'restos a pagar' in action_label or 'conciliação bancária' in action_label or 'conciliacao bancaria' in action_label or 'organização' in action_label or 'organizacao' in action_label or 'governança' in action_label or 'governanca' in action_label or 'financeiro' in action_label or 'processos' in action_label or 'processo' in action_label or 'compras' in action_label or 'contratos' in action_label or action_label == 'rh' or 'painel rh' in action_label or 'ponto' in action_label or 'folha' in action_label or 'patrimônio' in action_label or 'patrimonio' in action_label or 'almoxarifado' in action_label or 'frota' in action_label or 'ouvidoria' in action_label or 'tributos' in action_label or 'competência' in action_label or 'competencia' in action_label or 'escalas/turnos' in action_label or action_label == 'escalas' or 'vínculos' in action_label or 'vinculos' in action_label %} gp-button--outline gp-button--operacao{% elif a.variant == 'btn-primary' or a.variant == 'btn btn-primary' %} gp-button--primary{% elif a.variant == 'btn-secondary' or a.variant == 'btn btn-secondary' %} gp-button--secondary{% elif a.variant == 'btn-danger' or a.variant == 'btn btn-danger' %} gp-button--danger{% elif a.variant == 'btn-success' or a.variant == 'btn btn-success' %} gp-button--success{% elif a.variant == 'btn--ghost' or a.variant == 'btn btn--ghost' %} gp-button--ghost{% elif a.variant == 'btn--outline' or a.variant == 'btn' %} gp-button--outline{% elif a.variant and 'gp-button--' in a.variant %} {{ a.variant }}{% else %} gp-button--outline{% endif %}" href="{{ a.url }}">
+        <a class="gp-button {{ a|gp_action_variant }}" href="{{ a.url }}">
           {% if a.icon %}<i class="{{ a.icon }}" aria-hidden="true"></i>{% endif %}
           {{ a.label }}
         </a>
-        {% endwith %}
       {% endfor %}
     </div>
   {% endif %}

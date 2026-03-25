@@ -5,7 +5,7 @@
       <p>
         Utilizamos cookies necessários para o funcionamento do portal e, com sua autorização, cookies opcionais
         para desempenho, personalização e comunicação institucional. Você pode aceitar, recusar ou escolher por
-        categoria, e alterar essa decisão a qualquer momento.
+        categoria, e editar essa decisão a qualquer momento.
       </p>
       <p class="cc-banner__links">
         <a href="{% url 'core:politica_privacidade_public' %}">Política de Privacidade</a>
@@ -14,9 +14,9 @@
       </p>
     </div>
     <div class="cc-banner__actions">
-      <button class="cc-btn cc-btn--ghost" type="button" data-cookie-reject-all>Recusar opcionais</button>
-      <button class="cc-btn cc-btn--soft" type="button" data-cookie-open-modal>Gerenciar escolhas</button>
-      <button class="cc-btn cc-btn--primary" type="button" data-cookie-accept-all>Aceitar todos</button>
+      <button class="cc-btn cc-btn--ghost gp-button gp-button--ghost" type="button" data-cookie-reject-all>Recusar opcionais</button>
+      <button class="cc-btn cc-btn--soft gp-button" type="button" data-cookie-open-modal>Gerenciar escolhas</button>
+      <button class="cc-btn cc-btn--primary gp-button gp-button--primary" type="button" data-cookie-accept-all>Aceitar todos</button>
     </div>
   </section>
 
@@ -32,7 +32,7 @@
   >
     <header class="cc-modal__header">
       <h3 id="cookie-modal-title">Central de preferências de cookies</h3>
-      <button class="cc-icon-btn" type="button" aria-label="Fechar preferências de cookies" data-cookie-close-modal>
+      <button class="cc-icon-btn gp-button" type="button" aria-label="Fechar preferências de cookies" data-cookie-close-modal>
         <span aria-hidden="true">×</span>
       </button>
     </header>
@@ -86,9 +86,9 @@
     </div>
 
     <footer class="cc-modal__actions">
-      <button class="cc-btn cc-btn--ghost" type="button" data-cookie-reject-all-modal>Recusar opcionais</button>
-      <button class="cc-btn cc-btn--soft" type="button" data-cookie-save-prefs>Salvar preferências</button>
-      <button class="cc-btn cc-btn--primary" type="button" data-cookie-accept-all-modal>Aceitar todos</button>
+      <button class="cc-btn cc-btn--ghost gp-button gp-button--ghost" type="button" data-cookie-reject-all-modal>Recusar opcionais</button>
+      <button class="cc-btn cc-btn--soft gp-button" type="button" data-cookie-save-prefs>Salvar preferências</button>
+      <button class="cc-btn cc-btn--primary gp-button gp-button--primary" type="button" data-cookie-accept-all-modal>Aceitar todos</button>
     </footer>
   </section>
 </div>

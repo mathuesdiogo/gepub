@@ -7,14 +7,14 @@
 
   <article class="gp-student-stage__card">
     <h3>Procedimentos de Apoio</h3>
-    <form method="post" class="gp-form gp-form--smart gp-mb-3">
+    <form method="post" class="gp-form gp-form--smart gp-mb-3 form-shell">
       {% csrf_token %}
       <input type="hidden" name="form_kind" value="apoio">
       {% for field in apoio_form %}
-        <div class="gp-form-group">
-          <label class="gp-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        <div class="gp-form-group form-shell">
+          <label class="gp-form-label form-shell" for="{{ field.id_for_label }}">{{ field.label }}</label>
           {{ field }}
-          {% if field.errors %}<small class="gp-form-error">{{ field.errors|striptags }}</small>{% endif %}
+          {% if field.errors %}<small class="gp-form-error form-shell">{{ field.errors|striptags }}</small>{% endif %}
         </div>
       {% endfor %}
       <button class="gp-button gp-button--outline" type="submit">Solicitar apoio</button>

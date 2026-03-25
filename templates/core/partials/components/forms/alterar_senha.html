@@ -1,6 +1,6 @@
 {% extends "core/base.html" %}
 
-{% block title %}Alterar senha • GEPUB{% endblock %}
+{% block title %}Editar senha • GEPUB{% endblock %}
 {% block header %}Conta{% endblock %}
 
 {% block breadcrumbs %}
@@ -9,20 +9,20 @@
   <span class="breadcrumbs__sep">/</span>
   <a class="breadcrumbs__link" href="{% url 'accounts:meu_perfil' %}">Meu perfil</a>
   <span class="breadcrumbs__sep">/</span>
-  <span class="breadcrumbs__current">Alterar senha</span>
+  <span class="breadcrumbs__current">Editar senha</span>
 </div>
 {% endblock %}
 
 {% block content %}
-<div class="card"><div class="card__body">
+<div class="card gp-card"><div class="card__body gp-card__body">
 
-{% include "core/partials/components/layout/page_head.html" with title="Alterar senha" subtitle="Defina uma nova senha para sua conta" actions=None %}
+{% include "core/partials/components/layout/page_head.html" with title="Editar senha" subtitle="Defina uma nova senha para sua conta" actions=None %}
 
 {% if error %}
-  <div class="alert alert--error">{{ error }}</div>
+  <div class="alert alert--error gp-alert">{{ error }}</div>
 {% endif %}
 
-<form method="post" class="form-vertical">
+<form method="post" class="form-vertical form-shell">
   {% csrf_token %}
 
   {% include "core/partials/components/forms/form_shell.html" with form=form %}

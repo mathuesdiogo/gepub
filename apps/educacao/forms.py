@@ -42,6 +42,7 @@ class TurmaForm(forms.ModelForm):
             "professores",
             "classe_especial",
             "bilingue_surdos",
+            "permite_sobreposicao_horario",
             "ativo",
         ]
 
@@ -63,6 +64,9 @@ class TurmaForm(forms.ModelForm):
         self.fields["professores"].required = False
         self.fields["professores"].help_text = (
             "Professores vinculados à turma. O sistema cria/atualiza automaticamente os diários da turma."
+        )
+        self.fields["permite_sobreposicao_horario"].help_text = (
+            "Use com cautela: permite matrícula mesmo com sobreposição de horários."
         )
         self.fields["professores"].queryset = get_user_model().objects.none()
         self.fields["matriz_curricular"].queryset = MatrizCurricular.objects.filter(ativo=True).select_related(
@@ -647,6 +651,7 @@ class MatriculaCursoForm(forms.ModelForm):
     def __init__(self, *args, user=None, aluno=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.aluno = aluno
+        self.schedule_conflict_result = None
         self.fields["curso"].queryset = Curso.objects.filter(ativo=True).order_by("nome")
         self.fields["curso"].label = "Atividade/Curso extracurricular"
 
@@ -697,6 +702,20 @@ class MatriculaCursoForm(forms.ModelForm):
                 qs = qs.filter(turma__isnull=True)
             if qs.exists():
                 self.add_error("curso", "Já existe matrícula ativa deste aluno para este curso/oferta.")
+
+        if self.aluno and curso:
+            from .services_schedule_conflicts import ScheduleConflictService
+
+            self.schedule_conflict_result = ScheduleConflictService.validate_course_enrollment(
+                aluno=self.aluno,
+                curso=curso,
+                turma=turma,
+                data_matricula=data_matricula,
+                data_conclusao=data_conclusao,
+                exclude_matricula_curso_id=self.instance.pk if self.instance and self.instance.pk else None,
+            )
+            if self.schedule_conflict_result.has_conflict and self.schedule_conflict_result.blocking_mode == "block":
+                self.add_error("turma", self.schedule_conflict_result.message)
 
         return cleaned
 

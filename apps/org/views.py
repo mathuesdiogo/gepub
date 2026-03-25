@@ -8,11 +8,18 @@ from .views_municipios import MunicipioListView, MunicipioCreateView, MunicipioU
 from .views_secretarias import SecretariaListView, SecretariaCreateView, SecretariaUpdateView, SecretariaDetailView
 from .views_unidades import UnidadeListView, UnidadeCreateView, UnidadeUpdateView, UnidadeDetailView
 from .views_setores import SetorListView, SetorCreateView, SetorUpdateView, SetorDetailView
+from .views_locais import (
+    LocalEstruturalListView,
+    LocalEstruturalCreateView,
+    LocalEstruturalUpdateView,
+    LocalEstruturalDetailView,
+)
 from .models import (
     Municipio,
     Secretaria,
     Unidade,
     Setor,
+    LocalEstrutural,
     OnboardingStep,
     MunicipioModuloAtivo,
     SecretariaProvisionamento,
@@ -32,6 +39,7 @@ def index(request):
     secretarias_qs = Secretaria.objects.filter(municipio_id__in=municipio_ids)
     unidades_qs = Unidade.objects.filter(secretaria__municipio_id__in=municipio_ids)
     setores_qs = Setor.objects.filter(unidade__secretaria__municipio_id__in=municipio_ids)
+    locais_qs = LocalEstrutural.objects.filter(municipio_id__in=municipio_ids)
     steps_qs = OnboardingStep.objects.filter(municipio_id__in=municipio_ids)
     modulos_ativos_qs = MunicipioModuloAtivo.objects.filter(municipio_id__in=municipio_ids, ativo=True)
     provisionamentos_qs = SecretariaProvisionamento.objects.filter(municipio_id__in=municipio_ids)
@@ -46,7 +54,7 @@ def index(request):
             "label": "Assistente guiado",
             "url": "/org/onboarding/",
             "icon": "fa-solid fa-wand-magic-sparkles",
-            "variant": "btn-primary",
+            "variant": "gp-button--primary",
         }
     ]
 
@@ -56,6 +64,7 @@ def index(request):
             "secretarias": secretarias_qs.count(),
             "unidades": unidades_qs.count(),
             "setores": setores_qs.count(),
+            "locais": locais_qs.count(),
             "modulos_ativos": modulos_ativos_qs.count(),
             "onboarding_total": steps_total,
             "onboarding_concluidos": steps_concluidos,

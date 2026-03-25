@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load gepub_design_system %}
 
 {% block title %}Onboarding Inicial • ORG • GEPUB{% endblock %}
 
@@ -7,27 +8,27 @@
 {% include "org/partials/nav_tabs.html" %}
 
 <section class="org-info-grid">
-  <article class="org-info-card">
+  <article class="org-info-card gp-card">
     <p class="org-info-card__label">Templates disponíveis</p>
     <p class="org-info-card__value">{{ summary.templates_total }}</p>
     <p class="org-info-card__meta">{{ summary.templates_ativos }} ativos no catálogo</p>
   </article>
-  <article class="org-info-card">
+  <article class="org-info-card gp-card">
     <p class="org-info-card__label">Módulos ativos</p>
     <p class="org-info-card__value">{{ summary.modulos_ativos }}</p>
     <p class="org-info-card__meta">Ativados para o município atual</p>
   </article>
-  <article class="org-info-card">
+  <article class="org-info-card gp-card">
     <p class="org-info-card__label">Plano municipal</p>
     <p class="org-info-card__value">{{ summary.plano_atual }}</p>
     <p class="org-info-card__meta">Base para limites, cobrança e upgrades</p>
   </article>
-  <article class="org-info-card">
+  <article class="org-info-card gp-card">
     <p class="org-info-card__label">Provisionamentos</p>
     <p class="org-info-card__value">{{ summary.provisionamentos }}</p>
     <p class="org-info-card__meta">Execuções já realizadas</p>
   </article>
-  <article class="org-info-card">
+  <article class="org-info-card gp-card">
     <p class="org-info-card__label">Etapas concluídas</p>
     <p class="org-info-card__value">{{ summary.steps_concluidos }}</p>
     <p class="org-info-card__meta">De {{ summary.steps_total }} passos de onboarding</p>
@@ -35,17 +36,17 @@
 </section>
 
 <div class="onboard-grid">
-  <section class="onboard-card">
+  <section class="onboard-card gp-card">
     <div class="onboard-card__head">
       <h3 class="onboard-card__title">1. Dados do Município</h3>
       <p class="onboard-card__sub">Configure as informações principais da prefeitura para iniciar o provisionamento.</p>
     </div>
-    <div class="onboard-card__body">
+    <div class="onboard-card__body gp-card__body">
       <form method="post" class="form-shell">
         {% csrf_token %}
         <input type="hidden" name="action" value="save_municipio">
         <div class="form-shell__fields">
-          {{ form_municipio.as_p }}
+          {% render_form form_municipio %}
         </div>
         <div class="form-shell__actions">
           <button type="submit" class="gp-button gp-button--primary"><i class="fa-solid fa-floppy-disk"></i> Salvar Município</button>
@@ -54,17 +55,17 @@
     </div>
   </section>
 
-  <section class="onboard-card">
+  <section class="onboard-card gp-card">
     <div class="onboard-card__head">
       <h3 class="onboard-card__title">2. Plano Municipal</h3>
       <p class="onboard-card__sub">Selecione o plano contratado para liberar limites e regras financeiras do município.</p>
     </div>
-    <div class="onboard-card__body">
+    <div class="onboard-card__body gp-card__body">
       <form method="post" class="form-shell">
         {% csrf_token %}
         <input type="hidden" name="action" value="save_plano">
         <div class="form-shell__fields">
-          {{ form_plano.as_p }}
+          {% render_form form_plano %}
         </div>
         <div class="form-shell__actions">
           <button type="submit" class="gp-button gp-button--primary"><i class="fa-solid fa-file-contract"></i> Salvar Plano</button>
@@ -78,7 +79,7 @@
 
       <div class="sec-metrics gp-mt-3">
         {% for item in planos_catalogo %}
-          <article class="sec-kpi {% if plano_atual_info and plano_atual_info.codigo == item.codigo %}kpi-blue{% else %}kpi-card--slate{% endif %}">
+          <article class="sec-kpi {% if plano_atual_info and plano_atual_info.codigo == item.codigo %}kpi-blue{% else %}kpi-card--slate{% endif %} gp-card">
             <div>
               <div class="sec-kpi__label">{{ item.nome_comercial }}</div>
               <div class="sec-kpi__value">{{ item.categoria }}</div>
@@ -135,7 +136,7 @@
   </div>
 
   {% if limite_secretarias_alert %}
-    <section class="onboard-limit-alert">
+    <section class="onboard-limit-alert gp-alert">
       <div class="onboard-limit-alert__head">
         <p class="onboard-limit-alert__title"><i class="fa-solid fa-triangle-exclamation"></i> Limite do plano atingido</p>
         <p class="onboard-limit-alert__sub">
@@ -145,7 +146,7 @@
         </p>
       </div>
       <div class="onboard-limit-alert__options">
-        <form method="post" class="onboard-limit-alert__option">
+        <form method="post" class="onboard-limit-alert__option form-shell">
           {% csrf_token %}
           <input type="hidden" name="action" value="solicitar_overage_secretarias">
           <input type="hidden" name="qtd_excedente" value="{{ limite_secretarias_alert.excedente }}">
@@ -162,7 +163,7 @@
           </button>
         </form>
 
-        <form method="post" class="onboard-limit-alert__option">
+        <form method="post" class="onboard-limit-alert__option form-shell">
           {% csrf_token %}
           <input type="hidden" name="action" value="solicitar_troca_plano">
           <p class="onboard-limit-alert__option-title">Mudança de plano</p>
@@ -185,7 +186,7 @@
     {% csrf_token %}
     <input type="hidden" name="action" value="ativar_templates">
     {% if form_ativacao.non_field_errors %}
-      <div class="alert alert--danger">{{ form_ativacao.non_field_errors }}</div>
+      <div class="alert alert--danger gp-alert">{{ form_ativacao.non_field_errors }}</div>
     {% endif %}
 
     <div class="onboard-market-form__meta">
@@ -206,12 +207,12 @@
     <div class="sec-metrics onboard-install-grid">
       {% for row in template_rows %}
         <article
-          class="sec-kpi onboard-portal-card {{ row.kpi_variant }} {% if row.is_installed %}is-installed{% endif %}"
+          class="sec-kpi onboard-portal-card {{ row.kpi_variant }} {% if row.is_installed %}is-installed{% endif %} gp-card"
           data-onboard-template-card="{{ row.template.slug }}"
           data-module="{{ row.module_key }}"
           data-search="{{ row.search_text|lower }}"
         >
-          <div class="onboard-portal-card__body">
+          <div class="onboard-portal-card__body gp-card__body">
             <div class="onboard-portal-card__top">
               <div>
                 <p class="onboard-portal-card__module">{{ row.module_label }}</p>
@@ -249,7 +250,7 @@
               {% endif %}
             </div>
             <details class="onboard-portal-card__details">
-              <summary>Ver composição do modelo</summary>
+              <summary>Visualizar composição do modelo</summary>
               <div class="onboard-portal-card__meta">
                 <span><i class="fa-solid fa-building"></i> {{ row.qtd_unidades }} unidades</span>
                 <span><i class="fa-solid fa-sitemap"></i> {{ row.qtd_setores }} setores</span>

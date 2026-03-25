@@ -95,7 +95,7 @@ def estagio_list(request):
             "label": "Voltar",
             "url": reverse("educacao:index"),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
     ]
     if can_manage:
@@ -105,7 +105,7 @@ def estagio_list(request):
                 "label": "Novo Estágio",
                 "url": reverse("educacao:estagio_create"),
                 "icon": "fa-solid fa-plus",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             },
         )
 
@@ -173,7 +173,7 @@ def estagio_detail(request, pk: int):
             "label": "Voltar",
             "url": reverse("educacao:estagio_list"),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }
     ]
     if can_manage:
@@ -182,7 +182,7 @@ def estagio_detail(request, pk: int):
                 "label": "Editar",
                 "url": reverse("educacao:estagio_update", args=[estagio.pk]),
                 "icon": "fa-solid fa-pen",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             }
         )
 
@@ -285,7 +285,7 @@ def estagio_update(request, pk: int):
             "mode": "update",
             "estagio": estagio,
             "cancel_url": reverse("educacao:estagio_list"),
-            "submit_label": "Atualizar estágio",
+            "submit_label": "Editar estágio",
             "action_url": reverse("educacao:estagio_update", args=[estagio.pk]),
         },
     )

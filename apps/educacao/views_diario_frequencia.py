@@ -90,13 +90,13 @@ def aula_frequencia_impl(request, pk: int, aula_id: int):
             "label": "Voltar",
             "url": reverse("educacao:diario_detail", args=[diario.pk]),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
         {
             "label": "Imprimir PDF",
             "url": (reverse("educacao:aula_frequencia", args=[diario.pk, aula.pk]) + ("?q=" + q + "&" if q else "?") + "export=pdf"),
             "icon": "fa-solid fa-file-pdf",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
     ]
     if can_edit:
@@ -105,7 +105,7 @@ def aula_frequencia_impl(request, pk: int, aula_id: int):
                 "label": "Salvar Frequência",
                 "url": "#freq-form",
                 "icon": "fa-solid fa-check",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             }
         )
 

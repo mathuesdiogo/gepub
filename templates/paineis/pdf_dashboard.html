@@ -20,7 +20,7 @@
   <h1>{{ title }}</h1>
   <p class="muted">{{ subtitle }}{% if filtros %} • {{ filtros }}{% endif %}</p>
 
-  <table class="kpis">
+  <table class="kpis gp-table__native">
     <tr>
       <td><strong>Linhas filtradas</strong><br>{{ kpis.linhas_filtradas }}</td>
       <td><strong>Linhas totais</strong><br>{{ kpis.linhas_total }}</td>
@@ -30,7 +30,7 @@
   </table>
 
   <h2>Amostra de dados (até 100 linhas)</h2>
-  <table>
+  <table class="gp-table__native">
     <thead>
       <tr>
         {% for h in headers %}

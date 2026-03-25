@@ -4,23 +4,23 @@
 <div class="gp-card"><div class="gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:12px 0 18px;">
+  <div class="u-kpi-grid-190">
     {% for card in cards %}
       {% include "core/partials/components/data/kpi_card.html" with label=card.label value=card.value %}
     {% endfor %}
   </div>
 
-  <div class="gp-card" style="margin-bottom:14px;"><div class="gp-card__body">
+  <div class="gp-card u-mb-14"><div class="gp-card__body">
     <strong>Status do plano:</strong> {{ plano.get_status_display }}
     {% if is_manager %}
-      <form method="post" action="{% url 'rh:pdp_plano_exportar_sipec' plano.pk %}?municipio={{ municipio.pk }}" style="margin-top:10px;">
+      <form method="post" action="{% url 'rh:pdp_plano_exportar_sipec' plano.pk %}?municipio={{ municipio.pk }}" class="u-mt-10 form-shell">
         {% csrf_token %}
         <button class="gp-button gp-button--primary" type="submit">Marcar como exportado SIPEC</button>
       </form>
     {% endif %}
   </div></div>
 
-  <form method="get" class="gp-table__filters">
+  <form method="get" class="gp-table__filters search-and-filters">
     <input type="hidden" name="municipio" value="{{ municipio.pk }}">
     <select name="status" class="gp-input">
       <option value="">Todas as situações</option>
@@ -60,7 +60,7 @@
             <td>{{ item.get_status_display }}</td>
             <td>
               {% if is_manager %}
-                <form method="post" action="{% url 'rh:pdp_necessidade_status' item.pk %}?municipio={{ municipio.pk }}" style="display:flex;gap:6px;flex-wrap:wrap;">
+                <form method="post" action="{% url 'rh:pdp_necessidade_status' item.pk %}?municipio={{ municipio.pk }}" class="u-flex u-gap-6 u-flex-wrap form-shell">
                   {% csrf_token %}
                   <input class="gp-input" type="text" name="parecer" placeholder="Parecer">
                   <button class="gp-button gp-button--sm gp-button--success" name="acao" value="aprovar_local" type="submit">Aprovar local</button>

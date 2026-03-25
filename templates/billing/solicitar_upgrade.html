@@ -2,11 +2,11 @@
 {% load static %}
 
 {% block content %}
-<div class="card billing-page billing-page--upgrade"><div class="card__body billing-page__body">
+<div class="card billing-page billing-page--upgrade gp-card"><div class="card__body billing-page__body gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
   <section class="billing-hero-grid">
-    <article class="billing-hero-card">
+    <article class="billing-hero-card gp-card">
       <p class="billing-hero-card__kicker">Upgrade contratual</p>
       <h2 class="billing-hero-card__title">{{ assinatura.plano.nome }}</h2>
       <p class="billing-hero-card__desc">Solicite expansão de capacidade, addons ou migração para plano superior com rastreabilidade.</p>
@@ -15,7 +15,7 @@
         <span class="billing-pill billing-pill--soft">{{ municipio.nome }}/{{ municipio.uf }}</span>
       </div>
     </article>
-    <article class="billing-status-card">
+    <article class="billing-status-card gp-card">
       <div class="billing-status-card__row">
         <p class="billing-status-card__label">Status do contrato</p>
         <p class="billing-status-card__value">{{ assinatura.get_status_display }}</p>

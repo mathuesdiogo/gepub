@@ -6,7 +6,7 @@
     <div class="gp-card__body">
       {% include "core/partials/components/layout/page_head.html" with title="Matrículas" subtitle="Controle de vagas por turma e origem dos alunos" actions=actions %}
 
-      <form method="get" class="gp-form gp-form--inline u-mb-10">
+      <form method="get" class="gp-form gp-form--inline u-mb-10 form-shell">
         <input type="text" class="gp-input" name="q" placeholder="Aluno, curso, turma ou escola" value="{{ q }}">
         <select class="gp-input" name="status">
           <option value="">Todos os status</option>

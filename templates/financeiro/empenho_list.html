@@ -4,7 +4,7 @@
 <div class="gp-card"><div class="gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <form method="get" class="gp-table__filters">
+  <form method="get" class="gp-table__filters search-and-filters">
     {% if municipios and municipios|length %}
       <select name="municipio" class="gp-input">
         {% for m in municipios %}

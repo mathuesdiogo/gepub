@@ -1,12 +1,12 @@
 {% extends "core/base.html" %}
-{% load static %}
+{% load static gepub_design_system %}
 
 {% block content %}
-<div class="card billing-page billing-page--simulador"><div class="card__body billing-page__body">
+<div class="card billing-page billing-page--simulador gp-card"><div class="card__body billing-page__body gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
   <section class="billing-hero-grid">
-    <article class="billing-hero-card">
+    <article class="billing-hero-card gp-card">
       <p class="billing-hero-card__kicker">Planejamento comercial</p>
       <h2 class="billing-hero-card__title">Simule cenário real da prefeitura</h2>
       <p class="billing-hero-card__desc">Informe volume operacional e receba recomendação de plano com projeção financeira mensal.</p>
@@ -15,7 +15,7 @@
         <span class="billing-pill billing-pill--soft">Comparativo automático</span>
       </div>
     </article>
-    <article class="billing-status-card">
+    <article class="billing-status-card gp-card">
       <div class="billing-status-card__row">
         <p class="billing-status-card__label">Entrada de dados</p>
         <p class="billing-status-card__value">Preencha secretarias, usuários, alunos e atendimentos anuais.</p>
@@ -34,7 +34,7 @@
     </div>
     <form method="post" class="form-shell">
       {% csrf_token %}
-      <div class="form-shell__fields">{{ form.as_p }}</div>
+      <div class="form-shell__fields">{% render_form form %}</div>
       <div class="form-shell__actions">
         <button type="submit" class="gp-button gp-button--primary">Simular</button>
         <a class="gp-anchor-link" href="{{ cancel_url }}">Cancelar</a>
@@ -102,8 +102,8 @@
         <h3>Composição de custos</h3>
         <p>Itens adicionais considerados para o cenário informado.</p>
       </div>
-      <div class="table-shell billing-table-shell">
-        <table class="table">
+      <div class="table-shell billing-table-shell gp-table gp-table--responsive">
+        <table class="gp-table__native table">
           <thead>
             <tr>
               <th>Item</th>
@@ -127,7 +127,7 @@
         </table>
       </div>
 
-      <form method="post" style="margin-top: 12px;">
+      <form method="post" class="u-mt-12 form-shell">
         {% csrf_token %}
         {% for field in form %}
           <input type="hidden" name="{{ field.name }}" value="{{ field.value|default_if_none:'' }}">

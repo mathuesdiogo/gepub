@@ -118,7 +118,7 @@ def agenda_list(request):
 
     actions = []
     if can_manage:
-        actions.append({"label": "Novo Agendamento", "url": reverse("saude:agenda_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+        actions.append({"label": "Novo Agendamento", "url": reverse("saude:agenda_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
 
     headers = [
         {"label": "Paciente"},
@@ -375,9 +375,9 @@ def agenda_detail(request, pk: int):
     obj = get_object_or_404(qs, pk=pk)
 
     can_manage = can(request.user, "saude.manage")
-    actions = [{"label": "Voltar", "url": reverse("saude:agenda_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+    actions = [{"label": "Voltar", "url": reverse("saude:agenda_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
     if can_manage:
-        actions.append({"label": "Editar", "url": reverse("saude:agenda_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+        actions.append({"label": "Editar", "url": reverse("saude:agenda_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
 
     fields = [
         {"label": "Paciente", "value": obj.paciente_nome},

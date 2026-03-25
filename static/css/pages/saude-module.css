@@ -375,7 +375,7 @@
   text-decoration: underline;
 }
 
-.saude-module .gp-pills,
+.saude-module .pills,
 .saude-module .chips {
   margin: 0 0 12px;
   display: flex;
@@ -383,7 +383,8 @@
   gap: 8px;
 }
 
-.saude-module .gp-pills__item,
+.saude-module .pills > li > a,
+.saude-module .pills > li > span,
 .saude-module .pill {
   border: 1px solid #b8d9e6;
   background: #eef8fd;

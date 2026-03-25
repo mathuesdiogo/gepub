@@ -1,5 +1,5 @@
 {% if row.can_undo %}
-  <form method="post" style="display:inline-flex;align-items:center;gap:.35rem;">
+  <form method="post" class="u-inline-flex u-items-center u-gap-6 u-inline-form">
     {% csrf_token %}
     <input type="hidden" name="_action" value="undo_mov_matricula">
     <input type="hidden" name="movimentacao_id" value="{{ row.movimentacao_id }}">

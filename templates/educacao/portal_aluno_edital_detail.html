@@ -2,16 +2,16 @@
 {% block title %}Acompanhamento de Edital • {{ aluno.nome }} • Educação • GEPUB{% endblock %}
 
 {% block module_content %}
-<section class="gp-student-stage">
+<section class="gp-student-stage edu-detail-flow">
 {% include "core/partials/components/layout/page_head.html" with title="Acompanhamento da Inscrição" subtitle=aluno.nome actions=actions %}
 
 <article class="gp-student-stage__card">
-  <div class="gp-pills">
-    <span class="gp-pills__item">Edital: {{ edital.numero_ano }}</span>
-    <span class="gp-pills__item">Benefício: {{ edital.beneficio.nome }}</span>
-    <span class="gp-pills__item">Status inscrição: {{ inscricao.get_status_display }}</span>
-    <span class="gp-pills__item">Pontuação: {{ inscricao.pontuacao }}</span>
-  </div>
+  <ul class="pills">
+    <li><span>Edital: {{ edital.numero_ano }}</span></li>
+    <li><span>Benefício: {{ edital.beneficio.nome }}</span></li>
+    <li><span>Status inscrição: {{ inscricao.get_status_display }}</span></li>
+    <li><span>Pontuação: {{ inscricao.pontuacao }}</span></li>
+  </ul>
 </article>
 
 <div class="gp-grid-2 gp-student-stage__grid">
@@ -69,7 +69,7 @@
             {% else %}Em análise
             {% endif %}
           </td>
-          <td>{% if d.arquivo %}<a href="{{ d.arquivo.url }}" target="_blank" rel="noopener">Abrir</a>{% else %}—{% endif %}</td>
+          <td>{% if d.arquivo %}<a href="{{ d.arquivo.url }}" target="_blank" rel="noopener">Visualizar</a>{% else %}—{% endif %}</td>
         </tr>
         {% empty %}
         <tr><td colspan="4">Nenhum documento anexado na inscrição.</td></tr>

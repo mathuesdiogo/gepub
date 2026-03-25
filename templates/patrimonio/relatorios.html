@@ -1,0 +1,134 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="card gp-card"><div class="card__body gp-card__body">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <form method="get" class="filter-bar u-mb-12 search-and-filters">
+    {% if municipios and municipios|length %}
+      <select name="municipio" class="gp-input u-maxw-240">
+        {% for m in municipios %}
+          <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+    <select name="secretaria" class="gp-input u-maxw-220">
+      <option value="">Todas secretarias</option>
+      {% for s in secretarias %}
+        <option value="{{ s.id }}" {% if secretaria_id == s.id|stringformat:'s' %}selected{% endif %}>{{ s.nome }}</option>
+      {% endfor %}
+    </select>
+    <select name="unidade" class="gp-input u-maxw-220">
+      <option value="">Todas unidades</option>
+      {% for u in unidades %}
+        <option value="{{ u.id }}" {% if unidade_id == u.id|stringformat:'s' %}selected{% endif %}>{{ u.nome }}</option>
+      {% endfor %}
+    </select>
+    <select name="local" class="gp-input u-maxw-240">
+      <option value="">Todos locais</option>
+      {% for l in locais %}
+        <option value="{{ l.id }}" {% if local_id == l.id|stringformat:'s' %}selected{% endif %}>{{ l.nome }}</option>
+      {% endfor %}
+    </select>
+    <input type="date" name="data_inicio" value="{{ data_inicio }}" class="gp-input u-maxw-170">
+    <input type="date" name="data_fim" value="{{ data_fim }}" class="gp-input u-maxw-170">
+    <button class="gp-button gp-button--outline gp-button--sm" type="submit">Filtrar</button>
+  </form>
+
+  <div class="u-kpi-grid-200">
+    {% for card in cards %}
+      {% include "core/partials/components/data/kpi_card.html" with label=card.label value=card.value %}
+    {% endfor %}
+  </div>
+
+  <div class="table-shell gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+    <table class="gp-table__native table">
+      <thead><tr><th>Secretaria</th><th>Total</th><th>Ativos</th><th>Manutenção</th><th>Baixados</th></tr></thead>
+      <tbody>
+        {% for row in bens_por_secretaria %}
+          <tr>
+            <td>{{ row.secretaria__nome|default:"Sem secretaria" }}</td>
+            <td>{{ row.total }}</td>
+            <td>{{ row.ativos }}</td>
+            <td>{{ row.manutencao }}</td>
+            <td>{{ row.baixados }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Sem dados para o recorte selecionado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+
+  <div class="table-shell u-mt-12 gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+    <table class="gp-table__native table">
+      <thead><tr><th>Unidade</th><th>Total</th><th>Ativos</th><th>Valor total</th></tr></thead>
+      <tbody>
+        {% for row in bens_por_unidade %}
+          <tr>
+            <td>{{ row.unidade__nome|default:"Sem unidade" }}</td>
+            <td>{{ row.total }}</td>
+            <td>{{ row.ativos }}</td>
+            <td>R$ {{ row.valor_total }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4">Sem dados para o recorte selecionado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+
+  <div class="table-shell u-mt-12 gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+    <table class="gp-table__native table">
+      <thead><tr><th>Local</th><th>Total</th><th>Valor total</th></tr></thead>
+      <tbody>
+        {% for row in bens_por_local %}
+          <tr>
+            <td>{{ row.local_nome }}</td>
+            <td>{{ row.total }}</td>
+            <td>R$ {{ row.valor_total }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="3">Sem dados para o recorte selecionado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+
+  <div class="table-shell u-mt-12 gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+    <table class="gp-table__native table">
+      <thead><tr><th>Tipo de movimentação</th><th>Total</th></tr></thead>
+      <tbody>
+        {% for row in movs_por_tipo %}
+          <tr>
+            <td>{{ row.tipo_label }}</td>
+            <td>{{ row.total }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="2">Sem movimentações no recorte selecionado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+
+  <div class="table-shell u-mt-12 gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+    <table class="gp-table__native table">
+      <thead><tr><th>Data</th><th>Bem</th><th>Secretaria</th><th>Unidade</th><th>Local</th><th>Tipo</th></tr></thead>
+      <tbody>
+        {% for item in movimentos_recentes %}
+          <tr>
+            <td>{{ item.data_movimento|date:"d/m/Y" }}</td>
+            <td>{{ item.bem.nome }}</td>
+            <td>{{ item.bem.secretaria|default:"-" }}</td>
+            <td>{{ item.bem.unidade|default:"-" }}</td>
+            <td>{{ item.bem.local_estrutural|default:item.bem.setor|default:"-" }}</td>
+            <td>{{ item.get_tipo_display }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6">Sem movimentações no recorte selecionado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+{% endblock %}

@@ -3,8 +3,8 @@
 {% block header %}Portal{% endblock %}
 
 {% block content %}
-<div class="card dashboard-shell">
-  <div class="card__body">
+<div class="card dashboard-shell gp-card">
+  <div class="card__body gp-card__body">
 
     {% include "core/partials/components/layout/page_head.html" with title="Portal Municipal" subtitle="Acesso central aos módulos da prefeitura" actions=None %}
 
@@ -41,7 +41,7 @@
             <div class="sec-kpi__meta">
               <a href="{{ plano_atual.links.contratacao }}" target="_blank" rel="noopener">Documento de contratação</a><br>
               <a href="{{ plano_atual.links.servicos }}" target="_blank" rel="noopener">Prestação de serviços</a><br>
-              <a href="{% url 'billing:meu_plano' %}">Ver detalhes do plano</a>
+              <a href="{% url 'billing:meu_plano' %}">Visualizar detalhes do plano</a>
             </div>
           </div>
           <div class="sec-kpi__icon" aria-hidden="true">

@@ -19,7 +19,7 @@ INSTITUTIONAL_DEFAULT_CONTENT = {
     ),
     "hero_cta_primario_label": "SIMULAR PLANO",
     "hero_cta_primario_link": "#simulador",
-    "hero_cta_secundario_label": "VER PLANOS",
+    "hero_cta_secundario_label": "VISUALIZAR PLANOS",
     "hero_cta_secundario_link": "#planos",
     "oferta_tag": "ESTRUTURA PRONTA PARA LICITAÇÃO",
     "oferta_titulo": (

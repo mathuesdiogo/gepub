@@ -75,25 +75,25 @@ def resto_list(request):
                     "label": "Inscrever resto a pagar",
                     "url": reverse("financeiro:resto_create") + f"?municipio={municipio.pk}",
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "CSV",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&exercicio={exercicio.pk if exercicio else ''}&export=csv",
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "PDF",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&exercicio={exercicio.pk if exercicio else ''}&export=pdf",
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Voltar",
                     "url": reverse("financeiro:index") + f"?municipio={municipio.pk}",
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -162,7 +162,7 @@ def resto_detail(request, pk: int):
             "label": "Voltar",
             "url": reverse("financeiro:resto_list") + f"?municipio={municipio.pk}",
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }
     ]
     if resto.saldo_a_pagar > Decimal("0.00"):
@@ -171,7 +171,7 @@ def resto_detail(request, pk: int):
                 "label": "Registrar pagamento",
                 "url": reverse("financeiro:resto_pagamento_create", args=[resto.pk]) + f"?municipio={municipio.pk}",
                 "icon": "fa-solid fa-money-check-dollar",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             }
         )
 
@@ -329,25 +329,25 @@ def empenho_list(request):
                     "label": "Novo empenho",
                     "url": reverse("financeiro:empenho_create") + f"?municipio={municipio.pk}",
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "CSV",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&exercicio={exercicio.pk if exercicio else ''}&export=csv",
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "PDF",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&exercicio={exercicio.pk if exercicio else ''}&export=pdf",
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Voltar",
                     "url": reverse("financeiro:index") + f"?municipio={municipio.pk}",
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -411,7 +411,7 @@ def empenho_detail(request, pk: int):
             "label": "Voltar",
             "url": reverse("financeiro:empenho_list") + f"?municipio={municipio.pk}",
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }
     ]
     if request.user and request.user.is_authenticated:
@@ -420,7 +420,7 @@ def empenho_detail(request, pk: int):
                 "label": "Registrar liquidação",
                 "url": reverse("financeiro:liquidacao_create", args=[empenho.pk]) + f"?municipio={municipio.pk}",
                 "icon": "fa-solid fa-clipboard-check",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             }
         )
         if empenho.saldo_a_pagar > Decimal("0.00"):
@@ -429,7 +429,7 @@ def empenho_detail(request, pk: int):
                     "label": "Inscrever em RP",
                     "url": reverse("financeiro:resto_create") + f"?municipio={municipio.pk}&empenho={empenho.pk}",
                     "icon": "fa-solid fa-receipt",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             )
 
@@ -615,25 +615,25 @@ def receita_list(request):
                     "label": "Nova arrecadação",
                     "url": reverse("financeiro:receita_create") + f"?municipio={municipio.pk}",
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "CSV",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&exercicio={exercicio.pk if exercicio else ''}&export=csv",
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "PDF",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&exercicio={exercicio.pk if exercicio else ''}&export=pdf",
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Voltar",
                     "url": reverse("financeiro:index") + f"?municipio={municipio.pk}",
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -668,7 +668,7 @@ def receita_create(request):
                     "label": "Voltar",
                     "url": reverse("financeiro:receita_list") + f"?municipio={municipio.pk}",
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
             "form": form,
@@ -731,19 +731,19 @@ def log_list(request):
                     "label": "CSV",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&export=csv",
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "PDF",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&export=pdf",
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Voltar",
                     "url": reverse("financeiro:index") + f"?municipio={municipio.pk}",
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },

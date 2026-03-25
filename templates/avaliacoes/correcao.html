@@ -1,10 +1,10 @@
 {% extends "core/base.html" %}
 
 {% block content %}
-<div class="card"><div class="card__body">
+<div class="card gp-card"><div class="card__body gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <div class="detail-summary" style="margin-top:12px;">
+  <div class="detail-summary u-mt-12">
     <div><strong>Aluno:</strong> {{ aplicacao.aluno.nome }}</div>
     <div><strong>Turma:</strong> {{ avaliacao.turma.nome }}</div>
     <div><strong>Versão:</strong> {{ folha.versao }}</div>
@@ -13,17 +13,17 @@
     <div><strong>Integridade:</strong> {% if folha.integridade_ok %}OK{% else %}Inválida{% endif %}</div>
   </div>
 
-  <form method="post" enctype="multipart/form-data" class="form-grid" style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:12px;">
+  <form method="post" enctype="multipart/form-data" class="form-grid u-grid-5 u-mt-12 form-shell">
     {% csrf_token %}
     {% for field in form %}
       <div>
         <label class="small" for="{{ field.id_for_label }}">{{ field.label }}</label>
         {{ field }}
-        {% if field.help_text %}<small class="muted" style="display:block;">{{ field.help_text }}</small>{% endif %}
-        {% for err in field.errors %}<div class="small" style="color:#c0392b;">{{ err }}</div>{% endfor %}
+        {% if field.help_text %}<small class="muted u-block">{{ field.help_text }}</small>{% endif %}
+        {% for err in field.errors %}<div class="small u-text-danger">{{ err }}</div>{% endfor %}
       </div>
     {% endfor %}
-    <div style="grid-column:1 / -1;display:flex;gap:8px;">
+    <div class="u-col-full u-flex u-gap-8">
       <button class="gp-button gp-button--outline" name="action" value="omr" type="submit"><i class="fa-solid fa-camera"></i> Ler marcações (OMR beta)</button>
       <button class="gp-button gp-button--primary" name="action" value="save" type="submit"><i class="fa-solid fa-check"></i> Salvar correção</button>
       <a class="gp-button gp-button--outline" href="{% url 'avaliacoes:avaliacao_detail' avaliacao.id %}">Cancelar</a>
@@ -31,20 +31,20 @@
   </form>
 
   {% if resultado %}
-    <div class="alert alert--success" style="margin-top:12px;">
+    <div class="alert alert--success u-mt-12 gp-alert">
       Nota {{ resultado.nota }} • {{ resultado.percentual }}% • Acertos {{ resultado.acertos }}/{{ resultado.questoes_avaliadas }}
     </div>
   {% endif %}
 
   {% if omr_resultado %}
-    <div class="card" style="margin-top:12px;"><div class="card__body">
-      <h3 style="margin-top:0;">Prévia OMR (beta)</h3>
+    <div class="card u-mt-12 gp-card"><div class="card__body gp-card__body">
+      <h3 class="u-mt-0">Prévia OMR (beta)</h3>
       <div class="detail-summary">
         <div><strong>Detectadas:</strong> {{ omr_resultado.questoes_detectadas }}/{{ omr_resultado.total_questoes }}</div>
         <div><strong>Confiança média:</strong> {{ omr_resultado.confianca_media }}%</div>
       </div>
-      <div class="table-shell" style="margin-top:10px;"><div class="table-shell__body">
-        <table class="table">
+      <div class="table-shell u-mt-10 gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+        <table class="gp-table__native table">
           <thead><tr><th>Questão</th><th>Resposta sugerida</th><th>Confiança</th></tr></thead>
           <tbody>
             {% for item in omr_resultado.detalhes %}
@@ -62,10 +62,10 @@
     </div></div>
   {% endif %}
 
-  <div class="card" style="margin-top:12px;"><div class="card__body">
-    <h3 style="margin-top:0;">Gabarito da versão {{ gabarito.versao }}</h3>
-    <div class="table-shell"><div class="table-shell__body">
-      <table class="table">
+  <div class="card u-mt-12 gp-card"><div class="card__body gp-card__body">
+    <h3 class="u-mt-0">Gabarito da versão {{ gabarito.versao }}</h3>
+    <div class="table-shell gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+      <table class="gp-table__native table">
         <thead><tr><th>Questão</th><th>Resposta oficial</th><th>Marcada</th></tr></thead>
         <tbody>
           {% for row in gabarito_rows %}

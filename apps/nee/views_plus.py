@@ -84,13 +84,13 @@ def aluno_hub(request, aluno_id: int):
             "label": "Voltar",
             "url": reverse("nee:buscar_aluno"),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
         {
-            "label": "Abrir aluno",
+            "label": "Visualizar aluno",
             "url": reverse("educacao:aluno_detail", args=[aluno.pk]),
             "icon": "fa-solid fa-user",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
     ]
 

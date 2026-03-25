@@ -4,8 +4,8 @@
 <div class="gp-card"><div class="gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <div class="gp-card" style="margin-bottom:14px;"><div class="gp-card__body">
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;">
+  <div class="gp-card u-mb-14"><div class="gp-card__body">
+    <div class="u-grid-auto-240">
       <div><strong>Substituído</strong><br>{{ item.substituido.nome }}</div>
       <div><strong>Substituto</strong><br>{{ item.substituto.nome }}</div>
       <div><strong>Período</strong><br>{{ item.data_inicio|date:"d/m/Y" }} a {{ item.data_fim|date:"d/m/Y" }}</div>
@@ -15,7 +15,7 @@
     </div>
   </div></div>
 
-  <div class="gp-card" style="margin-bottom:14px;"><div class="gp-card__body">
+  <div class="gp-card u-mb-14"><div class="gp-card__body">
     <strong>Motivo</strong>
     <p>{{ item.motivo }}</p>
     <strong>Módulos liberados</strong>
@@ -37,7 +37,7 @@
   </div></div>
 
   {% if is_manager and item.status != "CANCELADA" and item.status != "CONCLUIDA" %}
-    <form method="post" action="{% url 'rh:substituicao_cancelar' item.pk %}?municipio={{ municipio.pk }}">
+    <form method="post" action="{% url 'rh:substituicao_cancelar' item.pk %}?municipio={{ municipio.pk }}" class="u-inline-form">
       {% csrf_token %}
       <button class="gp-button gp-button--danger" type="submit">Cancelar substituição</button>
     </form>

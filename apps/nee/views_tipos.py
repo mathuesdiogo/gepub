@@ -33,15 +33,15 @@ class TipoListView(BaseListViewGepub):
 
     def get_actions(self, q: str = "", **kwargs):
         actions = [
-            {"label": "Voltar", "url": reverse("nee:index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+            {"label": "Voltar", "url": reverse("nee:index"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
         ]
         if can(self.request.user, "nee.manage"):
-            actions.append({"label": "Novo tipo", "url": reverse("nee:tipo_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+            actions.append({"label": "Novo tipo", "url": reverse("nee:tipo_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
         # exports
         if self.request.GET.get("export") == "csv":
             pass
-        actions.append({"label": "Exportar CSV", "url": f"{reverse('nee:tipo_list')}?q={escape(q)}&export=csv", "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"})
-        actions.append({"label": "Exportar PDF", "url": f"{reverse('nee:tipo_list')}?q={escape(q)}&export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"})
+        actions.append({"label": "Exportar CSV", "url": f"{reverse('nee:tipo_list')}?q={escape(q)}&export=csv", "icon": "fa-solid fa-file-csv", "variant": "gp-button--ghost"})
+        actions.append({"label": "Exportar PDF", "url": f"{reverse('nee:tipo_list')}?q={escape(q)}&export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"})
         return actions
 
     def get_headers(self, *args, **kwargs):
@@ -82,13 +82,13 @@ class TipoCreateView(BaseCreateViewGepub):
     template_name = "nee/tipo_form.html"
     form_class = TipoNecessidadeForm
     title = "Novo tipo"
-    subtitle = "Cadastrar tipo de necessidade"
+    subtitle = "Adicionar tipo de necessidade"
     manage_perm = "nee.manage"
     back_url_name = "nee:tipo_list"
 
     def get_actions(self, q: str = "", **kwargs):
         return [
-            {"label": "Voltar", "url": reverse("nee:tipo_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+            {"label": "Voltar", "url": reverse("nee:tipo_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
         ]
 
 
@@ -97,13 +97,13 @@ class TipoUpdateView(BaseUpdateViewGepub):
     form_class = TipoNecessidadeForm
     model = TipoNecessidade
     title = "Editar tipo"
-    subtitle = "Atualizar tipo de necessidade"
+    subtitle = "Editar tipo de necessidade"
     manage_perm = "nee.manage"
     back_url_name = "nee:tipo_list"
 
     def get_actions(self, q: str = "", obj=None, **kwargs):
         return [
-            {"label": "Voltar", "url": reverse("nee:tipo_detail", args=[obj.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+            {"label": "Voltar", "url": reverse("nee:tipo_detail", args=[obj.pk]), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
         ]
 
 
@@ -117,10 +117,10 @@ class TipoDetailView(BaseDetailViewGepub):
 
     def get_actions(self, q: str = "", obj=None, **kwargs):
         actions = [
-            {"label": "Voltar", "url": reverse("nee:tipo_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+            {"label": "Voltar", "url": reverse("nee:tipo_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
         ]
         if can(self.request.user, "nee.manage"):
-            actions.append({"label": "Editar", "url": reverse("nee:tipo_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+            actions.append({"label": "Editar", "url": reverse("nee:tipo_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
         return actions
 
     def get_fields(self, request, obj):

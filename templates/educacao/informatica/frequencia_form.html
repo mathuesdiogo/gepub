@@ -11,7 +11,7 @@
         {% if aula.encontro %} • <strong>Encontro:</strong> {{ aula.encontro.get_dia_semana_display }} {{ aula.encontro.hora_inicio|time:"H:i" }}-{{ aula.encontro.hora_fim|time:"H:i" }}{% endif %}
       </div>
 
-      <form method="post" class="gp-form">
+      <form method="post" class="gp-form form-shell">
         {% csrf_token %}
         {% if not can_edit_execucao %}
           <div class="gp-alert gp-alert--info u-mb-12">
@@ -20,7 +20,7 @@
           </div>
         {% endif %}
 
-        <table class="table gp-table--striped gp-table--hover">
+        <table class="gp-table__native table gp-table--striped gp-table--hover">
           <thead>
             <tr>
               <th>Aluno</th>
@@ -54,7 +54,7 @@
           </tbody>
         </table>
 
-        <label class="u-mt-12 u-mb-12" style="display:block;">
+        <label class="u-mt-12 u-mb-12 u-block">
           <input type="checkbox" name="encerrar_aula" value="1" {% if aula.encerrada %}checked{% endif %}{% if not can_edit_execucao %} disabled{% endif %}>
           Encerrar aula após salvar frequência
         </label>

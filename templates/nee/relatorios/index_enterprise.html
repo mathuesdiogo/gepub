@@ -2,13 +2,13 @@
 {% block title %}Relatórios NEE • NEE • GEPUB{% endblock %}
 
 {% block module_content %}
-  <div class="card"><div class="card__body">
+  <div class="card gp-card"><div class="card__body gp-card__body">
 
     {% include "core/partials/components/layout/page_head.html" with title="Relatórios NEE" subtitle="Por tipo, município e unidade." actions=actions %}
 
     <div class="grid grid-3 u-mt-16">
       {% for c in cards %}
-        <a class="link-card" href="{{ c.url }}">
+        <a class="link-card gp-card" href="{{ c.url }}">
           <div class="link-card__icon"><i class="{{ c.icon }}"></i></div>
           <div class="link-card__content">
             <div class="link-card__title">{{ c.title }}</div>

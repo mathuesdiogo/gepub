@@ -78,11 +78,11 @@ def profissional_list(request):
         return f"?{base_query + ('&' if base_query else '')}{extra}"
 
     actions = [
-        {"label": "Exportar CSV", "url": qjoin("export=csv"), "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
-        {"label": "Exportar PDF", "url": qjoin("export=pdf"), "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
+        {"label": "Exportar CSV", "url": qjoin("export=csv"), "icon": "fa-solid fa-file-csv", "variant": "gp-button--ghost"},
+        {"label": "Exportar PDF", "url": qjoin("export=pdf"), "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"},
     ]
     if can_manage:
-        actions.append({"label": "Novo Profissional", "url": reverse("saude:profissional_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+        actions.append({"label": "Novo Profissional", "url": reverse("saude:profissional_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
 
     headers = [
         {"label": "Nome"},
@@ -184,9 +184,9 @@ def profissional_update(request, pk: int):
 def profissional_detail(request, pk: int):
     obj = get_object_or_404(ProfissionalSaude.objects.select_related("unidade"), pk=pk)
 
-    actions = [{"label": "Voltar", "url": reverse("saude:profissional_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+    actions = [{"label": "Voltar", "url": reverse("saude:profissional_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
     if can(request.user, "saude.manage"):
-        actions.append({"label": "Editar", "url": reverse("saude:profissional_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+        actions.append({"label": "Editar", "url": reverse("saude:profissional_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
 
     fields = [
         {"label": "Unidade", "value": obj.unidade.nome if obj.unidade else "—"},

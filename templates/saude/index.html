@@ -24,10 +24,10 @@
       </div>
       <div class="saude-hero__actions">
         <a class="gp-button gp-button--primary" href="{% url 'saude:agenda_list' %}">
-          <i class="fa-solid fa-calendar-days"></i><span>Ver Agenda</span>
+          <i class="fa-solid fa-calendar-days"></i><span>Visualizar Agenda</span>
         </a>
         <a class="gp-button gp-button--ghost" href="{% url 'saude:atendimento_list' %}">
-          <i class="fa-solid fa-notes-medical"></i><span>Ver Atendimentos</span>
+          <i class="fa-solid fa-notes-medical"></i><span>Visualizar Atendimentos</span>
         </a>
         {% if perms.saude.manage %}
           <a class="gp-button gp-button--ghost" href="{% url 'saude:agenda_create' %}">
@@ -130,7 +130,7 @@
     </div>
 
     <section class="saude-insights">
-      <article class="saude-insight-card">
+      <article class="saude-insight-card gp-card">
         <h3>Resumo Operacional</h3>
         <p>Visão rápida dos principais volumes monitorados no módulo.</p>
         <ul class="saude-insight-list">
@@ -142,7 +142,7 @@
         </ul>
       </article>
 
-      <article class="saude-insight-card saude-insight-card--accent">
+      <article class="saude-insight-card saude-insight-card--accent gp-card">
         <h3>Rotina da Equipe</h3>
         <p>Atalhos para ações diárias do time assistencial e de regulação.</p>
         <div class="saude-insight-actions">
@@ -153,7 +153,7 @@
             <i class="fa-solid fa-people-line"></i><span>Acompanhar Fila</span>
           </a>
           <a class="gp-button gp-button--ghost" href="{% url 'saude:relatorio_mensal' %}">
-            <i class="fa-solid fa-chart-column"></i><span>Ver Relatório</span>
+            <i class="fa-solid fa-chart-column"></i><span>Visualizar Relatório</span>
           </a>
         </div>
       </article>
@@ -165,32 +165,32 @@
         <p>Atalhos para as rotinas mais usadas pela equipe</p>
       </div>
       <div class="saude-quick-links__grid">
-        <a class="saude-quick-card" href="{% url 'saude:unidade_list' %}">
+        <a class="saude-quick-card gp-card" href="{% url 'saude:unidade_list' %}">
           <i class="fa-solid fa-hospital"></i>
           <strong>Unidades</strong>
           <span>Estrutura e cobertura territorial</span>
         </a>
-        <a class="saude-quick-card" href="{% url 'saude:profissional_list' %}">
+        <a class="saude-quick-card gp-card" href="{% url 'saude:profissional_list' %}">
           <i class="fa-solid fa-user-doctor"></i>
           <strong>Profissionais</strong>
           <span>Equipe clínica e vínculos</span>
         </a>
-        <a class="saude-quick-card" href="{% url 'saude:agenda_list' %}">
+        <a class="saude-quick-card gp-card" href="{% url 'saude:agenda_list' %}">
           <i class="fa-solid fa-calendar-days"></i>
           <strong>Agenda Clínica</strong>
           <span>Marcação e remarcação de consultas</span>
         </a>
-        <a class="saude-quick-card" href="{% url 'saude:fila_list' %}">
+        <a class="saude-quick-card gp-card" href="{% url 'saude:fila_list' %}">
           <i class="fa-solid fa-people-line"></i>
           <strong>Fila de Espera</strong>
           <span>Priorização e status de espera</span>
         </a>
-        <a class="saude-quick-card" href="{% url 'saude:encaminhamento_list' %}">
+        <a class="saude-quick-card gp-card" href="{% url 'saude:encaminhamento_list' %}">
           <i class="fa-solid fa-share-from-square"></i>
           <strong>Encaminhamentos</strong>
           <span>Fluxo de referência e contrarreferência</span>
         </a>
-        <a class="saude-quick-card" href="{% url 'saude:auditoria_prontuario_list' %}">
+        <a class="saude-quick-card gp-card" href="{% url 'saude:auditoria_prontuario_list' %}">
           <i class="fa-solid fa-shield-halved"></i>
           <strong>Auditoria</strong>
           <span>Rastreabilidade do prontuário</span>

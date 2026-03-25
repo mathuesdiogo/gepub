@@ -1,8 +1,12 @@
-<nav class="gp-student-area-nav gp-professor-area-nav gp-pills" aria-label="Navegação da área do professor">
-  {% for item in professor_nav %}
-    <a class="gp-pills__item {% if professor_nav_active == item.key %}is-active{% endif %}" href="{{ item.url }}">
-      <i class="{{ item.icon }}" aria-hidden="true"></i>
-      <span>{{ item.label }}</span>
-    </a>
-  {% endfor %}
+<nav class="gp-student-area-nav gp-professor-area-nav" aria-label="Navegação da área do professor">
+  <ul class="pills">
+    {% for item in professor_nav %}
+      <li class="{% if professor_nav_active == item.key %}active{% endif %}">
+        <a class="{% if professor_nav_active == item.key %}is-active{% endif %}" href="{{ item.url }}" {% if professor_nav_active == item.key %}aria-current="page"{% endif %}>
+          <i class="{{ item.icon }}" aria-hidden="true"></i>
+          <span>{{ item.label }}</span>
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
 </nav>

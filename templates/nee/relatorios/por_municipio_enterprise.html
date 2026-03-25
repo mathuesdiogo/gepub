@@ -2,12 +2,12 @@
 {% block module_title %}NEE • Por município{% endblock %}
 
 {% block module_content %}
-<div class="card"><div class="card__body">
-  {% include "core/partials/components/layout/page_head.html" with title="Relatório — Por município" subtitle="Clique em um município para ver alunos (drilldown)." actions=actions %}
+<div class="card gp-card"><div class="card__body gp-card__body">
+  {% include "core/partials/components/layout/page_head.html" with title="Relatório — Por município" subtitle="Clique em um município para visualizar alunos (drilldown)." actions=actions %}
 
   {% if items %}
-    <div class="table-shell">
-      <table class="table">
+    <div class="table-shell gp-table gp-table--responsive">
+      <table class="gp-table__native table">
         <thead>
           <tr>
             <th>Município</th>

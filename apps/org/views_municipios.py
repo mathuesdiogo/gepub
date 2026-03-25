@@ -43,7 +43,7 @@ class MunicipioListView(BaseListViewGepub):
     def get_actions(self, request, **kwargs):
         actions = super().get_actions(**kwargs)
         if is_admin(request.user):
-            actions.insert(0, {"label": "Novo município", "url": reverse("org:municipio_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+            actions.insert(0, {"label": "Novo município", "url": reverse("org:municipio_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
         return actions
 
     def get_headers(self, request):
@@ -96,7 +96,7 @@ class MunicipioUpdateView(BaseUpdateViewGepub):
     back_url_name = "org:municipio_list"
     form_class = MunicipioForm
     model = Municipio
-    submit_label = "Atualizar município"
+    submit_label = "Editar município"
 
     def dispatch(self, request, *args, **kwargs):
         if not is_admin(request.user):
@@ -143,9 +143,9 @@ class MunicipioDetailView(BaseDetailViewGepub):
             ("Setores", setores_qs.count()),
         ]
 
-        actions = [{"label": "Voltar", "url": reverse("org:municipio_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+        actions = [{"label": "Voltar", "url": reverse("org:municipio_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
         if is_admin(request.user):
-            actions.append({"label": "Editar", "url": reverse("org:municipio_update", args=[municipio.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+            actions.append({"label": "Editar", "url": reverse("org:municipio_update", args=[municipio.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
 
         return render(request, self.template_name, {
             "title": f"{municipio.nome}/{municipio.uf}",
@@ -156,19 +156,19 @@ class MunicipioDetailView(BaseDetailViewGepub):
             "pills": [{"label": k, "value": v} for k, v in pills],
             "links": [
                 {
-                    "label": "Ver secretarias",
+                    "label": "Visualizar secretarias",
                     "url": reverse("org:secretaria_list") + f"?municipio={municipio.id}",
                     "meta": f"{secretarias_qs.count()} registros",
                     "icon": "fa-solid fa-building-columns",
                 },
                 {
-                    "label": "Ver unidades",
+                    "label": "Visualizar unidades",
                     "url": reverse("org:unidade_list") + f"?municipio={municipio.id}",
                     "meta": f"{unidades_qs.count()} registros",
                     "icon": "fa-solid fa-school",
                 },
                 {
-                    "label": "Ver setores",
+                    "label": "Visualizar setores",
                     "url": reverse("org:setor_list") + f"?municipio={municipio.id}",
                     "meta": f"{setores_qs.count()} registros",
                     "icon": "fa-solid fa-sitemap",

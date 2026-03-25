@@ -56,12 +56,12 @@ def componente_list(request):
 
     base_q = f"q={q}" if q else ""
     actions = [
-        {"label": "Exportar CSV", "url": f"?{base_q + ('&' if base_q else '')}export=csv", "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
-        {"label": "Exportar PDF", "url": f"?{base_q + ('&' if base_q else '')}export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
+        {"label": "Exportar CSV", "url": f"?{base_q + ('&' if base_q else '')}export=csv", "icon": "fa-solid fa-file-csv", "variant": "gp-button--ghost"},
+        {"label": "Exportar PDF", "url": f"?{base_q + ('&' if base_q else '')}export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"},
     ]
     if can_manage:
         actions.append(
-            {"label": "Novo Componente", "url": reverse("educacao:componente_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"}
+            {"label": "Novo Componente", "url": reverse("educacao:componente_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"}
         )
 
     headers = [
@@ -122,10 +122,10 @@ def componente_detail(request, pk: int):
         referencia_label = bncc_option_label(referencia_obj) if referencia_obj else referencia_codigo
 
     actions = [
-        {"label": "Voltar", "url": reverse("educacao:componente_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+        {"label": "Voltar", "url": reverse("educacao:componente_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
     ]
     if can_manage:
-        actions.append({"label": "Editar", "url": reverse("educacao:componente_update", args=[componente.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+        actions.append({"label": "Editar", "url": reverse("educacao:componente_update", args=[componente.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
 
     fields = [
         {"label": "Nome", "value": componente.nome},
@@ -202,7 +202,7 @@ def componente_update(request, pk: int):
             "componente": componente,
             "bncc_total": getattr(form, "bncc_options_total", 0),
             "cancel_url": reverse("educacao:componente_list"),
-            "submit_label": "Atualizar",
+            "submit_label": "Editar",
             "action_url": reverse("educacao:componente_update", args=[componente.pk]),
         },
     )

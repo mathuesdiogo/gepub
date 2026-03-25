@@ -1,7 +1,7 @@
 {% extends "nee/base_modulo.html" %}
 {% block module_title %}Apoios • {{ aluno.nome }} • NEE{% endblock %}
 {% block module_content %}
-<div class="card"><div class="card__body">
+<div class="card gp-card"><div class="card__body gp-card__body">
 {% include "core/partials/components/layout/page_head.html" with title=page_title subtitle=page_subtitle actions=actions %}
 {% if page_obj and page_obj.object_list %}
   {% include "core/partials/components/data/table_shell.html" with headers=headers rows=rows %}

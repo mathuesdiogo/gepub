@@ -131,9 +131,9 @@ def relatorio_geral_turma(request, pk: int):
         )
 
     actions = [
-        {"label": "Voltar", "url": reverse("educacao:turma_detail", args=[turma.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-        {"label": "Exportar CSV", "url": reverse("educacao:relatorio_geral_turma", args=[turma.pk]) + f"?export=csv&inicio={inicio or ''}&fim={fim or ''}", "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
-        {"label": "Imprimir PDF", "url": reverse("educacao:relatorio_geral_turma", args=[turma.pk]) + f"?export=pdf&inicio={inicio or ''}&fim={fim or ''}", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
+        {"label": "Voltar", "url": reverse("educacao:turma_detail", args=[turma.pk]), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+        {"label": "Exportar CSV", "url": reverse("educacao:relatorio_geral_turma", args=[turma.pk]) + f"?export=csv&inicio={inicio or ''}&fim={fim or ''}", "icon": "fa-solid fa-file-csv", "variant": "gp-button--ghost"},
+        {"label": "Imprimir PDF", "url": reverse("educacao:relatorio_geral_turma", args=[turma.pk]) + f"?export=pdf&inicio={inicio or ''}&fim={fim or ''}", "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"},
     ]
 
     return render(request, "educacao/relatorio_geral_turma.html", {

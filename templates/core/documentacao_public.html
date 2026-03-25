@@ -23,83 +23,95 @@
   </header>
 
   <div class="ps-doc-layout">
-    <aside class="ps-doc-tabs" role="tablist" aria-label="Áreas da documentação">
-      <button class="ps-doc-tab is-active" id="doc-tab-visao" type="button" role="tab" aria-selected="true" aria-controls="doc-panel-visao" data-doc-tab="visao">
-        <span class="ps-doc-tab__icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48" fill="none">
-            <rect x="6" y="8" width="36" height="24" rx="6" stroke="currentColor" stroke-width="2.4"></rect>
-            <rect x="10" y="12" width="28" height="5" rx="2.5" fill="currentColor" fill-opacity="0.24"></rect>
-            <path d="M15 28V40" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path>
-            <path d="M33 28V40" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path>
-            <path d="M11 40H37" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path>
-          </svg>
-        </span>
-        <span class="ps-doc-tab__text">
-          <strong>Visão Geral</strong>
-          <small>Pilares, arquitetura e fluxo-base</small>
-        </span>
-      </button>
+    <aside>
+      <ul class="nav nav-tabs ps-doc-tabs" role="tablist" aria-label="Áreas da documentação">
+        <li class="active">
+          <a class="ps-doc-tab is-active" id="doc-tab-visao" href="#doc-panel-visao" role="tab" aria-current="page" aria-controls="doc-panel-visao" data-doc-tab="visao">
+            <span class="ps-doc-tab__icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48" fill="none">
+                <rect x="6" y="8" width="36" height="24" rx="6" stroke="currentColor" stroke-width="2.4"></rect>
+                <rect x="10" y="12" width="28" height="5" rx="2.5" fill="currentColor" fill-opacity="0.24"></rect>
+                <path d="M15 28V40" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path>
+                <path d="M33 28V40" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path>
+                <path d="M11 40H37" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path>
+              </svg>
+            </span>
+            <span class="ps-doc-tab__text">
+              <strong>Visão Geral</strong>
+              <small>Pilares, arquitetura e fluxo-base</small>
+            </span>
+          </a>
+        </li>
 
-      <button class="ps-doc-tab" id="doc-tab-modulos" type="button" role="tab" aria-selected="false" aria-controls="doc-panel-modulos" data-doc-tab="modulos">
-        <span class="ps-doc-tab__icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48" fill="none">
-            <rect x="6" y="8" width="15" height="15" rx="3.5" stroke="currentColor" stroke-width="2.4"></rect>
-            <rect x="27" y="8" width="15" height="15" rx="3.5" stroke="currentColor" stroke-width="2.4"></rect>
-            <rect x="6" y="28" width="15" height="15" rx="3.5" stroke="currentColor" stroke-width="2.4"></rect>
-            <rect x="27" y="28" width="15" height="15" rx="3.5" stroke="currentColor" stroke-width="2.4"></rect>
-          </svg>
-        </span>
-        <span class="ps-doc-tab__text">
-          <strong>Módulos</strong>
-          <small>Apps de operação municipal</small>
-        </span>
-      </button>
+        <li>
+          <a class="ps-doc-tab" id="doc-tab-modulos" href="#doc-panel-modulos" role="tab" aria-controls="doc-panel-modulos" data-doc-tab="modulos">
+            <span class="ps-doc-tab__icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48" fill="none">
+                <rect x="6" y="8" width="15" height="15" rx="3.5" stroke="currentColor" stroke-width="2.4"></rect>
+                <rect x="27" y="8" width="15" height="15" rx="3.5" stroke="currentColor" stroke-width="2.4"></rect>
+                <rect x="6" y="28" width="15" height="15" rx="3.5" stroke="currentColor" stroke-width="2.4"></rect>
+                <rect x="27" y="28" width="15" height="15" rx="3.5" stroke="currentColor" stroke-width="2.4"></rect>
+              </svg>
+            </span>
+            <span class="ps-doc-tab__text">
+              <strong>Módulos</strong>
+              <small>Apps de operação municipal</small>
+            </span>
+          </a>
+        </li>
 
-      <button class="ps-doc-tab" id="doc-tab-func" type="button" role="tab" aria-selected="false" aria-controls="doc-panel-func" data-doc-tab="func">
-        <span class="ps-doc-tab__icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48" fill="none">
-            <circle cx="15" cy="15" r="5" stroke="currentColor" stroke-width="2.4"></circle>
-            <circle cx="33" cy="15" r="5" stroke="currentColor" stroke-width="2.4"></circle>
-            <circle cx="24" cy="33" r="5" stroke="currentColor" stroke-width="2.4"></circle>
-            <path d="M19 18L28.5 30" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path>
-            <path d="M29 18L19.5 30" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path>
-          </svg>
-        </span>
-        <span class="ps-doc-tab__text">
-          <strong>Funcionalidades</strong>
-          <small>Governança e operação transversal</small>
-        </span>
-      </button>
+        <li>
+          <a class="ps-doc-tab" id="doc-tab-func" href="#doc-panel-func" role="tab" aria-controls="doc-panel-func" data-doc-tab="func">
+            <span class="ps-doc-tab__icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48" fill="none">
+                <circle cx="15" cy="15" r="5" stroke="currentColor" stroke-width="2.4"></circle>
+                <circle cx="33" cy="15" r="5" stroke="currentColor" stroke-width="2.4"></circle>
+                <circle cx="24" cy="33" r="5" stroke="currentColor" stroke-width="2.4"></circle>
+                <path d="M19 18L28.5 30" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path>
+                <path d="M29 18L19.5 30" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path>
+              </svg>
+            </span>
+            <span class="ps-doc-tab__text">
+              <strong>Funcionalidades</strong>
+              <small>Governança e operação transversal</small>
+            </span>
+          </a>
+        </li>
 
-      <button class="ps-doc-tab" id="doc-tab-rbac" type="button" role="tab" aria-selected="false" aria-controls="doc-panel-rbac" data-doc-tab="rbac">
-        <span class="ps-doc-tab__icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48" fill="none">
-            <rect x="8" y="19" width="32" height="21" rx="5" stroke="currentColor" stroke-width="2.4"></rect>
-            <path d="M16 19V14C16 9.6 19.6 6 24 6C28.4 6 32 9.6 32 14V19" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path>
-            <circle cx="24" cy="29.5" r="3.5" fill="currentColor" fill-opacity="0.28"></circle>
-          </svg>
-        </span>
-        <span class="ps-doc-tab__text">
-          <strong>RBAC</strong>
-          <small>Perfis, escopo e permissões</small>
-        </span>
-      </button>
+        <li>
+          <a class="ps-doc-tab" id="doc-tab-rbac" href="#doc-panel-rbac" role="tab" aria-controls="doc-panel-rbac" data-doc-tab="rbac">
+            <span class="ps-doc-tab__icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48" fill="none">
+                <rect x="8" y="19" width="32" height="21" rx="5" stroke="currentColor" stroke-width="2.4"></rect>
+                <path d="M16 19V14C16 9.6 19.6 6 24 6C28.4 6 32 9.6 32 14V19" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path>
+                <circle cx="24" cy="29.5" r="3.5" fill="currentColor" fill-opacity="0.28"></circle>
+              </svg>
+            </span>
+            <span class="ps-doc-tab__text">
+              <strong>RBAC</strong>
+              <small>Perfis, escopo e permissões</small>
+            </span>
+          </a>
+        </li>
 
-      <button class="ps-doc-tab" id="doc-tab-int" type="button" role="tab" aria-selected="false" aria-controls="doc-panel-int" data-doc-tab="int">
-        <span class="ps-doc-tab__icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48" fill="none">
-            <path d="M18 14H9C7.3 14 6 15.3 6 17V22C6 23.7 7.3 25 9 25H18V14Z" stroke="currentColor" stroke-width="2.4"></path>
-            <path d="M30 34H39C40.7 34 42 32.7 42 31V26C42 24.3 40.7 23 39 23H30V34Z" stroke="currentColor" stroke-width="2.4"></path>
-            <path d="M18 24H30" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path>
-            <path d="M24 24V34" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path>
-            <circle cx="24" cy="34" r="3" fill="currentColor"></circle>
-          </svg>
-        </span>
-        <span class="ps-doc-tab__text">
-          <strong>Integrações</strong>
-          <small>Conectores e implantação</small>
-        </span>
-      </button>
+        <li>
+          <a class="ps-doc-tab" id="doc-tab-int" href="#doc-panel-int" role="tab" aria-controls="doc-panel-int" data-doc-tab="int">
+            <span class="ps-doc-tab__icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48" fill="none">
+                <path d="M18 14H9C7.3 14 6 15.3 6 17V22C6 23.7 7.3 25 9 25H18V14Z" stroke="currentColor" stroke-width="2.4"></path>
+                <path d="M30 34H39C40.7 34 42 32.7 42 31V26C42 24.3 40.7 23 39 23H30V34Z" stroke="currentColor" stroke-width="2.4"></path>
+                <path d="M18 24H30" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path>
+                <path d="M24 24V34" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path>
+                <circle cx="24" cy="34" r="3" fill="currentColor"></circle>
+              </svg>
+            </span>
+            <span class="ps-doc-tab__text">
+              <strong>Integrações</strong>
+              <small>Conectores e implantação</small>
+            </span>
+          </a>
+        </li>
+      </ul>
     </aside>
 
     <div class="ps-doc-panels">
@@ -112,13 +124,13 @@
           <div class="ps-doc-window__body">
             <div class="ps-grid ps-grid--2">
               {% for pilar in pilares %}
-                <article class="ps-card">
+                <article class="ps-card gp-card">
                   <h3>{{ pilar }}</h3>
                 </article>
               {% endfor %}
             </div>
             <div class="ps-grid ps-grid--2">
-              <article class="ps-card">
+              <article class="ps-card gp-card">
                 <h3>Arquitetura de referência</h3>
                 <ul>
                   {% for item in arquitetura %}
@@ -126,7 +138,7 @@
                   {% endfor %}
                 </ul>
               </article>
-              <article class="ps-card">
+              <article class="ps-card gp-card">
                 <h3>Fluxo de implantação</h3>
                 <ol>
                   {% for passo in fluxos %}
@@ -148,7 +160,7 @@
           <div class="ps-doc-window__body">
             <div class="ps-doc-module-grid">
               {% for modulo in modulos %}
-                <article class="ps-doc-module-card">
+                <article class="ps-doc-module-card gp-card">
                   <div class="ps-doc-module-art">
                     {% if "Organização" in modulo.nome %}
                       <svg viewBox="0 0 80 80" fill="none" aria-hidden="true">
@@ -228,7 +240,7 @@
           <div class="ps-doc-window__body">
             <div class="ps-grid ps-grid--2">
               {% for item in funcionalidades %}
-                <article class="ps-card">
+                <article class="ps-card gp-card">
                   <h3>{{ item.grupo }}</h3>
                   <ul>
                     {% for valor in item.itens %}
@@ -250,7 +262,7 @@
           </header>
           <div class="ps-doc-window__body">
             <div class="ps-grid ps-grid--2">
-              <article class="ps-card">
+              <article class="ps-card gp-card">
                 <h3>Princípios operacionais</h3>
                 <ul>
                   {% for item in rbac_principios %}
@@ -259,7 +271,7 @@
                 </ul>
               </article>
 
-              <article class="ps-card">
+              <article class="ps-card gp-card">
                 <h3>Indicadores da matriz</h3>
                 <div class="ps-kpi-grid ps-kpi-grid--compact">
                   {% for kpi in rbac_kpis %}
@@ -280,7 +292,7 @@
 
             <div class="ps-accordion">
               {% for area in rbac_sections %}
-                <details class="ps-card" {% if forloop.first %}open{% endif %}>
+                <details class="ps-card gp-card" {% if forloop.first %}open{% endif %}>
                   <summary>
                     <strong>{{ area.area }}</strong>
                     <small>{{ area.roles|length }} perfis</small>
@@ -309,7 +321,7 @@
           </header>
           <div class="ps-doc-window__body">
             <div class="ps-grid ps-grid--2">
-              <article class="ps-card">
+              <article class="ps-card gp-card">
                 <h3>Integrações</h3>
                 <ul>
                   {% for item in integracoes %}
@@ -318,7 +330,7 @@
                 </ul>
               </article>
 
-              <article class="ps-card">
+              <article class="ps-card gp-card">
                 <h3>Fluxo de implantação</h3>
                 <ol>
                   {% for passo in fluxos %}
@@ -351,8 +363,14 @@
     const activate = (targetId, focus = false) => {
       tabs.forEach((tab) => {
         const active = tab.dataset.docTab === targetId;
+        const tabItem = tab.closest('li');
+        if (tabItem) tabItem.classList.toggle('active', active);
         tab.classList.toggle('is-active', active);
-        tab.setAttribute('aria-selected', active ? 'true' : 'false');
+        if (active) {
+          tab.setAttribute('aria-current', 'page');
+        } else {
+          tab.removeAttribute('aria-current');
+        }
         if (active && focus) tab.focus();
       });
 
@@ -364,7 +382,10 @@
     };
 
     tabs.forEach((tab) => {
-      tab.addEventListener('click', () => activate(tab.dataset.docTab));
+      tab.addEventListener('click', (event) => {
+        event.preventDefault();
+        activate(tab.dataset.docTab);
+      });
       tab.addEventListener('keydown', (event) => {
         const keys = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
         if (!keys.includes(event.key)) return;

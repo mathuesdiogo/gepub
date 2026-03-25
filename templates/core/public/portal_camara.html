@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block page_content %}
-<section class="pp-card">
+<section class="pp-card gp-card">
   <form method="get" class="pp-form-inline pp-form-inline--3">
     <div>
       <label for="id_q">Busca</label>
@@ -32,17 +32,17 @@
     <div>
       <label>&nbsp;</label>
       <div class="pp-actions">
-        <button class="pp-btn pp-btn--primary" type="submit">Filtrar</button>
-        <a class="pp-btn pp-btn--soft" href="{% url 'core:portal_camara_public' %}">Limpar</a>
+        <button class="pp-btn pp-btn--primary gp-button gp-button--primary" type="submit">Filtrar</button>
+        <a class="pp-btn pp-btn--soft gp-button" href="{% url 'core:portal_camara_public' %}">Limpar</a>
       </div>
     </div>
   </form>
 </section>
 
-<section class="pp-grid pp-grid--2" style="margin-top:10px;">
-  <article class="pp-card">
+<section class="pp-grid pp-grid--2 u-mt-10">
+  <article class="pp-card gp-card">
     <h2>Proposições e Matérias</h2>
-    <ul class="pp-list" style="margin-top:8px;">
+    <ul class="pp-list u-mt-8">
       {% for item in materias %}
         <li class="pp-list__item">
           <p class="pp-meta">{{ item.get_tipo_display }} • {{ item.numero }}/{{ item.ano }} • {{ item.situacao|default:item.get_status_display }}</p>
@@ -50,7 +50,7 @@
           {% if item.descricao %}<p>{{ item.descricao }}</p>{% endif %}
           {% if item.tramitacao_resumo %}<p>{{ item.tramitacao_resumo }}</p>{% endif %}
           <div class="pp-actions">
-            {% if item.arquivo %}<a class="pp-btn pp-btn--soft" href="{{ item.arquivo.url }}" target="_blank" rel="noopener">Documento</a>{% endif %}
+            {% if item.arquivo %}<a class="pp-btn pp-btn--soft gp-button" href="{{ item.arquivo.url }}" target="_blank" rel="noopener">Documento</a>{% endif %}
           </div>
         </li>
       {% empty %}
@@ -59,9 +59,9 @@
     </ul>
   </article>
 
-  <article class="pp-card">
+  <article class="pp-card gp-card">
     <h2>Sessões</h2>
-    <ul class="pp-list" style="margin-top:8px;">
+    <ul class="pp-list u-mt-8">
       {% for sessao in sessoes %}
         <li class="pp-list__item">
           <p class="pp-meta">
@@ -74,9 +74,9 @@
           <h3>{{ sessao.titulo }}</h3>
           {% if sessao.pauta %}<p>{{ sessao.pauta }}</p>{% endif %}
           <div class="pp-actions">
-            {% if sessao.ata_arquivo %}<a class="pp-btn pp-btn--soft" href="{{ sessao.ata_arquivo.url }}" target="_blank" rel="noopener">Ata</a>{% endif %}
-            {% if sessao.video_url %}<a class="pp-btn pp-btn--soft" href="{{ sessao.video_url }}" target="_blank" rel="noopener">Vídeo</a>{% endif %}
-            {% if sessao.link_transmissao %}<a class="pp-btn pp-btn--soft" href="{{ sessao.link_transmissao }}" target="_blank" rel="noopener">Vídeo</a>{% endif %}
+            {% if sessao.ata_arquivo %}<a class="pp-btn pp-btn--soft gp-button" href="{{ sessao.ata_arquivo.url }}" target="_blank" rel="noopener">Ata</a>{% endif %}
+            {% if sessao.video_url %}<a class="pp-btn pp-btn--soft gp-button" href="{{ sessao.video_url }}" target="_blank" rel="noopener">Vídeo</a>{% endif %}
+            {% if sessao.link_transmissao %}<a class="pp-btn pp-btn--soft gp-button" href="{{ sessao.link_transmissao }}" target="_blank" rel="noopener">Vídeo</a>{% endif %}
           </div>
         </li>
       {% empty %}
@@ -86,10 +86,10 @@
   </article>
 </section>
 
-<section class="pp-grid pp-grid--2" style="margin-top:10px;">
-  <article class="pp-card">
+<section class="pp-grid pp-grid--2 u-mt-10">
+  <article class="pp-card gp-card">
     <h2>Vereadores</h2>
-    <ul class="pp-list" style="margin-top:8px;">
+    <ul class="pp-list u-mt-8">
       {% for item in vereadores %}
         <li class="pp-list__item">
           <h3>{{ item.nome_parlamentar|default:item.nome_completo }}</h3>
@@ -101,9 +101,9 @@
     </ul>
   </article>
 
-  <article class="pp-card">
+  <article class="pp-card gp-card">
     <h2>Comissões</h2>
-    <ul class="pp-list" style="margin-top:8px;">
+    <ul class="pp-list u-mt-8">
       {% for item in comissoes %}
         <li class="pp-list__item">
           <h3>{{ item.nome }}</h3>
@@ -117,17 +117,17 @@
 </section>
 
 {% if transmissoes %}
-<section class="pp-card" style="margin-top:10px;">
+<section class="pp-card u-mt-10 gp-card">
   <h2>Transmissões</h2>
-  <ul class="pp-list" style="margin-top:8px;">
+  <ul class="pp-list u-mt-8">
     {% for item in transmissoes %}
       <li class="pp-list__item">
         <h3>{{ item.titulo }}</h3>
         <p>{{ item.get_status_transmissao_display }}</p>
         <div class="pp-actions">
-          {% if item.live_url %}<a class="pp-btn pp-btn--soft" href="{{ item.live_url }}" target="_blank" rel="noopener">Assistir</a>{% endif %}
-          {% if item.canal_url %}<a class="pp-btn pp-btn--soft" href="{{ item.canal_url }}" target="_blank" rel="noopener">Canal</a>{% endif %}
-          {% if item.playlist_url %}<a class="pp-btn pp-btn--soft" href="{{ item.playlist_url }}" target="_blank" rel="noopener">Gravações</a>{% endif %}
+          {% if item.live_url %}<a class="pp-btn pp-btn--soft gp-button" href="{{ item.live_url }}" target="_blank" rel="noopener">Assistir</a>{% endif %}
+          {% if item.canal_url %}<a class="pp-btn pp-btn--soft gp-button" href="{{ item.canal_url }}" target="_blank" rel="noopener">Canal</a>{% endif %}
+          {% if item.playlist_url %}<a class="pp-btn pp-btn--soft gp-button" href="{{ item.playlist_url }}" target="_blank" rel="noopener">Gravações</a>{% endif %}
         </div>
       </li>
     {% endfor %}

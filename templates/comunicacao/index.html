@@ -27,10 +27,10 @@
         <p class="comms-panel__sub">Refine por canal, status, evento e destino.</p>
       </div>
     </div>
-    <form method="get" class="comms-filter-grid">
+    <form method="get" class="comms-filter-grid form-shell search-and-filters">
       {% if municipios and municipios|length %}
-        <label class="gp-form-group">
-          <span class="gp-form-label">Município</span>
+        <label class="gp-form-group form-shell">
+          <span class="gp-form-label form-shell">Município</span>
           <select name="municipio" class="gp-select">
             {% for m in municipios %}
               <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
@@ -38,12 +38,12 @@
           </select>
         </label>
       {% endif %}
-      <label class="gp-form-group">
-        <span class="gp-form-label">Busca</span>
+      <label class="gp-form-group form-shell">
+        <span class="gp-form-label form-shell">Busca</span>
         <input class="gp-input" name="q" value="{{ q }}" placeholder="Evento, destino, provedor">
       </label>
-      <label class="gp-form-group">
-        <span class="gp-form-label">Canal</span>
+      <label class="gp-form-group form-shell">
+        <span class="gp-form-label form-shell">Canal</span>
         <select class="gp-select" name="channel">
           <option value="">Todos</option>
           {% for value,label in channel_choices %}
@@ -51,8 +51,8 @@
           {% endfor %}
         </select>
       </label>
-      <label class="gp-form-group">
-        <span class="gp-form-label">Status</span>
+      <label class="gp-form-group form-shell">
+        <span class="gp-form-label form-shell">Status</span>
         <select class="gp-select" name="status">
           <option value="">Todos</option>
           {% for value,label in status_choices %}
@@ -60,8 +60,8 @@
           {% endfor %}
         </select>
       </label>
-      <label class="gp-form-group">
-        <span class="gp-form-label">Event key</span>
+      <label class="gp-form-group form-shell">
+        <span class="gp-form-label form-shell">Event key</span>
         <input class="gp-input" name="event_key" value="{{ event_key }}" placeholder="ex.: educacao.fechamento.periodo">
       </label>
       <div class="comms-filter-actions">
@@ -81,13 +81,21 @@
     <article class="comms-kpi comms-kpi--neutral"><span class="comms-kpi__label">Eventos no catálogo</span><strong class="comms-kpi__value">{{ counts.eventos_catalogo }}</strong></article>
   </section>
 
-  <section class="comms-tabs" role="tablist" aria-label="Seções do módulo de comunicação">
-    <button class="comms-tab is-active" type="button" role="tab" aria-selected="true" data-comms-tab="operacao">Operação</button>
-    <button class="comms-tab" type="button" role="tab" aria-selected="false" data-comms-tab="configuracao">Configuração</button>
-    <button class="comms-tab" type="button" role="tab" aria-selected="false" data-comms-tab="integracao">Integração</button>
+  <section aria-label="Seções do módulo de comunicação">
+    <ul class="nav nav-tabs comms-tabs" role="tablist" aria-label="Seções do módulo de comunicação">
+      <li class="active">
+        <a class="comms-tab is-active" href="#operacao" role="tab" aria-current="page" data-comms-tab="operacao">Operação</a>
+      </li>
+      <li>
+        <a class="comms-tab" href="#configuracao" role="tab" data-comms-tab="configuracao">Configuração</a>
+      </li>
+      <li>
+        <a class="comms-tab" href="#integracao" role="tab" data-comms-tab="integracao">Integração</a>
+      </li>
+    </ul>
   </section>
 
-  <div class="comms-pane" role="tabpanel" data-comms-pane="operacao">
+  <div class="comms-pane" id="operacao" role="tabpanel" data-comms-pane="operacao">
     {% if can_manage %}
       <section class="comms-panel">
         <div class="comms-panel__head">
@@ -97,11 +105,11 @@
           </div>
         </div>
         <div class="comms-action-bar">
-          <form method="post" action="{% url 'comunicacao:processar_fila' %}?municipio={{ municipio.id }}">
+          <form method="post" action="{% url 'comunicacao:processar_fila' %}?municipio={{ municipio.id }}" class="u-inline-form">
             {% csrf_token %}
             <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-play"></i> Processar fila agora</button>
           </form>
-          <form method="post" action="{% url 'comunicacao:requeue_failed_jobs' %}?municipio={{ municipio.id }}">
+          <form method="post" action="{% url 'comunicacao:requeue_failed_jobs' %}?municipio={{ municipio.id }}" class="u-inline-form">
             {% csrf_token %}
             <button class="gp-button gp-button--outline" type="submit"><i class="fa-solid fa-rotate"></i> Reenfileirar falhas</button>
           </form>
@@ -117,8 +125,8 @@
         </div>
         <span class="comms-counter">{{ items_jobs|length }} itens</span>
       </div>
-      <div class="table-shell">
-        <table class="table">
+      <div class="table-shell gp-table gp-table--responsive">
+        <table class="gp-table__native table">
           <thead><tr><th>Data</th><th>Evento</th><th>Canal</th><th>Destino</th><th>Status</th><th>Tentativas</th><th>Escopo</th></tr></thead>
           <tbody>
             {% for item in items_jobs %}
@@ -151,8 +159,8 @@
         </div>
         <span class="comms-counter">{{ items_logs|length }} itens</span>
       </div>
-      <div class="table-shell">
-        <table class="table">
+      <div class="table-shell gp-table gp-table--responsive">
+        <table class="gp-table__native table">
           <thead><tr><th>Data</th><th>Evento</th><th>Canal</th><th>Destino</th><th>Status</th><th>Erro</th></tr></thead>
           <tbody>
             {% for item in items_logs %}
@@ -180,8 +188,8 @@
         </div>
         <span class="comms-counter">{{ items_dead_letter|length }} itens</span>
       </div>
-      <div class="table-shell">
-        <table class="table">
+      <div class="table-shell gp-table gp-table--responsive">
+        <table class="gp-table__native table">
           <thead><tr><th>Data</th><th>Evento</th><th>Canal</th><th>Destino</th><th>Tentativas</th><th>Erro</th></tr></thead>
           <tbody>
             {% for item in items_dead_letter %}
@@ -202,7 +210,7 @@
     </section>
   </div>
 
-  <div class="comms-pane" role="tabpanel" data-comms-pane="configuracao">
+  <div class="comms-pane" id="configuracao" role="tabpanel" data-comms-pane="configuracao">
     <section class="comms-grid">
       <article class="comms-panel">
         <div class="comms-panel__head">
@@ -212,8 +220,8 @@
           </div>
           <span class="comms-counter">{{ items_templates|length }} itens</span>
         </div>
-        <div class="table-shell">
-          <table class="table">
+        <div class="table-shell gp-table gp-table--responsive">
+          <table class="gp-table__native table">
             <thead><tr><th>Evento</th><th>Canal</th><th>Nome</th><th>Escopo</th><th>Ativo</th><th>NEE Safe</th></tr></thead>
             <tbody>
               {% for item in items_templates %}
@@ -241,8 +249,8 @@
           </div>
           <span class="comms-counter">{{ items_channels|length }} itens</span>
         </div>
-        <div class="table-shell">
-          <table class="table">
+        <div class="table-shell gp-table gp-table--responsive">
+          <table class="gp-table__native table">
             <thead><tr><th>Canal</th><th>Provedor</th><th>Remetente</th><th>Escopo</th><th>Ativo</th></tr></thead>
             <tbody>
               {% for item in items_channels %}
@@ -274,8 +282,8 @@
         </div>
         <span class="comms-counter">{{ event_catalog_preview|length }} itens</span>
       </div>
-      <div class="table-shell">
-        <table class="table">
+      <div class="table-shell gp-table gp-table--responsive">
+        <table class="gp-table__native table">
           <thead><tr><th>Módulo</th><th>Event key</th><th>Descrição</th><th>Variáveis</th></tr></thead>
           <tbody>
             {% for event in event_catalog_preview %}
@@ -294,7 +302,7 @@
     </section>
   </div>
 
-  <div class="comms-pane" role="tabpanel" data-comms-pane="integracao">
+  <div class="comms-pane" id="integracao" role="tabpanel" data-comms-pane="integracao">
     <section class="comms-panel">
       <div class="comms-panel__head">
         <div>
@@ -335,9 +343,14 @@
       if (!paneNames.has(tabName)) tabName = defaultTab;
       tabs.forEach(function (tab) {
         const active = tab.getAttribute("data-comms-tab") === tabName;
+        const tabItem = tab.closest("li");
+        if (tabItem) tabItem.classList.toggle("active", active);
         tab.classList.toggle("is-active", active);
-        tab.setAttribute("aria-selected", active ? "true" : "false");
-        tab.setAttribute("tabindex", active ? "0" : "-1");
+        if (active) {
+          tab.setAttribute("aria-current", "page");
+        } else {
+          tab.removeAttribute("aria-current");
+        }
       });
       panes.forEach(function (pane) {
         pane.hidden = pane.getAttribute("data-comms-pane") !== tabName;
@@ -348,7 +361,8 @@
     }
 
     tabs.forEach(function (tab) {
-      tab.addEventListener("click", function () {
+      tab.addEventListener("click", function (event) {
+        event.preventDefault();
         activate(tab.getAttribute("data-comms-tab"), true);
       });
     });

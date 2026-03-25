@@ -1,7 +1,7 @@
 {% extends "nee/base_modulo.html" %}
 {% block module_title %}NEE • Timeline{% endblock %}
 {% block module_content %}
-<div class="card"><div class="card__body">
+<div class="card gp-card"><div class="card__body gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title="Timeline unificada" subtitle=aluno.nome actions=actions %}
 
   {% if eventos %}
@@ -11,12 +11,12 @@
           <div class="timeline__dot"></div>
           <div class="timeline__content">
             <div class="timeline__meta">
-              <span class="badge">{{ e.tipo }}</span>
+              <span class="badge gp-badge">{{ e.tipo }}</span>
               {% if e.data %}<span class="muted">{{ e.data }}</span>{% endif %}
             </div>
             <div class="timeline__title">{{ e.titulo }}</div>
             <div class="timeline__text">{{ e.descricao }}</div>
-            {% if e.url %}<div class="timeline__actions"><a class="gp-button gp-button--outline gp-button--sm" href="{{ e.url }}">Abrir</a></div>{% endif %}
+            {% if e.url %}<div class="timeline__actions"><a class="gp-button gp-button--outline gp-button--sm" href="{{ e.url }}">Visualizar</a></div>{% endif %}
           </div>
         </div>
       {% endfor %}

@@ -6,7 +6,7 @@
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
   {% include "core/partials/components/data/filter_bar.html" with q=q placeholder="Paciente, edital, título ou benefício..." action_url=action_url clear_url=clear_url has_filters=has_filters %}
 
-  <form method="get" class="filter-bar">
+  <form method="get" class="filter-bar search-and-filters">
     {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
     <div>
       <label class="small">Status inscrição</label>

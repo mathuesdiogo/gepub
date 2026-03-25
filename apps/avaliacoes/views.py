@@ -189,13 +189,13 @@ def index(request):
                     "label": "Lista de avaliações",
                     "url": reverse("avaliacoes:avaliacao_list") + f"?municipio={municipio.pk}",
                     "icon": "fa-solid fa-list",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Nova avaliação",
                     "url": reverse("avaliacoes:avaliacao_create") + f"?municipio={municipio.pk}",
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
             ],
         },
@@ -330,7 +330,7 @@ def avaliacao_list(request):
                     "label": "Nova avaliação",
                     "url": reverse("avaliacoes:avaliacao_create") + f"?municipio={municipio.pk}",
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "CSV",
@@ -339,7 +339,7 @@ def avaliacao_list(request):
                         + f"?municipio={municipio.pk}&q={q}&tipo={tipo}&turma={turma_id}&status={status}&export=csv"
                     ),
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "PDF",
@@ -348,13 +348,13 @@ def avaliacao_list(request):
                         + f"?municipio={municipio.pk}&q={q}&tipo={tipo}&turma={turma_id}&status={status}&export=pdf"
                     ),
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Portal",
                     "url": reverse("portal"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -446,25 +446,25 @@ def avaliacao_detail(request, pk: int):
             "label": "Nova questão",
             "url": reverse("avaliacoes:questao_create", args=[avaliacao.pk]) + f"?municipio={avaliacao.municipio_id}",
             "icon": "fa-solid fa-circle-plus",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
         {
             "label": "Resultados",
             "url": reverse("avaliacoes:resultados", args=[avaliacao.pk]) + f"?municipio={avaliacao.municipio_id}",
             "icon": "fa-solid fa-chart-column",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
         {
             "label": "PDF provas",
             "url": reverse("avaliacoes:prova_pdf", args=[avaliacao.pk]) + f"?municipio={avaliacao.municipio_id}",
             "icon": "fa-solid fa-file-pdf",
-            "variant": "btn-primary",
+            "variant": "gp-button--primary",
         },
         {
             "label": "CSV notas",
             "url": reverse("avaliacoes:resultados_csv", args=[avaliacao.pk]) + f"?municipio={avaliacao.municipio_id}",
             "icon": "fa-solid fa-file-csv",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
     ]
 
@@ -474,7 +474,7 @@ def avaliacao_detail(request, pk: int):
                 "label": f"Gabarito {versao}",
                 "url": reverse("avaliacoes:gabarito_update", args=[avaliacao.pk, versao]) + f"?municipio={avaliacao.municipio_id}",
                 "icon": "fa-solid fa-list-check",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             }
         )
 
@@ -574,7 +574,7 @@ def questao_update(request, avaliacao_pk: int, questao_pk: int):
             "subtitle": avaliacao.titulo,
             "form": form,
             "cancel_url": reverse("avaliacoes:avaliacao_detail", args=[avaliacao.pk]),
-            "submit_label": "Atualizar questão",
+            "submit_label": "Editar questão",
         },
     )
 
@@ -639,7 +639,7 @@ def gabarito_update(request, avaliacao_pk: int, versao: str):
                     "label": "Voltar",
                     "url": reverse("avaliacoes:avaliacao_detail", args=[avaliacao.pk]),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
         },
@@ -798,7 +798,7 @@ def folha_corrigir(request, token):
                     "label": "Voltar",
                     "url": reverse("avaliacoes:avaliacao_detail", args=[avaliacao.pk]),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
         },
@@ -851,13 +851,13 @@ def resultados(request, avaliacao_pk: int):
                     "label": "Voltar",
                     "url": reverse("avaliacoes:avaliacao_detail", args=[avaliacao.pk]),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Exportar CSV",
                     "url": reverse("avaliacoes:resultados_csv", args=[avaliacao.pk]),
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
             ],
         },

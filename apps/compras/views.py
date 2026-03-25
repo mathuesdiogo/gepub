@@ -114,25 +114,25 @@ def requisicao_list(request):
                     "label": "Nova requisicao",
                     "url": reverse("compras:requisicao_create") + f"?municipio={municipio.pk}",
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "Licitacoes",
                     "url": reverse("compras:licitacao_list") + f"?municipio={municipio.pk}",
                     "icon": "fa-solid fa-gavel",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "CSV",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&export=csv",
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "PDF",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&export=pdf",
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -222,13 +222,13 @@ def requisicao_detail(request, pk: int):
             "label": "Adicionar item",
             "url": reverse("compras:item_create", args=[obj.pk]) + f"?municipio={municipio.pk}",
             "icon": "fa-solid fa-list-check",
-            "variant": "btn-primary",
+            "variant": "gp-button--primary",
         },
         {
             "label": "Aprovar",
             "url": reverse("compras:aprovar", args=[obj.pk]) + f"?municipio={municipio.pk}",
             "icon": "fa-solid fa-circle-check",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
     ]
     if pode_empenhar:
@@ -237,7 +237,7 @@ def requisicao_detail(request, pk: int):
                 "label": "Gerar empenho",
                 "url": reverse("compras:gerar_empenho", args=[obj.pk]) + f"?municipio={municipio.pk}",
                 "icon": "fa-solid fa-file-signature",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             }
         )
     actions.append(
@@ -245,7 +245,7 @@ def requisicao_detail(request, pk: int):
             "label": "Voltar",
             "url": reverse("compras:requisicao_list") + f"?municipio={municipio.pk}",
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }
     )
 
@@ -502,13 +502,13 @@ def licitacao_list(request):
                     "label": "Nova licitacao",
                     "url": reverse("compras:licitacao_create") + f"?municipio={municipio.pk}",
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "Requisicoes",
                     "url": reverse("compras:requisicao_list") + f"?municipio={municipio.pk}",
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },

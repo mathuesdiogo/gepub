@@ -96,8 +96,8 @@ def turma_list(request):
         return f"?{base_query + ('&' if base_query else '')}{extra}"
 
     actions = [
-        {"label": "Exportar CSV", "url": qjoin("export=csv"), "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
-        {"label": "Exportar PDF", "url": qjoin("export=pdf"), "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
+        {"label": "Exportar CSV", "url": qjoin("export=csv"), "icon": "fa-solid fa-file-csv", "variant": "gp-button--ghost"},
+        {"label": "Exportar PDF", "url": qjoin("export=pdf"), "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"},
     ]
     if can_edu_manage:
         actions.append(
@@ -105,7 +105,7 @@ def turma_list(request):
                 "label": "Nova Turma",
                 "url": reverse("educacao:turma_create"),
                 "icon": "fa-solid fa-plus",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             }
         )
 
@@ -177,25 +177,25 @@ def turma_detail(request, pk: int):
     role = getattr(getattr(request.user, "profile", None), "role", "")
     is_professor = is_professor_profile_role(role)
 
-    actions = [{"label": "Voltar", "url": reverse("educacao:turma_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+    actions = [{"label": "Voltar", "url": reverse("educacao:turma_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
     if is_professor:
         actions.extend(
             [
-                {"label": "Diário", "url": reverse("educacao:meus_diarios"), "icon": "fa-solid fa-book", "variant": "btn--ghost"},
-                {"label": "Boletim", "url": reverse("educacao:boletim_turma", args=[turma.pk]), "icon": "fa-solid fa-clipboard-list", "variant": "btn--ghost"},
+                {"label": "Diário", "url": reverse("educacao:meus_diarios"), "icon": "fa-solid fa-book", "variant": "gp-button--ghost"},
+                {"label": "Boletim", "url": reverse("educacao:boletim_turma", args=[turma.pk]), "icon": "fa-solid fa-clipboard-list", "variant": "gp-button--ghost"},
             ]
         )
     else:
         actions.extend(
             [
-                {"label": "Horário", "url": reverse("educacao:horario_turma", args=[turma.pk]), "icon": "fa-solid fa-calendar-days", "variant": "btn--ghost"},
-                {"label": "Boletim", "url": reverse("educacao:boletim_turma", args=[turma.pk]), "icon": "fa-solid fa-clipboard-list", "variant": "btn--ghost"},
-                {"label": "Fechamento", "url": reverse("educacao:fechamento_turma_periodo", args=[turma.pk]), "icon": "fa-solid fa-check-double", "variant": "btn--ghost"},
-                {"label": "Relatório", "url": reverse("educacao:relatorio_geral_turma", args=[turma.pk]), "icon": "fa-solid fa-file-lines", "variant": "btn--ghost"},
+                {"label": "Horário", "url": reverse("educacao:horario_turma", args=[turma.pk]), "icon": "fa-solid fa-calendar-days", "variant": "gp-button--ghost"},
+                {"label": "Boletim", "url": reverse("educacao:boletim_turma", args=[turma.pk]), "icon": "fa-solid fa-clipboard-list", "variant": "gp-button--ghost"},
+                {"label": "Fechamento", "url": reverse("educacao:fechamento_turma_periodo", args=[turma.pk]), "icon": "fa-solid fa-check-double", "variant": "gp-button--ghost"},
+                {"label": "Relatório", "url": reverse("educacao:relatorio_geral_turma", args=[turma.pk]), "icon": "fa-solid fa-file-lines", "variant": "gp-button--ghost"},
             ]
         )
     if can_edu_manage:
-        actions.append({"label": "Editar", "url": reverse("educacao:turma_update", args=[turma.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+        actions.append({"label": "Editar", "url": reverse("educacao:turma_update", args=[turma.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
 
     matriculas_qs = Matricula.objects.filter(turma_id=turma.id).select_related("aluno").order_by("aluno__nome")
 

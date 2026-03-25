@@ -2,11 +2,11 @@
 {% load static %}
 
 {% block content %}
-<div class="card billing-page billing-page--admin-assinaturas"><div class="card__body billing-page__body">
+<div class="card billing-page billing-page--admin-assinaturas gp-card"><div class="card__body billing-page__body gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
   <section class="billing-section billing-section--compact">
-    <form method="get" class="billing-filter-form">
+    <form method="get" class="billing-filter-form form-shell search-and-filters">
       {{ filtro.q.label_tag }} {{ filtro.q }}
       {{ filtro.status.label_tag }} {{ filtro.status }}
       <button type="submit" class="gp-button gp-button--outline">Filtrar</button>
@@ -18,8 +18,8 @@
       <h3>Assinaturas municipais</h3>
       <p>Gerencie vigência, status contratual e acesso ao detalhe operacional de cada município.</p>
     </div>
-    <div class="table-shell billing-table-shell">
-      <table class="table">
+    <div class="table-shell billing-table-shell gp-table gp-table--responsive">
+      <table class="gp-table__native table">
         <thead>
           <tr>
             <th>Município</th>

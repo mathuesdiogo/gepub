@@ -13,31 +13,31 @@
     <p>Informe o código de validação (UUID) para verificar autenticidade e assinatura do emissor.</p>
   </header>
 
-  <form method="get" class="ps-validate-form" action="{% url 'core:validar_documento_public' %}">
+  <form method="get" class="ps-validate-form form-shell" action="{% url 'core:validar_documento_public' %}">
     <label for="id_codigo">Código do documento</label>
     <div class="ps-validate-form__row">
       <input id="id_codigo" type="text" name="codigo" value="{{ code_input }}" placeholder="Ex.: 123e4567-e89b-12d3-a456-426614174000" autocomplete="off">
-      <button type="submit" class="ps-btn ps-btn--dark">Validar</button>
+      <button type="submit" class="ps-btn ps-btn--dark gp-button">Validar</button>
     </div>
   </form>
 
   {% if status == "pendente" %}
-    <article class="ps-card ps-validation-card">
+    <article class="ps-card ps-validation-card gp-card">
       <h3>Aguardando código</h3>
       <p>Digite o código de validação para consultar um documento emitido pela plataforma.</p>
     </article>
   {% elif status == "codigo_invalido" %}
-    <article class="ps-card ps-validation-card ps-validation-card--invalid">
+    <article class="ps-card ps-validation-card ps-validation-card--invalid gp-card">
       <h3>Código inválido</h3>
       <p>O valor informado não está no formato esperado. Verifique o código e tente novamente.</p>
     </article>
   {% elif status == "nao_encontrado" %}
-    <article class="ps-card ps-validation-card ps-validation-card--notfound">
+    <article class="ps-card ps-validation-card ps-validation-card--notfound gp-card">
       <h3>Documento não encontrado</h3>
       <p>Nenhum registro foi localizado para o código informado.</p>
     </article>
   {% else %}
-    <article class="ps-card ps-validation-card {% if status == 'valido' %}ps-validation-card--ok{% else %}ps-validation-card--revogado{% endif %}">
+    <article class="ps-card ps-validation-card {% if status == 'valido' %}ps-validation-card--ok{% else %}ps-validation-card--revogado{% endif %} gp-card">
       <h3>{% if status == "valido" %}Documento válido{% else %}Documento revogado{% endif %}</h3>
       <p>
         {% if status == "valido" %}
@@ -54,7 +54,7 @@
         <div><strong>Emitido em</strong><span>{{ documento.gerado_em|date:"d/m/Y H:i" }}</span></div>
         <div><strong>Assinatura</strong><span>{{ documento.assinatura_resumo }}</span></div>
         {% if documento.origem_url %}
-          <div><strong>Origem</strong><span><a href="{{ documento.origem_url }}">Abrir documento relacionado</a></span></div>
+          <div><strong>Origem</strong><span><a href="{{ documento.origem_url }}">Visualizar documento relacionado</a></span></div>
         {% endif %}
       </div>
     </article>

@@ -152,3 +152,131 @@ textarea{
   background:color-mix(in srgb,var(--danger) 8%,#fff);
   color:color-mix(in srgb,var(--danger) 80%,#111);
 }
+
+/* DS compat: Formulários */
+.stars{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  margin:0;
+  padding:0;
+  list-style:none;
+}
+
+.stars a{
+  text-decoration:none;
+  color:var(--success);
+}
+
+.stars .disabled{
+  opacity:.38;
+}
+
+.search-and-filters{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:end;
+  gap:12px;
+  padding:12px;
+  border:1px solid var(--border);
+  border-radius:var(--radius-md);
+  background:var(--surface-2);
+}
+
+.search-and-filters .filter{
+  min-width:180px;
+  flex:1 1 220px;
+}
+
+.search-and-filters.large-filters .filter{
+  flex-basis:280px;
+}
+
+.search-and-filters .filter.large{
+  flex-basis:320px;
+}
+
+.search-and-filters .filter.separator{
+  position:relative;
+  padding-right:12px;
+  margin-right:4px;
+}
+
+.search-and-filters .filter.separator::after{
+  content:"";
+  position:absolute;
+  right:0;
+  top:6px;
+  bottom:6px;
+  width:1px;
+  background:var(--border);
+}
+
+.search-and-filters .filter.show-condition-or + .filter::before{
+  content:"ou";
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin-right:10px;
+  padding:2px 8px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--muted);
+  font-size:.73rem;
+  font-weight:var(--font-weight-bold);
+}
+
+.switch{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  min-height:30px;
+}
+
+.switch input{
+  opacity:0;
+  width:0;
+  height:0;
+  position:absolute;
+}
+
+.switch .slider{
+  position:relative;
+  display:inline-block;
+  width:46px;
+  height:26px;
+  background:color-mix(in srgb,var(--border) 70%,#8f98a3);
+  border-radius:999px;
+  transition:background .2s ease;
+}
+
+.switch .slider::before{
+  content:"";
+  position:absolute;
+  width:20px;
+  height:20px;
+  left:3px;
+  top:3px;
+  border-radius:50%;
+  background:#fff;
+  transition:transform .2s ease;
+}
+
+.switch input:checked + .slider{
+  background:color-mix(in srgb,var(--success) 85%,#188b5a);
+}
+
+.switch input:checked + .slider::before{
+  transform:translateX(20px);
+}
+
+.markall-container{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 10px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--surface-2);
+}

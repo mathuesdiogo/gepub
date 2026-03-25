@@ -935,6 +935,60 @@ def scope_filter_unidades(user, qs):
     return qs.none()
 
 
+def _collect_local_estrutural_descendants_ids(local_id: int) -> set[int]:
+    try:
+        from apps.org.models import LocalEstrutural
+    except Exception:
+        return {int(local_id)}
+
+    visited: set[int] = {int(local_id)}
+    frontier: set[int] = {int(local_id)}
+    while frontier:
+        child_ids = set(
+            LocalEstrutural.objects.filter(local_pai_id__in=frontier).values_list("id", flat=True)
+        )
+        child_ids -= visited
+        if not child_ids:
+            break
+        visited |= child_ids
+        frontier = child_ids
+    return visited
+
+
+def scope_filter_locais_estruturais(user, qs):
+    if not user or not getattr(user, "is_authenticated", False):
+        return qs.none()
+    if is_admin(user):
+        return qs
+
+    p = _require_auth_active(user)
+    if not p:
+        return qs.none()
+
+    base = role_scope_base(getattr(p, "role", None))
+
+    if getattr(p, "local_estrutural_id", None):
+        local_ids = _collect_local_estrutural_descendants_ids(int(p.local_estrutural_id))
+        return qs.filter(id__in=local_ids)
+
+    if base == "UNIDADE" and getattr(p, "unidade_id", None):
+        return qs.filter(unidade_id=p.unidade_id)
+
+    if base == "SECRETARIA":
+        secretaria_id = _resolve_secretaria_id_from_profile(p)
+        if secretaria_id:
+            return qs.filter(secretaria_id=secretaria_id)
+        return qs.none()
+
+    if base == "ALUNO":
+        return qs.none()
+
+    if getattr(p, "municipio_id", None):
+        return qs.filter(municipio_id=p.municipio_id)
+
+    return qs.none()
+
+
 def scope_filter_turmas(user, qs):
     """
     Professor (inclui perfis docentes) vê apenas as turmas em que está vinculado.

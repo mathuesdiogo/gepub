@@ -4,12 +4,12 @@
 <div class="gp-card"><div class="gp-card__body">
 {% include "core/partials/components/layout/page_head.html" with title="Relatório Geral — Turma" subtitle=turma.nome actions=actions %}
 
-<form method="get" class="gp-form gp-table__filters" action="">
-  <div class="gp-form-group">
+<form method="get" class="gp-form gp-table__filters search-and-filters form-shell" action="">
+  <div class="gp-form-group form-shell">
     <label class="small">Início</label>
     <input class="gp-input" type="date" name="inicio" value="{{ inicio }}" />
   </div>
-  <div class="gp-form-group">
+  <div class="gp-form-group form-shell">
     <label class="small">Fim</label>
     <input class="gp-input" type="date" name="fim" value="{{ fim }}" />
   </div>

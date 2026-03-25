@@ -2,18 +2,18 @@
 {% block title %}Recorrência #{{ obj.pk }} • Educação • GEPUB{% endblock %}
 
 {% block module_content %}
-<div class="gp-card"><div class="gp-card__body">
+<div class="gp-card"><div class="gp-card__body edu-detail-flow">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <div class="gp-pills">
-    <span class="gp-pills__item">Aluno: {{ obj.aluno.nome }}</span>
-    <span class="gp-pills__item">{{ obj.beneficio.nome }}</span>
-    <span class="gp-pills__item">{{ obj.get_frequencia_display }}</span>
-    <span class="gp-pills__item">{{ obj.get_status_display }}</span>
-  </div>
+  <ul class="pills">
+    <li><span>Aluno: {{ obj.aluno.nome }}</span></li>
+    <li><span>{{ obj.beneficio.nome }}</span></li>
+    <li><span>{{ obj.get_frequencia_display }}</span></li>
+    <li><span>{{ obj.get_status_display }}</span></li>
+  </ul>
 
   {% if can_manage %}
-  <form class="gp-form" method="post" action="{% url 'educacao:beneficio_recorrencia_gerar_ciclos' obj.pk %}?municipio={{ municipio.id }}">
+  <form class="gp-form form-shell" method="post" action="{% url 'educacao:beneficio_recorrencia_gerar_ciclos' obj.pk %}?municipio={{ municipio.id }}">
     {% csrf_token %}
     <button class="gp-button gp-button--primary" type="submit">Gerar ciclos</button>
     <button class="gp-button gp-button--outline" type="submit" name="force" value="1">Regenerar ciclos</button>
@@ -32,7 +32,7 @@
         <td>{% if c.entrega_id %}<a href="{% url 'educacao:beneficio_entrega_detail' c.entrega_id %}?municipio={{ municipio.id }}">#{{ c.entrega_id }}</a>{% else %}—{% endif %}</td>
         <td>
           {% if can_manage and not c.entrega_id %}
-          <form class="gp-form" method="post" action="{% url 'educacao:beneficio_recorrencia_executar_ciclo' obj.pk c.pk %}?municipio={{ municipio.id }}">
+          <form class="gp-form form-shell" method="post" action="{% url 'educacao:beneficio_recorrencia_executar_ciclo' obj.pk c.pk %}?municipio={{ municipio.id }}">
             {% csrf_token %}
             <button class="gp-button gp-button--primary gp-button--sm" type="submit">Gerar entrega</button>
           </form>

@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import Http404, HttpResponseForbidden
@@ -34,6 +35,7 @@ from .services_requisitos import (
     avaliar_requisitos_matricula,
     registrar_override_requisitos_matricula,
 )
+from .services_schedule_conflicts import ScheduleConflictService
 
 
 def _municipio_id_from_turma(turma: Turma | None) -> int | None:
@@ -195,11 +197,11 @@ def aluno_list(request):
 
     base_q = f"q={escape(q)}" if q else ""
     actions = [
-        {"label": "Exportar CSV", "url": f"?{base_q + ('&' if base_q else '')}export=csv", "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
-        {"label": "Exportar PDF", "url": f"?{base_q + ('&' if base_q else '')}export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
+        {"label": "Exportar CSV", "url": f"?{base_q + ('&' if base_q else '')}export=csv", "icon": "fa-solid fa-file-csv", "variant": "gp-button--ghost"},
+        {"label": "Exportar PDF", "url": f"?{base_q + ('&' if base_q else '')}export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"},
     ]
     if can_edu_manage:
-        actions.append({"label": "Novo Aluno", "url": reverse("educacao:aluno_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+        actions.append({"label": "Novo Aluno", "url": reverse("educacao:aluno_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
 
     headers = [
         {"label": "Nome"},
@@ -361,7 +363,7 @@ def aluno_detail(request, pk: int):
             "add_certificado",
             "add_matricula_curso",
         } and not can_edu_manage:
-            return HttpResponseForbidden("403 — Você não tem permissão para alterar dados de Educação.")
+            return HttpResponseForbidden("403 — Você não tem permissão para editar dados de Educação.")
 
         if action == "add_matricula":
             form_matricula = MatriculaForm(request.POST, user=request.user)
@@ -380,10 +382,10 @@ def aluno_detail(request, pk: int):
                 if not turma_ok:
                     return HttpResponseForbidden("403 — Turma fora do seu escopo.")
 
+                wants_override = bool(form_matricula.cleaned_data.get("override_requisitos"))
+                justificativa = (form_matricula.cleaned_data.get("override_justificativa") or "").strip()
                 avaliacao_requisitos = avaliar_requisitos_matricula(aluno=aluno, turma=m.turma)
                 if avaliacao_requisitos.bloqueado:
-                    wants_override = bool(form_matricula.cleaned_data.get("override_requisitos"))
-                    justificativa = (form_matricula.cleaned_data.get("override_justificativa") or "").strip()
                     if wants_override and justificativa:
                         registrar_override_requisitos_matricula(
                             usuario=request.user,
@@ -401,9 +403,41 @@ def aluno_detail(request, pk: int):
                 for aviso in avaliacao_requisitos.avisos:
                     messages.warning(request, aviso)
 
+                try:
+                    conflict_result = ScheduleConflictService.ensure_regular_enrollment_allowed(
+                        aluno=aluno,
+                        turma=m.turma,
+                        data_matricula=m.data_matricula,
+                        allow_override=wants_override,
+                        override_justificativa=justificativa,
+                        usuario=request.user,
+                        contexto="ALUNO_DETAIL_MATRICULA",
+                        ip_origem=(request.META.get("REMOTE_ADDR") or ""),
+                    )
+                except ValueError as exc:
+                    for line in str(exc).splitlines():
+                        if line.strip():
+                            form_matricula.add_error("turma", line.strip())
+                            messages.error(request, line.strip())
+                    messages.error(request, "Matrícula bloqueada por conflito de horários.")
+                    return redirect("educacao:aluno_detail", pk=aluno.pk)
+
+                if conflict_result.has_conflict:
+                    if conflict_result.blocking_mode == "block" and wants_override and justificativa:
+                        messages.warning(request, "Matrícula liberada por exceção de conflito de horário com auditoria.")
+                    elif conflict_result.blocking_mode in {"warn", "allow"}:
+                        for line in ScheduleConflictService.describe_conflicts(conflict_result):
+                            messages.warning(request, line)
+
                 if not m.data_matricula:
                     m.data_matricula = timezone.localdate()
 
+                try:
+                    m.full_clean()
+                except ValidationError as exc:
+                    for line in exc.messages:
+                        messages.error(request, line)
+                    return redirect("educacao:aluno_detail", pk=aluno.pk)
                 m.save()
                 registrar_movimentacao(
                     matricula=m,
@@ -513,13 +547,13 @@ def aluno_detail(request, pk: int):
                 motivo = form_movimentacao.cleaned_data.get("motivo") or ""
                 data_referencia = form_movimentacao.cleaned_data.get("data_referencia")
                 tipo_trancamento = form_movimentacao.cleaned_data.get("tipo_trancamento") or ""
+                wants_override = bool(form_movimentacao.cleaned_data.get("override_requisitos"))
+                justificativa = (form_movimentacao.cleaned_data.get("override_justificativa") or "").strip()
                 if tipo in {
                     MatriculaMovimentacao.Tipo.REMANEJAMENTO,
                     MatriculaMovimentacao.Tipo.TRANSFERENCIA,
                 } and turma_destino:
                     avaliacao_requisitos = avaliar_requisitos_matricula(aluno=aluno, turma=turma_destino)
-                    wants_override = bool(form_movimentacao.cleaned_data.get("override_requisitos"))
-                    justificativa = (form_movimentacao.cleaned_data.get("override_justificativa") or "").strip()
                     if avaliacao_requisitos.bloqueado:
                         if wants_override and justificativa:
                             registrar_override_requisitos_matricula(
@@ -569,11 +603,19 @@ def aluno_detail(request, pk: int):
                             data_referencia=data_referencia,
                             tipo_trancamento=tipo_trancamento,
                             motivo=motivo,
+                            allow_conflict_override=wants_override,
+                            conflict_override_justificativa=justificativa,
+                            conflict_override_contexto=f"ALUNO_DETAIL_{tipo}",
                         )
                     except ValueError as exc:
                         form_movimentacao.add_error("turma_destino", str(exc))
                         messages.error(request, str(exc))
                     else:
+                        if tipo in {
+                            MatriculaMovimentacao.Tipo.REMANEJAMENTO,
+                            MatriculaMovimentacao.Tipo.TRANSFERENCIA,
+                        } and wants_override and justificativa:
+                            messages.warning(request, "Movimentação liberada por exceção de conflito de horário com auditoria.")
                         messages_map = {
                             MatriculaMovimentacao.Tipo.REMANEJAMENTO: "Remanejamento realizado com sucesso.",
                             MatriculaMovimentacao.Tipo.TRANSFERENCIA: "Transferência realizada com sucesso.",
@@ -647,7 +689,17 @@ def aluno_detail(request, pk: int):
                 matricula_curso = form_matricula_curso.save(commit=False)
                 matricula_curso.aluno = aluno
                 matricula_curso.cadastrado_por = request.user
+                try:
+                    matricula_curso.full_clean()
+                except ValidationError as exc:
+                    for line in exc.messages:
+                        messages.error(request, line)
+                    return redirect("educacao:aluno_detail", pk=aluno.pk)
                 matricula_curso.save()
+                conflict_result = getattr(form_matricula_curso, "schedule_conflict_result", None)
+                if conflict_result and conflict_result.has_conflict and conflict_result.blocking_mode in {"warn", "allow"}:
+                    for line in ScheduleConflictService.describe_conflicts(conflict_result):
+                        messages.warning(request, line)
                 messages.success(request, "Aluno matriculado na atividade extracurricular com sucesso.")
                 return redirect("educacao:aluno_detail", pk=aluno.pk)
 
@@ -762,14 +814,14 @@ def aluno_detail(request, pk: int):
         )
 
     actions = [
-        {"label": "Voltar", "url": reverse("educacao:aluno_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-        {"label": "Meus dados do aluno", "url": reverse("educacao:aluno_meus_dados", args=[aluno.pk]), "icon": "fa-solid fa-user-graduate", "variant": "btn--ghost"},
-        {"label": "Histórico Escolar", "url": reverse("educacao:historico_aluno", args=[aluno.pk]), "icon": "fa-solid fa-scroll", "variant": "btn--ghost"},
+        {"label": "Voltar", "url": reverse("educacao:aluno_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+        {"label": "Meus dados do aluno", "url": reverse("educacao:aluno_meus_dados", args=[aluno.pk]), "icon": "fa-solid fa-user-graduate", "variant": "gp-button--ghost"},
+        {"label": "Histórico Escolar", "url": reverse("educacao:historico_aluno", args=[aluno.pk]), "icon": "fa-solid fa-scroll", "variant": "gp-button--ghost"},
         {
             "label": "Declaração de Vínculo",
             "url": reverse("educacao:declaracao_vinculo_pdf", args=[aluno.pk]),
             "icon": "fa-solid fa-file-signature",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
     ]
     if can_edu_manage:
@@ -778,10 +830,10 @@ def aluno_detail(request, pk: int):
                 "label": "Carteira PDF",
                 "url": reverse("educacao:carteira_emitir_pdf", args=[aluno.pk]),
                 "icon": "fa-solid fa-id-card",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             }
         )
-        actions.append({"label": "Editar", "url": reverse("educacao:aluno_update", args=[aluno.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+        actions.append({"label": "Editar", "url": reverse("educacao:aluno_update", args=[aluno.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
 
     return render(
         request,

@@ -1,6 +1,6 @@
 {% extends "core/base.html" %}
 
-{% block header %}Confirmar Exclusão{% endblock %}
+{% block header %}Confirmar Remoção{% endblock %}
 
 {% block content %}
 <div class="card gp-card">
@@ -8,17 +8,17 @@
     {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
     {% if can_delete %}
-      <div class="alert gp-alert alert--warning" style="margin: 12px 0 16px;">
+      <div class="alert gp-alert alert--warning u-my-12-16">
         Esta ação é permanente. Revise os dados antes de confirmar.
       </div>
     {% else %}
-      <div class="alert gp-alert alert--danger" style="margin: 12px 0 16px;">
-        Esta exclusão está bloqueada por vínculos ativos.
+      <div class="alert gp-alert alert--danger u-my-12-16">
+        Esta remoção está bloqueada por vínculos ativos.
       </div>
     {% endif %}
 
-    <div class="gp-detail-summary" style="margin-bottom: 14px;">
-      <div class="gp-detail-summary__grid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px;">
+    <div class="gp-detail-summary u-mb-14">
+      <div class="gp-detail-summary__grid u-grid-auto-220">
         <article class="gp-detail-summary__item">
           <span class="gp-detail-summary__label">Tipo</span>
           <strong class="gp-detail-summary__value">{{ entity_label }}</strong>
@@ -35,8 +35,8 @@
     </div>
 
     {% if dependencies %}
-      <div class="table-shell gp-table gp-table--responsive" style="margin-bottom: 14px;">
-        <table class="table">
+      <div class="table-shell gp-table gp-table--responsive u-mb-14">
+        <table class="gp-table__native table">
           <thead>
             <tr>
               <th>Dependência</th>
@@ -56,9 +56,9 @@
     {% endif %}
 
     {% if blockers %}
-      <div class="alert gp-alert alert--danger" style="margin-bottom: 14px;">
+      <div class="alert gp-alert alert--danger u-mb-14">
         <strong>Bloqueios:</strong>
-        <ul style="margin:8px 0 0 16px;">
+        <ul class="u-mt-8 u-ml-16">
           {% for item in blockers %}
             <li>{{ item }}</li>
           {% endfor %}
@@ -67,18 +67,18 @@
     {% endif %}
 
     {% if can_delete %}
-      <form method="post" style="display:grid; gap:10px; max-width:440px;">
+      <form method="post" class="u-grid-gap-10 u-maxw-440 form-shell">
         {% csrf_token %}
         <input type="hidden" name="next" value="{{ next_url }}">
-        <div class="gp-form-group">
-          <label class="gp-form-label" for="id_confirm_text">
+        <div class="gp-form-group form-shell">
+          <label class="gp-form-label form-shell" for="id_confirm_text">
             Digite <strong>{{ confirm_text }}</strong> para confirmar
           </label>
           <input id="id_confirm_text" name="confirm_text" type="text" class="gp-input" autocomplete="off" required>
         </div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <div class="u-flex u-gap-8 u-flex-wrap">
           <button type="submit" class="gp-button gp-button--danger">
-            <i class="fa-solid fa-trash-can"></i> Confirmar exclusão
+            <i class="fa-solid fa-trash-can"></i> Confirmar remoção
           </button>
           <a href="{{ next_url }}" class="gp-button gp-button--outline">Cancelar</a>
         </div>

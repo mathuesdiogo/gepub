@@ -75,13 +75,13 @@ def index(request):
                     "label": "Novo contribuinte",
                     "url": reverse("tributos:contribuinte_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "Lançamentos",
                     "url": reverse("tributos:lancamento_list") + _q_municipio(municipio),
                     "icon": "fa-solid fa-receipt",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -149,19 +149,19 @@ def contribuinte_list(request):
                     "label": "Novo contribuinte",
                     "url": reverse("tributos:contribuinte_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "CSV",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&export=csv",
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "PDF",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&export=pdf",
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -173,7 +173,7 @@ def contribuinte_list(request):
 def contribuinte_create(request):
     municipio = _resolve_municipio(request, require_selected=True)
     if not municipio:
-        messages.error(request, "Selecione um município para cadastrar contribuinte.")
+        messages.error(request, "Selecione um município para adicionar contribuinte.")
         return redirect("tributos:contribuinte_list")
     form = TributosCadastroForm(request.POST or None, municipio=municipio)
     if request.method == "POST" and form.is_valid():
@@ -287,19 +287,19 @@ def lancamento_list(request):
                     "label": "Novo lançamento",
                     "url": reverse("tributos:lancamento_create") + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "CSV",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&tipo={tipo}&export=csv",
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "PDF",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&tipo={tipo}&export=pdf",
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },

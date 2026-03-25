@@ -53,7 +53,7 @@ def cid_list(request):
     can_manage = can(request.user, "saude.manage")
     actions = []
     if can_manage:
-        actions.append({"label": "Novo CID", "url": reverse("saude:cid_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+        actions.append({"label": "Novo CID", "url": reverse("saude:cid_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
     headers = [{"label": "Código"}, {"label": "Descrição"}, {"label": "Ativo", "width": "90px"}]
     rows = [
         {
@@ -122,9 +122,9 @@ def cid_update(request, pk: int):
 @require_perm("saude.view")
 def cid_detail(request, pk: int):
     obj = get_object_or_404(CidSaude, pk=pk)
-    actions = [{"label": "Voltar", "url": reverse("saude:cid_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+    actions = [{"label": "Voltar", "url": reverse("saude:cid_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
     if can(request.user, "saude.manage"):
-        actions.append({"label": "Editar", "url": reverse("saude:cid_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+        actions.append({"label": "Editar", "url": reverse("saude:cid_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
     fields = [{"label": "Código", "value": obj.codigo}, {"label": "Descrição", "value": obj.descricao}]
     pills = [{"label": "Ativo", "value": "Sim" if obj.ativo else "Não", "variant": "info"}]
     return render(request, "saude/generic_detail.html", {"title": f"CID {obj.codigo}", "subtitle": obj.descricao, "fields": fields, "pills": pills, "actions": actions})
@@ -141,7 +141,7 @@ def programa_list(request):
     can_manage = can(request.user, "saude.manage")
     actions = []
     if can_manage:
-        actions.append({"label": "Novo Programa/Convênio", "url": reverse("saude:programa_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+        actions.append({"label": "Novo Programa/Convênio", "url": reverse("saude:programa_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
     headers = [{"label": "Nome"}, {"label": "Tipo"}, {"label": "Ativo", "width": "90px"}]
     rows = [
         {
@@ -193,9 +193,9 @@ def programa_update(request, pk: int):
 @require_perm("saude.view")
 def programa_detail(request, pk: int):
     obj = get_object_or_404(ProgramaSaude, pk=pk)
-    actions = [{"label": "Voltar", "url": reverse("saude:programa_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+    actions = [{"label": "Voltar", "url": reverse("saude:programa_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
     if can(request.user, "saude.manage"):
-        actions.append({"label": "Editar", "url": reverse("saude:programa_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+        actions.append({"label": "Editar", "url": reverse("saude:programa_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
     fields = [{"label": "Nome", "value": obj.nome}, {"label": "Tipo", "value": obj.get_tipo_display()}]
     pills = [{"label": "Ativo", "value": "Sim" if obj.ativo else "Não", "variant": "info"}]
     return render(request, "saude/generic_detail.html", {"title": obj.nome, "subtitle": "Programa/Convênio", "fields": fields, "pills": pills, "actions": actions})
@@ -215,7 +215,7 @@ def paciente_list(request):
     can_manage = can(request.user, "saude.manage")
     actions = []
     if can_manage:
-        actions.append({"label": "Novo Paciente", "url": reverse("saude:paciente_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+        actions.append({"label": "Novo Paciente", "url": reverse("saude:paciente_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
     headers = [{"label": "Paciente"}, {"label": "Unidade"}, {"label": "Programa"}, {"label": "CPF"}, {"label": "Ativo", "width": "90px"}]
     rows = [
         {
@@ -272,17 +272,17 @@ def paciente_update(request, pk: int):
 def paciente_detail(request, pk: int):
     unidades_qs = _scoped_unidades(request.user)
     obj = get_object_or_404(PacienteSaude.objects.select_related("unidade_referencia", "programa").filter(unidade_referencia_id__in=unidades_qs.values_list("id", flat=True)), pk=pk)
-    actions = [{"label": "Voltar", "url": reverse("saude:paciente_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+    actions = [{"label": "Voltar", "url": reverse("saude:paciente_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
     actions.append(
         {
             "label": "Portal Editais",
             "url": reverse("saude:portal_paciente_inscricoes", args=[obj.pk]),
             "icon": "fa-solid fa-file-circle-check",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }
     )
     if can(request.user, "saude.manage"):
-        actions.append({"label": "Editar", "url": reverse("saude:paciente_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+        actions.append({"label": "Editar", "url": reverse("saude:paciente_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
     fields = [
         {"label": "Unidade", "value": obj.unidade_referencia.nome},
         {"label": "Programa/Convênio", "value": obj.programa.nome if obj.programa_id else "—"},
@@ -316,7 +316,7 @@ def checkin_list(request):
     can_manage = can(request.user, "saude.manage")
     actions = []
     if can_manage:
-        actions.append({"label": "Novo Check-in", "url": reverse("saude:checkin_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+        actions.append({"label": "Novo Check-in", "url": reverse("saude:checkin_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
     headers = [{"label": "Paciente"}, {"label": "Chegada"}, {"label": "Unidade"}, {"label": "Status"}, {"label": "Risco"}]
     rows = [
         {
@@ -394,9 +394,9 @@ def checkin_update(request, pk: int):
 def checkin_detail(request, pk: int):
     unidades_qs = _scoped_unidades(request.user)
     obj = get_object_or_404(CheckInSaude.objects.select_related("unidade", "paciente", "agendamento", "atendimento", "criado_por").filter(unidade_id__in=unidades_qs.values_list("id", flat=True)), pk=pk)
-    actions = [{"label": "Voltar", "url": reverse("saude:checkin_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+    actions = [{"label": "Voltar", "url": reverse("saude:checkin_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
     if can(request.user, "saude.manage"):
-        actions.append({"label": "Editar", "url": reverse("saude:checkin_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+        actions.append({"label": "Editar", "url": reverse("saude:checkin_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
     fields = [
         {"label": "Unidade", "value": obj.unidade.nome},
         {"label": "Paciente cadastro", "value": obj.paciente.nome if obj.paciente_id else "—"},
@@ -424,7 +424,7 @@ def medicamento_uso_list(request):
     can_manage = can(request.user, "saude.manage")
     actions = []
     if can_manage:
-        actions.append({"label": "Novo Medicamento em Uso", "url": reverse("saude:medicamento_uso_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+        actions.append({"label": "Novo Medicamento em Uso", "url": reverse("saude:medicamento_uso_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
     headers = [{"label": "Paciente"}, {"label": "Medicamento"}, {"label": "Posologia"}, {"label": "Ativo"}]
     rows = [
         {
@@ -482,9 +482,9 @@ def medicamento_uso_update(request, pk: int):
 def medicamento_uso_detail(request, pk: int):
     unidades_qs = _scoped_unidades(request.user)
     obj = get_object_or_404(MedicamentoUsoContinuoSaude.objects.select_related("paciente", "criado_por").filter(paciente__unidade_referencia_id__in=unidades_qs.values_list("id", flat=True)), pk=pk)
-    actions = [{"label": "Voltar", "url": reverse("saude:medicamento_uso_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+    actions = [{"label": "Voltar", "url": reverse("saude:medicamento_uso_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
     if can(request.user, "saude.manage"):
-        actions.append({"label": "Editar", "url": reverse("saude:medicamento_uso_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+        actions.append({"label": "Editar", "url": reverse("saude:medicamento_uso_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
     fields = [{"label": "Paciente", "value": obj.paciente.nome}, {"label": "Medicamento", "value": obj.medicamento}, {"label": "Dose", "value": obj.dose or "—"}, {"label": "Via", "value": obj.via or "—"}, {"label": "Frequência", "value": obj.frequencia or "—"}, {"label": "Início", "value": obj.inicio.strftime("%d/%m/%Y") if obj.inicio else "—"}, {"label": "Fim", "value": obj.fim.strftime("%d/%m/%Y") if obj.fim else "—"}, {"label": "Observações", "value": obj.observacoes or "—"}, {"label": "Registrado por", "value": obj.criado_por.get_username()}]
     pills = [{"label": "Ativo", "value": "Sim" if obj.ativo else "Não", "variant": "info"}]
     return render(request, "saude/generic_detail.html", {"title": obj.medicamento, "subtitle": obj.paciente.nome, "fields": fields, "pills": pills, "actions": actions})
@@ -502,7 +502,7 @@ def dispensacao_list(request):
     can_manage = can(request.user, "saude.manage")
     actions = []
     if can_manage:
-        actions.append({"label": "Nova Dispensação", "url": reverse("saude:dispensacao_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+        actions.append({"label": "Nova Dispensação", "url": reverse("saude:dispensacao_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
     headers = [{"label": "Paciente"}, {"label": "Medicamento"}, {"label": "Quantidade"}, {"label": "Unidade"}, {"label": "Data"}]
     rows = [
         {
@@ -561,9 +561,9 @@ def dispensacao_update(request, pk: int):
 def dispensacao_detail(request, pk: int):
     unidades_qs = _scoped_unidades(request.user)
     obj = get_object_or_404(DispensacaoSaude.objects.select_related("unidade", "paciente", "dispensado_por").filter(unidade_id__in=unidades_qs.values_list("id", flat=True)), pk=pk)
-    actions = [{"label": "Voltar", "url": reverse("saude:dispensacao_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+    actions = [{"label": "Voltar", "url": reverse("saude:dispensacao_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
     if can(request.user, "saude.manage"):
-        actions.append({"label": "Editar", "url": reverse("saude:dispensacao_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+        actions.append({"label": "Editar", "url": reverse("saude:dispensacao_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
     fields = [{"label": "Paciente", "value": obj.paciente.nome}, {"label": "Medicamento", "value": obj.medicamento}, {"label": "Quantidade", "value": f"{obj.quantidade} {obj.unidade_medida}"}, {"label": "Lote", "value": obj.lote or "—"}, {"label": "Validade", "value": obj.validade.strftime("%d/%m/%Y") if obj.validade else "—"}, {"label": "Unidade", "value": obj.unidade.nome}, {"label": "Orientações", "value": obj.orientacoes or "—"}, {"label": "Dispensado por", "value": obj.dispensado_por.get_username()}]
     pills = [{"label": "Data", "value": obj.dispensado_em.strftime("%d/%m/%Y %H:%M"), "variant": "info"}]
     return render(request, "saude/generic_detail.html", {"title": obj.medicamento, "subtitle": "Dispensação", "fields": fields, "pills": pills, "actions": actions})
@@ -586,7 +586,7 @@ def exame_coleta_list(request):
     can_manage = can(request.user, "saude.manage")
     actions = []
     if can_manage:
-        actions.append({"label": "Novo Fluxo de Exame", "url": reverse("saude:exame_coleta_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+        actions.append({"label": "Novo Fluxo de Exame", "url": reverse("saude:exame_coleta_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
     headers = [{"label": "Paciente"}, {"label": "Exame"}, {"label": "Status"}, {"label": "Coleta"}, {"label": "Atualização"}]
     rows = [
         {
@@ -661,9 +661,9 @@ def exame_coleta_update(request, pk: int):
 def exame_coleta_detail(request, pk: int):
     unidades_qs = _scoped_unidades(request.user)
     obj = get_object_or_404(ExameColetaSaude.objects.select_related("pedido", "pedido__atendimento", "atualizado_por").filter(pedido__atendimento__unidade_id__in=unidades_qs.values_list("id", flat=True)), pk=pk)
-    actions = [{"label": "Voltar", "url": reverse("saude:exame_coleta_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+    actions = [{"label": "Voltar", "url": reverse("saude:exame_coleta_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
     if can(request.user, "saude.manage"):
-        actions.append({"label": "Editar", "url": reverse("saude:exame_coleta_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+        actions.append({"label": "Editar", "url": reverse("saude:exame_coleta_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
     fields = [{"label": "Paciente", "value": obj.pedido.atendimento.paciente_nome}, {"label": "Exame", "value": obj.pedido.nome_exame}, {"label": "Local de coleta", "value": obj.local_coleta or "—"}, {"label": "Encaminhado para", "value": obj.encaminhado_para or "—"}, {"label": "Observações", "value": obj.observacoes or "—"}, {"label": "Atualizado por", "value": obj.atualizado_por.get_username()}]
     pills = [{"label": "Status", "value": obj.get_status_display(), "variant": "info"}, {"label": "Data da coleta", "value": obj.data_coleta.strftime("%d/%m/%Y %H:%M") if obj.data_coleta else "—", "variant": "warning"}]
     return render(request, "saude/generic_detail.html", {"title": obj.pedido.nome_exame, "subtitle": "Fluxo de exame", "fields": fields, "pills": pills, "actions": actions})
@@ -684,7 +684,7 @@ def internacao_list(request):
     can_manage = can(request.user, "saude.manage")
     actions = []
     if can_manage:
-        actions.append({"label": "Nova Internação/Observação", "url": reverse("saude:internacao_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"})
+        actions.append({"label": "Nova Internação/Observação", "url": reverse("saude:internacao_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"})
     headers = [{"label": "Paciente"}, {"label": "Tipo"}, {"label": "Leito"}, {"label": "Unidade"}, {"label": "Status"}]
     rows = [
         {
@@ -772,9 +772,9 @@ def internacao_detail(request, pk: int):
         messages.error(request, "Corrija os erros do registro da internação.")
 
     reg_form = InternacaoRegistroSaudeForm()
-    actions = [{"label": "Voltar", "url": reverse("saude:internacao_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+    actions = [{"label": "Voltar", "url": reverse("saude:internacao_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
     if can(request.user, "saude.manage"):
-        actions.append({"label": "Editar", "url": reverse("saude:internacao_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+        actions.append({"label": "Editar", "url": reverse("saude:internacao_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
     fields = [{"label": "Paciente", "value": obj.paciente.nome}, {"label": "Unidade", "value": obj.unidade.nome}, {"label": "Profissional responsável", "value": obj.profissional_responsavel.nome if obj.profissional_responsavel_id else "—"}, {"label": "Leito", "value": obj.leito or "—"}, {"label": "Motivo", "value": obj.motivo}, {"label": "Resumo de alta", "value": obj.resumo_alta or "—"}, {"label": "Criado por", "value": obj.criado_por.get_username()}]
     pills = [{"label": "Tipo", "value": obj.get_tipo_display(), "variant": "info"}, {"label": "Status", "value": obj.get_status_display(), "variant": "warning"}, {"label": "Admissão", "value": obj.data_admissao.strftime("%d/%m/%Y %H:%M"), "variant": "info"}]
     registros = [

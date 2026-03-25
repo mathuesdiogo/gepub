@@ -8,34 +8,34 @@
 
   <div class="gp-grid-2 gp-student-stage__grid">
     <article class="gp-student-stage__card">
-      <h3>Abrir chamado</h3>
-      <form method="post" class="gp-form gp-form--smart">
+      <h3>Adicionar chamado</h3>
+      <form method="post" class="gp-form gp-form--smart form-shell">
         {% csrf_token %}
         <input type="hidden" name="form_kind" value="abrir_chamado">
         {% for field in chamado_form %}
-          <div class="gp-form-group">
-            <label class="gp-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          <div class="gp-form-group form-shell">
+            <label class="gp-form-label form-shell" for="{{ field.id_for_label }}">{{ field.label }}</label>
             {{ field }}
-            {% if field.errors %}<small class="gp-form-error">{{ field.errors|striptags }}</small>{% endif %}
+            {% if field.errors %}<small class="gp-form-error form-shell">{{ field.errors|striptags }}</small>{% endif %}
           </div>
         {% endfor %}
-        <button type="submit" class="gp-button gp-button--primary"><i class="fa-solid fa-life-ring"></i> Abrir chamado</button>
+        <button type="submit" class="gp-button gp-button--primary"><i class="fa-solid fa-life-ring"></i> Adicionar chamado</button>
       </form>
     </article>
 
     <article class="gp-student-stage__card">
       <h3>Solicitações cadastrais</h3>
-      <form method="post" class="gp-form gp-form--smart">
+      <form method="post" class="gp-form gp-form--smart form-shell">
         {% csrf_token %}
         <input type="hidden" name="form_kind" value="solicitacao_cadastro">
         {% for field in cadastro_form %}
-          <div class="gp-form-group">
-            <label class="gp-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          <div class="gp-form-group form-shell">
+            <label class="gp-form-label form-shell" for="{{ field.id_for_label }}">{{ field.label }}</label>
             {{ field }}
-            {% if field.errors %}<small class="gp-form-error">{{ field.errors|striptags }}</small>{% endif %}
+            {% if field.errors %}<small class="gp-form-error form-shell">{{ field.errors|striptags }}</small>{% endif %}
           </div>
         {% endfor %}
-        <button type="submit" class="gp-button gp-button--secondary"><i class="fa-solid fa-id-card"></i> Enviar solicitação</button>
+        <button type="submit" class="gp-button gp-button--secondary"><i class="fa-solid fa-id-card gp-card"></i> Enviar solicitação</button>
       </form>
     </article>
   </div>

@@ -98,20 +98,20 @@ class AvaliacaoListView(BaseListViewGepub):
                 "label": "Voltar",
                 "url": reverse("educacao:diario_detail", args=[diario.pk]),
                 "icon": "fa-solid fa-arrow-left",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             })
             actions.append({
                 "label": "Imprimir PDF",
                 "url": reverse("educacao:avaliacao_list", args=[diario.pk]) + "?export=pdf",
                 "icon": "fa-solid fa-file-pdf",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             })
             if _can_edit_diario(self.request.user, diario):
                 actions.append({
                     "label": "Nova Avaliação",
                     "url": reverse("educacao:avaliacao_create", args=[diario.pk]),
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 })
         return actions
 

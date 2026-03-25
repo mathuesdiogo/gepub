@@ -1,7 +1,7 @@
 {% extends "nee/base_modulo.html" %}
 {% block module_title %}NEE • Painel{% endblock %}
 {% block module_content %}
-<div class="card nee-dashboard"><div class="card__body">
+<div class="card nee-dashboard gp-card"><div class="card__body gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title="NEE" subtitle="Necessidades Educacionais Especiais" actions=actions %}
 
   <section class="nee-hero">
@@ -23,7 +23,7 @@
         <i class="fa-solid fa-magnifying-glass"></i><span>Buscar aluno</span>
       </a>
       <a class="gp-button gp-button--outline" href="{% url 'nee:alertas_index' %}">
-        <i class="fa-solid fa-triangle-exclamation"></i><span>Ver alertas</span>
+        <i class="fa-solid fa-triangle-exclamation"></i><span>Visualizar alertas</span>
       </a>
       <a class="gp-button gp-button--outline" href="{% url 'nee:relatorios_index' %}">
         <i class="fa-solid fa-chart-column"></i><span>Relatórios</span>

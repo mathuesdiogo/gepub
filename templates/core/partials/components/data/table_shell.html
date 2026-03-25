@@ -1,9 +1,18 @@
-<div class="table-shell gp-table gp-table--responsive gp-table--striped gp-table--hover">
-  <table class="table gp-table--paginated">
+<div class="table-shell table-responsive gp-table gp-table--responsive gp-table--striped gp-table--hover">
+  <table class="gp-table__native table gp-table--paginated">
+    {% if caption %}
+      <caption>{{ caption }}</caption>
+    {% endif %}
     <thead>
       <tr>
         {% for h in headers %}
-          <th{% if h.width %} width="{{ h.width }}"{% endif %}>{{ h.label }}</th>
+          <th{% if h.width %} width="{{ h.width }}"{% endif %}>
+            {% if h.hint %}
+              <span class="text hint bottom" aria-label="{{ h.hint }}">{{ h.label }}</span>
+            {% else %}
+              {{ h.label }}
+            {% endif %}
+          </th>
         {% endfor %}
         {% if actions_partial %}
           <th width="280px">Ações</th>
@@ -13,7 +22,7 @@
 
     <tbody>
       {% for r in rows %}
-        <tr>
+        <tr{% if r.row_class %} class="{{ r.row_class }}"{% endif %}>
           {% for c in r.cells %}
             <td{% if c.width %} width="{{ c.width }}"{% endif %}>
               {% if c.html %}

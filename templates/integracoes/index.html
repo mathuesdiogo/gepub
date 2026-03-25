@@ -48,10 +48,10 @@
       </div>
     </div>
 
-    <form method="get" class="ig-filter-grid">
+    <form method="get" class="ig-filter-grid form-shell search-and-filters">
       {% if municipios and municipios|length %}
-        <label class="gp-form-group">
-          <span class="gp-form-label">Município</span>
+        <label class="gp-form-group form-shell">
+          <span class="gp-form-label form-shell">Município</span>
           <select name="municipio" class="gp-select">
             {% for m in municipios %}
               <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
@@ -60,8 +60,8 @@
         </label>
       {% endif %}
 
-      <label class="gp-form-group">
-        <span class="gp-form-label">Busca textual</span>
+      <label class="gp-form-group form-shell">
+        <span class="gp-form-label form-shell">Busca textual</span>
         <input name="q" value="{{ q }}" class="gp-input" placeholder="Conector, domínio, endpoint ou referência">
       </label>
 
@@ -81,9 +81,9 @@
         </div>
       </div>
 
-      <div class="table-shell">
-        <div class="table-shell__body">
-          <table class="table ig-table">
+      <div class="table-shell gp-table gp-table--responsive">
+        <div class="table-shell__body gp-table__body">
+          <table class="gp-table__native table ig-table">
             <thead>
               <tr>
                 <th>Nome</th>
@@ -150,9 +150,9 @@
         </div>
       </div>
 
-      <div class="table-shell">
-        <div class="table-shell__body">
-          <table class="table ig-table">
+      <div class="table-shell gp-table gp-table--responsive">
+        <div class="table-shell__body gp-table__body">
+          <table class="gp-table__native table ig-table">
             <thead>
               <tr>
                 <th>Data/Hora</th>
@@ -175,7 +175,7 @@
                   <td><code class="ig-code">{{ item.referencia|default:"-" }}</code></td>
                   <td>
                     {% if item.status == "FALHA" %}
-                      <form method="post" action="{% url 'integracoes:execucao_reprocessar' item.id %}?municipio={{ municipio.id }}">
+                      <form method="post" action="{% url 'integracoes:execucao_reprocessar' item.id %}?municipio={{ municipio.id }}" class="u-inline-form">
                         {% csrf_token %}
                         <button type="submit" class="gp-button gp-button--outline gp-button--sm">Reprocessar</button>
                       </form>

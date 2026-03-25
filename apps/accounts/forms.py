@@ -4,7 +4,7 @@ from apps.core.rbac import allowed_roles_for_manager_role, is_admin, scope_filte
 from django import forms
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from apps.org.models import Municipio, Secretaria, Unidade, Setor
+from apps.org.models import Municipio, Secretaria, Unidade, Setor, LocalEstrutural
 from .models import Profile
 from django.contrib.auth.password_validation import validate_password
 User = get_user_model()
@@ -63,6 +63,11 @@ class _UsuarioBaseForm(forms.Form):
     secretaria = forms.ModelChoiceField(label="Secretaria", queryset=Secretaria.objects.none(), required=False)
     unidade = forms.ModelChoiceField(label="Unidade", queryset=Unidade.objects.none(), required=False)
     setor = forms.ModelChoiceField(label="Setor", queryset=Setor.objects.none(), required=False)
+    local_estrutural = forms.ModelChoiceField(
+        label="Local estrutural",
+        queryset=LocalEstrutural.objects.none(),
+        required=False,
+    )
     turmas = forms.ModelMultipleChoiceField(
         label="Turmas (somente para Professor)",
         queryset=Turma.objects.none(),
@@ -90,6 +95,11 @@ class _UsuarioBaseForm(forms.Form):
         self.fields["setor"].queryset = (
             Setor.objects.select_related("unidade", "unidade__secretaria", "unidade__secretaria__municipio")
             .filter(ativo=True)
+            .order_by("nome")
+        )
+        self.fields["local_estrutural"].queryset = (
+            LocalEstrutural.objects.select_related("unidade", "secretaria", "municipio")
+            .filter(status=LocalEstrutural.Status.ATIVO)
             .order_by("nome")
         )
 
@@ -159,6 +169,13 @@ class _UsuarioBaseForm(forms.Form):
             self.fields["setor"].initial = p.setor_id
             self.fields["setor"].disabled = True
 
+        if getattr(p, "local_estrutural_id", None):
+            self.fields["local_estrutural"].queryset = self.fields["local_estrutural"].queryset.filter(
+                id=p.local_estrutural_id
+            )
+            self.fields["local_estrutural"].initial = p.local_estrutural_id
+            self.fields["local_estrutural"].disabled = True
+
     def _apply_chained_filters(self):
         selected_municipio = self._selected_value("municipio")
         selected_secretaria = self._selected_value("secretaria")
@@ -174,6 +191,9 @@ class _UsuarioBaseForm(forms.Form):
             self.fields["setor"].queryset = self.fields["setor"].queryset.filter(
                 unidade__secretaria__municipio_id=int(selected_municipio)
             )
+            self.fields["local_estrutural"].queryset = self.fields["local_estrutural"].queryset.filter(
+                municipio_id=int(selected_municipio)
+            )
 
         if selected_secretaria and selected_secretaria.isdigit():
             self.fields["unidade"].queryset = self.fields["unidade"].queryset.filter(
@@ -182,9 +202,15 @@ class _UsuarioBaseForm(forms.Form):
             self.fields["setor"].queryset = self.fields["setor"].queryset.filter(
                 unidade__secretaria_id=int(selected_secretaria)
             )
+            self.fields["local_estrutural"].queryset = self.fields["local_estrutural"].queryset.filter(
+                secretaria_id=int(selected_secretaria)
+            )
 
         if selected_unidade and selected_unidade.isdigit():
             self.fields["setor"].queryset = self.fields["setor"].queryset.filter(
+                unidade_id=int(selected_unidade)
+            )
+            self.fields["local_estrutural"].queryset = self.fields["local_estrutural"].queryset.filter(
                 unidade_id=int(selected_unidade)
             )
 
@@ -194,6 +220,7 @@ class _UsuarioBaseForm(forms.Form):
         secretaria = cleaned.get("secretaria")
         unidade = cleaned.get("unidade")
         setor = cleaned.get("setor")
+        local_estrutural = cleaned.get("local_estrutural")
 
         if secretaria and municipio and secretaria.municipio_id != municipio.id:
             self.add_error("secretaria", "A secretaria não pertence ao município selecionado.")
@@ -210,6 +237,13 @@ class _UsuarioBaseForm(forms.Form):
             self.add_error("setor", "O setor não pertence à secretaria selecionada.")
         elif setor and municipio and setor.unidade and setor.unidade.secretaria and setor.unidade.secretaria.municipio_id != municipio.id:
             self.add_error("setor", "O setor não pertence ao município selecionado.")
+
+        if local_estrutural and unidade and local_estrutural.unidade_id != unidade.id:
+            self.add_error("local_estrutural", "O local estrutural não pertence à unidade selecionada.")
+        elif local_estrutural and secretaria and local_estrutural.secretaria_id != secretaria.id:
+            self.add_error("local_estrutural", "O local estrutural não pertence à secretaria selecionada.")
+        elif local_estrutural and municipio and local_estrutural.municipio_id != municipio.id:
+            self.add_error("local_estrutural", "O local estrutural não pertence ao município selecionado.")
 
         return cleaned
 

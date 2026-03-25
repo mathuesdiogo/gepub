@@ -178,7 +178,7 @@ def curso_list(request):
                 "label": "Nova Atividade Extra",
                 "url": reverse("educacao:curso_create"),
                 "icon": "fa-solid fa-plus",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             }
         )
     actions.append(
@@ -186,7 +186,7 @@ def curso_list(request):
             "label": "Voltar",
             "url": reverse("educacao:index"),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }
     )
 
@@ -251,7 +251,7 @@ def curso_create(request):
                     "label": "Voltar",
                     "url": reverse("educacao:curso_list"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -301,13 +301,13 @@ def curso_update(request, pk: int):
             "mode": "update",
             "curso": curso,
             "cancel_url": reverse("educacao:curso_list"),
-            "submit_label": "Atualizar atividade extra",
+            "submit_label": "Editar atividade extra",
             "actions": [
                 {
                     "label": "Voltar",
                     "url": reverse("educacao:curso_list"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -364,7 +364,7 @@ def matriz_list(request):
             "label": "Voltar",
             "url": reverse("educacao:index"),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         }
     ]
     if can_manage:
@@ -374,7 +374,7 @@ def matriz_list(request):
                 "label": "Modelos Oficiais",
                 "url": reverse("educacao:matriz_modelos"),
                 "icon": "fa-solid fa-layer-group",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             },
         )
         actions.insert(
@@ -383,7 +383,7 @@ def matriz_list(request):
                 "label": "Nova Matriz",
                 "url": reverse("educacao:matriz_create"),
                 "icon": "fa-solid fa-plus",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             },
         )
 
@@ -541,7 +541,7 @@ def matriz_modelos(request):
                     "label": "Voltar para Matrizes",
                     "url": reverse("educacao:matriz_list"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -585,7 +585,7 @@ def matriz_create(request):
                     "label": "Voltar",
                     "url": reverse("educacao:matriz_list"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -705,25 +705,25 @@ def matriz_update(request, pk: int):
             "matriz": matriz,
             "next_year_default": int(matriz.ano_referencia) + 1,
             "cancel_url": reverse("educacao:matriz_list"),
-            "submit_label": "Atualizar matriz",
+            "submit_label": "Editar matriz",
             "actions": [
                 {
                     "label": "Equivalências",
                     "url": reverse("educacao:matriz_equivalencias", args=[matriz.pk]),
                     "icon": "fa-solid fa-network-wired",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Consistência",
                     "url": reverse("educacao:matriz_consistencia", args=[matriz.pk]),
                     "icon": "fa-solid fa-ruler-combined",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Voltar",
                     "url": reverse("educacao:matriz_list"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -835,13 +835,13 @@ def matriz_equivalencias(request, pk: int):
                     "label": "Consistência",
                     "url": reverse("educacao:matriz_consistencia", args=[matriz.pk]),
                     "icon": "fa-solid fa-ruler-combined",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Voltar para Matriz",
                     "url": reverse("educacao:matriz_update", args=[matriz.pk]),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -970,25 +970,25 @@ def matriz_consistencia(request, pk: int):
                     "label": "Exportar CSV",
                     "url": reverse("educacao:matriz_consistencia", args=[matriz.pk]) + "?export=csv",
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Exportar PDF",
                     "url": reverse("educacao:matriz_consistencia", args=[matriz.pk]) + "?export=pdf",
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Equivalências",
                     "url": reverse("educacao:matriz_equivalencias", args=[matriz.pk]),
                     "icon": "fa-solid fa-network-wired",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Voltar para Matriz",
                     "url": reverse("educacao:matriz_update", args=[matriz.pk]),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -1055,7 +1055,7 @@ def coordenacao_list(request):
             "label": "Voltar",
             "url": reverse("educacao:index"),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
     ]
     if can_manage:
@@ -1065,7 +1065,7 @@ def coordenacao_list(request):
                 "label": "Nova Coordenação",
                 "url": reverse("educacao:coordenacao_create"),
                 "icon": "fa-solid fa-plus",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             },
         )
 
@@ -1126,7 +1126,7 @@ def coordenacao_create(request):
                     "label": "Voltar",
                     "url": reverse("educacao:coordenacao_list"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -1160,13 +1160,13 @@ def coordenacao_update(request, pk: int):
             "mode": "update",
             "coordenacao": obj,
             "cancel_url": reverse("educacao:coordenacao_list"),
-            "submit_label": "Atualizar coordenação",
+            "submit_label": "Editar coordenação",
             "actions": [
                 {
                     "label": "Voltar",
                     "url": reverse("educacao:coordenacao_list"),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },

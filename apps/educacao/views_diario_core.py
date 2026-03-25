@@ -102,19 +102,19 @@ def diario_detail_impl(request, pk: int):
             "label": "Voltar",
             "url": reverse("educacao:meus_diarios"),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
         {
             "label": "Imprimir PDF",
             "url": reverse("educacao:diario_detail", args=[diario.pk]) + "?export=pdf",
             "icon": "fa-solid fa-file-pdf",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
         {
             "label": "Avaliações",
             "url": reverse("educacao:avaliacao_list", args=[diario.pk]),
             "icon": "fa-solid fa-clipboard-check",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
     ]
 
@@ -124,7 +124,7 @@ def diario_detail_impl(request, pk: int):
                 "label": "Justificativas de Falta",
                 "url": reverse("educacao:justificativa_falta_list"),
                 "icon": "fa-solid fa-file-signature",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             }
         )
 
@@ -134,7 +134,7 @@ def diario_detail_impl(request, pk: int):
                 "label": "Nova Aula",
                 "url": reverse("educacao:aula_create", args=[diario.pk]),
                 "icon": "fa-solid fa-plus",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             }
         )
 
@@ -177,7 +177,7 @@ def diario_detail_impl(request, pk: int):
                     {"text": str(a.periodo) if a.periodo else "—"},
                     {"text": str(a.componente) if a.componente else "—"},
                     {"text": (a.conteudo or "—")[:120]},
-                    {"text": "Abrir link", "url": a.url_atividade} if a.url_atividade else {"text": "—"},
+                    {"text": "Visualizar link", "url": a.url_atividade} if a.url_atividade else {"text": "—"},
                     {"html": acoes_html},
                 ],
                 "can_edit": False,
@@ -291,7 +291,7 @@ def aula_update_impl(request, pk: int, aula_id: int):
             "aula": aula,
             "mode": "update",
             "cancel_url": reverse("educacao:diario_detail", args=[diario.pk]),
-            "submit_label": "Atualizar",
+            "submit_label": "Editar",
             "action_url": reverse("educacao:aula_update", args=[diario.pk, aula.pk]),
             "bncc_hint": getattr(form, "bncc_hint", ""),
         },
@@ -361,7 +361,7 @@ def diario_turma_entry_impl(request, pk: int):
             "label": "Voltar",
             "url": reverse("educacao:turma_detail", args=[turma.pk]),
             "icon": "fa-solid fa-arrow-left",
-            "variant": "btn--ghost",
+            "variant": "gp-button--ghost",
         },
     ]
 

@@ -113,9 +113,9 @@ def historico_aluno(request, pk: int):
         )
 
     actions = [
-        {"label": "Voltar", "url": reverse("educacao:aluno_detail", args=[aluno.pk]), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-        {"label": "Exportar CSV", "url": reverse("educacao:historico_aluno", args=[aluno.pk]) + "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
-        {"label": "Exportar PDF", "url": reverse("educacao:historico_aluno", args=[aluno.pk]) + "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
+        {"label": "Voltar", "url": reverse("educacao:aluno_detail", args=[aluno.pk]), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+        {"label": "Exportar CSV", "url": reverse("educacao:historico_aluno", args=[aluno.pk]) + "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "gp-button--ghost"},
+        {"label": "Exportar PDF", "url": reverse("educacao:historico_aluno", args=[aluno.pk]) + "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"},
     ]
 
     headers = [

@@ -1,19 +1,19 @@
 {% extends "core/base.html" %}
 
 {% block content %}
-<div class="card"><div class="card__body">
+<div class="card gp-card"><div class="card__body gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <form method="post" class="form-grid" style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:12px;">
+  <form method="post" class="form-grid u-grid-5 u-mt-12 form-shell">
     {% csrf_token %}
     {% for field in form %}
       <div>
         <label class="small" for="{{ field.id_for_label }}">{{ field.label }}</label>
         {{ field }}
-        {% for err in field.errors %}<div class="small" style="color:#c0392b;">{{ err }}</div>{% endfor %}
+        {% for err in field.errors %}<div class="small u-text-danger">{{ err }}</div>{% endfor %}
       </div>
     {% endfor %}
-    <div style="grid-column:1 / -1;display:flex;gap:8px;">
+    <div class="u-col-full u-flex u-gap-8">
       <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-floppy-disk"></i> Salvar gabarito {{ versao }}</button>
       <a class="gp-button gp-button--outline" href="{% url 'avaliacoes:avaliacao_detail' avaliacao.id %}">Cancelar</a>
     </div>

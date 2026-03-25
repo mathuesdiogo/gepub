@@ -1679,3 +1679,103 @@
 .educacao-module .form-shell__actions {
   border-top-color: var(--gp-border);
 }
+
+/* ---------------------------------------------------------
+   Educação > páginas de detalhe: fluxo vertical consistente
+   --------------------------------------------------------- */
+.educacao-module .edu-detail-flow {
+  display: grid;
+  gap: var(--gp-space-4);
+}
+
+.educacao-module .edu-detail-flow > .page-head {
+  margin-bottom: 0;
+}
+
+.educacao-module .edu-detail-flow > .chips,
+.educacao-module .edu-detail-flow > .pills {
+  margin: 0;
+  padding: 0;
+}
+
+.educacao-module .edu-detail-flow > .gp-flex-wrap-row,
+.educacao-module .edu-detail-flow > .gp-table,
+.educacao-module .edu-detail-flow > .detail-summary,
+.educacao-module .edu-detail-flow > .gp-grid,
+.educacao-module .edu-detail-flow > .gp-grid-1,
+.educacao-module .edu-detail-flow > .gp-grid-2,
+.educacao-module .edu-detail-flow > .gp-grid-3,
+.educacao-module .edu-detail-flow > .gp-form,
+.educacao-module .edu-detail-flow > .gp-inline-form,
+.educacao-module .edu-detail-flow > .u-inline-form,
+.educacao-module .edu-detail-flow > details,
+.educacao-module .edu-detail-flow > .section {
+  margin: 0;
+}
+
+/* ---------------------------------------------------------
+   Turmas > Detalhe: ritmo vertical e respiro entre blocos
+   --------------------------------------------------------- */
+.educacao-module .edu-turma-detail > .edu-turma-detail__body {
+  display: grid;
+  gap: var(--gp-space-4);
+}
+
+.educacao-module .edu-turma-detail .page-head {
+  margin-bottom: 0;
+}
+
+.educacao-module .edu-turma-detail .page-head__actions {
+  row-gap: var(--gp-space-2);
+}
+
+.educacao-module .edu-turma-detail__section {
+  display: grid;
+  gap: var(--gp-space-3);
+}
+
+.educacao-module .edu-turma-detail__section + .edu-turma-detail__section {
+  padding-top: var(--gp-space-4);
+  border-top: 1px solid color-mix(in srgb, var(--gp-border) 86%, var(--gp-surface));
+}
+
+.educacao-module .edu-turma-detail__section--summary {
+  gap: var(--gp-space-2);
+}
+
+.educacao-module .edu-turma-detail .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gp-space-2);
+  margin: 0;
+  padding: 0;
+}
+
+.educacao-module .edu-turma-detail .section__title {
+  margin: 0;
+  font-size: 1.12rem;
+  line-height: 1.25;
+}
+
+.educacao-module .edu-turma-detail .detail-summary,
+.educacao-module .edu-turma-detail .gp-table {
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .educacao-module .edu-detail-flow {
+    gap: var(--gp-space-3);
+  }
+
+  .educacao-module .edu-turma-detail > .edu-turma-detail__body {
+    gap: var(--gp-space-3);
+  }
+
+  .educacao-module .edu-turma-detail__section + .edu-turma-detail__section {
+    padding-top: var(--gp-space-3);
+  }
+
+  .educacao-module .edu-turma-detail .section__title {
+    font-size: 1.02rem;
+  }
+}

@@ -8,9 +8,9 @@
   <article class="gp-student-stage__card gp-boletim-clean">
     <h3>Avaliações por Período/Semestre</h3>
     {% if periodos_disponiveis %}
-      <form method="get" class="gp-form gp-form--smart gp-boletim-clean__toolbar">
-        <div class="gp-form-group">
-          <label class="gp-form-label" for="periodo_ref">Semestre de referência</label>
+      <form method="get" class="gp-form gp-form--smart gp-boletim-clean__toolbar form-shell">
+        <div class="gp-form-group form-shell">
+          <label class="gp-form-label form-shell" for="periodo_ref">Semestre de referência</label>
           <select id="periodo_ref" name="periodo" class="gp-select" onchange="this.form.submit()">
             {% for p in periodos_disponiveis %}
               <option

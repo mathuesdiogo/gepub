@@ -4,6 +4,7 @@ from django import forms
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -14,6 +15,7 @@ from apps.core.rbac import can, is_admin, scope_filter_alunos, scope_filter_turm
 from apps.org.models import Unidade
 
 from .models import Aluno, AlunoCertificado, Curso, MatriculaCurso, Turma
+from .services_schedule_conflicts import ScheduleConflictService
 
 
 def _minicurso_cursos_scope(user):
@@ -152,6 +154,7 @@ class MinicursoMatriculaForm(forms.Form):
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.user = user
+        self.schedule_conflict_result = None
         self.fields["data_matricula"].initial = timezone.localdate()
         self.fields["aluno"].queryset = scope_filter_alunos(user, Aluno.objects.filter(ativo=True)).order_by("nome")
         self.fields["curso"].queryset = _minicurso_cursos_scope(user).filter(ativo=True)
@@ -183,10 +186,21 @@ class MinicursoMatriculaForm(forms.Form):
                 qs = qs.filter(turma=turma)
             if qs.exists():
                 self.add_error("aluno", "Este aluno já possui matrícula ativa nesse minicurso/turma.")
+
+        if aluno and curso:
+            self.schedule_conflict_result = ScheduleConflictService.validate_course_enrollment(
+                aluno=aluno,
+                curso=curso,
+                turma=turma,
+                data_matricula=cleaned.get("data_matricula"),
+                data_conclusao=None,
+            )
+            if self.schedule_conflict_result.has_conflict and self.schedule_conflict_result.blocking_mode == "block":
+                self.add_error("turma", self.schedule_conflict_result.message)
         return cleaned
 
     def save(self, *, user):
-        return MatriculaCurso.objects.create(
+        matricula = MatriculaCurso(
             aluno=self.cleaned_data["aluno"],
             curso=self.cleaned_data["curso"],
             turma=self.cleaned_data.get("turma"),
@@ -195,6 +209,9 @@ class MinicursoMatriculaForm(forms.Form):
             observacao=self.cleaned_data.get("observacao") or "",
             cadastrado_por=user,
         )
+        matricula.full_clean()
+        matricula.save()
+        return matricula
 
 
 class MinicursoCertificadoForm(forms.Form):
@@ -276,10 +293,10 @@ def minicurso_dashboard(request):
             "recentes_matriculas": matriculas_qs.order_by("-id")[:10],
             "recentes_certificados": certificados_qs.order_by("-id")[:10],
             "actions": [
-                {"label": "Novo minicurso", "url": reverse("educacao:minicurso_curso_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"},
-                {"label": "Nova turma", "url": reverse("educacao:minicurso_turma_create"), "icon": "fa-solid fa-people-group", "variant": "btn--outline"},
-                {"label": "Nova matrícula", "url": reverse("educacao:minicurso_matricula_create"), "icon": "fa-solid fa-user-plus", "variant": "btn--outline"},
-                {"label": "Emitir certificado", "url": reverse("educacao:minicurso_certificado_emitir"), "icon": "fa-solid fa-certificate", "variant": "btn--outline"},
+                {"label": "Novo minicurso", "url": reverse("educacao:minicurso_curso_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"},
+                {"label": "Nova turma", "url": reverse("educacao:minicurso_turma_create"), "icon": "fa-solid fa-people-group", "variant": "gp-button--outline"},
+                {"label": "Nova matrícula", "url": reverse("educacao:minicurso_matricula_create"), "icon": "fa-solid fa-user-plus", "variant": "gp-button--outline"},
+                {"label": "Emitir certificado", "url": reverse("educacao:minicurso_certificado_emitir"), "icon": "fa-solid fa-certificate", "variant": "gp-button--outline"},
             ],
             "can_edu_manage": can(request.user, "educacao.manage"),
         },
@@ -302,7 +319,7 @@ def minicurso_curso_create(request):
             "subtitle": "Crie o minicurso e defina modalidade, carga horária e eixo.",
             "form": form,
             "submit_label": "Salvar minicurso",
-            "actions": [{"label": "Voltar", "url": reverse("educacao:minicurso_dashboard"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}],
+            "actions": [{"label": "Voltar", "url": reverse("educacao:minicurso_dashboard"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}],
         },
     )
 
@@ -323,7 +340,7 @@ def minicurso_turma_create(request):
             "subtitle": "Associe unidade, turno e professor para operação das turmas.",
             "form": form,
             "submit_label": "Salvar turma",
-            "actions": [{"label": "Voltar", "url": reverse("educacao:minicurso_dashboard"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}],
+            "actions": [{"label": "Voltar", "url": reverse("educacao:minicurso_dashboard"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}],
         },
     )
 
@@ -333,9 +350,18 @@ def minicurso_turma_create(request):
 def minicurso_matricula_create(request):
     form = MinicursoMatriculaForm(request.POST or None, user=request.user)
     if request.method == "POST" and form.is_valid():
-        matricula = form.save(user=request.user)
-        messages.success(request, f"Matrícula criada com sucesso para {matricula.aluno.nome}.")
-        return redirect("educacao:minicurso_dashboard")
+        try:
+            matricula = form.save(user=request.user)
+        except ValidationError as exc:
+            for line in exc.messages:
+                form.add_error(None, line)
+        else:
+            conflict_result = getattr(form, "schedule_conflict_result", None)
+            if conflict_result and conflict_result.has_conflict and conflict_result.blocking_mode in {"warn", "allow"}:
+                for line in ScheduleConflictService.describe_conflicts(conflict_result):
+                    messages.warning(request, line)
+            messages.success(request, f"Matrícula criada com sucesso para {matricula.aluno.nome}.")
+            return redirect("educacao:minicurso_dashboard")
     return render(
         request,
         "educacao/minicurso_form.html",
@@ -344,7 +370,7 @@ def minicurso_matricula_create(request):
             "subtitle": "Registre alunos em minicursos e turmas específicas.",
             "form": form,
             "submit_label": "Salvar matrícula",
-            "actions": [{"label": "Voltar", "url": reverse("educacao:minicurso_dashboard"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}],
+            "actions": [{"label": "Voltar", "url": reverse("educacao:minicurso_dashboard"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}],
         },
     )
 
@@ -368,6 +394,6 @@ def minicurso_certificado_emitir(request):
             "subtitle": "Emita certificados a partir das matrículas de minicurso.",
             "form": form,
             "submit_label": "Emitir certificado",
-            "actions": [{"label": "Voltar", "url": reverse("educacao:minicurso_dashboard"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}],
+            "actions": [{"label": "Voltar", "url": reverse("educacao:minicurso_dashboard"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}],
         },
     )

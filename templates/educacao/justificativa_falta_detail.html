@@ -2,7 +2,7 @@
 {% block title %}Pedido de Justificativa • Educação • GEPUB{% endblock %}
 
 {% block module_content %}
-<div class="gp-card"><div class="gp-card__body">
+<div class="gp-card"><div class="gp-card__body edu-detail-flow">
 {% include "core/partials/components/layout/page_head.html" with title="Pedido de Justificativa de Falta" subtitle=pedido.aluno.nome actions=actions %}
 
 <div class="gp-grid-2">
@@ -42,10 +42,10 @@
 {% if can_decide %}
   <article class="gp-card gp-mt-3"><div class="gp-card__body">
     <h3>Decisão do professor</h3>
-    <form method="post" class="gp-form gp-form--smart">
+    <form method="post" class="gp-form gp-form--smart form-shell">
       {% csrf_token %}
-      <div class="gp-form-group gp-field--full">
-        <label class="gp-form-label" for="id_parecer">Parecer</label>
+      <div class="gp-form-group gp-field--full form-shell">
+        <label class="gp-form-label form-shell" for="id_parecer">Parecer</label>
         <textarea id="id_parecer" name="parecer" class="gp-textarea" rows="4" placeholder="Justifique a decisão (obrigatório para indeferimento).">{{ pedido.parecer }}</textarea>
       </div>
       <div class="gp-flex-wrap-row">

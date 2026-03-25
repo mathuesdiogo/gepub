@@ -12,7 +12,7 @@
   <div class="gp-card u-mb-12">
     <div class="gp-card__body">
       <h3>Aulas de hoje</h3>
-      <table class="table gp-table--striped gp-table--hover">
+      <table class="gp-table__native table gp-table--striped gp-table--hover">
         <thead><tr><th>Turma</th><th>Horário</th><th>Status</th><th>Ações</th></tr></thead>
         <tbody>
           {% for aula in aulas_hoje %}
@@ -21,7 +21,7 @@
               <td>{% if aula.encontro %}{{ aula.encontro.hora_inicio|time:"H:i" }}-{{ aula.encontro.hora_fim|time:"H:i" }}{% else %}—{% endif %}</td>
               <td>{{ aula.get_status_display }}</td>
               <td>
-                <a class="gp-button gp-button--outline" href="{% url 'educacao:informatica_frequencia_aula' aula.pk %}">Abrir chamada</a>
+                <a class="gp-button gp-button--outline" href="{% url 'educacao:informatica_frequencia_aula' aula.pk %}">Visualizar chamada</a>
               </td>
             </tr>
           {% empty %}
@@ -35,7 +35,7 @@
   <div class="gp-card u-mb-12">
     <div class="gp-card__body">
       <h3>Próximas aulas</h3>
-      <table class="table gp-table--striped gp-table--hover">
+      <table class="gp-table__native table gp-table--striped gp-table--hover">
         <thead><tr><th>Data</th><th>Turma</th><th>Horário</th><th>Status</th></tr></thead>
         <tbody>
           {% for aula in proximas_aulas %}
@@ -56,7 +56,7 @@
   <div class="gp-card">
     <div class="gp-card__body">
       <h3>Histórico recente</h3>
-      <table class="table gp-table--striped gp-table--hover">
+      <table class="gp-table__native table gp-table--striped gp-table--hover">
         <thead><tr><th>Data</th><th>Turma</th><th>Status</th><th>Ações</th></tr></thead>
         <tbody>
           {% for aula in historico_aulas %}

@@ -4,7 +4,7 @@
 <div class="gp-card"><div class="gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
-  <form method="get" class="gp-table__filters">
+  <form method="get" class="gp-table__filters search-and-filters">
     {% if municipios and municipios|length %}
       <select name="municipio" class="gp-input">
         {% for m in municipios %}
@@ -36,7 +36,7 @@
             <td>{{ item.get_status_display }}</td>
             <td>{{ item.vigencia_inicio|date:"d/m/Y" }} a {{ item.vigencia_fim|date:"d/m/Y" }}</td>
             <td>{{ item.empenho|default:"-" }}</td>
-            <td><a class="gp-anchor-link" href="{% url 'contratos:detail' item.id %}?municipio={{ municipio.id }}">ver</a></td>
+            <td><a class="gp-anchor-link" href="{% url 'contratos:detail' item.id %}?municipio={{ municipio.id }}">visualizar</a></td>
           </tr>
         {% empty %}
           <tr><td colspan="7">Nenhum contrato encontrado.</td></tr>

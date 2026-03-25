@@ -2,16 +2,16 @@
 {% block module_title %}Buscar aluno • NEE{% endblock %}
 
 {% block module_content %}
-<div class="card"><div class="card__body">
+<div class="card gp-card"><div class="card__body gp-card__body">
 
 {% include "core/partials/components/layout/page_head.html" with title="Buscar aluno (NEE)" subtitle="Aparecem apenas alunos com necessidade ativa. Use o autocomplete ou pesquise pelo nome." actions=actions %}
 
-<form method="get" class="filter-bar gp-table__filters u-relative">
-  <div class="filter-bar__field gp-form-group">
-    <label class="small gp-form-label" for="nee-search">Buscar</label>
+<form method="get" class="filter-bar gp-table__filters u-relative search-and-filters">
+  <div class="filter-bar__field gp-form-group form-shell">
+    <label class="small gp-form-label form-shell" for="nee-search">Buscar</label>
     <input id="nee-search" type="text" name="q" value="{{ q }}" placeholder="Digite o nome do aluno (min 2 letras)..." class="gp-input" autocomplete="off">
     <div id="nee-autocomplete" class="dropdown autocomplete-panel">
-      <div class="card"><div class="card__body autocomplete-panel__body">
+      <div class="card gp-card"><div class="card__body autocomplete-panel__body gp-card__body">
         <div id="nee-autocomplete-items"></div>
       </div></div>
     </div>
@@ -22,8 +22,8 @@
 </form>
 
 {% if rows %}
-  <div class="table-shell u-mt-12">
-    <table class="table">
+  <div class="table-shell u-mt-12 gp-table gp-table--responsive">
+    <table class="gp-table__native table">
       <thead>
         <tr>
           {% for h in headers %}

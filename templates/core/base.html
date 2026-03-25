@@ -44,10 +44,10 @@
 
       <div class="sidebar__footer">
         <div class="sidebar__footer-tools">
-          <a class="sidebar__footer-btn" href="{% url 'core:guia_telas' %}" title="Ajuda - Guia de telas" aria-label="Ajuda - Guia de telas">
+          <a class="sidebar__footer-btn gp-button" href="{% url 'core:guia_telas' %}" title="Ajuda - Guia de telas" aria-label="Ajuda - Guia de telas">
             <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
           </a>
-          <a class="sidebar__footer-btn sidebar__footer-btn--danger" href="{% url 'accounts:logout' %}" title="Sair" aria-label="Sair">
+          <a class="sidebar__footer-btn sidebar__footer-btn--danger gp-button gp-button--danger" href="{% url 'accounts:logout' %}" title="Sair" aria-label="Sair">
             <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
           </a>
         </div>
@@ -110,7 +110,7 @@
 
       <section class="content gp-content">
         {% if messages %}
-          <div class="alert-stack">
+          <div class="alert-stack gp-alert">
             {% for message in messages %}
               <div class="alert gp-alert gp-alert--dismissible alert--{{ message.tags }}">
                 {{ message }}
@@ -125,6 +125,7 @@
   </div>
 
   <script src="{% static 'js/autocomplete.js' %}"></script>
+  <script src="{% static 'js/ds-style-bindings.js' %}"></script>
   <script src="{% static 'js/gepub-design-system.js' %}"></script>
   <script>
     (function () {

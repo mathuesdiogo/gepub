@@ -1,10 +1,11 @@
 {% extends "educacao/base_modulo.html" %}
+{% load gepub_design_system %}
 {% block title %}Novo Aluno • Informática • Educação • GEPUB{% endblock %}
 
 {% block module_content %}
   <div class="gp-card">
     <div class="gp-card__body">
-      {% include "core/partials/components/layout/page_head.html" with title="Cadastrar aluno (Informática)" subtitle="Após salvar, você será redirecionado para efetivar a matrícula" actions=actions %}
+      {% include "core/partials/components/layout/page_head.html" with title="Adicionar aluno (Informática)" subtitle="Após salvar, você será redirecionado para efetivar a matrícula" actions=actions %}
 
       {% if turma %}
         <p><strong>Turma de destino:</strong> {{ turma.codigo }} • {{ turma.curso.nome }}</p>
@@ -13,7 +14,7 @@
       <form method="post" enctype="multipart/form-data" class="gp-form form-shell">
         {% csrf_token %}
         {% if form.non_field_errors %}<div class="flash flash--error">{{ form.non_field_errors }}</div>{% endif %}
-        <div class="form-shell__fields">{{ form.as_p }}</div>
+        <div class="form-shell__fields">{% render_form form %}</div>
         <div class="form-shell__actions">
           <button type="submit" class="gp-button gp-button--primary">Salvar e continuar matrícula</button>
         </div>

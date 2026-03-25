@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from django import forms
 
-from apps.org.models import Secretaria, Setor, Unidade
+from apps.org.models import Secretaria, Setor, Unidade, LocalEstrutural
 from apps.org.services.cadastros_base import aplicar_sugestoes_em_campo, mapear_sugestoes_por_categoria
 
 from .models import AlmoxarifadoCadastro, AlmoxarifadoMovimento, AlmoxarifadoRequisicao
@@ -17,6 +17,7 @@ class AlmoxarifadoCadastroForm(forms.ModelForm):
             "secretaria",
             "unidade",
             "setor",
+            "local_estrutural",
             "codigo",
             "nome",
             "unidade_medida",
@@ -33,11 +34,23 @@ class AlmoxarifadoCadastroForm(forms.ModelForm):
             self.fields["secretaria"].queryset = self.fields["secretaria"].queryset.filter(municipio=municipio)
             self.fields["unidade"].queryset = self.fields["unidade"].queryset.filter(secretaria__municipio=municipio)
             self.fields["setor"].queryset = self.fields["setor"].queryset.filter(unidade__secretaria__municipio=municipio)
+            self.fields["local_estrutural"].queryset = LocalEstrutural.objects.filter(
+                municipio=municipio,
+                status=LocalEstrutural.Status.ATIVO,
+            ).order_by("nome")
             sugestoes = mapear_sugestoes_por_categoria(
                 municipio_id=municipio.id,
                 categorias=["INSUMO_TIPO"],
             )
             aplicar_sugestoes_em_campo(self, "nome", sugestoes.get("INSUMO_TIPO"))
+
+    def clean(self):
+        cleaned = super().clean()
+        unidade = cleaned.get("unidade")
+        local = cleaned.get("local_estrutural")
+        if local and unidade and local.unidade_id != unidade.id:
+            self.add_error("local_estrutural", "Local estrutural deve pertencer à unidade selecionada.")
+        return cleaned
 
 
 class AlmoxarifadoMovimentoForm(forms.ModelForm):
@@ -67,6 +80,7 @@ class AlmoxarifadoRequisicaoForm(forms.ModelForm):
             "secretaria_solicitante",
             "unidade_solicitante",
             "setor_solicitante",
+            "local_solicitante",
             "quantidade",
             "justificativa",
         ]
@@ -79,14 +93,21 @@ class AlmoxarifadoRequisicaoForm(forms.ModelForm):
             self.fields["secretaria_solicitante"].queryset = Secretaria.objects.filter(municipio=municipio, ativo=True)
             self.fields["unidade_solicitante"].queryset = Unidade.objects.filter(secretaria__municipio=municipio, ativo=True)
             self.fields["setor_solicitante"].queryset = Setor.objects.filter(unidade__secretaria__municipio=municipio, ativo=True)
+            self.fields["local_solicitante"].queryset = LocalEstrutural.objects.filter(
+                municipio=municipio,
+                status=LocalEstrutural.Status.ATIVO,
+            ).order_by("nome")
 
     def clean(self):
         cleaned = super().clean()
         unidade = cleaned.get("unidade_solicitante")
         setor = cleaned.get("setor_solicitante")
+        local = cleaned.get("local_solicitante")
         qtd = cleaned.get("quantidade") or Decimal("0")
         if qtd <= 0:
             self.add_error("quantidade", "Quantidade deve ser maior que zero.")
         if setor and unidade and setor.unidade_id != unidade.id:
             self.add_error("setor_solicitante", "Setor solicitante deve pertencer à unidade solicitante.")
+        if local and unidade and local.unidade_id != unidade.id:
+            self.add_error("local_solicitante", "Local solicitante deve pertencer à unidade solicitante.")
         return cleaned

@@ -13,13 +13,13 @@
       <span class="gp-badge gp-badge--neutral">Total: {{ total_materiais }}</span>
     </div>
 
-    <form method="get" class="gp-form gp-form--smart gp-professor-filter-row">
-      <div class="gp-form-group gp-field--full">
-        <label class="gp-form-label" for="id_q">Buscar material</label>
+    <form method="get" class="gp-form gp-form--smart gp-professor-filter-row form-shell search-and-filters">
+      <div class="gp-form-group gp-field--full form-shell">
+        <label class="gp-form-label form-shell" for="id_q">Buscar material</label>
         <input id="id_q" type="text" class="gp-input" name="q" value="{{ q }}" placeholder="Título, descrição ou turma" />
       </div>
-      <div class="gp-form-group">
-        <label class="gp-form-label">&nbsp;</label>
+      <div class="gp-form-group form-shell">
+        <label class="gp-form-label form-shell">&nbsp;</label>
         <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
       </div>
     </form>

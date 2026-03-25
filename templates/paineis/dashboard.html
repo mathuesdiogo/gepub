@@ -14,25 +14,25 @@
   </section>
 
   <section class="bi-panel">
-    <form method="get" class="bi-filter-bar">
-      <input type="date" name="date_start" value="{{ filters.date_start }}" class="gp-input" style="max-width:180px;">
-      <input type="date" name="date_end" value="{{ filters.date_end }}" class="gp-input" style="max-width:180px;">
+    <form method="get" class="bi-filter-bar search-and-filters">
+      <input type="date" name="date_start" value="{{ filters.date_start }}" class="gp-input u-maxw-180">
+      <input type="date" name="date_end" value="{{ filters.date_end }}" class="gp-input u-maxw-180">
 
-      <select name="secretaria" class="gp-input" style="max-width:220px;">
+      <select name="secretaria" class="gp-input u-maxw-220">
         <option value="">Secretaria</option>
         {% for value in payload.filter_options.secretaria %}
           <option value="{{ value }}" {% if filters.secretaria == value %}selected{% endif %}>{{ value }}</option>
         {% endfor %}
       </select>
 
-      <select name="unidade" class="gp-input" style="max-width:220px;">
+      <select name="unidade" class="gp-input u-maxw-220">
         <option value="">Unidade</option>
         {% for value in payload.filter_options.unidade %}
           <option value="{{ value }}" {% if filters.unidade == value %}selected{% endif %}>{{ value }}</option>
         {% endfor %}
       </select>
 
-      <select name="categoria" class="gp-input" style="max-width:220px;">
+      <select name="categoria" class="gp-input u-maxw-220">
         <option value="">Categoria</option>
         {% for value in payload.filter_options.categoria %}
           <option value="{{ value }}" {% if filters.categoria == value %}selected{% endif %}>{{ value }}</option>
@@ -80,8 +80,8 @@
 
     <article class="bi-panel bi-chart bi-chart--table">
       <div class="bi-panel__head"><h3>Tabela analítica</h3></div>
-      <div class="table-shell"><div class="table-shell__body">
-        <table class="table">
+      <div class="table-shell gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+        <table class="gp-table__native table">
           <thead>
             <tr>
               {% for h in payload.headers %}

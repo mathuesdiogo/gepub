@@ -64,7 +64,7 @@
         <article class="question">
           <h3>Questao {{ numero }}</h3>
           {% if avaliacao.tipo == "DISCURSIVA" %}
-            <div style="height:38px;border:1px solid #d7e2ec;border-radius:6px;"></div>
+            <div class="u-box-38"></div>
           {% else %}
             <div class="alternatives">
               {% for letra in letras %}
@@ -92,7 +92,7 @@
       </div>
 
       <h2 class="answer-title">Marque uma alternativa por questao</h2>
-      <table class="grid">
+      <table class="grid gp-table__native">
         <thead>
           <tr>
             <th>Q</th>

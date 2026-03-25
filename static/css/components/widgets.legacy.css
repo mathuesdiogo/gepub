@@ -108,7 +108,7 @@
    3) Barra de progresso
    SUAP mostra barras com % e às vezes "2/5"
    HTML típico que funciona bem:
-   <div class="progress progress-warning"><span>70%</span><div class="progress-bar" style="width:70%"></div></div>
+   <div class="progress progress-warning"><span>70%</span><div class="progress-bar" data-style-width-pct="70"></div></div>
    OU o template tag pode gerar algo parecido.
    --------------------------------------------------------------------- */
 

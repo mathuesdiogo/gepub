@@ -1,39 +1,60 @@
 {% extends "core/base.html" %}
 
 {% block content %}
-<div class="card"><div class="card__body">
+<div class="card gp-card"><div class="card__body gp-card__body">
   {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
-  <form method="get" class="filter-bar" style="margin-bottom:12px;">
+  <form method="get" class="filter-bar u-mb-12 search-and-filters">
     {% if municipios and municipios|length %}
-      <select name="municipio" class="gp-input" style="max-width:240px;">
+      <select name="municipio" class="gp-input u-maxw-240">
         {% for m in municipios %}
           <option value="{{ m.id }}" {% if municipio and m.id == municipio.id %}selected{% endif %}>{{ m.nome }}/{{ m.uf }}</option>
         {% endfor %}
       </select>
     {% endif %}
-    <select name="tipo" class="gp-input" style="max-width:220px;">
+    <select name="secretaria" class="gp-input u-maxw-220">
+      <option value="">Todas secretarias</option>
+      {% for s in secretarias %}
+        <option value="{{ s.id }}" {% if secretaria_id == s.id|stringformat:'s' %}selected{% endif %}>{{ s.nome }}</option>
+      {% endfor %}
+    </select>
+    <select name="unidade" class="gp-input u-maxw-220">
+      <option value="">Todas unidades</option>
+      {% for u in unidades %}
+        <option value="{{ u.id }}" {% if unidade_id == u.id|stringformat:'s' %}selected{% endif %}>{{ u.nome }}</option>
+      {% endfor %}
+    </select>
+    <select name="local" class="gp-input u-maxw-240">
+      <option value="">Todos locais</option>
+      {% for l in locais %}
+        <option value="{{ l.id }}" {% if local_id == l.id|stringformat:'s' %}selected{% endif %}>{{ l.nome }}</option>
+      {% endfor %}
+    </select>
+    <select name="tipo" class="gp-input u-maxw-220">
       <option value="">Todos tipos</option>
       {% for key,label in tipo_choices %}
         <option value="{{ key }}" {% if tipo == key %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
-    <input name="q" value="{{ q }}" class="gp-input" placeholder="Item código/nome" style="max-width:280px;">
+    <input name="q" value="{{ q }}" class="gp-input u-maxw-280" placeholder="Item código/nome">
     <button class="gp-button gp-button--outline gp-button--sm" type="submit">Filtrar</button>
   </form>
-  <div class="table-shell"><div class="table-shell__body">
-    <table class="table">
-      <thead><tr><th>Data</th><th>Item</th><th>Tipo</th><th>Quantidade</th><th>Documento</th></tr></thead>
+  <div class="table-shell gp-table gp-table--responsive"><div class="table-shell__body gp-table__body">
+    <table class="gp-table__native table">
+      <thead><tr><th>Data</th><th>Item</th><th>Secretaria</th><th>Unidade</th><th>Local</th><th>Tipo</th><th>Quantidade</th><th>Documento</th></tr></thead>
       <tbody>
         {% for item in items %}
           <tr>
             <td>{{ item.data_movimento|date:"d/m/Y" }}</td>
             <td>{{ item.item.codigo }} - {{ item.item.nome }}</td>
+            <td>{{ item.item.secretaria|default:"-" }}</td>
+            <td>{{ item.item.unidade|default:"-" }}</td>
+            <td>{{ item.item.local_estrutural|default:item.item.setor|default:"-" }}</td>
             <td>{{ item.get_tipo_display }}</td>
             <td>{{ item.quantidade }}</td>
             <td>{{ item.documento|default:"-" }}</td>
           </tr>
         {% empty %}
-          <tr><td colspan="5">Nenhum movimento encontrado.</td></tr>
+          <tr><td colspan="8">Nenhum movimento encontrado.</td></tr>
         {% endfor %}
       </tbody>
     </table>

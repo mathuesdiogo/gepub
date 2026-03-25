@@ -1,0 +1,174 @@
+/* =====================================================================
+   GEPUB DS 2.0 - Sistema de tamanho e espaçamento
+   Escopo: caixas, itens e tabelas
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   1) Caixas (cards/boxes/superfícies)
+   --------------------------------------------------------------------- */
+.gp-card,
+.card,
+.box,
+.board,
+.service-box,
+.general-box,
+.indicator-box,
+.text-box,
+.link-box,
+.gallery-item,
+.total-item,
+.kpi-card,
+.table-shell,
+.table-responsive,
+.gp-table {
+  border-radius: var(--gp-size-box-radius);
+}
+
+.gp-card__header,
+.card__head,
+.card__header {
+  padding: var(--gp-size-box-header-py) var(--gp-size-box-header-px);
+  min-height: var(--gp-size-item-lg);
+}
+
+.gp-card__body,
+.card__body,
+.box,
+.board,
+.service-box,
+.general-box .primary-info,
+.indicator-box,
+.text-box,
+.link-box,
+.gallery-item,
+.total-item {
+  padding: var(--gp-size-box-body-py) var(--gp-size-box-body-px);
+}
+
+.gp-board,
+.board-container,
+.flex-container,
+.total-container,
+.gallery {
+  gap: var(--gp-size-box-gap);
+}
+
+/* ---------------------------------------------------------------------
+   2) Itens (linhas/listas/blocos clicáveis)
+   --------------------------------------------------------------------- */
+.counter-container > li,
+.numbered-list .list-item,
+.action-list li,
+.publicacoes-item,
+.service-box .service-box__links li,
+.table-shell tbody tr td .gp-button-group,
+.table-shell tbody tr td .gp-action-bar {
+  min-height: var(--gp-size-item-md);
+}
+
+.counter-container > li,
+.numbered-list .list-item,
+.action-list li,
+.publicacoes-item,
+.service-box .service-box__links li {
+  padding: var(--gp-size-item-py) var(--gp-size-item-px);
+}
+
+.publicacoes-item__actions,
+.action-list,
+.gp-table__actions {
+  gap: var(--gp-size-box-gap);
+}
+
+/* ---------------------------------------------------------------------
+   3) Tabelas (densidade confortável padrão)
+   --------------------------------------------------------------------- */
+.gp-table__native th,
+.gp-table__native td,
+.gp-table th,
+.gp-table td,
+.table-shell thead th,
+.table-shell tbody td,
+.table-responsive table th,
+.table-responsive table td,
+table th,
+table td {
+  padding: var(--gp-size-table-cell-py) var(--gp-size-table-cell-px);
+  line-height: 1.45;
+  font-size: 0.92rem;
+}
+
+.gp-table__native thead th,
+.gp-table thead th,
+.table-shell thead th,
+.table-responsive table thead th,
+table thead th {
+  padding: var(--gp-size-table-head-py) var(--gp-size-table-head-px);
+  min-height: var(--gp-size-table-row-min);
+  font-size: 0.83rem;
+  letter-spacing: 0.01em;
+}
+
+.gp-table caption,
+.gp-table__native caption,
+.table-shell caption,
+.table-responsive caption,
+table caption {
+  padding: var(--gp-size-item-py) var(--gp-size-item-px);
+  font-size: 0.8rem;
+}
+
+.gp-table tbody tr,
+.table-shell tbody tr,
+.table-responsive tbody tr,
+table tbody tr {
+  min-height: var(--gp-size-table-row-min);
+}
+
+/* ---------------------------------------------------------------------
+   4) Densidade opcional (uso por página/componente)
+   --------------------------------------------------------------------- */
+.gp-density-compact {
+  --gp-size-box-header-px: 12px;
+  --gp-size-box-header-py: 8px;
+  --gp-size-box-body-px: 12px;
+  --gp-size-box-body-py: 10px;
+  --gp-size-item-px: 8px;
+  --gp-size-item-py: 6px;
+  --gp-size-table-head-px: 10px;
+  --gp-size-table-head-py: 8px;
+  --gp-size-table-cell-px: 10px;
+  --gp-size-table-cell-py: 8px;
+  --gp-size-table-row-min: 36px;
+}
+
+.gp-density-comfortable {
+  --gp-size-box-header-px: 18px;
+  --gp-size-box-header-py: 12px;
+  --gp-size-box-body-px: 20px;
+  --gp-size-box-body-py: 16px;
+  --gp-size-item-px: 12px;
+  --gp-size-item-py: 10px;
+  --gp-size-table-head-px: 14px;
+  --gp-size-table-head-py: 12px;
+  --gp-size-table-cell-px: 14px;
+  --gp-size-table-cell-py: 12px;
+  --gp-size-table-row-min: 46px;
+}
+
+@media (max-width: 900px) {
+  .gp-card__header,
+  .card__head,
+  .card__header {
+    min-height: var(--gp-size-item-md);
+  }
+
+  .gp-table__native th,
+  .gp-table__native td,
+  .table-shell thead th,
+  .table-shell tbody td,
+  .table-responsive table th,
+  .table-responsive table td {
+    font-size: 0.88rem;
+  }
+}

@@ -15,37 +15,37 @@
 <section class="gp-profile-page">
   {% include "core/partials/components/layout/page_head.html" with title="Meu perfil" subtitle="Minha conta, preferências e histórico de acesso" actions=None %}
 
-  <form id="meu-perfil-form" method="post" enctype="multipart/form-data" class="gp-profile-dashboard gp-form">
+  <form id="meu-perfil-form" method="post" enctype="multipart/form-data" class="gp-profile-dashboard gp-form form-shell">
     {% csrf_token %}
     <input id="foto-perfil-input" class="profile-photo__input" type="file" name="foto" accept="image/*" aria-label="Selecionar foto de perfil">
 
     <div class="gp-profile-quick-grid">
-      <a class="gp-profile-quick-card" href="{{ quick_actions_url }}">
+      <a class="gp-profile-quick-card gp-card" href="{{ quick_actions_url }}">
         <i class="fa-solid fa-bolt"></i>
         <strong>Minhas ações</strong>
         <span>{{ actions_total }} registro(s)</span>
       </a>
       {% if meus_dados_url %}
-        <a class="gp-profile-quick-card" href="{{ meus_dados_url }}">
-          <i class="fa-solid fa-id-card"></i>
+        <a class="gp-profile-quick-card gp-card" href="{{ meus_dados_url }}">
+          <i class="fa-solid fa-id-card gp-card"></i>
           <strong>Meus dados</strong>
           <span>Acesso acadêmico detalhado</span>
         </a>
       {% else %}
-        <a class="gp-profile-quick-card" href="{{ quick_documents_url }}">
+        <a class="gp-profile-quick-card gp-card" href="{{ quick_documents_url }}">
           <i class="fa-solid fa-folder-open"></i>
           <strong>Meus documentos</strong>
           <span>{{ documentos_total }} item(ns)</span>
         </a>
       {% endif %}
-      <a class="gp-profile-quick-card" href="#card-sessoes">
+      <a class="gp-profile-quick-card gp-card" href="#card-sessoes">
         <i class="fa-solid fa-shield-halved"></i>
         <strong>Minhas sessões</strong>
         <span>1 sessão atual</span>
       </a>
     </div>
 
-    <article class="gp-profile-card gp-profile-card--identity">
+    <article class="gp-profile-card gp-profile-card--identity gp-card">
       <header class="gp-profile-card__head">
         <h3>Dados da conta</h3>
         <small>{{ p.get_role_display }}</small>
@@ -70,7 +70,7 @@
                 <i class="fa-solid fa-image" aria-hidden="true"></i>
               </button>
               {% if p.foto %}
-                <button class="profile-photo__control profile-photo__control--remove" type="submit" name="remove_foto" value="1" title="Apagar foto">
+                <button class="profile-photo__control profile-photo__control--remove" type="submit" name="remove_foto" value="1" title="Remover foto">
                   <i class="fa-solid fa-trash" aria-hidden="true"></i>
                 </button>
               {% endif %}
@@ -80,44 +80,44 @@
 
         <div class="profile-form gp-profile-form">
           <div class="form-field">
-            <label class="small gp-form-label">Nome</label>
+            <label class="small gp-form-label form-shell">Nome</label>
             <input value="{{ request.user.first_name }}" readonly>
           </div>
 
           <div class="form-field">
-            <label class="small gp-form-label">Sobrenome</label>
+            <label class="small gp-form-label form-shell">Sobrenome</label>
             <input value="{{ request.user.last_name }}" readonly>
           </div>
 
           <div class="form-field">
-            <label class="small gp-form-label">CPF</label>
+            <label class="small gp-form-label form-shell">CPF</label>
             <input value="{{ p.cpf|default:'' }}" readonly>
           </div>
 
           <div class="form-field">
-            <label class="small gp-form-label">E-mail</label>
+            <label class="small gp-form-label form-shell">E-mail</label>
             <input name="email" value="{{ request.user.email|default:'' }}">
           </div>
 
           <div class="form-field">
-            <label class="small gp-form-label">Telefone</label>
+            <label class="small gp-form-label form-shell">Telefone</label>
             <input name="telefone" value="{{ p.telefone|default:'' }}">
           </div>
 
           <div class="form-field">
-            <label class="small gp-form-label">Expiração da senha (dias)</label>
+            <label class="small gp-form-label form-shell">Expiração da senha (dias)</label>
             <input type="number" min="0" max="365" name="password_expires_days" value="{{ p.password_expires_days|default:90 }}">
           </div>
 
           <div class="form-field full">
-            <label class="small gp-form-label">Endereço</label>
+            <label class="small gp-form-label form-shell">Endereço</label>
             <textarea name="endereco" rows="2">{{ p.endereco|default:'' }}</textarea>
           </div>
         </div>
       </div>
     </article>
 
-    <article class="gp-profile-card gp-profile-card--sessions" id="card-sessoes">
+    <article class="gp-profile-card gp-profile-card--sessions gp-card" id="card-sessoes">
       <header class="gp-profile-card__head">
         <h3>Minhas sessões</h3>
       </header>
@@ -128,7 +128,7 @@
       </div>
     </article>
 
-    <article class="gp-profile-card gp-profile-card--prefs">
+    <article class="gp-profile-card gp-profile-card--prefs gp-card">
       <header class="gp-profile-card__head">
         <h3>Preferências de recebimento de notificações</h3>
       </header>
@@ -151,26 +151,26 @@
       </div>
       <div class="gp-profile-mini-grid">
         <div class="form-field">
-          <label class="small gp-form-label">Telefone de aviso</label>
+          <label class="small gp-form-label form-shell">Telefone de aviso</label>
           <input name="pref_telefone" value="{{ pref.telefone|default:'' }}">
         </div>
         <div class="form-field">
-          <label class="small gp-form-label">WhatsApp de aviso</label>
+          <label class="small gp-form-label form-shell">WhatsApp de aviso</label>
           <input name="pref_whatsapp" value="{{ pref.whatsapp|default:'' }}">
         </div>
         <div class="form-field">
-          <label class="small gp-form-label">Início de envio</label>
+          <label class="small gp-form-label form-shell">Início de envio</label>
           <input type="time" name="horario_inicio" value="{% if pref.horario_inicio %}{{ pref.horario_inicio|time:'H:i' }}{% endif %}">
         </div>
         <div class="form-field">
-          <label class="small gp-form-label">Fim de envio</label>
+          <label class="small gp-form-label form-shell">Fim de envio</label>
           <input type="time" name="horario_fim" value="{% if pref.horario_fim %}{{ pref.horario_fim|time:'H:i' }}{% endif %}">
         </div>
       </div>
       {% endif %}
     </article>
 
-    <article class="gp-profile-card gp-profile-card--system">
+    <article class="gp-profile-card gp-profile-card--system gp-card">
       <header class="gp-profile-card__head">
         <h3>Personalizações do sistema</h3>
       </header>
@@ -181,7 +181,7 @@
 
       <div class="form-field">
         {% if can_choose_theme %}
-          <label class="small gp-form-label">Tema da administração interna</label>
+          <label class="small gp-form-label form-shell">Tema da administração interna</label>
           <select name="ui_theme">
             <option value="">Usar padrão do município ({{ theme_config.get_default_theme_display|default:'Kassya' }})</option>
             {% for value, label in ui_theme_choices %}
@@ -189,7 +189,7 @@
             {% endfor %}
           </select>
         {% else %}
-          <label class="small gp-form-label">Tema da administração interna</label>
+          <label class="small gp-form-label form-shell">Tema da administração interna</label>
           <input value="{{ theme_config.get_default_theme_display|default:'Kassya' }} (definido pelo município)" readonly>
         {% endif %}
       </div>
@@ -207,12 +207,12 @@
         </label>
       </div>
       <div class="form-field">
-        <label class="small gp-form-label">Senha expira em</label>
+        <label class="small gp-form-label form-shell">Senha expira em</label>
         <input value="{% if password_expires_at %}{{ password_expires_at|date:'d/m/Y H:i' }}{% else %}Não definido{% endif %}" readonly>
       </div>
     </article>
 
-    <article class="gp-profile-card gp-profile-card--actionslog">
+    <article class="gp-profile-card gp-profile-card--actionslog gp-card">
       <header class="gp-profile-card__head">
         <h3>Minhas ações</h3>
       </header>
@@ -232,7 +232,7 @@
       </ul>
     </article>
 
-    <article class="gp-profile-card gp-profile-card--history">
+    <article class="gp-profile-card gp-profile-card--history gp-card">
       <header class="gp-profile-card__head">
         <h3>Histórico em grupos</h3>
       </header>
@@ -247,7 +247,7 @@
       </ul>
     </article>
 
-    <article class="gp-profile-card gp-profile-card--moves">
+    <article class="gp-profile-card gp-profile-card--moves gp-card">
       <header class="gp-profile-card__head">
         <h3>Transferências e manejos</h3>
       </header>
@@ -264,7 +264,7 @@
 
     <div class="gp-profile-actions">
       <button class="gp-button gp-button--primary" type="submit">Salvar ajustes</button>
-      <a class="gp-button gp-button--secondary" href="{% url 'accounts:alterar_senha' %}">Alterar senha</a>
+      <a class="gp-button gp-button--secondary" href="{% url 'accounts:alterar_senha' %}">Editar senha</a>
     </div>
   </form>
 </section>

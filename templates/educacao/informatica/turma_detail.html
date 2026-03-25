@@ -4,7 +4,7 @@
 {% block module_content %}
   <section class="edu-inf-turma-clean">
     <div class="gp-card u-mb-12">
-      <div class="gp-card__body">
+      <div class="gp-card__body edu-detail-flow">
         {% include "core/partials/components/layout/page_head.html" with title=turma.codigo subtitle=turma.curso.nome actions=None %}
 
         <div class="edu-inf-turma-clean__chips">
@@ -60,7 +60,7 @@
           <small>{{ matriculas|length }}</small>
         </summary>
         <div class="edu-inf-turma-clean__table-wrap">
-          <table class="table gp-table--striped gp-table--hover">
+          <table class="gp-table__native table gp-table--striped gp-table--hover">
             <thead>
               <tr>
                 <th>Aluno</th>
@@ -92,7 +92,7 @@
             <small>{{ aulas|length }}</small>
           </summary>
           <div class="edu-inf-turma-clean__table-wrap">
-            <table class="table gp-table--striped gp-table--hover">
+            <table class="gp-table__native table gp-table--striped gp-table--hover">
               <thead><tr><th>Data</th><th>Conteúdo</th><th>Ações</th></tr></thead>
               <tbody>
                 {% for aula in aulas %}
@@ -116,7 +116,7 @@
           <small>{{ lista_espera|length }}</small>
         </summary>
         <div class="edu-inf-turma-clean__table-wrap">
-          <table class="table gp-table--striped gp-table--hover">
+          <table class="gp-table__native table gp-table--striped gp-table--hover">
             <thead><tr><th>Posição</th><th>Aluno</th><th>Escola</th></tr></thead>
             <tbody>
               {% for item in lista_espera %}

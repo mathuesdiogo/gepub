@@ -13,10 +13,10 @@ from .models import TipoNecessidade, AlunoNecessidade
 def _aluno_actions_html(aluno_id: int) -> str:
     # HTML seguro: o core/table_shell já suporta cell.html|safe
     return (
-        f'<a class="btn btn--ghost btn--sm" href="/nee/alunos/{aluno_id}/necessidades/"><i class="fa-solid fa-tags"></i> Necessidades</a> '
-        f'<a class="btn btn--ghost btn--sm" href="/nee/alunos/{aluno_id}/laudos/"><i class="fa-solid fa-file-medical"></i> Laudos</a> '
-        f'<a class="btn btn--ghost btn--sm" href="/nee/alunos/{aluno_id}/recursos/"><i class="fa-solid fa-screwdriver-wrench"></i> Recursos</a> '
-        f'<a class="btn btn--ghost btn--sm" href="/nee/alunos/{aluno_id}/timeline/"><i class="fa-solid fa-timeline"></i> Timeline</a>'
+        f'<a class="gp-button gp-button--ghost gp-button--sm" href="/nee/alunos/{aluno_id}/necessidades/"><i class="fa-solid fa-tags"></i> Necessidades</a> '
+        f'<a class="gp-button gp-button--ghost gp-button--sm" href="/nee/alunos/{aluno_id}/laudos/"><i class="fa-solid fa-file-medical"></i> Laudos</a> '
+        f'<a class="gp-button gp-button--ghost gp-button--sm" href="/nee/alunos/{aluno_id}/recursos/"><i class="fa-solid fa-screwdriver-wrench"></i> Recursos</a> '
+        f'<a class="gp-button gp-button--ghost gp-button--sm" href="/nee/alunos/{aluno_id}/timeline/"><i class="fa-solid fa-timeline"></i> Timeline</a>'
     )
 
 
@@ -69,9 +69,9 @@ def relatorio_por_tipo(request):
         )
 
     actions = [
-        {"label": "Exportar CSV", "url": "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
-        {"label": "Exportar PDF", "url": "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
-        {"label": "Voltar", "url": reverse("nee:relatorios_index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+        {"label": "Exportar CSV", "url": "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "gp-button--ghost"},
+        {"label": "Exportar PDF", "url": "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"},
+        {"label": "Voltar", "url": reverse("nee:relatorios_index"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
     ]
     return render(request, "nee/relatorios/por_tipo_enterprise.html", {"actions": actions, "rows": rows})
 
@@ -112,9 +112,9 @@ def relatorio_tipo_alunos(request, tipo_id: int):
     ]
     ctx = {
         "actions": [
-            {"label": "Voltar", "url": reverse("nee:relatorios_por_tipo"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-            {"label": "Exportar CSV", "url": "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
-            {"label": "Exportar PDF", "url": "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
+            {"label": "Voltar", "url": reverse("nee:relatorios_por_tipo"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+            {"label": "Exportar CSV", "url": "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "gp-button--ghost"},
+            {"label": "Exportar PDF", "url": "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"},
         ],
         "title": "Alunos por tipo",
         "subtitle": f"{tipo.nome} • {alunos.count()} alunos",
@@ -157,9 +157,9 @@ def relatorio_por_municipio(request):
         )
 
     actions = [
-        {"label": "Exportar CSV", "url": "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
-        {"label": "Exportar PDF", "url": "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
-        {"label": "Voltar", "url": reverse("nee:relatorios_index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+        {"label": "Exportar CSV", "url": "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "gp-button--ghost"},
+        {"label": "Exportar PDF", "url": "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"},
+        {"label": "Voltar", "url": reverse("nee:relatorios_index"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
     ]
     return render(request, "nee/relatorios/por_municipio_enterprise.html", {"actions": actions, "rows": rows})
 
@@ -199,9 +199,9 @@ def relatorio_municipio_alunos(request, municipio_id: int):
     ]
     ctx = {
         "actions": [
-            {"label": "Voltar", "url": reverse("nee:relatorios_por_municipio"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-            {"label": "Exportar CSV", "url": "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
-            {"label": "Exportar PDF", "url": "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
+            {"label": "Voltar", "url": reverse("nee:relatorios_por_municipio"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+            {"label": "Exportar CSV", "url": "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "gp-button--ghost"},
+            {"label": "Exportar PDF", "url": "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"},
         ],
         "title": "Alunos por município",
         "subtitle": f"{alunos.count()} alunos com NEE",
@@ -245,9 +245,9 @@ def relatorio_por_unidade(request):
         )
 
     actions = [
-        {"label": "Exportar CSV", "url": "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
-        {"label": "Exportar PDF", "url": "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
-        {"label": "Voltar", "url": reverse("nee:relatorios_index"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
+        {"label": "Exportar CSV", "url": "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "gp-button--ghost"},
+        {"label": "Exportar PDF", "url": "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"},
+        {"label": "Voltar", "url": reverse("nee:relatorios_index"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
     ]
     return render(request, "nee/relatorios/por_unidade_enterprise.html", {"actions": actions, "rows": rows})
 
@@ -287,9 +287,9 @@ def relatorio_unidade_alunos(request, unidade_id: int):
     ]
     ctx = {
         "actions": [
-            {"label": "Voltar", "url": reverse("nee:relatorios_por_unidade"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"},
-            {"label": "Exportar CSV", "url": "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "btn--ghost"},
-            {"label": "Exportar PDF", "url": "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "btn--ghost"},
+            {"label": "Voltar", "url": reverse("nee:relatorios_por_unidade"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"},
+            {"label": "Exportar CSV", "url": "?export=csv", "icon": "fa-solid fa-file-csv", "variant": "gp-button--ghost"},
+            {"label": "Exportar PDF", "url": "?export=pdf", "icon": "fa-solid fa-file-pdf", "variant": "gp-button--ghost"},
         ],
         "title": "Alunos por unidade",
         "subtitle": f"{alunos.count()} alunos com NEE",

@@ -30,9 +30,9 @@
 
 <div class="gp-card"><div class="gp-card__body">
   <h3>Ação de status</h3>
-  <form method="post" action="{% url 'compras:aprovar' obj.id %}?municipio={{ municipio.id }}">
+  <form method="post" action="{% url 'compras:aprovar' obj.id %}?municipio={{ municipio.id }}" class="form-shell">
     {% csrf_token %}
-    <div style="display:grid; gap:8px; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));">
+    <div class="u-grid-auto-180">
       <select class="gp-input" name="acao" required>
         <option value="aprovar">Aprovar</option>
         <option value="devolver">Devolver para ajustes</option>

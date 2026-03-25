@@ -41,19 +41,19 @@ class PeriodoListView(BaseListViewGepub):
                 "label": "Fechamento em Lote",
                 "url": reverse("educacao:fechamento_periodo_lote"),
                 "icon": "fa-solid fa-check-double",
-                "variant": "btn--outline",
+                "variant": "gp-button--outline",
             })
             actions.append({
                 "label": "Gerar Bimestres",
                 "url": reverse("educacao:periodo_gerar_bimestres"),
                 "icon": "fa-solid fa-wand-magic-sparkles",
-                "variant": "btn--ghost",
+                "variant": "gp-button--ghost",
             })
             actions.append({
                 "label": "Novo Período",
                 "url": reverse("educacao:periodo_create"),
                 "icon": "fa-solid fa-plus",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             })
         return actions
 

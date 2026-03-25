@@ -69,7 +69,7 @@ def grade_list(request):
     actions = []
     if can_manage:
         actions.append(
-            {"label": "Nova Grade", "url": reverse("saude:grade_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"}
+            {"label": "Nova Grade", "url": reverse("saude:grade_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"}
         )
 
     return render(
@@ -176,9 +176,9 @@ def grade_detail(request, pk: int):
         pk=pk,
     )
     can_manage = can(request.user, "saude.manage")
-    actions = [{"label": "Voltar", "url": reverse("saude:grade_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+    actions = [{"label": "Voltar", "url": reverse("saude:grade_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
     if can_manage:
-        actions.append({"label": "Editar", "url": reverse("saude:grade_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+        actions.append({"label": "Editar", "url": reverse("saude:grade_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
 
     fields = [
         {"label": "Profissional", "value": obj.profissional.nome},
@@ -215,7 +215,7 @@ def bloqueio_list(request):
                 "label": "Novo Bloqueio",
                 "url": reverse("saude:bloqueio_create"),
                 "icon": "fa-solid fa-plus",
-                "variant": "btn-primary",
+                "variant": "gp-button--primary",
             }
         )
 
@@ -333,9 +333,9 @@ def bloqueio_detail(request, pk: int):
         pk=pk,
     )
     can_manage = can(request.user, "saude.manage")
-    actions = [{"label": "Voltar", "url": reverse("saude:bloqueio_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+    actions = [{"label": "Voltar", "url": reverse("saude:bloqueio_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
     if can_manage:
-        actions.append({"label": "Editar", "url": reverse("saude:bloqueio_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+        actions.append({"label": "Editar", "url": reverse("saude:bloqueio_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
 
     fields = [
         {"label": "Período", "value": f"{obj.inicio:%d/%m/%Y %H:%M} - {obj.fim:%d/%m/%Y %H:%M}"},
@@ -380,7 +380,7 @@ def fila_list(request):
     actions = []
     if can_manage:
         actions.append(
-            {"label": "Nova Entrada", "url": reverse("saude:fila_create"), "icon": "fa-solid fa-plus", "variant": "btn-primary"}
+            {"label": "Nova Entrada", "url": reverse("saude:fila_create"), "icon": "fa-solid fa-plus", "variant": "gp-button--primary"}
         )
 
     headers = [
@@ -513,9 +513,9 @@ def fila_detail(request, pk: int):
         pk=pk,
     )
     can_manage = can(request.user, "saude.manage")
-    actions = [{"label": "Voltar", "url": reverse("saude:fila_list"), "icon": "fa-solid fa-arrow-left", "variant": "btn--ghost"}]
+    actions = [{"label": "Voltar", "url": reverse("saude:fila_list"), "icon": "fa-solid fa-arrow-left", "variant": "gp-button--ghost"}]
     if can_manage:
-        actions.append({"label": "Editar", "url": reverse("saude:fila_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "btn-primary"})
+        actions.append({"label": "Editar", "url": reverse("saude:fila_update", args=[obj.pk]), "icon": "fa-solid fa-pen", "variant": "gp-button--primary"})
 
     fields = [
         {"label": "Paciente", "value": obj.paciente_nome},

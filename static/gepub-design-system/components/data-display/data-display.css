@@ -57,6 +57,109 @@
   gap: var(--gp-space-1) var(--gp-space-3);
 }
 
+.gp-definition-list.inline,
+.definition-list.inline {
+  display: inline-grid;
+}
+
+.gp-definition-list.compact,
+.definition-list.compact {
+  gap: 4px var(--gp-space-2);
+}
+
+.gp-definition-list.large,
+.definition-list.large {
+  font-size: 1.02rem;
+}
+
+.gp-definition-list.small-items dt,
+.gp-definition-list.small-items dd,
+.definition-list.small-items dt,
+.definition-list.small-items dd {
+  font-size: 0.84rem;
+}
+
+.sm-5-list.item,
+.definition-list .item {
+  display: grid;
+  gap: 4px;
+}
+
+.xs-cols-100 {
+  width: 100%;
+}
+
+.sm-cols-50 {
+  width: 50%;
+}
+
+.md-cols-50 {
+  width: 50%;
+}
+
+.lg-cols-33 {
+  width: 33.3333%;
+}
+
+.gp-link-list.counter-container,
+.counter-container {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: item;
+  display: grid;
+  gap: var(--gp-space-2);
+}
+
+.gp-link-list.counter-container > li,
+.counter-container > li {
+  list-style: none;
+  counter-increment: item;
+  display: flex;
+  align-items: center;
+  gap: var(--gp-space-2);
+  padding: var(--gp-space-2);
+  border-radius: var(--gp-radius-sm);
+  border: 1px solid var(--gp-border);
+  background: color-mix(in srgb, var(--gp-primary) 4%, var(--gp-surface));
+}
+
+.gp-link-list.counter-container > li::before,
+.counter-container > li::before {
+  content: counter(item);
+  width: 1.5rem;
+  height: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border: 1px solid var(--gp-border);
+  background: var(--gp-surface);
+  color: var(--gp-text-secondary);
+}
+
+.numbered-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: var(--gp-space-1);
+}
+
+.numbered-list .list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gp-space-2);
+}
+
+.numbered-list .list-item a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gp-space-1);
+}
+
 .gp-link-list,
 .link-list {
   display: grid;

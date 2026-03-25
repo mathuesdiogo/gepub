@@ -5,7 +5,7 @@
 <section class="gp-student-data-page">
   {% include "core/partials/components/layout/page_head.html" with title=aluno.nome subtitle="Meus dados acadêmicos detalhados" actions=actions %}
 
-  <article class="gp-student-data-card gp-student-data-card--identity">
+  <article class="gp-student-data-card gp-student-data-card--identity gp-card">
     <div class="gp-student-data-identity">
       <div class="gp-student-data-identity__avatar">
         {% if aluno.foto %}
@@ -27,12 +27,14 @@
     </div>
   </article>
 
-  <nav class="gp-student-data-tabs gp-pills" aria-label="Atalhos de dados">
-    <a class="gp-pills__item" href="#bloco-matriculas">Matrículas em períodos</a>
-    <a class="gp-pills__item" href="#bloco-observacoes">Observações gerais</a>
-    <a class="gp-pills__item" href="#bloco-academico">Dados acadêmicos</a>
-    <a class="gp-pills__item" href="#bloco-base">Base pedagógica</a>
-    <a class="gp-pills__item" href="{% url 'educacao:aluno_ensino_renovacao' code_value %}">Renovação de matrícula</a>
+  <nav class="gp-student-data-tabs" aria-label="Atalhos de dados">
+    <ul class="pills">
+      <li><a href="#bloco-matriculas">Matrículas em períodos</a></li>
+      <li><a href="#bloco-observacoes">Observações gerais</a></li>
+      <li><a href="#bloco-academico">Dados acadêmicos</a></li>
+      <li><a href="#bloco-base">Base pedagógica</a></li>
+      <li><a href="{% url 'educacao:aluno_ensino_renovacao' code_value %}">Renovação de matrícula</a></li>
+    </ul>
   </nav>
 
   <div class="gp-student-data-accordion">
@@ -45,7 +47,7 @@
         {% if matriculas_extra_count > 0 %}
           <div class="gp-alert gp-alert--info">
             Exibindo {{ rows_matriculas_resumo|length }} de {{ matriculas_total }} matrículas.
-            Para ver tudo, use o botão <strong>Histórico completo</strong>.
+            Para visualizar tudo, use o botão <strong>Histórico completo</strong>.
           </div>
         {% endif %}
         <div class="gp-student-data-filters">

@@ -118,7 +118,7 @@ def remanejamento_edital_list(request):
                             "label": "Novo edital",
                             "url": reverse("rh:remanejamento_edital_create") + _q_municipio(municipio),
                             "icon": "fa-solid fa-plus",
-                            "variant": "btn-primary",
+                            "variant": "gp-button--primary",
                         }
                     ]
                     if _is_manager(request.user)
@@ -128,19 +128,19 @@ def remanejamento_edital_list(request):
                     "label": "CSV",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&tipo={tipo}&status={status}&export=csv",
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "PDF",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&tipo={tipo}&status={status}&export=pdf",
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Painel RH",
                     "url": reverse("rh:index") + _q_municipio(municipio),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -152,7 +152,7 @@ def remanejamento_edital_list(request):
 def remanejamento_edital_create(request):
     municipio = _resolve_municipio(request, require_selected=True)
     if not municipio:
-        messages.error(request, "Selecione um município para cadastrar edital.")
+        messages.error(request, "Selecione um município para adicionar edital.")
         return redirect("rh:remanejamento_edital_list")
 
     form = RhRemanejamentoEditalForm(request.POST or None)
@@ -249,13 +249,13 @@ def remanejamento_edital_detail(request, pk: int):
                     "label": "Nova inscrição",
                     "url": reverse("rh:remanejamento_inscricao_create", args=[edital.pk]) + _q_municipio(municipio),
                     "icon": "fa-solid fa-file-signature",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "Voltar",
                     "url": reverse("rh:remanejamento_edital_list") + _q_municipio(municipio),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -368,7 +368,7 @@ def remanejamento_recurso_create(request, inscricao_pk: int):
     )
     is_manager = _is_manager(request.user)
     if not is_manager and not _is_owner_inscricao(request.user, inscricao):
-        return HttpResponseForbidden("403 — Sem permissão para abrir recurso desta inscrição.")
+        return HttpResponseForbidden("403 — Sem permissão para iniciar recurso desta inscrição.")
     if not is_manager and not inscricao.edital.recurso_aberto:
         return HttpResponseForbidden("403 — O período de recurso não está aberto.")
 
@@ -490,7 +490,7 @@ def substituicao_list(request):
                             "label": "Nova substituição",
                             "url": reverse("rh:substituicao_create") + _q_municipio(municipio),
                             "icon": "fa-solid fa-plus",
-                            "variant": "btn-primary",
+                            "variant": "gp-button--primary",
                         }
                     ]
                     if _is_manager(request.user)
@@ -500,19 +500,19 @@ def substituicao_list(request):
                     "label": "CSV",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&export=csv",
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "PDF",
                     "url": request.path + f"?municipio={municipio.pk}&q={q}&status={status}&export=pdf",
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Painel RH",
                     "url": reverse("rh:index") + _q_municipio(municipio),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -524,7 +524,7 @@ def substituicao_list(request):
 def substituicao_create(request):
     municipio = _resolve_municipio(request, require_selected=True)
     if not municipio:
-        messages.error(request, "Selecione um município para cadastrar substituição.")
+        messages.error(request, "Selecione um município para adicionar substituição.")
         return redirect("rh:substituicao_list")
 
     form = RhSubstituicaoServidorForm(request.POST or None, municipio=municipio)
@@ -580,7 +580,7 @@ def substituicao_detail(request, pk: int):
                     "label": "Voltar",
                     "url": reverse("rh:substituicao_list") + _q_municipio(municipio),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 }
             ],
         },
@@ -662,7 +662,7 @@ def pdp_plano_list(request):
                             "label": "Novo plano",
                             "url": reverse("rh:pdp_plano_create") + _q_municipio(municipio),
                             "icon": "fa-solid fa-plus",
-                            "variant": "btn-primary",
+                            "variant": "gp-button--primary",
                         }
                     ]
                     if _is_manager(request.user)
@@ -672,19 +672,19 @@ def pdp_plano_list(request):
                     "label": "CSV",
                     "url": request.path + f"?municipio={municipio.pk}&ano={ano}&status={status}&export=csv",
                     "icon": "fa-solid fa-file-csv",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "PDF",
                     "url": request.path + f"?municipio={municipio.pk}&ano={ano}&status={status}&export=pdf",
                     "icon": "fa-solid fa-file-pdf",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
                 {
                     "label": "Painel RH",
                     "url": reverse("rh:index") + _q_municipio(municipio),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },
@@ -696,7 +696,7 @@ def pdp_plano_list(request):
 def pdp_plano_create(request):
     municipio = _resolve_municipio(request, require_selected=True)
     if not municipio:
-        messages.error(request, "Selecione um município para cadastrar plano PDP.")
+        messages.error(request, "Selecione um município para adicionar plano PDP.")
         return redirect("rh:pdp_plano_list")
 
     form = RhPdpPlanoForm(request.POST or None)
@@ -765,13 +765,13 @@ def pdp_plano_detail(request, pk: int):
                     "label": "Nova necessidade",
                     "url": reverse("rh:pdp_necessidade_create", args=[plano.pk]) + _q_municipio(municipio),
                     "icon": "fa-solid fa-plus",
-                    "variant": "btn-primary",
+                    "variant": "gp-button--primary",
                 },
                 {
                     "label": "Voltar",
                     "url": reverse("rh:pdp_plano_list") + _q_municipio(municipio),
                     "icon": "fa-solid fa-arrow-left",
-                    "variant": "btn--ghost",
+                    "variant": "gp-button--ghost",
                 },
             ],
         },

@@ -13,7 +13,7 @@
   </div>
 
   {% if perms.saude.manage %}
-    <form method="post" action="{% url 'saude:agenda_remarcacao_auto' %}" class="u-mt-16 gp-flex-wrap-row">
+    <form method="post" action="{% url 'saude:agenda_remarcacao_auto' %}" class="u-mt-16 gp-flex-wrap-row form-shell">
       {% csrf_token %}
       <div>
         <label class="small">Buscar faltas (dias)</label>

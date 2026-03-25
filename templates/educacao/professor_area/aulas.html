@@ -15,7 +15,7 @@
             <li class="gp-student-list__item">
               <strong>{{ item.turma }} • {{ item.ano }}</strong>
               <div class="gp-professor-inline-actions">
-                <a class="gp-button gp-button--outline" href="{{ item.url_diario }}"><i class="fa-solid fa-book-open"></i> Abrir diário</a>
+                <a class="gp-button gp-button--outline" href="{{ item.url_diario }}"><i class="fa-solid fa-book-open"></i> Visualizar diário</a>
                 <a class="gp-button gp-button--primary" href="{{ item.url_nova_aula }}"><i class="fa-solid fa-plus"></i> Nova aula</a>
               </div>
             </li>
@@ -29,9 +29,9 @@
 
     <article class="gp-student-stage__card">
       <h3>Buscar aulas</h3>
-      <form method="get" class="gp-form gp-form--smart">
-        <div class="gp-form-group gp-field--full">
-          <label class="gp-form-label" for="id_q">Busca</label>
+      <form method="get" class="gp-form gp-form--smart form-shell">
+        <div class="gp-form-group gp-field--full form-shell">
+          <label class="gp-form-label form-shell" for="id_q">Busca</label>
           <input id="id_q" type="text" class="gp-input" name="q" value="{{ q }}" placeholder="Turma, componente ou conteúdo" />
         </div>
         <button class="gp-button gp-button--primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i> Buscar</button>
@@ -47,7 +47,7 @@
             <li class="gp-student-list__item">
               <strong>{{ item.turma }} • {{ item.ano }}</strong>
               <div class="gp-professor-inline-actions">
-                <a class="gp-button gp-button--outline" href="{{ item.url_diario }}"><i class="fa-solid fa-book-open"></i> Abrir diário</a>
+                <a class="gp-button gp-button--outline" href="{{ item.url_diario }}"><i class="fa-solid fa-book-open"></i> Visualizar diário</a>
                 <a class="gp-button gp-button--outline" href="{{ item.url_aulas }}"><i class="fa-solid fa-list"></i> Aulas</a>
                 <a class="gp-button gp-button--primary" href="{{ item.url_lancar_aula }}"><i class="fa-solid fa-plus"></i> Lançar aula</a>
               </div>
