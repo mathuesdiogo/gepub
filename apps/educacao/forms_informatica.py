@@ -260,6 +260,7 @@ class InformaticaTurmaForm(forms.ModelForm):
             "max_vagas",
             "status",
             "permite_aluno_externo",
+            "permite_sobreposicao_horario",
             "observacoes",
         ]
 
@@ -280,6 +281,9 @@ class InformaticaTurmaForm(forms.ModelForm):
             "A turma herda laboratório, turno, dias, horários e professor principal da grade selecionada."
         )
         self.fields["instrutor"].help_text = "Definido automaticamente pela grade de horários."
+        self.fields["permite_sobreposicao_horario"].help_text = (
+            "Permite matrícula de aluno nesta turma mesmo quando houver conflito de horário."
+        )
 
     def clean(self):
         cleaned = super().clean()
@@ -344,6 +348,7 @@ class InformaticaMatriculaForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
+        self.schedule_conflict_result = None
         if self.user:
             alunos_qs = alunos_scope(self.user)
             profile = get_profile(self.user)
@@ -394,6 +399,7 @@ class InformaticaMatriculaForm(forms.ModelForm):
         aluno = cleaned.get("aluno")
         escola_origem = cleaned.get("escola_origem")
         origem_indicacao = (cleaned.get("origem_indicacao") or "").strip()
+        turma = cleaned.get("turma")
 
         if aluno and not escola_origem:
             mat = (
@@ -412,6 +418,18 @@ class InformaticaMatriculaForm(forms.ModelForm):
                 cleaned["origem_indicacao"] = f"Escola de origem: {escola_origem.nome}"[:80]
             else:
                 cleaned["origem_indicacao"] = "Cadastro do aluno"
+
+        if aluno and turma:
+            from .services_schedule_conflicts import ScheduleConflictService
+
+            self.schedule_conflict_result = ScheduleConflictService.validate_informatica_enrollment(
+                aluno=aluno,
+                turma=turma,
+                data_matricula=self.instance.data_matricula if getattr(self.instance, "pk", None) else None,
+                exclude_informatica_matricula_id=self.instance.pk if getattr(self.instance, "pk", None) else None,
+            )
+            if self.schedule_conflict_result.has_conflict and self.schedule_conflict_result.blocking_mode == "block":
+                self.add_error("aluno", self.schedule_conflict_result.message)
 
         return cleaned
 

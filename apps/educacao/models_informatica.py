@@ -371,6 +371,7 @@ class InformaticaTurma(models.Model):
     max_vagas = models.PositiveSmallIntegerField(default=12)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PLANEJADA)
     permite_aluno_externo = models.BooleanField(default=True)
+    permite_sobreposicao_horario = models.BooleanField(default=False)
     observacoes = models.TextField(blank=True, default="")
 
     class Meta:
@@ -561,6 +562,21 @@ class InformaticaEncontroSemanal(models.Model):
 
     def __str__(self) -> str:
         return f"{self.turma.codigo} • {self.get_dia_semana_display()} {self.hora_inicio:%H:%M}-{self.hora_fim:%H:%M}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.turma_id:
+            from .services_programas import ProgramasComplementaresService
+
+            ProgramasComplementaresService.sync_informatica_offer_schedule(turma=self.turma)
+
+    def delete(self, *args, **kwargs):
+        turma = self.turma if self.turma_id else None
+        super().delete(*args, **kwargs)
+        if turma is not None:
+            from .services_programas import ProgramasComplementaresService
+
+            ProgramasComplementaresService.sync_informatica_offer_schedule(turma=turma)
 
 
 class InformaticaSolicitacaoVaga(models.Model):
@@ -827,6 +843,18 @@ class InformaticaMatricula(models.Model):
                 if errors:
                     break
 
+        if self.aluno_id and self.turma_id and self.status in self.statuses_ativos():
+            from .services_schedule_conflicts import ScheduleConflictService
+
+            result = ScheduleConflictService.validate_informatica_enrollment(
+                aluno=self.aluno,
+                turma=self.turma,
+                data_matricula=self.data_matricula,
+                exclude_informatica_matricula_id=self.pk,
+            )
+            if result.has_conflict and result.blocking_mode == "block":
+                errors["aluno"] = result.message
+
         if errors:
             raise ValidationError(errors)
 
@@ -836,6 +864,22 @@ class InformaticaMatricula(models.Model):
             escola_lab_id = self.turma.laboratorio.unidade_id
             self.externo_laboratorio = bool(self.escola_origem_id and escola_lab_id and int(self.escola_origem_id) != int(escola_lab_id))
         super().save(*args, **kwargs)
+        if self.aluno_id and self.turma_id and self.status in self.statuses_ativos():
+            from .services_matricula_institucional import InstitutionalEnrollmentService
+
+            unidade = getattr(getattr(self.turma, "laboratorio", None), "unidade", None)
+            InstitutionalEnrollmentService.ensure_for_student(
+                aluno=self.aluno,
+                unidade=unidade,
+                ano_referencia=self.turma.ano_letivo,
+            )
+        if self.aluno_id and self.turma_id:
+            from .services_programas import ProgramasComplementaresService
+
+            ProgramasComplementaresService.sync_informatica_matricula(
+                matricula=self,
+                usuario=getattr(self, "criado_por", None),
+            )
 
     def __str__(self) -> str:
         return f"{self.aluno.nome} • {self.turma.codigo}"

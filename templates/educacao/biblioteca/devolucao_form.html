@@ -1,0 +1,29 @@
+{% extends "educacao/base_modulo.html" %}
+{% load gepub_design_system %}
+{% block title %}{{ title }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<div class="gp-card">
+  <div class="gp-card__body">
+    {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+    <div class="gp-summary">
+      <p><strong>Livro:</strong> {{ emprestimo.livro.titulo }}</p>
+      <p><strong>Exemplar:</strong> {{ emprestimo.exemplar.codigo_exemplar }}</p>
+      <p><strong>Biblioteca:</strong> {{ emprestimo.biblioteca.nome }}</p>
+      <p><strong>Previsto:</strong> {{ emprestimo.data_prevista_devolucao|date:"d/m/Y" }}</p>
+    </div>
+
+    <form method="post" class="gp-form gp-form--smart form-shell">
+      {% csrf_token %}
+      {% render_form form %}
+      <div class="form-shell__actions gp-action-bar">
+        <button type="submit" class="gp-button gp-button--primary">
+          <i class="fa-solid fa-check"></i>
+          {{ submit_label }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

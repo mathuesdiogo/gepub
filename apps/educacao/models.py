@@ -518,6 +518,10 @@ class Turma(models.Model):
         default=False,
         help_text="Marque quando a turma for bilíngue de surdos.",
     )
+    permite_sobreposicao_horario = models.BooleanField(
+        default=False,
+        help_text="Permite matrícula com sobreposição de horário para esta oferta.",
+    )
     ativo = models.BooleanField(default=True)
 
     class Meta:
@@ -700,6 +704,38 @@ class Matricula(models.Model):
 
     def __str__(self) -> str:
         return f"{self.aluno} → {self.turma} ({self.situacao})"
+
+    def clean(self):
+        super().clean()
+        if not self.aluno_id or not self.turma_id:
+            return
+        if self.situacao != self.Situacao.ATIVA:
+            return
+
+        from .services_schedule_conflicts import ScheduleConflictService
+
+        result = ScheduleConflictService.validate_regular_enrollment(
+            aluno=self.aluno,
+            turma=self.turma,
+            data_matricula=self.data_matricula,
+            exclude_matricula_id=self.pk,
+        )
+        ScheduleConflictService.raise_if_blocking(result=result, field="turma")
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if not self.aluno_id:
+            return
+
+        from .services_matricula_institucional import InstitutionalEnrollmentService
+
+        if self.situacao == self.Situacao.ATIVA and self.turma_id:
+            InstitutionalEnrollmentService.ensure_for_student(
+                aluno=self.aluno,
+                unidade=self.turma.unidade,
+                ano_referencia=self.turma.ano_letivo,
+            )
+        InstitutionalEnrollmentService.sync_status_from_student(aluno=self.aluno)
 
 
 class MatriculaMovimentacao(models.Model):
@@ -1199,6 +1235,28 @@ class MatriculaCurso(models.Model):
     def __str__(self) -> str:
         return f"{self.aluno.nome} • {self.curso.nome} • {self.get_situacao_display()}"
 
+    def clean(self):
+        super().clean()
+        if self.data_conclusao and self.data_matricula and self.data_conclusao < self.data_matricula:
+            raise ValidationError({"data_conclusao": "A data de conclusão não pode ser anterior à data de matrícula."})
+
+        if not self.aluno_id or not self.curso_id:
+            return
+        if self.situacao not in {self.Situacao.MATRICULADO, self.Situacao.EM_ANDAMENTO}:
+            return
+
+        from .services_schedule_conflicts import ScheduleConflictService
+
+        result = ScheduleConflictService.validate_course_enrollment(
+            aluno=self.aluno,
+            curso=self.curso,
+            turma=self.turma,
+            data_matricula=self.data_matricula,
+            data_conclusao=self.data_conclusao,
+            exclude_matricula_curso_id=self.pk,
+        )
+        ScheduleConflictService.raise_if_blocking(result=result, field="turma")
+
 
 class CoordenacaoEnsino(models.Model):
     coordenador = models.ForeignKey(
@@ -1414,3 +1472,6 @@ from . import models_assistencia  # noqa: F401
 from . import models_calendario  # noqa: F401
 from . import models_beneficios  # noqa: F401
 from . import models_informatica  # noqa: F401
+from . import models_schedule_conflicts  # noqa: F401
+from . import models_biblioteca  # noqa: F401
+from . import models_programas  # noqa: F401

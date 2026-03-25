@@ -1,0 +1,51 @@
+{% extends "educacao/base_modulo.html" %}
+{% load gepub_design_system %}
+{% block title %}{{ title }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-page-stack">
+  <div class="gp-card">
+    <div class="gp-card__body">
+      {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+      <form method="post" class="gp-form gp-form--smart form-shell">
+        {% csrf_token %}
+        {% render_form form %}
+        <div class="form-shell__actions gp-action-bar">
+          <button type="submit" class="gp-button gp-button--primary">
+            <i class="fa-solid fa-check"></i>
+            {{ submit_label }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="gp-card">
+    <div class="gp-card__body">
+      <h3>Últimos registros de frequência</h3>
+      <table class="gp-table">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Status</th>
+            <th>Justificativa</th>
+            <th>Observações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in historico %}
+            <tr>
+              <td>{{ item.data_aula|date:"d/m/Y" }}</td>
+              <td>{{ item.get_status_presenca_display }}</td>
+              <td>{{ item.justificativa|default:"—" }}</td>
+              <td>{{ item.observacoes|default:"—" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4">Sem registros de frequência para esta participação.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

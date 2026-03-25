@@ -1,0 +1,63 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}{{ title }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-page-stack">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="gp-card">
+    <div class="gp-card__body">
+      <form method="get" class="gp-form gp-form--inline">
+        <label for="id_q">Busca</label>
+        <input id="id_q" type="text" name="q" value="{{ q }}" placeholder="Código, oferta, programa, unidade..." />
+        <label for="id_status">Status</label>
+        <select id="id_status" name="status">
+          <option value="">Todos</option>
+          <option value="PLANEJADA" {% if status == "PLANEJADA" %}selected{% endif %}>Planejada</option>
+          <option value="ATIVA" {% if status == "ATIVA" %}selected{% endif %}>Ativa</option>
+          <option value="ENCERRADA" {% if status == "ENCERRADA" %}selected{% endif %}>Encerrada</option>
+          <option value="CANCELADA" {% if status == "CANCELADA" %}selected{% endif %}>Cancelada</option>
+        </select>
+        <button type="submit" class="gp-button gp-button--outline">Aplicar</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="gp-card">
+    <div class="gp-card__body">
+      <table class="gp-table">
+        <thead>
+          <tr>
+            <th>Oferta</th>
+            <th>Programa</th>
+            <th>Unidade</th>
+            <th>Ano/Turno</th>
+            <th>Vagas</th>
+            <th>Status</th>
+            <th>Período</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in ofertas %}
+            <tr>
+              <td>{{ item.codigo }} • {{ item.nome }}</td>
+              <td>{{ item.programa.nome }}</td>
+              <td>{{ item.unidade.nome }}</td>
+              <td>{{ item.ano_letivo }} • {{ item.get_turno_display }}</td>
+              <td>{{ item.vagas_ocupadas }}/{{ item.capacidade_maxima }}</td>
+              <td>{{ item.get_status_display }}</td>
+              <td>
+                {% if item.data_inicio %}{{ item.data_inicio|date:"d/m/Y" }}{% else %}—{% endif %}
+                até
+                {% if item.data_fim %}{{ item.data_fim|date:"d/m/Y" }}{% else %}—{% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="7">Nenhuma oferta encontrada.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

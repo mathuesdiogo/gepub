@@ -1,0 +1,81 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}{{ title }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-page-stack">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="gp-card">
+    <div class="gp-card__body">
+      <form method="get" class="gp-form gp-form--inline">
+        <label for="id_biblioteca">Biblioteca</label>
+        <select id="id_biblioteca" name="biblioteca">
+          <option value="">Todas</option>
+          {% for item in bibliotecas %}
+            <option value="{{ item.id }}" {% if biblioteca and item.id == biblioteca.id %}selected{% endif %}>
+              {{ item.nome }} • {{ item.unidade.nome }}
+            </option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="gp-button gp-button--outline">Aplicar</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="gp-grid gp-grid--3">
+    <article class="gp-card"><div class="gp-card__body"><strong>{{ kpis.livros_total }}</strong><p>Livros no acervo</p></div></article>
+    <article class="gp-card"><div class="gp-card__body"><strong>{{ kpis.exemplares_disponiveis }}</strong><p>Exemplares disponíveis</p></div></article>
+    <article class="gp-card"><div class="gp-card__body"><strong>{{ kpis.emprestimos_ativos }}</strong><p>Empréstimos ativos</p></div></article>
+    <article class="gp-card"><div class="gp-card__body"><strong>{{ kpis.emprestimos_atrasados }}</strong><p>Empréstimos atrasados</p></div></article>
+    <article class="gp-card"><div class="gp-card__body"><strong>{{ kpis.reservas_ativas }}</strong><p>Reservas ativas</p></div></article>
+    <article class="gp-card"><div class="gp-card__body"><strong>{{ kpis.bloqueios_ativos }}</strong><p>Bloqueios ativos</p></div></article>
+  </div>
+
+  <div class="gp-grid gp-grid--3">
+    <article class="gp-card">
+      <div class="gp-card__body">
+        <h3>Últimos empréstimos</h3>
+        <ul class="gp-list">
+          {% for emp in ultimos_emprestimos %}
+            <li>
+              {{ emp.aluno.nome }} • {{ emp.matricula_institucional.numero_matricula }} • {{ emp.livro.titulo }}
+              <small>({{ emp.get_status_display }})</small>
+            </li>
+          {% empty %}
+            <li>Sem movimentações recentes.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </article>
+
+    <article class="gp-card">
+      <div class="gp-card__body">
+        <h3>Reservas pendentes</h3>
+        <ul class="gp-list">
+          {% for item in reservas_pendentes %}
+            <li>
+              {{ item.aluno.nome }} • {{ item.matricula_institucional.numero_matricula }} • {{ item.livro.titulo }}
+              {% if item.exemplar %}<small>(Exemplar {{ item.exemplar.codigo_exemplar }})</small>{% endif %}
+            </li>
+          {% empty %}
+            <li>Sem reservas pendentes.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </article>
+
+    <article class="gp-card">
+      <div class="gp-card__body">
+        <h3>Livros mais emprestados</h3>
+        <ul class="gp-list">
+          {% for item in livros_populares %}
+            <li>{{ item.titulo }} <small>({{ item.total_emprestimos }} empréstimos)</small></li>
+          {% empty %}
+            <li>Sem dados suficientes.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </article>
+  </div>
+</section>
+{% endblock %}

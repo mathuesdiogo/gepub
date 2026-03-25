@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 
+from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from .models import Matricula, MatriculaMovimentacao
@@ -55,6 +56,9 @@ def aplicar_movimentacao_matricula(
     data_referencia=None,
     tipo_trancamento: str = "",
     motivo: str = "",
+    allow_conflict_override: bool = False,
+    conflict_override_justificativa: str = "",
+    conflict_override_contexto: str = "",
 ) -> MovimentacaoResultado:
     tipo = (tipo or "").strip()
     motivo = (motivo or "").strip()
@@ -68,6 +72,19 @@ def aplicar_movimentacao_matricula(
             raise ValueError("A turma de destino deve ser diferente da turma atual.")
         if Matricula.objects.filter(aluno=matricula.aluno, turma=turma_destino).exclude(pk=matricula.pk).exists():
             raise ValueError("Já existe matrícula deste aluno na turma de destino.")
+
+        from .services_schedule_conflicts import ScheduleConflictService
+
+        ScheduleConflictService.ensure_regular_enrollment_allowed(
+            aluno=matricula.aluno,
+            turma=turma_destino,
+            data_matricula=data_referencia or date.today(),
+            exclude_matricula_id=matricula.pk,
+            allow_override=allow_conflict_override,
+            override_justificativa=conflict_override_justificativa,
+            usuario=usuario,
+            contexto=(conflict_override_contexto or "MOVIMENTACAO_REMANEJAMENTO"),
+        )
 
         matricula.turma = turma_destino
         matricula.situacao = Matricula.Situacao.ATIVA
@@ -93,6 +110,19 @@ def aplicar_movimentacao_matricula(
         if Matricula.objects.filter(aluno=matricula.aluno, turma=turma_destino).exists():
             raise ValueError("Já existe matrícula deste aluno na turma de destino.")
 
+        from .services_schedule_conflicts import ScheduleConflictService
+
+        ScheduleConflictService.ensure_regular_enrollment_allowed(
+            aluno=matricula.aluno,
+            turma=turma_destino,
+            data_matricula=data_referencia or date.today(),
+            exclude_matricula_id=matricula.pk,
+            allow_override=allow_conflict_override,
+            override_justificativa=conflict_override_justificativa,
+            usuario=usuario,
+            contexto=(conflict_override_contexto or "MOVIMENTACAO_TRANSFERENCIA"),
+        )
+
         matricula.situacao = Matricula.Situacao.TRANSFERIDO
         matricula.save(update_fields=["situacao"])
         mov = registrar_movimentacao(
@@ -106,13 +136,18 @@ def aplicar_movimentacao_matricula(
             data_referencia=data_referencia,
             motivo=motivo,
         )
-        nova_matricula = Matricula.objects.create(
+        nova_matricula = Matricula(
             aluno=matricula.aluno,
             turma=turma_destino,
             data_matricula=data_referencia or date.today(),
             situacao=Matricula.Situacao.ATIVA,
             observacao=(f"Transferência da matrícula #{matricula.pk}. {motivo}".strip()),
         )
+        try:
+            nova_matricula.full_clean()
+        except ValidationError as exc:
+            raise ValueError("; ".join(exc.messages)) from exc
+        nova_matricula.save()
         registrar_movimentacao(
             matricula=nova_matricula,
             tipo=MatriculaMovimentacao.Tipo.CRIACAO,

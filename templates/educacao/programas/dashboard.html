@@ -1,0 +1,45 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}{{ title }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-page-stack">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="gp-grid gp-grid--4">
+    <article class="gp-card"><div class="gp-card__body"><strong>{{ kpis.programas_ativos }}</strong><p>Programas ativos</p></div></article>
+    <article class="gp-card"><div class="gp-card__body"><strong>{{ kpis.ofertas_ativas }}</strong><p>Ofertas ativas</p></div></article>
+    <article class="gp-card"><div class="gp-card__body"><strong>{{ kpis.participacoes_ativas }}</strong><p>Participações ativas</p></div></article>
+    <article class="gp-card"><div class="gp-card__body"><strong>{{ kpis.participacoes_concluidas }}</strong><p>Concluídas</p></div></article>
+  </div>
+
+  <div class="gp-grid gp-grid--2">
+    <article class="gp-card">
+      <div class="gp-card__body">
+        <h3>Programas com mais participações</h3>
+        <ul class="gp-list">
+          {% for item in programas_populares %}
+            <li>{{ item.programa__nome }} <small>({{ item.programa__tipo }} • {{ item.total }} participações)</small></li>
+          {% empty %}
+            <li>Sem dados disponíveis.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </article>
+    <article class="gp-card">
+      <div class="gp-card__body">
+        <h3>Participações recentes</h3>
+        <ul class="gp-list">
+          {% for p in participacoes_recentes %}
+            <li>
+              {{ p.aluno.nome }} • {{ p.matricula_institucional.numero_matricula }} • {{ p.programa.nome }}
+              <small>({{ p.oferta.codigo }} • {{ p.get_status_display }})</small>
+            </li>
+          {% empty %}
+            <li>Nenhuma participação recente.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </article>
+  </div>
+</section>
+{% endblock %}

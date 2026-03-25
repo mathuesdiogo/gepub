@@ -1,0 +1,69 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}{{ title }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-page-stack">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="gp-card">
+    <div class="gp-card__body">
+      <form method="get" class="gp-form gp-form--inline">
+        <label for="id_q">Busca</label>
+        <input id="id_q" type="text" name="q" value="{{ q }}" placeholder="Aluno, matrícula, exemplar, livro..." />
+        <label for="id_status">Status</label>
+        <select id="id_status" name="status">
+          <option value="">Todos</option>
+          <option value="ATIVO" {% if status == "ATIVO" %}selected{% endif %}>Ativo</option>
+          <option value="RENOVADO" {% if status == "RENOVADO" %}selected{% endif %}>Renovado</option>
+          <option value="ATRASADO" {% if status == "ATRASADO" %}selected{% endif %}>Atrasado</option>
+          <option value="DEVOLVIDO" {% if status == "DEVOLVIDO" %}selected{% endif %}>Devolvido</option>
+          <option value="CANCELADO" {% if status == "CANCELADO" %}selected{% endif %}>Cancelado</option>
+        </select>
+        <button type="submit" class="gp-button gp-button--outline">Aplicar</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="gp-card">
+    <div class="gp-card__body">
+      <table class="gp-table">
+        <thead>
+          <tr>
+            <th>Aluno</th>
+            <th>Matrícula</th>
+            <th>Livro/Exemplar</th>
+            <th>Empréstimo</th>
+            <th>Prevista</th>
+            <th>Devolução</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for emp in emprestimos %}
+            <tr>
+              <td>{{ emp.aluno.nome }}</td>
+              <td>{{ emp.matricula_institucional.numero_matricula }}</td>
+              <td>{{ emp.livro.titulo }} • {{ emp.exemplar.codigo_exemplar }}</td>
+              <td>{{ emp.data_emprestimo|date:"d/m/Y" }}</td>
+              <td>{{ emp.data_prevista_devolucao|date:"d/m/Y" }}</td>
+              <td>{% if emp.data_devolucao_real %}{{ emp.data_devolucao_real|date:"d/m/Y" }}{% else %}—{% endif %}</td>
+              <td>{{ emp.get_status_display }}</td>
+              <td>
+                {% if emp.status == "ATIVO" or emp.status == "RENOVADO" or emp.status == "ATRASADO" %}
+                  <a class="gp-button gp-button--ghost" href="{% url 'educacao:biblioteca_emprestimo_renovar' emp.id %}">Renovar</a>
+                  <a class="gp-button gp-button--outline" href="{% url 'educacao:biblioteca_emprestimo_devolver' emp.id %}">Devolver</a>
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="8">Nenhum empréstimo encontrado.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

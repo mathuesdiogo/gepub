@@ -1,0 +1,68 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}{{ title }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-page-stack">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="gp-card">
+    <div class="gp-card__body">
+      <form method="get" class="gp-form gp-form--inline">
+        <label for="id_q">Busca</label>
+        <input id="id_q" type="text" name="q" value="{{ q }}" placeholder="Aluno, matrícula, exemplar, livro..." />
+        <label for="id_status">Status</label>
+        <select id="id_status" name="status">
+          <option value="">Todos</option>
+          <option value="ATIVA" {% if status == "ATIVA" %}selected{% endif %}>Ativa</option>
+          <option value="ATENDIDA" {% if status == "ATENDIDA" %}selected{% endif %}>Atendida</option>
+          <option value="CANCELADA" {% if status == "CANCELADA" %}selected{% endif %}>Cancelada</option>
+          <option value="EXPIRADA" {% if status == "EXPIRADA" %}selected{% endif %}>Expirada</option>
+        </select>
+        <button type="submit" class="gp-button gp-button--outline">Aplicar</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="gp-card">
+    <div class="gp-card__body">
+      <table class="gp-table">
+        <thead>
+          <tr>
+            <th>Aluno</th>
+            <th>Matrícula</th>
+            <th>Livro/Exemplar</th>
+            <th>Reserva</th>
+            <th>Expiração</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in reservas %}
+            <tr>
+              <td>{{ item.aluno.nome }}</td>
+              <td>{{ item.matricula_institucional.numero_matricula }}</td>
+              <td>
+                {{ item.livro.titulo }}
+                {% if item.exemplar %} • {{ item.exemplar.codigo_exemplar }}{% endif %}
+              </td>
+              <td>{{ item.data_reserva|date:"d/m/Y" }}</td>
+              <td>{% if item.data_expiracao %}{{ item.data_expiracao|date:"d/m/Y" }}{% else %}—{% endif %}</td>
+              <td>{{ item.get_status_display }}</td>
+              <td>
+                {% if item.status == "ATIVA" %}
+                  <a class="gp-button gp-button--outline" href="{% url 'educacao:biblioteca_reserva_cancel' item.id %}">Cancelar</a>
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="7">Nenhuma reserva encontrada.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

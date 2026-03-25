@@ -1,0 +1,67 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}{{ title }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-page-stack">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="gp-card">
+    <div class="gp-card__body">
+      <form method="get" class="gp-form gp-form--inline">
+        <label for="id_q">Busca</label>
+        <input id="id_q" type="text" name="q" value="{{ q }}" placeholder="Aluno, matrícula, programa, oferta..." />
+        <label for="id_status">Status</label>
+        <select id="id_status" name="status">
+          <option value="">Todos</option>
+          <option value="ATIVO" {% if status == "ATIVO" %}selected{% endif %}>Ativo</option>
+          <option value="PRE_INSCRITO" {% if status == "PRE_INSCRITO" %}selected{% endif %}>Pré-inscrito</option>
+          <option value="AGUARDANDO_VAGA" {% if status == "AGUARDANDO_VAGA" %}selected{% endif %}>Aguardando vaga</option>
+          <option value="CONCLUIDO" {% if status == "CONCLUIDO" %}selected{% endif %}>Concluído</option>
+          <option value="CANCELADO" {% if status == "CANCELADO" %}selected{% endif %}>Cancelado</option>
+          <option value="TRANSFERIDO" {% if status == "TRANSFERIDO" %}selected{% endif %}>Transferido</option>
+          <option value="DESLIGADO" {% if status == "DESLIGADO" %}selected{% endif %}>Desligado</option>
+          <option value="SUSPENSO" {% if status == "SUSPENSO" %}selected{% endif %}>Suspenso</option>
+        </select>
+        <button type="submit" class="gp-button gp-button--outline">Aplicar</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="gp-card">
+    <div class="gp-card__body">
+      <table class="gp-table">
+        <thead>
+          <tr>
+            <th>Aluno</th>
+            <th>Matrícula</th>
+            <th>Programa</th>
+            <th>Oferta</th>
+            <th>Status</th>
+            <th>Ingresso</th>
+            <th>Frequência</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in participacoes %}
+            <tr>
+              <td>{{ p.aluno.nome }}</td>
+              <td>{{ p.matricula_institucional.numero_matricula }}</td>
+              <td>{{ p.programa.nome }}</td>
+              <td>{{ p.oferta.codigo }} • {{ p.oferta.nome }}</td>
+              <td>{{ p.get_status_display }}</td>
+              <td>{{ p.data_ingresso|date:"d/m/Y" }}</td>
+              <td>{% if p.percentual_frequencia is not None %}{{ p.percentual_frequencia|floatformat:1 }}%{% else %}—{% endif %}</td>
+              <td>
+                <a class="gp-button gp-button--outline" href="{% url 'educacao:programa_complementar_frequencia_registrar' p.id %}">Frequência</a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="8">Nenhuma participação encontrada.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

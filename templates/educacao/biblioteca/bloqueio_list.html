@@ -1,0 +1,41 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}{{ title }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-page-stack">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="gp-card">
+    <div class="gp-card__body">
+      <table class="gp-table">
+        <thead>
+          <tr>
+            <th>Aluno</th>
+            <th>Matrícula</th>
+            <th>Biblioteca</th>
+            <th>Início</th>
+            <th>Fim</th>
+            <th>Status</th>
+            <th>Motivo</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in bloqueios %}
+            <tr>
+              <td>{{ item.aluno.nome }}</td>
+              <td>{% if item.matricula_institucional %}{{ item.matricula_institucional.numero_matricula }}{% else %}—{% endif %}</td>
+              <td>{% if item.biblioteca %}{{ item.biblioteca.nome }}{% else %}Rede{% endif %}</td>
+              <td>{{ item.data_inicio|date:"d/m/Y" }}</td>
+              <td>{% if item.data_fim %}{{ item.data_fim|date:"d/m/Y" }}{% else %}—{% endif %}</td>
+              <td>{{ item.get_status_display }}</td>
+              <td>{{ item.motivo|truncatechars:90 }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="7">Nenhum bloqueio registrado.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

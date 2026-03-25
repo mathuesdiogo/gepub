@@ -1,0 +1,100 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}{{ title }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-page-stack">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="gp-card">
+    <div class="gp-card__body">
+      <form method="get" class="gp-form gp-form--inline">
+        <label for="id_biblioteca">Biblioteca</label>
+        <select id="id_biblioteca" name="biblioteca">
+          <option value="">Todas</option>
+          {% for item in bibliotecas %}
+            <option value="{{ item.id }}" {% if biblioteca_id|stringformat:"s" == item.id|stringformat:"s" %}selected{% endif %}>
+              {{ item.nome }} • {{ item.unidade.nome }}
+            </option>
+          {% endfor %}
+        </select>
+
+        <label for="id_tipo">Tipo</label>
+        <select id="id_tipo" name="tipo">
+          <option value="ativos" {% if tipo == "ativos" %}selected{% endif %}>Empréstimos ativos</option>
+          <option value="atrasados" {% if tipo == "atrasados" %}selected{% endif %}>Atrasados</option>
+          <option value="devolvidos" {% if tipo == "devolvidos" %}selected{% endif %}>Devolvidos</option>
+          <option value="historico" {% if tipo == "historico" %}selected{% endif %}>Histórico geral</option>
+          <option value="reservas" {% if tipo == "reservas" %}selected{% endif %}>Reservas</option>
+        </select>
+
+        <label for="id_q">Busca</label>
+        <input id="id_q" type="text" name="q" value="{{ q }}" placeholder="Aluno, matrícula, livro..." />
+        <button type="submit" class="gp-button gp-button--outline">Aplicar</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="gp-card">
+    <div class="gp-card__body">
+      <table class="gp-table">
+        <thead>
+          {% if dataset_kind == "reservas" %}
+            <tr>
+              <th>Biblioteca</th>
+              <th>Aluno</th>
+              <th>Matrícula</th>
+              <th>Livro</th>
+              <th>Exemplar</th>
+              <th>Status</th>
+              <th>Reserva</th>
+              <th>Expiração</th>
+            </tr>
+          {% else %}
+            <tr>
+              <th>Biblioteca</th>
+              <th>Aluno</th>
+              <th>Matrícula</th>
+              <th>Livro</th>
+              <th>Exemplar</th>
+              <th>Status</th>
+              <th>Empréstimo</th>
+              <th>Prevista</th>
+              <th>Devolução</th>
+            </tr>
+          {% endif %}
+        </thead>
+        <tbody>
+          {% for item in dataset %}
+            {% if dataset_kind == "reservas" %}
+              <tr>
+                <td>{{ item.biblioteca.nome }}</td>
+                <td>{{ item.aluno.nome }}</td>
+                <td>{{ item.matricula_institucional.numero_matricula }}</td>
+                <td>{{ item.livro.titulo }}</td>
+                <td>{% if item.exemplar %}{{ item.exemplar.codigo_exemplar }}{% else %}—{% endif %}</td>
+                <td>{{ item.get_status_display }}</td>
+                <td>{{ item.data_reserva|date:"d/m/Y" }}</td>
+                <td>{% if item.data_expiracao %}{{ item.data_expiracao|date:"d/m/Y" }}{% else %}—{% endif %}</td>
+              </tr>
+            {% else %}
+              <tr>
+                <td>{{ item.biblioteca.nome }}</td>
+                <td>{{ item.aluno.nome }}</td>
+                <td>{{ item.matricula_institucional.numero_matricula }}</td>
+                <td>{{ item.livro.titulo }}</td>
+                <td>{{ item.exemplar.codigo_exemplar }}</td>
+                <td>{{ item.get_status_display }}</td>
+                <td>{{ item.data_emprestimo|date:"d/m/Y" }}</td>
+                <td>{{ item.data_prevista_devolucao|date:"d/m/Y" }}</td>
+                <td>{% if item.data_devolucao_real %}{{ item.data_devolucao_real|date:"d/m/Y" }}{% else %}—{% endif %}</td>
+              </tr>
+            {% endif %}
+          {% empty %}
+            <tr><td colspan="9">Sem dados para os filtros selecionados.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

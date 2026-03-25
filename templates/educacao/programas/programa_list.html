@@ -1,0 +1,49 @@
+{% extends "educacao/base_modulo.html" %}
+{% block title %}{{ title }} • Educação • GEPUB{% endblock %}
+
+{% block module_content %}
+<section class="gp-page-stack">
+  {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
+
+  <div class="gp-card">
+    <div class="gp-card__body">
+      <form method="get" class="gp-form gp-form--inline">
+        <label for="id_q">Busca</label>
+        <input id="id_q" type="text" name="q" value="{{ q }}" placeholder="Nome, tipo, slug..." />
+        <button type="submit" class="gp-button gp-button--outline">Aplicar</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="gp-card">
+    <div class="gp-card__body">
+      <table class="gp-table">
+        <thead>
+          <tr>
+            <th>Programa</th>
+            <th>Tipo</th>
+            <th>Slug</th>
+            <th>Status</th>
+            <th>Vínculo escolar ativo</th>
+            <th>Múltiplas participações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in programas %}
+            <tr>
+              <td>{{ p.nome }}</td>
+              <td>{{ p.get_tipo_display }}</td>
+              <td>{{ p.slug }}</td>
+              <td>{{ p.get_status_display }}</td>
+              <td>{% if p.exige_vinculo_escolar_ativo %}Sim{% else %}Não{% endif %}</td>
+              <td>{% if p.permite_multiplas_participacoes %}Sim{% else %}Não{% endif %}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6">Nenhum programa encontrado.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}
