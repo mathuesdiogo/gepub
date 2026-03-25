@@ -89,23 +89,23 @@
               {% widthratio stats.modulos_ativos base 100 as modulos_pct %}
               <div class="org-bars">
                 <div class="org-bar-item">
-                  <div class="org-bar-item__track"><span style="--v: {{ municipios_pct }};"></span></div>
+                  <div class="org-bar-item__track"><span data-style-var-v="{{ municipios_pct }}"></span></div>
                   <small>Mun</small>
                 </div>
                 <div class="org-bar-item">
-                  <div class="org-bar-item__track"><span style="--v: {{ secretarias_pct }};"></span></div>
+                  <div class="org-bar-item__track"><span data-style-var-v="{{ secretarias_pct }}"></span></div>
                   <small>Sec</small>
                 </div>
                 <div class="org-bar-item">
-                  <div class="org-bar-item__track"><span style="--v: {{ unidades_pct }};"></span></div>
+                  <div class="org-bar-item__track"><span data-style-var-v="{{ unidades_pct }}"></span></div>
                   <small>Uni</small>
                 </div>
                 <div class="org-bar-item">
-                  <div class="org-bar-item__track"><span style="--v: {{ setores_pct }};"></span></div>
+                  <div class="org-bar-item__track"><span data-style-var-v="{{ setores_pct }}"></span></div>
                   <small>Set</small>
                 </div>
                 <div class="org-bar-item">
-                  <div class="org-bar-item__track"><span style="--v: {{ modulos_pct }};"></span></div>
+                  <div class="org-bar-item__track"><span data-style-var-v="{{ modulos_pct }}"></span></div>
                   <small>Mod</small>
                 </div>
               </div>
@@ -118,7 +118,7 @@
               <span class="org-stats-mini__badge">{{ stats.onboarding_progress_pct }}%</span>
             </div>
             <div class="org-donut-layout">
-              <div class="org-donut" style="--pct: {{ stats.onboarding_progress_pct|default:0 }};">
+              <div class="org-donut" data-style-var-pct="{{ stats.onboarding_progress_pct|default:0 }}">
                 <span>{{ stats.onboarding_progress_pct }}%</span>
               </div>
               <div class="org-donut-legend">
@@ -153,18 +153,18 @@
     </summary>
     <div class="org-collapsible__content">
       <div class="org-board__grid">
-        <a class="org-board-card org-board-card--accent" href="{% url 'org:onboarding_wizard' %}">
+        <a class="org-board-card org-board-card--accent gp-card" href="{% url 'org:onboarding_wizard' %}">
           <span class="org-board-card__icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
           <span class="org-board-card__title">Assistente guiado</span>
           <span class="org-board-card__meta">Conduza o onboarding por etapas</span>
         </a>
-        <a class="org-board-card" href="{% url 'org:onboarding_painel' %}">
+        <a class="org-board-card gp-card" href="{% url 'org:onboarding_painel' %}">
           <span class="org-board-card__icon"><i class="fa-solid fa-list-check"></i></span>
           <span class="org-board-card__title">Painel de progresso</span>
           <span class="org-board-card__meta">Acompanhe status por módulo e secretaria</span>
         </a>
         {% if can_manage_secretaria %}
-          <a class="org-board-card" href="{% url 'org:secretaria_governanca_hub' %}">
+          <a class="org-board-card gp-card" href="{% url 'org:secretaria_governanca_hub' %}">
             <span class="org-board-card__icon"><i class="fa-solid fa-sliders"></i></span>
             <span class="org-board-card__title">Governança avançada</span>
             <span class="org-board-card__meta">Configurações e cadastros-base por secretaria</span>
@@ -172,13 +172,13 @@
         {% endif %}
 
         {% if perms.org.add_municipio %}
-          <a class="org-board-card" href="{% url 'org:municipio_create' %}">
+          <a class="org-board-card gp-card" href="{% url 'org:municipio_create' %}">
             <span class="org-board-card__icon"><i class="fa-solid fa-city"></i></span>
             <span class="org-board-card__title">Novo município</span>
-            <span class="org-board-card__meta">Cadastrar uma nova prefeitura no escopo</span>
+            <span class="org-board-card__meta">Adicionar uma nova prefeitura no escopo</span>
           </a>
         {% else %}
-          <a class="org-board-card" href="{% url 'org:municipio_list' %}">
+          <a class="org-board-card gp-card" href="{% url 'org:municipio_list' %}">
             <span class="org-board-card__icon"><i class="fa-solid fa-city"></i></span>
             <span class="org-board-card__title">Mapa de municípios</span>
             <span class="org-board-card__meta">Visualizar municípios cadastrados</span>
@@ -186,13 +186,13 @@
         {% endif %}
 
         {% if perms.org.add_secretaria %}
-          <a class="org-board-card" href="{% url 'org:secretaria_create' %}">
+          <a class="org-board-card gp-card" href="{% url 'org:secretaria_create' %}">
             <span class="org-board-card__icon"><i class="fa-solid fa-building-columns"></i></span>
             <span class="org-board-card__title">Nova secretaria</span>
             <span class="org-board-card__meta">Adicionar secretaria por município</span>
           </a>
         {% else %}
-          <a class="org-board-card" href="{% url 'org:secretaria_list' %}">
+          <a class="org-board-card gp-card" href="{% url 'org:secretaria_list' %}">
             <span class="org-board-card__icon"><i class="fa-solid fa-building-columns"></i></span>
             <span class="org-board-card__title">Estrutura de secretarias</span>
             <span class="org-board-card__meta">Consultar secretarias e vínculos</span>
@@ -200,13 +200,13 @@
         {% endif %}
 
         {% if perms.org.add_unidade %}
-          <a class="org-board-card" href="{% url 'org:unidade_create' %}">
+          <a class="org-board-card gp-card" href="{% url 'org:unidade_create' %}">
             <span class="org-board-card__icon"><i class="fa-solid fa-school"></i></span>
             <span class="org-board-card__title">Nova unidade</span>
-            <span class="org-board-card__meta">Cadastrar escola, UBS ou unidade administrativa</span>
+            <span class="org-board-card__meta">Adicionar escola, UBS ou unidade administrativa</span>
           </a>
         {% else %}
-          <a class="org-board-card" href="{% url 'org:unidade_list' %}">
+          <a class="org-board-card gp-card" href="{% url 'org:unidade_list' %}">
             <span class="org-board-card__icon"><i class="fa-solid fa-school"></i></span>
             <span class="org-board-card__title">Mapa de unidades</span>
             <span class="org-board-card__meta">Visualizar unidades e tipologias</span>
@@ -214,13 +214,13 @@
         {% endif %}
 
         {% if perms.org.add_setor %}
-          <a class="org-board-card" href="{% url 'org:setor_create' %}">
+          <a class="org-board-card gp-card" href="{% url 'org:setor_create' %}">
             <span class="org-board-card__icon"><i class="fa-solid fa-sitemap"></i></span>
             <span class="org-board-card__title">Novo setor</span>
             <span class="org-board-card__meta">Criar setores vinculados às unidades</span>
           </a>
         {% else %}
-          <a class="org-board-card" href="{% url 'org:setor_list' %}">
+          <a class="org-board-card gp-card" href="{% url 'org:setor_list' %}">
             <span class="org-board-card__icon"><i class="fa-solid fa-sitemap"></i></span>
             <span class="org-board-card__title">Estrutura setorial</span>
             <span class="org-board-card__meta">Analisar distribuição por unidades</span>

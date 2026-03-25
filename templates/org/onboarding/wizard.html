@@ -25,7 +25,7 @@
           <span>{{ wizard_progress_pct }}%</span>
         </div>
         <div class="ob-progress__bar">
-          <div class="ob-progress__fill" style="width: {{ wizard_progress_pct }}%"></div>
+          <div class="ob-progress__fill" data-style-width-pct="{{ wizard_progress_pct }}"></div>
         </div>
       </div>
 
@@ -40,7 +40,7 @@
     </aside>
 
     <main class="onboarding-main">
-      <section class="onboarding-card">
+      <section class="onboarding-card gp-card">
         <div class="onboarding-card__head">
           <p class="onboarding-card__kicker">Implantação Guiada</p>
           <h1 class="onboarding-card__title">{{ step_title }}</h1>
@@ -49,7 +49,7 @@
 
         <form method="post" class="onboarding-form" enctype="multipart/form-data">
           {% csrf_token %}
-          <div class="onboarding-card__body">
+          <div class="onboarding-card__body gp-card__body">
             {% if messages %}
               {% for message in messages %}
                 <div class="onboarding-note">{{ message }}</div>
@@ -229,7 +229,7 @@
               </div>
             {% elif wizard_step == 6 %}
               <div class="onboarding-note">
-                Não é necessário cadastrar unidades por secretaria nesta etapa.
+                Não é necessário adicionar unidades por secretaria nesta etapa.
                 Cadastre apenas escolas, unidades de saúde e setores de gestão.
                 Use 1 linha por item no formato <strong>Nome</strong>, <strong>Nome | Endereço</strong> ou <strong>Nome | TIPO | Endereço</strong>.
               </div>
@@ -306,6 +306,7 @@
     </main>
   </div>
 
+  <script src="{% static 'js/ds-style-bindings.js' %}"></script>
   <script>
     (function () {
       function getCookie(name) {

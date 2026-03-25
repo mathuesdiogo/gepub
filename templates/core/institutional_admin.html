@@ -13,19 +13,19 @@
     {% include "core/partials/components/layout/page_head.html" with title=title subtitle=subtitle actions=actions %}
 
     <div class="ia-metrics" aria-label="Resumo do editor">
-      <article class="ia-metric-card">
+      <article class="ia-metric-card gp-card">
         <p class="ia-metric-card__label">Campos editáveis</p>
         <p class="ia-metric-card__value">3</p>
       </article>
-      <article class="ia-metric-card">
+      <article class="ia-metric-card gp-card">
         <p class="ia-metric-card__label">Tema atual</p>
         <p class="ia-metric-card__value ia-metric-card__value--small">Institucional 2026</p>
       </article>
-      <article class="ia-metric-card">
+      <article class="ia-metric-card gp-card">
         <p class="ia-metric-card__label">Publicação</p>
         <p class="ia-metric-card__value ia-metric-card__value--small">{{ page.ativo|yesno:"Ativa,Inativa" }}</p>
       </article>
-      <article class="ia-metric-card">
+      <article class="ia-metric-card gp-card">
         <p class="ia-metric-card__label">Atualizado em</p>
         <p class="ia-metric-card__value ia-metric-card__value--small">{{ page.atualizado_em|date:"d/m/Y H:i" }}</p>
       </article>
@@ -52,7 +52,7 @@
       {% csrf_token %}
 
       {% if form.non_field_errors %}
-        <div class="ia-alert ia-alert--error">
+        <div class="ia-alert ia-alert--error gp-alert">
           {% for error in form.non_field_errors %}
             <p>{{ error }}</p>
           {% endfor %}

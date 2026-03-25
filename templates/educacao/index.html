@@ -94,7 +94,7 @@
               <div class="gp-student-widget__body">
                 <section class="gp-student-calendar" aria-label="Calendário escolar do mês">
                   <h4 class="gp-student-calendar__month">{{ professor_calendario.mes_label }}</h4>
-                  <table class="gp-student-calendar__table">
+                  <table class="gp-table__native gp-student-calendar__table">
                     <thead>
                       <tr>
                         {% for label in professor_calendario.semana_labels %}
@@ -106,7 +106,7 @@
                       {% for week in professor_calendario.weeks %}
                         <tr>
                           {% for cell in week %}
-                            <td class="{% if not cell.day %}is-empty{% endif %}{% if cell.is_today %} is-today{% endif %}{% if cell.has_event %} has-event{% endif %}{% if cell.event_type %} evento-{{ cell.event_type }}{% endif %}">
+                            <td class="{% if not cell.day %}is-empty{% endif %}{% if cell.is_today %} is-today{% endif %}{% if cell.has_event %} has-event{% endif %}{% if cell.event_type %} evento-{{ cell.event_type|lower }}{% endif %}">
                               {% if cell.day %}{{ cell.day }}{% endif %}
                             </td>
                           {% endfor %}
@@ -156,7 +156,7 @@
                         <p>{{ diario.turma.unidade.nome|default:"Unidade não informada" }}</p>
                         <div class="gp-professor-inline-actions">
                           <a class="gp-student-pill gp-student-pill--compact" href="{% url 'educacao:diario_detail' diario.id %}">
-                            <i class="fa-solid fa-book-open"></i><span>Abrir diário</span>
+                            <i class="fa-solid fa-book-open"></i><span>Visualizar diário</span>
                           </a>
                           <a class="gp-student-pill gp-student-pill--compact" href="{% url 'educacao:aula_create' diario.id %}">
                             <i class="fa-solid fa-plus"></i><span>Nova aula</span>
@@ -169,7 +169,7 @@
                   <div class="gp-student-empty">Nenhum diário ativo encontrado para o seu perfil.</div>
                 {% endif %}
                 <a class="gp-student-pill gp-student-pill--compact" href="{% url 'educacao:professor_diarios' codigo %}">
-                  <i class="fa-solid fa-arrow-right"></i><span>Ver todos os diários</span>
+                  <i class="fa-solid fa-arrow-right"></i><span>Visualizar todos os diários</span>
                 </a>
               </div>
             </details>
@@ -193,7 +193,7 @@
             <span class="edu-chip"><i class="fa-solid fa-school"></i>{{ unidades_total }} unidades</span>
             <span class="edu-chip"><i class="fa-solid fa-people-group"></i>{{ turmas_total }} turmas</span>
             <span class="edu-chip"><i class="fa-solid fa-user-graduate"></i>{{ alunos_total }} alunos</span>
-            <span class="edu-chip"><i class="fa-solid fa-id-card"></i>{{ matriculas_total }} matrículas</span>
+            <span class="edu-chip"><i class="fa-solid fa-id-card gp-card"></i>{{ matriculas_total }} matrículas</span>
             <span class="edu-chip"><i class="fa-solid fa-arrows-rotate"></i>{{ renovacoes_abertas|default:0 }} renovações abertas</span>
           </div>
         </div>
@@ -202,7 +202,7 @@
             <i class="fa-solid fa-plus"></i><span>Criar Turma</span>
           </a>
           <a class="gp-button gp-button--outline" href="{% url 'educacao:aluno_create' %}">
-            <i class="fa-solid fa-user-plus"></i><span>Cadastrar Aluno</span>
+            <i class="fa-solid fa-user-plus"></i><span>Adicionar Aluno</span>
           </a>
           <a class="gp-button gp-button--outline" href="{% url 'educacao:censo_escolar' %}">
             <i class="fa-solid fa-database"></i><span>Censo Escolar</span>
@@ -275,84 +275,84 @@
         </div>
 
         <div class="gp-link-list">
-          <a class="gp-link-box edu-link-card" href="{% url 'educacao:turma_create' %}">
+          <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:turma_create' %}">
             <div>
               <div class="gp-link-box__title">Criar Turma</div>
-              <div class="gp-link-box__meta">Cadastrar turma regular vinculada à matriz curricular</div>
+              <div class="gp-link-box__meta">Adicionar turma regular vinculada à matriz curricular</div>
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
-          <a class="gp-link-box edu-link-card" href="{% url 'educacao:aluno_create' %}">
+          <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:aluno_create' %}">
             <div>
-              <div class="gp-link-box__title">Cadastrar Aluno</div>
+              <div class="gp-link-box__title">Adicionar Aluno</div>
               <div class="gp-link-box__meta">Novo aluno com vínculo de matrícula</div>
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
-          <a class="gp-link-box edu-link-card" href="{% url 'educacao:censo_escolar' %}">
+          <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:censo_escolar' %}">
             <div>
               <div class="gp-link-box__title">Censo Escolar</div>
               <div class="gp-link-box__meta">Conferência e exportação INEP</div>
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
-          <a class="gp-link-box edu-link-card" href="{% url 'educacao:componente_list' %}">
+          <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:componente_list' %}">
             <div>
               <div class="gp-link-box__title">Componentes Curriculares</div>
               <div class="gp-link-box__meta">Disciplinas e componentes por etapa</div>
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
-          <a class="gp-link-box edu-link-card" href="{% url 'educacao:matriz_list' %}">
+          <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:matriz_list' %}">
             <div>
               <div class="gp-link-box__title">Matrizes Curriculares</div>
               <div class="gp-link-box__meta">Estrutura por etapa e série/ano da rede</div>
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
-          <a class="gp-link-box edu-link-card" href="{% url 'educacao:calendario_index' %}">
+          <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:calendario_index' %}">
             <div>
               <div class="gp-link-box__title">Calendário Educacional</div>
               <div class="gp-link-box__meta">Dias letivos, feriados e bimestres</div>
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
-          <a class="gp-link-box edu-link-card" href="{% url 'educacao:portal_professor' %}">
+          <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:portal_professor' %}">
             <div>
               <div class="gp-link-box__title">Portal do Professor</div>
               <div class="gp-link-box__meta">Diários, avaliações e pendências</div>
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
-          <a class="gp-link-box edu-link-card" href="{% url 'educacao:justificativa_falta_list' %}">
+          <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:justificativa_falta_list' %}">
             <div>
               <div class="gp-link-box__title">Justificativas de Falta</div>
               <div class="gp-link-box__meta">Fila centralizada de análise por perfil operacional</div>
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
-          <a class="gp-link-box edu-link-card" href="{% url 'educacao:assistencia_index' %}">
+          <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:assistencia_index' %}">
             <div>
               <div class="gp-link-box__title">Assistência Escolar</div>
               <div class="gp-link-box__meta">Merenda e transporte escolar</div>
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
-          <a class="gp-link-box edu-link-card" href="{% url 'educacao:beneficios_index' %}">
+          <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:beneficios_index' %}">
             <div>
               <div class="gp-link-box__title">Benefícios e Entregas</div>
               <div class="gp-link-box__meta">Kits, editais, campanhas, recorrências e histórico por aluno</div>
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
-          <a class="gp-link-box edu-link-card" href="{% url 'educacao:curso_list' %}">
+          <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:curso_list' %}">
             <div>
               <div class="gp-link-box__title">Atividades Extras</div>
               <div class="gp-link-box__meta">Cursos e trilhas extracurriculares complementares</div>
             </div>
             <i class="fa-solid fa-arrow-right"></i>
           </a>
-          <a class="gp-link-box edu-link-card" href="{% url 'educacao:informatica_index' %}">
+          <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:informatica_index' %}">
             <div>
               <div class="gp-link-box__title">Curso de Informática</div>
               <div class="gp-link-box__meta">Laboratórios, turmas, matrículas e frequência</div>
@@ -360,35 +360,35 @@
             <i class="fa-solid fa-arrow-right"></i>
           </a>
           {% if can_edu_manage %}
-            <a class="gp-link-box edu-link-card" href="{% url 'educacao:turma_geracao_lote' %}">
+            <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:turma_geracao_lote' %}">
               <div>
                 <div class="gp-link-box__title">Wizard de Turmas e Diários</div>
                 <div class="gp-link-box__meta">Geração em lote por matriz/ano/período com setup automático</div>
               </div>
               <i class="fa-solid fa-arrow-right"></i>
             </a>
-            <a class="gp-link-box edu-link-card" href="{% url 'educacao:evasao_lote' %}">
+            <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:evasao_lote' %}">
               <div>
                 <div class="gp-link-box__title">Evasão em Lote</div>
                 <div class="gp-link-box__meta">Prévia, execução em massa e rollback seguro por token</div>
               </div>
               <i class="fa-solid fa-arrow-right"></i>
             </a>
-            <a class="gp-link-box edu-link-card" href="{% url 'educacao:fechamento_periodo_lote' %}">
+            <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:fechamento_periodo_lote' %}">
               <div>
                 <div class="gp-link-box__title">Fechamento de Período em Lote</div>
                 <div class="gp-link-box__meta">Fechar ou reabrir turmas por secretaria/unidade em um único fluxo</div>
               </div>
               <i class="fa-solid fa-arrow-right"></i>
             </a>
-            <a class="gp-link-box edu-link-card" href="{% url 'educacao:operacoes_lote' %}">
+            <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:operacoes_lote' %}">
               <div>
                 <div class="gp-link-box__title">Operações em Lote</div>
                 <div class="gp-link-box__meta">Carômetro, etiquetas e atualização de fotos por ZIP</div>
               </div>
               <i class="fa-solid fa-arrow-right"></i>
             </a>
-            <a class="gp-link-box edu-link-card" href="{% url 'educacao:renovacao_matricula_list' %}">
+            <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:renovacao_matricula_list' %}">
               <div>
                 <div class="gp-link-box__title">Renovação de Matrícula</div>
                 <div class="gp-link-box__meta">
@@ -397,7 +397,7 @@
               </div>
               <i class="fa-solid fa-arrow-right"></i>
             </a>
-            <a class="gp-link-box edu-link-card" href="{% url 'educacao:minicurso_dashboard' %}">
+            <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:minicurso_dashboard' %}">
               <div>
                 <div class="gp-link-box__title">Minicursos</div>
                 <div class="gp-link-box__meta">Cadastro, turmas, matrículas e certificados de FIC e cursos livres</div>
@@ -405,7 +405,7 @@
               <i class="fa-solid fa-arrow-right"></i>
             </a>
           {% endif %}
-          <a class="gp-link-box edu-link-card" href="{% url 'educacao:indicadores_gerenciais' %}">
+          <a class="gp-link-box edu-link-card gp-card" href="{% url 'educacao:indicadores_gerenciais' %}">
             <div>
               <div class="gp-link-box__title">Indicadores Gerenciais</div>
               <div class="gp-link-box__meta">Rendimento, evasão e produtividade</div>
@@ -413,7 +413,7 @@
             <i class="fa-solid fa-arrow-right"></i>
           </a>
           {% if can_nee_view %}
-            <a class="gp-link-box edu-link-card" href="{% url 'nee:relatorios_index' %}">
+            <a class="gp-link-box edu-link-card gp-card" href="{% url 'nee:relatorios_index' %}">
               <div>
                 <div class="gp-link-box__title">Relatórios NEE</div>
                 <div class="gp-link-box__meta">Necessidades educacionais especiais</div>

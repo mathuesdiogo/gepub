@@ -7,7 +7,7 @@
 
 <div class="cal-nav">
   <a class="gp-button gp-button--ghost" href="{% url 'educacao:calendario_index' %}?ano={{ ano_prev }}&mes={{ mes_prev }}"><i class="fa-solid fa-chevron-left"></i> Mês anterior</a>
-  <form method="get" class="gp-form cal-nav__form">
+  <form method="get" class="gp-form cal-nav__form form-shell">
     <label class="small">Ano</label>
     <select class="gp-select" name="ano">
       {% for a in anos_opcoes %}
@@ -48,7 +48,7 @@
 
   {% for semana in semanas %}
     {% for cell in semana %}
-      <div class="cal-day {% if not cell.day %}cal-day--empty{% endif %} {% if cell.is_weekend %}cal-day--weekend{% endif %} {% if cell.has_holiday %}cal-day--holiday{% endif %}">
+      <div class="cal-day {% if not cell.day %}cal-day--empty{% endif %}{% if cell.is_weekend %} cal-day--weekend{% endif %}{% if cell.has_holiday %} cal-day--holiday{% endif %}">
         {% if cell.day %}
           <div class="cal-day__number {% if cell.is_weekend or cell.has_holiday %}cal-day__number--danger{% endif %}">{{ cell.day }}</div>
           <div class="cal-day__events">
@@ -72,7 +72,7 @@
 {% include "core/partials/components/layout/page_head.html" with title="Avisos de próximos eventos do mês" subtitle="Alertas rápidos para planejamento escolar" actions=None %}
 <div class="cal-alerts">
   {% for item in avisos_proximos_mes %}
-    <div class="cal-alert cal-alert--{{ item.evento.tipo|lower }}">
+    <div class="cal-alert cal-alert--{{ item.evento.tipo|lower }} gp-alert">
       <div class="cal-alert__left">
         <div class="cal-alert__title">{{ item.evento.titulo }}</div>
         <div class="cal-alert__meta">{{ item.evento.get_tipo_display }} • {{ item.evento.data_inicio|date:"d/m/Y" }}</div>
@@ -80,7 +80,7 @@
       <div class="cal-alert__right">{{ item.aviso }}</div>
     </div>
   {% empty %}
-    <div class="cal-alert cal-alert--empty">Sem eventos futuros neste mês.</div>
+    <div class="cal-alert cal-alert--empty gp-alert">Sem eventos futuros neste mês.</div>
   {% endfor %}
 </div>
 
@@ -113,9 +113,9 @@
           {% if can_manage_calendar %}
             <td>
               <a class="gp-button gp-button--ghost" href="{% url 'educacao:calendario_evento_update' ev.pk %}"><i class="fa-solid fa-pen"></i> Editar</a>
-              <form method="post" action="{% url 'educacao:calendario_evento_delete' ev.pk %}" class="gp-form u-inline-block">
+              <form method="post" action="{% url 'educacao:calendario_evento_delete' ev.pk %}" class="gp-form u-inline-block form-shell">
                 {% csrf_token %}
-                <button type="submit" class="gp-button gp-button--ghost"><i class="fa-solid fa-trash"></i> Excluir</button>
+                <button type="submit" class="gp-button gp-button--ghost"><i class="fa-solid fa-trash"></i> Remover</button>
               </form>
             </td>
           {% endif %}

@@ -78,7 +78,7 @@
         <div class="gp-student-widget__body">
           <section class="gp-student-calendar" aria-label="Calendário escolar do mês">
             <h4 class="gp-student-calendar__month">{{ student_calendario.mes_label }}</h4>
-            <table class="gp-student-calendar__table">
+            <table class="gp-table__native gp-student-calendar__table">
               <thead>
                 <tr>
                   {% for label in student_calendario.semana_labels %}
@@ -90,7 +90,7 @@
                 {% for week in student_calendario.weeks %}
                   <tr>
                     {% for cell in week %}
-                      <td class="{% if not cell.day %}is-empty{% endif %}{% if cell.is_today %} is-today{% endif %}{% if cell.has_event %} has-event{% endif %}{% if cell.event_type %} evento-{{ cell.event_type }}{% endif %}">
+                      <td class="{% if not cell.day %}is-empty{% endif %}{% if cell.is_today %} is-today{% endif %}{% if cell.has_event %} has-event{% endif %}{% if cell.event_type %} evento-{{ cell.event_type|lower }}{% endif %}">
                         {% if cell.day %}{{ cell.day }}{% endif %}
                       </td>
                     {% endfor %}
@@ -140,7 +140,7 @@
                   <p>{{ d.turma.unidade.nome|default:"Unidade não informada" }}</p>
                   <div class="gp-professor-inline-actions">
                     <a class="gp-student-pill gp-student-pill--compact" href="{% url 'educacao:diario_detail' d.id %}">
-                      <i class="fa-solid fa-book-open"></i><span>Abrir diário</span>
+                      <i class="fa-solid fa-book-open"></i><span>Visualizar diário</span>
                     </a>
                     <a class="gp-student-pill gp-student-pill--compact" href="{% url 'educacao:aula_create' d.id %}">
                       <i class="fa-solid fa-plus"></i><span>Nova aula</span>
@@ -153,7 +153,7 @@
             <div class="gp-student-empty">Nenhum diário ativo encontrado para o seu perfil.</div>
           {% endif %}
           <a class="gp-student-pill gp-student-pill--compact" href="{% url 'educacao:meus_diarios' %}">
-            <i class="fa-solid fa-arrow-right"></i><span>Ver todos os diários</span>
+            <i class="fa-solid fa-arrow-right"></i><span>Visualizar todos os diários</span>
           </a>
         </div>
       </details>

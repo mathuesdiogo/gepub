@@ -33,11 +33,31 @@
     .day-number { font-size: 8px; font-weight: 800; color: #0f172a; }
     td.weekend .day-number, td.holiday .day-number { color: #991b1b; }
     .dot { width: 6px; height: 6px; border-radius: 99px; margin-top: 2px; }
+    .dot.type-letivo { background: #2563eb; }
+    .dot.type-facultativo { background: #d97706; }
+    .dot.type-feriado { background: #dc2626; }
+    .dot.type-comemorativa { background: #9333ea; }
+    .dot.type-bimestre_inicio { background: #16a34a; }
+    .dot.type-bimestre_fim { background: #ea580c; }
+    .dot.type-planejamento { background: #4f46e5; }
+    .dot.type-recesso { background: #0f766e; }
+    .dot.type-pedagogico { background: #4f46e5; }
+    .dot.type-outro { background: #475569; }
     .legend-wrap { margin-top: 8px; border: 1px solid #dbe3ee; border-radius: 8px; padding: 7px; background: #fff; }
     .legend-title { font-size: 11px; font-weight: 800; margin-bottom: 5px; }
     .legend { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px 8px; }
     .legend-item { display: flex; align-items: center; gap: 5px; font-size: 9px; }
     .legend-dot { width: 9px; height: 9px; border-radius: 999px; border: 1px solid rgba(15, 23, 42, 0.15); }
+    .legend-dot.type-letivo { background: #2563eb; }
+    .legend-dot.type-facultativo { background: #d97706; }
+    .legend-dot.type-feriado { background: #dc2626; }
+    .legend-dot.type-comemorativa { background: #9333ea; }
+    .legend-dot.type-bimestre_inicio { background: #16a34a; }
+    .legend-dot.type-bimestre_fim { background: #ea580c; }
+    .legend-dot.type-planejamento { background: #4f46e5; }
+    .legend-dot.type-recesso { background: #0f766e; }
+    .legend-dot.type-pedagogico { background: #4f46e5; }
+    .legend-dot.type-outro { background: #475569; }
     .ann-wrap { margin-top: 8px; border: 1px solid #dbe3ee; border-radius: 8px; background: #fff; padding: 7px; page-break-inside: avoid; }
     .ann-title { font-size: 11px; font-weight: 800; margin-bottom: 6px; }
     .ann-grid { display: grid; gap: 5px; }
@@ -76,17 +96,17 @@
     <div class="chip"><b>Total de eventos:</b> {{ total_eventos_ano }}</div>
     <div class="chip"><b>Impresso por:</b> {{ printed_by }}</div>
     <div class="chip"><b>Data/hora:</b> {{ printed_at }}</div>
-    <div class="chip" style="grid-column: span 3;"><b>Filtros:</b> {{ filtros }}</div>
+    <div class="chip u-col-span-3"><b>Filtros:</b> {{ filtros }}</div>
   </div>
 
   <div class="months">
     {% for m in meses_cards %}
-      <div class="month-card">
+      <div class="month-card gp-card">
         <div class="month-head">
           <div class="month-title">{{ m.mes_nome }}</div>
           <div class="month-meta">{{ m.dias_letivos }} letivos • {{ m.eventos }} eventos</div>
         </div>
-        <table>
+        <table class="gp-table__native">
           <thead>
             <tr>
               {% for d in dias_semana %}
@@ -98,11 +118,11 @@
             {% for semana in m.semanas %}
               <tr>
                 {% for c in semana %}
-                  <td class="{% if not c.day %}empty{% endif %} {% if c.is_weekend %}weekend{% endif %} {% if c.has_holiday %}holiday{% endif %}">
+                  <td class="{% if not c.day %}empty{% endif %}{% if c.is_weekend %} weekend{% endif %}{% if c.has_holiday %} holiday{% endif %}">
                     {% if c.day %}
                       <div class="day-number">{{ c.day }}</div>
                       {% if c.events %}
-                        <div class="dot" style="background: {{ c.events.0.cor_hex|default:'#334155' }};"></div>
+                        <div class="dot type-{{ c.dominant_tipo|default:'OUTRO'|lower }}"></div>
                       {% endif %}
                     {% endif %}
                   </td>
@@ -120,7 +140,7 @@
     <div class="legend">
       {% for l in legendas %}
         <div class="legend-item">
-          <span class="legend-dot" style="background: {{ l.cor }};"></span>
+          <span class="legend-dot type-{{ l.tipo_css }}"></span>
           <span>{{ l.label }}</span>
         </div>
       {% endfor %}

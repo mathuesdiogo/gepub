@@ -1,14 +1,16 @@
 {# core/partials/components/layout/detail_summary.html #}
 
 {% if pills %}
-  <div class="chips gp-pills">
+  <ul class="chips pills">
     {% for p in pills %}
-      <span class="pill gp-pills__item{% if p.variant %} pill--{{ p.variant }}{% endif %}">
-        {% if p.label %}<strong>{{ p.label }}:</strong>{% endif %}
-        {{ p.value }}
-      </span>
+      <li>
+        <span class="pill{% if p.variant %} pill--{{ p.variant }}{% endif %}">
+          {% if p.label %}<strong>{{ p.label }}:</strong>{% endif %}
+          {{ p.value }}
+        </span>
+      </li>
     {% endfor %}
-  </div>
+  </ul>
 {% endif %}
 
 {% if fields %}

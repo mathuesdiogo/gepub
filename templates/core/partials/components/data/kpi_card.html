@@ -1,4 +1,4 @@
-<div class="sec-kpi {% if variant %}{% if 'kpi-' in variant %}{{ variant }}{% else %}kpi-{{ variant }}{% endif %}{% endif %}">
+<div class="sec-kpi {% if variant %}kpi-{{ variant }}{% else %}kpi-default{% endif %}">
   <div class="sec-kpi__body">
     <div class="sec-kpi__label">{{ label|default:"Indicador" }}</div>
     <div class="sec-kpi__value">{{ value|default:"0" }}</div>

@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('educacao', '0039_informaticaturma_permite_sobreposicao_horario_and_more'),
-        ('org', '0016_localestrutural'),
+        ('org', '0015_unidade_tipo_educacional'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

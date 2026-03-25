@@ -34,6 +34,16 @@
     .legend { padding: 8px; display: grid; gap: 6px; }
     .legend-item { display: flex; align-items: center; gap: 6px; font-size: 10px; }
     .legend-dot { width: 10px; height: 10px; border-radius: 999px; border: 1px solid rgba(15, 23, 42, 0.15); }
+    .legend-dot.type-letivo { background: #2563eb; }
+    .legend-dot.type-facultativo { background: #d97706; }
+    .legend-dot.type-feriado { background: #dc2626; }
+    .legend-dot.type-comemorativa { background: #9333ea; }
+    .legend-dot.type-bimestre_inicio { background: #16a34a; }
+    .legend-dot.type-bimestre_fim { background: #ea580c; }
+    .legend-dot.type-planejamento { background: #4f46e5; }
+    .legend-dot.type-recesso { background: #0f766e; }
+    .legend-dot.type-pedagogico { background: #4f46e5; }
+    .legend-dot.type-outro { background: #475569; }
     .annotations { margin-top: 8px; display: grid; gap: 6px; max-height: 460px; }
     .ann { border: 1px solid #dbe3ee; border-left-width: 6px; border-radius: 8px; padding: 6px 8px; background: #fff; }
     .ann-title { font-size: 11px; font-weight: 800; color: #0f172a; }
@@ -72,13 +82,13 @@
     <div class="chip"><b>Total de eventos:</b> {{ total_eventos_mes }}</div>
     <div class="chip"><b>Impresso por:</b> {{ printed_by }}</div>
     <div class="chip"><b>Data/hora:</b> {{ printed_at }}</div>
-    <div class="chip" style="grid-column: span 2;"><b>Filtros:</b> {{ filtros }}</div>
+    <div class="chip u-col-span-2"><b>Filtros:</b> {{ filtros }}</div>
   </div>
 
   <div class="layout">
     <div class="gp-card">
-      <p class="card-title">Grade do Mês</p>
-      <table>
+      <p class="card-title gp-card">Grade do Mês</p>
+      <table class="gp-table__native">
         <thead>
           <tr>
             {% for d in dias_semana %}
@@ -90,7 +100,7 @@
           {% for semana in semanas %}
             <tr>
               {% for c in semana %}
-                <td class="{% if not c.day %}empty{% endif %} {% if c.is_weekend %}weekend{% endif %} {% if c.has_holiday %}holiday{% endif %}">
+                <td class="{% if not c.day %}empty{% endif %}{% if c.is_weekend %} weekend{% endif %}{% if c.has_holiday %} holiday{% endif %}">
                   {% if c.day %}
                     <div class="day-number">{{ c.day }}</div>
                     {% for ev in c.events|slice:":3" %}
@@ -107,18 +117,18 @@
 
     <div>
       <div class="gp-card">
-        <p class="card-title">Legenda por Cor</p>
+        <p class="card-title gp-card">Legenda por Cor</p>
         <div class="legend">
           {% for l in legendas %}
             <div class="legend-item">
-              <span class="legend-dot" style="background: {{ l.cor }};"></span>
+              <span class="legend-dot type-{{ l.tipo_css }}"></span>
               <span>{{ l.label }}</span>
             </div>
           {% endfor %}
         </div>
       </div>
-      <div class="gp-card" style="margin-top: 8px;">
-        <p class="card-title">Bloco de Anotações</p>
+      <div class="gp-card u-mt-8">
+        <p class="card-title gp-card">Bloco de Anotações</p>
         <div class="legend">
           <div class="annotations">
             {% for a in anotacoes %}

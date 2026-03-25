@@ -6,6 +6,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}GEPUB{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'gepub-design-system/gepub-design-system.css' %}">
+  <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
   <link rel="stylesheet" href="{% static 'css/components/cookie-consent.css' %}">
   {% block extra_head %}{% endblock %}
@@ -14,9 +16,9 @@
 
   {% if messages %}
     <div class="public-flash">
-      <div class="flash-stack">
+      <div class="flash-stack alert-stack">
         {% for message in messages %}
-          <div class="flash flash--{{ message.tags }}">
+          <div class="flash flash--{{ message.tags }} alert gp-alert alert--{{">
             {{ message }}
           </div>
         {% endfor %}
@@ -28,6 +30,8 @@
 
   {% include "core/partials/cookie_consent.html" %}
 
+  <script src="{% static 'js/ds-style-bindings.js' %}"></script>
+  <script src="{% static 'js/gepub-design-system.js' %}"></script>
   <script src="{% static 'js/cookie-consent.js' %}"></script>
   {% block extra_js %}{% endblock %}
 </body>
