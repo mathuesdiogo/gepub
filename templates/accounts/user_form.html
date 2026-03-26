@@ -49,6 +49,18 @@
           {{ form.role }}
           {% if form.role.errors %}<span class="small u-text-danger">{{ form.role.errors|striptags }}</span>{% endif %}
         </p>
+        <p id="aluno-wrap">
+          {{ form.aluno.label_tag }}
+          {{ form.aluno }}
+          {% if form.aluno.errors %}<span class="small u-text-danger">{{ form.aluno.errors|striptags }}</span>{% endif %}
+          <span class="users-form__note">Obrigatório para perfil Aluno. Para Cidadão, pode ser preenchido automaticamente via paciente.</span>
+        </p>
+        <p id="paciente-wrap">
+          {{ form.paciente.label_tag }}
+          {{ form.paciente }}
+          {% if form.paciente.errors %}<span class="small u-text-danger">{{ form.paciente.errors|striptags }}</span>{% endif %}
+          <span class="users-form__note">Obrigatório para perfil Cidadão (paciente).</span>
+        </p>
 
         <p>
           {{ form.municipio.label_tag }}
@@ -110,17 +122,32 @@
 (function () {
   const roleSelect = document.querySelector('[name="role"]');
   const turmasWrap = document.getElementById('turmas-wrap');
-  if (!roleSelect || !turmasWrap) return;
+  const alunoWrap = document.getElementById('aluno-wrap');
+  const pacienteWrap = document.getElementById('paciente-wrap');
+  if (!roleSelect || !turmasWrap || !alunoWrap || !pacienteWrap) return;
+
+  const getSelect = (wrap) => wrap ? wrap.querySelector('select') : null;
+  const alunoSelect = getSelect(alunoWrap);
+  const pacienteSelect = getSelect(pacienteWrap);
+  const turmasSelect = getSelect(turmasWrap);
 
   function syncVisibility() {
-    const isProfessor = roleSelect.value === 'PROFESSOR';
+    const role = roleSelect.value;
+    const isProfessor = role === 'PROFESSOR' || role === 'EDU_PROF';
+    const isAluno = role === 'ALUNO';
+    const isCidadao = role === 'CIDADAO';
+
     turmasWrap.style.display = isProfessor ? '' : 'none';
+    alunoWrap.style.display = (isAluno || isCidadao) ? '' : 'none';
+    pacienteWrap.style.display = isCidadao ? '' : 'none';
+
     if (!isProfessor) {
-      const select = turmasWrap.querySelector('select');
-      if (select) {
-        for (const opt of select.options) opt.selected = false;
+      if (turmasSelect) {
+        for (const opt of turmasSelect.options) opt.selected = false;
       }
     }
+    if (!isAluno && !isCidadao && alunoSelect) alunoSelect.value = '';
+    if (!isCidadao && pacienteSelect) pacienteSelect.value = '';
   }
   roleSelect.addEventListener('change', syncVisibility);
   syncVisibility();

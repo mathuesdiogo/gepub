@@ -1,0 +1,517 @@
+MAPA UNICO E GUIA OPERACIONAL DO SISTEMA DE USUARIOS - GEPUB
+Data da consolidacao tecnica: 2026-03-25
+Status deste documento: BASE OFICIAL PARA REORGANIZACAO DE PERFIS E FLUXOS
+
+====================================================================
+1) OBJETIVO
+====================================================================
+
+Este documento consolida, em um unico lugar:
+- como o sistema de usuarios do GEPUB esta funcionando hoje no codigo;
+- quais sao os 43 perfis cadastraveis e o papel de cada um;
+- a cadeia de criacao (quem cria quem);
+- os escopos obrigatorios por nivel;
+- o fluxo profissional de criacao de usuario administrativo, aluno e paciente;
+- regras de seguranca e auditoria;
+- guia pratico para prefeitura implantar de forma organizada.
+
+
+====================================================================
+2) CHECKUP TECNICO (RESUMO DO QUE FOI VALIDADO)
+====================================================================
+
+Arquivos auditados no checkup:
+- apps/accounts/models.py
+- apps/accounts/forms.py
+- apps/accounts/views_users_crud.py
+- apps/accounts/views_users_list.py
+- templates/accounts/user_form.html
+- apps/core/rbac.py
+- apps/org/views_onboarding.py
+- apps/org/views_onboarding_wizard.py
+- apps/org/services/provisioning.py
+- apps/educacao/models.py
+- apps/saude/models.py
+
+Conclusao tecnica:
+- A base de RBAC esta robusta e cobre multiplos modulos.
+- O sistema usa User + Profile (1:1) com escopo organizacional.
+- Ha auditoria de acoes sensiveis de usuarios.
+- Havia lacuna para fluxo formal de usuario do tipo paciente.
+- Havia oportunidade de melhorar validacoes de escopo por nivel.
+
+
+====================================================================
+3) MELHORIAS APLICADAS NESTA REVISAO
+====================================================================
+
+3.1 Fluxo de usuario aluno/paciente profissionalizado
+- Profile agora possui vinculo explicito com paciente:
+  - campo novo: profile.paciente (FK para saude.PacienteSaude)
+- Migracao criada:
+  - apps/accounts/migrations/0013_profile_paciente.py
+
+3.2 Formulario de usuario reforcado
+- Inclusao de campos no create/update:
+  - Aluno vinculado
+  - Paciente vinculado
+- Regras aplicadas:
+  - perfil ALUNO exige aluno vinculado;
+  - perfil CIDADAO exige paciente vinculado (ou aluno, quando aplicavel);
+  - coerencia aluno/paciente validada quando ambos informados.
+
+3.3 Escopo obrigatorio por nivel (validacao)
+- O formulario agora valida escopo minimo por base de perfil:
+  - MUNICIPAL: exige municipio
+  - SECRETARIA: exige municipio + secretaria
+  - UNIDADE/PROFESSOR: exige municipio + secretaria + unidade
+
+3.4 UX da tela de usuarios
+- Campo Turmas passou a considerar perfis docentes:
+  - PROFESSOR
+  - EDU_PROF
+- Exibicao dinamica dos blocos:
+  - aluno visivel para ALUNO/CIDADAO
+  - paciente visivel para CIDADAO
+
+3.5 Listagem/export de usuarios melhorada
+- Busca agora considera:
+  - nome de aluno vinculado
+  - nome de paciente vinculado
+- CSV/XLSX agora exporta colunas:
+  - Aluno
+  - Paciente
+
+3.6 Auditoria e detalhes enriquecidos
+- Logs de create/update agora incluem:
+  - aluno=<id>
+  - paciente=<id>
+- Tela de detalhe exibe vinculos de aluno e paciente.
+
+
+====================================================================
+4) ARQUITETURA REAL DO USUARIO (COMO FUNCIONA)
+====================================================================
+
+4.1 Estrutura
+- User (Django): autenticacao, senha, email, is_active.
+- Profile (accounts): papel, escopo e seguranca.
+
+4.2 Campos chave do Profile
+- role
+- municipio, secretaria, unidade, setor, local_estrutural
+- aluno, paciente
+- ativo, bloqueado
+- codigo_acesso
+- must_change_password, mfa_enabled, password_changed_at, password_expires_days
+- cpf protegido (mascara + hash + criptografia)
+
+4.3 Criacao automatica de Profile
+- Sinal post_save cria Profile ao criar User.
+
+
+====================================================================
+5) LISTA OFICIAL DOS 43 PERFIS (CADASTRAVEIS)
+====================================================================
+
+Formato: CODIGO | FUNCAO PRINCIPAL
+
+ADMIN | Administrador global do sistema
+MUNICIPAL | Gestor maximo da prefeitura no GEPUB
+SECRETARIA | Gestor de uma secretaria
+UNIDADE | Gestor de unidade (escola, UBS, etc.)
+PROFESSOR | Docente (fluxo educacional)
+ALUNO | Conta de aluno no portal educacional
+NEE | Tecnico NEE legado/geral
+LEITURA | Consulta sem operacao
+AUDITORIA | Controle interno e auditoria
+RH_GESTOR | Gestao de pessoas, folha e ponto
+PROTOCOLO | Atendimento/protocolo e tramitacao
+CAD_GESTOR | Governanca de cadastros mestres
+CAD_OPER | Operacao de cadastros da secretaria
+SAU_SECRETARIO | Gestor de saude em nivel secretaria
+SAU_DIRETOR | Diretor de unidade de saude
+SAU_COORD | Coordenador de saude na unidade
+SAU_MEDICO | Medico
+SAU_ENFERMEIRO | Enfermeiro
+SAU_TEC_ENF | Tecnico de enfermagem
+SAU_ACS | Agente comunitario de saude
+SAU_RECEPCAO | Recepcao da unidade de saude
+SAU_REGULACAO | Regulacao de saude
+SAU_FARMACIA | Operacao de farmacia
+EDU_SECRETARIO | Gestor de educacao em nivel secretaria
+EDU_DIRETOR | Diretor escolar
+EDU_COORD | Coordenador pedagogico
+EDU_PROF | Professor (familia educacao)
+EDU_SECRETARIA | Secretaria escolar
+EDU_TRANSPORTE | Operacao de transporte escolar
+NEE_COORD_MUN | Coordenador NEE municipal
+NEE_COORD_ESC | Coordenador NEE da escola
+NEE_MEDIADOR | Mediador/apoio NEE
+NEE_TECNICO | Equipe tecnica NEE
+DADOS_GESTOR | Gestor de dados e BI
+DADOS_ANALISTA | Analista setorial de dados
+INT_TI | Administrador tecnico de integracoes
+INT_GESTAO | Administrador funcional de integracoes
+INT_LEITOR | Leitor de integracoes
+PORTAL_ADMIN | Administrador de portal
+PORTAL_EDITOR | Editor de conteudo
+PORTAL_APROV | Aprovador de conteudo
+PORTAL_DESIGN | Design/tema do portal
+CIDADAO | Conta de cidadao (portal; pode representar paciente)
+
+
+====================================================================
+6) AGRUPAMENTO POR MODULOS (VISAO DE NEGOCIO)
+====================================================================
+
+6.1 Governanca central
+- ADMIN
+- MUNICIPAL
+- SECRETARIA
+- UNIDADE
+- AUDITORIA
+- CAD_GESTOR
+- CAD_OPER
+- LEITURA
+
+6.2 Educacao
+- EDU_SECRETARIO
+- EDU_DIRETOR
+- EDU_COORD
+- EDU_PROF
+- EDU_SECRETARIA
+- EDU_TRANSPORTE
+- PROFESSOR
+- ALUNO
+- NEE, NEE_COORD_MUN, NEE_COORD_ESC, NEE_MEDIADOR, NEE_TECNICO
+
+6.3 Saude
+- SAU_SECRETARIO
+- SAU_DIRETOR
+- SAU_COORD
+- SAU_MEDICO
+- SAU_ENFERMEIRO
+- SAU_TEC_ENF
+- SAU_ACS
+- SAU_RECEPCAO
+- SAU_REGULACAO
+- SAU_FARMACIA
+- CIDADAO (quando usado para paciente)
+
+6.4 Administrativo geral
+- RH_GESTOR
+- PROTOCOLO
+
+6.5 Portais e comunicacao
+- PORTAL_ADMIN
+- PORTAL_EDITOR
+- PORTAL_APROV
+- PORTAL_DESIGN
+
+6.6 Dados e integracoes
+- DADOS_GESTOR
+- DADOS_ANALISTA
+- INT_TI
+- INT_GESTAO
+- INT_LEITOR
+
+
+====================================================================
+7) CADEIA OFICIAL - QUEM CRIA QUEM
+====================================================================
+
+Regra fonte: ROLE_MANAGEMENT_ALLOWED (apps/core/rbac.py)
+
+7.1 ADMIN
+- Pode criar todos os 43 perfis.
+
+7.2 MUNICIPAL
+- Pode criar 41 perfis.
+- Nao pode criar ADMIN nem MUNICIPAL.
+
+7.3 SECRETARIA
+- Pode criar 25 perfis operacionais/de unidade.
+- Inclui criacao de UNIDADE e perfis finais de operacao.
+
+7.4 UNIDADE
+- Pode criar 18 perfis operacionais finais.
+
+7.5 Observacao de governanca importante
+- Perfis com permissao accounts.manage_users: ADMIN, MUNICIPAL, SECRETARIA, UNIDADE, NEE, CAD_GESTOR.
+- Porem, cadeia de atribuicao formal so existe para: ADMIN, MUNICIPAL, SECRETARIA, UNIDADE.
+- Isso significa que NEE e CAD_GESTOR podem acessar gestao de usuarios, mas nao atribuem papel na cadeia padrao.
+- Recomendacao: manter assim somente se for intencional (operacao de cadastro sem delegacao de perfis).
+
+
+====================================================================
+8) ESCOPOS POR NIVEL (FUNIL PROFISSIONAL)
+====================================================================
+
+8.1 Nivel 0 - ADMIN global
+- Escopo: total
+- Cria: tudo
+
+8.2 Nivel 1 - MUNICIPAL
+- Escopo minimo: municipio
+- Cria: gestores de secretaria, perfis especializados municipais, operacionais amplos
+
+8.3 Nivel 2 - SECRETARIA
+- Escopo minimo: municipio + secretaria
+- Cria: unidades e perfis de unidade/operacao
+
+8.4 Nivel 3 - UNIDADE
+- Escopo minimo: municipio + secretaria + unidade
+- Cria: perfis finais de execucao
+
+8.5 Nivel 4 - PERFIS OPERACIONAIS
+- Escopo: unidade/setor/local, conforme caso
+- Nao devem criar perfis de governanca
+
+8.6 Nivel 5 - USUARIOS DE IDENTIDADE (ALUNO/PACIENTE/CIDADAO)
+- Conta individual de portal
+- Vinculo obrigatorio ao sujeito de negocio:
+  - ALUNO -> aluno
+  - CIDADAO (paciente) -> paciente (e opcionalmente aluno vinculado)
+
+
+====================================================================
+9) PROCESSO PROFISSIONAL DE CRIACAO DE USUARIO
+====================================================================
+
+9.1 Usuario administrativo (funcional)
+1. Definir papel alvo (role) conforme matriz.
+2. Definir escopo organizacional exigido.
+3. Preencher dados basicos (nome, email, CPF).
+4. Salvar conta.
+5. Sistema:
+   - gera codigo_acesso unico;
+   - define senha inicial como CPF (somente digitos);
+   - ativa must_change_password;
+   - grava auditoria CREATE.
+
+9.2 Usuario tipo ALUNO
+1. Selecionar role = ALUNO.
+2. Selecionar aluno vinculado (obrigatorio).
+3. Informar escopo coerente.
+4. Salvar.
+5. Sistema passa a permitir escopos de portal do proprio aluno.
+
+9.3 Usuario tipo PACIENTE (via CIDADAO)
+1. Selecionar role = CIDADAO.
+2. Selecionar paciente vinculado (obrigatorio no fluxo recomendado).
+3. Se paciente tiver aluno associado, sistema pode aproveitar vinculo educacional.
+4. Salvar com escopo coerente.
+
+9.4 Edicao de usuario
+- Mantem mesmas regras de cadeia, escopo e validacao.
+- Gera auditoria UPDATE.
+
+9.5 Bloqueio/inativacao/reset
+- Toggle ativo/inativo: auditoria ACTIVATE/DEACTIVATE
+- Toggle bloqueio: auditoria BLOCK/UNBLOCK
+- Reset codigo: RESET_CODE
+- Reset senha para CPF: RESET_PASSWORD + must_change_password=True
+
+
+====================================================================
+10) SEGURANCA E CONFORMIDADE
+====================================================================
+
+10.1 Senha e primeiro acesso
+- Senha inicial padrao por CPF (digitos).
+- Troca obrigatoria no primeiro login.
+
+10.2 MFA
+- mfa_enabled disponivel no profile.
+- Fluxo de codigo temporario com limite de tentativas.
+
+10.3 Politica de expiração
+- password_expires_days configuravel.
+- perfil expira e exige troca quando necessario.
+
+10.4 Protecao de dados pessoais
+- CPF mascarado em campo visivel.
+- CPF hash e criptografia para seguranca.
+
+10.5 Auditoria
+- Toda acao critica de usuario e registrada.
+- Base para rastreabilidade e compliance.
+
+
+====================================================================
+11) HIERARQUIA OFICIAL RECOMENDADA PARA PREFEITURA
+====================================================================
+
+11.1 Arvore macro
+ADMIN GLOBAL
+  -> GESTOR MUNICIPAL
+     -> GESTORES DE SECRETARIA
+        -> GESTORES DE UNIDADE
+           -> OPERACIONAIS (EDU/SAU/ADM)
+              -> IDENTIDADE (ALUNO/CIDADAO-PACIENTE)
+
+11.2 Regra de ouro
+- Quem esta acima cria quem esta abaixo.
+- Ninguem cria acima do proprio nivel.
+- Escopo do criador limita escopo do criado.
+
+
+====================================================================
+12) GUIA PRATICO PARA IMPLANTACAO (PREFEITURA)
+====================================================================
+
+12.1 Sequencia recomendada de ativacao
+1. Criar gestor MUNICIPAL.
+2. Cadastrar secretarias base:
+   - Gestao/Administracao
+   - Educacao
+   - Saude
+3. Criar gestor SECRETARIA por secretaria.
+4. Criar unidades (escolas, UBS, etc.).
+5. Criar gestor UNIDADE.
+6. Criar perfis operacionais por unidade.
+7. Criar contas de aluno/paciente quando houver portal ativo.
+
+12.2 Quem deve criar no dia a dia
+- Novas secretarias: MUNICIPAL
+- Novas unidades: SECRETARIA
+- Novos operadores locais: UNIDADE
+- Contas de aluno/paciente: SECRETARIA ou UNIDADE (conforme governanca local)
+
+12.3 Matriz rapida (uso recomendado)
+- MUNICIPAL: governanca, planejamento, controle e criacao estrutural
+- SECRETARIA: gestao do modulo da pasta e expansao de unidades
+- UNIDADE: operacao diaria e equipe de ponta
+- ALUNO/CIDADAO: acesso individual ao proprio contexto
+
+
+====================================================================
+13) PERFIS QUE MERECEM DECISAO DE PRODUTO (PENDENCIAS)
+====================================================================
+
+13.1 Papeis de Camara no motor RBAC
+- Existem no motor, mas nao estao em Profile.Role (nao cadastraveis pela tela).
+- Decidir:
+  - incluir em Profile.Role para cadastro direto, ou
+  - manter apenas para uso interno/legado.
+
+13.2 manage_users x cadeia de atribuicao
+- NEE e CAD_GESTOR possuem accounts.manage_users, mas nao possuem chave na cadeia formal.
+- Decidir se:
+  - entram oficialmente como criadores com regras especificas, ou
+  - permanecem apenas para operacao auxiliar sem delegacao de perfis.
+
+13.3 Portal paciente dedicado
+- Com vinculo profile.paciente, a identidade de paciente esta estruturada.
+- Proximo passo de produto (se desejado):
+  - desenhar permissoes finas para portal de paciente sem expor telas administrativas.
+
+
+====================================================================
+14) ESTRUTURA IDEAL DA TELA DE USUARIOS (RECOMENDACAO)
+====================================================================
+
+14.1 Bloco 1 - Identidade
+- Nome
+- Sobrenome
+- Email
+- CPF
+- Role
+
+14.2 Bloco 2 - Vinculo de sujeito
+- Aluno vinculado (quando ALUNO/CIDADAO)
+- Paciente vinculado (quando CIDADAO)
+
+14.3 Bloco 3 - Escopo
+- Municipio
+- Secretaria
+- Unidade
+- Setor
+- Local estrutural
+
+14.4 Bloco 4 - Operacao
+- Turmas (somente perfis docentes)
+- Ativo
+
+14.5 Bloco 5 - Seguranca (detalhe/acoes)
+- Bloquear/desbloquear
+- Reset de senha
+- Reset de codigo
+- Historico de auditoria
+
+
+====================================================================
+15) FLUXO COMPLETO DE CRIACAO (PREFEITURA -> SECRETARIA -> UNIDADE)
+====================================================================
+
+15.1 Admin global
+- Cria conta municipal inicial (onboarding).
+
+15.2 Gestor municipal
+- Finaliza onboarding de prefeitura.
+- Estrutura secretarias e nomeia gestores de secretaria.
+
+15.3 Gestor de secretaria
+- Estrutura unidades da pasta.
+- Nomeia gestores de unidade.
+
+15.4 Gestor de unidade
+- Cria equipe operacional final.
+- Mantem usuarios de ponta (professores, recepcao, tecnicos etc.).
+
+15.5 Criacao de usuario de identidade
+- ALUNO: perfil ALUNO com aluno vinculado.
+- PACIENTE: perfil CIDADAO com paciente vinculado.
+
+
+====================================================================
+16) CHECKLIST DE QUALIDADE OPERACIONAL
+====================================================================
+
+16.1 Antes de criar
+- Papel correto definido?
+- Escopo correto definido?
+- Usuario realmente precisa desse nivel?
+
+16.2 Depois de criar
+- Codigo de acesso entregue com seguranca?
+- Troca obrigatoria de senha confirmada?
+- Auditoria registrada?
+
+16.3 Revisao periodica
+- Remover acessos antigos/inativos.
+- Revisar perfis com poder de criacao.
+- Revisar logs de bloqueio, reset e alteracao de escopo.
+
+
+====================================================================
+17) REFERENCIA DE ARQUIVOS ALTERADOS NESTA FASE
+====================================================================
+
+- apps/accounts/models.py
+- apps/accounts/migrations/0013_profile_paciente.py
+- apps/accounts/forms.py
+- apps/accounts/views_users_common.py
+- apps/accounts/views_users_crud.py
+- apps/accounts/views_users_list.py
+- templates/accounts/user_form.html
+
+
+====================================================================
+18) CONCLUSAO
+====================================================================
+
+O sistema de usuarios do GEPUB esta pronto para operar em cadeia profissional
+com governanca por nivel, escopos definidos e trilha de auditoria.
+
+Com as melhorias desta revisao, o processo de criacao de usuario passa a cobrir
+formalmente:
+- usuario funcional (administrativo/operacional),
+- usuario aluno,
+- usuario paciente (via perfil cidadao com vinculo de paciente).
+
+Este arquivo pode ser usado como referencia oficial para reorganizacao final
+(de nomenclatura, fusao de perfis e desenho definitivo da tela de usuarios)
+sem perder rastreabilidade tecnica.
+

@@ -21,6 +21,8 @@ def can_manage_users(user) -> bool:
 def scope_users_queryset(request):
     qs = User.objects.select_related(
         "profile",
+        "profile__aluno",
+        "profile__paciente",
         "profile__municipio",
         "profile__secretaria",
         "profile__unidade",

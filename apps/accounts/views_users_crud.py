@@ -151,6 +151,8 @@ def usuario_create(request):
         prof, _ = Profile.objects.get_or_create(user=user, defaults={"ativo": True})
         prof.cpf = form.cleaned_data["cpf"]
         prof.role = role_new
+        prof.aluno = form.cleaned_data.get("aluno")
+        prof.paciente = form.cleaned_data.get("paciente")
         prof.ativo = bool(form.cleaned_data.get("ativo", True))
         prof.bloqueado = False
         _assign_scope_by_actor_or_form(actor=request.user, profile=prof, form_cleaned=form.cleaned_data)
@@ -170,7 +172,8 @@ def usuario_create(request):
             action=UserManagementAudit.Action.CREATE,
             details=(
                 f"role={prof.role}; municipio={prof.municipio_id}; secretaria={prof.secretaria_id}; "
-                f"unidade={prof.unidade_id}; setor={prof.setor_id}; local_estrutural={prof.local_estrutural_id}"
+                f"unidade={prof.unidade_id}; setor={prof.setor_id}; local_estrutural={prof.local_estrutural_id}; "
+                f"aluno={prof.aluno_id}; paciente={prof.paciente_id}"
             ),
         )
 
@@ -333,6 +336,8 @@ def usuario_update(request, pk: int):
         "unidade": prof.unidade_id,
         "setor": prof.setor_id,
         "local_estrutural": prof.local_estrutural_id,
+        "aluno": prof.aluno_id,
+        "paciente": prof.paciente_id,
         "ativo": prof.ativo,
         "turmas": user.turmas_ministradas.all(),
     }
@@ -362,6 +367,8 @@ def usuario_update(request, pk: int):
 
         prof.cpf = form.cleaned_data.get("cpf") or prof.cpf_digits
         prof.role = role_new
+        prof.aluno = form.cleaned_data.get("aluno")
+        prof.paciente = form.cleaned_data.get("paciente")
         prof.ativo = bool(form.cleaned_data.get("ativo", True))
         _assign_scope_by_actor_or_form(actor=request.user, profile=prof, form_cleaned=form.cleaned_data)
 
@@ -401,7 +408,8 @@ def usuario_update(request, pk: int):
             details=(
                 f"role={prof.role}; ativo={prof.ativo}; bloqueado={prof.bloqueado}; "
                 f"municipio={prof.municipio_id}; secretaria={prof.secretaria_id}; "
-                f"unidade={prof.unidade_id}; setor={prof.setor_id}; local_estrutural={prof.local_estrutural_id}"
+                f"unidade={prof.unidade_id}; setor={prof.setor_id}; local_estrutural={prof.local_estrutural_id}; "
+                f"aluno={prof.aluno_id}; paciente={prof.paciente_id}"
             ),
         )
 
@@ -449,6 +457,8 @@ def usuario_detail(request, pk: int):
         {"label": "Unidade", "value": str(prof.unidade) if prof.unidade else "—"},
         {"label": "Setor", "value": str(prof.setor) if prof.setor else "—"},
         {"label": "Local estrutural", "value": str(prof.local_estrutural) if prof.local_estrutural else "—"},
+        {"label": "Aluno vinculado", "value": str(prof.aluno) if prof.aluno else "—"},
+        {"label": "Paciente vinculado", "value": str(prof.paciente) if prof.paciente else "—"},
         {"label": "Último login", "value": user.last_login.strftime("%d/%m/%Y %H:%M") if user.last_login else "Nunca"},
     ]
     pills = [

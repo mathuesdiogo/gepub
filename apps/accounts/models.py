@@ -98,6 +98,13 @@ class Profile(models.Model):
         blank=True,
         related_name="perfis",
     )
+    paciente = models.ForeignKey(
+        "saude.PacienteSaude",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="perfis",
+    )
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,

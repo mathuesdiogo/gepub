@@ -152,6 +152,8 @@ def _export_users_xlsx(*, rows: list[list[str]]) -> HttpResponse:
             "Unidade",
             "Setor",
             "Local estrutural",
+            "Aluno",
+            "Paciente",
             "Status",
         ]
         return export_csv("usuarios.xlsx.csv", headers=headers, rows=rows)
@@ -171,6 +173,8 @@ def _export_users_xlsx(*, rows: list[list[str]]) -> HttpResponse:
             "Unidade",
             "Setor",
             "Local estrutural",
+            "Aluno",
+            "Paciente",
             "Status",
         ]
     )
@@ -229,6 +233,8 @@ def usuarios_list(request):
             | Q(first_name__icontains=q)
             | Q(last_name__icontains=q)
             | Q(profile__codigo_acesso__icontains=q)
+            | Q(profile__aluno__nome__icontains=q)
+            | Q(profile__paciente__nome__icontains=q)
         )
     if role:
         qs = qs.filter(profile__role=role)
@@ -282,6 +288,8 @@ def usuarios_list(request):
                     str(getattr(p, "unidade", "") or ""),
                     str(getattr(p, "setor", "") or ""),
                     str(getattr(p, "local_estrutural", "") or ""),
+                    str(getattr(p, "aluno", "") or ""),
+                    str(getattr(p, "paciente", "") or ""),
                     _status_slug(p, u),
                 ]
             )
@@ -297,6 +305,8 @@ def usuarios_list(request):
                 "Unidade",
                 "Setor",
                 "Local estrutural",
+                "Aluno",
+                "Paciente",
                 "Status",
             ]
             return export_csv("usuarios.csv", headers=headers, rows=rows_export)

@@ -1,10 +1,18 @@
 from __future__ import annotations
-from apps.educacao.models import Turma
-from apps.core.rbac import allowed_roles_for_manager_role, is_admin, scope_filter_turmas
+from apps.educacao.models import Aluno, Turma
+from apps.core.rbac import (
+    allowed_roles_for_manager_role,
+    is_admin,
+    role_scope_base,
+    scope_filter_alunos,
+    scope_filter_turmas,
+    scope_filter_unidades,
+)
 from django import forms
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from apps.org.models import Municipio, Secretaria, Unidade, Setor, LocalEstrutural
+from apps.saude.models import PacienteSaude
 from .models import Profile
 from django.contrib.auth.password_validation import validate_password
 User = get_user_model()
@@ -69,8 +77,18 @@ class _UsuarioBaseForm(forms.Form):
         required=False,
     )
     turmas = forms.ModelMultipleChoiceField(
-        label="Turmas (somente para Professor)",
+        label="Turmas (somente para perfis docentes)",
         queryset=Turma.objects.none(),
+        required=False,
+    )
+    aluno = forms.ModelChoiceField(
+        label="Aluno vinculado",
+        queryset=Aluno.objects.none(),
+        required=False,
+    )
+    paciente = forms.ModelChoiceField(
+        label="Paciente vinculado",
+        queryset=PacienteSaude.objects.none(),
         required=False,
     )
     ativo = forms.BooleanField(label="Ativo", required=False, initial=True)
@@ -107,6 +125,26 @@ class _UsuarioBaseForm(forms.Form):
         if user and getattr(user, "is_authenticated", False) and not is_admin(user):
             turmas_qs = scope_filter_turmas(user, turmas_qs)
         self.fields["turmas"].queryset = turmas_qs
+
+        alunos_qs = Aluno.objects.filter(ativo=True).order_by("nome")
+        if user and getattr(user, "is_authenticated", False) and not is_admin(user):
+            alunos_qs = scope_filter_alunos(user, alunos_qs)
+        self.fields["aluno"].queryset = alunos_qs
+
+        pacientes_qs = (
+            PacienteSaude.objects.select_related("unidade_referencia", "unidade_referencia__secretaria", "aluno")
+            .filter(ativo=True)
+            .order_by("nome")
+        )
+        if user and getattr(user, "is_authenticated", False) and not is_admin(user):
+            unidades_saude_qs = scope_filter_unidades(
+                user,
+                Unidade.objects.filter(tipo=Unidade.Tipo.SAUDE, ativo=True),
+            )
+            pacientes_qs = pacientes_qs.filter(
+                unidade_referencia_id__in=unidades_saude_qs.values_list("id", flat=True)
+            )
+        self.fields["paciente"].queryset = pacientes_qs
 
         if edited_user and hasattr(edited_user, "turmas_ministradas"):
             self.fields["turmas"].initial = list(edited_user.turmas_ministradas.values_list("pk", flat=True))
@@ -221,6 +259,9 @@ class _UsuarioBaseForm(forms.Form):
         unidade = cleaned.get("unidade")
         setor = cleaned.get("setor")
         local_estrutural = cleaned.get("local_estrutural")
+        aluno = cleaned.get("aluno")
+        paciente = cleaned.get("paciente")
+        role = ((cleaned.get("role") or "") + "").strip().upper()
 
         if secretaria and municipio and secretaria.municipio_id != municipio.id:
             self.add_error("secretaria", "A secretaria não pertence ao município selecionado.")
@@ -244,6 +285,52 @@ class _UsuarioBaseForm(forms.Form):
             self.add_error("local_estrutural", "O local estrutural não pertence à secretaria selecionada.")
         elif local_estrutural and municipio and local_estrutural.municipio_id != municipio.id:
             self.add_error("local_estrutural", "O local estrutural não pertence ao município selecionado.")
+
+        if paciente and unidade and paciente.unidade_referencia_id != unidade.id:
+            self.add_error("paciente", "O paciente não pertence à unidade selecionada.")
+        elif paciente and secretaria and paciente.unidade_referencia and paciente.unidade_referencia.secretaria_id != secretaria.id:
+            self.add_error("paciente", "O paciente não pertence à secretaria selecionada.")
+        elif (
+            paciente
+            and municipio
+            and paciente.unidade_referencia
+            and paciente.unidade_referencia.secretaria
+            and paciente.unidade_referencia.secretaria.municipio_id != municipio.id
+        ):
+            self.add_error("paciente", "O paciente não pertence ao município selecionado.")
+
+        role_base = role_scope_base(role)
+        if role_base == "MUNICIPAL":
+            if not municipio:
+                self.add_error("municipio", "Campo obrigatório para perfil municipal.")
+        elif role_base == "SECRETARIA":
+            if not municipio:
+                self.add_error("municipio", "Campo obrigatório para perfil de secretaria.")
+            if not secretaria:
+                self.add_error("secretaria", "Campo obrigatório para perfil de secretaria.")
+        elif role_base in {"UNIDADE", "PROFESSOR"}:
+            if not municipio:
+                self.add_error("municipio", "Campo obrigatório para perfil de unidade.")
+            if not secretaria:
+                self.add_error("secretaria", "Campo obrigatório para perfil de unidade.")
+            if not unidade:
+                self.add_error("unidade", "Campo obrigatório para perfil de unidade.")
+
+        if role == Profile.Role.ALUNO:
+            if not aluno:
+                self.add_error("aluno", "Selecione o aluno vinculado para o perfil Aluno.")
+            cleaned["paciente"] = None
+        elif role == Profile.Role.CIDADAO:
+            if not paciente and not aluno:
+                self.add_error("paciente", "Selecione o paciente vinculado para o perfil Cidadão.")
+            if paciente and paciente.aluno_id and not aluno:
+                cleaned["aluno"] = paciente.aluno
+                aluno = cleaned["aluno"]
+            if paciente and aluno and paciente.aluno_id and paciente.aluno_id != aluno.id:
+                self.add_error("aluno", "O aluno não corresponde ao paciente informado.")
+        else:
+            cleaned["aluno"] = None
+            cleaned["paciente"] = None
 
         return cleaned
 
